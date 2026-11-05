@@ -5139,3 +5139,35 @@ hashes matched. Its approval is current for that exact binding. The original
 job still has one failed claim and zero recovery authorizations. The exact
 future commands and separate authorization boundary are in
 [CONTINUATION.md](CONTINUATION.md). Counted headroom is 73.92 MiB.
+
+## 2026-11-05 — Original 9187 preparation completed on its one recovery
+
+The original synthetic normalization task finished offline preparation at
+23:07 UTC under the single authorized recovery. Immutable revalidation passed
+on clean `b54853e` before writing. The worker used the existing private policy
+and pinned source, the corrected zero-request guard and a dedicated delegated
+cgroup. All four control suites passed the five-group inventory. The
+independent oracle passed the positive control and rejected the original,
+vacuous and wrong-behavior controls. All 17 command cgroups were removed.
+
+The store retained its original inode and failed claim. The original DB bytes
+and closed manifest are backed up. All 118 original manifest entries and 45
+new evidence files verified. One current certified offer was saved, with the
+original scope approval and planning attempt unchanged. The run added zero
+model requests, approvals, run budgets, activations, implementation or
+publication records. The read-only 9187 preview displayed the exact scope
+and unavailable execution status at 1440 px and 390 px. The preview stopped,
+and the observed 9487, 8765 and 8080 listeners matched at entry and exit.
+
+Ruff, contract generation, TypeScript, the frontend build and 29 focused
+checks passed. Capacity remained above the 72 MiB reserve under the existing
+512 MiB cap. No evidence archival was needed. The temporary recovery clone
+was removed after verification and the offer still validated.
+
+Use the combined local-only authorization proposal in
+[CONTINUATION.md](CONTINUATION.md#one-proposed-authorization-for-a-finished-local-result)
+for the next decision. The local-only route uses the existing API's
+publication hold because the browser approval form always includes
+draft-PR consent. The retained real-addon base still lacks supported
+fixture mapping. The recovery and evidence receipts are under
+`artifacts/runs/original-preparation-recovery-20261105T230557Z-dKmVKq/`.

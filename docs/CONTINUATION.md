@@ -1,10 +1,199 @@
-# One-shot preparation recovery ready for review — November 5, 2026
+# Original preparation recovered and certified — November 5, 2026
+
+**Cover lowercase name normalization** finished its preparation checks on the
+original retained store. The one offline recovery at Workbench checkpoint
+`b54853e` completed at 23:07 UTC. It created one certified offer
+`a31b6c41-d655-4361-b335-26461be58dd8`. The original scope approval is the
+only approval in the store. The next step is a separate decision about the
+local implementation and verification package below.
+
+The retained job `1da6e56b-3a67-466b-93a1-880f7f902052` still records its
+original failed attempt. Recovery `833e8c01-19e3-402c-a3ed-9597bc82507f` has
+one completed claim and its own private evidence directory. Before writing,
+the immutable audit revalidated proposal revision 1, applied scope and
+expectation review, the clean fixture base, the original request packet,
+committed evidence, the preparation policy and the saved model selection.
+The audit verified all 118 closed manifest entries. The original SQLite
+bytes and closed manifest were copied and verified before the supported
+owner commands ran. The store kept device and inode `64512:6719454`.
+
+With the zero-request guard installed, delegated preflight confirmed the
+trusted suite's private loopback and denial of host IPC and the parent
+marker. The Lua-launched untrusted check was denied sockets and a private
+file read. In the actual recovery, syntax and focused checks passed on all
+four controls. Each full suite passed all five expected groups. The
+independent oracle passed the known-good addition and rejected the original,
+vacuous and wrong-behavior controls. All 17 command cgroups were removed.
+The recovery unit was collected. All 45 new evidence files were hashed
+before scratch cleanup and rechecked afterward. The offer remained current.
+
+SQLite integrity and foreign keys passed. The only changes relative to the
+backup were the recovery journal beside the original failed claim, the latest
+preparation summary in the planning job, and the new offer. The 117
+non-database entries in the original manifest still match in place. The
+original database hash matches the preserved backup. The original model
+attempt is the only attempt in the model ledger. This window made zero
+model requests and created zero new approvals, run budgets, activations,
+execution sessions, grants, implementation requests or publication records.
+Listener and live-store metadata matched at entry and exit for the observed
+services. The owned read-only preview stopped and port 9187 is free.
+
+The proposal and task API reads returned the same offer, pinned base and
+sole writable file `tests/test_normalize.lua`. The task card showed
+execution unavailable and no saved run approval. Inspected the 1440 px and
+390 px Chromium renders. The request identifies the synthetic fixture. The
+standard approval card includes draft-PR consent and displays the repository
+label `Twich-Team/TwichUI`. Its proposed candidate check list still
+awaits an implementation. The local-only follow-up must use the API's
+publication hold, which the current card cannot select.
+
+Focused tests passed 29 checks. Ruff, contract generation, TypeScript and
+the frontend build passed. The schema was inspected on the retained store
+without running a migration. The handoff's capacity reserve fit, and the
+run needed no archival. The requested `PROJECT_WORKING_PHILOSOPHY.md` was
+absent from the checkout, its history and the local file search. The run
+followed the supplied instructions and the repository's execution contract.
+
+[Recovery and preservation receipt](../artifacts/runs/original-preparation-recovery-20261105T230557Z-dKmVKq/recovery-verification-after-cleanup.json),
+[task API receipt](../artifacts/runs/original-preparation-recovery-20261105T230557Z-dKmVKq/api-task-offer.json),
+[desktop](../artifacts/runs/original-preparation-recovery-20261105T230557Z-dKmVKq/browser/certified-offer-1440.png),
+[phone](../artifacts/runs/original-preparation-recovery-20261105T230557Z-dKmVKq/browser/certified-offer-details-390.png),
+and [capacity](../artifacts/runs/original-preparation-recovery-20261105T230557Z-dKmVKq/capacity.after.txt).
+
+## One proposed authorization for a finished local result
+
+The owner would approve this entire package once. It covers offline readiness,
+one conditional implementation run, independent checks, restoration and a
+locally reviewable result. The existing scope approval remains the basis for
+the exact task. This proposal is awaiting owner authorization.
+
+1. **Task and change boundary.** Use certified offer
+   `a31b6c41-d655-4361-b335-26461be58dd8`, fingerprint
+   `859e5238b10931da265a3d92ecb681066fc165a9c6045e573392b23844e351c9`, for
+   **Cover lowercase name normalization** on the synthetic fixture's clean
+   `main` at `ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. In a fresh
+   isolated candidate clone, allow only additive assertions in the existing
+   `tests/test_normalize.lua`. Confirm the exported function's first return
+   for `" ALICE "` is `"alice"` and the test fails when that observation is
+   `"ALICE"`. The model's source reads are limited to the test and
+   `!!!TwichUI/normalize.lua`. Preserve existing tests, production Lua,
+   shared harness, runner, file modes and base. The positive control is
+   calibration evidence. The finished patch must come from the authorized
+   implementation run.
+2. **Offline gates and one approval.** Build the reviewed checkpoint in a
+   private Workbench checkout with its own runtime configuration and evidence
+   roots. Use the exact retained store inode, private preparation policy and
+   fixture path. Back up the current closed store bytes, verify the original
+   and recovery manifests, and revalidate the certificate, recipe and task
+   binding. Confirm no pending work or prior run budget, the exact checks and
+   frozen controls, the installed sampler proof and binary provenance,
+   delegated confinement, local result access and capacity. The retained
+   proof passes the controller's source-hash check. The installed service
+   identity and live cancellation still need the controller's gates.
+   Bind the private one-off runtime capability in the isolated checkout to
+   this store and sampler proof. Use a loopback API on 9187 and the existing
+   worker with an explicit environment, without planner inference or
+   publication configuration. After the gates, submit one supported
+   `POST /api/intake/{intake_id}/tasks/{task_id}/run-approval` with the
+   current task binding, existing scope-approval ID, exact offer ID and
+   fingerprint, a fresh command ID, `activate_once=true` and
+   `publication="hold"`. This is the operator's recording of the one owner
+   decision. Let the worker apply it, reprovision and certify the controls,
+   and own the run and its terminal record. Exact delivery of an uncertain
+   approval receipt may be reconciled using the same command ID.
+3. **Model, request and time limits.** Use only the existing local
+   `pilot-qwen38-27b` at 8080, with the recipe's temperature 0.2 and no
+   reasoning effort. One controller cycle may establish one lease of up to
+   60 minutes, clamped to the original deadline with its five-minute
+   restoration reserve. This requires express permission for the existing
+   controller to take the two maintenance locks, temporarily isolate 8080
+   authentication, stop and start only `twichui-llm.service` using the
+   existing named grants, and verify restoration. The controller performs
+   only its fixed bounded metadata, authorization, token-counting,
+   cancellation and restoration exchanges. Generation is limited to one
+   30-second cancellation probe of up to 60 generated tokens with at most
+   128 input tokens, and one implementation attempt of up to 20 generation
+   requests, 120 seconds each, 2,500 generated tokens per response with a
+   2,496 wire maximum, and 24,000 generated tokens total. That is at most
+   21 generating requests and 24,060 generated tokens for the package.
+   The probe and attempt allow up to 21 non-generating input token counts
+   across those requests. The attempt checks each request against the
+   existing 32,768-token context. Use the fixed 90-minute overall budget, 20-minute implementation
+   limit and 40-minute run through verification. Keep setup and handoff
+   within the authorized overall window and enforce the earlier of the
+   operator deadline and the saved budget expiry. The controller requires
+   50 minutes remaining before starting the lease and 45 minutes of
+   lease time before the attempt. The schema's publication clock gives
+   this hold-mode run no publication time or authority.
+4. **Resources and retries.** Require the documented 72 MiB of counted
+   headroom, with 64 MiB for the package and 8 MiB for checks and handoff,
+   and at least 4 GiB free on the working filesystems. Count both
+   checkouts' generated evidence against the existing 512 MiB cap and
+   enforce 1 GiB scratch. The Runtime limits are 6 GiB RAM, zero swap
+   and 200% CPU, with at most 64 tasks and 16 MiB per file for untrusted
+   checks, and 128 tasks and 128 MiB per file for trusted checks. The
+   patch cap is 150 added lines and 65,536 bytes. The recipe also caps
+   source reads at 45,000 characters, logs at 8 MiB, streamed responses
+   at 2 MiB, stream lines at 64 KiB and assembled responses at 256 KiB.
+   The existing 8080 service runs under its installed configuration.
+   Its systemd unit reports no finite CPU or memory cap. These Runtime
+   limits govern the Workbench processes. Allow the two shared safe
+   tool-input corrections and normal check-driven repairs within the
+   same attempt and its original turn, token and time ceilings. Allow
+   reconciliation of the same saved result and the controller's
+   original restoration or watchdog path. Permit zero replacement
+   attempts, probes or leases and zero fallback.
+5. **Checks and local handoff.** Keep the candidate workspace disposable,
+   with no remote transport or model tool access to host services.
+   Reproduce the reviewed controls, run syntax, the focused regression,
+   the frozen independent behavior check and the exact five-group suite.
+   Confine trusted suite networking to private loopback. Require the
+   checked candidate's manifest, patch, file contents, usage and
+   completion seal to agree with the durable execution record. Verify
+   original 8080 configuration, access, model readiness and rejection of
+   the temporary credential before calling the result complete. The
+   finished diff, checks and summary will be available in the isolated
+   Workbench's intake task and `/executions/<request-id>` review on
+   loopback, with desktop and phone captures in the handoff. Retain
+   `real-run/candidates/<candidate-sha>/changes.patch`, `manifest.json`,
+   `result.json` and the sealed record in the owned
+   `task-lease-task-session-<decision-id>-01` run directory. A local
+   frozen patch and result are the deliverable. Remote publication
+   requires separate authorization.
+6. **Stop conditions.** Hold before recording the budget if a binding,
+   readiness, authorization, ownership or capacity check fails. Require the
+   correct model identity, exclusive lease and time reserve before the probe.
+   Require a passing cancellation probe before implementation generation.
+   End the attempt on expiry, cancellation, out-of-scope change, confinement
+   loss, unknown completion or usage, or exhausted limits. A candidate
+   that lacks complete independent verification stays held. If restoration
+   is uncertain, retain private recovery state and keep the result held.
+   Save the precise terminal reason and partial evidence. The package
+   applies only to this fixture and does not authorize changes to 9487,
+   8765, the addon, game data or any remote repository.
+
+### Separate real-addon blocker
+
+The recovered offer covers the synthetic normalization fixture. In a fresh
+read-only scan of retained addon base
+`f48b2e0bbdf966293695de8b1435b0e7e4372224`, the grounding code recognized no
+literal addon loader in 164 regular Lua tests plus the harness. For example,
+`tests/test_map_viewmath_tileat.lua` uses `loadfile(ROOT .. ...)`, which
+the current committed-source mapper cannot resolve. The grounded evidence
+size limits also held several representative files in the previous audit.
+A real addon task needs a clean current base and exact test whose committed
+loading and behavior evidence fit the existing gates, or a separately
+reviewed mapping change. Current upstream readiness was not established.
+
+[Read-only addon and sampler proof audit](../artifacts/runs/original-preparation-recovery-20261105T230557Z-dKmVKq/next-readiness-audit.json).
+
+## Previous checkpoint — one-shot recovery support
 
 The offline engineering window added two local operator commands to the
-existing preparation and worker owners. The retained 9187 job remains failed
-with one original claim and zero recovery authorizations. Immutable read-only
-revalidation passed the new eligibility gate, and all 118 retained hashes
-matched. The applied scope and expectation approval
+existing preparation and worker owners. At that checkpoint the retained 9187
+job had one failed claim and zero recovery authorizations. Immutable
+read-only revalidation passed the new eligibility gate, and all 118 retained
+hashes matched. The applied scope and expectation approval
 `f66f99d3-ace2-43e5-87ba-0cfd7b78fe83` is still valid for proposal
 `1b47fb3c-7b00-55b5-b3a8-f326be4a38ac` revision 1 and clean fixture main
 `ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. The retained store is schema 0012
@@ -48,8 +237,8 @@ actual delegated Runtime confinement. All four trusted suites passed with
 private loopback, and the untrusted checks retained kernel network denial.
 Every command cgroup was removed. The fixture produced one certified offer
 and zero budgets, sessions, grants, implementation requests or publications.
-The retained desktop and phone proposal screenshots were inspected. Current
-browser acceptance and the original-store recovery remain separate.
+The retained desktop and phone proposal screenshots were inspected. That
+checkpoint left current browser acceptance and original-store recovery pending.
 
 Counted headroom was 77,519,935 bytes at entry and 77,514,297 bytes (73.92 MiB)
 at closeout under the 512 MiB cap.
@@ -57,12 +246,14 @@ at closeout under the 512 MiB cap.
 [disposable confinement receipt](../artifacts/runs/preparation-recovery.ytGSFs/disposable-confined.json),
 and [retained read-only audit](../artifacts/runs/preparation-recovery.ytGSFs/retained-read-only.json).
 
-## Proposed original-store action after separate authorization
+## Historical original-store recovery instructions
 
-Use a separately authorized 60-minute window at this recovery checkpoint.
-Before writing, repeat the immutable audit, confirm the original store and
-fixture identities, and preserve the original SQLite bytes and closed hash
-manifest. Require at least 72 MiB of counted headroom after preservation and
+This authorization has been consumed by the completed recovery above.
+
+The prior handoff proposed a separately authorized 60-minute window.
+Its preconditions included repeating the immutable audit, confirming the
+original store and fixture identities, and preserving the original SQLite
+bytes and closed hash manifest. It required at least 72 MiB of counted headroom after preservation and
 4 GiB free on the working filesystems. Verify the guarded confinement preflight
 inside an owned delegated cgroup with the same worker environment. Use the
 exact policy and fixture below. Stop on the first hold or timeout, or after
@@ -70,7 +261,7 @@ one certified offer. Verify the original evidence, the single retained planning
 attempt, and zero run budgets, activations, sessions, grants, implementation
 requests or publications. A changed binding requires fresh review.
 
-Proposed commands for that future window, from the Workbench checkout.
+Commands retained from the recovery handoff.
 
 ```bash
 set -eu
