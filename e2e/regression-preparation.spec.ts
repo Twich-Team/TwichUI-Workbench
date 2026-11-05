@@ -138,13 +138,18 @@ test('generated expectation mismatch stays a specific browser hold after review'
   await overflow(page);await hold.screenshot({path:(await import('./output')).artifactPath('generated-expectations/specific-expectation-hold-phone.png')});
 });
 
+const moduleExample = 'Example 1: {"args":["  ALICE "],"expected":"alice","incorrect":"ALICE"}';
+const clientExample = 'Example 1: {"args":["  bob  "],"expected":"bob","incorrect":"  bob  "}';
+
 for(const width of [1440,390])test(`application worker prepares grounded ordinary requests after scope review at ${width}`,async({page})=>{
   fixture('reviewed-offer-automatic-setup');
   await page.setViewportSize({width,height:1000});
   const client=width===390;
   await page.goto('/intake/new?kind=feature');
   await page.getByLabel('Title Required').fill(client?'Cover storing a trimmed last name':'Cover lowercase name normalization');
-  await page.getByLabel('Description Required').fill(client?'In tests/test_client.lua cover trimming spaces before storing the last name.':'In tests/test_normalize.lua cover trimming spaces and lowercasing names.');
+  await page.getByLabel('Description Required').fill(client
+    ? `In tests/test_client.lua cover trimming spaces before storing the last name.\n${clientExample}`
+    : `In tests/test_normalize.lua cover trimming spaces and lowercasing names.\n${moduleExample}`);
   await page.getByLabel('Prepare a Lua regression-test task').check();
   await page.getByLabel('Expected test results').fill(client?'The last name stores bob after a spaced input.':'Spaces and capital letters normalize to alice.');
   await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
@@ -188,11 +193,46 @@ for(const width of [1440,390])test(`application worker prepares grounded ordinar
   writeFileSync(artifactPath(`automatic-scenarios/worker-${width}.json`),JSON.stringify({planned,prepared,replay},null,2));
 });
 
+test('grounded intake asks for exact example values before opening approval',async({page})=>{
+  fixture('reviewed-offer-automatic-setup');
+  await page.goto('/intake/new?kind=feature');
+  await page.getByLabel('Title Required').fill('Cover lowercase name normalization');
+  await page.getByLabel('Description Required').fill('Synthetic fixture only. In tests/test_normalize.lua cover trimming spaces and lowercasing names.');
+  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Expected test results').fill('Spaces and capital letters normalize to alice.');
+  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByRole('button',{name:'Submit request',exact:true}).click();
+  await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
+  const held=JSON.parse(fixture('reviewed-offer-automatic-worker'));
+  expect(held).toMatchObject({adapter_calls:0,model_attempts:[],grants:0,requests:0,publications:0});
+  await page.reload();
+  await expect(page.getByText('Waiting for information',{exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Approve proposal',exact:true})).toHaveCount(0);
+  await expect(page.getByText('Expected result 1:',{exact:false})).toHaveCount(0);
+  const question=page.getByText(/For expected result 1.*what exact arguments/).first();
+  await expect(question).toContainText('Example 1:');
+  for(const width of [1440,390]){
+    await page.setViewportSize({width,height:1000});
+    await question.scrollIntoViewIfNeeded();
+    await overflow(page);
+    await page.screenshot({path:(await import('./output')).artifactPath(`screenshots/grounded-clarification-${width}.png`)});
+  }
+  const answered=page.waitForResponse(r=>r.url().endsWith('/clarification')&&r.request().method()==='POST');
+  await page.getByLabel('Your answer').fill(moduleExample);
+  await page.getByRole('button',{name:'Send information'}).click();
+  expect((await answered).status()).toBe(200);
+  const planned=JSON.parse(fixture('reviewed-offer-automatic-worker'));
+  expect(planned.adapter_calls).toBe(1);
+  await page.reload();
+  await expect(page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.')).toBeVisible();
+  await expect(page.getByRole('button',{name:'Approve proposal',exact:true})).toBeDisabled();
+});
+
 test('application preparation policy denial is a specific hold without a duplicate retry button',async({page})=>{
   fixture('reviewed-offer-automatic-setup');await page.setViewportSize({width:390,height:1000});
   await page.goto('/intake/new?kind=feature');
   await page.getByLabel('Title Required').fill('Cover lowercase normalization with reviewed policy');
-  await page.getByLabel('Description Required').fill('In tests/test_normalize.lua cover trimming spaces and lowercasing names.');
+  await page.getByLabel('Description Required').fill(`In tests/test_normalize.lua cover trimming spaces and lowercasing names.\n${moduleExample}`);
   await page.getByLabel('Prepare a Lua regression-test task').check();
   await page.getByLabel('Expected test results').fill('Spaces and capital letters normalize to alice.');
   await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');

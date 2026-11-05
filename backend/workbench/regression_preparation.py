@@ -300,6 +300,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     if generation:
         from workbench import grounded_scenarios, model_policy, trusted_preparation, planning_worker
         from workbench.planning_provider import LocalProvider, provider, PlanningUnavailable
+        raw = None
         try:
             policy = trusted_preparation.configuration(engine)
             if not policy['scenario_generation']:
@@ -307,6 +308,11 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             if (job['payload'].get('scope_revision') != scope['revision'] or scope['stage'] != 'implementation'
                     or job['revision'] <= original['revision']):
                 raise ValueError('Human scope or proposal changed before scenario generation; review the current request.')
+            base_contract = prepare(original['payload'], feedback)
+            packet = grounded_scenarios.context(original['payload'], feedback, base_contract, policy)
+            grounded_scenarios.require_plannable(packet)
+            if len(json.dumps(packet).encode()) > 24000:
+                raise ValueError('Grounded scenario context exceeds the planning input budget; narrow the request.')
             # Same job/lease and accounting owners; duplicate workers never call an
             # adapter for an already claimed job. No automatic inference retry.
             with write_transaction(engine) as c:
@@ -328,10 +334,6 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     routing_reason=('Saved preferred local planning model; fixed decoding, no fallback.' if model_selection else
                                     'Controlled planning adapter; no saved model selection consumed.')))
             claimed_generation = True
-            base_contract = prepare(original['payload'], feedback)
-            packet = grounded_scenarios.context(original['payload'], feedback, base_contract, policy)
-            if len(json.dumps(packet).encode()) > 24000:
-                raise ValueError('Grounded scenario context exceeds the planning input budget; narrow the request.')
             if model_selection:
                 raw, model, basis = adapter_used.generate(packet, grounded_scenarios.Response, expected_model=model_selection.model)
             else:
@@ -342,7 +344,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             if (parsed.input_sha256 != packet['input_sha256'] or parsed.evidence_sha256 != packet['evidence_sha256']
                     or parsed.policy_sha256 != packet['policy_sha256']):
                 raise ValueError('Generated scenario evidence/request/policy bindings are stale; prepare a fresh proposal.')
-            grounded_scenarios.validate_mapping(parsed.draft, packet)
+            grounded_scenarios.validate_generation(parsed.draft, packet)
             # Re-read committed evidence and private policy after the response.
             if grounded_scenarios.context(original['payload'], feedback, prepare(original['payload'], feedback),
                     trusted_preparation.configuration(engine)) != packet:
@@ -350,7 +352,12 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             scenario_response = parsed.model_dump(exclude={'evidence_sha256', 'policy_sha256'})
             scenario_response['model'] = model  # Actual adapter attribution, never a generated identity claim.
         except ValidationError as error:
-            issue = error.errors(include_input=False, include_context=False)[0]
+            issues = error.errors(include_input=False, include_context=False)
+            # A malformed clarification has a more useful error on that branch.
+            # Keep scenario-specific diagnostics for responses proposing examples.
+            draft = raw.get('draft') if isinstance(raw, dict) else None
+            branch = 'GroundedDraft' if isinstance(draft, dict) and draft.get('scenarios') else 'ClarificationDraft'
+            issue = next((e for e in issues if e['loc'][:2] == ('draft', branch)), issues[0])
             location = '.'.join(map(str, issue['loc'])) or 'response'
             generated_failure = f'Scenario preparation rejected structured data at {location}: {issue["msg"]}'[:1200]
         except (ValueError, OSError, PlanningUnavailable) as error:
@@ -364,7 +371,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     if contract and generated_failure:
         from workbench.regression_evidence import expectation_digest
         prepared = contract['behavioral_evidence']
-        prepared['holds'].append(generated_failure)
+        prepared['holds'].insert(0, generated_failure)
         prepared['status'] = 'hold'
         prepared['review_digest'] = expectation_digest(prepared)
         contract['execution_blockers'].append(generated_failure)
@@ -377,6 +384,11 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
         requirement = 'More than eight preparation revisions need an explicit consolidated request; older requirements must not be silently dropped.'
         contract['scope_missing'].append(requirement)
         contract['execution_blockers'].append(requirement)
+    message = 'Reusable Lua regression-test scope prepared. No model, run offer or execution permission created.'
+    if generation:
+        message = ('Behavioral planning needs more information; no examples are ready for approval.'
+                   if contract['scope_missing'] else
+                   'Grounded behavioral proposal prepared for independent review; no certification or execution authority.')
     publication_failed = False
     with write_transaction(engine) as c:
         current = intake.require(c, planning_jobs, job['id'])
@@ -393,12 +405,17 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 if job['revision'] <= original['revision']:
                     raise ValueError('A newer proposal supersedes this preparation job.')
                 content = proposal_content(original['payload'], contract)
+                clarification = contract['scope_missing']
+                if generation and generated_failure:
+                    clarification = clarification[:1]
+                elif generation and (questions := scenario_response['draft']['unresolved']):
+                    clarification = contract['behavioral_evidence']['holds'][:len(questions)]
                 identity = str(uuid5(UUID(original['id']), 'lua-test-preparation-' + str(job['revision'])))
                 c.execute(proposals.insert().values(id=identity, intake_id=original['id'], revision=job['revision'],
                     scope_revision=scope['revision'], content=content, model=model or MODEL, basis='preparation', created_at=intake.now()))
                 payload = {**job['payload'], **({'scenario_generation': dict(model=model, basis=basis, evidence_sha256=packet['evidence_sha256'] if packet else None, policy_sha256=packet['policy_sha256'] if packet else None, diagnostics=getattr(adapter_used, 'diagnostics', {}))} if generation else {}), 'prepared_proposal_id': identity, 'task_contract': contract,
                     'basis': 'preparation', 'evidence': [], 'result': dict(summary=content['summary'],
-                        clarification=' '.join(contract['scope_missing'])[:800], evidence_ids=[], related_ids=[], proposal=content)}
+                        clarification=' '.join(clarification)[:800], evidence_ids=[], related_ids=[], proposal=content)}
                 c.execute(intakes.update().where(intakes.c.id == original['id']).values(revision=job['revision'],
                     status='waiting_for_information' if contract['scope_missing'] else 'completed'))
             else:
@@ -413,7 +430,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         dict(ref=dict(intake_id=original['id'], task_id=task_id, approval_id=job['payload']['approval_id'])))
             c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(status='completed',
                 payload=payload, model=model or MODEL, finished_at=intake.now(), lease=None, lease_until=None,
-                message='Grounded behavioral proposal prepared for independent review; no certification or execution authority.' if generation else 'Reusable Lua regression-test scope prepared. No model, run offer or execution permission created.'))
+                message=message))
         except (ValueError, HTTPException) as error:
             publication_failed = True
             c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(status='failed',

@@ -9,9 +9,27 @@ import json
 import re
 from typing import Annotated, Literal
 
-from pydantic import Field, TypeAdapter
+from pydantic import Field, TypeAdapter, model_validator
 from workbench import regression_evidence as behavior, regression_preparation as preparation
 from workbench.visual_scope import digest
+
+
+Arguments = Annotated[list[behavior.Scalar], Field(max_length=8)]
+SOURCE_PATH = TypeAdapter(behavior.LuaPath)
+
+
+class ConcreteExample(behavior.Data):
+    args: Arguments
+    expected: behavior.Scalar
+    incorrect: behavior.Scalar
+    setup: Annotated[list[behavior.Setup], Field(max_length=8)] = []
+
+    @model_validator(mode="after")
+    def distinct_outcomes(self):
+        json.dumps(self.model_dump(mode="json"), allow_nan=False)
+        if self.expected == self.incorrect:
+            raise ValueError("Expected and incorrect outcomes must differ.")
+        return self
 
 
 class ModuleObservation(behavior.Observation):
@@ -20,6 +38,7 @@ class ModuleObservation(behavior.Observation):
 
 class ModuleScenario(behavior.Scenario):
     fixture: Literal["module"]
+    args: Arguments
     source_paths: Annotated[list[behavior.LuaPath], Field(min_length=1, max_length=1)]
     setup: Annotated[list[behavior.Setup], Field(max_length=0)] = []
     observe: ModuleObservation
@@ -27,20 +46,27 @@ class ModuleScenario(behavior.Scenario):
 
 class ClientScenario(behavior.Scenario):
     fixture: Literal["client"]
+    args: Arguments
     target: behavior.Keys
 
 
-class GroundedDraft(behavior.ScenarioDraft):
+class GroundedDraft(behavior.Data):
     # Expose existing compiler and mapping constraints to structured generation.
     # Reviewed/stored drafts keep the shared scenario representation.
     scenarios: Annotated[
         list[Annotated[ModuleScenario | ClientScenario, Field(discriminator="fixture")]],
-        Field(max_length=3),
-    ] = []
+        Field(min_length=1, max_length=3),
+    ]
+    unresolved: Annotated[list[behavior.Question], Field(max_length=0)] = []
+
+
+class ClarificationDraft(behavior.Data):
+    scenarios: Annotated[list[None], Field(max_length=0)] = []
+    unresolved: Annotated[list[behavior.Question], Field(min_length=1, max_length=8)]
 
 
 class Response(behavior.ScenarioResponse):
-    draft: GroundedDraft
+    draft: GroundedDraft | ClarificationDraft
     evidence_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     policy_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
@@ -52,43 +78,30 @@ def context(original, feedback, contract, policy):
             "Resolve the selected committed test and repository evidence before scenario generation."
         )
     paths = contract["writable_paths"]
-    # A bounded inventory lets the planner select supplied evidence, never host paths.
-    inventory = []
-    for line in (
-        preparation.git(
-            root, "ls-tree", "-r", base, "--", "!!!TwichUI", "TwichUI_Settings", max_bytes=262144
-        )
-        .decode()
-        .splitlines()
-    ):
-        mode, kind, oid, path = line.split(maxsplit=3)
-        if mode in ("100644", "100755") and kind == "blob":
-            try:
-                TypeAdapter(behavior.LuaPath).validate_python(path)
-                inventory.append((path, oid))
-            except ValueError:
-                pass
-    words = set(re.findall(r"[a-z]{3,}", json.dumps(original).lower()))
-    inventory.sort(key=lambda p: (-sum(w in p[0].lower() for w in words), p[0]))
     selected = [(e["path"], e["git_blob"]) for e in contract["evidence"]]
+    framework = {path: preparation.blob(root, oid) for path, oid in selected}
+    harness = framework["tests/harness.lua"].decode()
     references = set()
-    for path, oid in selected:
-        if path.endswith(".lua"):
-            references.update(loaders(preparation.blob(root, oid).decode()))
-    inventory.sort(
-        key=lambda p: (p[0] not in references, -sum(w in p[0].lower() for w in words), p[0])
-    )
-    selected += inventory[:6]
+    for path in paths:
+        test = framework[path].decode()
+        references.update(loaders(test))
+        if uses_client(test, harness):
+            references.update(loaders(harness))
+    sources = committed_sources(root, base, references)
+    selected += sources
     evidence = []
-    for path, oid in dict(selected).items():
-        raw = preparation.blob(root, oid)
-        if len(raw) > 12000 or sum(len(e["text"].encode()) for e in evidence) + len(raw) > 18000:
+    total = 0
+    for path, oid in selected:
+        raw = framework[path] if path in framework else preparation.blob(root, oid)
+        total += len(raw)
+        if len(raw) > 12000 or total > 18000:
             raise ValueError(
                 "Relevant committed source exceeds the scenario context bound; narrow the source/test selection."
             )
         evidence.append(
             dict(path=path, git_blob=oid, sha256=hashlib.sha256(raw).hexdigest(), text=raw.decode())
         )
+    bindings = fixture_bindings(paths, [path for path, _ in sources], evidence)
     return dict(
         purpose="propose-regression-scenarios",
         original=original,
@@ -99,6 +112,8 @@ def context(original, feedback, contract, policy):
         input_sha256=behavior.input_binding(original, feedback, base, paths),
         evidence=evidence,
         evidence_sha256=digest(evidence),
+        fixture_bindings=bindings,
+        examples=concrete_examples(original, feedback),
         policy_sha256=digest(policy),
         supported_schema="One existing test; up to three module/client scalar examples. Expected and meaningful incorrect outcomes are proposed intent, never certification.",
         preparation_policy=dict(
@@ -108,8 +123,88 @@ def context(original, feedback, contract, policy):
             permissions=[],
             independent_review_required=True,
         ),
-        instruction="Use only supplied committed evidence and exported operations. Do not infer intent from current output. Return specific unresolved questions for ambiguity or unsupported mappings. Echo the three bindings exactly. No Lua, permissions, checks or certification fields.",
     )
+
+
+def committed_sources(root, base, references):
+    allowed = []
+    for path in sorted(references):
+        if ".." in path.split("/"):
+            continue
+        try:
+            allowed.append(SOURCE_PATH.validate_python(path))
+        except ValueError:
+            continue
+    if not allowed:
+        return []
+    if len(allowed) > 6:
+        raise ValueError("The selected fixture references more than six Lua sources; narrow the test selection.")
+    rows = preparation.git(root, "ls-tree", "-r", base, "--", *allowed).decode().splitlines()
+    sources = []
+    for row in rows:
+        mode, kind, oid, path = row.split(maxsplit=3)
+        if mode in ("100644", "100755") and kind == "blob" and path in allowed:
+            sources.append((path, oid))
+    return sources
+
+
+def unique_json_object(pairs):
+    value = dict(pairs)
+    if len(value) != len(pairs):
+        raise ValueError("Duplicate JSON field")
+    return value
+
+
+def concrete_examples(original, feedback):
+    # The existing text fields can carry exact values without a schema migration.
+    # A later explicitly numbered clarification replaces that example only.
+    examples = {}
+    for text in (original["description"], feedback):
+        for line in text.split("\n"):
+            match = re.fullmatch(r"\s*Example ([1-8]):\s*(.*)", line)
+            if match:
+                index = int(match[1]) - 1
+                try:
+                    value = json.loads(match[2], object_pairs_hook=unique_json_object)
+                    examples[index] = ConcreteExample.model_validate(value)
+                except (ValueError, RecursionError):
+                    examples[index] = None
+    return [
+        dict(acceptance_index=index, **example.model_dump(mode="json"))
+        for index, example in sorted(examples.items())
+        if example is not None and index < len(original["regression_tests"]["acceptance"])
+    ]
+
+
+def require_plannable(packet):
+    if len(packet["writable_paths"]) != 1:
+        raise ValueError("Select one existing focused test for these behavioral examples.")
+    if not packet["fixture_bindings"]:
+        raise ValueError(
+            f"For {packet['writable_paths'][0]}, identify a literal module loader and exported operation "
+            "or an existing test that uses the harness client."
+        )
+    acceptance = packet["original"]["regression_tests"]["acceptance"]
+    if len(acceptance) > 3:
+        raise ValueError("Split this request into at most three expected results for one focused test.")
+    supplied = {example["acceptance_index"]: example for example in packet["examples"]}
+    for index, result in enumerate(acceptance):
+        if index not in supplied:
+            raise ValueError(
+                f'For expected result {index + 1} ("{result[:250]}"), what exact arguments should the test '
+                "pass, what should it observe, and which incorrect outcome should it reject? "
+                f'Use one line: Example {index + 1}: {{"args": [<values>], "expected": <value>, '
+                '"incorrect": <value>}. Use JSON values, preserve spaces inside strings, '
+                "and use [] for a call with no arguments."
+            )
+        count = len(supplied[index]["args"])
+        if not any(accepts_argument_count(op, count) for binding in packet["fixture_bindings"]
+                   for op in binding["operations"]):
+            raise ValueError(
+                f"For expected result {index + 1}, no committed callable matches the {count} explicit "
+                f"arguments in Example {index + 1}. What exact arguments should the test pass? "
+                "Include each parameter value or null for an explicit Lua nil."
+            )
 
 
 LITERALS = re.compile(
@@ -147,6 +242,130 @@ def loaders(text):
 def returned(text):
     match = re.search(r"\breturn\s+([A-Za-z_]\w*)\s*(?:end\s*)?$", code(text))
     return match[1] if match else None
+
+
+def uses_client(test, harness):
+    return re.search(r"(?<![\w.:])MakeClient\s*\(", code(test)) and re.search(
+        r"\b(?:function\s+MakeClient|MakeClient\s*=\s*function)\s*\(", code(harness)
+    )
+
+
+IDENTIFIER = r"[A-Za-z_]\w*"
+DIRECT_FUNCTION = re.compile(r"^\s*return\s+function\s*\(([^()]*)\)")
+
+
+def operation(path, target, params, method=False):
+    parameters = [p.strip() for p in params.split(",")] if params.strip() else []
+    variadic = bool(parameters and parameters[-1] == "...")
+    if variadic:
+        parameters.pop()
+    if len(target) > 8 or any(k in behavior.FORBIDDEN or k.startswith("__") for k in target):
+        return None
+    if len(parameters) > 8 or any(not re.fullmatch(IDENTIFIER, p) for p in parameters):
+        return None
+    return dict(defined_in=path, target=target, method=method, parameters=parameters, variadic=variadic)
+
+
+def operations(path, text, receiver, *, direct=False):
+    symbols = code(text)
+    if direct and (match := DIRECT_FUNCTION.match(symbols)):
+        callable_ = operation(path, [], match[1])
+        return [callable_] if callable_ else []
+    if not receiver:
+        return []
+    target = rf"{re.escape(receiver)}((?:\s*[.:]\s*{IDENTIFIER})+)"
+    declaration = rf"(?:\bfunction\s+{target}|(?<![\w.:]){target}\s*=\s*function)\s*\(([^()]*)\)"
+    found = []
+    for declared, assigned, params in re.findall(declaration, symbols):
+        name = re.sub(r"\s+", "", declared or assigned)
+        parts = re.split(r"[.:]", name[1:])
+        method = ":" in name
+        if method and (assigned or ":" in name[: -len(parts[-1]) - 1]):
+            continue
+        callable_ = operation(path, parts, params, method)
+        if callable_:
+            found.append(callable_)
+    return found
+
+
+def fixture_bindings(paths, sources, evidence):
+    files = {e["path"]: e["text"] for e in evidence}
+    harness_path = "tests/harness.lua"
+    harness = files.get(harness_path, "")
+    bindings = []
+    for path in paths:
+        test = files[path]
+        module_loaders = loaders(test)
+        for source in sorted(module_loaders.intersection(sources)):
+            text = files[source]
+            exports = operations(source, text, returned(text), direct=True)
+            if exports:
+                bindings.append(dict(
+                    test_path=path, fixture="module", source_paths=[source],
+                    observation="scalar first return", operations=exports,
+                ))
+        if uses_client(test, harness):
+            client_sources = sorted((module_loaders | loaders(harness)).intersection(sources))
+            receiver = returned(harness)
+            exports = [
+                op for source in [harness_path, *client_sources]
+                for op in operations(source, files[source], receiver)
+            ]
+            if client_sources and exports:
+                bindings.append(dict(
+                    test_path=path, fixture="client", source_paths=client_sources,
+                    observation="scalar first return or established client field", operations=exports,
+                ))
+    return bindings
+
+
+def accepts_argument_count(signature, count):
+    named = len(signature["parameters"])
+    return count >= named if signature["variadic"] else count == named
+
+
+def validate_call(example_id, binding, sources, target, method, args):
+    matches = [
+        op for op in binding["operations"]
+        if op["target"] == target and op["method"] == method
+        and (op["defined_in"] in sources or op["defined_in"] == "tests/harness.lua")
+    ]
+    if len(matches) != 1:
+        raise ValueError(f"Example {example_id}: select one callable and calling convention from the committed fixture bindings.")
+    signature = matches[0]
+    if not accepts_argument_count(signature, len(args)):
+        parameters = ", ".join(signature["parameters"]) or "none"
+        raise ValueError(f"Example {example_id}: supply explicit arguments for the callable parameters ({parameters}).")
+
+
+def validate_generation(draft, packet):
+    # Retain the existing committed-fixture and unsafe path checks. The packet
+    # further limits generation to surfaced signatures and explicit user data.
+    validate_mapping(draft, packet)
+    examples = {example["acceptance_index"]: example for example in packet["examples"]}
+    if draft.unresolved:
+        if any(q.acceptance_index not in examples or not q.question.strip() for q in draft.unresolved):
+            raise ValueError("Ask a specific clarification about an existing expected result.")
+        return
+    if {s.acceptance_index for s in draft.scenarios} != examples.keys():
+        raise ValueError("Cover the supplied expected results or return clarification only; result indices are zero-based.")
+    for s in draft.scenarios:
+        sources = set(s.source_paths)
+        binding = next((
+            b for b in packet["fixture_bindings"]
+            if b["test_path"] == s.test_path and b["fixture"] == s.fixture
+            and sources <= set(b["source_paths"])
+        ), None)
+        if binding is None:
+            raise ValueError(f"Example {s.id}: select a binding established for the selected test.")
+        validate_call(s.id, binding, sources, s.target, s.method, s.args)
+        for step in s.setup:
+            if step.op == "call":
+                validate_call(s.id, binding, sources, step.path, step.method, step.args)
+        actual = dict(acceptance_index=s.acceptance_index, args=s.args, expected=s.observe.expected,
+                      incorrect=s.incorrect, setup=[step.model_dump(mode="json") for step in s.setup])
+        if digest(actual) != digest(examples[s.acceptance_index]):
+            raise ValueError(f"Example {s.id}: arguments, setup and outcomes must match the user's explicit example.")
 
 
 def validate_mapping(draft, packet):

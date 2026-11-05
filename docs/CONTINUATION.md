@@ -1,4 +1,172 @@
-# Grounded module-fixture contract checkpoint — November 5, 2026
+# Grounded scenario intake repaired offline — November 5, 2026
+
+Continue from the local checkpoint that contains this handoff. Both real 9187
+attempts are closed. The checklist for the last attempt below is historical.
+
+## Exact evidence from the second attempt
+
+Reconstructed the 2,980-byte packet and 11,375-byte POST from checkpoint
+`19b8605`, the immutable intake and the pinned Git fixture. Both matched the
+wire receipt byte for byte by SHA-256. Replayed the exact saved response through
+the old decoder, schema, three binding checks and fixture validator. It stopped
+at the same committed-client-fixture error recorded by the worker.
+
+The packet contained four complete committed blobs at `ebb16fff…`.
+
+- `tests/run.sh` loaded the module for the Lua tests.
+- `tests/test_normalize.lua` loaded `../!!!TwichUI/normalize.lua` if needed and
+  asserted only that `normalize("alice") == "alice"`.
+- `!!!TwichUI/normalize.lua` directly returned a function with one parameter
+  `s`. The method calls on `s` and the test's literal established a string
+  argument and a first-return comparison.
+- `tests/harness.lua` did define `MakeClient` and `c.API.Normalize(value)`.
+  The selected test never constructed that client. `tests/test_client.lua`
+  was outside the packet and the selected scope.
+
+The technical evidence was sufficient for the direct module binding. The
+application had supplied raw blobs and the generic module/client schema, so
+the model had to choose the fixture and operation. The schema defaulted an
+omitted `args` to `[]`, allowed scenarios alongside questions, and admitted an
+index of 1 even though the sole acceptance item occupies zero-based index 0.
+The prompt asked for scalar arguments and grounded mappings. The response
+omitted both argument arrays, paired an unsupported client binding with a
+module scenario, and acknowledged the missing input only in a question.
+The guard rejected the response before any scenario was accepted.
+
+The intake asked to cover trimming and lowercasing and named `alice` as the
+result. It supplied neither the exact string to pass nor the incorrect outcome
+to reject. The operator review checklist held `"  ALICE "` and `"ALICE"`.
+Neither was model-visible intent, and the response's `"Alice"` counterexample
+had no basis in the intake. The committed implementation could show how a
+chosen input behaves. Only the requester can choose the intended example.
+
+## New planning boundary and handoff
+
+Grounded preparation derives eligible per-test fixture bindings, operations,
+calling conventions and named positional parameters from bounded committed Lua
+loaders and explicit exports. The wire packet exposes those bindings and
+the supported observation shape. The existing mapping validator still runs.
+Dynamic or unrecognized mappings need technical clarification. The lexical
+screen establishes eligible shapes for review and independent Lua checks.
+
+Grounded generation requires exact user-supplied arguments, expected outcome
+and counterexample. The requester can put one line per expected result in the
+description or a clarification reply, using the one-based result number. A
+later numbered reply replaces that example. Arguments are a JSON array,
+including `[]` for a zero-argument call and `null` for an explicit Lua nil.
+An optional `setup` array uses the existing client fixture grammar.
+For this particular fixture, the operator's intended example would be
+
+```text
+Example 1: {"args":["  ALICE "],"expected":"alice","incorrect":"ALICE"}
+```
+
+The original intake now waits for that information before a planner attempt.
+With complete values the response must be either scenarios with explicit
+argument arrays or questions with zero scenarios. Submitted scenarios must
+match the committed bindings and the user's concrete values and setup.
+Independent expectation confirmation remains necessary before scope approval.
+Only the existing offline Lua preparation and control path can certify a
+reviewed offer. The answer box appears before the held scope details.
+
+The clarified packet captured offline serialized to 12,318 bytes, below the
+24,000-byte request limit. It contains one eligible module binding and the
+user values above as controlled test data. An unchanged submission would
+hold before transport. A separately authorized real attempt would be useful
+after the owner supplies those exact values in the actual intake and fresh
+preflight passes. Use the same one-exchange and certified-offer stop, with
+the bound module target, explicit arguments and independent human review.
+Controlled results establish neither real model behavior nor authorization.
+The current 56.42 MiB of counted headroom is below the earlier 72 MiB
+preflight floor.
+
+[Exact reconstructed POST](../artifacts/runs/scenario-grounding-20261105-B5xLUl/reconstructed-19b8605-post.body)
+and [offline serializer receipt](../artifacts/runs/scenario-grounding-20261105-B5xLUl/SERIALIZER.json).
+
+The controlled wire replay covered omitted and empty arguments, unsupported
+client selection, changed user values, mixed scenario/question output and a
+clarification-only hold. Invalid drafts produced zero accepted scenarios,
+scope decisions, preparation jobs, certificates, offers or execution authority.
+The grounded normalization and two-argument numeric floor examples reached
+certified offers after separate expectation confirmation and actual Lua
+controls with simulated confinement telemetry. Chromium also exercised the
+supported client field observation. The 1440 px and 390 px captures show the
+clarification before scope details and exact values in the subsequent review.
+
+[Checkpoint checks](../artifacts/runs/scenario-grounding-20261105-B5xLUl/CHECKPOINT.json),
+[desktop clarification](../artifacts/runs/browser-VgB5yJ/screenshots/grounded-clarification-1440.png),
+[phone clarification](../artifacts/runs/browser-VgB5yJ/screenshots/grounded-clarification-390.png),
+[desktop review](../artifacts/runs/browser-r2Vnbs/automatic-scenarios/observation-1440.png)
+and [enlarged phone review](../artifacts/runs/browser-r2Vnbs/automatic-scenarios/observation-390.png).
+
+## 9187 real-adapter attempt closed at fixture mapping — November 5, 2026
+
+The owner-authorized attempt used clean Workbench checkpoint
+`19b86056bb3d1d4f637f2552ff565b554e2f35a4` and the pinned synthetic fixture
+`ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. The normal API and worker ran
+on a fresh schema `0012` store at `64512:6719390`. The API served 22
+hash-verified staged assets from unchanged frontend inputs. The private
+preparation policy bound the store inode. Saved revision 1 enabled and
+preferred `pilot-qwen38-27b` with unspecified effort, no fallback and
+unavailable routing set to block. The owner-designated credential was a
+regular `rich:rich` mode-0600 file, opened read-only in the worker before
+the exchange. Evidence excludes the credential and authorization headers.
+
+Actual Runtime checks in the delegated worker passed cgroup limit readback,
+Landlock file denial, untrusted socket denial, trusted private loopback,
+host marker and IPC denial, descendant reaping and cgroup removal. Counted
+headroom was 77,464,579 bytes at entry and 77,063,595 bytes (73.49 MiB)
+immediately before intake. The workspace, scratch and shared memory each had
+more than 4 GiB free. Scratch measured 20,477,134 logical bytes at shutdown
+under the 1 GiB ceiling. Both Chromium intake captures (1440 px and 390 px)
+were inspected.
+
+The browser submitted **Cover lowercase name normalization** once, with
+additive assertions restricted to `tests/test_normalize.lua`. Under the
+existing locks, LocalProvider made one identity GET and one structured POST.
+Saved, advertised and returned API model identity matched
+`pilot-qwen38-27b`. The POST was 11,375 bytes and the response was 2,325
+bytes. The exchange took 25.906 seconds and reported 1,534 prompt, 577
+completion and 2,111 total tokens. The request set 2,600 maximum output
+tokens, zero requested reasoning tokens and no tools.
+
+The structured schema and all three bindings passed. Workbench rejected the
+draft at the committed-fixture mapping gate with the exact error
+“Example normalize-client-trim-lowercase: the committed test/harness does not
+establish a client fixture.” That scenario specified `fixture="client"`
+and `target=["API","Normalize"]` for the module-only test. The other
+scenario specified the directly returned module function. Both omitted
+`args`, set `acceptance_index=1` for the sole result, expected `"alice"`
+and supplied `"Alice"` as the incorrect outcome. The draft's unresolved
+question mentioned `" Alice "` in prose. The scenario fields contain no
+literal input to review. The documented intake wording described the behavior
+without spelling out the exact intended input `"  ALICE "` or incorrect
+outcome `"ALICE"`.
+
+The held proposal has zero accepted scenarios. The attempt stopped before
+human review, scope approval, offline certification controls and a certified
+offer. Read-only SQLite checks found zero scope decisions, run budgets,
+activations, execution sessions, grants, execution requests, preparation jobs,
+offers and publication rows. There was one model attempt. The owner-authorized
+attempt is closed and consumed.
+
+Only the owned 9187 browser, API and worker stopped. The delegated cgroup
+was removed and port 9187 was free. Port 9487 and its service and store
+were left untouched. The supervisor removed owned scratch before final
+manifest verification. The original store, source and protected evidence
+remained in place and all 61 original manifest entries verified. An offline
+check of the saved bytes reproduced the exact stored mapping error. Final
+counted headroom after the validation receipt was **76,895,495 bytes
+(73.33 MiB)** under the unchanged 512 MiB cap.
+
+[Preflight](../artifacts/runs/adapter-9187-20261105T214139Z-Yimn2EdG/PREFLIGHT.json),
+[wire receipt](../artifacts/runs/adapter-9187-20261105T214139Z-Yimn2EdG/wire.jsonl),
+[closeout](../artifacts/runs/adapter-9187-20261105T214139Z-Yimn2EdG/RESULT.json),
+[response body](../artifacts/runs/adapter-9187-20261105T214139Z-Yimn2EdG/model-evidence/response.body),
+[parsed response](../artifacts/runs/adapter-9187-20261105T214139Z-Yimn2EdG/model-evidence/parsed-response.json)
+and [validation receipt](../artifacts/runs/adapter-9187-20261105T214139Z-Yimn2EdG/model-evidence/validation-receipt.json).
+
+## Grounded module-fixture contract checkpoint — November 5, 2026
 
 Continue from the clean local commit containing this handoff. See the
 [checkpoint receipt](../artifacts/runs/grounded-module-contract-20261105/CHECKPOINT.json)
@@ -464,8 +632,9 @@ disposable processes and retain the store, receipt and outputs. The existing
    owned transient scratch after verifying the retained files. A timeout does
    not authorize a retry, a lease, a cancellation probe or a service restart.
 
-The proposal now pins the repaired checkpoint. The task, model, request count,
-limits and certified-offer endpoint carry forward.
+The proposal above was the basis for the closed `19b8605` attempt recorded
+at the top of this handoff. Any future real attempt requires fresh owner
+authorization and preflight.
 
 ### Separate real-repository implementation proposal
 

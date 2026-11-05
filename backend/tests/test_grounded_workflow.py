@@ -6,6 +6,7 @@ The application, not a per-task command or registration, dispatches preparation.
 
 import copy
 from contextlib import nullcontext
+import hashlib
 import json
 from subprocess import CalledProcessError
 from pathlib import Path
@@ -23,6 +24,8 @@ from workbench.db import (
     task_run_offers,
     write_transaction,
     engine_for,
+    fake_publications,
+    pr_preparations,
 )
 from workbench.regression_evidence import ScenarioResponse, input_binding
 from test_regression_evidence import ControlledPreparer, approve
@@ -31,6 +34,8 @@ from test_verification_profiles import PRODUCTION, TEST, git
 from workbench import verification_profiles as profiles
 
 CLIENT_TEST = "tests/test_client.lua"
+FLOOR_TEST = "tests/test_floor.lua"
+FLOOR_SOURCE = "!!!TwichUI/floor.lua"
 
 
 def controlled_source(tmp_path):
@@ -68,6 +73,20 @@ end
         "Two supported fixture mappings",
     )
     return root
+
+
+def add_floor_fixture(root):
+    (root / FLOOR_SOURCE).write_text(
+        "local M = {}\nfunction M.AtLeast(value, floor) return math.max(value, floor) end\nreturn M\n"
+    )
+    (root / FLOOR_TEST).write_text(
+        "local bounds = dofile('../!!!TwichUI/floor.lua')\nassert(bounds.AtLeast(9, 3) == 9)\n"
+    )
+    runner = root / "tests/run.sh"
+    runner.write_text(runner.read_text().replace("5 passed", "6 passed"))
+    git(root, "add", ".")
+    git(root, "-c", "user.name=Fixture", "-c", "user.email=fixture@invalid", "commit", "-qm",
+        "Add a distinct numeric module fixture")
 
 
 def policy_file(store, tmp_path):
@@ -139,7 +158,7 @@ class ControlledPlanner:
         return value, "controlled-scenario-adapter", "demo"
 
 
-def submit(client, headers, path=TEST):
+def submit(client, headers, path=TEST, *, example=True, example_line=None):
     value = dict(
         request_id=str(uuid4()),
         kind="feature",
@@ -159,6 +178,12 @@ def submit(client, headers, path=TEST):
             else ["Spaces and capital letters normalize to alice."],
         ),
     )
+    if example:
+        value["description"] += "\n" + (example_line or (
+            'Example 1: {"args": ["  bob  "], "expected": "bob", "incorrect": "  bob  "}'
+            if path == CLIENT_TEST else
+            'Example 1: {"args": ["  ALICE "], "expected": "alice", "incorrect": "ALICE"}'
+        ))
     r = client.post("/api/intake", headers=headers, json=value)
     assert r.status_code == 200, r.text
     return r.json()
@@ -474,6 +499,54 @@ def test_ambiguous_expectation_is_clarified_in_place_with_fresh_bound_feedback(
     assert adapter.calls[-1]["input_sha256"] != adapter.calls[0]["input_sha256"]
 
 
+@pytest.mark.parametrize("example_line, reason", [
+    (None, "what exact arguments"),
+    ('Example 1: {"args":["  ALICE "],"expected":"alice"}', "what exact arguments"),
+    ('Example 1: {"args":[],"expected":"alice","incorrect":"ALICE"}', "no committed callable matches"),
+    ('Example 1: {"args":["  ALICE "],"args":[" Alice "],"expected":"alice","incorrect":"ALICE"}', "what exact arguments"),
+])
+def test_missing_user_example_holds_without_a_planning_attempt(
+    store, client, headers, tmp_path, monkeypatch, example_line, reason
+):
+    _, _, output = configure(store, tmp_path, monkeypatch)
+    adapter = ControlledPlanner()
+    item = submit(client, headers, example=example_line is not None, example_line=example_line)
+    assert worker.tick(store, planning_adapter=adapter)
+    held = current(client, item)
+    assert held["status"] == "waiting_for_information"
+    assert reason in held["result"]["clarification"]
+    assert "Example 1" in held["result"]["clarification"]
+    assert "No reviewed behavioral example" not in held["result"]["clarification"]
+    assert held["proposals"][0]["task_contract"]["behavioral_evidence"]["scenarios"] == []
+    assert not adapter.calls and not list(output.iterdir()) and not worker.tick(store)
+    denied, _ = approve(store, client, headers, held)
+    assert denied.status_code == 409
+    assert not held["tasks"] and not held["decisions"]
+    assert all(value == 0 for value in authority_counts(store).values())
+    with store.connect() as c:
+        assert not c.execute(select(task_run_offers)).first()
+        assert not c.execute(select(planning_jobs).where(
+            planning_jobs.c.kind == "behavioral_preparation"
+        )).first()
+
+    answer = 'Example 1: {"args":["  ALICE "],"expected":"alice","incorrect":"ALICE"}'
+    saved = client.post(
+        f"/api/intake/{item['id']}/clarification", headers=headers,
+        json=dict(command_id=str(uuid4()), revision=held["revision"], text=answer),
+    )
+    assert saved.status_code == 200
+    assert worker.tick(store, planning_adapter=adapter)
+    fresh = current(client, item)
+    assert fresh["status"] == "completed" and len(adapter.calls) == 1
+    assert fresh["original"] == held["original"]
+    assert fresh["proposals"][0]["binding"] != held["proposals"][0]["binding"]
+    assert adapter.calls[0]["feedback"] == answer
+    assert adapter.calls[0]["examples"] == [
+        dict(acceptance_index=0, args=["  ALICE "], expected="alice", incorrect="ALICE", setup=[])
+    ]
+    assert not fresh["tasks"] and not fresh["decisions"] and not list(output.iterdir())
+
+
 def test_source_drift_during_generation_discards_response(
     store, client, headers, tmp_path, monkeypatch
 ):
@@ -619,6 +692,29 @@ return M
     assert not exported(code(text), ["Invented"], returned(text))
 
 
+def test_grounded_signatures_distinguish_zero_argument_calls_and_variadic_methods():
+    from workbench.grounded_scenarios import operations, validate_call
+
+    source = """local M = {API={}}
+M.Empty = function() return 0 end
+function M.API:Count(first, ...) return 1 end
+other.M.Decoy = function(value) return value end
+return M
+"""
+    exports = operations(PRODUCTION, source, "M")
+    assert exports == [
+        dict(defined_in=PRODUCTION, target=["Empty"], method=False, parameters=[], variadic=False),
+        dict(defined_in=PRODUCTION, target=["API", "Count"], method=True, parameters=["first"], variadic=True),
+    ]
+    binding = {"operations": exports}
+    validate_call("empty", binding, {PRODUCTION}, ["Empty"], False, [])
+    validate_call("count", binding, {PRODUCTION}, ["API", "Count"], True, [None, 1, 2])
+    with pytest.raises(ValueError, match="explicit arguments"):
+        validate_call("count", binding, {PRODUCTION}, ["API", "Count"], True, [])
+    with pytest.raises(ValueError, match="calling convention"):
+        validate_call("count", binding, {PRODUCTION}, ["API", "Count"], False, [1])
+
+
 def test_existing_local_adapter_uses_scenario_schema_and_instructions_with_controlled_transport():
     from workbench.grounded_scenarios import Response
     from workbench.planning_provider import LocalProvider
@@ -647,6 +743,11 @@ def test_existing_local_adapter_uses_scenario_schema_and_instructions_with_contr
                 payload["response_format"]["json_schema"]["schema"] == Response.model_json_schema()
             )
             defs = payload["response_format"]["json_schema"]["schema"]["$defs"]
+            draft = payload["response_format"]["json_schema"]["schema"]["properties"]["draft"]["anyOf"]
+            assert {v["$ref"] for v in draft} == {"#/$defs/GroundedDraft", "#/$defs/ClarificationDraft"}
+            assert defs["GroundedDraft"]["properties"]["unresolved"]["maxItems"] == 0
+            assert defs["ClarificationDraft"]["properties"]["scenarios"]["maxItems"] == 0
+            assert defs["ClarificationDraft"]["properties"]["unresolved"]["minItems"] == 1
             variants = defs["GroundedDraft"]["properties"]["scenarios"]["items"]["oneOf"]
             assert {v["$ref"] for v in variants} == {"#/$defs/ModuleScenario", "#/$defs/ClientScenario"}
             module = defs["ModuleScenario"]["properties"]
@@ -657,6 +758,7 @@ def test_existing_local_adapter_uses_scenario_schema_and_instructions_with_contr
             client = defs["ClientScenario"]["properties"]
             assert client["fixture"]["const"] == "client"
             assert client["target"]["minItems"] == 1 and "target" in defs["ClientScenario"]["required"]
+            assert all("args" in defs[name]["required"] for name in ("ModuleScenario", "ClientScenario"))
             assert client["setup"]["maxItems"] > 0
             assert defs["Observation"]["properties"]["path"]["maxItems"] > 0
             instructions = payload["messages"][0]["content"]
@@ -665,7 +767,7 @@ def test_existing_local_adapter_uses_scenario_schema_and_instructions_with_contr
             )
             assert 'fixture="module"' in instructions and "only the first return" in instructions
             assert "Omit setup and observe.path or leave them empty" in instructions
-            assert "behavior these fixtures cannot express" in instructions
+            assert "return specific unresolved questions only, with no scenarios" in instructions
             assert "Features: proposal required" not in instructions
             return json.dumps(
                 dict(
@@ -692,16 +794,32 @@ def save_local_policy(store, model="selected-local-model", *, enabled=True, pref
 
 @pytest.mark.parametrize("fault, field", [
     (None, None),
-    ("module-setup", "setup"),
-    ("module-field", "observe.path"),
-    ("module-table-result", "observe.expected"),
-    ("module-extra-source", "source_paths"),
-    ("client-empty-target", "target"),
+    ("distinct-task", None),
+    ("clarification", "Which value should the test reject?"),
+    ("retained-response", "scenarios.0.module.args"),
+    ("missing-args", "scenarios.0.module.args"),
+    ("empty-required-args", "explicit arguments for the callable parameters (s)"),
+    ("unsupported-client", "committed test/harness does not establish a client fixture"),
+    ("ungrounded-intent", "match the user's explicit example"),
+    ("mixed-clarification", "GroundedDraft.unresolved"),
+    ("module-setup", "scenarios.0.module.setup"),
+    ("module-field", "scenarios.0.module.observe.path"),
+    ("module-table-result", "scenarios.0.module.observe.expected"),
+    ("module-extra-source", "scenarios.0.module.source_paths"),
+    ("client-empty-target", "scenarios.0.client.target"),
 ])
 def test_9187_scenario_shape_through_local_parser_and_preparation(
     fault, field, store, client, headers, tmp_path, monkeypatch
 ):
-    _, _, output = configure(store, tmp_path, monkeypatch)
+    root, _, output = configure(store, tmp_path, monkeypatch)
+    distinct = fault == "distinct-task"
+    if distinct:
+        add_floor_fixture(root)
+    test_path, source_path, target, parameters = (
+        (FLOOR_TEST, FLOOR_SOURCE, ["AtLeast"], ["value", "floor"]) if distinct
+        else (TEST, PRODUCTION, [], ["s"])
+    )
+    args, expected, incorrect = ([2, 5], 5, 2) if distinct else (["  ALICE "], "alice", "ALICE")
     selected = "pilot-qwen38-27b"
     save_local_policy(store, selected)
     key = tmp_path / "inert-key"
@@ -721,9 +839,48 @@ def test_9187_scenario_shape_through_local_parser_and_preparation(
         def read(self, request, limit):
             payload = json.loads(request.data)
             packet = json.loads(payload["messages"][1]["content"])
+            assert len(request.data) <= planning_provider.MAX_INPUT
+            assert packet["writable_paths"] == [test_path]
+            assert packet["fixture_bindings"] == [
+                dict(test_path=test_path, fixture="module", source_paths=[source_path],
+                     observation="scalar first return", operations=[
+                         dict(defined_in=source_path, target=target, method=False,
+                              parameters=parameters, variadic=False),
+                     ])
+            ]
+            assert packet["examples"] == [
+                dict(acceptance_index=0, args=args, expected=expected, incorrect=incorrect, setup=[])
+            ]
+            assert [entry["path"] for entry in packet["evidence"]] == [
+                "tests/run.sh", "tests/harness.lua", test_path, source_path
+            ]
+            assert "API.Normalize" in packet["evidence"][1]["text"]
             response, _, _ = planner.generate(packet, None)
+            if fault == "retained-response":
+                captured = (Path(__file__).with_name("fixtures") / "grounded_9187_response.json").read_bytes()
+                assert hashlib.sha256(captured).hexdigest() == (
+                    "0c2d54d0d4d2021489a91a196f89435bbd4a78c6df18de373fc654fe6a3958fa"
+                )
+                return captured  # Actual envelope and draft, including omitted args and mixed clarification.
             scenario = response["draft"]["scenarios"][0]
             del scenario["observe"]["path"]  # Omitted path and setup select the first return.
+            if distinct:
+                scenario.update(id="floor-below-minimum", source_paths=[source_path], target=target,
+                                args=args, observe=dict(expected=expected), incorrect=incorrect)
+            if fault == "missing-args":
+                del scenario["args"]
+            if fault == "empty-required-args":
+                scenario["args"] = []
+            if fault == "unsupported-client":
+                scenario.update(fixture="client", target=["API", "Normalize"])
+            if fault == "ungrounded-intent":
+                scenario["args"] = [" Alice "]
+                scenario["incorrect"] = "Alice"
+            if fault in {"clarification", "mixed-clarification"}:
+                response["draft"]["unresolved"] = [dict(acceptance_index=0, question=field if fault == "clarification" else
+                    "Which value should the test reject?")]
+                if fault == "clarification":
+                    del response["draft"]["scenarios"]
             if fault == "module-setup":
                 scenario["setup"] = [dict(op="set", path=["name"], value="  ALICE ")]
             if fault == "module-field":
@@ -744,7 +901,18 @@ def test_9187_scenario_shape_through_local_parser_and_preparation(
             ])).encode()
 
     monkeypatch.setattr(planning_provider, "LocalHTTP", lambda _: nullcontext(Transport()))
-    item = submit(client, headers)
+    if distinct:
+        response = client.post("/api/intake", headers=headers, json=dict(
+            request_id=str(uuid4()), kind="feature", title="Cover the numeric lower bound",
+            description='Add a regression for applying a numeric floor.\n'
+                        'Example 1: {"args":[2,5],"expected":5,"incorrect":2}',
+            visual_requirement="nonvisual",
+            regression_tests=dict(test_paths=[test_path], acceptance=["A value below the floor is raised."]),
+        ))
+        assert response.status_code == 200, response.text
+        item = response.json()
+    else:
+        item = submit(client, headers)
     assert worker.tick(store)
     view = current(client, item)
     contract = view["proposals"][0]["task_contract"]
@@ -752,21 +920,23 @@ def test_9187_scenario_shape_through_local_parser_and_preparation(
     with store.connect() as c:
         attempt = c.execute(select(model_attempts)).mappings().one()
     assert len(planner.calls) == 1 and attempt["actual_model"] == selected
-    if fault:
-        assert attempt["outcome"] == "failed" and view["status"] == "waiting_for_information"
+    if field:
+        assert attempt["outcome"] == ("completed" if fault == "clarification" else "failed")
+        assert view["status"] == "waiting_for_information"
         assert prepared["status"] == "hold" and prepared["scenarios"] == []
-        fixture = "client" if fault == "client-empty-target" else "module"
-        assert any(f"draft.scenarios.0.{fixture}.{field}" in hold for hold in prepared["holds"])
-        assert "scenario_grounding" not in contract
+        assert any(field in hold for hold in prepared["holds"])
+        assert ("scenario_grounding" in contract) == (fault == "clarification")
         denied, _ = approve(store, client, headers, view)
         assert denied.status_code in {409, 422}
         assert not view["tasks"] and not list(output.iterdir())
     else:
         assert attempt["outcome"] == "completed" and prepared["status"] == "review_required"
         (scenario,) = prepared["scenarios"]
-        assert scenario["args"] == ["  ALICE "] and scenario["incorrect"] == "ALICE"
-        assert scenario["observe"] == {"path": [], "expected": "alice"} and scenario["setup"] == []
+        assert scenario["args"] == args and scenario["incorrect"] == incorrect
+        assert scenario["observe"] == {"path": [], "expected": expected} and scenario["setup"] == []
         assert not list(output.iterdir())
+        denied, _ = approve(store, client, headers, view, confirm=False)
+        assert denied.status_code == 422
         approve_and_decompose(store, client, headers, item)
         assert worker.tick(store)  # Lua original, positive, vacuous and wrong-behavior controls.
         job = preparation_job(store)
@@ -775,7 +945,7 @@ def test_9187_scenario_shape_through_local_parser_and_preparation(
     with store.connect() as c:
         decisions = c.execute(select(proposal_decisions.c.payload)).scalars().all()
         offers = c.execute(select(task_run_offers)).mappings().all()
-        if fault:
+        if field:
             assert not decisions and not offers
             assert not c.execute(select(planning_jobs).where(
                 planning_jobs.c.kind == "behavioral_preparation"
@@ -783,6 +953,8 @@ def test_9187_scenario_shape_through_local_parser_and_preparation(
         else:
             assert len(decisions) == len(offers) == 1 and not decisions[0].get("run_budget")
             assert offers[0]["snapshot"]["certified_preparation"]["certificate"]["status"] == "certified"
+        assert not c.execute(select(pr_preparations)).first()
+        assert not c.execute(select(fake_publications)).first()
     counts = authority_counts(store)
     assert all(counts[k] == 0 for k in (
         "task_sessions", "real_execution_grants", "real_execution_requests", "real_publications"

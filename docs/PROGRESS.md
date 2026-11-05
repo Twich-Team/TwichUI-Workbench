@@ -4994,3 +4994,70 @@ Verified all 57 retained hashes. Entry headroom was 73.88 MiB under the same
 512 MiB cap. The separate 60-minute acceptance proposal now pins the repaired
 checkpoint and keeps the existing task, one exchange and certified-offer stop.
 See `CONTINUATION.md` and `artifacts/runs/grounded-module-contract-20261105/CHECKPOINT.json`.
+
+## 2026-11-05 — Repaired 9187 real-adapter attempt held at fixture mapping
+
+The fresh disposable `19b8605` API and worker passed store binding, fixture
+pinning, saved revision 1 policy, private credential checks, capacity and
+actual delegated Runtime confinement. Reused the staged assets after verifying
+unchanged frontend inputs and all 22 asset hashes. Inspected both Chromium
+intake widths. The disposable launcher used the existing create-only durable
+writer to retain the bounded response body and parsed response without
+persisting request headers or credential material.
+
+One identity GET and one structured POST matched `pilot-qwen38-27b`.
+The exchange took 25.906 seconds and reported 577 completion tokens. The
+schema and bindings passed. Grounding rejected `normalize-client-trim-lowercase`
+because the committed test/harness does not establish a client fixture.
+The retained draft omits both argument lists and proposes `"Alice"` as
+the incorrect outcome. The held store contains zero accepted scenarios.
+An offline check of the captured response reproduced the exact stored error.
+
+Stopped before human review, scope approval, preparation and certification.
+Run budgets, activations, sessions, grants, execution requests and publication
+rows remained at zero. Closed only owned processes, kept the original store
+and evidence, and left 9487 untouched. Scratch cleanup preceded verification
+of all 61 original evidence hashes. Final counted headroom was 73.33 MiB.
+See `CONTINUATION.md` and
+`artifacts/runs/adapter-9187-20261105T214139Z-Yimn2EdG/model-evidence/validation-receipt.json`.
+
+## 2026-11-05 — Evidence and explicit examples bound before grounded review
+
+Entry storage was 76,895,495 bytes free (73.33 MiB) under the 512 MiB cap.
+Reconstructed the second 9187 POST and packet byte for byte against the
+retained wire receipt. The selected test called a directly returned module
+function and checked its first return. The packet's harness exported
+`API.Normalize` for a different fixture. No allowed mapping was listed in the
+request. The old schema defaulted missing argument arrays and allowed a
+question with scenarios. Intake supplied the general result `alice`. Only
+the operator checklist contained the exact padded uppercase input and
+uppercase counterexample. The old validator correctly rejected the retained
+draft's unsupported client binding.
+
+Grounded planning now lists eligible bindings and signatures from selected
+committed fixtures. It requires numbered user examples with explicit argument
+arrays, expected values and counterexamples. A missing example waits for
+information before adapter selection or an attempt claim. The response has
+separate complete-scenario and clarification-only shapes. Mapping, argument
+counts and equality to the user's literal data are checked before review.
+The existing expectation receipt, compiler, Lua controls and certificate
+owners still gate every offer. The browser leads with the clarification form.
+
+The exact response replay and the serialized controlled scenarios covered
+wrong fixture/API, missing arguments, ungrounded values and clarification-only
+holds. The normalized name and numeric lower-bound fixtures reached certified
+offers through separate review and Lua controls with simulated confinement.
+Invalid drafts created no certificate or authority. The broader suite exposed
+a preexisting `schema=None` crash in the adjacent demo provider. Its type
+check now preserves the legacy no-schema caller. Nine scoped Chromium tests
+passed. The final clarification was also checked independently at both widths.
+`wb check` passed. `wb test` passed 949 backend tests with one opt-in test
+skipped and all 23 frontend tests.
+
+Both real-attempt manifests verified (57 and 61 files). Final headroom was
+56.42 MiB. The original request would hold before transport. A real attempt
+requires the owner to supply the exact example in intake and separately
+authorize a new bounded window after the existing preflight passes.
+The handoff and controlled evidence are in `CONTINUATION.md` and
+`artifacts/runs/scenario-grounding-20261105-B5xLUl/`. No real planning
+acceptance, inference or installed-store changes occurred.

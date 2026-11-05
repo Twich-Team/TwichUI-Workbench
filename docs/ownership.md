@@ -1476,14 +1476,15 @@ explicitly enabled there. Without configuration, historical deterministic scope
 preparation applies. Production routing and capacity acceptance remain open.
 
 Committed Git blobs supply bounded source/test/harness context and hashes. The
-response must match original request/feedback/base/test, evidence and policy
-bindings. Strict scenario data rejects extra permission/code/certification fields,
-invented operations and unsupported source/fixture mappings. Automatic mapping is
-a conservative lexical screen for explicit literal loaders and returned function /
-receiver shapes; it is not a Lua semantic proof. Unknown/dynamic mappings require
-specific technical clarification. Expected/incorrect outcomes remain proposed
-intent, checked by independent human expectation confirmation in the existing scope
-review. Optional `scenario_grounding` enters the typed contract and review digest;
+application derives eligible fixture bindings and callable signatures from literal
+loaders and explicit returned function/receiver shapes. Dynamic or unknown mappings
+need technical clarification. Grounded generation requires concrete user values in
+the original description or retained feedback before claiming a model attempt.
+Scenarios must use the derived bindings and match those values. A clarification
+response contains questions and zero scenarios. The response still binds the exact
+request/feedback/base/test, evidence and policy and passes the existing fixture
+validator. The human independently confirms behavior in the existing scope review.
+Optional `scenario_grounding` enters the typed contract and review digest;
 historical contracts omit it. Current preparation policy is revalidated during
 preparation and canonical offer reconstruction; drift requires a fresh proposal.
 

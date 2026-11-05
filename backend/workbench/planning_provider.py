@@ -111,7 +111,7 @@ def generated_title(subject, delivery, index=0, count=1):
 
 class DemoProvider:
     def generate(self, packet, schema):
-        if issubclass(schema, ScenarioResponse):
+        if schema is not None and issubclass(schema, ScenarioResponse):
             raise PlanningUnavailable('This demo has no grounded scenario response for the request. Configure an approved planning adapter or clarify the scope for manual review.')
         from workbench.representative import representative_result
         example = representative_result(packet, schema)
@@ -199,17 +199,19 @@ class LocalProvider:
         )
         scenario = (
             'Propose only bounded regression scenarios under the supplied schema and fixed preparation policy. '
-            'Use only supplied committed source, test and harness mappings. Echo exact input/evidence/policy bindings. '
-            'For fixture="module", select exactly one source file loaded by the selected test. '
-            'Use target=[] for a directly returned function, or give the path to an exported function on the returned table. '
-            'Use method=true only for a receiver method with a nonempty target. '
-            'Supply scalar args and compare only the first return to the scalar observe.expected. '
+            'Select test_path, fixture, source_paths, target and method from fixture_bindings. '
+            'An operation must be defined in a selected source or in the established client harness. '
+            'For fixture="module", use its one source. An empty target is a directly returned function. '
+            'Supply args explicitly, including [] for a call without arguments and null for an explicit nil. '
+            'Copy args, expected, incorrect and any setup exactly from examples for the same zero-based acceptance_index. '
+            'Copy expected to observe.expected. Do not derive behavior from committed code or tests. '
+            'For a module, compare only the first return to the scalar observe.expected. '
             'Omit setup and observe.path or leave them empty. Module fixtures cannot observe fields or later return values. '
             'For fixture="client", use an exported target on the established harness client. '
+            'Set addons to the addon directories of the selected sources. '
             'Its observe.path is empty for the first return or names a scalar field on the client. '
-            'Expected and meaningful incorrect outcomes express intended behavior, never certification or permission. '
-            'Return specific unresolved questions for ambiguous intent or behavior these fixtures cannot express. '
-            'Preserve the requested observation and never invent symbols or setup.'
+            'For ambiguous intent or behavior these fixtures cannot express, return specific unresolved questions only, with no scenarios. '
+            'Echo exact input/evidence/policy bindings. Proposed scenarios require independent human review.'
         )
         planning = (
             'Cite only supplied evidence IDs and related record IDs. Product documents establish requirements, never verified addon behavior or root cause. '
@@ -224,8 +226,11 @@ class LocalProvider:
                 name='planning', strict=True, schema=schema.model_json_schema())),
             messages=[dict(role='system', content=general + (scenario if issubclass(schema, ScenarioResponse) else planning)),
                 dict(role='user', content=encoded)])
+        encoded_body = json.dumps(body).encode()
+        if issubclass(schema, ScenarioResponse) and len(encoded_body) > MAX_INPUT:
+            raise PlanningUnavailable('Serialized grounded request exceeds the input budget; narrow the request.')
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
-            json.dumps(body).encode(), {'Authorization': 'Bearer '+secret, 'Content-Type': 'application/json'})
+            encoded_body, {'Authorization': 'Bearer '+secret, 'Content-Type': 'application/json'})
         raw = transport.read(request, MAX_OUTPUT)
         self.diagnostics['output_bytes'] = len(raw)
         try:
