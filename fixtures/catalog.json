@@ -1,0 +1,6 @@
+[
+  {"id":"guide-request","title":"Make guide progress easier to follow","kind":"request","summary":"An example request showing how a player-facing goal groups smaller pieces of work.","state":"Organizational request","subsystem":"Guides"},
+  {"id":"guide-review","title":"Clear, predictable step selection","kind":"milestone","parent":"guide-request","summary":"Review the behavior of a picked step. This grouping does not grant execution permission.","state":"Organizational milestone","subsystem":"Guides"},
+  {"id":"guide-copy","title":"Explain returning to the current step","kind":"task","parent":"guide-review","summary":"An illustrative waiting task. A dependency is a prerequisite, not a parent relationship.","state":"Waiting for clarification","subsystem":"Guides","verification":"Not run","attempt_outcome":"No recorded attempt","publication":"Not published"},
+  {"id":"fixture-inspection","title":"Guide inspection found no additional changes","kind":"inspection","summary":"Sanitized history example. No change is a useful outcome; it is not an executable task.","state":"Finished","attempt_outcome":"No change","verification":"Recorded fixture inspection","publication":"Not published","updated_at":"2026-11-02T16:00:00+00:00","date_basis":"Sanitized fixture inspection record time"}
+]

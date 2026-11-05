@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cozy-step-review",
+    "title": "Keep your place in a guide",
+    "summary": "A small test update checks what happens when you pick a guide step. The checks passed, but the intended behavior needs your review.",
+    "subsystem": "Guides · Step selection",
+    "state": "held",
+    "revision": 1,
+    "attempt_outcome": "accepted",
+    "verification": "passed",
+    "publication": "not_published",
+    "eligibility": "contract_hold",
+    "evidence": {
+      "candidate": "fixture-guide-tests-v1",
+      "patch_sha256": "66d9175e85aa6f4576987141beedbfde952dab4ca62c2cd0cc4f27c36493ad44e",
+      "checks": "12 sanitized fixture checks passed. These illustrate recorded evidence; no addon or game files were loaded.",
+      "caveat": "Passing checks do not establish the intended player experience. Review each behavior below.",
+      "claims": [
+        {"id": "follow", "text": "Following tracks the current step. Picking another step keeps it selected as progress changes.", "source": "Sanitized guide contract · §1"},
+        {"id": "fallback", "text": "If your picked step no longer applies, the guide returns to following the current step.", "source": "Sanitized guide contract · §2"},
+        {"id": "finished", "text": "A finished guide shows the last required step, leaving out any optional step after it.", "source": "Sanitized guide contract · §3"}
+      ],
+      "excerpt": "Fixture contract v1\nFollow the current step unless a valid step is picked.\nWhen the picked step stops applying, return to following.\nAt completion, show the last required step."
+    }
+  }
+]

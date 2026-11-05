@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "request": {
+    "kind": "feature",
+    "title": "Synthetic feature · Admission rehearsal",
+    "description": "Plan one synthetic nonvisual record-normalization task solely to rehearse approval binding. No implementation, provider call, addon change or publication is requested by this rehearsal.",
+    "lua_error": "",
+    "visual_requirement": "nonvisual"
+  },
+  "planning": {
+    "summary": "Synthetic nonvisual scope for a single admission rehearsal.",
+    "clarification": "",
+    "evidence_ids": [],
+    "related_ids": [],
+    "proposal": {
+      "summary": "Normalize a synthetic record label",
+      "value": "Provide one exact scope item for checking the existing human approval contract.",
+      "feasibility": "Deterministic synthetic planning only; no addon feasibility has been established.",
+      "uncertainty": ["No implementation or independent behavior verification exists."],
+      "evidence_ids": [],
+      "behavior": ["A future implementation would trim surrounding whitespace from a synthetic record label."],
+      "scope": ["Trim surrounding whitespace from a synthetic record label without changing its interior text."],
+      "exclusions": ["Interface changes, addon changes, provider calls, execution permission and publication."],
+      "acceptance": ["The synthetic label's surrounding whitespace is removed and its interior text is preserved."],
+      "dependencies": [],
+      "risks": ["Admission checks approval binding only; they do not demonstrate this behavior."],
+      "stages": ["Review this exact scope, then rehearse admission with execution denied."],
+      "visual": "nonvisual",
+      "delivery": "implementation"
+    }
+  },
+  "decomposition": {
+    "tasks": [
+      {
+        "key": "normalize-label",
+        "kind": "task",
+        "parent": null,
+        "title": "Normalize the synthetic record label",
+        "purpose": "Trim surrounding whitespace from a synthetic record label without changing its interior text.",
+        "acceptance": ["The synthetic label's surrounding whitespace is removed and its interior text is preserved."],
+        "depends_on": [],
+        "scope_indices": [0]
+      }
+    ]
+  }
+}

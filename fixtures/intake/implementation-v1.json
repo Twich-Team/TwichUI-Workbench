@@ -1,0 +1,12 @@
+{
+  "contract": "synthetic-label-implementation-v1",
+  "version": 1,
+  "media_type": "application/json",
+  "cases": [
+    {"input": "  Sample label  ", "expected": "Sample label"},
+    {"input": "\t  Two  inner spaces \n", "expected": "Two  inner spaces"},
+    {"input": "Already tidy", "expected": "Already tidy"},
+    {"input": " \t\n ", "expected": ""},
+    {"input": "  Café · sample  ", "expected": "Café · sample"}
+  ]
+}

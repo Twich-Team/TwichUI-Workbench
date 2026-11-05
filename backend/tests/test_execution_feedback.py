@@ -1,0 +1,217 @@
+"""NON-MODEL diagnostics, confinement and repeated-read regression evidence."""
+
+import json
+from types import SimpleNamespace
+import pytest
+from workbench.real_feedback import CheckFeedback
+from workbench.real_workspace import Tools
+from workbench.real_tool_contract import ToolDenied, ToolBudgetExceeded, invoke
+from workbench.real_execution import PATHS
+
+
+def test_failure_at_end_is_actionable_and_full_log_is_paged(tmp_path):
+    f = CheckFeedback(tmp_path, ["tests/test_guild_locations.lua"])
+    raw = (
+        "routine chatter\n" * 120
+        + "lua5.1: test_guild_locations.lua:920: FAILED: expected valid level1, actual nil\nstack traceback:\n\ttest_guild_locations.lua:920: in main chunk\n"
+    )
+    result = f.record(dict(status="fail", rc=1, out=raw), "fixed-000")
+    assert "expected valid level1, actual nil" in result["diagnostic"]
+    assert result["context_hint"] == dict(path="tests/test_guild_locations.lua", start=916, end=924)
+    page = json.loads(f.read(dict(check_id="fixed-000", start=121, end=123)))
+    assert "FAILED" in page["lines"][0]["text"]
+    assert not json.loads(f.read(dict(check_id="fixed-000", start=121, end=123)))["lines"]
+    assert len(json.dumps(result, ensure_ascii=True).encode()) < 8192
+    for identity in ["../private", "/etc/passwd", "working-01-00"]:
+        with pytest.raises(ToolDenied):
+            f.read(dict(check_id=identity))
+
+
+def test_untrusted_unicode_controls_and_large_diagnostics_stay_bounded(tmp_path):
+    f = CheckFeedback(tmp_path, [])
+    result = f.record(dict(status="fail", rc=1, out="FAILED:" + ("\x00é☃" * 1000)), "fixed-000")
+    # Tool serialization must remain a valid bounded JSON object, never clipped JSON.
+    assert len(json.dumps(result, ensure_ascii=True).encode()) < 8192
+    with pytest.raises(ValueError):
+        f.read(dict(check_id="fixed-000", start=True))
+
+
+def distinct(tmp_path):
+    p = tmp_path / PATHS[0]
+    p.parent.mkdir(parents=True)
+    p.write_text("alpha\nbeta\ngamma\n")
+    rt = SimpleNamespace(workspace=tmp_path, recipe={"read_budget_policy": "distinct-lines-v1"})
+    return Tools(rt, lambda: True), p
+
+
+def read(tools, start=1, end=3):
+    return json.loads(tools.handle("read_file", dict(path=PATHS[0], start=start, end=end)))
+
+
+def test_distinct_reads_omit_unchanged_overlap_and_charge_changed_lines(tmp_path):
+    tools, p = distinct(tmp_path)
+    assert [v["text"] for v in read(tools, 1, 2)["spans"]] == ["alpha\nbeta\n"]
+    assert tools.read == 11
+    assert [v["text"] for v in read(tools, 2, 3)["spans"]] == ["gamma\n"]
+    assert tools.read == 17 and read(tools)["already_shown_or_empty"]
+    p.write_text("alpha\nfixed\ngamma\n")
+    assert [v["text"] for v in read(tools)["spans"]] == ["fixed\n"]
+    assert tools.read == 23
+    p.unlink()
+    p.symlink_to("/etc/passwd")
+    with pytest.raises(ToolDenied):
+        read(tools)
+
+
+def test_source_budget_and_response_bound_remain_enforced(tmp_path):
+    tools, p = distinct(tmp_path)
+    p.write_text(("☃" * 20 + "\n") * 250)
+    result = read(tools, 1, 250)
+    assert len(json.dumps(result, ensure_ascii=True).encode()) < 8192
+    assert result["spans"][-1]["end"] < 250  # Unreturned lines are not charged.
+    assert tools.read == sum(len(x["text"]) for x in result["spans"])
+    tools.read = 45000
+    with pytest.raises(ToolBudgetExceeded):
+        read(tools, 250, 250)
+
+
+def test_log_dispatch_path_cannot_select_arbitrary_files(tmp_path):
+    tools, _ = distinct(tmp_path)
+    tools.runtime.feedback = CheckFeedback(tmp_path, PATHS)
+    tools.runtime.feedback.record(dict(status="fail", rc=1, out="FAILED: retained"), "fixed-000")
+    event = []
+    result = invoke(
+        tools,
+        dict(
+            id="scripted",
+            function=dict(name="read_check_log", arguments=json.dumps(dict(check_id="fixed-000"))),
+        ),
+        0,
+        0,
+        event.append,
+    )
+    assert "retained" in json.loads(result)["lines"][0]["text"]
+    assert event[0]["outcome"] == "completed"
+    with pytest.raises(ToolDenied):
+        invoke(
+            tools,
+            dict(
+                function=dict(
+                    name="read_check_log", arguments=json.dumps(dict(check_id="../SECRET"))
+                )
+            ),
+            0,
+            1,
+            event.append,
+        )
+    assert "SECRET" not in json.dumps(event)
+
+
+def test_unicode_multiline_summary_and_long_log_line_are_retrievable(tmp_path):
+    f = CheckFeedback(tmp_path, [])
+    raw = "".join("FAILED: " + ("☃" * 1000) + "\n" for _ in range(10))
+    result = f.record(dict(status="fail", rc=1, out=raw), "fixed-000")
+    assert len(json.dumps(result, ensure_ascii=True).encode()) < 8192
+    output = []
+    position = {"start": 1}
+    loops = 0
+    while position:
+        value = json.loads(f.read(dict(check_id="fixed-000", **position)))
+        output.extend(x["text"] for x in value["lines"])
+        position = value["next_page"]
+        loops += 1
+        assert loops < 100
+    assert "".join(output) == raw
+
+
+def test_saved_log_tamper_is_denied(tmp_path):
+    f = CheckFeedback(tmp_path, [])
+    f.record(dict(status="fail", rc=1, out="FAILED: original"), "fixed-000")
+    (tmp_path / "check-logs/fixed-000.json").write_text("{}")
+    with pytest.raises(ToolDenied):
+        f.read(dict(check_id="fixed-000"))
+
+
+def test_candidate_feedback_does_not_duplicate_escaped_diagnostic_past_wire_bound(
+    tmp_path, monkeypatch
+):
+    from workbench.real_workspace import Runtime
+    import workbench.real_workspace as module
+
+    rt = object.__new__(Runtime)
+    rt.root = tmp_path
+    rt.workspace = tmp_path / "workspace"
+    rt.workspace.mkdir()
+    rt.initial = tmp_path / "base.json"
+    rt.initial.write_text("{}")
+    rt.oracle_source = tmp_path / "oracle.lua"
+    rt.oracle_source.write_text("-- NON-MODEL")
+    rt.base = "a" * 40
+    rt.enforce_storage = lambda: None
+    fixture_file = rt.workspace / "tests/test_fixture.lua"
+    fixture_file.parent.mkdir()
+    fixture_file.write_text("-- NON-MODEL fixture\n")
+    rt.paths = ("tests/test_fixture.lua",)
+    rt.recipe = {"controlled": True}
+    rt._request_id = "NON-MODEL"
+    rt._fence = "NON-MODEL"
+    rt._context_sha = None
+    rt.context_sha = lambda: None
+    rt.scope = lambda: (list(rt.paths), "NON-MODEL diff")
+    rt.expected_checks = lambda: [["syntax"], ["focused"], ["oracle"], ["suite"]]
+    rt.expected_suite = lambda: []
+    rt.check = lambda *a, **k: dict(status="fail", rc=1, out=("FAILED: " + "☃" * 600 + "\n") * 5)
+    rt.feedback = CheckFeedback(tmp_path, rt.paths)
+    monkeypatch.setattr(module, "tree", lambda _: {"changed": "fixture"})
+    reply = Tools(rt, lambda: True).handle("run_check", {"name": "candidate"})
+    assert len(reply.encode()) < 8192
+    assert json.loads(reply)["check_id"] == "working-00-01"
+
+
+def test_literal_symbol_search_is_bounded_scoped_and_deduplicated(tmp_path):
+    tools, p = distinct(tmp_path)
+    p.write_text("preamble\nfunction SH.FullName(name)\nreturn name\nend\n")
+    result = json.loads(
+        invoke(
+            tools,
+            dict(
+                function=dict(
+                    name="find_text", arguments=json.dumps(dict(path=PATHS[0], query="FullName"))
+                )
+            ),
+            0,
+            0,
+        )
+    )
+    assert result["matches"] == [dict(line=2, preview="function SH.FullName(name)")]
+    cost = tools.read
+    assert json.loads(tools.handle("find_text", dict(path=PATHS[0], query="FullName")))[
+        "already_shown"
+    ]
+    assert tools.read == cost
+    with pytest.raises(ToolDenied):
+        tools.handle("find_text", dict(path="../private", query="SECRET"))
+    p.write_text(("☃" * 300 + "\n") * 100)
+    result = tools.handle("find_text", dict(path=PATHS[0], query="☃"))
+    assert len(result.encode()) < 8192 and len(json.loads(result)["matches"]) <= 12
+
+
+def test_measured_supported_read_allowance_is_bounded_without_legacy_change(tmp_path):
+    from workbench.task_budget import valid_contract
+    from workbench.real_execution import contract
+
+    value = contract()
+    value["limits"] = {**value["limits"], "read_chars": 98304}
+    assert valid_contract(value)
+    assert not valid_contract({**value, "limits": {**value["limits"], "read_chars": 98305}})
+    assert not valid_contract({**value, "limits": {**value["limits"], "memory_bytes": 7 << 30}})
+    tools, p = distinct(tmp_path)
+    tools.runtime.source_read_limit = 98304
+    p.write_text(("x" * 200 + "\n") * 500)
+    for _ in range(15):
+        read(tools, 1, 250)
+    assert tools.read == 50250 > 45000
+    with pytest.raises(ToolBudgetExceeded):
+        for _ in range(15):
+            read(tools, 251, 500)
+    assert tools.read <= 98304

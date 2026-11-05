@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "summary", "screenshots_inspected", "blockers"],
+  "properties": {
+    "status": {"type": "string", "enum": ["READY_FOR_REVIEW", "BLOCKED", "BUDGET_EXHAUSTED", "INTERRUPTED"]},
+    "summary": {"type": "string", "maxLength": 2000},
+    "screenshots_inspected": {"type": "array", "items": {"type": "string"}, "maxItems": 20},
+    "blockers": {"type": "array", "items": {"type": "string"}, "maxItems": 10}
+  }
+}

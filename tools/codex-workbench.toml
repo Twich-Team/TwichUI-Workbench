@@ -1,0 +1,33 @@
+# Invocation-only config overrides; never installed into ~/.codex/config.toml.
+# Codex 0.166.0. This file does not authorize a milestone.
+default_permissions = "workbench"
+approval_policy = "never"
+model_reasoning_effort = "high"
+forced_login_method = "chatgpt"
+web_search = "disabled"
+
+[features]
+multi_agent = false
+multi_agent_v2 = false
+hooks = false
+network_proxy = true
+
+[permissions.workbench]
+extends = ":workspace"
+
+[permissions.workbench.filesystem]
+"/home/rich/.ssh" = "deny"
+"/home/rich/.codex/auth.json" = "deny"
+"/home/rich/.config/gh" = "deny"
+"/home/rich/twichui-pilot" = "read"
+
+[permissions.workbench.network]
+enabled = true
+allow_local_binding = false
+allow_upstream_proxy = false
+proxy_url = "http://127.0.0.1:19880"
+socks_url = "http://127.0.0.1:19881"
+
+[permissions.workbench.network.domains]
+"127.0.0.1" = "allow"
+"localhost" = "allow"

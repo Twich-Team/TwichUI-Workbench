@@ -1,0 +1,36 @@
+{
+  "request": {
+    "kind": "feature",
+    "title": "Synthetic demo · Guide tracking status",
+    "description": "Show whether the guide is following the current step or pinned to a chosen step. Keep the chosen step selected until the user resumes following. This is a synthetic product example, not addon research or an implementation request."
+  },
+  "planning": {
+    "summary": "A clear following-or-pinned status for the guide panel.",
+    "clarification": "",
+    "evidence_ids": [],
+    "related_ids": [],
+    "proposal": {
+      "summary": "Know which step the guide is tracking",
+      "value": "A small status row explains why a chosen step stays selected and offers a clear way to follow progress again.",
+      "feasibility": "Preliminary synthetic proposal. Existing selection APIs and addon layout constraints have not been inspected.",
+      "uncertainty": ["Confirm the existing guide selection and reload behavior in actual addon code before implementation.", "Both attached pictures are synthetic illustrations, not in-game captures or simulator evidence."],
+      "evidence_ids": [],
+      "behavior": ["While following progress, show ‘Following current step’ above the step list.", "Choosing another step switches the row to ‘Pinned to chosen step’ and keeps that selection as progress changes.", "A ‘Resume following’ button returns to the current eligible step and restores the following label."],
+      "scope": ["Following and pinned states in the existing guide panel", "A resume-following action using existing step selection rules"],
+      "exclusions": ["New guide content, navigation routes, map overlays, or automatic player actions", "Changes to completion rules, other addon panels, execution permissions, or publication"],
+      "acceptance": ["The status row says ‘Following current step’ when automatic tracking is active.", "Manual selection shows ‘Pinned to chosen step’ and remains selected when progress advances.", "Resume following selects the current eligible step and updates the status label.", "The status and action remain readable at supported UI scales and usable with the existing keyboard controls."],
+      "dependencies": ["Confirm the authoritative selected-step and current-step APIs."],
+      "risks": ["Saved selection behavior may differ across guide types or interface reloads.", "The compact status row must fit existing supported UI scales."],
+      "stages": ["Confirm the selection state contract.", "Add the status row and resume action within the agreed design.", "Verify selection transitions and layout together."],
+      "visual": "visual",
+      "delivery": "implementation"
+    }
+  },
+  "decomposition": {
+    "tasks": [
+      {"key":"tracking-states","kind":"task","parent":null,"title":"Define guide tracking transitions","purpose":"Confirm the selected/current-step contract and define following, manual pinning, and resume transitions within the approved guide panel scope.","acceptance":["Following, pinning, and resuming have explicit state transitions using existing step rules."],"depends_on":[],"scope_indices":[0,1]},
+      {"key":"status-row","kind":"task","parent":null,"title":"Add the tracking status row","purpose":"Display the agreed following/pinned labels and resume action in the existing guide panel, using the approved revision's mockup as design intent.","acceptance":["Following and pinned labels match the actual selection state.","Resume following selects the current eligible step without changing completion rules."],"depends_on":["tracking-states"],"scope_indices":[0,1]},
+      {"key":"selection-checks","kind":"task","parent":null,"title":"Verify selection and resume behavior","purpose":"Check the integrated state transitions, keyboard operation, reload uncertainty, and supported layout scales without adding new guide behavior.","acceptance":["Manual selection remains pinned as progress changes.","Resume restores current-step tracking.","Keyboard use and supported UI scales preserve a readable, operable status row."],"depends_on":["status-row"],"scope_indices":[0,1]}
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+.venv/
+node_modules/
+frontend/dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.local/
+playwright-report/
+test-results/
+artifacts/*
+!artifacts/.gitkeep
+
+# Local credentials/configuration and runtime stores never belong in source history.
+.env
+.env.*
+!.env.example
+!.env.template
+.codex/
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.sqlite-*
+*.db
+*.db-*
+*.pem
+*.key
+
+# Recreated from backend schemas by npm run contracts (also part of check).
+/frontend/openapi.json
+/frontend/src/api.generated.ts

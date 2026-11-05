@@ -1,0 +1,125 @@
+import { test, expect } from '@playwright/test';
+import { fixture, capture, overflow } from './helpers';
+
+test.beforeEach(()=>fixture('reset'));
+
+test('display preferences persist, preserve dirty edits, reject conflicts and use exact ownership',async ({page},info)=>{
+  await page.goto('/settings');
+  await expect(page.getByRole('heading',{name:'Settings',exact:true})).toBeVisible();
+  await expect(page.getByText('Saved. Preferences apply immediately.',{exact:true})).toBeVisible();
+  await page.getByLabel('Default chart time range').selectOption('24');
+  await page.getByLabel('Display refresh',{exact:true}).selectOption('15');
+  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Work',exact:true}).click();
+  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Settings',exact:true}).click();
+  await expect(page.getByLabel('Default chart time range')).toHaveValue('24');
+  await page.reload();
+  await expect(page.getByLabel('Display refresh',{exact:true})).toHaveValue('15');
+  await page.getByRole('button',{name:'Save display preferences'}).click();
+  await expect(page.getByText('Display preferences saved and applied.')).toBeVisible();
+  await page.getByLabel('Default chart time range').selectOption('168');
+  await page.evaluate(async()=>{
+    const {csrf_token}=await (await fetch('/api/session')).json();
+    const previous=await (await fetch('/api/display-settings')).json();
+    await fetch('/api/display-settings',{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf_token},body:JSON.stringify({...previous,resource_hours:1,refresh_seconds:60})});
+  });
+  await page.getByRole('button',{name:'Save display preferences'}).click();
+  await expect(page.getByText(/Display settings changed/)).toBeVisible();
+  await expect(page.getByLabel('Default chart time range')).toHaveValue('168');
+  await page.getByRole('button',{name:'Discard edits and reload'}).click();
+  await expect(page.getByLabel('Default chart time range')).toHaveValue('1');
+  await expect(page.getByLabel('Display refresh',{exact:true})).toHaveValue('60');
+  await capture(page,info,'operating-settings-desktop');
+  await page.setViewportSize({width:390,height:844}); await overflow(page);
+  await capture(page,info,'operating-settings-phone');
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%'); await overflow(page);
+});
+
+test('real ECharts demo updates preserve zoom and legend while observed remains unavailable',async ({page},info)=>{
+  await page.goto('/monitoring');
+  await expect(page.getByText('Resource source unavailable',{exact:true})).toBeVisible();
+  await page.getByLabel('Resource source').selectOption('demo');
+  await expect(page.getByText('Deterministic demo · simulated host · demo')).toBeVisible();
+  const chart=page.getByRole('img',{name:'CPU / GPU utilization',exact:true});
+  await expect(chart).toHaveAttribute('data-chart-ready','true');
+  await expect(page.locator('.resource-card').filter({hasText:'GPU utilization'})).toContainText('%');
+  const initial=await chart.evaluate(element=>{
+    const library=(window as any).echarts;
+    const instance=library.getInstanceByDom(element);
+    const option=instance.getOption();
+    const start=option.xAxis[0].min+10*60*1000, end=option.xAxis[0].min+30*60*1000;
+    instance.dispatchAction({type:'dataZoom',startValue:start,endValue:end});
+    instance.dispatchAction({type:'legendUnSelect',name:'GPU'});
+    return {start,end};
+  });
+  await page.route('**/api/resources?source=demo*',async route=>{
+    const response=await route.fetch(); const data=await response.json();
+    data.start+=15; data.end+=15; data.latest={...data.latest,at:data.latest.at+15,cpu:27.5};
+    data.points.push(data.latest);
+    await route.fulfill({response,json:data});
+  });
+  await Promise.all([page.waitForResponse(response=>response.url().includes('/api/resources?source=demo')),page.getByRole('button',{name:'Refresh display',exact:true}).click()]);
+  await expect.poll(()=>chart.evaluate(el=>(window as any).echarts.getInstanceByDom(el).getOption().series[0].data.at(-1)[1])).toBe(27.5);
+  await expect.poll(()=>chart.evaluate(el=>{const opt=(window as any).echarts.getInstanceByDom(el).getOption();return {start:opt.dataZoom[0].startValue,end:opt.dataZoom[0].endValue};})).toEqual(initial);
+  expect(await chart.evaluate(el=>(window as any).echarts.getInstanceByDom(el).getOption().legend[0].selected.GPU)).toBe(false);
+  await page.getByText('Read values · keyboard and touch',{exact:true}).first().click();
+  await expect(page.getByRole('columnheader',{name:'CPU (%)',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Older readings',exact:true}).first().click();
+  await page.getByRole('button',{name:'Newer readings',exact:true}).first().click();
+  await capture(page,info,'operating-monitoring-demo-desktop');
+  await page.setViewportSize({width:390,height:844});await overflow(page);
+  await capture(page,info,'operating-monitoring-demo-phone');
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%');await overflow(page);
+  await page.evaluate(()=>document.documentElement.style.fontSize='');
+  await page.getByLabel('Resource source').selectOption('observed');
+  await expect(page.getByText('Resource source unavailable',{exact:true})).toBeVisible();
+  await expect(page.locator('.resource-card').filter({hasText:'GPU utilization'})).toContainText('Unavailable');
+});
+
+test('monitoring handles loading, failed refresh, missing GPU and empty history',async ({page},info)=>{
+  let release=()=>{};
+  const wait=new Promise<void>(resolve=>release=resolve);
+  await page.route('**/api/resources*',async route=>{await wait;await route.continue();});
+  await page.goto('/monitoring');
+  await expect(page.getByText('Loading resource observations…')).toBeVisible();release();
+  await expect(page.getByText('Resource source unavailable',{exact:true})).toBeVisible();
+  await page.unroute('**/api/resources*');
+  await page.route('**/api/resources*',route=>route.abort());
+  await page.getByRole('button',{name:'Refresh display',exact:true}).click();
+  await expect(page.getByText(/Refresh failed. These are the last loaded readings/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByText(/Resource observations couldn’t be loaded/)).toBeVisible();
+  await capture(page,info,'operating-monitoring-failed');
+});
+
+test('partial GPU demo keeps CPU, RAM and VRAM available',async ({page},info)=>{
+  await page.route('**/api/resources?source=demo*',async route=>{
+    const response=await route.fetch();const body=await response.json();
+    body.latest.gpu=null;
+    body.points.forEach((point:{gpu:number|null})=>point.gpu=null);
+    await route.fulfill({response,json:body});
+  });
+  await page.goto('/monitoring');
+  await page.getByLabel('Resource source').selectOption('demo');
+  await expect(page.getByText('Deterministic demo · simulated host · demo')).toBeVisible();
+  await expect(page.locator('.resource-card').filter({hasText:'GPU utilization'})).toContainText('Unavailable');
+  await expect(page.locator('.resource-card').filter({hasText:'CPU utilization'})).toContainText('%');
+  await expect(page.locator('.resource-card').filter({hasText:'System RAM'})).toContainText('GiB');
+  await expect(page.locator('.resource-card').filter({hasText:'VRAM'})).toContainText('GiB');
+  await capture(page,info,'operating-monitoring-partial-demo');
+  await page.getByRole('button',{name:'Zoom in',exact:true}).first().focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button',{name:'Zoom in',exact:true}).first()).toBeFocused();
+});
+
+test('empty demo history stays empty and does not manufacture readings',async ({page})=>{
+  await page.route('**/api/resources?source=demo*',async route=>{
+    const response=await route.fetch();const data=await response.json();
+    data.points=[];data.latest=null;data.first_at=null;data.last_at=null;
+    await route.fulfill({response,json:data});
+  });
+  await page.goto('/monitoring');
+  await page.getByLabel('Resource source').selectOption('demo');
+  await expect(page.getByRole('heading',{name:'No readings in this range'})).toBeVisible();
+  await expect(page.getByRole('img',{name:'CPU / GPU utilization',exact:true})).toHaveCount(0);
+  await expect(page.locator('.resource-card').filter({hasText:'CPU utilization'})).toContainText('Unavailable');
+});

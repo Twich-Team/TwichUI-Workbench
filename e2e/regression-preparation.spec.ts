@@ -1,0 +1,65 @@
+import {test,expect} from '@playwright/test';
+import {fixture,overflow,capture} from './helpers';
+
+test.beforeEach(()=>fixture('reset'));
+
+test('ordinary regression request prepares a bound contract without a registered recipe or run',async({page},info)=>{
+  await page.goto('/intake/new?kind=feature');
+  await page.getByLabel('Title Required').fill('Regression coverage for invalid profile names');
+  await page.getByLabel('Description Required').fill('In tests/test_profiles.lua cover rejecting invalid names while preserving the selected profile.');
+  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Expected test results').fill('Invalid names are rejected.\nThe selected profile stays unchanged.');
+  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByRole('button',{name:'Submit request',exact:true}).click();
+  await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
+  fixture('regression-planning');
+  const contract=page.getByRole('region',{name:'Proposed regression-test contract'});
+  await expect(contract.getByRole('heading',{name:'Proposed task contract'})).toBeVisible();
+  await expect(contract.getByText('tests/test_profiles.lua',{exact:true})).toBeVisible();
+  await expect(contract.getByText('Proposed verification · Not run')).toBeVisible();
+  await expect(contract.getByText(/Before execution, independently certify/).first()).toBeVisible();
+  await expect(page.getByRole('checkbox',{name:'Approve this scope and one task-to-PR budget together'})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Approve proposal',exact:true})).toBeEnabled();
+  const identity=page.url().split('/intake/')[1].split('?')[0];
+  const saved=await page.request.get('/api/intake/'+identity).then(r=>r.json());
+  expect(saved.proposals[0].basis).toBe('preparation');
+  expect(saved.proposals[0].task_contract.execution_authorized).toBe(false);
+  expect(saved.proposals[0].task_contract.resolved_base).toMatch(/^[a-f0-9]{40}$/);
+  expect(saved.decisions).toEqual([]);
+  expect(saved.tasks).toEqual([]);
+  await overflow(page);await capture(page,info,'regression-contract-desktop');
+  await page.setViewportSize({width:390,height:844});
+  await overflow(page);await capture(page,info,'regression-contract-phone');
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+  await overflow(page);await capture(page,info,'regression-contract-phone-enlarged');
+  await page.evaluate(()=>document.documentElement.style.fontSize='');
+  await page.setViewportSize({width:320,height:740});await overflow(page);
+  await page.reload();
+  await expect(contract.getByRole('heading',{name:'Proposed task contract'})).toBeVisible();
+  const again=await page.request.get('/api/intake/'+identity).then(r=>r.json());
+  expect(again.proposals[0]).toEqual(saved.proposals[0]);
+});
+
+test('missing target is explained and clarified without granting permissions',async({page},info)=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/intake/new?kind=feature');
+  await page.getByLabel('Title Required').fill('Regression coverage for truncated sharing payloads');
+  await page.getByLabel('Description Required').fill('Exercise rejection of a truncated settings payload.');
+  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Expected test results').fill('A truncated payload does not apply any settings.');
+  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByRole('button',{name:'Submit request',exact:true}).click();
+  await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
+  fixture('regression-planning');
+  await expect(page.getByRole('heading',{name:'Missing scope requirements'})).toBeVisible();
+  await expect(page.getByText('No paths selected.')).toBeVisible();
+  await expect(page.getByRole('button',{name:'Approve proposal',exact:true})).toHaveCount(0);
+  await overflow(page);await capture(page,info,'regression-missing-phone');
+  await page.getByLabel('Your answer').fill('Use tests/test_share.lua.');
+  await page.getByRole('button',{name:'Send information'}).click();
+  fixture('regression-planning');
+  await page.getByRole('button',{name:'Open current proposal'}).click();
+  await expect(page.getByRole('region',{name:'Proposed regression-test contract'}).getByText('tests/test_share.lua',{exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Missing scope requirements'})).toHaveCount(0);
+  await overflow(page);
+});

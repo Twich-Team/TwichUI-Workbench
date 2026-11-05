@@ -1,0 +1,520 @@
+"""One bounded session provisioner used by the existing worker, disabled by default.
+
+Reuses Runtime, frozen controls, existing lease controller, worker recovery and PR
+owner. No task approval, model retry, recurring scheduler or parallel engine.
+"""
+
+from datetime import datetime, timezone
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+import time
+
+from sqlalchemy import select
+from workbench import real_execution as execution, task_budget, task_execution, real_publication
+from workbench.db import proposal_decisions, write_transaction, real_publications
+from workbench.real_workspace import Runtime, durable, sha, PRELUDE, suite_inventory
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def read_config(path, *, allow_expired=False):
+    raw = Path(path)
+    if (
+        raw.is_symlink()
+        or not raw.is_file()
+        or raw.stat().st_uid != os.getuid()
+        or raw.stat().st_mode & 0o077
+        or raw.stat().st_size > 8192
+    ):
+        raise ValueError("Private owned one-session configuration required")
+    value = json.loads(raw.read_text())
+    authored = value.get("authoring_mode") == "explicit-current-session"
+    started = datetime.fromisoformat(value["started_at"])
+    end = datetime.fromisoformat(value["deadline"])
+    if (
+        started.utcoffset() is None
+        or end.utcoffset() is None
+        or not (
+            0 < (end - started).total_seconds() <= 10800 or (end - started).total_seconds() == 21600
+        )
+        or not (
+            started <= datetime.now(timezone.utc)
+            and (allow_expired or datetime.now(timezone.utc) < end)
+        )
+        or value.get("max_attempts") != 1
+        or value.get("max_probes") != (0 if authored else 1)
+        or value.get("max_leases") != (0 if authored else 1)
+    ):
+        raise ValueError("Current single-cycle bounded session required")
+    instruction = Path(value["owner_instruction"])
+    from workbench.owner_task import instruction as verify_instruction
+
+    verify_instruction(instruction, value["owner_instruction_sha256"])
+    run = Path(value["run_root"])
+    if (
+        run.is_symlink()
+        or not ((not authored and run.parent.resolve() == ROOT / "artifacts/runs" and run.name.startswith("task-lease-"))
+                or (authored and run.parent.parent.resolve() == ROOT / "artifacts/runs" and run.parent.name.startswith("task-pr-completion-") and run.name.startswith("authored-")))
+        or not run.is_dir()
+        or run.stat().st_uid != os.getuid()
+    ):
+        raise ValueError("Unique existing owned task session root required")
+    return value
+
+
+def provision(runtime, template):
+    """Actual deterministic baseline/oracle controls BEFORE any model lease/probe.
+
+    Control patches are frozen non-model fixtures, never implementation output.
+    They are applied only to disposable sibling clones, never the model workspace.
+    """
+    runtime.prepare()
+    baseline = runtime.check(
+        ["bash", "tests/run.sh"], runtime.workspace, timeout=600, private_loopback=True
+    )
+    durable(
+        runtime.root / "fresh-baseline-suite.json", json.dumps(baseline, sort_keys=True).encode()
+    )
+    if not suite_inventory(baseline, runtime.expected_suite()):
+        raise ValueError("Complete confined baseline failed")
+    original = runtime.workspace
+    results = {}
+    for name, expected in runtime.recipe["controls"].items():
+        parent = Path(tempfile.mkdtemp(prefix="workbench-verify-"))
+        try:
+            clone = parent / "workspace"
+            subprocess.run(
+                [
+                    "git",
+                    "-c",
+                    "core.hooksPath=/dev/null",
+                    "-c",
+                    "protocol.allow=never",
+                    "-c",
+                    "protocol.file.allow=always",
+                    "clone",
+                    "--local",
+                    "--no-hardlinks",
+                    "--quiet",
+                    str(original),
+                    str(clone),
+                ],
+                check=True,
+                timeout=60,
+                env={
+                    "PATH": "/usr/bin:/bin",
+                    "GIT_CONFIG_GLOBAL": "/dev/null",
+                    "GIT_CONFIG_NOSYSTEM": "1",
+                },
+            )
+            runtime.workspace = clone
+            if name != "original":
+                patch = template["control_patches"][name]
+                if not isinstance(patch, str) or len(patch.encode()) > 65536:
+                    raise ValueError("Bounded trusted control patch required")
+                target = parent / "control.patch"
+                target.write_text(patch)
+                subprocess.run(
+                    ["git", "-c", "core.hooksPath=/dev/null", "apply", str(target)],
+                    cwd=clone,
+                    check=True,
+                    timeout=10,
+                )
+                runtime.scope()
+                durable(runtime.root / "control-fixtures" / (name + ".patch"), patch.encode())
+            result = runtime.check(
+                ["lua5.1", "-e", PRELUDE, str(runtime.root / "oracle.lua")],
+                clone / "tests",
+                ro=[runtime.root / "oracle.lua"],
+            )
+            durable(
+                runtime.root / "control-results" / (name + ".json"),
+                json.dumps(result, sort_keys=True).encode(),
+            )
+            if result["status"] != expected or result["rc"] in (None, 97):
+                raise ValueError("Independent oracle control did not match its expected outcome")
+            results[name] = result
+        finally:
+            runtime.workspace = original
+            shutil.rmtree(parent)
+    durable(
+        runtime.root / "oracle-controls.json",
+        json.dumps(
+            dict(oracle_sha256=sha(runtime.oracle_source.read_bytes()), results=results),
+            sort_keys=True,
+        ).encode(),
+    )
+    marker = runtime.root / "private-boundary-marker"
+    durable(marker, b"NON-MODEL boundary marker")
+    code = (
+        "import socket,resource;assert resource.getrlimit(resource.RLIMIT_FSIZE)[1]==16777216;"
+        "\ntry:socket.socket();raise AssertionError('network escape')\nexcept PermissionError:pass\n"
+        "try:open("
+        + repr(str(marker))
+        + ");raise AssertionError('read escape')\nexcept PermissionError:pass\nprint('bounded model command boundary verified')"
+    )
+    boundary = runtime.check(["python3", "-c", code], runtime.workspace)
+    if boundary["status"] != "pass" or boundary["rc"] != 0:
+        raise ValueError("Actual model command boundary failed")
+    proof = runtime.root / "static-boundary.json"
+    durable(proof, json.dumps(dict(checks={"model-command": boundary}), sort_keys=True).encode())
+    runtime.record_controls(proof)
+    durable(
+        runtime.root / "preparation-completed.json",
+        json.dumps(
+            dict(
+                base=runtime.base,
+                recipe_sha256=sha((runtime.root / "recipe.json").read_bytes()),
+                no_generation=True,
+            ),
+            sort_keys=True,
+        ).encode(),
+    )
+
+
+def close_selected(engine, decision_id):
+    """Close ONLY this session's execution permission; history/delivery stay intact."""
+    with write_transaction(engine) as c:
+        c.execute(
+            execution.grants.update()
+            .where(
+                execution.grants.c.snapshot["task_budget"]["decision_id"].as_string()
+                == decision_id,
+                execution.grants.c.revoked_at.is_(None),
+            )
+            .values(revoked_at=execution.now())
+        )
+
+
+def finish(engine, config, status, message):
+    root = Path(config["run_root"])
+    marker = root / "session-finished.json"
+    if marker.exists():
+        if json.loads(marker.read_text())["task"] != config["task"]:
+            raise ValueError("Conflicting session outcome")
+        return False
+    close_selected(engine, config["task"]["approval_id"])
+    if status == "published":
+        with engine.connect() as c:
+            publication = (
+                c.execute(
+                    select(real_publications).where(
+                        real_publications.c.snapshot["task_budget"]["decision_id"].as_string()
+                        == config["task"]["approval_id"]
+                    )
+                )
+                .mappings()
+                .one()
+            )
+        if publication["state"].get("source") == "github":
+            from workbench.publication_adapter import PilotGitHub
+
+            client = PilotGitHub(root / "publication", publication["snapshot"])
+            client.cleanup(publication["state"]["commit"])
+    durable(
+        marker,
+        json.dumps(
+            dict(
+                task=config["task"],
+                status=status,
+                message=message,
+                finished_at=execution.now(),
+                execution_closed=True,
+            ),
+            sort_keys=True,
+        ).encode(),
+    )
+    return False
+
+
+def finished(config_path):
+    config = read_config(config_path, allow_expired=True)
+    marker = Path(config["run_root"]) / "session-finished.json"
+    return (
+        marker.is_file()
+        and not marker.is_symlink()
+        and json.loads(marker.read_text()).get("task") == config["task"]
+    )
+
+
+def process_one(engine, config_path, stop_event=None, prepare=provision, launch=None):
+    """Called only by a separately configured one-session worker; never the API."""
+    config = read_config(config_path, allow_expired=True)
+    if (
+        datetime.now(timezone.utc) >= datetime.fromisoformat(config["deadline"])
+        and not (Path(config["run_root"]) / "session-claimed.json").exists()
+    ):
+        return finish(
+            engine,
+            config,
+            "expired",
+            "The approved time budget expired before activation. Saved readiness remains; no model starts.",
+        )
+    ref = config["task"]
+    if (Path(config["run_root"]) / "session-finished.json").exists():
+        return False
+    with engine.connect() as c:
+        linked = task_execution.snapshot(c, ref["intake_id"], ref["task_id"], ref["approval_id"])
+        approval = (
+            c.execute(
+                select(proposal_decisions).where(proposal_decisions.c.id == ref["approval_id"])
+            )
+            .mappings()
+            .one()
+        )
+        budget = task_budget.permission(
+            c,
+            approval,
+            require_current=not (Path(config["run_root"]) / "session-claimed.json").exists(),
+        )
+        if not budget or execution.digest(budget) != config["task_budget_fingerprint"]:
+            raise ValueError("Current explicit owner task budget differs from session")
+    root = Path(config["run_root"])
+    real = root / "real-run"
+    real.mkdir(exist_ok=True)
+    claim = root / "session-claimed.json"
+    if not claim.exists():
+        # These deterministic proofs are prepared under the same one-session
+        # package before any lease, then independently rechecked by the controller.
+        proof = Path(config["total_limit_proof"])
+        if proof.is_symlink() or not proof.is_file() or proof.stat().st_size > 16384:
+            raise ValueError("Bounded installed-sampler proof required before activation")
+        if sha(proof.read_bytes()) != config["total_limit_proof_sha256"]:
+            raise ValueError("Installed-sampler proof identity changed")
+        durable(root / "total-limit-proof.json", proof.read_bytes())
+        import runpy
+
+        runpy.run_path(str(ROOT / "scripts/chronicle_lease.py"))["checked_limit"](root)
+        from workbench.real_package import package_for
+
+        if config.get('authoring_mode') == 'explicit-current-session':
+            from workbench.real_package import Package
+            package = Package(root.parent, config['package_baseline_sha256'])
+        else:
+            package = package_for(root)
+        if (
+            package is None
+            or package.budget.get("evidence_ceiling_bytes") not in (64 << 20, 72 << 20)
+            or any(
+                package.budget.get(key) not in (1, 2, 3)
+                for key in ("max_cycles", "max_probes", "max_attempts")
+            )
+        ):
+            raise ValueError("Append-only one-cycle72MiB package allocation required")
+        package.require_time(3000)
+        package.enforce_storage(root)
+        from workbench.supported_tasks import load
+
+        template = load(linked["original"]["supported_task"], engine)
+        template = {**template, "recipe": budget["offer"]["snapshot"]["specification"]}
+        oracle = template.get("oracle")
+        if (
+            not isinstance(oracle, str)
+            or sha(oracle.encode()) != template["recipe"]["oracle_sha256"]
+        ):
+            raise ValueError("Frozen supported-task oracle is unavailable")
+        durable(real / "recipe.json", json.dumps(template["recipe"], sort_keys=True).encode())
+        durable(real / "recipe-oracle.lua", oracle.encode())
+        runtime = Runtime(real)
+        db = Path(engine.url.database)
+        stat = db.stat()
+        ready_before = (real / "preparation-completed.json").is_file() and all(
+            g["status"] == "passed" for g in runtime.static_preflight()
+        )
+        if prepare is provision and not ready_before:
+            durable(root / "template.json", json.dumps(template, sort_keys=True).encode())
+            command = [
+                "systemd-run",
+                "--user",
+                "--unit=workbench-real-prepare-" + root.name,
+                "--property=Delegate=yes",
+                "--property=MemoryMax=6G",
+                "--property=MemorySwapMax=0",
+                "--property=TasksMax=128",
+                "--property=CPUQuota=200%",
+                "--property=RuntimeMaxSec=2400",
+                "--wait",
+                "--pipe",
+                str(ROOT / ".venv/bin/python"),
+                str(ROOT / "scripts/provision_task.py"),
+                str(root),
+            ]
+            with (root / "preparation-controller.log").open("xb") as log:
+                subprocess.run(
+                    command, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=2420
+                )
+        elif prepare is not provision:
+            prepare(runtime, template)
+        if (root / "workflow-link.json").exists():
+            prior = json.loads((root / "workflow-link.json").read_text())
+            if prior["task"] != ref or prior["task_budget_fingerprint"] != execution.digest(budget):
+                raise ValueError("Original workflow identity changed")
+        else:
+            started = time.time()
+            link = dict(
+                database=str(db),
+                database_identity=[stat.st_dev, stat.st_ino],
+                task=ref,
+                authorization_sha256=config["owner_instruction_sha256"],
+                task_budget_fingerprint=execution.digest(budget),
+                run_started_at=started,
+                run_deadline=min(
+                    started + 2400, datetime.fromisoformat(config["deadline"]).timestamp()
+                ),
+            )
+            if link["run_deadline"] - started != 2400:
+                raise ValueError("Full acceptance clock does not fit; no lease")
+            durable(root / "workflow-link.json", json.dumps(link).encode())
+            (root / "workflow-link.json").chmod(0o600)
+        if (
+            datetime.now(timezone.utc).timestamp() + 3000
+            > datetime.fromisoformat(config["deadline"]).timestamp()
+        ):
+            raise ValueError("Lease/run/restoration reserve does not fit; no lease")
+        if stop_event is not None and stop_event.is_set():
+            return finish(
+                engine,
+                config,
+                "cancelled",
+                "Stopped before model activation. Readiness evidence is retained.",
+            )
+        durable(
+            claim,
+            json.dumps(
+                dict(
+                    task=ref,
+                    task_budget_fingerprint=execution.digest(budget),
+                    owner=execution.owner_identity(),
+                ),
+                sort_keys=True,
+            ).encode(),
+        )
+        # Existing controller owns service/drain/auth/probe/attempt/watchdog/restore.
+        command = [
+            str(ROOT / ".venv/bin/python"),
+            str(ROOT / "scripts/chronicle_lease.py"),
+            "controller",
+            "--root",
+            str(root),
+            "--owner-instruction",
+            config["owner_instruction"],
+        ]
+        if config.get('authoring_mode') == 'explicit-current-session':
+            command = ['systemd-run','--user','--unit=workbench-real-authored-'+root.parent.name,
+                '--property=WorkingDirectory='+str(ROOT),'--property=Delegate=yes','--property=MemoryMax=6G',
+                '--property=MemorySwapMax=0','--property=TasksMax=128','--property=CPUQuota=200%',
+                '--property=RuntimeMaxSec=2450','--wait','--pipe',str(ROOT/'.venv/bin/python'),
+                str(ROOT/'scripts/complete_authored_task.py'),str(config_path)]
+
+        if launch is None:
+            with (root / "session-controller.log").open("xb") as log:
+                child = subprocess.Popen(
+                    command, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL
+                )
+                child_proc = Path("/proc") / str(child.pid)
+                durable(
+                    root / "controller-owner.json",
+                    json.dumps(
+                        dict(
+                            pid=child.pid,
+                            boot=Path("/proc/sys/kernel/random/boot_id").read_text(),
+                            start=(child_proc / "stat").read_text().split(") ", 1)[1].split()[19],
+                        )
+                    ).encode(),
+                )
+                descriptor = os.pidfd_open(child.pid)
+                try:
+                    while child.poll() is None:
+                        if (stop_event is not None and stop_event.is_set()) or datetime.now(
+                            timezone.utc
+                        ) >= datetime.fromisoformat(config["deadline"]):
+                            import signal
+
+                            signal.pidfd_send_signal(descriptor, signal.SIGTERM)
+                            child.wait(timeout=15)
+                            break
+                        time.sleep(0.1)
+                finally:
+                    os.close(descriptor)
+        else:
+            launch(command)
+    report_file = root / ("authored-controller-result.json" if config.get("authoring_mode")=="explicit-current-session" else "lease-controller-result.json")
+    if not report_file.is_file():
+        return False  # Never relaunch a claimed session.
+    report = json.loads(report_file.read_text())
+    if not report.get("restoration", {}).get("restored"):
+        return False  # Restoration uncertainty always wins over result delivery.
+    runtime = Runtime(real)
+    execution.recover(engine, runtime)  # Recovery only; never process_one/replay.
+    with engine.connect() as c:
+        row = (
+            c.execute(
+                select(execution.requests)
+                .join(execution.grants, execution.requests.c.grant_id == execution.grants.c.id)
+                .where(
+                    execution.grants.c.snapshot["task_budget"]["decision_id"].as_string()
+                    == ref["approval_id"]
+                )
+            )
+            .mappings()
+            .first()
+        )
+    if not row:
+        return finish(
+            engine,
+            config,
+            "ended-before-result",
+            "Controller ended; no implementation result was recorded. See retained controller evidence.",
+        )
+    if row["status"] != "checked":
+        if row["status"] in {"failed", "blocked", "cancelled", "interrupted"}:
+            return finish(
+                engine,
+                config,
+                row["status"],
+                "Implementation ended without a qualifying candidate; no replacement attempt.",
+            )
+        return False  # Existing sealed-outcome recovery still owns pending delivery.
+    if config.get("allow_publication") is not True:
+        return finish(
+            engine, config, "verified", "Verified candidate retained; publication not activated."
+        )
+    with engine.connect() as c:
+        publication = (
+            c.execute(
+                select(real_publications).where(real_publications.c.execution_id == row["id"])
+            )
+            .mappings()
+            .first()
+        )
+    if publication and publication["status"] not in real_publication.ACTIVE:
+        return finish(engine, config, publication["status"], publication["message"])
+    directory = root / "publication"
+    directory.mkdir(mode=0o700, exist_ok=True)
+    expires = min(
+        datetime.fromisoformat(config["deadline"]), datetime.fromisoformat(budget["expires_at"])
+    )
+    activation = dict(
+        decision_id=ref["approval_id"],
+        execution_id=row["id"],
+        repository=runtime.execution_contract["repository"],
+        base=runtime.base,
+        max_prs=1,
+        draft=True,
+        expires_at=expires.isoformat(),
+    )
+    durable(directory / "activation.json", json.dumps(activation, sort_keys=True).encode())
+    (directory / "activation.json").chmod(0o600)
+    previous = os.environ.get("WORKBENCH_PUBLICATION_ROOT")
+    try:
+        os.environ["WORKBENCH_PUBLICATION_ROOT"] = str(directory)
+        return real_publication.process_one(engine, stop_event=stop_event, execution_id=row["id"])
+    finally:
+        if previous is None:
+            os.environ.pop("WORKBENCH_PUBLICATION_ROOT", None)
+        else:
+            os.environ["WORKBENCH_PUBLICATION_ROOT"] = previous
