@@ -327,7 +327,7 @@ def offer_view(c, proposal, selected):
     if not selected:
         return dict(
             available=False,
-            message="Preparation held: independently certified evidence is missing, stale, or no longer matches the current reviewed scope/base. A trusted operator must prepare and certify it.",
+            message=preparation_hold(c, proposal),
             offer=None,
         )
     spec = selected["snapshot"]["specification"]
@@ -360,6 +360,27 @@ def offer_view(c, proposal, selected):
     )
 
 
+def preparation_hold(c, proposal):
+    from workbench.regression_preparation import contract_for
+    from workbench.db import planning_jobs
+    from workbench.intake import proposal_view
+    contract = contract_for(c, proposal)
+    if contract and contract['scope_missing']:
+        return 'Preparation held: ' + ' '.join(contract['scope_missing'])
+    prepared = (contract or {}).get('behavioral_evidence')
+    if prepared:
+        payload = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == proposal['intake_id'],
+            planning_jobs.c.revision == proposal['revision'], planning_jobs.c.kind == 'planning',
+            planning_jobs.c.status == 'completed')).scalar() or {}
+        outcome = payload.get('behavioral_preparation_outcome') or {}
+        if (outcome.get('status') == 'hold' and outcome.get('review_binding') == proposal_view(c, proposal)['binding']):
+            return 'Last behavioral preparation held: ' + outcome['message']
+        if prepared['holds']:
+            return 'Behavioral preparation held: ' + ' '.join(prepared['holds'])
+        return 'Behavioral examples require independent expectation review and fresh positive, vacuous and wrong-behavior control checks at the reviewed base. No certified offer exists yet.'
+    return 'Preparation held: independently certified evidence is missing, stale, or no longer matches the current reviewed scope/base. A trusted operator must prepare and certify it.'
+
+
 def run_context(engine, intake_id, task_id):
     """Current offer and exact scope for a first browser budget after scope review."""
     from workbench import intake, task_execution
@@ -376,7 +397,8 @@ def run_context(engine, intake_id, task_id):
         ).order_by(proposal_decisions.c.created_at.desc()).limit(1)).mappings().first()
         receipt = intake.receipt_view(saved) if saved else None
         if not selected or 'reviewed_task' not in selected['snapshot']:
-            return dict(available=False, message='Preparation held: certified evidence is missing, stale, or differs from the current review/base. Trusted preparation is required.', offer=None, receipt=receipt)
+            proposal = intake.require(c, intake.proposals, task['proposal_id'])
+            return dict(available=False, message=preparation_hold(c, proposal), offer=None, receipt=receipt)
         ref = selected['snapshot']['reviewed_task']['ref']
         if ref['intake_id'] != intake_id or ref['task_id'] != task_id:
             raise HTTPException(409, 'Offer is bound to another task')

@@ -188,6 +188,8 @@ def decide(engine, identity, body):
             validate_selection(connection, proposal['id'], body.run_budget)
         if body.action == 'approve':
             validate_review(connection, proposal, review, body.scope_revision)
+            from workbench.regression_evidence import validate_expectation_review
+            validate_expectation_review(review, payload)
         receipt = dict(id=str(body.command_id), intake_id=identity, proposal_id=proposal['id'], binding=body.binding,
             scope_revision=body.scope_revision, required_artifacts=review['required_artifacts'], scope_review_required=0,
             payload=payload, snapshot=review, status='pending',
@@ -331,6 +333,9 @@ def validate_approval(connection, receipt):
             or receipt['scope_review_required'] or receipt['required_artifacts'] is None):
         raise HTTPException(409, 'The approval requires human scope review. No tasks may be created.')
     validate_review(connection, proposal, review, receipt['scope_revision'], receipt['required_artifacts'])
+    from workbench.regression_evidence import validate_expectation_review
+    if not continuation:
+        validate_expectation_review(review, receipt['payload'])
     return proposal
 
 

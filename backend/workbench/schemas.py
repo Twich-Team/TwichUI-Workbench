@@ -1,6 +1,7 @@
 from typing import Annotated, Literal
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+from workbench.regression_evidence import BehavioralPreparation
 
 Choice = Literal["confirm", "change"]
 
@@ -357,6 +358,7 @@ class BrowserApprovalProvenance(StrictModel):
 
 
 class ProposalDecisionInput(StrictModel):
+    expectation_review: Annotated[str | None, Field(pattern=r'^[a-f0-9]{64}$', exclude_if=lambda value: value is None)] = None
     run_budget: TaskBudget | None = Field(default=None, exclude_if=lambda value: value is None)
     scope_revision: Annotated[int | None, Field(ge=0)] = None
     command_id: UUID
@@ -432,6 +434,7 @@ class VerificationProfileSelection(StrictModel):
 
 
 class RegressionTaskContract(StrictModel):
+    behavioral_evidence: BehavioralPreparation | None = Field(default=None, exclude_if=lambda value: value is None)
     verification_profile: VerificationProfileSelection | None = Field(default=None, exclude_if=lambda value: value is None)
     category: Literal['lua-regression-tests', 'lua-offline-bugfix'] = 'lua-regression-tests'
     version: Literal[1] = 1

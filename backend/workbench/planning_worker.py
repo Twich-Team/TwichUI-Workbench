@@ -59,6 +59,8 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
             if action == 'approve':
                 intake.validate_review(connection, proposal, intake.proposal_view(connection, proposal),
                                        receipt['scope_revision'], receipt['required_artifacts'])
+                from workbench.regression_evidence import validate_expectation_review
+                validate_expectation_review(intake.proposal_view(connection, proposal), receipt['payload'])
                 if receipt['scope_review_required'] or receipt['required_artifacts'] is None:
                     raise HTTPException(409, 'Scope review required')
             if receipt['scope_revision'] != intake.human_scope(connection, row['id'])['revision']:
@@ -196,9 +198,10 @@ def claim(engine):
         return job
 
 
-def process_one(engine, adapter=None, fail_before_commit=False, stop_event=None):
+def process_one(engine, adapter=None, fail_before_commit=False, stop_event=None, *, scenario_response=None):
     from workbench import regression_preparation
-    if regression_preparation.process_one(engine, fail_before_commit=fail_before_commit):
+    if regression_preparation.process_one(engine, fail_before_commit=fail_before_commit,
+                                          scenario_response=scenario_response):
         return True
     if adapter is None:
         from workbench import supported_tasks

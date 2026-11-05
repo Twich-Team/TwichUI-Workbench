@@ -5,6 +5,7 @@ does not register a runtime recipe, an offer, a budget or an execution permissio
 """
 
 import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -114,11 +115,24 @@ def blob(root, oid):
     return raw
 
 
-def prepare(original, feedback=''):
+def prepare(original, feedback='', scenario_response=None):
+    from workbench import regression_evidence as behavioral
     profile = select_profile('lua-regression-tests')
     request = original['regression_tests']
     missing, evidence, commands, paths, candidates = [], [], [], [], []
     base = None
+    draft, origin, response_hold, response = None, 'no-behavior-planner', None, None
+    if scenario_response is not None:
+        # Explicit internal structured response seam, never a provider activation.
+        # Binding prevents a generated draft being borrowed by another revision.
+        try:
+            if len(json.dumps(scenario_response, allow_nan=False).encode()) > 24000:
+                raise ValueError('Response budget')
+            response = behavioral.ScenarioResponse.model_validate(scenario_response)
+            draft = response.draft.model_dump(mode='json')
+            origin = response.model
+        except (TypeError, ValueError):
+            response_hold = 'The behavioral draft is unsupported. Specify bounded fixture actions, a scalar expected observation and a behavior-relevant incorrect outcome to reject; arbitrary Lua or model assertions cannot establish the expectation.'
     text = original['title'] + '\n' + original['description'] + '\n' + feedback
     selected = request['test_paths'] or list(dict.fromkeys(
         'tests/' + name for name in re.findall(r'(?<![\w./!-])(?:tests/)?(test_[A-Za-z0-9_-]+\.lua)\b', text)))
@@ -137,12 +151,20 @@ def prepare(original, feedback=''):
                 paths.append(path)
         if not selected:
             missing.append('Name an existing tests/test_*.lua file in the request or the test-path field; suggestions are not selected automatically.')
-        for path in ['tests/run.sh', 'tests/harness.lua', *paths]:
-            if path not in inventory:
+        if response and response.input_sha256 != behavioral.input_binding(original, feedback, base, paths):
+            response_hold = 'The behavioral draft does not match this request, committed base, selected tests and feedback. Prepare fresh example inputs and expected outcomes.'
+            draft, origin = None, 'stale-behavior-draft'
+        source_paths = list(dict.fromkeys(p for s in (draft or {}).get('scenarios', []) for p in s['source_paths']))
+        for path in ['tests/run.sh', 'tests/harness.lua', *paths, *source_paths]:
+            oid = inventory.get(path)
+            if path in source_paths:
+                entry = git(root, 'ls-tree', base, '--', path).decode().strip().split()
+                oid = entry[2] if len(entry) == 4 and entry[0] in ('100644', '100755') and entry[1] == 'blob' and entry[3] == path else None
+            if not oid:
                 missing.append('Required existing Lua framework file is missing: ' + path)
                 continue
-            raw = blob(root, inventory[path])
-            evidence.append(dict(path=path, git_blob=inventory[path], sha256=hashlib.sha256(raw).hexdigest()))
+            raw = blob(root, oid)
+            evidence.append(dict(path=path, git_blob=oid, sha256=hashlib.sha256(raw).hexdigest()))
             if path == 'tests/run.sh' and not all(token in raw.decode() for token in
                     ('for t in test_*.lua; do', 'lua5.1', 'require("bit")', 'PASSED', 'ERROR:')):
                 missing.append('Inspect the changed test runner: compatibility with the existing Lua verification commands is unconfirmed.')
@@ -156,13 +178,24 @@ def prepare(original, feedback=''):
         # Preserve the known commit/evidence, but mark incomplete inspection honestly.
         missing.append(str(error) if isinstance(error, RepositoryUnavailable) else
                        'Repository evidence could not be inspected safely; review the configured checkout.')
+    prepared_behavior = behavioral.plan(original, paths, draft, origin=origin, feedback=feedback, base=base)
+    if prepared_behavior['status'] == 'review_required':
+        try:
+            behavioral.compile_plan(prepared_behavior)
+        except ValueError as error:
+            response_hold = str(error)
+    if response_hold:
+        prepared_behavior['holds'].append(response_hold)
+        prepared_behavior['status'] = 'hold'
+        prepared_behavior['review_digest'] = behavioral.expectation_digest(prepared_behavior)
     acceptance = list(request['acceptance'])
     if feedback:
         acceptance.append('Address the complete owner feedback retained in the proposed task contract; do not treat it as operating permission.')
-    blockers = [*missing, ORACLE_REQUIREMENT,
+    blockers = [*missing, *prepared_behavior['holds'], ORACLE_REQUIREMENT,
                 'Revalidate the resolved base against destination main before execution and delivery. Local Git inspection does not establish remote freshness.',
                 'A separate current human scope/run-budget decision and certified bounded runtime are required. Preparation creates no run offer or permission.']
     return RegressionTaskContract(
+        behavioral_evidence=prepared_behavior,
         verification_profile=profile,
         resolved_base=base, intended_behavior=original['description'], acceptance=acceptance, review_feedback=feedback,
         writable_paths=paths, path_candidates=candidates, verification_commands=commands,
@@ -187,6 +220,25 @@ def contract_for(connection, proposal):
     return RegressionTaskContract.model_validate(payload['task_contract']).model_dump(mode='json')
 
 
+def record_behavioral_outcome(engine, ref, binding, outcome):
+    """Latest diagnostic in the existing planning owner; never changes the contract.
+
+    Every attempt retains its immutable outcome file. This projection has no effect
+    on scope, certification, offer eligibility, retries, grants or execution.
+    """
+    from workbench.task_execution import snapshot
+    with write_transaction(engine) as c:
+        linked = snapshot(c, **ref)
+        if linked['proposal_review']['binding'] != binding:
+            raise ValueError('Reviewed examples changed before recording preparation outcome')
+        proposal = linked['proposal_review']
+        row = c.execute(select(planning_jobs).where(planning_jobs.c.intake_id == ref['intake_id'],
+            planning_jobs.c.kind == 'planning', planning_jobs.c.revision == proposal['revision'],
+            planning_jobs.c.status == 'completed')).mappings().one()
+        c.execute(planning_jobs.update().where(planning_jobs.c.id == row['id']).values(
+            payload={**row['payload'], 'behavioral_preparation_outcome': {**outcome, 'review_binding': binding}}))
+
+
 def proposal_content(original, contract):
     return ProposalContent(
         summary=original['title'], value='Add focused regression coverage for the requested existing behavior.',
@@ -203,7 +255,7 @@ def proposal_content(original, contract):
     ).model_dump(mode='json')
 
 
-def process_one(engine, *, fail_before_commit=False):
+def process_one(engine, *, fail_before_commit=False, scenario_response=None):
     # Git inspection happens outside the writer transaction. Revalidate everything
     # before atomic publication; concurrent processors may inspect but cannot duplicate.
     with engine.connect() as c:
@@ -221,7 +273,7 @@ def process_one(engine, *, fail_before_commit=False):
             planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning',
             planning_jobs.c.revision <= job['revision']).order_by(planning_jobs.c.revision.desc()).limit(9)).scalars())
     feedback = '\n'.join(dict.fromkeys(p['feedback'] for p in reversed(notes) if p.get('feedback')))
-    contract = prepare(original['payload'], feedback) if job['kind'] == 'planning' else None
+    contract = prepare(original['payload'], feedback, scenario_response) if job['kind'] == 'planning' else None
     if contract and len(notes) > 8:
         requirement = 'More than eight preparation revisions need an explicit consolidated request; older requirements must not be silently dropped.'
         contract['scope_missing'].append(requirement)

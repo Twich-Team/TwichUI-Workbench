@@ -4686,3 +4686,105 @@ in artifacts/runs/browser-offers-20261105T183114Z. No install/restart/activation
 no migration, model/lease/probe, external write or remote push. Next exact product
 blocker remains independent task-specific preparation/certification and manual bug
 contract ingress, followed by a separately authorized real operational acceptance.
+
+## 2026-11-05 — reusable declarative regression evidence (engineering slice)
+
+Owner authorized60minutes from clean7e644da; start18:52:10UTC /11:52:10Denver,
+hard stop19:52:10UTC /12:52:10Denver including checks/local checkpoint/handoff.
+Measured entry453,166,819bytes; headroom83,704,093bytes (79.83MiB). Reserved32MiB
+initially,48MiB for final checks/handoff; unchanged512MiB cap. No archive/deletion.
+
+Inspection separated deterministic source/base/inventory/hash/check/limit derivation
+from model reasoning about fixture/source symbols, inputs, observable expectations
+and meaningful counterexamples. Ambiguous desired behavior needs domain-owner input;
+unimplemented source mapping must not be presented as a request for the user to
+write code. Independent technical mapping/mutation review may still need a developer.
+A generated oracle is not correct because a model or compiler produced it.
+
+Implemented bounded declarative scenarios through the existing preparation owner:
+one existing focused test, up to three examples, module functions or exported
+harness-client functions, scalar arguments/results or client fields and bounded
+setup. Strict internal response binds immutable request, exact committed base,
+selected tests and retained feedback; extra Lua/oracle/permission fields reject.
+Committed source selections join existing reviewed framework evidence. No per-task
+registration, oracle script, positive solution or custom control patches required
+for those supported shapes. Generated positives are controls, never accepted work.
+
+The compiler generates the oracle and positive/vacuous/wrong-behavior additions.
+Review caught that an arbitrary alternate output could let a length-only test
+appear to cover case normalization. Fixed before checkpoint: the scenario must
+supply a meaningful incorrect outcome as reviewed data; a same-length wrong-case
+counterexample rejects that weak candidate. Wrong-behavior controls contain a real
+assertion which incorrectly admits the fault. Scope/ordinary checks/full inventory
+and the existing original-fail/positive-pass/negative-fail certification stay intact.
+Every example must distinguish its own fault. Nil arity and method return values
+are preserved; candidate globals cannot replace oracle verdict/exit primitives or
+inspect its wrapper upvalues. This isolation is not a replacement for OS confinement.
+
+Browser scope review shows actual fixture/operation/inputs/expected and incorrect
+outcomes, with explicit unchecked expectation confirmation on the existing decision
+receipt. Submission, application, decomposition, current review and recipe owners
+revalidate its digest. Old scope-only approvals cannot bless generated examples.
+`trusted_preparation.prepare_regression` compiles reviewed data and calls existing
+provision/Runtime/profile/canonical-offer owners. Fresh controller preparation reruns
+its frozen generated controls. No new queue/table/migration/registry/worker/grant or
+public preparation endpoint. Small bug-fix support remains, without new automation.
+
+Missing/unsupported examples identify their acceptance result and missing concrete
+expectation. Wrong expected observations/fixture setup name the scenario. Fresh failed
+preparation retains a create-only outcome and a review-bound diagnostic projection
+in the existing planning payload; missing-offer browser views display that exact hold
+with no approval action. Contracts/approvals are not rewritten. Already-covered
+examples reject make-work. Publication identity/storage remain configured inputs,
+not model-granted authority. Preparation retries/recovery remain separate obligations.
+
+Controlled actual-Lua tests exercised module return, client return/state, methods,
+nil input/output, multiple examples, generated controls, wrong expectations even
+after incorrect human confirmation, missing/unsafe/stale drafts, source/base drift,
+review/decision drift, exact receipt replay, inadequate/length-only candidates,
+already-covered examples and verdict-global tampering. Initial failures exposed
+normalized-request digest and fixture-runner TESTS setup mistakes; fixed fixtures
+and preserved logs. No test or certification gate was weakened.
+
+`wb check` passed with regenerated contracts/TypeScript/build/Ruff/schema drift.
+Full `wb test`:898backend passed/1pre-existing skip and23frontend passed before
+final counterexample refinement; final changed-path run136backend passed, including
+19new compiler tests and existing bug/review/profile boundaries. Final frontend23
+passed. Seven focused browser paths passed before the counterexample refinement;
+final three changed browser paths passed afterward (generated review/offer/control
+preparation at1440/390px and specific wrong-expectation hold). These use actual
+browser/API/worker preparation and actual Lua, with explicit controlled response /
+resource/boundary telemetry.0grants/model requests/attempts/publications; controller
+runs only the controlled preparer. No real confinement/unattended/model claim.
+No broad browser/visual/verify or physical Safari completion; prior64/92browser
+coverage and28missing cases remain historical limitations. No baselines updated.
+
+Inspected final browser-jkSOcu desktop and390px200%text observation/confirmation
+viewports, generated offers, and specific held-expectation capture. Values and
+counterexamples are visible; labels/paths wrap without overlap or page overflow.
+Preserved literal whitespace in displayed JSON inputs after screenshot inspection.
+Compact final captures avoid duplicating very tall phone pages. Retained51files /
+46,818bytes of historical controlled Lua evidence plus actual controlled receipt /
+zero-authority summaries, with byte/hash verification; no database was copied.
+These historical copies are not current deployable certificates. Earlier test output
+and the preceding session's50indexed files are preserved; hashes rechecked at handoff.
+
+Actual result: the custom oracle/control-package coding step is removed for the
+supported scenario shapes. Ordinary natural-language requests still cannot
+**automatically** reach an approvable executable offer: policy-bound grounded draft
+generation through the existing planning lifecycle is the immediate next blocker,
+then application-owned configuration/dispatch of the generic offline preparer.
+No ordinary-user CLI substitute or another backlog recipe is proposed. Domain intent
+clarification can come from a nondeveloper; uncertain technical fixture/source /
+counterexample mapping still requires independent capable review. No hand-authored
+passing solution is necessary.
+
+Audit reconciliation: model-policy integration, application runtime ownership,
+retries/fallback, delivery consistency/recovery and installation remain separate
+unfinished obligations. This slice completes none of them and is not general M5
+acceptance. No inference, lease/probe, service/live-data update, migration, privilege,
+spending, publication, installation or remote push.9487/8765left unchanged. No real
+model check is needed for this machinery; do not start a new demonstration from it.
+Evidence/checkpoint/source/preservation receipts:
+artifacts/runs/regression-evidence-20261105T185210Z. CONTINUATION.md records exact
+supported boundaries and next blocker; clean local checkpoint recorded separately.

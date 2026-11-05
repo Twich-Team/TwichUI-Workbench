@@ -148,6 +148,14 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         raise ValueError('Reviewed resource limits or PR destination are unsupported')
     if not isinstance(oracle, str) or not 1 <= len(oracle.encode()) <= 65536:
         raise ValueError('Bounded independent task oracle required')
+    prepared = reviewed.get('behavioral_evidence')
+    if prepared and prepared['status'] == 'review_required':
+        from workbench.regression_evidence import compile_plan, validate_expectation_review
+        validate_expectation_review(linked['proposal_review'], linked['approval']['payload'])
+        compiled = compile_plan(prepared)
+        if (oracle != compiled['oracle'] or behavior_id != compiled['behavior_id']
+                or read_paths != compiled['read_paths'] or focused_test != compiled['focused_test']):
+            raise ValueError('Scenario oracle/read selection differs from the independently reviewed examples')
     contract = real_execution.contract()
     contract.update(task_id=linked['task']['id'], title=linked['task']['title'],
                     repository=reviewed['repository'], source=str(root), base=base,

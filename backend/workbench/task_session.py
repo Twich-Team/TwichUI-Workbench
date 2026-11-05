@@ -75,7 +75,15 @@ def provision(runtime, template):
     runtime.prepare()
     if (getattr(runtime, 'recipe', None) or {}).get('verification_profile'):
         from workbench.verification_profiles import prepare
-        prepare(runtime, template['control_patches'])
+        if 'scenario_preparation' in template:
+            from workbench.regression_evidence import compile_plan, patches
+            compiled = compile_plan(template['scenario_preparation'])
+            if runtime.oracle_source.read_text() != compiled['oracle']:
+                raise ValueError('Generated scenario oracle differs')
+            control_patches = patches(runtime, compiled)
+        else:
+            control_patches = template['control_patches']
+        prepare(runtime, control_patches)
     else:
         _legacy_controls(runtime, template)
     marker = runtime.root / "private-boundary-marker"

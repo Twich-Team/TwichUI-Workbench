@@ -1413,3 +1413,52 @@ No new tables, migrations, queue, grant/session/worker/publication owner are add
 server/store. They redirect runtime roots into that disposable directory and invoke
 only an explicit controlled preparation callback. Installed roots and 9487/8765
 are not changed by this test seam.
+
+## Declarative regression evidence — November 5, 2026
+
+`regression_evidence.py` owns a bounded data grammar and deterministic compiler,
+not intent, approval, model policy, execution or a new registry. Up to three
+examples select one existing test file, committed Lua sources, a module function or
+harness client operation, scalar arguments, bounded fixture setup and a scalar
+return/field expectation and a meaningful incorrect outcome to reject. Unsupported shapes hold. File selection, base, hashes,
+checks and read/resource limits remain owned by existing preparation/recipe owners.
+
+The existing regression planning job may receive an internal bounded structured
+`scenario_response`, bound to original input, retained feedback, exact committed
+base and selected test paths. No default provider call was added. Its strict
+schema rejects arbitrary Lua/oracle/check/permission fields. Model/source mapping
+and expected-behavior interpretation remain proposed data in `task_contract`,
+separate from original intake. Historical contracts omit the new optional field.
+
+The existing human `proposal_decisions` receipt optionally binds an
+`expectation_review` digest. Complete generated examples require this separate,
+explicit fixture/operation/input/outcome confirmation. API submission, application,
+decomposition, current-scope projection and recipe construction revalidate it.
+Neither a model label nor an ordinary old scope checkbox supplies that confirmation.
+The human must independently judge that the proposed fixture/operation corresponds
+to the requested behavior; unsupported or unclear source mapping can still need a
+technical reviewer. Domain expectation clarification need not come from a developer.
+
+The compiler derives a passing test addition, a vacuous assertion, an assertion
+that wrongly admits the injected incorrect observation, and an oracle that replays
+normal/faulted tests using the reviewed counterexample. Generated positive code is a control, never an accepted
+implementation. Expected observations are first checked against committed behavior;
+wrong expectations, unobserved operations, incompatible fixtures and unrelated
+errors identify the example and missing expectation. Already-covered examples are
+rejected rather than creating make-work. Candidate Lua globals are isolated from
+oracle verdict/exit primitives and upvalue inspection; this is not OS confinement.
+
+`trusted_preparation.prepare_regression` invokes the existing `task_session.provision`
+owner, Runtime isolation/scope/check/freezing and unchanged profile certification,
+then canonical reviewed-offer registration. It creates no budget/grant/attempt or
+publication. Fresh implementation preparation consumes the frozen controls through
+that same provisioner. Existing small bug-fix and manually certified paths remain.
+No new table, queue, migration, provider adapter or public preparation endpoint.
+
+Each attempt's create-only `behavioral-preparation-outcome.json` retains its outcome.
+The existing planning job payload's `behavioral_preparation_outcome` is only a
+latest diagnostic projection bound to the reviewed proposal. It does not modify the
+typed contract, original approval, decomposition, certificate or offer snapshot.
+Missing-offer views may show that precise retained failure. This projection grants
+nothing and cannot make missing/stale evidence eligible. Retry/recovery/transactional
+integration of application-owned preparation remains separate work.

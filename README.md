@@ -207,8 +207,10 @@ The proposed contract records repository/base, behavior/acceptance, writable tes
 paths, unrun verification commands, independent-check requirements, resource limits
 and the draft destination `Twich-Team/TwichUI:main`. Scope approval is separate.
 Preparation creates no run offer, recipe, grant or publication authority. Independent
-behavioral oracle/control certification and conversion to the existing bounded
-execution recipe remain manual; this is not a generally usable task-to-PR service.
+semantic expectation review remains required. The bounded scenario compiler below
+now generates oracle/controls for supported shapes through an internal preparer;
+ordinary model-draft generation and preparer dispatch remain unimplemented. This is
+not a generally usable task-to-PR service.
 Local base inspection does not verify the current remote branch or live-game behavior.
 
 For bounded browser verification, use `python3 scripts/wb.py test-e2e --grep 'title expression'`
@@ -296,6 +298,23 @@ it contains denied-path rules, with no authentication material.
 
 ### Bind a reviewed contract to a certified offer
 
+The next reusable regression preparation slice compiles declarative behavioral
+examples into the frozen oracle and positive/vacuous/wrong-behavior controls. It
+supports one existing test file, up to three scalar observations through a returned
+module function or the harness's exported client functions. No per-task Lua package,
+registered recipe or hand-authored passing solution is required for those shapes.
+The browser separately confirms the exact fixture/operation/inputs/expected outcomes;
+model authorship and that confirmation do not replace independent control checks.
+Missing examples and failed expectation checks have specific holds.
+
+`trusted_preparation.prepare_regression` is the internal, reusable offline entry
+through the existing Runtime/profile/offer owners. Controlled `scenario_response`
+data exercises the existing planning owner without inference. **Ordinary natural
+language requests do not yet automatically call a model or dispatch this preparer.**
+Policy-bound draft generation, application-owned preparation configuration/dispatch
+and installation remain open. This is not a new user CLI workflow; `prepare-offer`
+below still consumes existing evidence. See `docs/CONTINUATION.md` for boundaries.
+
 Trusted local operators can now register an **already independently certified**
 preparation through the supported wrapper, without database edits or an owner
 instruction script:
@@ -325,8 +344,9 @@ attempt. Missing or stale certification holds the offer. An installation without
 one-off execution capability explicitly says execution is unavailable; a saved
 non-activating budget never turns into activation later.
 
-Human/developer work is still required to independently review the behavior oracle,
-prepare meaningful controls, certify bounded task evidence and configure/authorize
-the operational runtime. Bug-fix typed-contract preparation remains manual. Profile
+Independent fixture/behavior review and operational configuration/authorization
+remain required. Supported scenario controls need no hand-authored solution; other
+oracle shapes still need trusted preparation. Bug-fix typed-contract preparation
+remains manual. Profile
 selection, evidence certification, offer creation and human execution authorization
 are distinct operations. This source capability does not install itself on port9487.

@@ -45,6 +45,46 @@ def advance(engine, path, action):
     os.environ['WORKBENCH_RESEARCH_ROOT'] = str(path.parent / 'reviewed-research/source')
     task_sessions.ROOT = path.parent / 'controlled-session-owner'
     task_session.ROOT = task_sessions.ROOT
+    if action in {'scenario-plan', 'scenario-wrong-plan'}:
+        from workbench.regression_evidence import input_binding
+        with engine.connect() as c:
+            original = c.execute(select(intakes.c.payload)).scalar_one()
+        _, base, _ = regression_preparation.repository()
+        response = dict(input_sha256=input_binding(original, '', base, [TEST]),
+            model='CONTROLLED model response; no inference', draft=dict(scenarios=[dict(
+                id='capital-name', acceptance_index=0, test_path=TEST, fixture='module',
+                source_paths=['!!!TwichUI/normalize.lua'], target=[], args=['  ALICE '],
+                observe=dict(expected='ALICE' if action == 'scenario-wrong-plan' else 'alice'),
+                incorrect='alice' if action == 'scenario-wrong-plan' else 'ALICE')]))
+        assert regression_preparation.process_one(engine, scenario_response=response)
+        return
+    if action in {'scenario-certify', 'scenario-certify-hold'}:
+        from unittest.mock import patch
+        from workbench import trusted_preparation
+        with engine.connect() as c:
+            original = c.execute(select(intakes)).mappings().one()
+            task = c.execute(select(backlog_items).where(backlog_items.c.kind == 'task')).mappings().one()
+            approval = c.execute(select(proposal_decisions)).mappings().one()
+            ref = dict(intake_id=original['id'], task_id=task['id'], approval_id=approval['id'])
+        root = path.parent / ('certified-' + ref['intake_id'])
+        root.mkdir(mode=0o700)
+        class ControlledPreparer(PreparedLuaRuntime):
+            def check(self, argv, *args, **kwargs):
+                if argv[:2] == ['python3', '-c']:
+                    return dict(command=argv, status='pass', rc=0, out='CONTROLLED boundary only',
+                        usage=dict(cgroup_removed=True, controlled_fixture=True))
+                return super().check(argv, *args, **kwargs)
+        with patch.object(trusted_preparation, 'Runtime', ControlledPreparer):
+            try:
+                trusted_preparation.prepare_regression(engine, ref, root,
+                    dict(name='Controlled author', email='fixture@invalid'))
+            except ValueError as error:
+                if action != 'scenario-certify-hold':
+                    raise
+                print(json.dumps(dict(status='hold', message=str(error), no_generation=True)))
+                return
+        assert action != 'scenario-certify-hold', 'Expected the deliberately wrong expectation to hold'
+        return
     if action == 'plan':
         assert regression_preparation.process_one(engine)
         return

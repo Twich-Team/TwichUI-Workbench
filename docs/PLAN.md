@@ -1,6 +1,22 @@
 # Implementation plan
 
-Current owner-authorized package (2026-11-05): **trusted preparation operation and
+Current owner-authorized package (2026-11-05): **reusable behavioral evidence for
+Lua regression additions**, from clean `7e644da`. Start18:52:10UTC (11:52:10Denver),
+hard stop19:52:10UTC (12:52:10Denver),60minutes including checks/checkpoint/handoff.
+Inspect deterministic/source versus reasoning/expectation boundaries, then implement
+declarative scenario compilation and generated controls through the existing
+planning/review/Runtime/certification/offer owners. Independent expectation review
+remains required; generated evidence is never certified by authorship. Specific
+missing-expectation holds, no backlog recipe or hand-authored positive solution.
+Controlled model responses only; no inference or new real execution demonstration.
+No installation/live data/service/migration/lease/probe/publication/spending/push.
+Entry453,166,819bytes/headroom83,704,093bytes (79.83MiB); reserve32MiB for focused
+checks and desktop/phone inspection, later48MiB for final checks/handoff, under the
+unchanged512MiB cap. No archive needed.
+Model-policy integration, application runtime ownership, retry/fallback, delivery
+consistency and installation remain separate unfinished obligations.
+
+Preceding closed engineering package (2026-11-05): **trusted preparation operation and
 browser combined reviewed-scope/run/draft-PR approval**, continuing clean checkpoint
 `9f475eb`. Session starts18:31:14UTC (11:31:14America/Denver), hard stop19:31:14UTC
 (12:31:14Denver);60minutes including tests/handoff, no automatic extension. Reuse
@@ -27,7 +43,7 @@ approved Milestone 2 for direct execution in the existing chat; see PROGRESS.md.
 | Operating controls and monitoring | Dedicated display Settings, read-only resource Monitoring and supported activity charts; bounded presentation repairs and original logo | Accepted by owner; final transparent derivative verified separately after full closeout verification; see PROGRESS.md; no worker writes, intake, execution, deployment or spending changes |
 | 3. Intake and planning | Persist original issue/feature intake immediately; revisioned research/proposals, hierarchy versus dependencies, applicable mockups and explicit revision-bound approval | Owner accepted the application workflow with explicit limitations on 2026-11-04; WB-16 resolved and verified. Prior real local transport/schema/proposal persistence remains observed; WB-15 grounding and actual local decomposition remain unaccepted with 2/2 approaches used. Intake/proposal grants no execution permission |
 | 4. Models and execution policy | Provider adapters, valid model/effort combinations, requested/actual attribution, attempt accounting and conservative capacity policies | Presentation accepted November 3, 2026; reported 179 backend / 15 frontend / 40 browser / 10 visual. No inference, paid activation, live migration or next milestone |
-| 5. Authorized execution and delivery | One approved end-to-end implementation slice with durable attempts, recovery, feature-level checks, applicable simulator evidence and publication gates | Controlled sample workflow accepted; bounded real Chronicle fix accepted and one connected real-model replay passed. Durable recovery tested/loaded. New-task-to-real-draft-PR delivery and demonstrated unattended reliability remain open; activation/external writes need explicit permission |
+| 5. Authorized execution and delivery | One approved end-to-end implementation slice with durable attempts, recovery, feature-level checks, applicable simulator evidence and publication gates | Controlled sample workflow and bounded Chronicle fix accepted; durable recovery tested/loaded. One assisted tests-only real draft delivered. Ordinary-request preparation/model-policy/runtime integration, delivery consistency and demonstrated unattended reliability remain open; activation/external writes need explicit permission |
 | 6. Deployment and advanced automation | Verified authentik/proxy trust, supervised deployment, restrained notifications, upstream data workflow using the existing transformation, later adaptive recommendations | Separate infrastructure, deployment and spending approval |
 
 If any milestone needs broader network exposure, move SSO/trusted-proxy design

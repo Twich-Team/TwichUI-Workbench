@@ -1,136 +1,126 @@
-# Trusted preparation and browser approval checkpoint — November 5, 2026
+# Reusable regression evidence checkpoint — November 5, 2026
 
-Continue from the reviewed local source checkpoint recorded in
-`artifacts/runs/browser-offers-20261105T183114Z/CHECKPOINT.json` / `SOURCE.json`.
-Its parent is clean `9f475eb3dccdd06e12e99818b777980100e84e37`; earlier baseline
-`17dec095f14a40b29d4e66ac04f83631102555f0` and all recovery bundles remain intact.
-Preserve the modular monolith, existing owners/design and durable worker.
+Continue from the clean local source checkpoint recorded in
+`artifacts/runs/regression-evidence-20261105T185210Z/CHECKPOINT.json`. Its parent is
+`7e644da8dc61b845e36ab9e9393d03af2683b0ac`. Preserve earlier evidence/checkpoints,
+modular monolith, existing owners and separate durable worker.
 
-This owner-authorized package started18:31:14UTC (11:31:14America/Denver), with a
-hard stop19:31:14UTC (12:31:14Denver),60minutes including tests/handoff and no automatic
-extension. It is an engineering/controlled-executor result, not activation or general
-ordinary-task-to-verified-PR acceptance. No inference, lease/probe, live service/data
-change, migration, spending, publication, remote push or activation occurred.
+This authorized engineering session started18:52:10UTC (11:52:10America/Denver),
+with a hard stop19:52:10UTC (12:52:10Denver),60minutes including checks/checkpoint /
+handoff. Controlled model responses and ordinary tests only. No inference, real
+execution demonstration, lease/probe, live-service/data update, migration,
+publication, spending, privilege change, installation or remote push occurred.
+The source does not install itself on9487;8765 remains untouched.
 
-## What works through Workbench
+## What manual preparation was removed
 
-An existing current, applied, nonvisual Lua scope review and completed task mapping
-can be bound to independently certified evidence through the supported operation:
+For the supported declarative shapes, the developer no longer writes per-task
+oracle Lua, a passing test solution, three custom control patches or recipe
+registration code. The reusable compiler generates the positive/vacuous/wrong-
+behavior additions and mutation oracle from reviewed scenario DATA, then the
+existing provision/Runtime/profile/offer owners prepare and certify the evidence.
+This is one reusable preparation slice within unfinished M5, not a generally usable
+ordinary-request-to-PR workflow.
 
-```sh
-WORKBENCH_RESEARCH_ROOT=/absolute/owned/research-checkout \
-python3 scripts/wb.py prepare-offer \
-  --database /absolute/existing/workbench.sqlite3 \
-  --intake-id INTAKE_UUID --task-id TASK_ID \
-  --scope-approval-id APPLIED_SCOPE_DECISION_UUID \
-  --evidence-root /absolute/owned/certified-runtime
-```
+The strict scenario grammar supports one existing focused test file, up to three
+examples, committed Lua source selections, a returned module function or exported
+harness client function, scalar arguments, bounded fixture setup, and a scalar
+first-return or client-field expectation plus a meaningful incorrect outcome to reject. It can express methods and nil values;
+unsupported shapes, multiple test files and unmet bounds hold. Expected outcomes
+are never derived merely by observing current source behavior.
 
-This is a same-user trusted local operation, with existing-path/ownership/nonshared
-write/link checks and canonical Runtime/certificate/current-review revalidation.
-It registers only an idempotent offer in the existing store. No developer DB edits,
-owner instruction file, arbitrary commands, HTTP certification endpoint or grant
-issuance are needed for this registration/browser-approval connection.
+A generated positive is only a verifier control. The incorrect observation is
+reviewed model/domain data, not a compiler-invented arbitrary sentinel. A length-only
+check must not establish case normalization: the tests reject that weak candidate
+using a same-length, wrong-case counterexample. Existing tests must miss the
+example; the positive must distinguish its exact-input faulty observation; a
+vacuous addition and a real but overly permissive assertion admitting the faulty
+result must not. Every control still passes syntax/focused/full-suite checks.
+The unchanged profile certification independently evaluates frozen facts, source /
+framework/base/suite identities, scope and control results. Actual runtime
+confinement remains a separate prerequisite. Candidate test globals cannot replace
+the generated oracle's verdict/exit functions or inspect its wrapper upvalues.
 
-In the request's Resulting work section, the user can inspect the exact reviewed
-scope, repository/base, writable paths, required checks, acceptance/exclusions,
-aggregate limits and draft-PR destination. One explicit combined decision reaffirms
-that scope and approves one fixed run budget plus one draft PR. It is saved first,
-applied by the existing planning worker, then consumed by the existing finite
-`task_sessions` / `task_session` workflow. The original scope review/decomposition
-remain unchanged. Browser provenance is distinct from trusted owner-file provenance;
-both retain the existing continuation owner and validation. No parallel queue,
-authorization store, execution state, migration, grant issuer or worker was created.
+## Determination versus reasoning versus human input
 
-Exact retries/reloads recover the original decision. A different command cannot
-create another budget/attempt for that proposal. Scope/base/task/certification drift,
-expiry, stopped sessions and lost runtime capability hold execution. Browser forms
-retain their reviewed offer across refresh and require renewed consent after scope,
-offer or runtime-availability changes. Applied receipts remain historical facts,
-with current preparation/authorization holds explained beside them.
+| Work | Who/what establishes it |
+| --- | --- |
+| Repository/base, existing paths and committed regular-file bytes/hashes; harness/runner compatibility; fixed checks, limits and destination | Deterministic existing source/preparation/recipe owners. No inference or repository code runs during scope inspection. Local main does not establish remote freshness. |
+| Lua/control generation, data escaping, exact fault injection, positive/vacuous/wrong-behavior diffs; actual base replay and control discrimination | Deterministic compiler plus the existing isolated Runtime and independent profile checks. These establish only the reviewed examples, not general intent or real-game behavior. |
+| Map ordinary prose to relevant source symbols, concrete fixture state, inputs, operation, observable outcome, meaningful counterexample and uncovered cases | Model-assisted reasoning still needed. Its output is proposed scenario data, never certification or authority. Default production draft generation is not connected yet. |
+| Decide an ambiguous desired outcome, such as reject versus normalize an empty/invalid name | Domain owner clarification; no developer required merely to state the expected behavior. Ask only when the expectation is actually ambiguous, not because source mapping is unimplemented. |
+| Confirm that the fixture/operation/input/output really measures the request and that the mutation is meaningful | Independent reviewer. Understandable domain examples can be confirmed by a nondeveloper; uncertain technical source/fixture mapping can still require a developer or independently grounded technical review. No one must hand-author a passing solution. |
 
-Missing certification has no approval action. If execution is unavailable, the form
-explicitly says so and can save only a non-activating budget. Such a saved budget
-never silently becomes activation later. Configured capability still requires all
-fresh independent runtime/operational gates; it is not readiness proof.
+The existing planning job accepts a bounded internal `scenario_response` envelope
+bound to immutable original request, retained feedback, exact committed base and
+selected test paths. This session exercised controlled model responses only.
+`task_contract.behavioral_evidence` preserves draft origin, concrete data, explicit
+holds and review digest; the original intake is unchanged. A plain/model-supplied
+`certified` flag, arbitrary Lua/checks or permissions cannot enter this grammar.
 
-## Trusted human/developer work still required
+The browser displays the actual examples and requires an unchecked, explicit
+fixture/operation/input/expected-and-incorrect-outcome confirmation saved as `expectation_review` on the
+existing scope decision. API, application, decomposition, current-scope and recipe
+owners revalidate it. Changing examples/base/request/feedback invalidates the draft
+or review. This semantic review does not certify the generated oracle: even a
+wrong human confirmation cannot make a mismatching base observation pass.
 
-Profile selection is proposed data, not evidence certification. An independent human
-or trusted preparer must review the behavior oracle/reproducer and meaningful
-positive/vacuous/wrong-behavior controls as applicable, prepare/certify the exact
-bundle, and select bounded reads/publication identity. `prepare-offer` consumes that
-existing certification; it does not automatically generate or bless an oracle.
-Bug-fix typed-contract preparation before human scope review remains manual through
-the existing planning/proposal owner. Ordinary regression intake is supported;
-automatic general bug-contract preparation is not implemented.
+Missing examples name the affected acceptance result and missing input/setup /
+operation/outcome. Failed expectation replay identifies the scenario. Failed fresh
+preparation is retained in create-only outcome evidence and projected by the
+existing planning job as a review-bound diagnostic; the browser shows that precise
+hold with no approval action. Diagnostics do not change contracts or grant authority.
+Already-covered examples reject make-work. Unsupported instrumentation names the
+missing observed operation instead of claiming “needs certification.”
 
-The next exact blocker to ordinary task → verified PR is that trusted task-specific
-preparation/certification step (including supported bug-contract ingress). After
-that, an expressly authorized installation/runtime acceptance package must verify
-real confinement, current operational/resource gates, model execution, frozen result
-and draft delivery. This package supplied no such activation permission and made no
-new real inference/PR-delivery claim. Minimum product/M5/general unattended acceptance
-remain incomplete.
+## Existing owners and next precise blocker
 
-## Verification and deployment boundary
+`trusted_preparation.prepare_regression` is the reusable INTERNAL offline entry
+point. It consumes the current applied scope/task mapping and configured local
+identity/output root, compiles the reviewed data, and invokes the existing
+`task_session.provision`, Runtime, profile certification and canonical offer
+registration. Fresh worker preparation reruns the frozen generated controls.
+No new queue, table, migration, task registry, grant issuer, worker or public
+preparation endpoint was added. Small bug-fix support and legacy trusted paths
+remain intact; bug-contract automation was not expanded.
 
-Final source checks passed: generated contracts via `npm run contracts`, TypeScript,
-Vite build, Ruff and schema migration drift. Relevant backend selection:262passed;
-final additional changed-path selection:12passed. Frontend:23passed, including exact
-retry, stale review, changed runtime availability, missing certification and saved
-historical hold cases. No full backend/verify claim is made for this package.
+**An ordinary natural-language request cannot yet automatically reach an approvable
+executable offer.** Under controlled structured responses, the complete supported
+machinery reaches an offer and browser budget approval without custom task code.
+The immediate next blocker is obtaining grounded scenario drafts through the
+existing planning lifecycle with bounded committed-source context, model-policy /
+accounting/claim ownership and precise ambiguity handling. After independent review,
+the existing application worker still needs owned configuration/dispatch for this
+generic offline preparer. Do not replace those connections with an operator writing
+Python packages or calling `wb prepare-offer` as the final user workflow.
 
-Seven focused browser cases passed: two actual new reviewed-offer paths at1440px /
-390px, two existing site-session controls and three existing controlled task-to-PR
-cases. The new path used an ordinary browser request and scope decision, normal
-planning/decomposition, independently prepared actual-Lua certification, the supported
-local registration command, actual browser combined approval and existing durable
-session/controller preparation with an explicit controlled executor. Fresh profile
-provision ran once per session;0grants/requests/model attempts/publications were
-created. No browser API response was substituted in the new path. Controlled
-boundary/resource telemetry is not actual confinement acceptance.
+No real-model check is necessary to validate this compiler machinery. A future
+real check requires its own exact purpose/budget/activation authorization after
+safe provider/runtime preparation. Do not start a new real execution demonstration
+from this checkpoint.
 
-Inspected final desktop, normal phone,390px200%text, full viewport and missing-
-certification screenshots under `artifacts/runs/browser-URzS0A/reviewed-offers/`.
-Normal phone copy wraps without overlap; enlarged paths wrap and controls remain
-usable with no page overflow. Details expose exact checks/base/limits. Retained
-handoff JSON records the bound recipe, original policy and single controller call.
-Earlier failed tests/logs/traces remain; no screenshot baseline was updated.
+Audit reconciliation remains explicit: model-policy integration, application runtime
+ownership/provisioning, bounded retries/fallback, delivery consistency/recovery and
+installation are separate unfinished obligations. This compiler is not completion
+of any of them. Broader task support, real confinement/model/draft delivery and M5
+acceptance remain uncompleted; prior real assisted delivery is not autonomous proof.
 
-The previous profile-session64/92unique browser result and28remaining cases in
-`artifacts/runs/verification-profiles-20261105T174907Z/BROWSER_COVERAGE.json` remain
-an explicitly incomplete historical acceptance. This focused pass is not a broad
-browser or visual-suite completion. No physical Safari acceptance is claimed.
+## Verification and preservation
 
-**Code only, not installed on9487.** Read-only inspection found PID2032833 using
-`.local/m5-review/static` and its pre-session imported backend. No assets were copied
-there, process restarted, database migrated or runtime activated. Port8765 and all
-live services were left alone. E2E runtime roots/capabilities are isolated inside the
-owned disposable browser directory, with no production activation path added.
+Checks: `wb check` passed. Full `wb test` passed898backend/1pre-existing skip and
+23frontend before final counterexample refinement; final changed-path136backend
+and23frontend passed. Seven focused browser paths passed before refinement; final
+three changed paths passed afterward. Inspected final desktop/390px200%text
+observation/confirmation/offer/hold captures in `browser-jkSOcu`.
+Exact logs, source hashes/checkpoint and headroom are in session `REPORT.md` /
+`CHECKPOINT.json`. No broad browser/visual
+or full `verify` acceptance is inferred. The earlier64/92browser result and28missing
+cases remain a separate historical gap; viewport Chromium is not physical Safari.
+No screenshot baseline was updated.
 
-## Storage and preservation
-
-Entry counted514,595,874bytes; headroom22,275,038bytes (21.24MiB). After checking
-ownership/references,17closed profile-session generated browser roots were losslessly
-archived:1,143files/85,448,791bytes. Archive ID
-`browser-offer-20261105-profile-generated`; full path/hash/mode/time manifest and
-hashed durable index preserve lookup/restoration. Verification preceded removal and
-was repeated afterward. Directly inspected browser-dTJ9hw screenshots remain in
-place. Protected historical evidence/candidates/approvals/DBs/source recovery/active
-runtime roots were excluded. Exact roots and receipt are in session `ARCHIVE.json`.
-
-The existing tool supports `verify`, `lookup ORIGINAL_PATH` and
-`restore ARCHIVE_ID --destination /absolute/isolated/root`. Do not rerun historical
-capture scripts into archived original paths. All previous archive manifests and
-source recovery hashes were rechecked. The historical hash index includes one
-intentionally changed source test, `e2e/task-session.spec.ts`; its original bytes
-remain in parent9f475eb. No historical evidence change is hidden by that source edit.
-
-Post-archive counted429,148,454bytes;64MiB reserved for this session. The aggregate
-limit remains536,870,912bytes (512MiB). At final checks, roughly80.7MiB headroom
-remained; exact final bytes, source checkpoint, preservation and test receipts are in
-`CHECKPOINT.json`. Remeasure before another test/execution reservation. No broad
-browser suite or64MiB operational run is authorized by this handoff. A later session
-requires its own explicit scope/time/activation authorization; no automatic extension
-or continuation is implemented.
+Entry453,166,819bytes/headroom83,704,093bytes (79.83MiB). Initially reserved32MiB;
+final changed-code checks/captures/handoff reserved48MiB under the unchanged
+536,870,912byte (512MiB) aggregate limit. No archive or deletion was needed.
+Preceding-session output hashes are in `PRECEDING_HASHES.json`; protected evidence,
+candidates, approvals, databases, baselines and existing archives remain preserved.
+New browser invocations use fresh owned output roots, never historical paths.

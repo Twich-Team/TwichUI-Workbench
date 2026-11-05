@@ -134,8 +134,23 @@ def evaluate_snapshot(runtime, record, expected):
             return 'rejected', 'Existing suite failed or its inventory changed'
         outcome = behavioral_outcome(checks[-2], runtime.recipe['behavior']['id'])
         if outcome == 'hold':
+            missing = re.findall(r'^WB_EXPECTATION ([a-z][a-z0-9-]{0,47}) MISMATCH$', checks[-2].get('out', ''), re.MULTILINE)
+            if missing:
+                return 'hold', f'Example {missing[0]}: the expected observation or fixture setup does not match the committed behavior. Clarify that expectation; generated examples are not correctness evidence.'
             return 'hold', 'Missing or ambiguous behavioral verdict'
         if outcome != expected:
+            if runtime.recipe['behavior']['id'] == 'regression-scenarios':
+                if expected == 'fail' and outcome == 'pass':
+                    return 'rejected', 'Existing or negative-control tests already distinguish the supplied example. Identify an uncovered expected behavior before proposing new coverage.'
+                details = re.findall(r'^WB_SCENARIO ([a-z][a-z0-9-]{0,47}) ([A-Z_]+)$', checks[-2].get('out', ''), re.MULTILINE)
+                if details:
+                    identity, why = details[0]
+                    message = {'CORRECT_RUN_FAILED': 'the existing test does not run with the proposed fixture setup',
+                        'TARGET_NOT_OBSERVED': 'the proposed operation/input was not observed through the supported fixture adapter',
+                        'OBSERVATION_NOT_ASSERTED': 'the generated positive addition does not distinguish the expected observation',
+                        'NON_ASSERTION_FAILURE': 'the fault caused an unrelated error rather than a checked expectation'}.get(why)
+                    if message:
+                        return 'hold', f'Example {identity}: {message}. Clarify the fixture, operation and expected result.'
             return 'rejected', 'Approved-behavior outcome differs'
         return 'certified', 'Fixed checks and approved behavior match'
     except (KeyError, TypeError, ValueError, IndexError):
