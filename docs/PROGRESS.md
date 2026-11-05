@@ -5061,3 +5061,60 @@ authorize a new bounded window after the existing preflight passes.
 The handoff and controlled evidence are in `CONTINUATION.md` and
 `artifacts/runs/scenario-grounding-20261105-B5xLUl/`. No real planning
 acceptance, inference or installed-store changes occurred.
+
+## 2026-11-05 — Real normalization proposal reviewed, certification held
+
+The owner authorized one 60-minute disposable 9187 window including archival
+and preflight. Used clean `e4d5a96` and pinned fixture `ebb16fff`. Selected
+closed Playwright reports and framework attachments, preserving the primary
+captures and the two prior real attempts. Verified isolated restoration of
+28 files before removing originals via the archive tool. Counted headroom
+was 74.33 MiB immediately before transport and 73.95 MiB at closeout. The
+512 MiB limit, protected historical evidence and rollback package were preserved.
+
+Used the normal checkpoint API and worker, with a private operator wrapper to
+verify serialized bytes before either outbound request, enforce the wire count
+and retain protected evidence. The exact Chromium intake and 12,368-byte POST
+included `" ALICE "`, `"alice"` and `"ALICE"`, the committed one-argument
+module binding and additive-only scope. The isolated build and worker Runtime
+preflight passed. One identity GET and one structured POST completed in 18.539
+seconds with 1,683 prompt and 354 completion tokens. Saved, advertised and
+envelope identities matched `pilot-qwen38-27b`. The model-authored `gpt-5`
+label is preserved separately as an attribution discrepancy.
+
+Proposal revision 1 passed grounded validation. The owner independently
+confirmed it and scope approval applied. The four oracle checks produced the
+expected verdicts. Certification held when the wrapper's broad socket guard
+blocked the trusted suite harness's parent-side loopback marker connection.
+The Runtime preflight had exercised that path before the guard was installed.
+No certified offer was created. The existing worker does not replay the failed
+preparation job. A guarded trusted-suite rehearsal and further acceptance
+require fresh authorization. The window closed early at 3:18:19 p.m. Denver
+time after stopping the owned processes. Zero execution or publication
+authority and isolation from 9487 were verified. See
+`artifacts/runs/adapter-9187-20261105T221451Z-AqoKpk/RESULT.json`.
+
+## 2026-11-05 — Offline 9187 transport guard verified, recovery pending
+
+Measured 73.95 MiB entry headroom under the unchanged 512 MiB cap. The
+archived acceptance wrapper used the model request count to gate every
+parent `socket.connect`. It blocked the trusted suite's self-connection to
+its live host marker before the child entered its private network namespace.
+Added a separate zero-request operator guard. It admits one connection per
+same-thread, process-owned IPv4 loopback listener bound with port zero and
+denies model HTTP and port 8080. The archived wrapper, original proposal,
+approval, response and attribution evidence were preserved.
+
+With the guard active, the actual delegated Runtime passed a synthetic
+trusted suite and denied kernel socket creation and service access for an
+untrusted Lua descendant. The focused guard and profile suite passed 39
+tests. The read-only audit verified all 118 retained hashes and current
+repository, policy, recipe and human approval bindings. The failed job has
+one claim and no completion marker or certified offer. Its current evidence
+cannot register an offer. Supported recovery requires an explicit durable
+operation before a separately authorized offline attempt. Existing scope
+approval can be used only while the exact binding stays current.
+
+The real preparation was held throughout. Evidence and bounded next
+authorizations are recorded in `CONTINUATION.md` and
+`artifacts/runs/offline-transport-9187-fDOEVT/`.

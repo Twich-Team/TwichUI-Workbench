@@ -1,7 +1,209 @@
-# Grounded scenario intake repaired offline — November 5, 2026
+# 9187 transport guard fixed offline, acceptance still held — November 5, 2026
 
-Continue from the local checkpoint that contains this handoff. Both real 9187
-attempts are closed. The checklist for the last attempt below is historical.
+## Offline diagnosis and verification
+
+The 45-minute window authorized diagnosis and controlled regression only.
+Counted headroom was 73.95 MiB at entry and 73.93 MiB at handoff under the
+512 MiB cap.
+The real preparation stayed stopped. The original store was opened with SQLite
+`mode=ro&immutable=1`, and all 118 retained hashes matched.
+
+The guard lived in the [disposable acceptance wrapper](../artifacts/runs/adapter-9187-20261105T221451Z-AqoKpk/preflight-worker.py),
+which installed a process-wide Python audit hook and transport wrappers before
+entering the normal worker. Its `socket.connect` branch only admitted
+`127.0.0.1:8080` against the HTTP request count. It rejected
+`socket.create_connection(marker.getsockname(), timeout=1)` in
+`real_confine.run`. The parent binds a temporary listener on IPv4 loopback,
+connects, accepts, and keeps the listener open during the child check. That
+proves the host marker is live before a trusted child tests that it cannot
+reach the marker from its separate network namespace. The historical preflight
+ran before the hook was installed.
+
+The [offline operator guard](../scripts/acceptance_transport_guard.py) closes
+all urllib requests and denies outbound socket connects except one TCP
+connection to a listening IPv4 loopback socket that this process bound with
+port zero after installation, on the same thread. Port 8080 is always denied.
+The exception is consumed before the kernel connect. The guard also denies
+audited datagram and message sends. This process-local Python guard governs
+the trusted acceptance launcher. Untrusted commands still run under the
+existing kernel confinement. The default check path denies socket creation.
+Only the fixed trusted verification capability enters the private network
+namespace with private loopback. It still has to pass the parent marker check
+and the existing suite and certification gates.
+
+The guard was installed before the actual `Runtime.check` rehearsal in an
+owned delegated cgroup. A synthetic `bash tests/run.sh` suite passed the
+parent self-connection and child checks for private loopback, host marker
+denial and host IPC denial. A separate Lua-launched probe received kernel
+`EACCES` for IPv4, IPv6 and Unix socket creation and could not reach the
+disposable host listener or the test-net address. Both command cgroups were
+removed and the transient unit was collected. The focused guard and profile
+tests passed 39 checks. They covered an unrelated host listener, a second
+marker connect, synthetic audit events for repeated model requests, and
+the existing fixed checks and frozen evidence gates. The retained profile
+still returns a hold and has zero offers, budgets, sessions, grants,
+implementation requests and publication records.
+
+[Runtime probe results](../artifacts/runs/offline-transport-9187-fDOEVT/runtime-results.json),
+[focused tests](../artifacts/runs/offline-transport-9187-fDOEVT/focused-pytest.log),
+and [read-only recovery audit](../artifacts/runs/offline-transport-9187-fDOEVT/recovery-audit.json).
+
+## Recovery assessment and authorization
+
+Proposal `1b47fb3c-7b00-55b5-b3a8-f326be4a38ac` revision 1 and applied
+scope decision `f66f99d3-ace2-43e5-87ba-0cfd7b78fe83` still pass the
+application's current review, expectation and decomposition checks.
+The fixture checkout is clean with HEAD and main at
+`ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. The rebuilt request packet,
+committed blob evidence, original response and discrepancy receipt match.
+The schema 0012 store has its original device/inode `64512:6719454`. Its
+owned preparation policy, saved model selection and canonical reviewed
+recipe match the claim and review. The guard checkpoint changes only the
+operator helper, its test and these records. The retained verification
+binding still matches.
+
+There is no supported durable resume for job
+`1da6e56b-3a67-466b-93a1-880f7f902052`. It is terminal `failed` after
+one claim. The worker dispatches queued jobs and reconciles interrupted
+running jobs only when complete evidence already exists. The behavioral
+preparation HTTP retry returns 409. `wb prepare-offer` registers complete,
+independently certified evidence only, and this job has neither a completion
+marker nor a controls certificate. Calling the private preparer directly
+would leave the existing durable claim outside the recovery transition.
+
+Fresh scope approval is unnecessary for this exact, still-current binding.
+The owner must separately authorize a recovery attempt. Any changed review,
+expectation, source evidence, base or bound preparation policy must hold for
+a freshly bound proposal and independent human review. A new store path or
+inode, changed output root, or a change to the policy's generation flag
+changes its digest. Use the external zero-request guard to enforce offline
+operation while preserving those reviewed bytes. A certified offer remains
+outstanding.
+
+1. **Authorize a 45-minute offline engineering window** from the guard
+   checkpoint to add and test one supported local durable recovery operation
+   for this specific failure class. Use disposable controlled fixtures.
+   Require an explicit operator command, current proposal and exact bound
+   store, repo, base, evidence and policy, a single durable claim that can
+   survive restart without automatic replay, and a fresh attempt directory
+   under the existing bound root. Preserve the failed claim and its evidence.
+   Save a clean local checkpoint for review. This window stops before any
+   attempt on the retained real proposal.
+2. **Once the recovery operation is reviewed, authorize one 60-minute offline
+   9187 preparation window** at that exact checkpoint for the proposal,
+   approval and failed job above. Verify the bindings, snapshot the original
+   DB bytes and preserve the closed manifest before the supported operation
+   writes its new journal records. Continue only on the original bound store
+   and fixture. Require 72 MiB counted headroom after preservation and 4 GiB
+   free on the working filesystems, under the existing 512 MiB cap. Install
+   the zero-request guard before actual confined preflight. Run the existing
+   preparation and canonical certification once, with a fresh attempt root.
+   Stop at one certified offer or the first hold or timeout. Require the
+   original single planning attempt and zero budgets, activations, execution
+   sessions, grants, implementation requests and publications at closeout.
+   Both windows exclude model transport, credentials, manual database edits,
+   migrations, implementation, publication, remote pushes and changes to
+   9487 or other live services.
+
+## Previous 9187 normalization acceptance closeout
+
+The owner-authorized window is closed as of 3:18:19 p.m. America/Denver.
+Workbench ran at `e4d5a96b3e9880c2bfacd0d7fc093de9b7010b82` with pinned
+synthetic fixture `ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. The fresh schema
+`0012` store at `64512:6719454` retains the one model attempt, applied scope
+approval and failed certification job. The API served 22 assets hash-matched
+to the checkpoint build after an isolated `wb check` pass.
+
+Counted headroom was 56.42 MiB at entry. The existing evidence archive tool
+preserved 28 closed browser files (19,364,784 bytes) under
+`adapter-e4d5a96-20261105-closed-browser`. The archive was verified and
+restored in isolation before the matching originals were removed. The
+original-path lookup still resolves the closed failure trace. Both earlier
+real attempts (57 and 61 hashes) and the verified installation/rollback
+package (169 hashes) passed post-close verification.
+
+The store-bound preparation policy enabled scenario generation. Saved model
+policy revision 1 preferred and enabled `pilot-qwen38-27b` with unspecified
+effort, substitution denied and no fallback. The delegated worker opened the
+owner-designated credential read-only after verifying regular-file metadata.
+Actual Runtime probes in that worker confirmed cgroup limits, Landlock read
+denial, seccomp socket denial, private loopback, host marker and IPC denial,
+descendant reaping and cgroup cleanup. The worker's capacity check before
+transport found 77,944,505 counted bytes of headroom (74.33 MiB), more than
+4 GiB free on each measured filesystem and 25,145,312 scratch bytes.
+
+Chromium submitted **Cover lowercase name normalization** once. The description
+contained the model-visible example below and named the only writable file.
+
+```text
+Example 1: {"args":[" ALICE "],"expected":"alice","incorrect":"ALICE"}
+```
+
+The worker invoked the checkpoint serializer against the actual saved intake
+with an offline capture before the identity GET. It checked the exact example,
+one committed module binding for the directly returned `normalize.lua`
+function with one named parameter `s`, and the module's scalar-first-return,
+empty-setup and empty-field-path restrictions. It required the subsequent POST
+body to match those verified bytes. The existing adapter locks enclosed one
+identity GET and one structured POST. The POST body was 12,368 bytes and the
+response was 1,441 bytes. The exchange took 18.539 seconds and reported 1,683
+prompt, 354 completion and 2,037 total tokens. The request specified 2,600
+maximum output tokens, zero requested reasoning tokens and no tools.
+
+The saved, advertised and response-envelope identities matched
+`pilot-qwen38-27b`. The generated draft JSON separately labeled itself
+`gpt-5`. This attribution discrepancy is retained in the original response,
+parsed draft and attribution receipt. Workbench records the verified transport
+identity. The draft passed the structured schema, exact bindings, committed
+mapping and example checks. Its single scenario
+`normalize-trimmed-lowercase` calls the function exported directly by
+`!!!TwichUI/normalize.lua` with one ASCII space on each side of `ALICE`,
+expects the first return `"alice"`, and requires rejection of `"ALICE"`.
+Scope permits additive assertions only in `tests/test_normalize.lua`.
+Both the 1440 px and 390 px intake and review screenshots were inspected.
+
+The owner independently confirmed proposal
+`1b47fb3c-7b00-55b5-b3a8-f326be4a38ac`, revision 1, after seeing the
+discrepancy. The browser saved only the scope decision
+`f66f99d3-ace2-43e5-87ba-0cfd7b78fe83`, and the worker applied it. The
+existing offline preparation job ran once. Syntax and focused tests passed
+for all four controls. The behavioral oracle passed the known-good addition
+and failed the original, vacuous and wrong-behavior controls. The
+wrong-behavior control accepted the injected `"ALICE"` outcome and the oracle
+failed it with `OBSERVATION_NOT_ASSERTED`.
+
+Certification held because the disposable transport audit hook denied the
+trusted harness's parent-side self-connection to its own ephemeral loopback
+marker. The four full-suite checks stopped before launching their sandboxed
+children. The preliminary confinement probe passed before this guard was
+installed, so it missed that interaction. The profile reported
+`original: Incomplete or unsafe check evidence` and registered zero offers.
+The scope decision and one failed preparation claim are retained. The
+existing worker does not replay that failed job. Fresh authorization is
+required for any further acceptance work. The first check in a new window
+should exercise the trusted suite with the transport guard already active,
+allowing the harness's owned marker while preserving the one-exchange limit.
+The retained response and reviewed bindings are available for an offline
+rehearsal under that authorization.
+
+SQLite integrity and foreign-key checks passed. Counts were zero for run
+budgets, activations, execution sessions, grants, execution requests and
+publication. The owned API and worker stopped, the cgroup was removed and
+9187 is free. The 9487 listener process and store identity matched at entry
+and exit. The retained run has 118 verified evidence hashes. Final counted
+headroom is **77,537,967 bytes (73.95 MiB)** under the unchanged 512 MiB limit.
+
+[Closeout](../artifacts/runs/adapter-9187-20261105T221451Z-AqoKpk/RESULT.json),
+[proposal](../artifacts/runs/adapter-9187-20261105T221451Z-AqoKpk/grounded-proposal.json),
+[attribution receipt](../artifacts/runs/adapter-9187-20261105T221451Z-AqoKpk/model-evidence/attribution.json),
+[certification hold](../artifacts/runs/adapter-9187-20261105T221451Z-AqoKpk/certification-hold.json)
+and [archive index](../artifacts/archive-index/adapter-e4d5a96-20261105-closed-browser.json).
+
+## Previous offline checkpoint and historical attempts
+
+The earlier offline repair and two real 9187 attempts below remain closed.
+Their examples with two leading spaces are historical. The latest owner
+request and verified wire packet use exactly one leading ASCII space.
 
 ## Exact evidence from the second attempt
 
