@@ -4615,3 +4615,74 @@ All prior output and failed logs remain. Exact bytes and the local source checkp
 are in this session's CHECKPOINT.json. No full core/browser/visual/verify acceptance
 is claimed. The next missing product connection is trusted preparation ingress plus
 an explicit post-review browser budget command using these same owners.
+
+## 2026-11-05 — trusted preparation and browser combined run approval
+
+Owner authorizes this bounded implementation from clean9f475eb. Start18:31:14UTC /
+11:31:14Denver; hard stop19:31:14UTC /12:31:14Denver,60minutes including tests and
+handoff, no automatic extension. Entry counted514,595,874bytes/headroom22,275,038bytes
+(21.24MiB); unchanged536,870,912byte cap. Source/history/runtime owners preserved.
+
+Storage first: selected only closed generated browser outputs mapped in the recent
+profile session's browser result records, excluding browser-dTJ9hw so inspected
+screenshots stay directly available. Same-user ownership and no open process cwd/fd
+references checked.17closed roots/1,143files/85,448,791bytes archived with full paths,
+content hashes and mode/time metadata, durable lookup receipt before removal, and
+verification before/after per-file pruning. Archive ID
+`browser-offer-20261105-profile-generated`; existing archive tool provides lookup /
+isolated restoration. No protected historical evidence, candidates, approvals, DBs,
+source recovery or active runtime roots altered. Post-archive counted429,148,454bytes,
+headroom107,722,458bytes; reserve64MiB for this package. Receipt in session ARCHIVE.json.
+
+Supported `wb prepare-offer` binds an existing current reviewed contract and already
+certified Runtime through the existing task_budget registration owner. Same-user
+owned nonshared-write paths/local SQLite/link checks; no HTTP preparation endpoint,
+request-defined commands, self-certification or permission expansion. Existing
+independent oracle/control preparation and certification remain trusted manual work.
+Browser task UI displays eligible certified scope/base/paths/checks/limits/destination
+and requires explicit combined scope/budget/draft-PR consent. Its first-budget-only
+pending receipt reuses proposal_decisions and execution-continuation validation;
+original scope review and decomposition remain unchanged. Existing planning worker
+applies it only after revalidation; existing task_sessions owns durable preparation.
+Missing/stale certification and unavailable execution are explained; no disabled
+installation is advertised as ready. Exact retries/reloads recover one decision;
+changed command payloads/new commands cannot reset the run budget.
+
+Initial focused checks caught temporary-root permission setup and callback signature
+errors, corrected in fixtures; first browser pass caught a test helper dropping its
+stdout. Failed logs/traces remain. Subsequent two actual browser cases passed at
+1440px and390px (the latter200%text), through ordinary request, scope review,
+independent certified offer via supported CLI, browser decision, durable session and
+fresh actual-Lua profile provision using an explicit controlled executor. One
+controller invocation/session per case;0grants/requests/model attempts/publications.
+Actual screenshot inspection found excessive phone nesting at enlarged text; approval
+is now adjacent to progress instead of inside its padded card, pending final captures.
+No real model, lease, probe, publication, installed-root or live-service work occurred.
+9487PID2032833still serves `.local/m5-review/static` and pre-session imported code;
+these source changes have not been installed/reloaded there.
+
+Final relevant backend selection262passed, including both profiles and the existing
+review/intake/scope/budget/session/owner/handoff dependencies. Final changed-path
+selection12passed; frontend23passed. `wb check` passed (contracts/TS/build/Ruff/schema
+drift). Final focused browser7/7passed: new reviewed-offer1440px/390px paths, existing
+site-session controls and supported-task controlled delivery. No full core, broad
+browser, visual or verify completion is claimed. Previous64/92/28missing historical
+browser coverage remains documented. No baselines were updated.
+
+Inspected final browser-URzS0A/reviewed-offers desktop/normal-phone/200%phone/viewport/
+missing-certification captures. Adjacent approval card avoids excessive nesting;
+paths and commands wrap, no page overflow, exact details are expandable and the
+approval checkbox is explicit. Current runtime-capability changes also invalidate
+open consent without silently altering its budget. Stored approvals retain history
+while current evidence/expiry/stop holds are explained. Retained handoff JSON pins
+recipe/base/paths/checks/limits/destination/policy and one controlled controller call.
+
+Source reviewed for first-budget-only semantics, HTTP access boundaries, canonical
+certification reconstruction, original scope/decomposition preservation, original
+wall-clock expiry, exact retry and no alternate execution owner. Supported operation
+and its remaining human/developer prerequisites are documented in README and the
+updated CONTINUATION.md. Final source checkpoint/evidence/preservation receipts are
+in artifacts/runs/browser-offers-20261105T183114Z. No install/restart/activation on9487,
+no migration, model/lease/probe, external write or remote push. Next exact product
+blocker remains independent task-specific preparation/certification and manual bug
+contract ingress, followed by a separately authorized real operational acceptance.

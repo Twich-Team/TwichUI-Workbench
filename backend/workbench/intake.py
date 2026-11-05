@@ -155,6 +155,10 @@ def current(connection, identity, proposal_id, binding):
     return row, proposal
 
 
+def receipt_view(row):
+    return {k: v for k, v in row.items() if k not in {'snapshot', 'intake_id'}}
+
+
 def decide(engine, identity, body):
     payload = body.model_dump(mode='json')
     if body.run_budget is None:

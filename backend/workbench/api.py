@@ -320,6 +320,22 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
         from workbench.task_budget import context
         return context(app.state.engine, identity, proposal_id)
 
+    @app.get('/api/intake/{identity}/tasks/{task_id}/run-approval')
+    def task_run_approval(identity: str, task_id: str):
+        from workbench.task_budget import run_context
+        return run_context(app.state.engine, identity, task_id)
+
+    from workbench.schemas import TaskRunApprovalInput
+
+    @app.post('/api/intake/{identity}/tasks/{task_id}/run-approval', response_model=ProposalReceipt, responses=errors)
+    def approve_task_run(identity: str, task_id: str, body: TaskRunApprovalInput):
+        from workbench.task_budget import approve_run
+        from workbench.task_execution import Waiting
+        try:
+            return approve_run(app.state.engine, identity, task_id, body)
+        except (Waiting, ValueError) as error:
+            raise HTTPException(409, str(error)) from None
+
     @app.get('/api/real-executions', response_model=RunPage)
     def real_execution_listing(page: int = Query(default=1, ge=1, le=1000),
                                group: Literal['all','active','attention','checked'] = 'all'):

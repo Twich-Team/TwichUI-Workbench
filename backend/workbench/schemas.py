@@ -342,6 +342,20 @@ class TaskBudget(StrictModel):
 
 
 
+class TaskRunApprovalInput(StrictModel):
+    command_id: UUID
+    scope_approval_id: UUID
+    binding: str = Field(pattern=r'^[a-f0-9]{64}$')
+    run_budget: TaskBudget
+    note: str = Field(default='', max_length=1600)
+
+
+class BrowserApprovalProvenance(StrictModel):
+    actor: Literal['owner']
+    purpose: Literal['browser-reviewed-offer-v1']
+    command_id: UUID
+
+
 class ProposalDecisionInput(StrictModel):
     run_budget: TaskBudget | None = Field(default=None, exclude_if=lambda value: value is None)
     scope_revision: Annotated[int | None, Field(ge=0)] = None
@@ -365,10 +379,11 @@ class OwnerInstructionProvenance(StrictModel):
 
 
 class ExecutionContinuationView(StrictModel):
+    browser_request: dict | None = Field(default=None, exclude_if=lambda value: value is None)
     authoring_mode: Literal['explicit-current-session'] | None = Field(default=None, exclude_if=lambda value: value is None)
     scope_approval_id: UUID
     scope_binding: str = Field(pattern=r'^[a-f0-9]{64}$')
-    owner_provenance: OwnerInstructionProvenance
+    owner_provenance: OwnerInstructionProvenance | BrowserApprovalProvenance
     continuation_id: str = Field(default='', max_length=200)
 
 

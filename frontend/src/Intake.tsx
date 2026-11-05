@@ -193,7 +193,7 @@ function RegressionContract({contract:c}: {contract:NonNullable<Proposal['task_c
     <p>{c.repository} · Base {c.resolved_base||'Unresolved'} ({c.base_ref} at preparation)</p>
     <p>Draft PR destination: {c.pr_repository} / {c.pr_base_branch}. Execution and publication are held.</p>
     <h4>Proposed writable paths</h4>{c.writable_paths.length?<ul>{c.writable_paths.map(p=><li key={p}>{p}</li>)}</ul>:<p>No paths selected.</p>}
-    <p>Additions to existing test files only. Shared harness, runner and production code are excluded.</p>
+    <p>{c.category==='lua-regression-tests'?'Additions to existing test files only. Shared harness, runner and production code are excluded.':'Bounded changes to the reviewed existing Lua files. Shared framework and unrelated behavior are excluded.'}</p>
     {c.review_feedback && <><h4>Recorded owner feedback</h4><p className="original-text">{c.review_feedback}</p></>}
     {c.scope_missing.length>0&&<><h4>Missing scope requirements</h4><ul>{c.scope_missing.map((m,i)=><li key={i}>{m}</li>)}</ul>{c.path_candidates.length>0&&<p>Possible existing files (not selected): {c.path_candidates.join(', ')}</p>}</>}
     <h4>Proposed verification · Not run</h4><ul>{c.verification_commands.map((check,i)=><li key={i}>{check.purpose}: <code>{check.argv.join(' ')}</code> (from {check.cwd})</li>)}</ul>

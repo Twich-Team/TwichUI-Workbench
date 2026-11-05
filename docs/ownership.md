@@ -1379,3 +1379,37 @@ for a scope-only approved certified offer, with the same continuation validation
 original scope, one-shot budget/grant and worker ownership. Registration, evidence
 and scope-only approval still issue no grant/session/attempt/publication permission.
 No new browser budget-after-review command is added in this package.
+
+## Trusted preparation and browser reviewed-offer approval — November 5, 2026
+
+`wb prepare-offer` is the supported same-user local preparation operation. It
+accepts only an existing owned SQLite store, current intake/task/scope-approval
+identity and independently certified Runtime root. It rejects links/shared-write
+paths and reconstructs canonical Runtime checks through `task_budget` before
+registering in the existing offer table. It cannot run commands, certify request
+input, change profiles or issue permission. There is no HTTP preparation endpoint;
+ordinary requests retain the exact host/origin/CSRF/body/schema access boundary.
+Oracle/control review and certification are distinct trusted operations.
+
+The task/review UI reads the current offer and reaffirms the exact applied scope,
+aggregate fixed budget and draft destination in one explicit browser decision.
+`task_budget.approve_run` writes a pending `proposal_decisions` receipt with the
+existing execution-continuation binding. Browser provenance is distinct from an
+owner instruction file; neither is generated-model authority. Public input cannot
+supply stored continuation/provenance or change checks/repository/permissions.
+The original applied scope and completed decomposition are never rewritten.
+The existing planning worker revalidates parent scope, offer/certificate, original
+expiry and runtime selection before applying, without another decomposition.
+The existing task-session owner alone queues/prepares the finite run. This path
+permits only a first budget; any saved budget prevents another command creating a
+fresh attempt. Exact command replay returns its original durable receipt.
+
+Execution unavailable is explicit; saving a budget without `activate_once` does
+not later turn into activation. Stale evidence/review/base, expiry, stopped sessions
+and lost capabilities retain their existing fail-closed meanings. Applied approval
+is historical fact, never a claim that current preparation or execution is ready.
+No new tables, migrations, queue, grant/session/worker/publication owner are added.
+`e2e_api` and `reviewed_offer_fixture` are confined to the owned disposable E2E
+server/store. They redirect runtime roots into that disposable directory and invoke
+only an explicit controlled preparation callback. Installed roots and 9487/8765
+are not changed by this test seam.

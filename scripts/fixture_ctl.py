@@ -61,6 +61,9 @@ def main():
         "action",
         choices=[
             "regression-planning",
+            "reviewed-offer-setup", "reviewed-offer-plan", "reviewed-offer-prepare",
+            "reviewed-offer-controller", "reviewed-offer-stale",
+            "reviewed-offer-scope", "reviewed-offer-certify",
             "task-pr-setup",
             "task-pr-step",
             "task-pr-finish",
@@ -104,6 +107,14 @@ def main():
             )
         return
     engine = engine_for(path)
+    if args.action.startswith('reviewed-offer-'):
+        from reviewed_offer_fixture import setup, advance
+        action = args.action.removeprefix('reviewed-offer-')
+        if action == 'setup':
+            setup(path)
+        else:
+            advance(engine, path, action)
+        return
     if args.action == "regression-planning":
         # Committed, deliberately inert test source owned by this disposable E2E
         # directory. No recipe, provider, service, oracle or execution registration.
@@ -207,13 +218,17 @@ def main():
         raise SystemExit(0 if result.returncode in {0, 91} else result.returncode)
     with write_transaction(engine) as connection:
         if args.action in {"reset", "empty"}:
+            # Test capability belongs only to this validated disposable store.
+            (path.parent / 'controlled-session-owner/.local/task-runtime.json').unlink(missing_ok=True)
             from workbench.db import (
                 real_publications,
+                task_sessions,
                 task_run_offers,
                 real_execution_requests,
                 real_execution_grants,
             )
 
+            connection.execute(task_sessions.delete())
             connection.execute(real_publications.delete())
             connection.execute(model_attempts.delete())
             connection.execute(real_execution_requests.delete())

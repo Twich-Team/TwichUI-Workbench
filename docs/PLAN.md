@@ -1,16 +1,18 @@
 # Implementation plan
 
-Current owner-authorized package (2026-11-05): **reviewed contract → certified
-evidence → executable offer bridge**, 60 minutes including tests and handoff,
-18:12:06–19:12:06 UTC (11:12:06–12:12:06 America/Denver), no automatic extension.
-Reuse contract/certification/offer/approval/runtime owners for both existing Lua
-profiles without task-specific registration code. Demonstrate distinct regression
-and bug-fix requests and reject stale review/base/mismatched/missing evidence.
-Offer creation grants no execution permission. No inference, leases, probes,
-service/data/migration changes, activation, publication, spending or remote push.
-Review preceding uncommitted profiles with this work and create a checked local
-source checkpoint. Entry counted evidence 510,792,480 bytes; reserve 16 MiB under
-the unchanged 512 MiB aggregate cap. No broad browser rerun absent relevant changes.
+Current owner-authorized package (2026-11-05): **trusted preparation operation and
+browser combined reviewed-scope/run/draft-PR approval**, continuing clean checkpoint
+`9f475eb`. Session starts18:31:14UTC (11:31:14America/Denver), hard stop19:31:14UTC
+(12:31:14Denver);60minutes including tests/handoff, no automatic extension. Reuse
+existing approval/offer/task-session/worker owners, with independently certified
+trusted evidence and first-budget-only browser consent. Controlled executor only;
+no inference, lease/probe, live service/data changes, migration, publication,
+spending, activation or remote push. A reviewed local source checkpoint is expressly
+authorized. Entry counted514,595,874bytes/headroom22,275,038bytes. Owner-authorized
+closed profile-session browser outputs may be archived losslessly after ownership /
+reference checks; unchanged512MiB cap. After verified archival reserve64MiB for
+focused tests, actual desktop/phone inspection and handoff. Preserve prior incomplete
+browser acceptance and all protected evidence/recovery/runtime roots.
 
 One plan, one changing status record: `PROGRESS.md`. Product authority is
 `PRODUCT_PRINCIPLES.md`, supplied by the owner on 2026-11-03. Proposed product

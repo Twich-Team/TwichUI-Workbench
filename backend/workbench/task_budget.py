@@ -318,37 +318,134 @@ def context(engine, intake_id, proposal_id):
         if proposal["intake_id"] != intake_id:
             raise HTTPException(404, "Proposal not found")
         selected = offer(c, proposal_id)
-        if not selected:
-            return dict(
-                available=False,
-                message="No tested execution recipe is registered for this exact proposal.",
-                offer=None,
-            )
-        spec = selected["snapshot"]["specification"]
-        contract = spec["contract"]
-        from workbench.task_sessions import capability
+        return offer_view(c, proposal, selected)
 
-        one_off = capability(engine) is not None
+
+def offer_view(c, proposal, selected):
+    """Display only the selected owner's snapshot; never combine two read revisions."""
+    from workbench import intake
+    if not selected:
         return dict(
-            runtime_ready=one_off,
-            available=True,
-            message="Approval can include one bounded task run and draft PR. Operational activation is separately disabled.",
-            offer=dict(
-                id=selected["id"],
-                fingerprint=selected["fingerprint"],
-                title=contract["title"],
-                repository=contract["repository"],
-                base_branch=spec["base_branch"],
-                base=contract["base"],
-                paths=contract["paths"],
-                budget=TaskBudget(
-                    offer_id=selected["id"],
-                    offer_fingerprint=selected["fingerprint"],
-                    publication="draft-pr",
-                    activate_once=one_off,
-                ).model_dump(mode="json"),
-            ),
+            available=False,
+            message="Preparation held: independently certified evidence is missing, stale, or no longer matches the current reviewed scope/base. A trusted operator must prepare and certify it.",
+            offer=None,
         )
+    spec = selected["snapshot"]["specification"]
+    contract = spec["contract"]
+    from workbench.task_sessions import capability
+
+    one_off = capability(c.engine) is not None
+    return dict(
+        runtime_ready=one_off,
+        available=True,
+        message=("One-off runtime is configured; the worker must still pass current preparation and operational gates." if one_off else "Execution unavailable on this installation. Approval can save the exact budget, but no run starts."),
+        offer=dict(
+            id=selected["id"],
+            fingerprint=selected["fingerprint"],
+            title=contract["title"],
+            repository=contract["repository"],
+            base_branch=spec["base_branch"],
+            base=contract["base"],
+            paths=contract["paths"],
+            checks=(selected['snapshot'].get('reviewed_task') and
+                    intake.proposal_view(c, proposal)['task_contract']['verification_commands']) or [],
+            limits=contract["limits"],
+            budget=TaskBudget(
+                offer_id=selected["id"],
+                offer_fingerprint=selected["fingerprint"],
+                publication="draft-pr",
+                activate_once=one_off,
+            ).model_dump(mode="json"),
+        ),
+    )
+
+
+def run_context(engine, intake_id, task_id):
+    """Current offer and exact scope for a first browser budget after scope review."""
+    from workbench import intake, task_execution
+
+    with engine.connect() as c:
+        c.exec_driver_sql('BEGIN')
+        task = intake.require(c, backlog_items, task_id)
+        if task['intake_id'] != intake_id or task['kind'] != 'task':
+            raise HTTPException(404, 'Task not found for this request')
+        selected = offer(c, task['proposal_id'])
+        saved = c.execute(select(proposal_decisions).where(
+            proposal_decisions.c.proposal_id == task['proposal_id'],
+            proposal_decisions.c.payload['run_budget']['offer_id'].as_string().is_not(None),
+        ).order_by(proposal_decisions.c.created_at.desc()).limit(1)).mappings().first()
+        receipt = intake.receipt_view(saved) if saved else None
+        if not selected or 'reviewed_task' not in selected['snapshot']:
+            return dict(available=False, message='Preparation held: certified evidence is missing, stale, or differs from the current review/base. Trusted preparation is required.', offer=None, receipt=receipt)
+        ref = selected['snapshot']['reviewed_task']['ref']
+        if ref['intake_id'] != intake_id or ref['task_id'] != task_id:
+            raise HTTPException(409, 'Offer is bound to another task')
+        linked = task_execution.snapshot(c, **ref)
+        binding = digest(dict(scope=linked, offer=selected['fingerprint']))
+        budget_message = None
+        if saved and saved['status'] == 'applied':
+            try:
+                permission(c, saved)
+            except (ValueError, HTTPException) as error:
+                detail = error.detail if isinstance(error, HTTPException) else str(error)
+                budget_message = 'Saved approval no longer authorizes execution: ' + str(detail)
+        proposal = intake.require(c, intake.proposals, task['proposal_id'])
+        result = offer_view(c, proposal, selected)
+    if budget_message:
+        result['message'] = budget_message
+    return dict(**result, scope_approval_id=ref['approval_id'], binding=binding,
+                scope=linked['proposal_review'], receipt=receipt)
+
+
+def approve_run(engine, intake_id, task_id, body):
+    """One explicit browser decision, through the existing durable approval owner.
+
+    Scope is reaffirmed without rewriting its applied decision/decomposition.
+    First budget only: consumed attempts never gain a fresh run through this UI.
+    """
+    from workbench import intake, task_execution
+
+    request = body.model_dump(mode='json')
+    with write_transaction(engine) as c:
+        old = c.execute(select(proposal_decisions).where(
+            proposal_decisions.c.id == str(body.command_id))).mappings().first()
+        if old:
+            if (old['intake_id'] != intake_id or
+                    old['payload'].get('execution_continuation', {}).get('browser_request') !=
+                    dict(task_id=task_id, **request)):
+                raise HTTPException(409, 'This command ID already belongs to another decision')
+            return intake.receipt_view(old)
+        ref = dict(intake_id=intake_id, task_id=task_id, approval_id=str(body.scope_approval_id))
+        linked = task_execution.snapshot(c, **ref)
+        parent = intake.require(c, proposal_decisions, ref['approval_id'])
+        if parent['payload'].get('execution_continuation') or parent['payload'].get('run_budget'):
+            raise HTTPException(409, 'A first scope-only approval is required; earlier budgets cannot be reset')
+        selected = validate_selection(c, parent['proposal_id'], body.run_budget)
+        if (selected['snapshot'].get('reviewed_task', {}).get('ref') != ref or
+                body.binding != digest(dict(scope=linked, offer=selected['fingerprint']))):
+            raise HTTPException(409, 'Scope, certification or offer changed. Review the current task again.')
+        for row in c.execute(select(proposal_decisions).where(
+                proposal_decisions.c.proposal_id == parent['proposal_id'])).mappings():
+            if row['payload'].get('run_budget'):
+                raise HTTPException(409, 'A task budget is already saved. Refresh its receipt; no new run was created.')
+        review = linked['proposal_review']
+        continuation = dict(scope_approval_id=parent['id'], scope_binding=parent['binding'],
+                            owner_provenance=dict(actor='owner', purpose='browser-reviewed-offer-v1',
+                                                  command_id=str(body.command_id)),
+                            browser_request=dict(task_id=task_id, **request))
+        budget = body.run_budget.model_dump(mode='json')
+        binding = digest(dict(execution_continuation=continuation, run_budget=budget))
+        row = dict(id=str(body.command_id), intake_id=intake_id, proposal_id=parent['proposal_id'],
+                   binding=binding, scope_revision=review['human_scope']['revision'],
+                   required_artifacts=review['required_artifacts'], scope_review_required=0,
+                   payload=dict(command_id=str(body.command_id), proposal_id=parent['proposal_id'],
+                                binding=binding, scope_revision=review['human_scope']['revision'],
+                                action='approve', note=body.note, run_budget=budget,
+                                execution_continuation=continuation), snapshot=review,
+                   status='pending', message='Exact scope and one task/draft-PR budget saved · Waiting for application.',
+                   created_at=execution.now(), finished_at=None)
+        c.execute(proposal_decisions.insert().values(**row))
+        return intake.receipt_view(row)
 
 
 def authorize_one(engine, runtime):

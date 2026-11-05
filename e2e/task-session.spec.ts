@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {execFileSync} from 'node:child_process';
 import {artifactPath} from './output';
-function fixture(action:string){execFileSync('.venv/bin/python',['scripts/fixture_ctl.py',action],{env:{...process.env,PYTHONPATH:'backend'},stdio:'pipe'});}
+function fixture(action:string){return execFileSync('.venv/bin/python',['scripts/fixture_ctl.py',action],{env:{...process.env,PYTHONPATH:'backend'},stdio:'pipe',encoding:'utf8'}).trim();}
 for(const width of [1440,390])test(`NON-MODEL site session preparation, stop and recovery at ${width}`,async({page})=>{
   fixture('reset');fixture('task-pr-setup');await page.setViewportSize({width,height:1000});
   await page.goto('/intake/new?kind=feature');await expect(page.getByText('Local Workbench · Task-specific permissions',{exact:true})).toBeVisible();await expect(page.getByText('Local examples or read-only observations · Nothing is published here',{exact:true})).toHaveCount(0);await page.getByLabel('Supported task').selectOption({label:'NON-MODEL supported task'});
@@ -24,4 +24,57 @@ for(const width of [1440,390])test(`NON-MODEL site session preparation, stop and
   await page.getByRole('heading',{name:'Waiting for safe recovery'}).scrollIntoViewIfNeeded();await page.screenshot({path:artifactPath(`site-session/recovery-${width}.png`)});
   stage='held';await page.reload();await expect(page.getByText('NON-MODEL readiness failed. No model started.',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Stop this run',exact:true})).toHaveCount(0);
   await page.getByText('NON-MODEL readiness failed. No model started.',{exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:artifactPath(`site-session/held-${width}.png`)});
+});
+
+// Actual browser/API + independently certified Lua; controlled controller only.
+for(const width of [1440,390])test(`reviewed certified offer browser approval reaches controlled preparation at ${width}`,async({page})=>{
+  fixture('reset');fixture('reviewed-offer-setup');await page.setViewportSize({width,height:1000});
+  await page.goto('/intake/new?kind=feature');
+  await page.getByLabel('Title Required').fill('CONTROLLED regression coverage for case normalization');
+  await page.getByLabel('Description Required').fill('In tests/test_normalize.lua cover trimming surrounding spaces and lowercasing names.');
+  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Expected test results').fill('Names with surrounding spaces and capitals normalize to lowercase.');
+  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByRole('button',{name:'Submit request',exact:true}).click();
+  await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
+  fixture('reviewed-offer-plan');await page.reload();
+  await page.getByRole('button',{name:'Approve proposal',exact:true}).click();
+  await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
+  fixture('reviewed-offer-scope');await page.reload();
+  await expect(page.getByRole('heading',{name:'Task preparation held'})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Certified task run approval'})).toHaveCount(0);
+  await page.getByRole('region',{name:'Task preparation hold'}).screenshot({path:artifactPath(`reviewed-offers/missing-certification-${width}.png`)});
+  fixture('reviewed-offer-certify');await page.reload();
+  const offer=page.getByRole('region',{name:'Certified task run approval'});
+  await expect(offer.getByRole('heading',{name:'Review one task and draft-PR budget'})).toBeVisible();
+  await expect(offer.getByText('Draft PR destination: Twich-Team/TwichUI / main. No automatic merge or deployment.',{exact:true})).toBeVisible();
+  await offer.getByText('Bound base, checks, acceptance and limits',{exact:true}).click();
+  await expect(offer.getByText('tests/test_normalize.lua',{exact:true})).toBeVisible();
+  await offer.getByText('Bound base, checks, acceptance and limits',{exact:true}).click();
+  if(width===390){await offer.screenshot({path:artifactPath('reviewed-offers/offer-phone-normal.png')});await page.evaluate(()=>document.documentElement.style.fontSize='200%');}
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();
+  await offer.screenshot({path:artifactPath(`reviewed-offers/offer-${width}.png`)});
+  await page.screenshot({path:artifactPath(`reviewed-offers/viewport-${width}.png`)});
+  await offer.getByRole('checkbox',{name:'I approve this exact scope, aggregate budget, and one draft PR to the destination above.'}).check();
+  const send=page.waitForResponse(r=>r.url().endsWith('/run-approval')&&r.request().method()==='POST');
+  await offer.getByRole('button',{name:'Approve scope, budget and one draft-PR run',exact:true}).click();
+  expect((await send).status()).toBe(200);
+  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  const result=JSON.parse(fixture('reviewed-offer-controller'));
+  expect(result.controller_calls).toBe(1);expect(result.preparations[0].certified).toBe(true);
+  expect(result.authority_counts).toMatchObject({real_execution_grants:0,real_execution_requests:0,model_attempts:0,real_publications:0,task_sessions:1});
+  const {writeFileSync}=await import('node:fs');writeFileSync(artifactPath(`reviewed-offers/handoff-${width}.json`),JSON.stringify(result,null,2));
+  await page.reload();await expect(page.getByRole('heading',{name:'Task budget applied'})).toBeVisible();
+  await expect(page.getByText('CONTROLLED executor prepared and certified the bound task. No model, lease or PR.',{exact:true})).toBeVisible();
+  const identity=page.url().split('/intake/')[1].split('?')[0];
+  const data=await page.request.get('/api/intake/'+identity).then(r=>r.json());
+  expect(data.decisions).toHaveLength(2);
+  const approval=data.decisions.find((d:{payload:{run_budget?:unknown}})=>d.payload.run_budget);
+  expect(approval.payload.execution_continuation.owner_provenance.purpose).toBe('browser-reviewed-offer-v1');
+  await page.getByRole('region',{name:'Saved task run approval'}).screenshot({path:artifactPath(`reviewed-offers/applied-${width}.png`)});
+  fixture('reviewed-offer-stale');await page.reload();
+  await expect(page.getByRole('heading',{name:'Task budget applied'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Approve scope, budget and one draft-PR run',exact:true})).toHaveCount(0);
 });

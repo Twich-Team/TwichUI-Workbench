@@ -56,6 +56,7 @@ def main():
         environment["WORKBENCH_PLANNER"] = "demo"
         environment["WORKBENCH_DB"] = str(Path(temporary.name) / "test.sqlite3")
     if args.e2e:
+        environment['WORKBENCH_RESEARCH_ROOT'] = str(Path(temporary.name) / 'reviewed-research/source')
         templates = Path(temporary.name) / "task-templates"
         templates.mkdir()
         environment["WORKBENCH_TASK_TEMPLATES_ROOT"] = str(templates)
@@ -81,7 +82,7 @@ def main():
             python,
             "-m",
             "uvicorn",
-            "workbench.api:app",
+            "scripts.e2e_api:app" if args.e2e else "workbench.api:app",
             "--host",
             "127.0.0.1",
             "--port",

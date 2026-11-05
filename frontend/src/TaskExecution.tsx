@@ -3,6 +3,7 @@ import {useQuery} from '@tanstack/react-query';
 import {Link} from 'react-router-dom';
 import {request,mutate} from './api';
 import {Button} from './components/ui/button';
+import {RunApproval} from './RunApproval';
 import {runStage} from './ExecutionRuns';
 import type {components} from './api.generated';
 
@@ -23,7 +24,7 @@ export function TaskExecution({intakeId,taskId}:{intakeId:string;taskId:string})
   if(query.isPending)return <section className="task-execution" aria-busy="true">Loading task progress…</section>;
   if(!query.data)return <section className="task-execution" role="alert">Task progress could not be loaded. <Button variant="secondary" onClick={()=>void query.refetch()}>Reload task progress</Button></section>;
   const data=query.data,latest=data.runs[0];
-  return <section className="task-execution" aria-label="Task implementation progress">
+  return <><RunApproval intakeId={intakeId} taskId={taskId}/><section className="task-execution" aria-label="Task implementation progress">
     <h3>{data.stage==='waiting'?'Waiting to implement':runStage[data.stage]||'Recorded state unavailable'}</h3><p role="status">{data.message}</p>
     {data.session?.can_stop&&<StopRun key={data.session.id} id={data.session.id} session onSaved={()=>void query.refetch()}/>}
     {data.stage==='recovering'&&<p className="soft-callout">Saved evidence is retained. Implementation will not run again; other execution stays on hold until cleanup is confirmed.</p>}
@@ -39,5 +40,5 @@ export function TaskExecution({intakeId,taskId}:{intakeId:string;taskId:string})
     {data.runs.length===10&&<p>Showing up to 10 recent runs. <Link to="/executions">All recorded runs</Link></p>}
     {data.runs.length>1&&<details><summary>Earlier task runs ({data.runs.length-1})</summary><ul>{data.runs.slice(1).map(run=><li key={run.id}><Link to={'/executions/'+encodeURIComponent(run.id)}>{runStage[run.status]||run.status}</Link><p>{run.message}</p></li>)}</ul></details>}
     <p className="small-text">Plan approval and execution permission are separate. Verification is not acceptance or publication.</p>
-  </section>;
+  </section></>;
 }

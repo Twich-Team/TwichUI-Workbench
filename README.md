@@ -293,3 +293,40 @@ backend schemas before `check`. Authored fixtures, artwork and screenshot refere
 baselines are source inputs and remain versioned. `tools/codex-workbench.toml` is
 the repository's invocation-only safety policy, not installed host configuration;
 it contains denied-path rules, with no authentication material.
+
+### Bind a reviewed contract to a certified offer
+
+Trusted local operators can now register an **already independently certified**
+preparation through the supported wrapper, without database edits or an owner
+instruction script:
+
+```sh
+WORKBENCH_RESEARCH_ROOT=/absolute/owned/research-checkout \
+python3 scripts/wb.py prepare-offer \
+  --database /absolute/existing/workbench.sqlite3 \
+  --intake-id INTAKE_UUID --task-id TASK_ID \
+  --scope-approval-id APPLIED_SCOPE_DECISION_UUID \
+  --evidence-root /absolute/owned/certified-runtime
+```
+
+The store and evidence root must exist, belong to the local operator, have no shared
+write access or symlink traversal, and match the current reviewed contract and clean
+research base. This command re-evaluates existing certification and records only an
+idempotent offer. It does not create/migrate a store, run commands, certify ordinary
+request input, grant execution or activate a service. There is no HTTP preparation
+endpoint. See [verification profiles](docs/verification-profiles.md) for the existing
+independent oracle/control requirements.
+
+In the request's **Resulting work** section, open the eligible task offer, inspect
+scope/base/paths/checks/limits and draft destination, and explicitly approve the
+combined scope/run/draft-PR budget. The decision is saved first and applied by the
+existing worker; retries/reloads retain the same receipt and cannot create another
+attempt. Missing or stale certification holds the offer. An installation without
+one-off execution capability explicitly says execution is unavailable; a saved
+non-activating budget never turns into activation later.
+
+Human/developer work is still required to independently review the behavior oracle,
+prepare meaningful controls, certify bounded task evidence and configure/authorize
+the operational runtime. Bug-fix typed-contract preparation remains manual. Profile
+selection, evidence certification, offer creation and human execution authorization
+are distinct operations. This source capability does not install itself on port9487.

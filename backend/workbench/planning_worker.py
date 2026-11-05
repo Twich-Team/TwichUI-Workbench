@@ -22,6 +22,35 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
             .order_by(proposal_decisions.c.created_at, proposal_decisions.c.id).limit(1)).mappings().first()
         if not receipt:
             return False
+        if receipt['payload'].get('execution_continuation'):
+            # Same command journal, original scope/decomposition and budget owner.
+            # Applying a post-review budget must never enqueue decomposition again.
+            from workbench import task_budget, task_execution
+            try:
+                intake.validate_approval(connection, {**receipt, 'status': 'applied'})
+                continuation = receipt['payload']['execution_continuation']
+                if continuation.get('owner_provenance', {}).get('purpose') != 'browser-reviewed-offer-v1':
+                    raise ValueError('Unsupported pending continuation')
+                request = continuation['browser_request']
+                ref = dict(intake_id=receipt['intake_id'], task_id=request['task_id'],
+                           approval_id=continuation['scope_approval_id'])
+                linked = task_execution.snapshot(connection, **ref)
+                from workbench.schemas import TaskBudget
+                selected = task_budget.validate_selection(connection, receipt['proposal_id'],
+                    TaskBudget.model_validate(receipt['payload']['run_budget']))
+                if (request['binding'] != task_budget.digest(dict(scope=linked, offer=selected['fingerprint']))
+                        or selected['snapshot'].get('reviewed_task', {}).get('ref') != ref):
+                    raise ValueError('Scope or certified offer changed before application')
+                # Original timestamp owns expiry, including time spent pending.
+                task_budget.permission(connection, {**receipt, 'status': 'applied', 'finished_at': now()})
+                status, message = 'applied', 'Exact scope and one task/draft-PR budget applied. Waiting for certified execution.'
+            except (HTTPException, ValueError, KeyError, TypeError):
+                status, message = 'stale', 'Scope, certification, runtime or budget changed/expired. This saved decision cannot start execution.'
+            connection.execute(proposal_decisions.update().where(proposal_decisions.c.id == receipt['id']).values(
+                status=status, message=message, finished_at=now()))
+            if fail_before_commit:
+                raise RuntimeError('Simulated application crash')
+            return True
         try:
             row, proposal = intake.current(connection, receipt['intake_id'], receipt['proposal_id'], receipt['binding'])
             if row['status'] != 'completed':
