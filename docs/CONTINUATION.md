@@ -1,6 +1,117 @@
-# 9187 transport guard fixed offline, acceptance still held — November 5, 2026
+# One-shot preparation recovery ready for review — November 5, 2026
 
-## Offline diagnosis and verification
+The offline engineering window added two local operator commands to the
+existing preparation and worker owners. The retained 9187 job remains failed
+with one original claim and zero recovery authorizations. Immutable read-only
+revalidation passed the new eligibility gate, and all 118 retained hashes
+matched. The applied scope and expectation approval
+`f66f99d3-ace2-43e5-87ba-0cfd7b78fe83` is still valid for proposal
+`1b47fb3c-7b00-55b5-b3a8-f326be4a38ac` revision 1 and clean fixture main
+`ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. The retained store is schema 0012
+at device/inode `64512:6719454`. Its preparation policy, saved model selection,
+committed evidence, reviewed scenario and canonical recipe matched.
+
+## Recovery contract and verification
+
+`wb recover-preparation` records one authorization for a named original job
+and exact review binding. `wb run-preparation-recovery` starts the existing
+worker in targeted mode under the zero-request guard. Both commands require
+same-user access to the explicit existing SQLite file and private, store-bound
+preparation policy. The worker opens the store and runs only that job's
+preparation path. The regular worker ignores these targeted authorizations,
+and the existing HTTP planning retry continues to refuse preparation jobs.
+
+An eligible job has exactly one terminal failed claim, a retained hold and
+recipe/oracle under its original private evidence directory, and current
+scope-only approval. Existing offers, completion or certification markers,
+missing retained inputs, or changed bindings block authorization or dispatch.
+The worker reconstructs the exact reviewed recipe and committed grounding
+evidence, checks the saved policy, and fences canonical offer registration to
+the authorized review, recipe, worker claim and fresh evidence directory.
+
+The journal stores a recovery ID, original job and attempt number, operator UID,
+request time, binding hashes, claim and outcome beside the original failure in
+the existing planning job. Concurrent requests serialize, and the committed
+claim precedes creation of the new directory. A request saved before the claim
+can be dispatched after restart. A dead claimed worker can reconcile only
+complete independently certified evidence. A partial attempt or a second
+failure holds, and dispatch of a terminal receipt starts no work. The original
+failure, claim and evidence are preserved. A successful recovery registers one
+offer for separate budget review and creates zero execution or publication
+authority.
+
+Ruff and 58 focused checks passed. Coverage includes concurrent requests and
+claims, stale review/base/expectation/recipe/policy, access checks, active and
+certified refusal, terminal second failure, and restart before and after offer
+registration. The guarded worker also completed a disposable fixture using
+actual delegated Runtime confinement. All four trusted suites passed with
+private loopback, and the untrusted checks retained kernel network denial.
+Every command cgroup was removed. The fixture produced one certified offer
+and zero budgets, sessions, grants, implementation requests or publications.
+The retained desktop and phone proposal screenshots were inspected. Current
+browser acceptance and the original-store recovery remain separate.
+
+Counted headroom was 77,519,935 bytes at entry and 77,514,297 bytes (73.92 MiB)
+at closeout under the 512 MiB cap.
+[Focused tests](../artifacts/runs/preparation-recovery.ytGSFs/tests.log),
+[disposable confinement receipt](../artifacts/runs/preparation-recovery.ytGSFs/disposable-confined.json),
+and [retained read-only audit](../artifacts/runs/preparation-recovery.ytGSFs/retained-read-only.json).
+
+## Proposed original-store action after separate authorization
+
+Use a separately authorized 60-minute window at this recovery checkpoint.
+Before writing, repeat the immutable audit, confirm the original store and
+fixture identities, and preserve the original SQLite bytes and closed hash
+manifest. Require at least 72 MiB of counted headroom after preservation and
+4 GiB free on the working filesystems. Verify the guarded confinement preflight
+inside an owned delegated cgroup with the same worker environment. Use the
+exact policy and fixture below. Stop on the first hold or timeout, or after
+one certified offer. Verify the original evidence, the single retained planning
+attempt, and zero run budgets, activations, sessions, grants, implementation
+requests or publications. A changed binding requires fresh review.
+
+Proposed commands for that future window, from the Workbench checkout.
+
+```bash
+set -eu
+cd /home/rich/TwichUI-Workbench
+run="$PWD/artifacts/runs/adapter-9187-20261105T221451Z-AqoKpk"
+job=1da6e56b-3a67-466b-93a1-880f7f902052
+binding=b002b6cf7d94c8dd9ab4a5d72be3742621ab01ee96b3653a0c2895589ed5a63e
+export WORKBENCH_RESEARCH_ROOT="$run/fixture"
+export WORKBENCH_PREPARATION_CONFIG="$run/preparation-policy.json"
+
+python3 scripts/wb.py recover-preparation --database "$run/workbench.sqlite3" \
+  --job-id "$job" --review-binding "$binding"
+
+scratch=$(mktemp -d /tmp/wb-9187-recovery.XXXXXX)
+unit="workbench-real-9187-recovery-${scratch##*.}"
+systemd-run --user --wait --pipe --collect --unit="$unit" \
+  --property=Delegate=yes --property=RuntimeMaxSec=45min \
+  --property=MemoryMax=8G --property=TasksMax=256 --working-directory="$PWD" \
+  /bin/bash -ceu '
+    run=$1
+    job=$2
+    scratch=$3
+    unit=$4
+    IFS= read -r current < /proc/self/cgroup
+    cg="/sys/fs/cgroup${current#*::}"
+    test "${cg##*/}" = "$unit.service"
+    test -O "$cg"
+    mkdir "$cg/main"
+    printf "%s\n" "$$" > "$cg/main/cgroup.procs"
+    printf "%s\n" "+memory +pids +cpu" > "$cg/cgroup.subtree_control"
+    export WORKBENCH_CG_ROOT="$cg" TMPDIR="$scratch"
+    export WORKBENCH_RESEARCH_ROOT="$run/fixture"
+    export WORKBENCH_PREPARATION_CONFIG="$run/preparation-policy.json"
+    exec python3 scripts/wb.py run-preparation-recovery \
+      --database "$run/workbench.sqlite3" --job-id "$job"
+  ' bash "$run" "$job" "$scratch" "$unit"
+```
+
+## Previous offline transport guard checkpoint (49f30e5)
+
+### Offline diagnosis and verification
 
 The 45-minute window authorized diagnosis and controlled regression only.
 Counted headroom was 73.95 MiB at entry and 73.93 MiB at handoff under the
@@ -47,63 +158,6 @@ implementation requests and publication records.
 [Runtime probe results](../artifacts/runs/offline-transport-9187-fDOEVT/runtime-results.json),
 [focused tests](../artifacts/runs/offline-transport-9187-fDOEVT/focused-pytest.log),
 and [read-only recovery audit](../artifacts/runs/offline-transport-9187-fDOEVT/recovery-audit.json).
-
-## Recovery assessment and authorization
-
-Proposal `1b47fb3c-7b00-55b5-b3a8-f326be4a38ac` revision 1 and applied
-scope decision `f66f99d3-ace2-43e5-87ba-0cfd7b78fe83` still pass the
-application's current review, expectation and decomposition checks.
-The fixture checkout is clean with HEAD and main at
-`ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. The rebuilt request packet,
-committed blob evidence, original response and discrepancy receipt match.
-The schema 0012 store has its original device/inode `64512:6719454`. Its
-owned preparation policy, saved model selection and canonical reviewed
-recipe match the claim and review. The guard checkpoint changes only the
-operator helper, its test and these records. The retained verification
-binding still matches.
-
-There is no supported durable resume for job
-`1da6e56b-3a67-466b-93a1-880f7f902052`. It is terminal `failed` after
-one claim. The worker dispatches queued jobs and reconciles interrupted
-running jobs only when complete evidence already exists. The behavioral
-preparation HTTP retry returns 409. `wb prepare-offer` registers complete,
-independently certified evidence only, and this job has neither a completion
-marker nor a controls certificate. Calling the private preparer directly
-would leave the existing durable claim outside the recovery transition.
-
-Fresh scope approval is unnecessary for this exact, still-current binding.
-The owner must separately authorize a recovery attempt. Any changed review,
-expectation, source evidence, base or bound preparation policy must hold for
-a freshly bound proposal and independent human review. A new store path or
-inode, changed output root, or a change to the policy's generation flag
-changes its digest. Use the external zero-request guard to enforce offline
-operation while preserving those reviewed bytes. A certified offer remains
-outstanding.
-
-1. **Authorize a 45-minute offline engineering window** from the guard
-   checkpoint to add and test one supported local durable recovery operation
-   for this specific failure class. Use disposable controlled fixtures.
-   Require an explicit operator command, current proposal and exact bound
-   store, repo, base, evidence and policy, a single durable claim that can
-   survive restart without automatic replay, and a fresh attempt directory
-   under the existing bound root. Preserve the failed claim and its evidence.
-   Save a clean local checkpoint for review. This window stops before any
-   attempt on the retained real proposal.
-2. **Once the recovery operation is reviewed, authorize one 60-minute offline
-   9187 preparation window** at that exact checkpoint for the proposal,
-   approval and failed job above. Verify the bindings, snapshot the original
-   DB bytes and preserve the closed manifest before the supported operation
-   writes its new journal records. Continue only on the original bound store
-   and fixture. Require 72 MiB counted headroom after preservation and 4 GiB
-   free on the working filesystems, under the existing 512 MiB cap. Install
-   the zero-request guard before actual confined preflight. Run the existing
-   preparation and canonical certification once, with a fresh attempt root.
-   Stop at one certified offer or the first hold or timeout. Require the
-   original single planning attempt and zero budgets, activations, execution
-   sessions, grants, implementation requests and publications at closeout.
-   Both windows exclude model transport, credentials, manual database edits,
-   migrations, implementation, publication, remote pushes and changes to
-   9487 or other live services.
 
 ## Previous 9187 normalization acceptance closeout
 

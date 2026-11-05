@@ -110,6 +110,36 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
     )
 
 
+def preparation_recovery(job_id, binding):
+    """The local recovery worker runs only the named job under the offline guard."""
+    import json
+    import sys
+    from subprocess import SubprocessError
+
+    from fastapi import HTTPException
+    from acceptance_transport_guard import install_offline_guard
+
+    try:
+        install_offline_guard()
+        os.umask(0o077)
+        os.environ.pop("WORKBENCH_LOCAL_KEY", None)
+        database = trusted_preparation.owned(os.environ["WORKBENCH_DB"])
+        if not database.is_file():
+            raise ValueError("An existing owned SQLite file is required")
+        engine = engine_for(database)
+        try:
+            receipt = (trusted_preparation.request_recovery(engine, job_id, binding)
+                       if binding is not None else trusted_preparation.process_recovery(engine, job_id))
+        finally:
+            engine.dispose()
+    except (ValueError, OSError, HTTPException, OperationalError, SubprocessError) as error:
+        detail = error.detail if isinstance(error, HTTPException) else str(error)
+        print("Preparation recovery held. " + detail[:1600], file=sys.stderr)
+        return 2
+    print(json.dumps(receipt, sort_keys=True))
+    return 2 if receipt["status"] == "failed" else 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--once", action="store_true")
@@ -123,7 +153,15 @@ def main():
         type=Path,
         help="Private one-session operational authorization; never recurring",
     )
+    parser.add_argument("--preparation-recovery", metavar="JOB_ID", help="Dispatch only one authorized preparation recovery")
+    parser.add_argument("--authorize-review-binding", metavar="SHA256", help="Record authorization without dispatch")
     args = parser.parse_args()
+    if args.preparation_recovery:
+        if args.once or args.test_crash or args.session_config or not os.environ.get("WORKBENCH_DB"):
+            parser.error("Targeted preparation recovery requires only the named job and explicit WORKBENCH_DB")
+        return preparation_recovery(args.preparation_recovery, args.authorize_review_binding)
+    if args.authorize_review_binding is not None:
+        parser.error("--authorize-review-binding requires --preparation-recovery")
     logging.basicConfig(level=logging.INFO)
     stopped = threading.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
@@ -151,4 +189,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

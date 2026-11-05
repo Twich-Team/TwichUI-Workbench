@@ -5118,3 +5118,24 @@ approval can be used only while the exact binding stays current.
 The real preparation was held throughout. Evidence and bounded next
 authorizations are recorded in `CONTINUATION.md` and
 `artifacts/runs/offline-transport-9187-fDOEVT/`.
+
+## 2026-11-05 — One-shot preparation recovery ready for review
+
+Continued clean checkpoint `49f30e5` under the 45-minute offline engineering
+authorization. The existing preparation job keeps its original terminal
+failure and stores one operator recovery authorization alongside it. The
+same-user CLI requires the full job ID, exact review binding and private
+store-bound policy. A second targeted CLI invokes the existing worker and
+Runtime under the corrected zero-request guard. Keeping dispatch targeted
+lets the operator leave unrelated jobs and provider routes outside the window.
+A dead claim can reconcile complete evidence through the existing certification
+owner. Partial work and a second failure remain visible as terminal holds.
+
+Ruff and 58 focused tests passed. One disposable fixture completed through
+the actual delegated worker with all four confined control suites, one
+certified offer, and zero budgets, execution or publication records. The
+retained 9187 store passed immutable eligibility revalidation and all 118
+hashes matched. Its approval is current for that exact binding. The original
+job still has one failed claim and zero recovery authorizations. The exact
+future commands and separate authorization boundary are in
+[CONTINUATION.md](CONTINUATION.md). Counted headroom is 73.92 MiB.

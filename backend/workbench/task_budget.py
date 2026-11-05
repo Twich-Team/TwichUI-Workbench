@@ -178,10 +178,11 @@ def _reviewed_spec(c, ref, runtime):
     return actual
 
 
-def register_reviewed_offer(engine, ref, runtime):
+def register_reviewed_offer(engine, ref, runtime, *, recovery_id=None):
     """Existing offer store; certification/registration never creates permission."""
     from workbench.task_execution import snapshot as task_snapshot
     from workbench.real_workspace import Runtime
+    from workbench.trusted_preparation import validate_recovery_offer
 
     runtime = Runtime(runtime.root)  # Reconstruct canonical checks; caller methods cannot certify.
     prepared = _certified_preparation(runtime)
@@ -194,6 +195,7 @@ def register_reviewed_offer(engine, ref, runtime):
                         certified_preparation=prepared)
         fingerprint = digest(snapshot)
         old = c.execute(select(offers).where(offers.c.fingerprint == fingerprint)).mappings().first()
+        validate_recovery_offer(c, linked, spec, runtime.root, recovery_id, old)
         if old:
             return dict(old)
         row = dict(id=str(uuid4()), proposal_id=snapshot['proposal_id'], fingerprint=fingerprint,
@@ -382,8 +384,6 @@ def preparation_hold(c, proposal):
             planning_jobs.c.revision == proposal['revision'], planning_jobs.c.kind == 'planning',
             planning_jobs.c.status == 'completed')).scalar() or {}
         outcome = payload.get('behavioral_preparation_outcome') or {}
-        if (outcome.get('status') == 'hold' and outcome.get('review_binding') == proposal_view(c, proposal)['binding']):
-            return 'Last behavioral preparation held: ' + outcome['message']
         # Current application preparation is journaled in the existing job owner.
         # Read it directly so a lost diagnostic projection cannot hide a failure.
         from workbench.db import proposal_decisions
@@ -393,6 +393,11 @@ def preparation_hold(c, proposal):
             planning_jobs.c.intake_id == proposal['intake_id'], planning_jobs.c.revision == proposal['revision'],
             planning_jobs.c.kind == 'behavioral_preparation', proposal_decisions.c.binding == binding,
             proposal_decisions.c.status == 'applied')).mappings().first()
+        recovery = preparation['payload'].get('recovery') if preparation else None
+        if recovery and recovery['authorization']['review_binding'] == binding:
+            return recovery['message']
+        if outcome.get('status') == 'hold' and outcome.get('review_binding') == binding:
+            return 'Last behavioral preparation held: ' + outcome['message']
         if preparation:
             if preparation['status'] == 'failed':
                 return 'Behavioral preparation held: ' + preparation['message']

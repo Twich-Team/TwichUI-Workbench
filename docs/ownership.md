@@ -1519,3 +1519,24 @@ creates no execution grant/request/session/publication permission. A resulting o
 still needs the existing explicit run/draft budget and current real runtime gates.
 Controlled adapters/Lua and simulated boundary telemetry demonstrate machinery only;
 installation, real confinement/model acceptance and unattended delivery remain open.
+
+## One-shot local preparation recovery — November 5, 2026
+
+`wb recover-preparation` requires same-user local access to the exact owned
+store and private preparation policy, the original preparation job ID, and
+the current review binding. It adds one recovery record to the existing
+`behavioral_preparation` row. The original failure, claim and evidence remain
+available. Eligibility requires one terminal hold with retained recipe/oracle,
+the same current applied scope and expectation review, and revalidated
+repository, base, evidence and policy. An existing offer or original completion
+or certification evidence blocks recovery.
+
+`wb run-preparation-recovery` uses the existing worker's targeted offline
+dispatch. It commits one PID/start/boot claim before creating the fresh
+evidence directory. Restart can claim a saved request once or reconcile a
+dead claim against complete independently certified evidence. Incomplete
+evidence, stale bindings and another failure are terminal holds. The canonical
+offer writer fences recovery by claim, evidence root and exact binding. The
+existing scope, preparation, certification and separate run-budget owners
+retain their authority. Recovery creates zero execution or publication
+permission.
