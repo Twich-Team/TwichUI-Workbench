@@ -1311,3 +1311,71 @@ exact suite inventory, scope/freezer checks and any required real-client evidenc
 No offer, runtime recipe, decision, grant, attempt, session or publication record is
 created by preparation. Separate human run/publication authority and runtime
 certification remain mandatory; the current recipe/check/grant owners are unchanged.
+
+## Reusable offline Lua verification profiles — November 5, 2026
+
+`verification_profiles.py` owns versioned class requirements and evaluation of
+independently prepared evidence. It owns no intake, review decision, offer, budget,
+grant, execution request, worker, publication or new database state. Selection is
+`not_run`, with execution authority false. Regression preparation persists that
+selection in the existing typed proposed contract; absent selections on historical
+contracts remain absent when serialized, preserving old review bindings.
+
+Trusted task preparation supplies an exact review-binding digest, behavior ID,
+independently reviewed oracle and (for test additions) positive/vacuous/wrong-behavior
+control patches. A digest is a binding input, not proof that human review happened.
+The ordinary contract-to-recipe/review association still needs implementation.
+Candidate-authored tests cannot supply their own oracle or control certification.
+Small bug fixes need original-base reproduction and a passing frozen candidate;
+no hand-written known-good implementation is universally required.
+
+The existing Runtime owns isolated copies, scope/additive/line/mode guards, bounded
+confined checks, expected suite inventory and create-only artifacts. Preparation
+records raw checks and frozen control bytes; certification independently evaluates
+that evidence and returns certified/rejected/hold without running code or granting
+permission. A control's ordinary checks and complete existing suite must pass;
+only the independent oracle's exact behavior verdict can establish reproduction
+or adequacy failure. Missing/ambiguous verdicts hold. Infrastructure errors never
+become a behavioral failure. Current baseline/sandbox/activation gates remain.
+
+The existing `record_controls`/`controls_valid`, candidate-feedback and freezer
+consume the selected profile. They bind recipe/review/behavior, base/source state,
+manifest, oracle, controls/checks, suite inventory and checker-source identities.
+Cached feedback revalidates certification. Frozen candidates additionally carry
+the control-certificate hash. Historical non-profile recipe/record meanings and
+existing grant/one-shot/publication authority remain unchanged. No migration or
+public certification/execution endpoint is introduced.
+
+## Reviewed contract → certified offer bridge — November 5, 2026
+
+The existing typed proposed contract may describe either Lua profile. Ordinary
+regression intake still owns deterministic preparation; a bug-fix contract currently
+requires trusted manual preparation through the same planning-job/proposal owner.
+There is no new intake category, contract table, task registry or public oracle /
+certification endpoint. Historical contract serialization remains compatible.
+
+`real_recipes.from_review` compiles data from `task_execution.snapshot`: actual
+current applied human scope review, original request and completed task mapping.
+It pins the configured clean local repository HEAD/main, committed file/framework
+identities, reviewed behavior/acceptance/paths/checks/resource limits and draft PR
+destination. Trusted preparation still selects and independently reviews the oracle,
+behavior ID, bounded reads and publication identity. It supplies no permissions.
+
+`task_budget.register_reviewed_offer` uses the existing offer table, reconstructs
+canonical Runtime checks, and independently re-evaluates the certified bundle and
+boundary marker. Its immutable snapshot also binds the reviewed task, preparation
+root, certificate and evidence hashes. Current selection and preparation-input
+resolution revalidate those owners and bytes. Missing/mismatched/stale/tampered
+inputs hold; the newest invalid preparation cannot revive an older binding.
+Prepared contracts cannot downgrade to legacy uncertified registration. Old fixed
+templates without a typed task contract retain their existing meaning.
+
+The existing `task_session.process_one` resolves certified preparation data before
+its historical supported-template fallback. Its existing `provision` path reruns
+the selected profile in a fresh isolated Runtime and retains the same independent
+boundary/static checks. No certificate is copied as authority into a new workspace.
+Existing owner-instruction `continue_supported` can record the first express budget
+for a scope-only approved certified offer, with the same continuation validation,
+original scope, one-shot budget/grant and worker ownership. Registration, evidence
+and scope-only approval still issue no grant/session/attempt/publication permission.
+No new browser budget-after-review command is added in this package.

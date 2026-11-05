@@ -73,7 +73,10 @@ def validate(spec):
     ):
         raise ValueError("Unknown task category")
     controls = spec.get("controls")
-    if (
+    if 'verification_profile' in spec:
+        from workbench.verification_profiles import validate_recipe
+        validate_recipe(spec)
+    elif (
         not isinstance(controls, dict)
         or controls.get("original") != "fail"
         or controls.get("known-good-oracle-control") != "pass"
@@ -108,4 +111,76 @@ def load(root):
         or hashlib.sha256(oracle.read_bytes()).hexdigest() != spec["oracle_sha256"]
     ):
         raise ValueError("Independent recipe oracle identity mismatch")
+    return spec
+
+
+def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity):
+    """Compile task data from the actual applied review, never a task registry.
+
+    Oracle semantics and bounded read selection still require trusted preparation.
+    This function supplies neither certification nor execution permission.
+    """
+    from workbench import real_execution, task_execution, regression_preparation
+    from workbench.verification_profiles import select, requirements
+    from workbench.real_workspace import PRELUDE
+
+    linked = task_execution.snapshot(connection, **ref)
+    reviewed = linked['proposal_review'].get('task_contract')
+    if not reviewed or linked['dependencies']:
+        raise ValueError('A current reviewed Lua contract without prerequisites is required')
+    profile = select(reviewed['category'])
+    policy = ('additions-only-existing-test-files' if reviewed['category'] == 'lua-regression-tests'
+              else 'bounded-existing-lua-files')
+    if (reviewed['scope_missing'] or reviewed['verification_profile'] != profile
+            or reviewed['change_policy'] != policy or not reviewed['acceptance']
+            or any(not a.strip() for a in reviewed['acceptance'])
+            or not reviewed['intended_behavior'].strip()):
+        raise ValueError('Incomplete or changed reviewed verification requirements')
+    root, base, _ = regression_preparation.repository()
+    if (base != reviewed['resolved_base']
+            or regression_preparation.git(root, 'rev-parse', '--verify', 'refs/heads/main').decode().strip() != base
+            or regression_preparation.git(root, 'status', '--porcelain=v1', '--ignored')):
+        raise ValueError('Current clean repository/main base differs from the reviewed contract')
+    limits = {**real_execution.LIMITS, 'overall_seconds': 5400, 'implementation_attempts': 1,
+              'publication_seconds': 900, 'fallback_attempts': 0}
+    if (reviewed['resource_limits'] != limits or reviewed['pr_repository'] != reviewed['repository']
+            or reviewed['pr_base_branch'] != 'main' or reviewed['pr_draft'] is not True):
+        raise ValueError('Reviewed resource limits or PR destination are unsupported')
+    if not isinstance(oracle, str) or not 1 <= len(oracle.encode()) <= 65536:
+        raise ValueError('Bounded independent task oracle required')
+    contract = real_execution.contract()
+    contract.update(task_id=linked['task']['id'], title=linked['task']['title'],
+                    repository=reviewed['repository'], source=str(root), base=base,
+                    paths=reviewed['writable_paths'])
+    spec = dict(contract=contract, read_paths=read_paths, focused_test=focused_test,
+                oracle_sha256=hashlib.sha256(oracle.encode()).hexdigest(),
+                verification_profile=profile['id'],
+                behavior=dict(id=behavior_id, review_binding=linked['proposal_review']['binding']),
+                controls=requirements(profile['id'])['controls'],
+                instruction=json.dumps(dict(request=linked['original'], behavior=reviewed['intended_behavior'],
+                    acceptance=reviewed['acceptance'], feedback=reviewed['review_feedback'],
+                    scope=linked['approved_scope'], exclusions=linked['proposal_review']['content']['exclusions']),
+                    ensure_ascii=True),
+                initial_reads=[dict(path=read_paths[i % len(read_paths)], start=1, end=120) for i in range(4)] if read_paths else [],
+                base_branch=reviewed['pr_base_branch'], draft=reviewed['pr_draft'], identity=identity,
+                category='Tests' if reviewed['category'] == 'lua-regression-tests' else 'Bug fix')
+    validate(spec)
+    # Every command advertised to the reviewer must be consumed by this runtime.
+    checks = [dict(argv=['luac5.1', '-p', p], cwd='.') for p in contract['paths']]
+    checks += [dict(argv=['lua5.1', '-e', PRELUDE, focused_test.split('/')[-1]], cwd='tests'),
+               dict(argv=['bash', 'tests/run.sh'], cwd='.')]
+    if [{k: c[k] for k in ('argv', 'cwd')} for c in reviewed['verification_commands']] != checks:
+        raise ValueError('Reviewed checks differ from the supported fixed runtime checks')
+    # Pin actual committed regular bytes, including the harness and selected scope.
+    evidence = {e['path']: e for e in reviewed['evidence']}
+    if (not set(['tests/run.sh', 'tests/harness.lua', *read_paths]).issubset(evidence)
+            or len(evidence) != len(reviewed['evidence']) or len(evidence) > 12):
+        raise ValueError('Reviewed file/framework evidence is incomplete')
+    for path in evidence:
+        entry = regression_preparation.git(root, 'ls-tree', base, '--', path).decode().strip().split()
+        if len(entry) != 4 or entry[0] not in ('100644', '100755') or entry[1] != 'blob' or entry[3] != path:
+            raise ValueError('Reviewed file must be an existing regular committed file')
+        raw = regression_preparation.blob(root, entry[2])
+        if evidence[path] != dict(path=path, git_blob=entry[2], sha256=hashlib.sha256(raw).hexdigest()):
+            raise ValueError('Reviewed repository evidence differs')
     return spec

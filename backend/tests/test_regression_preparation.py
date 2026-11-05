@@ -101,6 +101,9 @@ def test_two_distinct_requests_prepare_without_registration_or_authority(store, 
         assert proposal['basis'] == 'preparation'
         contract = proposal['task_contract']
         assert contract['repository'] == 'Twich-Team/TwichUI'
+        assert contract['verification_profile']['id'] == 'lua-regression-tests-v1'
+        assert contract['verification_profile']['status'] == 'not_run'
+        assert contract['verification_profile']['execution_authorized'] is False
         assert contract['resolved_base'] == research[1]
         assert contract['writable_paths'] == [path]
         assert contract['acceptance'] == saved['original']['regression_tests']['acceptance']

@@ -409,8 +409,16 @@ class PreparationEvidence(StrictModel):
     git_blob: str
 
 
+class VerificationProfileSelection(StrictModel):
+    id: Literal['lua-regression-tests-v1', 'lua-offline-bugfix-v1']
+    requirements: list[str]
+    status: Literal['not_run'] = 'not_run'
+    execution_authorized: Literal[False] = False
+
+
 class RegressionTaskContract(StrictModel):
-    category: Literal['lua-regression-tests'] = 'lua-regression-tests'
+    verification_profile: VerificationProfileSelection | None = Field(default=None, exclude_if=lambda value: value is None)
+    category: Literal['lua-regression-tests', 'lua-offline-bugfix'] = 'lua-regression-tests'
     version: Literal[1] = 1
     repository: Literal['Twich-Team/TwichUI'] = 'Twich-Team/TwichUI'
     base_ref: Literal['HEAD'] = 'HEAD'
@@ -420,7 +428,7 @@ class RegressionTaskContract(StrictModel):
     review_feedback: str
     writable_paths: list[str]
     path_candidates: list[str]
-    change_policy: Literal['additions-only-existing-test-files'] = 'additions-only-existing-test-files'
+    change_policy: Literal['additions-only-existing-test-files', 'bounded-existing-lua-files'] = 'additions-only-existing-test-files'
     verification_commands: list[ProposedCheck]
     independent_checks: list[str]
     evidence: list[PreparationEvidence]

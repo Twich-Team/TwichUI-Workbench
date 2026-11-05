@@ -2,7 +2,8 @@
 
 from datetime import datetime, timedelta, timezone
 import json
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
+import os
 from uuid import uuid4
 
 from fastapi import HTTPException
@@ -74,6 +75,8 @@ def register_offer(engine, proposal_id, specification):
     from workbench.real_recipes import validate
 
     spec = validate(json.loads(json.dumps(specification, allow_nan=False)))
+    if spec.get('verification_profile'):
+        raise ValueError('Profile recipes require a current reviewed contract and certified evidence')
     if (
         not valid_contract(spec.get("contract", {}))
         or spec.get("base_branch") != "main"
@@ -84,6 +87,8 @@ def register_offer(engine, proposal_id, specification):
     with write_transaction(engine) as c:
         proposal = intake.require(c, intake.proposals, proposal_id)
         review = intake.proposal_view(c, proposal)
+        if review.get('task_contract'):
+            raise ValueError('Reviewed Lua contracts require certified profile offers')
         if (
             review["approval_blockers"]
             or review["human_scope"]["visual_requirement"] != "nonvisual"
@@ -114,19 +119,121 @@ def offer(c, proposal_id):
         return None
     from workbench import intake
 
-    proposal = intake.require(c, intake.proposals, proposal_id)
-    review = intake.proposal_view(c, proposal)
+    try:
+        proposal = intake.require(c, intake.proposals, proposal_id)
+        review = intake.proposal_view(c, proposal)
+    except (ValueError, KeyError, TypeError, HTTPException):
+        return None
     for row in c.execute(
         select(offers)
         .where(offers.c.proposal_id == proposal_id)
-        .order_by(offers.c.created_at.desc())
+        .order_by(offers.c.created_at.desc(), offers.c.id.desc())
     ).mappings():
-        if (
-            row["fingerprint"] == digest(row["snapshot"])
-            and row["snapshot"]["review_binding"] == review["binding"]
-        ):
-            return dict(row)
+        try:
+            saved = row['snapshot']
+            if (
+                row["fingerprint"] == digest(saved)
+                and saved["review_binding"] == review["binding"]
+                and (not review.get('task_contract') or saved['specification'].get('verification_profile'))
+                and certified_offer_current(c, row)
+            ):
+                return dict(row)
+            if saved['specification'].get('verification_profile') or 'certified_preparation' in saved:
+                return None  # A changed newest preparation cannot resurrect an older binding.
+        except (KeyError, TypeError, ValueError):
+            return None
     return None
+
+
+def _certified_preparation(runtime):
+    """Re-evaluate immutable task evidence; a certificate marker alone cannot pass."""
+    from workbench.verification_profiles import certify
+    from workbench.real_workspace import sha
+
+    root = runtime.root
+    if any(p.is_symlink() for p in (root, *root.parents)) or root.stat().st_uid != os.getuid():
+        raise ValueError('Owned certified preparation root required')
+    for name, ceiling in [('profile-evidence.json', 8 << 20), ('controls-passed.json', 65536)]:
+        path = root / name
+        if path.is_symlink() or not path.is_file() or path.stat().st_size > ceiling:
+            raise ValueError('Missing or unbounded certified evidence')
+    bundle = json.loads((root / 'profile-evidence.json').read_text())
+    certificate = certify(runtime, bundle)
+    if certificate['status'] != 'certified' or not runtime.controls_valid():
+        raise ValueError('Missing, mismatched or stale task-specific certification')
+    return dict(root=str(root), certificate=certificate,
+                marker_sha256=sha((root / 'controls-passed.json').read_bytes()),
+                evidence_sha256=sha((root / 'profile-evidence.json').read_bytes()))
+
+
+def _reviewed_spec(c, ref, runtime):
+    from workbench.real_recipes import from_review
+
+    spec = runtime.recipe
+    actual = from_review(c, ref, oracle=runtime.oracle_source.read_text(),
+                        behavior_id=spec['behavior']['id'], read_paths=spec['read_paths'],
+                        focused_test=spec['focused_test'], identity=spec['identity'])
+    if actual != spec:
+        raise ValueError('Certified recipe differs from the current reviewed contract')
+    return actual
+
+
+def register_reviewed_offer(engine, ref, runtime):
+    """Existing offer store; certification/registration never creates permission."""
+    from workbench.task_execution import snapshot as task_snapshot
+    from workbench.real_workspace import Runtime
+
+    runtime = Runtime(runtime.root)  # Reconstruct canonical checks; caller methods cannot certify.
+    prepared = _certified_preparation(runtime)
+    with write_transaction(engine) as c:
+        spec = _reviewed_spec(c, ref, runtime)
+        linked = task_snapshot(c, **ref)
+        snapshot = dict(proposal_id=linked['task']['proposal_id'],
+                        review_binding=linked['proposal_review']['binding'], specification=spec,
+                        reviewed_task=dict(ref=ref, binding=digest(linked)),
+                        certified_preparation=prepared)
+        fingerprint = digest(snapshot)
+        old = c.execute(select(offers).where(offers.c.fingerprint == fingerprint)).mappings().first()
+        if old:
+            return dict(old)
+        row = dict(id=str(uuid4()), proposal_id=snapshot['proposal_id'], fingerprint=fingerprint,
+                   snapshot=snapshot, created_at=execution.now())
+        c.execute(offers.insert().values(**row))
+        return row
+
+
+def certified_offer_current(c, row):
+    """Fail closed for changed review, decomposition, source or certified files."""
+    try:
+        spec = row['snapshot']['specification']
+        if not spec.get('verification_profile'):
+            return 'certified_preparation' not in row['snapshot']
+        from workbench.real_workspace import Runtime
+        from workbench.task_execution import snapshot as task_snapshot
+
+        saved = row['snapshot']
+        selected = saved['reviewed_task']
+        linked = task_snapshot(c, **selected['ref'])
+        if digest(linked) != selected['binding'] or linked['task']['proposal_id'] != row['proposal_id']:
+            return False
+        runtime = Runtime(saved['certified_preparation']['root'])
+        return (_reviewed_spec(c, selected['ref'], runtime) == spec
+                and _certified_preparation(runtime) == saved['certified_preparation'])
+    except (OSError, ValueError, KeyError, TypeError, HTTPException):
+        return False
+
+
+def preparation_inputs(c, selected):
+    """Runtime preparation consumes offer data without a supported-task template."""
+    if (selected['fingerprint'] != digest(selected['snapshot'])
+            or offer(c, selected['proposal_id']) != selected):
+        raise ValueError('Certified offer inputs changed')
+    saved = selected['snapshot']
+    root = Path(saved['certified_preparation']['root'])
+    profile = saved['specification']['controls']
+    return dict(recipe=saved['specification'], oracle=(root / 'recipe-oracle.lua').read_text(),
+                control_patches={name: (root / 'profile-evidence' / name / 'input.patch').read_text()
+                                 for name in profile if name != 'original'})
 
 
 def validate_selection(c, proposal_id, budget):

@@ -1,13 +1,16 @@
 # Implementation plan
 
-Current owner-authorized package (2026-11-05): **development readiness only**,
-60 minutes, with no automatic extension. Reconcile the 512 MiB evidence policy,
-provide lossless local archive/lookup/restore, archive only the three explicitly
-named closed `m5-usage-demo-xqmers17` generated directories, and establish a reviewed
-recoverable local source baseline. Preserve architecture and all existing evidence.
-No inference, leases/probes, services/migrations, publication/remote push, spending,
-activation or next-stage implementation. Current outcome and exact continuation
-state are recorded at the end of PROGRESS.md and in docs/CONTINUATION.md.
+Current owner-authorized package (2026-11-05): **reviewed contract → certified
+evidence → executable offer bridge**, 60 minutes including tests and handoff,
+18:12:06–19:12:06 UTC (11:12:06–12:12:06 America/Denver), no automatic extension.
+Reuse contract/certification/offer/approval/runtime owners for both existing Lua
+profiles without task-specific registration code. Demonstrate distinct regression
+and bug-fix requests and reject stale review/base/mismatched/missing evidence.
+Offer creation grants no execution permission. No inference, leases, probes,
+service/data/migration changes, activation, publication, spending or remote push.
+Review preceding uncommitted profiles with this work and create a checked local
+source checkpoint. Entry counted evidence 510,792,480 bytes; reserve 16 MiB under
+the unchanged 512 MiB aggregate cap. No broad browser rerun absent relevant changes.
 
 One plan, one changing status record: `PROGRESS.md`. Product authority is
 `PRODUCT_PRINCIPLES.md`, supplied by the owner on 2026-11-03. Proposed product

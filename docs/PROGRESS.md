@@ -4471,3 +4471,147 @@ oracle/control certification plus a reviewed-contract binding into existing
 recipe/offer/budget/worker/runtime owners, demonstrated by distinct ordinary requests
 and positive/vacuous/wrong-behavior controls. That implementation stage was not
 started. M5/general task-to-PR/unattended-model acceptance remains incomplete.
+
+## 2026-11-05 — reusable verification profiles, bounded offline engineering
+
+Owner authorizes only reusable profiles for Lua regression additions and small
+reproducible offline Lua fixes, not the next contract-to-offer stage. Session starts
+17:49:07 UTC / 10:49:07 America/Denver; deadline18:49:07UTC /11:49:07Denver, no extension.
+Baseline17dec09 and clean entry source preserved; subsequent source is uncommitted.
+Entry counted416,745,040bytes, headroom120,125,872bytes; reserved96MiB (100,663,296bytes)
+under unchanged512MiB total. No archive/deletion/limit increase or live operation.
+
+Added verification_profiles.py with versioned class requirements, trusted task-data
+validation, reusable preparation and independent evidence certification. Ordinary
+regression preparation persists a typed not_run selection in its existing contract;
+old stored contracts omit the optional field when reserialized. Reverted redundant
+extra visible requirement prose after inspection; final rendered content is unchanged.
+Bug-fix profile is consumed through trusted recipe preparation, not a new public
+intake category. No backlog-specific template/recipe registration was added.
+
+Regression controls require original adequacy failure, a passing test addition,
+vacuous and wrong-behavior adequacy failures. Ordinary checks and full suite must
+pass for all controls; production/harness remain unchanged. Bug fixes require an
+independent approved-behavior reproducer failing on the original and passing on the
+candidate, with existing scope/regression/artifact gates. A hand-written known-good
+implementation is not a universal requirement. Existing green-baseline prerequisite
+is retained; red-base bugs need separate supported analysis, never a waived gate.
+
+Preparation uses existing isolated Runtime copies, confined fixed checker, scope/
+additive/line/mode checks, suite inventory and create-only snapshots/raw results.
+Certification is a separate evaluator: certified/rejected/hold, authority false.
+Missing/ambiguous verdicts hold; unrelated failures cannot masquerade as reproduction.
+The task-specific independently reviewed oracle emits a final behavior-ID verdict;
+the protocol is not automatic semantic proof. Review/behavior/oracle/control choices
+remain trusted task-specific work. No candidate-authored self-certification path.
+
+Existing record_controls/controls_valid, candidate feedback/cache, runtime identity
+and freezer consume profiles. Exact recipe/review/base/source/manifest/oracle/
+requirements/checks/input+canonical patches/frozen files/inventory/checker hashes bind
+certification. Cached passing feedback rechecks it, final manifests pin certificate
+hashes, and current static verification gates consume the prepared baseline suite.
+Legacy non-profile recipe gates/records remain unchanged. No new database/migration,
+queue, grant issuer, worker, retry, fallback or publication owner was introduced.
+
+Preserved seven actual-Lua controlled demonstrations accept valid regression/fix,
+reject vacuous/wrong-behavior/unrelated controls, and hold missing/ambiguous behavior.
+Existing candidate checker/freezer accept correct changes and reject a still-broken
+fix. Tests cover changed recipe/review/base/source/manifests/oracle/control/check/
+requirements/inventory, permission loss, selection-only holds and historical format
+compatibility. These use a clearly controlled runner/resource fixture, not real
+sandbox/model/client/unattended acceptance. Initial demonstrations remain historical
+with earlier helper hashes; final-demonstrations uses final checker bytes.
+
+Browser budget outcome: first8file batches allpassed (53unique tests); next long
+preparation batchpassed11more before the monitor stopped it for the session evidence
+threshold.64/92unique browser tests passed;28remain in BROWSER_COVERAGE.json. The file
+substring selection would also include the two regression tests after the21preparation
+tests, but interruption occurred before reaching those duplicates. All outputs,
+including temporary trace/video files, were retained. The monitor's8MiB handoff
+buffer kept total new evidence under96MiB and aggregate under512MiB. Disposable
+orphan server group2093874 was identity-checked and stopped after the runner exited;
+no live9487/8765service was signaled. Fullbrowser/verify/visual acceptance is not
+claimed. Actual desktop/390px/200%text captures from affected regression flow were
+inspected; final UI prose was restored to entry wording, no reference update.
+
+Evidence: artifacts/runs/verification-profiles-20261105T174907Z. Final check/test,
+preservation, source identity and exact bytes are recorded below and CHECKPOINT.json.
+Next acceptance is actual-current-reviewed-contract binding to certified bundles
+and existing offers, with two distinct ordinary regressions and a controlled bug
+contract; fresh scope/base/review/evidence invalidation and existing one-shot replay
+must hold. No execution/activation is inferred from certification. The bridge,
+minimum product/general task-to-PR and fullM5 remain incomplete. Finish this package
+with handoff only; do not automatically start the next stage.
+
+Final validation: `wb check` exit0 (generated contracts/TypeScript/build/Ruff/schema
+migration drift), final `wb test` exit0:850backend passed/1optional actual-readiness
+skip and18frontend passed.38new profile cases passed within that full core run.
+Earlier focused83-case integration and both controlled-demo runs passed; failed/
+interrupted browser records were not relabelled. No further broad check was started
+after the storage stop. All entry-time evidence/reference files are checked against
+ENTRY.json in preservation-final.json; exact counts/changed-source recovery and
+final storage are recorded in CHECKPOINT.json. Workbench HEAD remains17dec09.
+
+## 2026-11-05 — reviewed contracts, certified evidence and existing offers
+
+Owner authorizes the bridge and a clean local source checkpoint, including review
+of the preceding uncommitted profiles. Session 18:12:06–19:12:06 UTC
+(11:12:06–12:12:06 America/Denver), 60 minutes including checks/handoff, no extension.
+Entry counted510,792,480bytes; headroom26,078,432bytes. Reserve16MiB (16,777,216bytes)
+under the unchanged536,870,912byte cap. No archival/deletion was necessary or done.
+Previous evidence, recovery source and incomplete browser results remain preserved.
+
+Implemented recipe compilation from actual applied scope review and completed
+single-task decomposition through existing owners. Both existing profiles use the
+same code and typed contract shape; bug contracts still need trusted manual data
+preparation before review. There is no new task template/registry, database state,
+queue, execution owner or public certification/permission endpoint. The compiled
+recipe binds request/review/task, configured clean HEAD/local main, repository and
+committed paths/framework evidence, behavior/acceptance/checks/default resources,
+selected profile and draft destination. Exact unsupported check shapes hold.
+
+Existing task_budget owner stores the certified preparation association in its
+existing offer snapshot. Registration reconstructs canonical Runtime checks and
+re-evaluates certification; current selection/preparation rechecks all bindings.
+Stale review, changed base/origin, task/request/scope drift, checks/limits/destination/
+profile drift and missing/tampered evidence reject. Legacy registration cannot
+bypass certification for a prepared contract. Losing a newer preparation cannot
+resurrect an earlier binding. Reference bundles remain required evidence.
+
+Existing task_session.process_one now resolves offer oracle/controls without a
+supported_task template. Existing provision reruns the profile and retains its
+original boundary/static gates. Existing trusted owner-instruction continuation
+can explicitly record a first run budget after scope-only review. Scope approval,
+certification and offers create no grants, attempts, sessions or PRs. Browser
+follow-up budget submission and automatic issue-to-bug-contract preparation remain
+unimplemented. No inference, probes, leases, service/data changes, migrations,
+publication, spending, remote writes or activation occurred.
+
+Controlled actual-Lua regression-addition and reproducible-bug requests each create
+an idempotent current offer and pass the existing runtime provision/candidate-check
+path without supported_task registration. Separate controlled owner-budget decisions
+replay without granting/starting execution. Preserved demonstrations also reject
+stale review, changed base, mismatched check evidence and missing certification;
+all grant/request/model-attempt/session/publication counts remain zero. Telemetry
+and boundary in these demonstrations are controlled fixtures, not actual confinement
+or unattended-readiness proof. The initial focused run caught fixture revision /
+fail-closed handling issues; a broader dependency run caught early profile dispatch
+breaking durable failed-baseline retention. Corrected both and retained failed logs.
+
+Evidence root: artifacts/runs/reviewed-offers-20261105T181206Z. Final validation,
+source checkpoint and exact headroom are recorded in CHECKPOINT.json and the
+current CONTINUATION.md. No broad browser/visual rerun: no frontend behavior or
+rendered UI changed. The preceding64/92browser result and28remaining tests remain
+an explicit limitation, not a fresh full-suite claim.
+
+Final source checks passed. Final targeted core run:275backend tests,18frontend
+tests; no skips in the selected set. Six retained demonstrations pass, and final
+read-only revalidation accepts the regression/fix offers and rejects all four
+negative cases.6063historical entry files match their saved hashes, the prior
+SOURCE.json matches its recorded digest, and all12prior changed-source recovery
+copies match that manifest. An additional1005preceding-session files are indexed
+now for future reference; that current index is not an entry-time hash witness.
+All prior output and failed logs remain. Exact bytes and the local source checkpoint
+are in this session's CHECKPOINT.json. No full core/browser/visual/verify acceptance
+is claimed. The next missing product connection is trusted preparation ingress plus
+an explicit post-review browser budget command using these same owners.

@@ -73,6 +73,40 @@ def provision(runtime, template):
     They are applied only to disposable sibling clones, never the model workspace.
     """
     runtime.prepare()
+    if (getattr(runtime, 'recipe', None) or {}).get('verification_profile'):
+        from workbench.verification_profiles import prepare
+        prepare(runtime, template['control_patches'])
+    else:
+        _legacy_controls(runtime, template)
+    marker = runtime.root / "private-boundary-marker"
+    durable(marker, b"NON-MODEL boundary marker")
+    code = (
+        "import socket,resource;assert resource.getrlimit(resource.RLIMIT_FSIZE)[1]==16777216;"
+        "\ntry:socket.socket();raise AssertionError('network escape')\nexcept PermissionError:pass\n"
+        "try:open("
+        + repr(str(marker))
+        + ");raise AssertionError('read escape')\nexcept PermissionError:pass\nprint('bounded model command boundary verified')"
+    )
+    boundary = runtime.check(["python3", "-c", code], runtime.workspace)
+    if boundary["status"] != "pass" or boundary["rc"] != 0:
+        raise ValueError("Actual model command boundary failed")
+    proof = runtime.root / "static-boundary.json"
+    durable(proof, json.dumps(dict(checks={"model-command": boundary}), sort_keys=True).encode())
+    runtime.record_controls(proof)
+    durable(
+        runtime.root / "preparation-completed.json",
+        json.dumps(
+            dict(
+                base=runtime.base,
+                recipe_sha256=sha((runtime.root / "recipe.json").read_bytes()),
+                no_generation=True,
+            ),
+            sort_keys=True,
+        ).encode(),
+    )
+
+
+def _legacy_controls(runtime, template):
     baseline = runtime.check(
         ["bash", "tests/run.sh"], runtime.workspace, timeout=600, private_loopback=True
     )
@@ -148,32 +182,23 @@ def provision(runtime, template):
             sort_keys=True,
         ).encode(),
     )
-    marker = runtime.root / "private-boundary-marker"
-    durable(marker, b"NON-MODEL boundary marker")
-    code = (
-        "import socket,resource;assert resource.getrlimit(resource.RLIMIT_FSIZE)[1]==16777216;"
-        "\ntry:socket.socket();raise AssertionError('network escape')\nexcept PermissionError:pass\n"
-        "try:open("
-        + repr(str(marker))
-        + ");raise AssertionError('read escape')\nexcept PermissionError:pass\nprint('bounded model command boundary verified')"
-    )
-    boundary = runtime.check(["python3", "-c", code], runtime.workspace)
-    if boundary["status"] != "pass" or boundary["rc"] != 0:
-        raise ValueError("Actual model command boundary failed")
-    proof = runtime.root / "static-boundary.json"
-    durable(proof, json.dumps(dict(checks={"model-command": boundary}), sort_keys=True).encode())
-    runtime.record_controls(proof)
-    durable(
-        runtime.root / "preparation-completed.json",
-        json.dumps(
-            dict(
-                base=runtime.base,
-                recipe_sha256=sha((runtime.root / "recipe.json").read_bytes()),
-                no_generation=True,
-            ),
-            sort_keys=True,
-        ).encode(),
-    )
+
+
+def preparation_template(c, linked, budget, engine):
+    """Resolve the existing offer owner before loading any per-task template."""
+    offered = budget['offer']
+    if offered['snapshot'].get('certified_preparation'):
+        selected = offered['snapshot']['reviewed_task']['ref']
+        continuation = linked['approval']['payload'].get('execution_continuation', {})
+        scope_approval = continuation.get('scope_approval_id', linked['approval']['id'])
+        if (selected['intake_id'] != linked['intake_id']
+                or selected['task_id'] != linked['task']['id']
+                or selected['approval_id'] != scope_approval):
+            raise ValueError('Certified offer belongs to another reviewed task')
+        return task_budget.preparation_inputs(c, offered)
+    from workbench.supported_tasks import load
+    template = load(linked['original']['supported_task'], engine)
+    return {**template, 'recipe': offered['snapshot']['specification']}
 
 
 def close_selected(engine, decision_id):
@@ -307,10 +332,8 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
             raise ValueError("Append-only one-cycle72MiB package allocation required")
         package.require_time(3000)
         package.enforce_storage(root)
-        from workbench.supported_tasks import load
-
-        template = load(linked["original"]["supported_task"], engine)
-        template = {**template, "recipe": budget["offer"]["snapshot"]["specification"]}
+        with engine.connect() as c:
+            template = preparation_template(c, linked, budget, engine)
         oracle = template.get("oracle")
         if (
             not isinstance(oracle, str)

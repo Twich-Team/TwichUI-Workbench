@@ -412,6 +412,12 @@ def continue_supported(
             old["payload"].get("execution_continuation", {}).get("scope_approval_id", old["id"])
         )
         previous = task_budget.permission(c, old, require_current=False)
+        certified_offer = task_budget.offer(c, old['proposal_id']) if recipe.get('verification_profile') else None
+        first_certified_budget = (
+            previous is None and certified_offer is not None and not session_authoring
+            and certified_offer['snapshot']['specification'] == recipe
+            and certified_offer['snapshot']['reviewed_task']['ref'] == ref
+        )
         compared_contract = dict(recipe["contract"])
         if session_authoring:
             from workbench.session_authorship import contract_allowed
@@ -420,7 +426,7 @@ def continue_supported(
                 raise ValueError("Explicit current-session authorship contract required")
             compared_contract.pop("authoring")
             compared_contract.update(provider="local", model="pilot-qwen38-27b")
-        if (
+        if not first_certified_budget and (
             not previous
             or {
                 **compared_contract,
@@ -459,7 +465,7 @@ def continue_supported(
                 raise ValueError("Conflicting continuation identity")
             return {**ref, "approval_id": identity}
         proposal_id = old["proposal_id"]
-    offer = task_budget.register_offer(engine, proposal_id, recipe)
+    offer = certified_offer if certified_offer else task_budget.register_offer(engine, proposal_id, recipe)
     budget = TaskBudget(
         offer_id=offer["id"], offer_fingerprint=offer["fingerprint"], publication="draft-pr"
     )
@@ -467,6 +473,8 @@ def continue_supported(
         # No race with a scope change or newly issued grant may grant stale permission.
         if task_execution.snapshot(c, **ref) != linked:
             raise ValueError("Scope changed during continuation")
+        if certified_offer and task_budget.offer(c, proposal_id) != certified_offer:
+            raise ValueError('Certified offer changed during explicit budget authorization')
         at = now()
         review = linked["proposal_review"]
         continuation = dict(

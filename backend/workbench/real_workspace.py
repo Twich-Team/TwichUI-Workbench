@@ -150,6 +150,10 @@ class Runtime:
                        ['real_execution.py','real_workspace.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py']})
         if self.recipe:
             value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes()) for name in ['real_recipes.py','task_budget.py','verification_process.py']})
+            if self.recipe.get('verification_profile'):
+                value['helper_sha256']['verification_profiles.py'] = sha(Path(__file__).with_name('verification_profiles.py').read_bytes())
+                certificate = self.root/'controls-passed.json'
+                value['profile_certificate_sha256'] = sha(certificate.read_bytes()) if certificate.is_file() else None
         return value
 
     def recovery_identity(self):
@@ -266,6 +270,22 @@ class Runtime:
         return gates
 
     def record_controls(self, boundary):
+        if self.recipe and self.recipe.get('verification_profile'):
+            from workbench.verification_profiles import certify
+            bundle = json.loads((self.root/'profile-evidence.json').read_text())
+            certificate = certify(self, bundle)
+            if certificate['status'] != 'certified':
+                raise ValueError('Profile verification '+certificate['status']+': '+certificate['reason'])
+            proof = json.loads(Path(boundary).read_text())
+            if not proof.get('checks') or any(
+                    r['usage'].get('leaked_after_kill') or r['usage'].get('cgroup_removed') is not True
+                    for r in proof['checks'].values()):
+                raise ValueError('Boundary/cleanup evidence incomplete')
+            durable(self.root/'boundary-proof.json', Path(boundary).read_bytes())
+            durable(self.root/'controls-passed.json', json.dumps(dict(
+                profile_certificate=certificate, boundary_sha256=sha(Path(boundary).read_bytes())),
+                sort_keys=True).encode())
+            return
         controls_path = self.root/'oracle-controls.json'
         controls = json.loads(controls_path.read_text())
         results = controls['results']
@@ -290,6 +310,11 @@ class Runtime:
         # A marker alone is never sufficient. Bind the trusted oracle and all control results.
         try:
             record = json.loads((self.root/'controls-passed.json').read_text())
+            if self.recipe and self.recipe.get('verification_profile'):
+                from workbench.verification_profiles import certify
+                certificate = certify(self, json.loads((self.root/'profile-evidence.json').read_text()))
+                return (certificate['status'] == 'certified' and certificate == record['profile_certificate']
+                        and record['boundary_sha256'] == sha((self.root/'boundary-proof.json').read_bytes()))
             return (record['oracle_sha256'] == sha(self.oracle_source.read_bytes()) and
                     record['base'] == self.base and
                     record['controls_sha256'] == sha((self.root/'oracle-controls.json').read_bytes()) and
@@ -359,6 +384,10 @@ class Runtime:
     def scope(self):
         if git(self.workspace, 'rev-parse', 'HEAD').strip() != self.base:
             raise ValueError('Candidate HEAD moved')
+        if self.recipe and self.recipe.get('verification_profile'):
+            statuses = git(self.workspace, 'status', '--porcelain=v1', '--ignored', '--untracked-files=all').splitlines()
+            if any(line[:3] != ' M ' or line[3:] not in self.paths for line in statuses):
+                raise ValueError('Profile requires existing regular files only; no staged/untracked/ignored changes')
         initial = json.loads(self.initial.read_text())
         current = tree(self.workspace)
         changed = sorted(set(initial) | set(current))
@@ -414,6 +443,9 @@ class Runtime:
         """Trusted checks, immutable intermediate evidence; ordinary failures may be repaired."""
         if not permitted() or self.context_sha() != self._context_sha:
             raise ToolDenied('candidate_denied', 'Candidate permission/context changed')
+        profiled = self.recipe and self.recipe.get('verification_profile')
+        if profiled and not self.controls_valid():
+            raise ToolDenied('profile_hold', 'Missing or stale independent profile certification')
         current = tree(self.workspace)
         if current == json.loads(self.initial.read_text()):
             return dict(status='fail', reason='No implementation changes yet; implement before finishing.')
@@ -426,6 +458,8 @@ class Runtime:
         manifest = dict(request_id=self._request_id, fence=self._fence, base=self.base,
                         tree=current, patch_sha256=sha(patch.encode()),
                         oracle_sha256=sha(self.oracle_source.read_bytes()), completion_context_sha256=self._context_sha)
+        if profiled:
+            manifest['profile_certificate_sha256'] = sha((self.root/'controls-passed.json').read_bytes())
         durable(folder/'manifest.json', json.dumps(manifest, sort_keys=True).encode())
         durable(folder/'changes.patch', patch.encode())
         for path in changed:
@@ -443,12 +477,22 @@ class Runtime:
             checks.append(result)
             durable(folder/f'check-{len(checks):02}.json', json.dumps(result, sort_keys=True).encode())
             require_safe_check(result)
+            if profiled and len(checks) == len(expected)-1:
+                from workbench.verification_profiles import behavioral_outcome
+                verdict = behavioral_outcome(result, self.recipe['behavior']['id'])
+                if verdict in ('hold', 'rejected'):
+                    raise ToolDenied('profile_'+verdict, 'Missing, ambiguous or unrelated behavioral evidence')
             if result['status'] != 'pass' or result['rc'] != 0:
                 break
         if tree(self.workspace) != current or self.context_sha() != self._context_sha or not permitted():
             raise ToolDenied('candidate_changed', 'Candidate/context/permission changed during checks')
         passed = len(checks) == len(expected) and all(c['status']=='pass' and c['rc']==0 for c in checks)
         passed = passed and suite_inventory(checks[-1], self.expected_suite())
+        if self.recipe and self.recipe.get('verification_profile') and passed:
+            from workbench.verification_profiles import evaluate_snapshot
+            status, reason = evaluate_snapshot(self, dict(checks=checks), 'pass')
+            if status != 'certified' or not self.controls_valid():
+                raise ToolDenied('profile_'+status, 'Candidate verification held: '+reason)
         if len(checks)==len(expected) and all(c['rc']==0 for c in checks) and not passed:
             raise ToolDenied('check_infrastructure', 'Complete-suite inventory mismatch')
         feedback = dict(status='pass' if passed else 'fail', check_round=index,
@@ -540,6 +584,8 @@ class Runtime:
         if hasattr(self, 'phase'):
             self.phase()
         changed, patch = self.scope()
+        if self.recipe and self.recipe.get('verification_profile') and not self.controls_valid():
+            raise ToolDenied('profile_stale', 'Profile certification changed before freezing')
         files = []
         for path in changed:
             base = subprocess.check_output(['git', '-C', str(self.workspace), 'show', self.base+':'+path])
@@ -550,6 +596,8 @@ class Runtime:
         if linked:
             manifest['workflow_task_binding'] = job.digest(linked)
             manifest['workflow_task'] = dict(intake_id=linked['intake_id'],task_id=linked['task']['id'])
+        if self.recipe and self.recipe.get('verification_profile'):
+            manifest['profile_certificate_sha256'] = sha((self.root/'controls-passed.json').read_bytes())
         if self._context_sha:
             manifest['completion_context_sha256'] = self._context_sha
         authorship = getattr(self, 'authoring_provenance', None)
@@ -566,6 +614,10 @@ class Runtime:
         if reviewed['tree'] != manifest['tree'] or reviewed['feedback']['status'] != 'pass':
             raise ToolDenied('candidate_changed', 'Final candidate differs from passing independent snapshot')
         checks = reviewed['checks']
+        if self.recipe and self.recipe.get('verification_profile'):
+            from workbench.verification_profiles import evaluate_snapshot
+            if evaluate_snapshot(self, dict(checks=checks), 'pass')[0] != 'certified':
+                raise ToolDenied('profile_hold', 'Final frozen behavioral evidence differs')
         passed = all(c['status'] == 'pass' and c['rc'] == 0 for c in checks)
         passed = passed and suite_inventory(checks[-1], self.expected_suite())
         passed = (passed and permitted() and tree(self.workspace) == manifest['tree'] and
@@ -611,7 +663,9 @@ class Runtime:
             manifest = (frozen/'manifest.json').read_bytes()
             hashes_valid = all(sha((frozen/'files'/f['path']).read_bytes()) == result['manifest']['tree'][f['path']]
                                for f in result['files'])
-            return (hashes_valid and sha(manifest) == candidate and json.loads(manifest) == result['manifest'] and
+            profile_valid = ('profile_certificate_sha256' not in result['manifest'] or
+                             result['manifest']['profile_certificate_sha256'] == sha((self.root/'controls-passed.json').read_bytes()))
+            return (hashes_valid and profile_valid and sha(manifest) == candidate and json.loads(manifest) == result['manifest'] and
                     sha((frozen/'changes.patch').read_bytes()) == result['manifest']['patch_sha256'] and
                     json.loads((frozen/'result.json').read_text()) == result)
         except (OSError, ValueError, KeyError):

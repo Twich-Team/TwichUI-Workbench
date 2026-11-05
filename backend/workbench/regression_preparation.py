@@ -21,6 +21,7 @@ from workbench.db import intakes, planning_jobs, proposals, write_transaction
 from workbench.schemas import ProposalContent, RegressionTaskContract
 from workbench.real_execution import LIMITS
 from workbench.real_workspace import PRELUDE
+from workbench.verification_profiles import select as select_profile
 
 MODEL = 'deterministic-lua-test-preparation-v1'
 TEST_PATH = re.compile(r'tests/test_[A-Za-z0-9_-]+\.lua')
@@ -114,6 +115,7 @@ def blob(root, oid):
 
 
 def prepare(original, feedback=''):
+    profile = select_profile('lua-regression-tests')
     request = original['regression_tests']
     missing, evidence, commands, paths, candidates = [], [], [], [], []
     base = None
@@ -161,6 +163,7 @@ def prepare(original, feedback=''):
                 'Revalidate the resolved base against destination main before execution and delivery. Local Git inspection does not establish remote freshness.',
                 'A separate current human scope/run-budget decision and certified bounded runtime are required. Preparation creates no run offer or permission.']
     return RegressionTaskContract(
+        verification_profile=profile,
         resolved_base=base, intended_behavior=original['description'], acceptance=acceptance, review_feedback=feedback,
         writable_paths=paths, path_candidates=candidates, verification_commands=commands,
         independent_checks=[ORACLE_REQUIREMENT,

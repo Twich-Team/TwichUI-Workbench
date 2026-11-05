@@ -1,76 +1,106 @@
-# Development readiness checkpoint — November 5, 2026
+# Reviewed-contract offer checkpoint — November 5, 2026
 
-The inspection diagnosis remains the baseline: preserve the modular monolith,
-durable worker, current design and owners; complete the missing integration.
-This session implements storage/source readiness only. It does not start the
-verification-profile or contract-to-execution stage or authorize activation.
+Preserve the audited modular monolith, durable worker, current design and ownership.
+This local source checkpoint includes the preceding uncommitted reusable Lua profiles
+and this session's bridge; development-readiness baseline remains
+`17dec095f14a40b29d4e66ac04f83631102555f0`. Nothing was reset. The checkpoint commit,
+source hashes/recovery copies and final evidence bytes are recorded in
+`artifacts/runs/reviewed-offers-20261105T181206Z/CHECKPOINT.json` and `SOURCE.json`.
+No remote push or publication is authorized or performed.
 
-Exact final commit/tree, source-file hashes, generated-contract hashes, bundle
-location/hash and recovery result are in
-`artifacts/runs/development-readiness-20261105/CHECKPOINT.json`. That record is
-written after the baseline commit; it avoids a self-referencing commit hash here.
-The source baseline contains this checkpoint and the latest PROGRESS entry.
-Runtime/private state, evidence, dependencies and generated contracts stay outside
-Git. Regenerate contracts using `npm run contracts`; do not edit them by hand.
+Session authorization: 18:12:06–19:12:06 UTC (11:12:06–12:12:06 America/Denver),
+60 minutes including tests/handoff, no automatic extension. Entry counted evidence
+510,792,480 bytes; headroom26,078,432 bytes. Reserved16MiB (16,777,216bytes) under
+the unchanged536,870,912byte aggregate cap. Lightweight checks and six retained
+controlled demonstrations fit without archival or deletion. After source recovery capture, counted evidence was514,592,493bytes, leaving
+22,278,419bytes (21.25MiB). Final receipt/index overhead is included exactly in
+CHECKPOINT.json; remeasure before work.
+The previous source recovery files and historical evidence remain intact.
 
-## What is ready
+## Implemented connection
 
-- Shared evidence policy/diagnostics now match the implemented 512 MiB limit.
-- Archive `readiness-20261105-m5-generated` preserves all 425 files / 87,351,027
-  bytes from ONLY the three explicitly authorized closed generated directories.
-  The external manifest preserves original paths/hashes/metadata; the local receipt
-  is `artifacts/archive-index/readiness-20261105-m5-generated.json`. Use the README
-  commands to verify, look up or restore. The older Lua-preparation archive retains
-  its own original ARCHIVE.json mapping; historical losses remain documented.
-- All 6,439 entry-time evidence/reference hashes match, including the 425 archived
-  files. No failure, candidate, approval, database or baseline was selected for
-  deletion. Only verified originals in the three named directories were removed.
-- Interrupted copy/removal, actual killed disposable processes, repeat execution,
-  integrity failures, unsafe paths, restore conflicts and exact round trips passed.
-  Core tests/checks passed; this storage-only session does not claim fresh browser,
-  visual, real-client, real-model or unattended acceptance.
+A current applied nonvisual Lua contract plus valid certified task-specific evidence
+can now produce an executable offer without developer-written task registration.
+Both existing profiles use `real_recipes.from_review` and
+`task_budget.register_reviewed_offer`, through the existing review/task/certification/
+offer owners. There is no new state store, task registry, migration or public
+certification endpoint. This is a bounded backend capability, not a claim that
+arbitrary browser requests automatically produce verified PRs.
 
-Counted headroom after archiving is about 114.6 MiB, measured precisely in the final
-checkpoint. A 96 MiB engineering/evidence reservation fits with about 18.6 MiB
-remaining. A 128 MiB reservation does **not** fit. Recheck status and declare the
-next stage's actual bounded reservation before beginning; do not raise the cap,
-erase evidence, or silently omit checks. All failure outputs must fit that budget.
+The compiled recipe binds the actual immutable request, proposal/current human
+review and task mapping; configured clean repository HEAD/local main and committed
+source/framework evidence; approved behavior/acceptance/scope; exact supported
+checks/default limits; selected profile; independent oracle/controls and current
+certificate; and Twich-Team/TwichUI/main draft destination. Local main does not
+establish remote freshness; publication retains its independent base checks.
+Changing those inputs invalidates selection. Missing/incomplete/mismatched/tampered
+inputs hold. Legacy registration cannot downgrade a prepared contract, and a failed
+newer preparation cannot revive an earlier offer.
 
-## Next acceptance condition (requires a new authorized session)
+The existing `task_session.process_one` resolves certified offer data before its
+supported-template fallback. Existing `task_session.provision` prepares a fresh
+isolated Runtime and reruns the selected profile and original boundary/static gates.
+It does not copy a certificate into a new workspace as execution authority.
+Existing grant, one-shot worker, candidate checker/freezer and publication owners
+remain unchanged. Scope approval, certification and offer registration grant no
+execution permission. Existing trusted `owner_task.continue_supported` can record
+a first express budget after scope-only approval, retaining the original review and
+task mapping. Operational activation remains separately explicit and disabled here.
 
-Start from the exact recorded Git commit, check source status and counted headroom,
-then implement the smallest reusable verification-profile and contract-to-execution
-connection through the existing owners. No design restart or parallel execution
-engine. Do not repeat the already delivered guild task just to obtain evidence.
+Task-specific preparation remains manual: independently review the behavior oracle /
+reproducer, supply meaningful regression positive/vacuous/wrong-behavior controls,
+confirm offline/client-evidence suitability, select bounded reads/publication
+identity, and prepare/certify the bundle. Bug-fix typed contracts currently also need
+trusted manual preparation through the existing planning-job/proposal owner before
+human review. Automatic oracle generation and a new bug-intake category are absent.
+Unsupported check shapes (including multiple focused commands) hold explicitly.
 
-Current boundary:
+## Verification and retained evidence
 
-- `regression_preparation.py` reads committed repository evidence and produces typed
-  proposed contracts on existing jobs/proposals. Syntax/focused/full-suite commands
-  are proposed and unrun. It creates no executable offer, budget or permission.
-- `supported_tasks.py` still requires a hash-addressed developer-supplied template
-  and recipe; `real_recipes.py` requires an independently frozen oracle and named
-  controls. Generic proposed contracts are not executable/certified recipes yet.
-- Existing `task_budget.py`, `task_execution.py`, `real_execution.py`, worker,
-  confined runtime/check/freezer/seal and real-publication owners must be reused.
+Final `wb check` passed: generated contracts, TypeScript/build, Ruff and schema
+migration drift. Targeted `wb test` passed275backend tests across the profile,
+regression-preparation, offer, intake/scope, budget/session, owner-ingress, task,
+grant and handoff owners, plus18frontend tests. Earlier failed logs remain; the
+legacy failed-baseline retention regression was repaired and its test passes.
+This session did not rerun the entire backend collection.
 
-Acceptance: at least two distinct ordinary regression-test requests can use the
-same data-driven profile/preparation path without new per-task registration code.
-Bind the reviewed contract, exact repository/base, selected paths, framework/suite
-inventory, immutable oracle/control identities and independently certified checks
-into the existing executable recipe/offer flow. Positive controls must pass;
-original, vacuous and wrong-behavior candidates must fail for their intended
-reasons. Stale/changed scope/base/check bundles and candidate-authored self-proof
-must be rejected. Replay/recovery preserves the existing one-shot/idempotent
-authority boundaries. A scope-only approval must still grant no execution.
+Six retained demonstrations show an ordinary regression request and a distinct
+ordinary bug report, each with manually prepared task data, reaching a current
+idempotent offer and the existing runtime provision/candidate-check path without
+supported_task registration. They also show stale review, changed base, mismatched
+check evidence and missing certification rejecting execution eligibility. Final
+source revalidation accepts only the two valid cases. All grant/request/model-
+attempt/session/publication counts remain zero. Actual Lua runs with controlled
+boundary/resource telemetry; this is not real confinement, inference, live-client,
+publication or unattended-readiness acceptance. See controlled-demonstrations/ and
+demonstrations-final-revalidation.json under this session root.
 
-Run appropriate disposable unit/integration checks plus the previously incomplete
-full browser suite once its output reservation fits; inspect actual desktop/phone
-screenshots for any UI change. Never substitute scoped or fake checks for required
-acceptance. A checked contract is distinct from model execution and delivery.
+No browser behavior or rendered UI changed; no broad browser or visual rerun was
+needed or performed. The preceding profile session's64/92unique browser passes and
+28remaining tests in its BROWSER_COVERAGE.json remain an explicit historical
+limitation. Its850backend/18frontend result is earlier evidence, not a fresh full
+suite pass for this checkpoint. No model calls, leases, probes, service/live-data
+changes, activation, spending or external writes occurred.
 
-Live activation, services/migrations, leases/probes, inference, publication, spending
-and remote push remain separately unauthorized. The prior draft PR is one assisted
-delivery after failed Qwen attempts; reliable unattended Qwen completion, general
-task-to-PR operation and full M5 remain unaccepted. Keep accepted Models/Phase 1,
-port 8765, closed historical records and documented evidence-loss limitations.
+## Next exact acceptance condition — separate authorized package
+
+Connect browser-submitted ordinary work to trusted task-specific preparation and
+a separate explicit budget decision after the scope review. Reuse this certified
+offer association and the existing decision/session owners; do not add another
+backlog recipe. Demonstrate a browser-origin request with independently reviewed
+manual oracle/control data receiving a current offer, then an idempotently saved /
+applied explicit run budget selecting that same offer and task through the existing
+finite-session preparation path. Scope-only review and offer creation must still
+start nothing; stale/superseded evidence, lost responses/restart, withdrawal and
+budget expiry must fail closed. A browser command for the post-review budget step
+is currently missing; the trusted owner-instruction ingress is the available path.
+
+No automatic semantic oracle is required for that connection. Bug-contract data
+preparation must gain a supported trusted ingress instead of fixture-level planning
+record construction. Real inference/lease/probe/PR delivery require a separate
+explicitly authorized package and fresh operational/resource gates; the controlled
+proof here supplies no permission. Recheck counted headroom and reserve bounded
+outputs before any checks. The remaining roughly21MiB cannot be assumed to support
+a64–72MiB runtime reservation or a broad browser run. Do not raise the512MiB cap or
+archive referenced certification roots as disposable outputs. The general task-to-
+verified-PR product and reliable unattended model completion remain unverified.
