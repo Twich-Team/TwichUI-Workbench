@@ -7,12 +7,40 @@ Lua mappings hold for technical clarification rather than guessing semantics.
 import hashlib
 import json
 import re
+from typing import Annotated, Literal
+
 from pydantic import Field, TypeAdapter
 from workbench import regression_evidence as behavior, regression_preparation as preparation
 from workbench.visual_scope import digest
 
 
+class ModuleObservation(behavior.Observation):
+    path: Annotated[list[behavior.Key], Field(max_length=0)] = []
+
+
+class ModuleScenario(behavior.Scenario):
+    fixture: Literal["module"]
+    source_paths: Annotated[list[behavior.LuaPath], Field(min_length=1, max_length=1)]
+    setup: Annotated[list[behavior.Setup], Field(max_length=0)] = []
+    observe: ModuleObservation
+
+
+class ClientScenario(behavior.Scenario):
+    fixture: Literal["client"]
+    target: behavior.Keys
+
+
+class GroundedDraft(behavior.ScenarioDraft):
+    # Expose existing compiler and mapping constraints to structured generation.
+    # Reviewed/stored drafts keep the shared scenario representation.
+    scenarios: Annotated[
+        list[Annotated[ModuleScenario | ClientScenario, Field(discriminator="fixture")]],
+        Field(max_length=3),
+    ] = []
+
+
 class Response(behavior.ScenarioResponse):
+    draft: GroundedDraft
     evidence_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     policy_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 

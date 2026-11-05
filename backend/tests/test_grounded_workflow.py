@@ -12,17 +12,19 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from pydantic import ValidationError
 from sqlalchemy import select
 
 from workbench import intake, model_policy, planning_provider, worker, trusted_preparation
 from workbench.db import (
     planning_jobs,
     model_attempts,
+    proposal_decisions,
     task_run_offers,
     write_transaction,
     engine_for,
 )
-from workbench.regression_evidence import input_binding
+from workbench.regression_evidence import ScenarioResponse, input_binding
 from test_regression_evidence import ControlledPreparer, approve
 from test_reviewed_offers import source, authority_counts
 from test_verification_profiles import PRODUCTION, TEST, git
@@ -644,10 +646,26 @@ def test_existing_local_adapter_uses_scenario_schema_and_instructions_with_contr
             assert (
                 payload["response_format"]["json_schema"]["schema"] == Response.model_json_schema()
             )
+            defs = payload["response_format"]["json_schema"]["schema"]["$defs"]
+            variants = defs["GroundedDraft"]["properties"]["scenarios"]["items"]["oneOf"]
+            assert {v["$ref"] for v in variants} == {"#/$defs/ModuleScenario", "#/$defs/ClientScenario"}
+            module = defs["ModuleScenario"]["properties"]
+            assert module["fixture"]["const"] == "module"
+            assert module["setup"]["maxItems"] == 0
+            assert module["source_paths"]["minItems"] == module["source_paths"]["maxItems"] == 1
+            assert defs["ModuleObservation"]["properties"]["path"]["maxItems"] == 0
+            client = defs["ClientScenario"]["properties"]
+            assert client["fixture"]["const"] == "client"
+            assert client["target"]["minItems"] == 1 and "target" in defs["ClientScenario"]["required"]
+            assert client["setup"]["maxItems"] > 0
+            assert defs["Observation"]["properties"]["path"]["maxItems"] > 0
             instructions = payload["messages"][0]["content"]
             assert (
                 "untrusted DATA" in instructions and "bounded regression scenarios" in instructions
             )
+            assert 'fixture="module"' in instructions and "only the first return" in instructions
+            assert "Omit setup and observe.path or leave them empty" in instructions
+            assert "behavior these fixtures cannot express" in instructions
             assert "Features: proposal required" not in instructions
             return json.dumps(
                 dict(
@@ -670,6 +688,105 @@ def save_local_policy(store, model="selected-local-model", *, enabled=True, pref
     policy.fallback = ["local"] if preferred == "codex" else ["codex"]
     policy.substitution = "configured_fallback_only"
     return model_policy.save(store, policy, model_policy.CapabilityReport(executors=[]))
+
+
+@pytest.mark.parametrize("fault, field", [
+    (None, None),
+    ("module-setup", "setup"),
+    ("module-field", "observe.path"),
+    ("module-table-result", "observe.expected"),
+    ("module-extra-source", "source_paths"),
+    ("client-empty-target", "target"),
+])
+def test_9187_scenario_shape_through_local_parser_and_preparation(
+    fault, field, store, client, headers, tmp_path, monkeypatch
+):
+    _, _, output = configure(store, tmp_path, monkeypatch)
+    selected = "pilot-qwen38-27b"
+    save_local_policy(store, selected)
+    key = tmp_path / "inert-key"
+    key.write_text("inert")
+    key.chmod(0o600)
+    monkeypatch.setenv("WORKBENCH_PLANNER", "local")
+    monkeypatch.setenv("WORKBENCH_LOCAL_KEY", str(key))
+    monkeypatch.setattr(planning_provider, "local_slot", nullcontext)
+    planner = ControlledPlanner()
+
+    class Transport:
+        seconds = 120
+
+        def models(self, secret):
+            return selected
+
+        def read(self, request, limit):
+            payload = json.loads(request.data)
+            packet = json.loads(payload["messages"][1]["content"])
+            response, _, _ = planner.generate(packet, None)
+            scenario = response["draft"]["scenarios"][0]
+            del scenario["observe"]["path"]  # Omitted path and setup select the first return.
+            if fault == "module-setup":
+                scenario["setup"] = [dict(op="set", path=["name"], value="  ALICE ")]
+            if fault == "module-field":
+                scenario["observe"]["path"] = ["name"]
+            if fault == "module-table-result":
+                scenario["observe"]["expected"] = {"name": "alice"}
+            if fault == "module-extra-source":
+                scenario["source_paths"].append(PRODUCTION)
+            if fault == "client-empty-target":
+                scenario["fixture"] = "client"
+            if fault in {"module-setup", "module-field"}:
+                # The retained 9187 attempt records this validator error, but no response
+                # body. Each synthetic payload reproduces one possible trigger.
+                with pytest.raises(ValidationError, match="Module scenarios support a scalar first return only"):
+                    ScenarioResponse.model_validate(response)
+            return json.dumps(dict(model=selected, choices=[
+                dict(finish_reason="stop", message=dict(content=json.dumps(response)))
+            ])).encode()
+
+    monkeypatch.setattr(planning_provider, "LocalHTTP", lambda _: nullcontext(Transport()))
+    item = submit(client, headers)
+    assert worker.tick(store)
+    view = current(client, item)
+    contract = view["proposals"][0]["task_contract"]
+    prepared = contract["behavioral_evidence"]
+    with store.connect() as c:
+        attempt = c.execute(select(model_attempts)).mappings().one()
+    assert len(planner.calls) == 1 and attempt["actual_model"] == selected
+    if fault:
+        assert attempt["outcome"] == "failed" and view["status"] == "waiting_for_information"
+        assert prepared["status"] == "hold" and prepared["scenarios"] == []
+        fixture = "client" if fault == "client-empty-target" else "module"
+        assert any(f"draft.scenarios.0.{fixture}.{field}" in hold for hold in prepared["holds"])
+        assert "scenario_grounding" not in contract
+        denied, _ = approve(store, client, headers, view)
+        assert denied.status_code in {409, 422}
+        assert not view["tasks"] and not list(output.iterdir())
+    else:
+        assert attempt["outcome"] == "completed" and prepared["status"] == "review_required"
+        (scenario,) = prepared["scenarios"]
+        assert scenario["args"] == ["  ALICE "] and scenario["incorrect"] == "ALICE"
+        assert scenario["observe"] == {"path": [], "expected": "alice"} and scenario["setup"] == []
+        assert not list(output.iterdir())
+        approve_and_decompose(store, client, headers, item)
+        assert worker.tick(store)  # Lua original, positive, vacuous and wrong-behavior controls.
+        job = preparation_job(store)
+        assert job["status"] == "completed", job["message"]
+    assert not worker.tick(store)
+    with store.connect() as c:
+        decisions = c.execute(select(proposal_decisions.c.payload)).scalars().all()
+        offers = c.execute(select(task_run_offers)).mappings().all()
+        if fault:
+            assert not decisions and not offers
+            assert not c.execute(select(planning_jobs).where(
+                planning_jobs.c.kind == "behavioral_preparation"
+            )).first()
+        else:
+            assert len(decisions) == len(offers) == 1 and not decisions[0].get("run_budget")
+            assert offers[0]["snapshot"]["certified_preparation"]["certificate"]["status"] == "certified"
+    counts = authority_counts(store)
+    assert all(counts[k] == 0 for k in (
+        "task_sessions", "real_execution_grants", "real_execution_requests", "real_publications"
+    ))
 
 
 @pytest.mark.parametrize("fault", [None, "loaded-model", "returned-model"])

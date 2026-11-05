@@ -1,17 +1,290 @@
-# Execution-path checkpoint — November 5, 2026
+# Grounded module-fixture contract checkpoint — November 5, 2026
 
-Continue from the clean local commit containing this handoff. Its exact SHA and
-check receipts are in `artifacts/runs/execution-path-20261105T200351Z/CHECKPOINT.json`.
-Entry was `b59b90751c1d23e9da67051f4ef56cb63abe5ed4`. Its handoff and evidence
-remain at `artifacts/runs/grounded-workflow-20261105T193102Z`. This session used
-controlled responses and ordinary checks within the 60-minute authorization.
+Continue from the clean local commit containing this handoff. See the
+[checkpoint receipt](../artifacts/runs/grounded-module-contract-20261105/CHECKPOINT.json)
+for its SHA and checks. The previous execution-path checkpoint `fcf74ce` and
+its evidence remain in `artifacts/runs/execution-path-20261105T200351Z`.
+
+## Offline diagnosis and repair of the 9187 hold
+
+Rebuilt the old POST offline using the retained immutable intake, committed
+fixture, private policy and `fcf74ce` adapter. Both the 2,980-byte packet and
+8,294-byte request matched the hashes in `wire.jsonl`. The request declared
+one common scenario shape for both fixtures. It constrained the expected and
+incorrect outcomes to scalars, but allowed up to eight setup steps and eight
+observation path segments for either fixture. Neither the system instructions
+nor the packet described the module-only restriction.
+
+The matching advertised and returned model was `pilot-qwen38-27b`. The
+retained SQLite job records `response_received` and the after-validation
+error at `draft.scenarios.0`. That error establishes `fixture="module"`
+with nonempty `setup`, nonempty `observe.path`, or both. Field validation had
+already succeeded, including scalar `observe.expected` and `incorrect`. The
+closeout explicitly says the 2,289-byte response body was not saved. The
+exact field contents and which of the two conditions fired cannot be recovered
+from the retained artifacts. The adapter decoded the response envelope and
+`message.content` as JSON and passed that value directly to validation. The
+worker's dump and model attribution assignment occur after validation and
+could not have introduced this mismatch.
+
+The grounded response schema now distinguishes modules and clients by
+`fixture`. It gives modules exactly one source and omitted or empty `setup`
+and `observe.path`, and requires a nonempty client target. The grounded system
+prompt explains direct and exported function targets, the scalar first return,
+client field observations and when to return an unresolved question. The
+shared stored scenario, compiler, safety validators, mapping checks and review
+and certification gates retain their existing behavior. An unsupported response
+holds with a field-specific reason.
+
+The original synthetic request fits the existing fixture. The committed test
+loads `../!!!TwichUI/normalize.lua`, which directly returns a function that
+trims and lowercases its scalar input. The example calls that function with
+`"  ALICE "`, expects the first return `"alice"` and rejects `"ALICE"`.
+This needs neither setup nor a field path. The existing test covers only the
+already-normalized input `"alice"`.
+
+Offline verification covered both synthetic triggers for the retained error,
+a table-valued expectation, multiple module sources, an empty client target
+and the supported counterpart. The controlled local transport exercised JSON
+decoding and validation on disposable stores. Invalid drafts held with zero
+accepted scenarios, rejected approval and created no decision, preparation
+job, certificate, offer, budget, execution session, grant, request or
+publication. The valid counterpart passed the existing durable review and Lua
+control path to a certified offer with controlled confinement telemetry and
+no execution authority. The local llama.cpp schema converter and GBNF validator
+also accepted the supported module and client samples and rejected the new
+structural violations. The revised POST measured 11,375 bytes with the retained
+packet, within the 24,000-byte limit. The focused backend run passed 91 tests
+and `wb check` passed. This was a backend-only repair with no browser rerun.
+
+Entry headroom was 77,465,659 bytes (73.88 MiB) under the unchanged 512 MiB
+limit. All 57 retained evidence hashes verified. No inference or live service
+work occurred in this repair. A separately authorized real attempt on the new
+checkpoint must still produce a valid proposal and pass independent human
+review and certification before real-adapter acceptance.
+
+## Fresh 9187 adapter attempt held at scenario validation — November 5, 2026
+
+The owner authorized one fresh 60-minute attempt. The disposable API and
+worker used checkpoint `fcf74ce75262e07ee9f59fd55fac9a0a10b22a3d`, 22 verified
+frontend assets, a new schema `0012` SQLite store at `64512:6719311`, and
+clean synthetic fixture `ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. The
+private preparation policy matched the store inode. Saved revision 1 enabled
+and preferred `pilot-qwen38-27b`, with unspecified effort and no fallback.
+The owner-designated regular credential file was `rich:rich` and mode
+`0600`. The delegated worker opened it read-only for the readability check.
+Only the existing LocalProvider read its contents via `WORKBENCH_LOCAL_KEY`.
+
+Fresh probes through the actual Runtime in the worker process passed cgroup,
+Landlock, seccomp, private-loopback and host IPC isolation checks, plus
+descendant reaping and cgroup removal. Entry counted headroom was 74.35 MiB.
+Headroom immediately before intake was 73.97 MiB, and the workspace, scratch
+and shared-memory filesystems each exceeded 4 GiB free. Owned scratch measured
+20,437,675 bytes at closeout under the 1 GiB ceiling.
+
+Chromium submitted **Cover lowercase name normalization** once, limited to
+additive assertions in `tests/test_normalize.lua`. The existing LocalProvider
+sent one identity GET and one structured POST using the existing locks. The
+advertised and returned model both matched `pilot-qwen38-27b`. The POST body
+was 8,294 bytes, the response was 2,289 bytes, and the exchange took 27.003
+seconds. The request specified 2,600 maximum output tokens, zero requested
+reasoning tokens and no tools. The provider reported 579 completion tokens.
+The wire receipt retains the packet, input, evidence and policy digests.
+
+Workbench rejected `draft.scenarios.0` with “Module scenarios support a
+scalar first return only.” That validator rejects a module scenario with
+setup steps or a nonempty observation path. The retained store has a held
+proposal record with zero accepted scenarios. The requested expectation that
+`"  ALICE "` returns `"alice"` and rejects `"ALICE"` therefore never
+reached human review. There was no retry, scope approval, control preparation
+or certified offer. Final SQLite checks found zero budgets, activations,
+execution sessions, grants, requests and publication rows.
+
+The owned browser, API and worker stopped, the delegated cgroup was removed,
+and port 9187 was free. The store, policy, fixture, logs and partial evidence
+were retained and 57 file hashes verified. The desktop intake capture was
+inspected. Closeout preceded phone and review captures. Port 9487 and its
+store were untouched. Final counted headroom was **77,465,659 bytes
+(73.88 MiB)**. This attempt is closed.
+
+[Preflight receipt](../artifacts/runs/adapter-9187-20261105T212620Z-KDcdGhku/PREFLIGHT.json),
+[wire receipt](../artifacts/runs/adapter-9187-20261105T212620Z-KDcdGhku/wire.jsonl)
+and [closeout receipt](../artifacts/runs/adapter-9187-20261105T212620Z-KDcdGhku/RESULT.json).
+
+## Review installation complete — November 5, 2026
+
+**Installed** `fcf74ce75262e07ee9f59fd55fac9a0a10b22a3d` on
+`127.0.0.1:9487` at 20:33:32 UTC. The existing rich-owned launcher restarted
+the supervisor, API and worker as PIDs `2320108`, `2320109`, and `2320110`.
+The API serves the checkpoint OpenAPI schema and the index references
+`index-CkG6v3Ki.js` and `index-CuekSOBd.css`. The clean detached checkpoint
+passed `wb check`. Its build matched both retained checkpoint builds byte for byte. The
+shared launcher checkout matched that source apart from the two existing
+handoff edits. The planner remained in demo mode with model execution inactive.
+
+The isolated rollback rehearsal passed before cutover on `127.0.0.1:9387`.
+The private backup at `.local/m5-review/backup-fcf74ce-uug9d2ee` verified all
+169 SHA-256 entries. It includes the prior backend and served assets, saved
+environment and launcher, Python environment, SQLite snapshot, retained
+one-off configuration, template and proof, the full `fixtures/` tree, and
+the product and ownership documents read by the planner. The prior build
+started from the packaged code and Python environment with a read-only
+SQLite copy, no worker, and outbound connections blocked. It passed the
+documented GET checks including `/api/work`, and the listener shut down.
+The packaging and cutover helper is retained in
+`.local/m5-review/install-fcf74ce-rehearsed-b5R7444B/install.py`.
+
+The installed API and worker opened the intended live store
+`.local/m5-review/review.sqlite3` at device/inode `64512:5935325`. Its schema
+is `0012`. Integrity and foreign-key checks passed, and the schema and all
+78 application rows matched the backup and rehearsal. The queue had zero
+runnable work before and after restart.
+
+GET-only acceptance passed for Work, Models and observed activity, History,
+the saved guild intake, execution and delivery, and the served assets.
+Chromium rendered Work, Models and the checked guild result at 1440 and
+390 px with no browser errors. The saved draft link was checked locally.
+Screenshots from both builds were inspected. No rollback, migration,
+unexpected activity, model call, task execution or publication occurred.
+This records installation and read-only acceptance. The separate 9187
+adapter acceptance is tracked below. Final counted evidence headroom
+was **25,975,137 bytes (24.77 MiB)** under the 512 MiB cap.
+
+[Installation receipt](../artifacts/runs/review-fcf74ce-20261105T202622Z/RESULT.json)
+and [preflight receipt](../artifacts/runs/review-fcf74ce-20261105T202622Z/PREFLIGHT.json).
+
+## 9187 adapter acceptance held before authentication — November 5, 2026
+
+The owner authorized one conditional 60-minute window. On the exact
+`fcf74ce75262e07ee9f59fd55fac9a0a10b22a3d` checkpoint with 22 hash-verified
+frontend assets, the normal API listened at `127.0.0.1:9187` and the normal
+worker used a fresh schema `0012` store at device/inode `64512:6692914`.
+The private preparation policy was verified against that inode. The synthetic
+fixture was restored at clean `main` `ebb16fff02f755bf523f3a7c30787ebdc0c8e894`.
+The saved and read-back model policy revision 1 enabled and preferred
+`pilot-qwen38-27b`, with unspecified effort, substitution denied, empty fallback
+and unavailable routing set to block. The copied source had no execution
+runtime capability, templates or publication configuration.
+
+Both actual `Runtime.check` confinement probes passed in the same delegated
+process that became the normal worker. Cgroup readback showed 6 GiB memory,
+zero swap and 200% CPU, with 64 tasks and 16 MiB per file for the untrusted
+probe and 128 tasks and 128 MiB per file for the trusted probe. Both denied
+the forbidden file read. Untrusted socket creation was denied. The trusted
+probe used a distinct network namespace with working private loopback, and
+could reach neither the parent marker nor host IPC. Both probe cgroups were
+removed after reaping descendants. Entry counted headroom was 74.99 MiB.
+Workspace, `/tmp`, and `/dev/shm` each had more than 4 GiB physically free.
+Owned scratch measured 20,437,675 logical bytes at closeout under the 1 GiB
+ceiling. The 1440 px and 390 px Chromium captures show the filled, unsubmitted
+synthetic intake. Both images were inspected.
+
+The handoff lacked an owner-designated 8080 key path. The path was requested
+and no designation arrived during the run. Intake remained empty. There were
+zero identity GETs and zero generation POSTs, so returned identity and usage
+were unobserved. Offline serialization with the actual store policy and a
+placeholder request ID verified an 8,294-byte structured POST, 120-second
+exchange configuration, 24,000-byte body ceilings, a 2,600-token output
+setting, zero requested reasoning tokens and no tools. The first offline
+serialization helper stopped before building a body because it lacked the
+transport deadline attribute. The corrected helper ran entirely offline.
+
+There was no generated proposal, human review, control preparation or
+certified offer. Final read-only SQLite checks found zero run budgets,
+execution sessions, grants, execution requests and publication rows. The owned
+API, worker and browser stopped and the delegated cgroup was removed. The
+disposable store, policy, fixture, logs, screenshots and probe evidence were
+retained. The 9487 service and store and the 8080 service were left untouched.
+Final counted headroom was **77,963,150 bytes (74.35 MiB)**. The hold closed
+this run. A later attempt requires the exact owner-designated existing key
+path, a newly authorized window and fresh preflight.
+
+[Result and boundary counts](../artifacts/runs/adapter-9187-20261105T2052Z-krFBiM/RESULT.json)
+and [retained evidence hashes](../artifacts/runs/adapter-9187-20261105T2052Z-krFBiM/SHA256.json).
+
+## Previous 9187 acceptance readiness — November 5, 2026
+
+**Held before inference.** The original 60-minute proposal below is ready for an
+explicit, conditional authorization. Actual confinement must first pass in the
+new worker's delegated cgroup. This proposal's disposable worker and store
+still need to be created, along with the saved policy and store-bound file.
+The owner needs to designate the existing private 8080 key file. Authentication
+and the endpoint's advertised identity can only be confirmed by the authorized
+identity GET after offline readiness passes. The installed process arguments
+show `pilot-qwen38-27b` and the Qwen3.8-27B GGUF on loopback 8080. Socket and
+process inspection found 9187 free and the 9487 API and worker still using
+`.local/m5-review/review.sqlite3`, device/inode `64512:5935325`, with the demo
+planner. The readiness session made no HTTP calls.
+
+Counted headroom rose from **25,975,137 bytes (24.77 MiB)** to
+**78,627,986 bytes (74.99 MiB)** under the unchanged 512 MiB cap, a net recovery
+of **52,652,849 bytes (50.21 MiB)** including the new receipts and fixture bundle.
+The archive contains 52,662,879 bytes in 90 files across 11 closed Playwright
+output trees. Same-user ownership and process and file references were checked.
+Three roots have diagnostic references in retained browser logs. Before pruning,
+an isolated restore matched all original paths, hashes, modes, and modification
+times for 90 files and 24 directories. Every file resolved by original-path lookup.
+The archive verified again after pruning. Primary inspection images, the retained
+candidate, approval and database records, source recovery, active runtime roots,
+and both installation packages stayed in place. All 169 corrected rollback
+manifest hashes and 149 earlier package hashes were rechecked. Physical free
+space on the workspace, `/tmp`, and `/dev/shm` exceeded 4 GiB.
+
+Use archive ID `adapter-readiness-20261105-browser-generated` with
+`scripts/evidence_archive.py lookup` on the original file path, or `restore`
+with an isolated destination. The [archive index](../artifacts/archive-index/adapter-readiness-20261105-browser-generated.json)
+pins the external manifest. The [selection receipt](../artifacts/runs/adapter-readiness-20261105T203747Z/ARCHIVE_OWNERSHIP.json)
+and [restore receipt](../artifacts/runs/adapter-readiness-20261105T203747Z/archive-restore.json)
+record the checks.
+
+The existing controlled desktop capture confirms the exact module fixture base
+`ebb16fff02f755bf523f3a7c30787ebdc0c8e894`, clean `main`, tree
+`7720d09d721cf4fb524faf338586d97a20fed6bb`. The enlarged phone capture exercises
+the sibling client fixture. Both were inspected from retained evidence. The
+test has a literal loader of `!!!TwichUI/normalize.lua` and calls its returned
+function. Read-only Git inspection and the lexical mapping check passed for the
+specified input and its counterexample. With placeholder request and store
+identities, the exact request yielded a 2,980-byte packet and an 8,294-byte POST
+body, including the schema. The final request and policy bindings must be computed
+with the new identities. A source-only bundle of that same fixture was restored
+and checked offline so the exact base survives temporary-directory cleanup.
+[Fixture bundle](../artifacts/runs/adapter-readiness-20261105T203747Z/normalization-fixture-main.bundle)
+and [fixture and packet receipt](../artifacts/runs/adapter-readiness-20261105T203747Z/fixture-proof.json).
+
+## Previous installation attempt — November 5, 2026
+
+**Stopped before cutover** during the separately authorized 30-minute installation
+of `fcf74ce75262e07ee9f59fd55fac9a0a10b22a3d` on `127.0.0.1:9487`.
+The checkout was clean at entry. The fresh staged build produced
+`index-CkG6v3Ki.js` and `index-CuekSOBd.css`, matching the checkpoint build.
+At that stop, the original `tested-release-final-task-pr-completion-18jzz1vj` build served
+`index-ns7R_4Mn.js` and `index-CuekSOBd.css` under the original supervisor, API
+and worker (UID `1000`, PIDs `2032832`, `2032833`, `2032834`).
+
+The private backup is `.local/m5-review/backup-fcf74ce-mq30ybb0`. All 149
+manifest hashes verified. The live SQLite store, backup and isolated copy passed
+integrity and foreign-key checks and matched across the schema and all 78
+application rows. The service used `.local/m5-review/review.sqlite3`, device
+`64512`, inode `5935325`, schema `0012`. The isolated rollback rehearsal stopped
+at GET `/api/work` because the copied release tree lacked `fixtures/catalog.json`.
+The original checkout has the file. The rollback prerequisite failed, so the
+original processes, served assets and saved environment stayed in place.
+
+Before the stop, GET checks on the original build returned HTTP 200 for Work,
+Models and observed activity, History, and the existing guild intake, execution
+and delivery. Chromium loaded Work, Models and the guild result at 1440 px and
+390 px. The historical draft link was verified locally. There was no cutover,
+installation acceptance, queued work change, migration, task start, inference,
+execution or publication. Entry headroom was 27,305,168 bytes (26.04 MiB), with
+more than 4 GiB free on disk. The [stop receipt](../artifacts/runs/review-fcf74ce-20261105T201708Z/RESULT.json)
+records the final measurement.
 
 ## Execution path and evidence
 
 | Transition | Existing owner | What the evidence establishes |
 | --- | --- | --- |
 | Browser submission → durable request | `Intake.tsx` → `POST /api/intake` → `intake` writes the immutable original and planning job | Actual Chromium, API and SQLite on disposable stores. |
-| Worker → selected local model → grounded proposal | `worker.tick` → `planning_worker` / `regression_preparation` → `model_policy.execution_policies` selection and `planning_provider.LocalProvider` / `planning_transport.LocalHTTP` | The actual adapter code and policy store passed controlled transport tests. The existing local endpoint previously produced structured generic planning output for WB-15. Its grounding and actual decomposition remained unaccepted. The grounded route has yet to reach real inference. |
+| Worker → selected local model → grounded proposal | `worker.tick` → `planning_worker` / `regression_preparation` → `model_policy.execution_policies` selection and `planning_provider.LocalProvider` / `planning_transport.LocalHTTP` | The fresh disposable run reached real inference with matching saved, advertised and returned model identity. The response failed structured scenario validation before grounding or human review. Controlled tests passed the proposal and decomposition path. |
 | Proposal → human scope/expectation review | `grounded_scenarios` binds committed Git evidence, original input and feedback to the typed contract. `intake` / `planning_worker.apply_one` own the exact proposal and independent expectation confirmation | Actual browser confirmation, SQLite receipt and task materialization on both supported fixture shapes. Model output was controlled. |
 | Applied review → certified offer | Single-task decomposition journals `behavioral_preparation` in `planning_jobs`. `trusted_preparation` uses `task_session.provision`, `Runtime`, `verification_profiles` and `task_budget.register_reviewed_offer` | Actual durable claims, Lua controls and canonical offer registration. Current grounded browser tests substitute confinement telemetry. |
 | Offer → separate authorization | `RunApproval.tsx` → task `run-approval` API → `task_budget.approve_run` and the existing decision worker | Actual browser/API and distinct durable receipts in disposable stores. Certification alone creates no session, grant or request. Normal one-off admission requires the later applied `activate_once` decision, matching store capability and an unexpired offer/budget. |
@@ -69,25 +342,9 @@ execution recipe's fixed model and budget remain distinct.
   The historical 64/92 run and 28 uncovered cases remain separate, along with
   physical Safari and full current verification.
 
-## Proposed next authorization
+## Proposed separate authorization
 
-**Immediate, 30 minutes.** Install the checkpoint identified above on the existing
-loopback review service at `127.0.0.1:9487`. Confirm fresh process UID/boot/start/argv
-and ownership, current schema `0012`, a quiescent worker, no pending runnable work,
-and sufficient headroom. Stage and hash-check backend/static assets and rehearse
-restoration of a private SQLite backup and the served code/assets/config before
-cutover. Use the existing owned supervisor/API/worker and serve assets index-last.
-Allow only private backup/staging, owned restart and GET/Chromium checks of Work,
-Models and existing delivered guild history. Preserve the DB inode, all rows,
-schema, bind and environment. Keep the installed planner in demo mode and the
-grounded and real runtime settings inactive. Reserve at most 8 MiB of counted
-evidence and require 4 GiB physical space. No intake write, inference, lease, probe,
-migration or publication in this stage. Stop before cutover for any failed gate.
-On a post-cutover mismatch, stop only the identified replacement processes,
-restore backed-up code/assets/config, start the prior build and environment with
-the existing owned launcher, and verify the same store. Retain rollback evidence.
-
-**Separate first real-adapter acceptance, 60 minutes.** Run the same checkpoint
+**Separate first real-adapter acceptance, 60 minutes.** Run the repaired checkpoint
 with the normal API and worker on a fresh disposable store at `127.0.0.1:9187`.
 The exact browser task is **Cover lowercase name normalization** in the existing
 synthetic `tests/test_normalize.lua` fixture from `controlled_source` in
@@ -97,8 +354,7 @@ as fixtures. Pin its clean main SHA and packet, bind the private preparation fil
 to the disposable DB inode, and demonstrate actual owned cgroup/Landlock/seccomp
 and private-loopback readiness before permitting any inference. Require 72 MiB
 counted headroom (64 MiB preparation ceiling plus 8 MiB checks/handoff), 4 GiB
-physical free space and 1 GiB maximum scratch. This stage requires more evidence
-headroom than the current measurement.
+physical free space and 1 GiB maximum scratch. Remeasure capacity before setup.
 
 Authorize `WORKBENCH_PLANNER=local` and `scenario_generation=true` only on the
 disposable worker path. Permit exactly one local request using saved enabled preferred
@@ -114,6 +370,104 @@ review/control, loss of confinement or exhausted limits. No retry, fallback,
 lease, cancellation probe, implementation or remote write. Stop only owned
 disposable processes and retain the store, receipt and outputs. The existing
 8080 and 9487 configurations need no change for this stage.
+
+### Authorization checklist for the 9187 proposal
+
+1. **Authorize isolated setup for this one 60-minute window.** Use the exact
+   repaired Workbench SHA in the checkpoint receipt and matching built assets in
+   a private copy. Initialize schema `0012` only on a new disposable SQLite file.
+   Start the normal `workbench.api:app` on `127.0.0.1:9187` and prepare one normal
+   `workbench.worker` launch with an explicit clean environment. Keep intake empty
+   through the offline readiness checks. The disposable dev wrapper forces demo
+   mode and its E2E variant injects controlled behavior. Check the new
+   DB device/inode, empty queues, absent runtime capability for this store, and
+   disabled execution, templates and publication. Supply no live DB, pilot
+   projection, resource/policy DB, runtime or delivery roots. Use separate owned
+   API, worker, browser and scratch paths. Keep the retained evidence and DB in
+   a private counted run root. Confirm 9187 is free, recheck 72 MiB counted
+   headroom and 4 GiB free space before starting, and enforce the 64 MiB preparation,
+   8 MiB checks/handoff and 1 GiB scratch ceilings throughout.
+2. **Pin the fixture and saved policy.** Restore the bundle's exact clean
+   `main` into a new research root. Keep `Twich-Team/TwichUI` as the repository
+   label the schema expects and set the recognized origin URL as local metadata
+   only. Use local Git with hooks and remote transport disabled. The Runtime
+   verification clone removes its origin. Create a mode-0600 preparation file
+   with this DB's absolute path and device/inode, the owned output root, a fixture
+   name/email and only `lua-regression-tests` allowed. Set
+   `scenario_generation=true` for this isolated workflow. The disposable API
+   needs the same research/config paths to revalidate the offer. Only the worker
+   needs `WORKBENCH_PLANNER=local`, the 120-second deadline and the owner-designated
+   existing private key path. Save and read back revision 1 on 9187
+   with preferred `local`, enabled `pilot-qwen38-27b`, unspecified effort,
+   substitution denied, an empty fallback list and unavailable routing set to
+   block. Keep the policy and source fixed.
+3. **Authorize actual offline confinement checks before the one request.** Place
+   the disposable worker in a dedicated user-owned `workbench-real-*` transient
+   cgroup with `Delegate=yes`. As in the existing provisioner, move the launcher
+   into its own child before enabling memory, pids and CPU controllers and
+   setting `WORKBENCH_CG_ROOT` inside that tree. Read back 6 GiB memory, zero
+   swap, 200% CPU, 64 tasks and 16 MiB per file for untrusted checks, and 128
+   tasks and 128 MiB per file for trusted suite checks. Through the actual
+   `Runtime.check`/`real_confine` launch path, prove forbidden file reads and
+   socket creation fail for the untrusted mode. For trusted verification, prove
+   a distinct network namespace, working private loopback and failed access to
+   a disposable parent marker and host IPC. Require safe descendant reaping and
+   cgroup removal in both modes. Reuse the boundary assertions in
+   `task_session.provision` and `backend/tests/test_real_network.py`. An installed
+   binary, static kernel capability, prior delegated unit or substituted telemetry
+   cannot prove this worker is confined. Keep these checks offline and local to
+   disposable paths, and start the normal worker in the proven tree before
+   submitting intake.
+4. **Conditionally authorize one browser submission and one planning exchange.**
+   Submit nonvisual feature **Cover lowercase name normalization**. Use
+   description “Synthetic fixture only. In tests/test_normalize.lua cover
+   trimming spaces and lowercasing names.” Select regression preparation and only
+   `tests/test_normalize.lua`. Use “Spaces and capital letters normalize to alice.”
+   as the sole expected result. Record the actual base and packet/input/evidence/
+   preparation-policy hashes. Verify the saved model policy revision and the
+   serialized request size. The adapter may take the two existing locks and use
+   the private key for one `GET /v1/models` and at most one structured
+   `POST /v1/chat/completions` on 8080. Keep 120 seconds total for the exchange,
+   24,000 body bytes each way, zero requested reasoning budget, no tools and
+   `max_tokens=2600`. Require the expected identity before the POST and the same
+   identity in the response. The current sampler source and historical limit
+   evidence support the wire setting. Verify reported completion usage at or
+   below 2,600 before approving scope. Hold if the response leaves that limit
+   unverified. The 120-second timer closes the client socket. Server-side
+   completion after timeout can remain unknown.
+5. **Require independent human scope and expectation review.** The owner or an
+   independent reviewer able to inspect the fixture checks the exact proposal
+   revision and bindings. Confirm the returned module function, scalar input
+   `"  ALICE "`, first result `"alice"` and meaningful incorrect result
+   `"ALICE"`. Confirm only additive assertions to the existing test file, with
+   production code, runner and harness excluded. Use the separate expectation
+   confirmation and ordinary **Approve proposal** action. Leave any run-budget
+   option unselected. The applied receipt binds the expectation digest, and
+   the worker materializes one task and prepares the original, positive,
+   vacuous and wrong-behavior controls. Require the exact existing suite
+   inventory, actual confinement and independent certification within the
+   40-minute Runtime clock. Stop at the certified offer. Verify the store has
+   exactly one grounded planning attempt and one offer on success, with no run
+   budget, `activate_once`, execution session, grant, execution request or
+   publication row.
+6. **Stop on any gate failure or when the window ends.** Hold on a timeout,
+   unknown completion, lock contention, authentication error, model mismatch,
+   changed or denied policy, invalid response or unsupported mapping, missing or
+   declined human confirmation, failed control or confinement, insufficient
+   capacity, or exhausted time or output limits. An incomplete or over-limit
+   response cannot pass. Keep the terminal reason and any observed usage.
+   Stop only owned disposable browser, API, worker and cgroup descendants.
+   Retain the DB with its original inode, the private config and pinned source
+   needed to reconstruct the offer, model/attempt attribution and timing,
+   approval and certification receipts, frozen controls, logs, hashes and
+   desktop/phone screenshots, or the partial evidence on failure. Clean up only
+   owned transient scratch after verifying the retained files. A timeout does
+   not authorize a retry, a lease, a cancellation probe or a service restart.
+
+The proposal now pins the repaired checkpoint. The task, model, request count,
+limits and certified-offer endpoint carry forward.
+
+### Separate real-repository implementation proposal
 
 A real-repository implementation demonstration stays held until a clean current
 TwichUI base and exact task pass the existing packet and mapping gates. It would
@@ -132,7 +486,7 @@ first-budget rule gives a verification-only decision no later upgrade path.
 
 ## Preservation
 
-No installation, model inference, lease, probe, migration or external write was
-performed. Entry counted 508,243,398 bytes with 28,627,514 bytes (27.30 MiB) free
+The execution-path checkpoint session performed no installation, model inference,
+lease, probe, migration or external write. Its entry counted 508,243,398 bytes with 28,627,514 bytes (27.30 MiB) free
 under the unchanged 536,870,912-byte cap. The targeted checks fit without archival.
 Final headroom is recorded with the checkpoint.

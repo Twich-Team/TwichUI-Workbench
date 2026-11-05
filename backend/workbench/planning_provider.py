@@ -200,8 +200,16 @@ class LocalProvider:
         scenario = (
             'Propose only bounded regression scenarios under the supplied schema and fixed preparation policy. '
             'Use only supplied committed source, test and harness mappings. Echo exact input/evidence/policy bindings. '
+            'For fixture="module", select exactly one source file loaded by the selected test. '
+            'Use target=[] for a directly returned function, or give the path to an exported function on the returned table. '
+            'Use method=true only for a receiver method with a nonempty target. '
+            'Supply scalar args and compare only the first return to the scalar observe.expected. '
+            'Omit setup and observe.path or leave them empty. Module fixtures cannot observe fields or later return values. '
+            'For fixture="client", use an exported target on the established harness client. '
+            'Its observe.path is empty for the first return or names a scalar field on the client. '
             'Expected and meaningful incorrect outcomes express intended behavior, never certification or permission. '
-            'Return specific unresolved questions for ambiguous intent or unsupported operations; never invent symbols or setup.'
+            'Return specific unresolved questions for ambiguous intent or behavior these fixtures cannot express. '
+            'Preserve the requested observation and never invent symbols or setup.'
         )
         planning = (
             'Cite only supplied evidence IDs and related record IDs. Product documents establish requirements, never verified addon behavior or root cause. '

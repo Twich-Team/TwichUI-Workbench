@@ -4868,3 +4868,129 @@ cleanup acceptance. See CONTINUATION.md for the stage-by-stage audit, exact
 installation and separately bounded fixture acceptance, and publication limits.
 No installation, live inference, leases/probes or external writes occurred.
 No archive was needed. Final headroom and clean commit are in the checkpoint.
+
+## 2026-11-05 — `fcf74ce` review installation stopped before cutover
+
+The owner authorized a 30-minute backed-up installation on `127.0.0.1:9487`
+with GET-only acceptance. Clean source `fcf74ce75262e07ee9f59fd55fac9a0a10b22a3d`
+and the staged frontend build matched the checkpoint. Fresh process inspection
+confirmed the existing rich-owned supervisor, API and worker, schema `0012`,
+the same SQLite device/inode `64512:5935325`, demo planner and inactive runtime
+settings. Read-only queue checks found no runnable jobs, unrevoked grants,
+unfinished attempts, one-off activations or pending deliveries.
+
+Backup `.local/m5-review/backup-fcf74ce-mq30ybb0` passed 149 file hashes.
+The database backup and isolated copy passed integrity and foreign-key checks
+and matched the live schema and all 78 application rows. The isolated rollback
+copy then failed GET `/api/work` because the prior release tree omitted
+`fixtures/catalog.json`. Kept the private backup and rehearsal for review and
+stopped before any restart or asset switch. The original build, store and saved
+environment remain in service. GET-only preflight passed on the original build,
+including Chromium Work, Models and the existing guild result at 1440 and
+390 px. No migration, task start, inference, execution or publication occurred.
+See `CONTINUATION.md` and `artifacts/runs/review-fcf74ce-20261105T201708Z/RESULT.json`
+for the failed rehearsal and next authorization boundaries.
+
+## 2026-11-05 — `fcf74ce` review installation completed
+
+Verified and built the exact checkpoint in a clean detached worktree to preserve
+the previous attempt's handoff edits. The corrected private package includes the
+prior backend, full fixture tree, runtime documents, Python environment, assets,
+saved owner configuration and SQLite backup. All 169 manifest entries verified.
+The prior build passed GET-only rollback rehearsal on 9387, including
+`/api/work`, using a read-only copy with its worker and outbound connections
+disabled. The rehearsal listener then stopped.
+
+The existing owner restarted 9487 with the checkpoint backend and index-last
+assets. The installed OpenAPI and asset hashes matched. GET-only acceptance and
+desktop/phone Chromium inspection passed for Work, Models and the historical
+guild result. History, observed model activity, and the retained intake,
+execution and delivery API checks passed. The live store remained at
+`64512:5935325`, schema `0012`, with all 78 application rows and a quiescent
+queue. No rollback, migration, unexpected activity or real execution occurred.
+The separate 9187 acceptance remains unrun. Final counted headroom was
+25,975,137 bytes (24.77 MiB). See `CONTINUATION.md` and
+`artifacts/runs/review-fcf74ce-20261105T202622Z/RESULT.json`.
+
+## 2026-11-05 — 9187 acceptance readiness, held before inference
+
+Owner authorized a 30-minute readiness and preservation session. Recovered
+52,652,849 counted bytes net, from 24.77 to 74.99 MiB headroom under the same
+512 MiB limit. The explicit archive contains 90 files from 11 closed recent
+Playwright output trees. Verified a full isolated restore and every original-path
+lookup before pruning, then reverified the archive. Retained diagnostic log
+references resolve through the index. Rechecked both installation backup
+manifests and kept protected records and active roots in place.
+
+Pinned the existing clean normalization fixture `main` at
+`ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. Retained a verified source-only Git
+bundle because the controlled run's source was under `/tmp`. The exact
+test-only mapping and bounded packet passed static inspection. The new store,
+saved policy, owner-designated key path and actual delegated-worker confinement
+proof remain prerequisites. No HTTP call, inference, lease, activation, service
+change, migration, task execution or publication occurred. The original
+certified-offer proposal remains unchanged. See the conditional sequence in
+`CONTINUATION.md` and receipts in
+`artifacts/runs/adapter-readiness-20261105T203747Z`.
+
+## 2026-11-05 — 9187 disposable adapter attempt held before authentication
+
+Started the exact `fcf74ce` API and worker on the new 9187 store and restored
+the pinned synthetic normalization fixture. Verified the mode-0600 preparation
+policy against store inode `64512:6692914` and read back enabled preferred
+`pilot-qwen38-27b` at saved revision 1 with unspecified effort and no fallback.
+Both actual Runtime confinement probes passed in the same delegated PID that
+became the worker. Readback covered CPU, RAM, swap, tasks and per-file limits.
+Landlock, untrusted socket denial, trusted private loopback, denial of host
+marker and IPC access, descendant reaping and cgroup removal passed.
+
+Inspected the unsubmitted intake at desktop and phone widths. Offline request
+serialization used the actual store policy and a placeholder request ID. The
+owner-designated key path was requested and remained missing. Held with empty
+intake, zero identity and generation requests, no human review or certification,
+and all execution and publication authority counts at zero. Stopped the owned
+disposable processes and retained the store and evidence. Counted headroom was
+77,963,150 bytes. See `CONTINUATION.md` and
+`artifacts/runs/adapter-9187-20261105T2052Z-krFBiM/RESULT.json`.
+
+## 2026-11-05 — Fresh 9187 real-adapter attempt held at scenario validation
+
+On checkpoint `fcf74ce`, the new disposable store, pinned fixture, store-bound
+policy and actual delegated-worker probes passed preflight. The worker opened
+the owner-designated private credential read-only. A disposable audit guard
+counted and bounded the requests through LocalProvider and removed the
+credential path from the worker environment when the identity request began.
+The browser admitted one exact fixture submission.
+
+The identity GET and structured POST both identified `pilot-qwen38-27b`.
+The exchange took 27.003 seconds and reported 579 completion tokens. The
+schema rejected the first generated scenario because module scenarios support
+a scalar first return only. The held record contains zero accepted scenarios.
+No human review, scope decision, controls, offer, retry or execution followed.
+Final authority counts were all zero. Closed owned processes, retained the
+store and partial evidence, and left 9487 untouched. Counted headroom was
+77,465,659 bytes. See `CONTINUATION.md` and
+`artifacts/runs/adapter-9187-20261105T212620Z-KDcdGhku/RESULT.json`.
+
+## 2026-11-05 — Grounded module-fixture contract repaired offline
+
+Reconstructed the retained 9187 packet and POST byte for byte by matching their
+receipt hashes. The old schema exposed module setup and observation paths that
+the shared validator rejects. Neither prompt explained the module restriction.
+The adapter only decoded JSON before validation. The retained hold proves a
+module with nonempty setup and/or an observation path; the body was not retained.
+
+Scoped the fix to grounded generation. Fixture-specific response branches expose
+existing structure while preserving the shared persisted contract and compiler.
+The system prompt specifies the module's scalar first return and when to ask for
+clarification. The original normalization example is expressible. Tested both
+possible causes of the retained error, adjacent malformed shapes and the valid
+counterpart through the local parser and disposable worker. Invalid responses
+granted no authority. Controlled review and Lua preparation certified the valid
+counterpart with no execution authority. Local GBNF checks, 91 focused backend
+tests and `wb check` passed. No inference or browser rerun occurred.
+
+Verified all 57 retained hashes. Entry headroom was 73.88 MiB under the same
+512 MiB cap. The separate 60-minute acceptance proposal now pins the repaired
+checkpoint and keeps the existing task, one exchange and certified-offer stop.
+See `CONTINUATION.md` and `artifacts/runs/grounded-module-contract-20261105/CHECKPOINT.json`.
