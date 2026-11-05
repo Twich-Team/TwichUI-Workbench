@@ -281,6 +281,8 @@ def retry(engine, identity, job_id):
         row = require(connection, intakes, identity)
         if job['intake_id'] != identity:
             raise HTTPException(404, 'Job not found for this request.')
+        if job['kind'] == 'behavioral_preparation':
+            raise HTTPException(409, 'Preparation retains one durable claim. Inspect its outcome or recovery hold; retry cannot launch duplicate preparation.')
         if job['kind'] == 'decomposition':
             validate_approval(connection, require(connection, proposal_decisions, job['payload']['approval_id']))
         if job['payload'].get('scope_revision', 0) != human_scope(connection, identity)['revision']:

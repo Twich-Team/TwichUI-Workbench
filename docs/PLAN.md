@@ -1,3 +1,14 @@
+# Current authorized connection — November 5, 2026
+
+Continue clean7c7ca48 for grounded ordinary Lua regression scenario planning and
+application-owned durable preparation after existing independent scope review.
+60minutes19:31:02–20:31:02UTC (12:31:02–13:31:02Denver), including checks/checkpoint.
+Controlled adapters only in this session. Two supported requests, invalid/stale /
+denied/duplicate/failure paths, targeted checks and inspected browser evidence.
+Entry35.11MiB headroom; reserve20MiB; unchanged512MiB cap. No new planner, queue,
+certification owner or execution authority. No inference/live changes/migration /
+publication/spending/privilege/install/push. Historical plans below remain context.
+
 # Implementation plan
 
 Current owner-authorized package (2026-11-05): **reusable behavioral evidence for

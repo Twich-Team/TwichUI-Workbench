@@ -1462,3 +1462,52 @@ typed contract, original approval, decomposition, certificate or offer snapshot.
 Missing-offer views may show that precise retained failure. This projection grants
 nothing and cannot make missing/stale evidence eligible. Retry/recovery/transactional
 integration of application-owned preparation remains separate work.
+
+## Grounded scenario planning and durable preparation dispatch — November 5, 2026
+
+The existing regression planning job may call the existing planning adapter's
+`generate(packet, schema)` interface. A private server-owned preparation config
+(`WORKBENCH_PREPARATION_CONFIG`) pins the SQLite path/device/inode, fixed repository,
+allowed regression class, owned output root and bounded local author identity.
+It is installation input, never model/request-supplied permission, an execution
+budget, a provider-policy acknowledgment or operational activation. Generation is
+explicitly enabled there; absent configuration preserves historical deterministic
+scope preparation. Production routing/model-policy acceptance remains unfinished.
+
+Committed Git blobs supply bounded source/test/harness context and hashes. The
+response must match original request/feedback/base/test, evidence and policy
+bindings. Strict scenario data rejects extra permission/code/certification fields,
+invented operations and unsupported source/fixture mappings. Automatic mapping is
+a conservative lexical screen for explicit literal loaders and returned function /
+receiver shapes; it is not a Lua semantic proof. Unknown/dynamic mappings require
+specific technical clarification. Expected/incorrect outcomes remain proposed
+intent, checked by independent human expectation confirmation in the existing scope
+review. Optional `scenario_grounding` enters the typed contract and review digest;
+historical contracts omit it. Current preparation policy is revalidated during
+preparation and canonical offer reconstruction; drift requires a fresh proposal.
+
+Scenario generation uses the existing job claim and model-attempt ledger, with
+actual adapter attribution and unavailable usage preserved. Interrupted generation
+records `interrupted_unknown`; no automatic request replay or fallback. The saved
+original remains immutable. Existing explicit planning retry limits still apply.
+This does not complete Workbench model-policy/capacity integration.
+
+After the applied expectation/scope decision, existing single-task decomposition
+atomically enqueues kind `behavioral_preparation` in the SAME `planning_jobs` journal,
+using its existing intake/kind/revision uniqueness and stable task/approval ref.
+No new table, queue, registry, certificate owner or public preparation endpoint.
+The existing separate application worker dispatches `trusted_preparation` with
+private installation inputs. A committed PID/start/boot claim precedes any output /
+checker process. Exact replay, another worker and ordinary HTTP retries cannot
+launch duplicate preparation. Restart can only reconstruct an already complete,
+independently certified package/offer; partial or unknown work retains a specific
+hold and never reruns the preparer. Failed/denied/stale preparation remains in its
+original job and create-only artifacts; the browser shows its stage and hold without
+a misleading Retry planning button. Broader recovery/retry/fallback remains open.
+
+The same Runtime/provision/profile/canonical-offer owners run all base/positive /
+vacuous/wrong-behavior controls. Generation never certifies itself. Preparation
+creates no execution grant/request/session/publication permission. A resulting offer
+still needs the existing explicit run/draft budget and current real runtime gates.
+Controlled adapters/Lua and simulated boundary telemetry demonstrate machinery only;
+installation, real confinement/model acceptance and unattended delivery remain open.

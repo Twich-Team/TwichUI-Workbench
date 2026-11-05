@@ -365,6 +365,15 @@ def preparation_hold(c, proposal):
     from workbench.db import planning_jobs
     from workbench.intake import proposal_view
     contract = contract_for(c, proposal)
+    if contract and contract.get('scenario_grounding'):
+        from workbench.trusted_preparation import validate_reviewed_policy
+        from workbench.regression_preparation import repository
+        try:
+            validate_reviewed_policy(c.engine, contract)
+            if repository()[1] != contract['resolved_base']:
+                return 'Preparation held: committed source changed from the reviewed scenario base. Request a fresh grounded proposal.'
+        except (ValueError, OSError) as error:
+            return 'Preparation held: ' + str(error)
     if contract and contract['scope_missing']:
         return 'Preparation held: ' + ' '.join(contract['scope_missing'])
     prepared = (contract or {}).get('behavioral_evidence')
@@ -375,6 +384,21 @@ def preparation_hold(c, proposal):
         outcome = payload.get('behavioral_preparation_outcome') or {}
         if (outcome.get('status') == 'hold' and outcome.get('review_binding') == proposal_view(c, proposal)['binding']):
             return 'Last behavioral preparation held: ' + outcome['message']
+        # Current application preparation is journaled in the existing job owner.
+        # Read it directly so a lost diagnostic projection cannot hide a failure.
+        from workbench.db import proposal_decisions
+        binding = proposal_view(c, proposal)['binding']
+        preparation = c.execute(select(planning_jobs).join(proposal_decisions,
+            planning_jobs.c.payload['ref']['approval_id'].as_string() == proposal_decisions.c.id).where(
+            planning_jobs.c.intake_id == proposal['intake_id'], planning_jobs.c.revision == proposal['revision'],
+            planning_jobs.c.kind == 'behavioral_preparation', proposal_decisions.c.binding == binding,
+            proposal_decisions.c.status == 'applied')).mappings().first()
+        if preparation:
+            if preparation['status'] == 'failed':
+                return 'Behavioral preparation held: ' + preparation['message']
+            if preparation['status'] in {'queued', 'running'}:
+                return ('Reviewed scenarios are queued for the application worker. No further preparation command is required.'
+                        if preparation['status'] == 'queued' else 'The application worker is preparing reviewed behavioral controls. Certification is not complete.')
         if prepared['holds']:
             return 'Behavioral preparation held: ' + ' '.join(prepared['holds'])
         return 'Behavioral examples require independent expectation review and fresh positive, vacuous and wrong-behavior control checks at the reviewed base. No certified offer exists yet.'

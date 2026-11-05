@@ -20,6 +20,7 @@ from workbench import (
     pr_preparation,
     real_execution,
     task_sessions,
+    trusted_preparation,
 )
 
 log = logging.getLogger("workbench.worker")
@@ -90,7 +91,7 @@ def process_one(engine, crash=None):
     return True
 
 
-def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None):
+def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, planning_adapter=None):
     """One production worker iteration; injectable controlled adapters are internal only."""
     if stop_event is not None and stop_event.is_set():
         return False
@@ -104,7 +105,8 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None):
         or task_sessions.process_one(engine, stop_event=stop_event)
         or real_execution.process_one(engine, runtime=runtime, stop_event=stop_event)
         or planning_worker.apply_one(engine)
-        or planning_worker.process_one(engine, stop_event=stop_event)
+        or planning_worker.process_one(engine, stop_event=stop_event, adapter=planning_adapter)
+        or trusted_preparation.process_one(engine)
     )
 
 

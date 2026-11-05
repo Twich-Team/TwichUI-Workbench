@@ -433,7 +433,14 @@ class VerificationProfileSelection(StrictModel):
     execution_authorized: Literal[False] = False
 
 
+class ScenarioGrounding(StrictModel):
+    evidence_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
+    policy_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
+    basis: Literal['demo', 'local']
+
+
 class RegressionTaskContract(StrictModel):
+    scenario_grounding: ScenarioGrounding | None = Field(default=None, exclude_if=lambda value: value is None)
     behavioral_evidence: BehavioralPreparation | None = Field(default=None, exclude_if=lambda value: value is None)
     verification_profile: VerificationProfileSelection | None = Field(default=None, exclude_if=lambda value: value is None)
     category: Literal['lua-regression-tests', 'lua-offline-bugfix'] = 'lua-regression-tests'
@@ -481,7 +488,7 @@ class ProposalView(StrictModel):
 class PlanningJobView(StrictModel):
     diagnostics: dict[str, str | int | float] = {}
     id: str
-    kind: Literal['planning', 'decomposition']
+    kind: Literal['planning', 'decomposition', 'behavioral_preparation']
     revision: int
     status: Literal['queued', 'running', 'completed', 'failed']
     attempts: int

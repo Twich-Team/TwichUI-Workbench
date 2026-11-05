@@ -64,6 +64,7 @@ def main():
             "reviewed-offer-setup", "reviewed-offer-plan", "reviewed-offer-prepare",
             "reviewed-offer-controller", "reviewed-offer-stale",
             "reviewed-offer-scope", "reviewed-offer-certify",
+            "reviewed-offer-automatic-setup", "reviewed-offer-automatic-worker", "reviewed-offer-automatic-denied-worker",
             "reviewed-offer-scenario-plan", "reviewed-offer-scenario-certify",
             "reviewed-offer-scenario-wrong-plan", "reviewed-offer-scenario-certify-hold",
             "task-pr-setup",

@@ -6,6 +6,7 @@ from scripts.fixture_ctl import fixture_path
 from workbench import task_sessions, task_session
 
 path = fixture_path(Path(os.environ['WORKBENCH_DB']))
+os.environ['WORKBENCH_PREPARATION_CONFIG'] = str(path.parent / 'automatic-workflow/preparation.json')
 root = path.parent / 'controlled-session-owner'
 root.mkdir(mode=0o700, exist_ok=True)
 task_sessions.ROOT = root

@@ -197,8 +197,9 @@ isolated operator diagnostic, never part of ordinary tests.
 For additions to existing Lua regression tests, select **Prepare a Lua
 regression-test task** on a feature request. Describe the behavior, enter observable
 expected results, and name up to three existing `tests/test_*.lua` files (in the
-description or path field). The existing worker prepares a proposal without a
-planning model or per-task template registration. An operator must configure an
+description or path field). The existing worker prepares deterministic scope and, when privately configured,
+requests grounded scenario data through the existing planning adapter. No per-task
+template registration is required. An operator must configure an
 owned TwichUI checkout through the existing `WORKBENCH_RESEARCH_ROOT`; preparation
 uses its committed HEAD and ignores dirty working files. Missing or ambiguous
 evidence is reported for clarification, with candidate paths left unselected.
@@ -206,10 +207,12 @@ evidence is reported for clarification, with candidate paths left unselected.
 The proposed contract records repository/base, behavior/acceptance, writable test
 paths, unrun verification commands, independent-check requirements, resource limits
 and the draft destination `Twich-Team/TwichUI:main`. Scope approval is separate.
-Preparation creates no run offer, recipe, grant or publication authority. Independent
-semantic expectation review remains required. The bounded scenario compiler below
-now generates oracle/controls for supported shapes through an internal preparer;
-ordinary model-draft generation and preparer dispatch remain unimplemented. This is
+Scope preparation grants no execution or publication authority. Independent
+semantic expectation review remains required in that same scope review. After its
+applied approval, the application worker durably dispatches the existing bounded
+scenario compiler and independent Runtime/profile checks, then registers a certified
+offer. This connection is verified with controlled planning responses and Lua. Real
+model-policy/runtime acceptance and installation remain unfinished. This is
 not a generally usable task-to-PR service.
 Local base inspection does not verify the current remote branch or live-game behavior.
 
@@ -298,7 +301,7 @@ it contains denied-path rules, with no authentication material.
 
 ### Bind a reviewed contract to a certified offer
 
-The next reusable regression preparation slice compiles declarative behavioral
+Reusable regression preparation compiles declarative behavioral
 examples into the frozen oracle and positive/vacuous/wrong-behavior controls. It
 supports one existing test file, up to three scalar observations through a returned
 module function or the harness's exported client functions. No per-task Lua package,
@@ -307,13 +310,49 @@ The browser separately confirms the exact fixture/operation/inputs/expected outc
 model authorship and that confirmation do not replace independent control checks.
 Missing examples and failed expectation checks have specific holds.
 
-`trusted_preparation.prepare_regression` is the internal, reusable offline entry
-through the existing Runtime/profile/offer owners. Controlled `scenario_response`
-data exercises the existing planning owner without inference. **Ordinary natural
-language requests do not yet automatically call a model or dispatch this preparer.**
-Policy-bound draft generation, application-owned preparation configuration/dispatch
-and installation remain open. This is not a new user CLI workflow; `prepare-offer`
-below still consumes existing evidence. See `docs/CONTINUATION.md` for boundaries.
+`trusted_preparation.prepare_regression` remains the internal entry through existing
+Runtime/profile/offer owners. The existing application worker now dispatches it from
+the existing planning-job journal after independent scope/expectation review and
+single-task decomposition. No individual user/developer preparation command is
+needed. Controlled tests cover module-return and client-state requests; this is a
+bounded supported subset, not arbitrary Lua planning. Literal committed module /
+client loaders and explicit exported receiver mappings are screened conservatively;
+unknown or dynamic mappings produce specific clarification/holds. Generation is
+proposed intent; it cannot certify itself or supply permissions.
+
+Installation input is a private (0600), existing absolute JSON file selected by
+`WORKBENCH_PREPARATION_CONFIG`, shared by API and worker. It contains:
+
+```json
+{
+  "version": 1,
+  "database": "/absolute/existing/workbench.sqlite3",
+  "database_identity": [123, 456],
+  "repository": "Twich-Team/TwichUI",
+  "allowed_classes": ["lua-regression-tests"],
+  "output_root": "/absolute/existing/owned/preparation-output",
+  "identity": {"name": "Configured author", "email": "configured@example.invalid"},
+  "scenario_generation": true
+}
+```
+
+The example device/inode numbers are placeholders: installation must use the actual
+store's `st_dev`/`st_ino`. Root and identity are trusted installation inputs, never
+request/model output. This config enables no implementation, publication, provider
+fallback or extra spending. The existing `WORKBENCH_RESEARCH_ROOT` and planner
+adapter configuration still apply. No installation or live model activation was
+performed here. Tests inject controlled responses into the ordinary adapter seam;
+a real adapter/model-policy/usage acceptance step is still required.
+
+Scenario response and reviewed contract bind original request, retained feedback,
+committed base/source hashes, schema and preparation policy. Changed policy/base
+requires fresh preparation/review. The job stores a claim before checks start;
+retries/restarts cannot duplicate preparation. Complete independently certified
+artifacts reconcile without rerunning checks; partial/unknown work holds for
+inspection. This bounded safe recovery does not complete general retries/fallback,
+runtime lifecycle, unattended delivery consistency or installation. `prepare-offer`
+below remains an operator tool for existing evidence, not the ordinary workflow.
+See `docs/CONTINUATION.md` for exact boundaries.
 
 Trusted local operators can now register an **already independently certified**
 preparation through the supported wrapper, without database edits or an owner

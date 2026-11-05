@@ -16,7 +16,7 @@ from workbench.visual_scope import digest
 
 
 class Data(BaseModel):
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra='forbid', strict=True)
 
 
 Scalar = StrictBool | StrictInt | StrictFloat | StrictStr | None

@@ -45,6 +45,40 @@ def advance(engine, path, action):
     os.environ['WORKBENCH_RESEARCH_ROOT'] = str(path.parent / 'reviewed-research/source')
     task_sessions.ROOT = path.parent / 'controlled-session-owner'
     task_session.ROOT = task_sessions.ROOT
+    if action.startswith('automatic-'):
+        from unittest.mock import patch
+        from test_grounded_workflow import controlled_source, policy_file, ControlledPlanner, ControlledPreparer
+        from workbench import worker, trusted_preparation
+        parent = path.parent / 'automatic-workflow'
+        parent.mkdir(mode=0o700, exist_ok=True)
+        if action == 'automatic-setup':
+            research = path.parent / 'reviewed-research'
+            research.mkdir(mode=0o700, exist_ok=True)
+            controlled_source(research)
+            policy_file(engine, parent)
+            return
+        assert action in {'automatic-worker', 'automatic-denied-worker'}
+        if action == 'automatic-denied-worker':
+            policy = json.loads((parent / 'preparation.json').read_text())
+            policy['allowed_classes'] = []
+            (parent / 'preparation.json').write_text(json.dumps(policy))
+        os.environ['WORKBENCH_RESEARCH_ROOT'] = str(path.parent / 'reviewed-research/source')
+        os.environ['WORKBENCH_PREPARATION_CONFIG'] = str(parent / 'preparation.json')
+        adapter = ControlledPlanner()
+        with patch.object(trusted_preparation, 'Runtime', ControlledPreparer):
+            # Tick the actual generic worker, never call a per-task preparer.
+            for _ in range(4):
+                if not worker.tick(engine, planning_adapter=adapter):
+                    break
+        with engine.connect() as c:
+            from workbench.db import planning_jobs, model_attempts, real_execution_grants, real_execution_requests, real_publications
+            report = dict(jobs=[dict(id=j['id'],kind=j['kind'],status=j['status'],message=j['message'])
+                for j in c.execute(select(planning_jobs)).mappings()], adapter_calls=len(adapter.calls),
+                model_attempts=[dict(source=a['source'],outcome=a['outcome'],model=a['actual_model']) for a in c.execute(select(model_attempts)).mappings()],
+                grants=len(c.execute(select(real_execution_grants)).all()), requests=len(c.execute(select(real_execution_requests)).all()),
+                publications=len(c.execute(select(real_publications)).all()))
+        print(json.dumps(report))
+        return
     if action in {'scenario-plan', 'scenario-wrong-plan'}:
         from workbench.regression_evidence import input_binding
         with engine.connect() as c:

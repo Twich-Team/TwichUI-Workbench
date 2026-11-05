@@ -126,6 +126,9 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
 
     linked = task_execution.snapshot(connection, **ref)
     reviewed = linked['proposal_review'].get('task_contract')
+    if reviewed:
+        from workbench.trusted_preparation import validate_reviewed_policy
+        validate_reviewed_policy(connection.engine, reviewed)
     if not reviewed or linked['dependencies']:
         raise ValueError('A current reviewed Lua contract without prerequisites is required')
     profile = select(reviewed['category'])

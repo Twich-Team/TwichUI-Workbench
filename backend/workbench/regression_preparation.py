@@ -12,13 +12,14 @@ import re
 import select as io_select
 import subprocess
 import time
-from uuid import UUID, uuid5
+from uuid import UUID, uuid5, uuid4
 
 from fastapi import HTTPException
+from pydantic import ValidationError
 from sqlalchemy import select
 
 from workbench import intake
-from workbench.db import intakes, planning_jobs, proposals, write_transaction
+from workbench.db import intakes, planning_jobs, proposals, model_attempts, write_transaction
 from workbench.schemas import ProposalContent, RegressionTaskContract
 from workbench.real_execution import LIMITS
 from workbench.real_workspace import PRELUDE
@@ -255,12 +256,31 @@ def proposal_content(original, contract):
     ).model_dump(mode='json')
 
 
-def process_one(engine, *, fail_before_commit=False, scenario_response=None):
+def process_one(engine, *, fail_before_commit=False, scenario_response=None, adapter=None, stop_event=None):
     # Git inspection happens outside the writer transaction. Revalidate everything
     # before atomic publication; concurrent processors may inspect but cannot duplicate.
-    with engine.connect() as c:
+    with write_transaction(engine) as c:
+        # A crashed scenario request is never automatically repeated. Reuse the
+        # existing attempt ledger and leave an explicit retry/unknown outcome.
+        running = c.execute(select(planning_jobs).join(intakes, planning_jobs.c.intake_id == intakes.c.id).where(
+            planning_jobs.c.kind == 'planning', planning_jobs.c.status == 'running',
+            intakes.c.payload['regression_tests'].as_string().is_not(None))).mappings().all()
+        from workbench.real_execution import alive, owner_identity
+        for active in running:
+            owner = active['payload'].get('scenario_generation_claim')
+            if owner and not alive(owner):
+                c.execute(planning_jobs.update().where(planning_jobs.c.id == active['id']).values(
+                    status='failed', finished_at=intake.now(), lease_until=None,
+                    message='Scenario generation was interrupted; provider completion is unknown. No automatic replay or fallback. Review retained input before an explicit retry.'))
+                c.execute(model_attempts.update().where(model_attempts.c.id == active['lease']).values(
+                    outcome='interrupted_unknown', finished_at=intake.now()))
+                current = intake.require(c, intakes, active['intake_id'])
+                if (current['revision'] < active['revision']
+                        and intake.human_scope(c, current['id'])['revision'] == active['payload'].get('scope_revision')):
+                    c.execute(intakes.update().where(intakes.c.id == current['id']).values(status='failed'))
+                return True
         row = c.execute(select(planning_jobs).join(intakes, planning_jobs.c.intake_id == intakes.c.id).where(
-            planning_jobs.c.status == 'queued', intakes.c.payload['regression_tests'].as_string().is_not(None),
+            planning_jobs.c.status == 'queued', planning_jobs.c.kind.in_(['planning', 'decomposition']), intakes.c.payload['regression_tests'].as_string().is_not(None),
         ).order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not row:
             return False
@@ -273,18 +293,87 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None):
             planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning',
             planning_jobs.c.revision <= job['revision']).order_by(planning_jobs.c.revision.desc()).limit(9)).scalars())
     feedback = '\n'.join(dict.fromkeys(p['feedback'] for p in reversed(notes) if p.get('feedback')))
+    adapter_used, generated_failure, packet, model, basis = None, None, None, None, None
+    claimed_generation = False
+    generation = job['kind'] == 'planning' and scenario_response is None and bool(os.environ.get('WORKBENCH_PREPARATION_CONFIG'))
+    if generation:
+        from workbench import grounded_scenarios, trusted_preparation, planning_worker
+        from workbench.planning_provider import provider, PlanningUnavailable
+        try:
+            policy = trusted_preparation.configuration(engine)
+            if not policy['scenario_generation']:
+                raise ValueError('Preparation policy denies scenario generation for this task class.')
+            if (job['payload'].get('scope_revision') != scope['revision'] or scope['stage'] != 'implementation'
+                    or job['revision'] <= original['revision']):
+                raise ValueError('Human scope or proposal changed before scenario generation; review the current request.')
+            # Same job/lease and accounting owners; duplicate workers never call an
+            # adapter for an already claimed job. No automatic inference retry.
+            with write_transaction(engine) as c:
+                if intake.require(c, planning_jobs, job['id']) != job:
+                    return True
+                lease = str(uuid4())
+                job['payload'] = {**job['payload'], 'scenario_generation_claim': owner_identity()}
+                job.update(status='running', lease=lease, attempts=job['attempts']+1, message='Preparing grounded behavioral examples for independent review.')
+                c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
+                    status='running', lease=lease, payload=job['payload'], attempts=job['attempts'], message=job['message']))
+                c.execute(model_attempts.insert().values(id=lease, job_id=job['id'], task_id=original['id'],
+                    purpose='planning', source='unknown', outcome='running', started_at=intake.now(),
+                    routing_reason='Existing planning adapter; bounded preparation policy. Workbench execution model-policy integration remains pending.'))
+            claimed_generation = True
+            base_contract = prepare(original['payload'], feedback)
+            packet = grounded_scenarios.context(original['payload'], feedback, base_contract, policy)
+            if len(json.dumps(packet).encode()) > 24000:
+                raise ValueError('Grounded scenario context exceeds the planning input budget; narrow the request.')
+            adapter_used = adapter or provider(stop_event)
+            raw, model, basis = adapter_used.generate(packet, grounded_scenarios.Response)
+            if len(json.dumps(raw, allow_nan=False).encode()) > 24000 or basis not in {'demo', 'local'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
+                raise ValueError('Invalid bounded scenario provider response')
+            parsed = grounded_scenarios.Response.model_validate(raw)
+            if (parsed.input_sha256 != packet['input_sha256'] or parsed.evidence_sha256 != packet['evidence_sha256']
+                    or parsed.policy_sha256 != packet['policy_sha256']):
+                raise ValueError('Generated scenario evidence/request/policy bindings are stale; prepare a fresh proposal.')
+            grounded_scenarios.validate_mapping(parsed.draft, packet)
+            # Re-read committed evidence and private policy after the response.
+            if grounded_scenarios.context(original['payload'], feedback, prepare(original['payload'], feedback),
+                    trusted_preparation.configuration(engine)) != packet:
+                raise ValueError('Committed source or preparation policy changed during generation; review fresh evidence.')
+            scenario_response = parsed.model_dump(exclude={'evidence_sha256', 'policy_sha256'})
+            scenario_response['model'] = model  # Actual adapter attribution, never a generated identity claim.
+        except ValidationError as error:
+            issue = error.errors(include_input=False, include_context=False)[0]
+            location = '.'.join(map(str, issue['loc'])) or 'response'
+            generated_failure = f'Scenario preparation rejected structured data at {location}: {issue["msg"]}'[:1200]
+        except (ValueError, OSError, PlanningUnavailable) as error:
+            generated_failure = str(error)[:1200]
     contract = prepare(original['payload'], feedback, scenario_response) if job['kind'] == 'planning' else None
+    if generation and packet and not generated_failure:
+        contract['scenario_grounding'] = dict(evidence_sha256=packet['evidence_sha256'],
+            policy_sha256=packet['policy_sha256'], basis=basis)
+    if contract and generated_failure:
+        from workbench.regression_evidence import expectation_digest
+        prepared = contract['behavioral_evidence']
+        prepared['holds'].append(generated_failure)
+        prepared['status'] = 'hold'
+        prepared['review_digest'] = expectation_digest(prepared)
+        contract['execution_blockers'].append(generated_failure)
+        contract['scope_missing'].append(generated_failure)
+    if generation and contract['behavioral_evidence']['holds']:
+        # New generated ambiguity needs clarification, not a scope-only approval
+        # of guessed behavior. Historical deterministic scope reviews stay intact.
+        contract['scope_missing'] = list(dict.fromkeys([*contract['scope_missing'], *contract['behavioral_evidence']['holds']]))
     if contract and len(notes) > 8:
         requirement = 'More than eight preparation revisions need an explicit consolidated request; older requirements must not be silently dropped.'
         contract['scope_missing'].append(requirement)
         contract['execution_blockers'].append(requirement)
+    publication_failed = False
     with write_transaction(engine) as c:
         current = intake.require(c, planning_jobs, job['id'])
         if current != job:
             return True
         fresh = intake.require(c, intakes, original['id'])
+        scope_changed = fresh != original or intake.human_scope(c, original['id']) != scope
         try:
-            if (fresh != original or intake.human_scope(c, original['id']) != scope
+            if (scope_changed
                     or job['payload'].get('scope_revision') != scope['revision']
                     or scope['stage'] != 'implementation'):
                 raise ValueError('The human scope changed. Review it before preparing this test-only task.')
@@ -294,8 +383,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None):
                 content = proposal_content(original['payload'], contract)
                 identity = str(uuid5(UUID(original['id']), 'lua-test-preparation-' + str(job['revision'])))
                 c.execute(proposals.insert().values(id=identity, intake_id=original['id'], revision=job['revision'],
-                    scope_revision=scope['revision'], content=content, model=MODEL, basis='preparation', created_at=intake.now()))
-                payload = {**job['payload'], 'prepared_proposal_id': identity, 'task_contract': contract,
+                    scope_revision=scope['revision'], content=content, model=model or MODEL, basis='preparation', created_at=intake.now()))
+                payload = {**job['payload'], **({'scenario_generation': dict(model=model, basis=basis, evidence_sha256=packet['evidence_sha256'] if packet else None, policy_sha256=packet['policy_sha256'] if packet else None, diagnostics=getattr(adapter_used, 'diagnostics', {}))} if generation else {}), 'prepared_proposal_id': identity, 'task_contract': contract,
                     'basis': 'preparation', 'evidence': [], 'result': dict(summary=content['summary'],
                         clarification=' '.join(contract['scope_missing'])[:800], evidence_ids=[], related_ids=[], proposal=content)}
                 c.execute(intakes.update().where(intakes.c.id == original['id']).values(revision=job['revision'],
@@ -303,13 +392,25 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None):
             else:
                 from workbench.planning_worker import materialize_single_task
                 payload = {**job['payload'], 'decomposition': materialize_single_task(c, original, job, MODEL)}
+                # Durable preparation intent commits atomically with task identity.
+                task_id = 'intake-' + original['id'] + '-' + str(job['revision']) + '-implementation'
+                selected = intake.require(c, proposals, job['payload']['proposal_id'])
+                prepared = (contract_for(c, selected) or {}).get('behavioral_evidence') or {}
+                if prepared.get('status') == 'review_required' and not prepared['holds']:
+                    intake.enqueue(c, original['id'], 'behavioral_preparation', job['revision'],
+                        dict(ref=dict(intake_id=original['id'], task_id=task_id, approval_id=job['payload']['approval_id'])))
             c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(status='completed',
-                payload=payload, model=MODEL, finished_at=intake.now(),
-                message='Reusable Lua regression-test scope prepared. No model, run offer or execution permission created.'))
+                payload=payload, model=model or MODEL, finished_at=intake.now(), lease=None, lease_until=None,
+                message='Grounded behavioral proposal prepared for independent review; no certification or execution authority.' if generation else 'Reusable Lua regression-test scope prepared. No model, run offer or execution permission created.'))
         except (ValueError, HTTPException) as error:
+            publication_failed = True
             c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(status='failed',
                 finished_at=intake.now(), message=str(error)[:800]))
-            c.execute(intakes.update().where(intakes.c.id == original['id']).values(status='failed'))
+            if not scope_changed:
+                c.execute(intakes.update().where(intakes.c.id == original['id']).values(status='failed'))
+        if claimed_generation:
+            outcome = 'superseded' if scope_changed else 'failed' if generated_failure or publication_failed else 'completed'
+            planning_worker.finish_attempt(c, job, adapter_used, model, basis, outcome)
         if fail_before_commit:
             raise RuntimeError('Simulated preparation crash before commit')
     return True

@@ -1,126 +1,142 @@
-# Reusable regression evidence checkpoint — November 5, 2026
+# Grounded scenario workflow checkpoint — November 5, 2026
 
-Continue from the clean local source checkpoint recorded in
-`artifacts/runs/regression-evidence-20261105T185210Z/CHECKPOINT.json`. Its parent is
-`7e644da8dc61b845e36ab9e9393d03af2683b0ac`. Preserve earlier evidence/checkpoints,
-modular monolith, existing owners and separate durable worker.
+Continue from the clean local checkpoint recorded in
+`artifacts/runs/grounded-workflow-20261105T193102Z/CHECKPOINT.json`.
+Parent: `7c7ca4878e4a8847320a2a8c7be43a113990169f`. Preserve that checkpoint and
+preceding compiler evidence in `artifacts/runs/regression-evidence-20261105T185210Z`.
+One modular monolith, existing owners and separate durable worker remain intact.
 
-This authorized engineering session started18:52:10UTC (11:52:10America/Denver),
-with a hard stop19:52:10UTC (12:52:10Denver),60minutes including checks/checkpoint /
-handoff. Controlled model responses and ordinary tests only. No inference, real
-execution demonstration, lease/probe, live-service/data update, migration,
-publication, spending, privilege change, installation or remote push occurred.
-The source does not install itself on9487;8765 remains untouched.
+Authorized session: 19:31:02–20:31:02 UTC /12:31:02–13:31:02 America/Denver,
+60 minutes including checks and local checkpoint. Controlled responses and ordinary
+checks only. No real inference, lease/probe, live-service/data update, migration,
+publication, spending, privilege expansion, installation or remote push. Source
+changes were not installed on9487. Port8765 was untouched.
 
-## What manual preparation was removed
+## What now connects
 
-For the supported declarative shapes, the developer no longer writes per-task
-oracle Lua, a passing test solution, three custom control patches or recipe
-registration code. The reusable compiler generates the positive/vacuous/wrong-
-behavior additions and mutation oracle from reviewed scenario DATA, then the
-existing provision/Runtime/profile/offer owners prepare and certify the evidence.
-This is one reusable preparation slice within unfinished M5, not a generally usable
-ordinary-request-to-PR workflow.
+A supported ordinary browser request (regression checkbox, intended behavior,
+observable acceptance and one existing test selected in prose or the path field)
+can reach a proposed scenario through the existing planning adapter interface.
+After the independent expectation confirmation in the existing scope review, the
+same application worker applies the decision, materializes the stable task and
+journals/dispatches preparation. No per-task recipe registration, oracle/control
+coding, hand-authored passing solution or individual preparation CLI is needed.
 
-The strict scenario grammar supports one existing focused test file, up to three
-examples, committed Lua source selections, a returned module function or exported
-harness client function, scalar arguments, bounded fixture setup, and a scalar
-first-return or client-field expectation plus a meaningful incorrect outcome to reject. It can express methods and nil values;
-unsupported shapes, multiple test files and unmet bounds hold. Expected outcomes
-are never derived merely by observing current source behavior.
+This is demonstrated with CONTROLLED adapters and actual Lua for two distinct
+requests: a returned module's normalization result and a client operation's stored
+trimmed-name field. Tests drive ordinary intake/decisions and the generic worker;
+browser fixtures tick that worker, never invoke a task-specific preparer. This is
+machinery acceptance, not proof of real natural-language reasoning or installation.
 
-A generated positive is only a verifier control. The incorrect observation is
-reviewed model/domain data, not a compiler-invented arbitrary sentinel. A length-only
-check must not establish case normalization: the tests reject that weak candidate
-using a same-length, wrong-case counterexample. Existing tests must miss the
-example; the positive must distinguish its exact-input faulty observation; a
-vacuous addition and a real but overly permissive assertion admitting the faulty
-result must not. Every control still passes syntax/focused/full-suite checks.
-The unchanged profile certification independently evaluates frozen facts, source /
-framework/base/suite identities, scope and control results. Actual runtime
-confinement remains a separate prerequisite. Candidate test globals cannot replace
-the generated oracle's verdict/exit functions or inspect its wrapper upvalues.
+Generation uses `generate(packet, schema)` on the existing planning adapter. The
+packet contains immutable original input/retained feedback, fixed repository,
+committed base and bounded full test/harness/source Git blobs with hashes, supported
+scenario grammar and fixed additive-tests-only policy. Response request/evidence /
+policy bindings must match. Actual model attribution comes from the adapter, never
+its generated label. Strict data rejects arbitrary Lua, permissions/certification,
+invented symbols, unsupported actions and source/fixture mismatches.
 
-## Determination versus reasoning versus human input
+The automatic mapping screen supports explicit literal committed loaders and
+returned function/receiver mappings. It removes comment/string decoys; dynamic or
+unrecognized mappings hold for specific technical clarification. It is a lexical
+screen, not a semantic proof. Source selection is bounded to six Lua source blobs,
+12KiB per context file and18KiB total source text, inside the existing24KiB packet
+limit. Larger or absent evidence holds. One focused existing test, up to three
+examples, scalar args/results or client fields and bounded fixture setup remain the
+compiler's supported grammar. No unrestricted arbitrary Lua support is claimed.
 
-| Work | Who/what establishes it |
-| --- | --- |
-| Repository/base, existing paths and committed regular-file bytes/hashes; harness/runner compatibility; fixed checks, limits and destination | Deterministic existing source/preparation/recipe owners. No inference or repository code runs during scope inspection. Local main does not establish remote freshness. |
-| Lua/control generation, data escaping, exact fault injection, positive/vacuous/wrong-behavior diffs; actual base replay and control discrimination | Deterministic compiler plus the existing isolated Runtime and independent profile checks. These establish only the reviewed examples, not general intent or real-game behavior. |
-| Map ordinary prose to relevant source symbols, concrete fixture state, inputs, operation, observable outcome, meaningful counterexample and uncovered cases | Model-assisted reasoning still needed. Its output is proposed scenario data, never certification or authority. Default production draft generation is not connected yet. |
-| Decide an ambiguous desired outcome, such as reject versus normalize an empty/invalid name | Domain owner clarification; no developer required merely to state the expected behavior. Ask only when the expectation is actually ambiguous, not because source mapping is unimplemented. |
-| Confirm that the fixture/operation/input/output really measures the request and that the mutation is meaningful | Independent reviewer. Understandable domain examples can be confirmed by a nondeveloper; uncertain technical source/fixture mapping can still require a developer or independently grounded technical review. No one must hand-author a passing solution. |
+## What the user reviews or clarifies
 
-The existing planning job accepts a bounded internal `scenario_response` envelope
-bound to immutable original request, retained feedback, exact committed base and
-selected test paths. This session exercised controlled model responses only.
-`task_contract.behavioral_evidence` preserves draft origin, concrete data, explicit
-holds and review digest; the original intake is unchanged. A plain/model-supplied
-`certified` flag, arbitrary Lua/checks or permissions cannot enter this grammar.
+The proposal shows intended acceptance, fixture/source, operation, concrete inputs,
+expected observation and a meaningful incorrect outcome to reject. The existing
+unchecked independent expectation-confirmation checkbox binds all of that to the
+scope decision. Generation supplies neither review nor certification. Ambiguous
+intent asks a specific domain question; source/fixture mappings that cannot be
+established need capable technical review. Users need not code an oracle/solution.
+Clarification retains task/request identity and original input, then produces a
+fresh revision bound to all retained feedback. An obsolete response cannot apply.
 
-The browser displays the actual examples and requires an unchecked, explicit
-fixture/operation/input/expected-and-incorrect-outcome confirmation saved as `expectation_review` on the
-existing scope decision. API, application, decomposition, current-scope and recipe
-owners revalidate it. Changing examples/base/request/feedback invalidates the draft
-or review. This semantic review does not certify the generated oracle: even a
-wrong human confirmation cannot make a mismatching base observation pass.
+After preparation, the existing run/draft budget review remains separate and
+explicit. No preparation result supplies a grant, run request, session, attempt at
+implementation or publication permission. Actual execution must pass current runtime
+and operational gates. The tested uninstalled browser correctly says execution is
+unavailable; saving a nonactivating budget never enables it later.
 
-Missing examples name the affected acceptance result and missing input/setup /
-operation/outcome. Failed expectation replay identifies the scenario. Failed fresh
-preparation is retained in create-only outcome evidence and projected by the
-existing planning job as a review-bound diagnostic; the browser shows that precise
-hold with no approval action. Diagnostics do not change contracts or grant authority.
-Already-covered examples reject make-work. Unsupported instrumentation names the
-missing observed operation instead of claiming “needs certification.”
+## Application ownership and recovery
 
-## Existing owners and next precise blocker
+`trusted_preparation.configuration` reads a private server-owned JSON file selected
+by `WORKBENCH_PREPARATION_CONFIG`. API and worker use the same config, bound to
+existing SQLite path/device/inode, fixed repository, allowed regression class,
+owned output root and bounded local author identity. Explicit `scenario_generation`
+enables the planning connection; absent config preserves historical deterministic
+scope preparation. README documents the format. This is preparation installation
+input, not a new model policy, execution permission, provider activation or fallback.
 
-`trusted_preparation.prepare_regression` is the reusable INTERNAL offline entry
-point. It consumes the current applied scope/task mapping and configured local
-identity/output root, compiles the reviewed data, and invokes the existing
-`task_session.provision`, Runtime, profile certification and canonical offer
-registration. Fresh worker preparation reruns the frozen generated controls.
-No new queue, table, migration, task registry, grant issuer, worker or public
-preparation endpoint was added. Small bug-fix support and legacy trusted paths
-remain intact; bug-contract automation was not expanded.
+The optional typed `scenario_grounding` commits evidence/policy hashes and controlled
+versus local basis into the contract/review binding. Absent historical fields remain
+absent. Policy/base drift holds preparation and canonical offer reconstruction.
+Current clean local main is revalidated by the existing recipe owner; local Git
+inspection still says nothing about remote freshness or real-game correctness.
 
-**An ordinary natural-language request cannot yet automatically reach an approvable
-executable offer.** Under controlled structured responses, the complete supported
-machinery reaches an offer and browser budget approval without custom task code.
-The immediate next blocker is obtaining grounded scenario drafts through the
-existing planning lifecycle with bounded committed-source context, model-policy /
-accounting/claim ownership and precise ambiguity handling. After independent review,
-the existing application worker still needs owned configuration/dispatch for this
-generic offline preparer. Do not replace those connections with an operator writing
-Python packages or calling `wb prepare-offer` as the final user workflow.
+Existing `planning_jobs` now journals kind `behavioral_preparation`; decomposition
+and its stable task/approval ref commit atomically with that unique intake/kind /
+revision job. There is no new table/migration/queue/registry/certification owner or
+public preparation endpoint. The existing separate worker calls the same internal
+preparer, Runtime/provision/profile and canonical offer-registration functions.
 
-No real-model check is necessary to validate this compiler machinery. A future
-real check requires its own exact purpose/budget/activation authorization after
-safe provider/runtime preparation. Do not start a new real execution demonstration
-from this checkpoint.
+A durable PID/start/boot claim precedes checker processes or output. Concurrent
+workers, receipt replay and HTTP retry cannot launch duplicate preparation. A dead
+worker may reconcile a complete independently certified artifact set/offer without
+rerunning checks; partial or unknown preparation holds, preserving original output.
+No automatic preparer retry is provided. Interrupted scenario generation records
+`interrupted_unknown` in the existing model-attempt ledger and does not repeat a
+provider request automatically. General provider retry/fallback and runtime cleanup
+remain unfinished. Preparation holds/stages are visible without a misleading Retry
+planning action. Frozen original/positive/vacuous/wrong-behavior checks remain the
+independent certification boundary; wrong human confirmation cannot make them pass.
 
-Audit reconciliation remains explicit: model-policy integration, application runtime
-ownership/provisioning, bounded retries/fallback, delivery consistency/recovery and
-installation are separate unfinished obligations. This compiler is not completion
-of any of them. Broader task support, real confinement/model/draft delivery and M5
-acceptance remain uncompleted; prior real assisted delivery is not autonomous proof.
+## Verification and remaining acceptance
 
-## Verification and preservation
+Focused backend selection:189 passed, followed by48 changed-path checks after
+source review and24 final workflow/adapter cases. It covers the two complete controlled
+requests, strict invalid/invented/permission/mapping output, source/policy/input
+bindings, drift during generation, clarification/revision binding, denied policy,
+actual preparation failure, duplicate workers, partial interruption, completed
+receipt recovery and interrupted model-request accounting, plus existing compiler /
+review/offer/budget/session/profile dependencies. No real model/provider call occurred.
+`wb check` passed contracts/TypeScript/build/Ruff/schema drift, and5 focused frontend
+run-approval cases passed. Generated types were regenerated through `npm run contracts`,
+not edited. Details are in the session REPORT/CHECKPOINT.
 
-Checks: `wb check` passed. Full `wb test` passed898backend/1pre-existing skip and
-23frontend before final counterexample refinement; final changed-path136backend
-and23frontend passed. Seven focused browser paths passed before refinement; final
-three changed paths passed afterward. Inspected final desktop/390px200%text
-observation/confirmation/offer/hold captures in `browser-jkSOcu`.
-Exact logs, source hashes/checkpoint and headroom are in session `REPORT.md` /
-`CHECKPOINT.json`. No broad browser/visual
-or full `verify` acceptance is inferred. The earlier64/92browser result and28missing
-cases remain a separate historical gap; viewport Chromium is not physical Safari.
-No screenshot baseline was updated.
+Five relevant browser paths passed in `browser-4d7aou`: legacy deterministic scope,
+missing-path clarification, wrong expectation hold, and the two new connected
+ordinary requests at1440/390px. A separate denied-policy phone check passed in `browser-ZbKfZ8`; the hold was
+inspected and offered no duplicate retry. Inspected desktop, phone200%text observation and completed
+preparation captures plus both certified-offer views. Expected/incorrect observations
+and paths wrap without page overflow; scope confirmation stays explicit. The browser
+shows execution unavailable, not an operational success. No screenshot baselines
+changed. No broad browser/visual/full verify or physical Safari claim; earlier64/92
+browser result and28 historical missing cases remain separate limitations.
 
-Entry453,166,819bytes/headroom83,704,093bytes (79.83MiB). Initially reserved32MiB;
-final changed-code checks/captures/handoff reserved48MiB under the unchanged
-536,870,912byte (512MiB) aggregate limit. No archive or deletion was needed.
-Preceding-session output hashes are in `PRECEDING_HASHES.json`; protected evidence,
-candidates, approvals, databases, baselines and existing archives remain preserved.
-New browser invocations use fresh owned output roots, never historical paths.
+Before a real browser-submitted task can run: separately authorize/configure the
+real planning adapter, complete its model-policy/routing/capacity/usage acceptance,
+install the shared private preparation config and this source, validate actual
+confinement and runtime ownership/lifecycle, and obtain the explicit current human
+run/draft budget plus operational activation. Broader retries/fallback, delivery
+consistency/recovery and demonstrated unattended operation remain open. This is not
+M5 completion. Do not start inference or another real execution demonstration from
+this handoff without exact authorization/budget.
+
+## Storage and preservation
+
+Entry500,053,991bytes/headroom36,816,921bytes (35.11MiB); unchanged536,870,912byte
+(512MiB) cap. Reserved20MiB for focused checks/handoff. Retained new failed browser
+traces reduced headroom, so authorized closed preceding development screenshot /
+report duplicates were losslessly archived as `scenario-development-20261105-closed`:
+28files/23,290,432bytes, original paths/modes/timestamps/SHA256 retained and verified
+restoration performed at `/tmp/twichui-scenario-development-restore-20261105` before
+removing only byte-matching originals. Archive index/ownership/copy/prune/restoration
+receipts are in this session and `artifacts/archive-index`. Lookup/restore remain
+available through `scripts/evidence_archive.py`. Final preceding `browser-jkSOcu`,
+handoff records, candidates, approvals, databases, source bundles, baselines and
+active runtime roots were excluded and preserved. Final headroom is in CHECKPOINT.

@@ -148,7 +148,7 @@ def materialize_single_task(connection, original, job, model):
 
 def claim(engine):
     with write_transaction(engine) as connection:
-        job = connection.execute(select(planning_jobs).where(or_(planning_jobs.c.status == 'queued',
+        job = connection.execute(select(planning_jobs).where(planning_jobs.c.kind.in_(['planning', 'decomposition']), or_(planning_jobs.c.status == 'queued',
             and_(planning_jobs.c.status == 'running', planning_jobs.c.lease_until < now())))
             .order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not job:
@@ -201,7 +201,7 @@ def claim(engine):
 def process_one(engine, adapter=None, fail_before_commit=False, stop_event=None, *, scenario_response=None):
     from workbench import regression_preparation
     if regression_preparation.process_one(engine, fail_before_commit=fail_before_commit,
-                                          scenario_response=scenario_response):
+                                          scenario_response=scenario_response, adapter=adapter, stop_event=stop_event):
         return True
     if adapter is None:
         from workbench import supported_tasks

@@ -4788,3 +4788,57 @@ model check is needed for this machinery; do not start a new demonstration from 
 Evidence/checkpoint/source/preservation receipts:
 artifacts/runs/regression-evidence-20261105T185210Z. CONTINUATION.md records exact
 supported boundaries and next blocker; clean local checkpoint recorded separately.
+
+## 2026-11-05 — grounded planning and durable preparation connection (active)
+
+Owner authorizes 60 minutes from clean7c7ca48. Start19:31:02UTC /12:31:02Denver;
+hard stop20:31:02UTC /13:31:02Denver, including tests and reviewed local checkpoint.
+Entry500,053,991bytes, headroom36,816,921bytes (35.11MiB); reserve20MiB for targeted
+checks/browser/handoff under unchanged512MiB cap. No archive needed initially.
+Reuse existing planning adapter/jobs, scope expectation review, preparation/profile /
+offer owners and separate worker; no new queue/table/certification owner. Controlled
+responses only; no inference/lease/probe/live update/migration/publication/spending /
+privilege expansion/install/push. Independent review remains explicit. Model-policy,
+runtime ownership, retries/fallback, delivery consistency and installation remain
+unfinished except for the specific connections demonstrated in this session.
+
+Connected both authorized paths. The existing planning adapter receives bounded
+committed Git evidence plus the strict scenario schema/request/evidence/policy
+bindings. Optional typed grounding enters the review digest; old bindings remain
+compatible. A conservative lexical screen accepts explicit literal-loader/export
+mappings only and rejects invented calls/fields, wrong source/fixture pairing,
+extra permissions and stale responses. Ambiguous intent waits for a specific owner
+answer; unsupported technical mappings hold. Existing expectation confirmation
+remains independent of model generation and Runtime/profile certification.
+
+Applied scope review/decomposition atomically adds a `behavioral_preparation` job
+with the existing stable task/approval IDs and uniqueness. The existing worker
+claims once before output/checks and dispatches the original trusted preparer with
+private store-bound configuration. Complete evidence can reconcile without rerunning
+checks; partial/unknown work holds. HTTP retries cannot duplicate it. Interrupted
+scenario generation keeps unknown accounting and does not auto-replay; a denied
+explicit retry does not rewrite that prior attempt. No second queue, table, migration,
+planner, runtime/certificate owner, approval checkpoint or public prepare endpoint.
+
+Verification:189 focused backend passed, then48 changed-path passed after source
+review plus24 final workflow/adapter cases;5 frontend run-approval passed; final `wb check`
+passed contracts/TS/build/Ruff/schema drift. Five focused browser paths passed plus
+one targeted denied-policy hold. Both distinct ordinary requests reached review and
+worker-prepared offers with controlled adapter responses, actual Lua and controlled
+boundary telemetry. Inspected1440/390px, enlarged phone observations, completed
+preparation and denied hold; no overflow or baseline update. No broad verify/Safari
+claim. Reports and screenshots are pinned in the session evidence.
+
+Final preservation: following new browser failure traces, archived28 closed
+preceding screenshots/report duplicates (23,290,432bytes), verified isolated restore
+and removed only matching originals. Original paths/hashes/metadata/index retained.
+Final prior browser-jkSOcu and all protected records excluded;50 preceding hashes
+verified. Unchanged512MiB cap; final exact headroom in CHECKPOINT.json.
+
+Source is ready for owner review in the local checkpoint. No installation, live
+changes, real inference, lease/probe, migration, publication, spending or remote push.
+Real model-policy/routing/capacity/usage integration, operational runtime ownership,
+broader retries/fallback, delivery consistency and installation remain unfinished.
+Controlled preparation grants nothing and is not real end-to-end execution or M5
+acceptance. Next step requires separately authorized real acceptance after safe
+configuration/runtime setup. See CONTINUATION.md.
