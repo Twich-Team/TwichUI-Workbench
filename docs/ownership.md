@@ -312,8 +312,9 @@ order, distinct fallback conditions, substitution and waiting behavior. API save
 use BEGIN IMMEDIATE, revision conflicts and exact lost-response reconciliation.
 All activation values are server-constrained false. No responsible execution
 worker consumes this configuration yet, so acknowledgment is absent, never invented.
-The existing planning adapter still uses its existing explicitly configured mode;
-new settings neither launch it nor change an active lease. Pilot operating policy,
+The existing planning adapter still uses its explicitly configured mode. Grounded
+local scenarios additionally pin the preferred local model per attempt as described
+below. Saved preferences neither launch the adapter nor change an active lease. Pilot operating policy,
 reservation/accounting files and receipts retain their original owners/read-only
 adapter. No canonical integration or competing pilot writer was introduced.
 
@@ -324,8 +325,8 @@ or stale paid capacity cannot establish eligibility. Routing cannot release hold
 GET preview uses saved preferences or explicitly synthetic fixtures and cannot
 execute, reserve capacity, persist demo usage or manufacture authorization. Saved
 policy history plus each new attempt's existing-adapter reason preserve provenance.
-New future-policy revision is null on existing planner attempts because that worker
-has not consumed it. Configured model identity mismatch remains a failed attempt;
+The policy revision is null on legacy generic and controlled planning attempts.
+Configured model identity mismatch remains a failed attempt;
 requested and reported identities are retained independently.
 
 The minimal `model_attempts` table records each newly claimed planning-job lease,
@@ -1471,8 +1472,8 @@ The existing regression planning job may call the existing planning adapter's
 allowed regression class, owned output root and bounded local author identity.
 It is installation input, never model/request-supplied permission, an execution
 budget, a provider-policy acknowledgment or operational activation. Generation is
-explicitly enabled there; absent configuration preserves historical deterministic
-scope preparation. Production routing/model-policy acceptance remains unfinished.
+explicitly enabled there. Without configuration, historical deterministic scope
+preparation applies. Production routing and capacity acceptance remain open.
 
 Committed Git blobs supply bounded source/test/harness context and hashes. The
 response must match original request/feedback/base/test, evidence and policy
@@ -1486,11 +1487,17 @@ review. Optional `scenario_grounding` enters the typed contract and review diges
 historical contracts omit it. Current preparation policy is revalidated during
 preparation and canonical offer reconstruction; drift requires a fresh proposal.
 
-Scenario generation uses the existing job claim and model-attempt ledger, with
-actual adapter attribution and unavailable usage preserved. Interrupted generation
-records `interrupted_unknown`; no automatic request replay or fallback. The saved
-original remains immutable. Existing explicit planning retry limits still apply.
-This does not complete Workbench model-policy/capacity integration.
+Scenario generation uses the existing job claim and model-attempt ledger. The real
+local adapter requires an enabled preferred local identifier from the saved
+`execution_policies` revision and unspecified effort for its fixed decoding. That
+revision and requested identifier commit with the claim before transport. The
+adapter checks the loaded identity before generation and the returned identity
+before accepting the response. The reviewed grounding retains the selection while
+actual identity and reported usage remain in the attempt ledger. Preference edits
+apply to new claims. Interrupted generation records `interrupted_unknown` and
+requires explicit review. The saved original remains immutable. Existing explicit
+planning retry limits still apply. Full routing, capacity, fallback and real
+grounded behavior acceptance remain open.
 
 After the applied expectation/scope decision, existing single-task decomposition
 atomically enqueues kind `behavioral_preparation` in the SAME `planning_jobs` journal,

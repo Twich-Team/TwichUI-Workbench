@@ -433,10 +433,16 @@ class VerificationProfileSelection(StrictModel):
     execution_authorized: Literal[False] = False
 
 
+class ScenarioModelSelection(StrictModel):
+    policy_revision: int = Field(ge=1)
+    model: str = Field(max_length=160, pattern=r'^[A-Za-z0-9_.:/-]+$')
+
+
 class ScenarioGrounding(StrictModel):
     evidence_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
     policy_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
     basis: Literal['demo', 'local']
+    model_selection: ScenarioModelSelection | None = Field(default=None, exclude_if=lambda value: value is None)
 
 
 class RegressionTaskContract(StrictModel):

@@ -5,6 +5,7 @@ The application, not a per-task command or registration, dispatches preparation.
 """
 
 import copy
+from contextlib import nullcontext
 import json
 from subprocess import CalledProcessError
 from pathlib import Path
@@ -13,7 +14,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import select
 
-from workbench import intake, worker, trusted_preparation
+from workbench import intake, model_policy, planning_provider, worker, trusted_preparation
 from workbench.db import (
     planning_jobs,
     model_attempts,
@@ -659,3 +660,138 @@ def test_existing_local_adapter_uses_scenario_schema_and_instructions_with_contr
 
     value, model, basis = LocalProvider()._infer(ControlledTransport(), "inert", Response, "{}")
     assert value == response and model == "controlled-transport-model" and basis == "local"
+
+
+def save_local_policy(store, model="selected-local-model", *, enabled=True, preferred="local"):
+    policy = model_policy.read(store)
+    policy.providers["local"].model = model
+    policy.providers["local"].enabled = enabled
+    policy.preferred = preferred
+    policy.fallback = ["local"] if preferred == "codex" else ["codex"]
+    policy.substitution = "configured_fallback_only"
+    return model_policy.save(store, policy, model_policy.CapabilityReport(executors=[]))
+
+
+@pytest.mark.parametrize("fault", [None, "loaded-model", "returned-model"])
+def test_saved_model_pinned_before_transport_and_through_review(
+    fault, store, client, headers, tmp_path, monkeypatch
+):
+    _, _, output = configure(store, tmp_path, monkeypatch)
+    saved = save_local_policy(store)
+    key = tmp_path / "inert-key"
+    key.write_text("inert")
+    key.chmod(0o600)
+    monkeypatch.setenv("WORKBENCH_PLANNER", "local")
+    monkeypatch.setenv("WORKBENCH_LOCAL_KEY", str(key))
+    monkeypatch.setattr(planning_provider, "local_slot", nullcontext)
+    planner = ControlledPlanner()
+    selected = saved.providers["local"].model
+    other = "different-local-model"
+
+    class Transport:
+        seconds = 120
+
+        def __init__(self, stop_event):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            pass
+
+        def models(self, secret):
+            with store.connect() as c:
+                attempt = c.execute(select(model_attempts)).mappings().one()
+            assert attempt["outcome"] == "running"
+            assert attempt["policy_revision"] == saved.revision
+            assert attempt["requested_model"] == selected
+            return other if fault == "loaded-model" else selected
+
+        def read(self, request, limit):
+            payload = json.loads(request.data)
+            assert payload["model"] == selected and payload["max_tokens"] == 2600
+            assert payload["reasoning_budget_tokens"] == 0
+            packet = json.loads(payload["messages"][-1]["content"])
+            value, _, _ = planner.generate(packet, None)
+            # Saving a new default cannot redirect this already claimed attempt.
+            save_local_policy(store, other)
+            return json.dumps(dict(
+                model=other if fault == "returned-model" else selected,
+                usage=dict(prompt_tokens=91, completion_tokens=29, total_tokens=120),
+                choices=[dict(finish_reason="stop", message=dict(content=json.dumps(value)))],
+            )).encode()
+
+    monkeypatch.setattr(planning_provider, "LocalHTTP", Transport)
+    item = submit(client, headers)
+    assert worker.tick(store)
+    view = current(client, item)
+    contract = view["proposals"][0]["task_contract"]
+    with store.connect() as c:
+        attempt = c.execute(select(model_attempts)).mappings().one()
+    assert attempt["policy_revision"] == saved.revision and attempt["requested_model"] == selected
+    assert attempt["actual_effort"] is None and attempt["requested_effort"] is None
+    if fault == "loaded-model":
+        assert not planner.calls and attempt["actual_model"] is None and attempt["usage"] is None
+    else:
+        assert len(planner.calls) == 1 and attempt["usage"]["values"]["total_tokens"] == 120
+        assert model_policy.read(store).revision == saved.revision + 1
+        assert attempt["actual_model"] == (other if fault else selected)
+    if fault:
+        assert attempt["outcome"] == "failed" and "scenario_grounding" not in contract
+        assert view["status"] == "waiting_for_information"
+        assert not worker.tick(store)
+    else:
+        assert attempt["outcome"] == "completed"
+        assert contract["scenario_grounding"]["model_selection"] == dict(
+            policy_revision=saved.revision, model=selected
+        )
+        assert contract["behavioral_evidence"]["origin"] == selected
+        denied, _ = approve(store, client, headers, view, confirm=False)
+        assert denied.status_code == 422
+        approve_and_decompose(store, client, headers, item)
+        assert worker.tick(store) and len(list(output.iterdir())) == 1
+        task = next(t for t in current(client, item)["tasks"] if t["kind"] == "task")
+        url = f"/api/intake/{item['id']}/tasks/{task['id']}/run-approval"
+        offered = client.get(url).json()
+        assert offered["available"] and offered["receipt"] is None
+        assert offered["scope"]["task_contract"]["scenario_grounding"] == contract["scenario_grounding"]
+        budget = offered["offer"]["budget"]
+        assert (budget["overall_seconds"], budget["generated_tokens"], budget["fallback"]) == (5400, 24000, False)
+        assert not worker.tick(store)  # Certification alone leaves the worker idle.
+        command = dict(command_id=str(uuid4()), scope_approval_id=offered["scope_approval_id"],
+                       binding=offered["binding"], run_budget=budget)
+        assert client.post(url, headers=headers, json={**command, "run_budget": {
+            **budget, "generated_tokens": 24001,
+        }}).status_code == 422
+        receipt = client.post(url, headers=headers, json=command)
+        assert receipt.status_code == 200, receipt.text
+        assert receipt.json()["status"] == "pending"
+        assert worker.tick(store) and not worker.tick(store)
+        applied = client.get(url).json()["receipt"]
+        assert applied["status"] == "applied" and applied["payload"]["run_budget"] == budget
+    counts = authority_counts(store)
+    assert all(counts[k] == 0 for k in (
+        "task_sessions", "real_execution_grants", "real_execution_requests", "real_publications"
+    ))
+
+
+@pytest.mark.parametrize("state", ["unsaved", "disabled", "paid-preferred", "unselected"])
+def test_ineligible_saved_policy_never_contacts_adapter_transport(
+    state, store, client, headers, tmp_path, monkeypatch
+):
+    configure(store, tmp_path, monkeypatch)
+    monkeypatch.setenv("WORKBENCH_PLANNER", "local")
+    if state != "unsaved":
+        save_local_policy(store, model="" if state == "unselected" else "selected-local-model",
+                          enabled=state != "disabled", preferred="codex" if state == "paid-preferred" else "local")
+
+    def unexpected(*_args, **_kwargs):
+        pytest.fail("An ineligible saved model policy must hold before contacting the adapter")
+
+    monkeypatch.setattr(planning_provider.LocalProvider, "generate", unexpected)
+    item = submit(client, headers)
+    assert worker.tick(store) and not worker.tick(store)
+    assert "saved, enabled preferred local model" in str(current(client, item))
+    with store.connect() as c:
+        assert not c.execute(select(model_attempts)).first()

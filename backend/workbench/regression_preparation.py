@@ -294,11 +294,12 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             planning_jobs.c.revision <= job['revision']).order_by(planning_jobs.c.revision.desc()).limit(9)).scalars())
     feedback = '\n'.join(dict.fromkeys(p['feedback'] for p in reversed(notes) if p.get('feedback')))
     adapter_used, generated_failure, packet, model, basis = None, None, None, None, None
+    model_selection = None
     claimed_generation = False
     generation = job['kind'] == 'planning' and scenario_response is None and bool(os.environ.get('WORKBENCH_PREPARATION_CONFIG'))
     if generation:
-        from workbench import grounded_scenarios, trusted_preparation, planning_worker
-        from workbench.planning_provider import provider, PlanningUnavailable
+        from workbench import grounded_scenarios, model_policy, trusted_preparation, planning_worker
+        from workbench.planning_provider import LocalProvider, provider, PlanningUnavailable
         try:
             policy = trusted_preparation.configuration(engine)
             if not policy['scenario_generation']:
@@ -311,21 +312,30 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             with write_transaction(engine) as c:
                 if intake.require(c, planning_jobs, job['id']) != job:
                     return True
+                adapter_used = adapter or provider(stop_event)
+                if isinstance(adapter_used, LocalProvider):
+                    model_selection = model_policy.grounded_local_selection(c)
                 lease = str(uuid4())
                 job['payload'] = {**job['payload'], 'scenario_generation_claim': owner_identity()}
                 job.update(status='running', lease=lease, attempts=job['attempts']+1, message='Preparing grounded behavioral examples for independent review.')
                 c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
                     status='running', lease=lease, payload=job['payload'], attempts=job['attempts'], message=job['message']))
                 c.execute(model_attempts.insert().values(id=lease, job_id=job['id'], task_id=original['id'],
-                    purpose='planning', source='unknown', outcome='running', started_at=intake.now(),
-                    routing_reason='Existing planning adapter; bounded preparation policy. Workbench execution model-policy integration remains pending.'))
+                    purpose='planning', source='workbench' if model_selection else 'unknown',
+                    backend='local' if model_selection else None, outcome='running', started_at=intake.now(),
+                    policy_revision=model_selection.policy_revision if model_selection else None,
+                    requested_model=model_selection.model if model_selection else None,
+                    routing_reason=('Saved preferred local planning model; fixed decoding, no fallback.' if model_selection else
+                                    'Controlled planning adapter; no saved model selection consumed.')))
             claimed_generation = True
             base_contract = prepare(original['payload'], feedback)
             packet = grounded_scenarios.context(original['payload'], feedback, base_contract, policy)
             if len(json.dumps(packet).encode()) > 24000:
                 raise ValueError('Grounded scenario context exceeds the planning input budget; narrow the request.')
-            adapter_used = adapter or provider(stop_event)
-            raw, model, basis = adapter_used.generate(packet, grounded_scenarios.Response)
+            if model_selection:
+                raw, model, basis = adapter_used.generate(packet, grounded_scenarios.Response, expected_model=model_selection.model)
+            else:
+                raw, model, basis = adapter_used.generate(packet, grounded_scenarios.Response)
             if len(json.dumps(raw, allow_nan=False).encode()) > 24000 or basis not in {'demo', 'local'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
                 raise ValueError('Invalid bounded scenario provider response')
             parsed = grounded_scenarios.Response.model_validate(raw)
@@ -349,6 +359,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     if generation and packet and not generated_failure:
         contract['scenario_grounding'] = dict(evidence_sha256=packet['evidence_sha256'],
             policy_sha256=packet['policy_sha256'], basis=basis)
+        if model_selection:
+            contract['scenario_grounding']['model_selection'] = model_selection.model_dump()
     if contract and generated_failure:
         from workbench.regression_evidence import expectation_digest
         prepared = contract['behavioral_evidence']

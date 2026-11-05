@@ -4789,7 +4789,7 @@ Evidence/checkpoint/source/preservation receipts:
 artifacts/runs/regression-evidence-20261105T185210Z. CONTINUATION.md records exact
 supported boundaries and next blocker; clean local checkpoint recorded separately.
 
-## 2026-11-05 — grounded planning and durable preparation connection (active)
+## 2026-11-05 — grounded planning and durable preparation connection (closed)
 
 Owner authorizes 60 minutes from clean7c7ca48. Start19:31:02UTC /12:31:02Denver;
 hard stop20:31:02UTC /13:31:02Denver, including tests and reviewed local checkpoint.
@@ -4842,3 +4842,29 @@ broader retries/fallback, delivery consistency and installation remain unfinishe
 Controlled preparation grants nothing and is not real end-to-end execution or M5
 acceptance. Next step requires separately authorized real acceptance after safe
 configuration/runtime setup. See CONTINUATION.md.
+
+## 2026-11-05 — execution-path audit and local planning policy binding
+
+Continued clean `b59b907` within the 60-minute controlled-only authorization.
+The first adapter blocker was an endpoint-selected model with no saved policy
+revision. The grounded worker now pins the existing preferred local selection
+and records it before transport. The adapter checks loaded and returned identity,
+and the reviewed contract retains the policy revision. Fixed decoding requires
+unspecified effort. A save changes new attempts only. No new model routing,
+authority, retry, delivery or persistence owner was introduced.
+
+Focused checks covered selection denial, both identity mismatches, usage,
+mid-flight policy edits, independent scope review and exact separate budget
+receipt. 186 focused backend and two targeted Chromium scenarios passed, and
+`wb check` passed. Inspected the desktop review, enlarged phone observation and
+phone offer in `artifacts/runs/browser-ZKHwKe`. The first backend run caught an
+inert test key with non-private file permissions. The fixture was corrected and
+the full focused selection passed. Broader historical browser coverage is open.
+
+Static committed-source inspection of retained TwichUI base `f48b2e0bb` found
+no current literal addon mapping accepted by the screen in 164 tests and the
+harness. The existing pre-offer worker also needs operational confinement and
+cleanup acceptance. See CONTINUATION.md for the stage-by-stage audit, exact
+installation and separately bounded fixture acceptance, and publication limits.
+No installation, live inference, leases/probes or external writes occurred.
+No archive was needed. Final headroom and clean commit are in the checkpoint.

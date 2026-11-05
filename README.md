@@ -182,9 +182,8 @@ the retained review's identity-safe shutdown command and observed process lifeti
 
 Local-only planning is an operator opt-in using `WORKBENCH_PLANNER=local` and
 `WORKBENCH_LOCAL_KEY` pointing to the existing local service's private key file.
-Never put that key in a browser, request or repository. There is no provider settings
-page or automatic fallback. The adapter uses only the fixed existing loopback
-llama.cpp endpoint, nonblocking existing maintenance/model locks, bounded JSON,
+Never put that key in a browser, request or repository. The adapter uses the fixed
+loopback llama.cpp endpoint, nonblocking existing maintenance/model locks, bounded JSON,
 a cancellable planning deadline and actual returned model identity. It never restarts/replaces the model.
 `WORKBENCH_RESEARCH_ROOT` optionally selects an existing source checkout for bounded
 read-only evidence; otherwise research context is limited to product documents.
@@ -340,9 +339,12 @@ The example device/inode numbers are placeholders: installation must use the act
 store's `st_dev`/`st_ino`. Root and identity are trusted installation inputs, never
 request/model output. This config enables no implementation, publication, provider
 fallback or extra spending. The existing `WORKBENCH_RESEARCH_ROOT` and planner
-adapter configuration still apply. No installation or live model activation was
-performed here. Tests inject controlled responses into the ordinary adapter seam;
-a real adapter/model-policy/usage acceptance step is still required.
+adapter configuration still apply. Grounded local planning requires a saved,
+enabled preferred local model with effort unspecified in Models. The worker
+records the selected revision and identifier before transport. The adapter requires
+that identifier from both `/v1/models` and the structured response. Full routing,
+capacity and real usage acceptance remain open. This source was checked with
+controlled responses and transport.
 
 Scenario response and reviewed contract bind original request, retained feedback,
 committed base/source hashes, schema and preparation policy. Changed policy/base

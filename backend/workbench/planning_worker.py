@@ -6,7 +6,7 @@ from uuid import uuid4
 from fastapi import HTTPException
 from pydantic import ValidationError
 from workbench.planning_transport import MAX_DEADLINE
-from sqlalchemy import select, or_, and_
+from sqlalchemy import select, or_, and_, func
 
 from workbench import intake
 from workbench.db import (intakes, planning_jobs, proposals, proposal_decisions, backlog_items,
@@ -356,5 +356,6 @@ def finish_attempt(connection, job, adapter, model, basis, outcome):
     connection.execute(model_attempts.update().where(model_attempts.c.id == job['lease']).values(
         source='demo' if is_demo else 'workbench' if is_local else 'unknown',
         backend='local' if is_local else None,
-        requested_model=diagnostics.get('configured_model'), actual_model=diagnostics.get('actual_model') or model,
+        requested_model=func.coalesce(model_attempts.c.requested_model, diagnostics.get('configured_model')),
+        actual_model=diagnostics.get('actual_model') or model,
         finished_at=now(), outcome=outcome, usage=diagnostics.get('usage')))

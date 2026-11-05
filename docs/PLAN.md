@@ -1,4 +1,12 @@
-# Current authorized connection — November 5, 2026
+# Execution-path audit and local model binding — November 5, 2026
+
+Continue clean `b59b907` for 60 minutes. Trace the existing execution and delivery
+owners, fix the first safe integration blocker, run focused controlled checks and
+save a local checkpoint. Entry headroom 27.30 MiB under the existing 512 MiB cap.
+Installation, model inference, leases, probes, migrations and external writes each
+remain outside this package. `CONTINUATION.md` records the next authorization.
+
+## Previous grounded workflow connection
 
 Continue clean7c7ca48 for grounded ordinary Lua regression scenario planning and
 application-owned durable preparation after existing independent scope review.

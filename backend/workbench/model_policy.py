@@ -1,4 +1,4 @@
-"""Workbench-owned future routing. Pure evaluation; no executor, reservation or pilot writer."""
+"""Workbench-owned model preferences and routing evaluation."""
 from datetime import datetime, timezone
 import json
 import os
@@ -8,7 +8,7 @@ from typing import Literal
 from fastapi import HTTPException
 from pydantic import Field, field_validator, model_validator
 from sqlalchemy import select
-from workbench.schemas import StrictModel
+from workbench.schemas import ScenarioModelSelection, StrictModel
 from workbench.db import execution_policies, write_transaction
 from workbench.service import now
 
@@ -103,6 +103,17 @@ def read_connection(connection):
 def read(engine):
     with engine.connect() as connection:
         return read_connection(connection)
+
+
+def grounded_local_selection(connection):
+    """Pin the saved preference for the only installed grounded planning route."""
+    policy = read_connection(connection)
+    local = policy.providers['local']
+    if not policy.revision or policy.preferred != 'local' or not local.enabled or not local.model:
+        raise ValueError('Grounded local planning requires a saved, enabled preferred local model. No fallback will be used.')
+    if local.effort is not None:
+        raise ValueError('The grounded local adapter uses fixed decoding. Leave local effort unspecified.')
+    return ScenarioModelSelection(policy_revision=policy.revision, model=local.model)
 
 
 def support(report, backend, model, effort, instant=None):
@@ -275,8 +286,8 @@ class ModelOverview(StrictModel):
 def overview(engine, report):
     policy = read(engine)
     return ModelOverview(policy=policy, capabilities=report,
-        acknowledgment='Configuration saved; not activated. No responsible execution worker consumes or acknowledges this policy yet. Existing planning adapter configuration remains separate.',
+        acknowledgment='Configuration saved; not activated for implementation. Grounded local planning records its saved model selection per attempt when separately configured.',
         observations=[Observation(backend=b) for b in ('local','codex','claude')],
         routing=preview(policy, report), cases=CASES,
         usage_message='Usage unavailable. No supported provider account allowance/window/reset telemetry is integrated. Workbench activity excludes outside usage. Tokens and request counts are not subscription percentages.',
-        allocation_message='Automation allocation, personal reserve and pacing require actual provider windows. No enforceable quota percentage or cost cap is offered. Existing planning safeguards: three attempts per job, one serial worker, coordinated local model lock. These are not subscription limits. Future policy admission remains inactive; adaptive pacing is deferred.')
+        allocation_message='Automation allocation, personal reserve and pacing require actual provider windows. No enforceable quota percentage or cost cap is offered. Existing planning safeguards: three attempts per job, one serial worker, coordinated local model lock. These are not subscription limits. Implementation routing and adaptive pacing remain deferred.')
