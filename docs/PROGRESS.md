@@ -1,3 +1,19 @@
+## November 6, 2026 — retry passed in Chromium, acceptance stopped at evidence reserve
+
+The fresh retry and connected stale-approval and response-loss checks
+passed. The full Chromium inventory reached 82 passed, two failed and
+23 unrun. The completed test-only fixes passed their affected cases.
+The final exact-match selector fix is checkpointed and awaits rerun.
+The visual project remains unrun. Inspected fresh permission views and
+enlarged phone layout without changing the visual baselines.
+
+Stopped between batches because the measured evidence reserve could not
+cover the remaining suites. Peak sampled usage including active output
+was 33.19 MiB, within the 40 MiB allowance. Preserved the original retry
+trace and all new failure evidence. Offline test processes closed.
+Product and frozen trial source remain unchanged. See CONTINUATION for
+the closeout receipts and remaining offline scope.
+
 ## November 6, 2026 — retry expectation and evidence plan repaired
 
 The saved HTTP 200, subsequent reads and browser state confirm that retry

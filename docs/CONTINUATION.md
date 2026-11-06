@@ -1,3 +1,65 @@
+# Fresh retry passed and offline verification held for capacity — November 6, 2026 Mountain time
+
+The approved offline window started at 10:29:37 a.m. MST with an
+11:29:37 a.m. deadline. It closed at 10:44 a.m. after the final completed
+batch, before another batch would have consumed the evidence reserve.
+The approved record SHA-256
+`3e3d9ad8f97f0cfeac701ff43d8b849c14d96af34775c417011b899a5239beaa`
+matches the saved proposal.
+
+The [fresh retry case](../.local/runs/offline-acceptance-compact-20261106/retryFocused.log)
+passed. A valid approval survived the retry, the same job requeued without
+a duplicate, progress showed the approved work in preparation, and the same
+job completed with one additional attempt. Response-loss recovery and the
+desktop and phone stale-approval cases passed, including server rejection.
+The original diagnosis trace still has SHA-256
+`de0cd2ea32420243bcc098bb7b3a88f446cdc1e762d7f83b18af2a87e324cd75`.
+
+The full Chromium inventory contains 107 cases. Of these, 82 passed, two
+failed and 23 were never run. No case was interrupted. The run-results
+checks initially targeted duplicate labels or wording now under technical
+details. Test-only corrections narrowed the locators, retained the checks
+on reload, failure and unknown activity, and passed the affected cases
+at the specified viewports. The two outstanding cases matched both
+`"alice"` and `"ALICE"` using a case-insensitive locator. Checkpoint
+`37a6eb078dbc68bdeeffbcb65c5519622ad6d958` makes both matches exact.
+That last change remains unverified in Chromium. Its shared helper also
+applies to three unrun cases. See the [failure log](../.local/runs/offline-acceptance-compact-20261106/chromium28.log)
+and [closeout](../.local/runs/offline-acceptance-compact-20261106/closeout.json)
+for the exact set of unfinished cases.
+
+The compact configuration retained screenshots and DOM/network evidence for
+failures. The additional failure attempts and authored screenshot output
+left 33,754,948 bytes before closeout receipts (32.19 MiB) and a highest
+sampled usage of 34,806,649 bytes (33.19 MiB) including temporary files.
+The cap was respected. Only 2,945,212 bytes remained before the 35 MiB
+operating stop. The estimated 8 MiB for visual output alone exceeded that
+by about 5.19 MiB, before the 25 remaining browser cases and their active
+trace overhead. The aggregate cap still had about 54.1 MiB of headroom,
+and physical space stayed above the 4 GiB floor. No evidence was archived,
+pruned or redirected.
+
+All 10 visual cases remain unrun and the reference files are unchanged.
+Fresh desktop and phone permission screenshots and the enlarged phone
+layout were inspected as part of Chromium. This inspection does not
+establish a completed visual comparison.
+
+The exact next offline scope is the two failed and 23 unrun Chromium
+cases named in the closeout receipt, followed by the full visual project.
+Carry forward the 82 passing cases only while their product and assertions
+remain identical. If separately approved, 30 minutes and up to 24 MiB
+would allow 6 MiB for Chromium output, 8 MiB for visual captures and
+comparisons, 3 MiB for diagnostics and active traces, and 7 MiB for
+contingency and closeout. Recount and measure the first cases before
+continuing. Stop if the plan does not fit within the actual remaining
+space. This estimate needs no additional archive or cap change.
+
+The offline test ports closed. The everyday app, the preview owners and
+the model listener matched entry, and the dormant stage has no active
+capability. Product source and guarded execution code still match
+`17ad1ac4658b26dcb3eba3fa44891a53d8310c97`. No model request or trial
+started. A fresh trial request depends on completing offline verification.
+
 # Retry failure diagnosed and compact offline verification prepared — November 6, 2026 Mountain time
 
 The previous offline window closed on the evidence hold. It recorded 36
