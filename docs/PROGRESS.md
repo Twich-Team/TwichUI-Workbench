@@ -1,3 +1,17 @@
+## November 6, 2026 — Approved interim cutover held in preflight
+
+- Preserved sealed candidate `2613172` and the exact request at `cd74f54`.
+  The existing user manager cannot enforce its configured service IP
+  filters. Keep cutover held pending verified equivalent filtering or a
+  revised, explicitly approved package.
+- Rechecked original history, model and listener ownership, seal, archive
+  hashes, storage and the scoped UFW preflight. Prepared a private server
+  certificate. No timed acceptance, archive, service or firewall change
+  began. See [current status](CURRENT_STATUS.md) and [handoff](CONTINUATION.md).
+- Recorded the interim choice without closing A8. Track operational
+  signed-in Codex, both bounded fallback directions, unresolved billing
+  enforcement and general addon bug fixing in the audit after styling.
+
 ## November 6, 2026 — Owner account report and Qwen-only approval
 
 - Recorded the owner-reported zero additional usage-credit balance and

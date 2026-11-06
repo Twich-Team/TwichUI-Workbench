@@ -1,5 +1,26 @@
 # Approved Qwen-only interim release — November 6, 2026 Mountain time
 
+**Cutover held in preflight.** The approved record says systemd enforces
+the IP filters on the candidate user units. The live user manager logged
+that its IP firewall cannot run without root. That manager lacks the
+required BPF capabilities, and unprivileged BPF is disabled. The exact
+LAN bind, UFW rule and application peer checks are separate controls.
+They do not establish the additional service-level filtering stated in
+the approved record. Require a verified service-level equivalent or an
+explicitly revised and approved package before cutover. Keep the sealed
+candidate and exact approved record for comparison.
+
+The earlier loopback app still serves its original assets. Its history
+and prior verified backup match at 28 tables and 79 rows. The model
+service remains on its original loopback listener and process. The new
+LAN listener and Codex socket are absent. The firewall snapshot showed
+default-deny ingress, disabled forwarding, and no 9487 rule. No firewall
+rule, service change, history cutover, named archive, or provider request
+was made. The timed window never started, so no rollback or model
+restoration was needed. The 341 archive file hashes matched. Archive
+pruning remains held. A private server certificate with IP SAN `10.0.0.9`
+was prepared and verified outside the seal. [Preflight receipt](/home/rich/.local/share/TwichUI-Workbench/everyday-install-20261106-receipts/cutover-hold.txt)
+
 The owner approved the limited installation of sealed candidate `2613172`
 against the exact [installation and acceptance record](EVERYDAY_INSTALL_APPROVAL_20261106.md)
 at checkpoint `cd74f54`. The approval covers the bound cutover, one deliberate
