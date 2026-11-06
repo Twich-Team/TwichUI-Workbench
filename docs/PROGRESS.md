@@ -1,3 +1,17 @@
+## November 6, 2026 — System acceptance rolled back after first Codex gate
+
+- Passed the privileged address filtering and isolated sandbox proofs.
+  Installed the exact four candidate services and scoped firewall rule.
+  Confirmed the owner's browser could reach LAN HTTPS, and preserved and
+  verified the 79-row history and both evidence archives.
+- The first Codex-only planning request held with a pre-generation
+  protocol error. Saved the terminal receipt with no reported usage or
+  partial output. No plan or run offer was created. Stopped the trial
+  sequence and executed the approved rollback.
+- Verified earlier loopback assets and history, baseline UFW status, both
+  archives, candidate seal and unchanged Qwen process. See
+  [current status](CURRENT_STATUS.md) and [handoff](CONTINUATION.md).
+
 ## November 6, 2026 — System installation and A8 package
 
 - Recorded the owner acceptance of snapshot uncertainty and retained

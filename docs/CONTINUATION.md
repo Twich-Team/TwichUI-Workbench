@@ -1,4 +1,34 @@
-# System-manager installation and A8 acceptance — November 6, 2026 Mountain time
+# System-manager acceptance rolled back — November 6, 2026 Mountain time
+
+The owner approved exact checkpoint `d13c2e6` for sealed `92094bc` and
+confirmed availability. The window opened at 3:49:55 p.m. Mountain time
+and closed after verified rollback at 3:58 p.m. The privileged TCP
+filtering and isolated sandbox proofs passed. Both named archives passed
+copy, metadata, independent restore and lookup checks. The matching
+originals were pruned and both verified restores were retained.
+
+The four candidate units ran as Rich with verified kernel filters and the
+exact UFW rule. Loopback and server-verified home-LAN HTTPS served the new
+assets and the original three task entries. The owner reached the app from
+a separate LAN device. The copied database matched the original 28 tables,
+79 rows and logical fingerprint before the trial.
+
+The first sealed Codex-only request reached the real connector and held on
+a protocol error. The terminal receipt records `generation_state=not_started`,
+no partial output and no reported usage. The connector supplied no finer
+cause. There was no plan or run offer. The remaining three trials were not
+started. Preserve the candidate database with the failed intake and require
+a new approved attempt for live acceptance after diagnosis.
+
+The approved rollback restored the earlier assets and all 79 history rows
+on `http://127.0.0.1:9487/` under the two sealed rollback services. The
+scoped UFW rule was removed, the baseline UFW status matched byte for byte,
+and the LAN listener and Codex socket were absent. The original Qwen model
+and separate dashboard retained their PIDs. Both archives and the sealed
+candidate were reverified after rollback. A8, general addon bug fixing,
+and broader initial-product acceptance remain open. [Closeout receipt](/home/rich/.local/share/TwichUI-Workbench/everyday-system-20261106-acceptance/acceptance-closeout.json)
+
+# Prepared system-manager installation and A8 acceptance — November 6, 2026 Mountain time
 
 The current [combined request](EVERYDAY_SYSTEM_INSTALL_APPROVAL_20261106.md)
 binds application `92094bc` and the new private seal. Keep the earlier

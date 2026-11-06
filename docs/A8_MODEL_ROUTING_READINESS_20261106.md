@@ -1,6 +1,17 @@
 # A8 signed-in Codex and model routing
 
-## Current installation candidate
+## Live acceptance outcome
+
+On November 6, 2026 Mountain time, the owner-approved system installation
+passed the host filtering and private HTTPS checks. The first Codex-only
+request stopped with a protocol error before generation. The stored
+receipt reports no partial output and no token usage. The failure did not
+identify a specific account, allowance, transport or protocol field. The
+approved rollback restored the original loopback app, original history and
+firewall. The other three trials were not started. Live A8 acceptance is
+still open. [Closeout receipt](/home/rich/.local/share/TwichUI-Workbench/everyday-system-20261106-acceptance/acceptance-closeout.json)
+
+## System installation candidate before live acceptance
 
 The [system installation and acceptance request](EVERYDAY_SYSTEM_INSTALL_APPROVAL_20261106.md)
 binds `92094bc` and replaces the proposed user-manager cutover. The owner
