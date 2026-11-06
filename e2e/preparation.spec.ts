@@ -347,14 +347,19 @@ for(const width of [1440,390])test(`durable real runs are reachable from Work an
   await page.goto('/');
   await page.getByRole('link',{name:'Run results',exact:true}).click();
   const runs=page.getByRole('region',{name:'Recorded real task runs'});
-  await expect(runs.getByText('Checks passed',{exact:true})).toBeVisible();
+  await expect(runs.getByRole('list').getByText('Checks passed',{exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Run results',exact:true})).toBeVisible();
   await page.getByLabel('Filter task runs').selectOption('checked');
   await expect(page.getByRole('link',{name:active.title})).toHaveCount(0);
   await page.getByRole('link',{name:completed.title}).click();
-  await expect(page.getByText(completed.message,{exact:true})).toBeVisible();
-  await page.reload();await expect(page.getByText(completed.message,{exact:true})).toBeVisible();
-  await page.getByRole('link',{name:'All recorded runs'}).click();
+  const result=page.getByRole('region',{name:'Run result and checks'});
+  for(const reload of [false,true]){
+    if(reload) await page.reload();
+    await expect(result.getByRole('heading',{name:'Changes checked',exact:true})).toBeVisible();
+    await result.getByText('Technical results and run details',{exact:true}).click();
+    await expect(result.getByText(completed.message,{exact:true})).toBeVisible();
+  }
+  await page.getByRole('link',{name:'All run results',exact:true}).click();
   await overflow(page);
   if(width===390){await page.evaluate(()=>document.documentElement.style.fontSize='200%');await overflow(page);}
   await page.getByLabel('Filter task runs').focus();await page.keyboard.press('Tab');
@@ -366,10 +371,14 @@ test('running model activity is unknown rather than falsely reported absent; sta
   let failed=false;
   await page.route('**/api/real-executions/non-model-active',route=>failed?route.abort():route.fulfill({json:{id:'non-model-active',title:'Controlled active evidence',status:'running',message:'Working in isolation.',base:'controlled',current_grant:true,grant_id:'NON-MODEL',expires_at:'2099-01-01T00:00:00Z',source:'real',publication_allowed:false,result:{inference_ran:false}}}));
   await page.goto('/executions/non-model-active');
-  await expect(page.getByText('Model activity has not yet been reported.',{exact:false})).toBeVisible();
-  await expect(page.getByText('No model implementation ran.',{exact:true})).toHaveCount(0);
+  const result=page.getByRole('region',{name:'Run result and checks'});
+  await expect(result.getByRole('heading',{name:'Working in a separate copy',exact:true})).toBeVisible();
+  await result.getByText('Technical results and run details',{exact:true}).click();
+  await expect(result.getByText('Model execution was not reported for this result.',{exact:true})).toBeVisible();
+  await expect(result.getByText('No model implementation ran.',{exact:true})).toHaveCount(0);
   failed=true;
-  await expect(page.getByText('Refresh unavailable. Showing the last loaded evidence.',{exact:true})).toBeVisible({timeout:15000});
+  await expect(result.getByRole('alert').filter({hasText:'Refresh unavailable. Showing the last loaded result.'})).toBeVisible({timeout:15000});
+  await expect(result.getByText('Model execution was not reported for this result.',{exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Controlled active evidence'})).toBeVisible();
 });
 
@@ -442,7 +451,9 @@ for(const width of [1440,390])test(`unattended recovery explains the held lane a
   await page.reload();await expect(box.getByRole('heading',{name:'Waiting for safe recovery'})).toBeVisible();
   row.recovery_pending=false;row.status='failed';row.verification='unknown';row.finished_at='2026-11-05T02:01:00Z';
   row.message='Failure outcome recovered. Evidence and known usage retained; no attempt will restart.';
-  await page.reload();await expect(box.getByText(row.message,{exact:true})).toBeVisible();
+  await page.reload();
+  await expect(box.getByRole('heading',{name:'Work could not finish',exact:true})).toBeVisible();
+  await expect(box.locator(':scope > p').and(box.getByText(row.message,{exact:true}))).toBeVisible();
   await box.getByText('Technical results and run details',{exact:true}).click();
   await expect(box.getByText('<script>controlled failure</script>',{exact:true})).toBeVisible();
   const failedCheck=box.getByRole('region',{name:'Last failed check'});

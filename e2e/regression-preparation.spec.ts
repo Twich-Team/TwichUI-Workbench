@@ -287,8 +287,8 @@ async function openLocalOffer(page: import('@playwright/test').Page) {
   const planned=JSON.parse(fixture('reviewed-offer-automatic-worker'));
   expect(planned.adapter_calls).toBe(1);
   const proposal=page.getByRole('region',{name:'Proposed test'});
-  await expect(proposal.getByText('"alice"')).toBeVisible();
-  await expect(proposal.getByText('"ALICE"')).toBeVisible();
+  await expect(proposal.getByText('"alice"',{exact:true})).toBeVisible();
+  await expect(proposal.getByText('"ALICE"',{exact:true})).toBeVisible();
   const approve=page.getByRole('button',{name:'Approve plan',exact:true});
   await expect(approve).toBeDisabled();
   await page.getByLabel('The test examples match what I asked for.').check();
