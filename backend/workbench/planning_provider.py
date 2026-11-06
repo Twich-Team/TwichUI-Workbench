@@ -156,8 +156,9 @@ class LocalBeforeGeneration(PlanningUnavailable):
 
 
 class LocalProvider:
-    def __init__(self, stop_event=None):
+    def __init__(self, stop_event=None, *, ends_at=None):
         self.stop_event = stop_event
+        self.ends_at = ends_at
         self.diagnostics = {}
 
     def generate(self, packet, schema, *, expected_model=None):
@@ -191,7 +192,7 @@ class LocalProvider:
     def _request(self, schema, encoded, key_path, expected_model):
         with local_slot():
             secret = Path(key_path).read_text().strip()
-            with LocalHTTP(self.stop_event) as transport:
+            with LocalHTTP(self.stop_event, ends_at=self.ends_at) as transport:
                 return self._infer(transport, secret, schema, encoded, expected_model=expected_model)
 
     def _infer(self, transport, secret, schema, encoded, *, expected_model=None):

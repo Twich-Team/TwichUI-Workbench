@@ -231,7 +231,7 @@ def _terminal_inputs(c, job, binding):
             dict(scenarios=reviewed['behavioral_evidence']['scenarios'])
         )
         grounded_scenarios.validate_generation(draft, packet)
-        _validate_model_selection(c, reviewed)
+        _validate_model_selection(c, linked)
     return dict(
         proposal_id=review['id'], proposal_revision=review['revision'],
         review_binding=binding, scope_approval_id=ref['approval_id'],
@@ -241,12 +241,15 @@ def _terminal_inputs(c, job, binding):
     )
 
 
-def _validate_model_selection(c, reviewed):
-    selection = (reviewed.get('scenario_grounding') or {}).get('model_selection')
-    if selection and (reviewed.get('scenario_grounding') or {}).get('basis') == 'local' and not (
-            reviewed.get('scenario_grounding') or {}).get('fallback_reason'):
+def _validate_model_selection(c, linked):
+    from workbench import everyday, provider_routes
+
+    grounding = linked['proposal_review']['task_contract'].get('scenario_grounding') or {}
+    if everyday.enabled() and linked['original'].get('local_planning') in provider_routes.CHOICES:
+        provider_routes.run_selection(c, linked)
+    elif grounding.get('model_selection') and grounding.get('basis') == 'local' and not grounding.get('fallback_reason'):
         from workbench.model_policy import grounded_local_selection
-        if grounded_local_selection(c).model_dump() != selection:
+        if grounded_local_selection(c).model_dump() != grounding['model_selection']:
             raise ValueError('The saved grounding model policy changed. Request a fresh review.')
 
 
@@ -292,7 +295,7 @@ def _validate_recovery_binding(c, linked, spec, authorization):
     if (digest(linked) != authorization['task_binding']
             or digest(spec) != authorization['recipe_sha256']):
         raise ValueError('Review or recipe changed after authorizing preparation recovery')
-    _validate_model_selection(c, linked['proposal_review']['task_contract'])
+    _validate_model_selection(c, linked)
 
 
 def validate_recovery_offer(c, linked, spec, root, recovery_id, existing):

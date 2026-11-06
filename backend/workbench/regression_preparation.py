@@ -21,7 +21,7 @@ from sqlalchemy.exc import OperationalError
 
 from workbench import intake
 from workbench.db import intakes, planning_jobs, proposals, model_attempts, write_transaction
-from workbench.planning_transport import scenario_failure_message
+from workbench.planning_transport import deadline_seconds, scenario_failure_message
 from workbench.schemas import ProposalContent, RegressionTaskContract
 from workbench.real_execution import LIMITS
 from workbench.real_workspace import PRELUDE
@@ -303,6 +303,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     claimed_generation = False
     loaded_selection = False
     codex_route = route = fallback_reason = None
+    planning_end = None
     choice = original['payload'].get('local_planning')
     everyday_mode = everyday.enabled()
     generation = job['kind'] == 'planning' and scenario_response is None and (
@@ -343,7 +344,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 from browser_demo.stage import require_active_stage
                 require_active_stage()
             def provider_stopped():
-                if stop_event is not None and stop_event.is_set():
+                if ((stop_event is not None and stop_event.is_set())
+                        or (planning_end is not None and time.monotonic() >= planning_end)):
                     return True
                 try:
                     with engine.connect() as active:
@@ -366,13 +368,15 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 if everyday_mode:
                     everyday.check_planning(c, original)
                     route = provider_routes.approved(c, original)
+                    planning_end = time.monotonic() + deadline_seconds()
                     if choice in provider_routes.CODEX_CHOICES:
                         codex_route = route
                 if codex_route:
                     model_selection = ScenarioModelSelection(policy_revision=route['policy_revision'], model=route['model'])
                     adapter_used = codex_provider.Planner(codex_route, provider_stopped)
                 else:
-                    adapter_used = adapter or (LocalProvider(stop_event) if everyday_mode else provider(stop_event))
+                    adapter_used = adapter or (LocalProvider(stop_event, ends_at=planning_end)
+                                               if everyday_mode else provider(stop_event))
                     if isinstance(adapter_used, LocalProvider):
                         model_selection = (ScenarioModelSelection(policy_revision=route['policy_revision'], model=route['model'])
                                            if route else model_policy.grounded_local_selection(c))
@@ -410,6 +414,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     raise ValueError('Committed source or preparation policy changed before fallback.')
                 from datetime import datetime, timedelta, timezone
                 with write_transaction(engine) as c:
+                    if time.monotonic() >= planning_end:
+                        raise PlanningUnavailable('The shared planning deadline expired.', 'timeout')
                     if (intake.require(c, planning_jobs, job['id']) != job
                             or intake.require(c, intakes, original['id']) != original
                             or intake.human_scope(c, original['id']) != scope
@@ -437,8 +443,10 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     adapter_used = codex_provider.Planner(codex_route, provider_stopped)
                     raw, model, basis = adapter_used.generate(wire, schema)
                 else:
-                    adapter_used = LocalProvider(stop_event)
+                    adapter_used = LocalProvider(stop_event, ends_at=planning_end)
                     raw, model, basis = adapter_used.generate(wire, schema, expected_model=target)
+            if planning_end is not None and time.monotonic() >= planning_end:
+                raise PlanningUnavailable('The shared planning deadline expired.', 'timeout')
             if len(json.dumps(raw, allow_nan=False).encode()) > 24000 or basis not in {'demo', 'local', 'codex'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
                 raise ValueError('Invalid bounded scenario provider response')
             parsed = grounded_scenarios.resolve_response(raw, schema, wire, packet)
@@ -463,8 +471,12 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 failure = ('schema_validation', f'Planning returned an invalid example at {location}: {issue["msg"]}')
         except PlanningUnavailable as error:
             hold = getattr(stop_event, 'reason', None)
-            failure = ('capacity_stop', hold) if hold else (
-                (error.reason, str(error)) if isinstance(error, (codex_provider.Hold, LocalBeforeGeneration)) else (error.reason, None))
+            if hold:
+                failure = ('capacity_stop', hold)
+            elif planning_end is not None and time.monotonic() >= planning_end:
+                failure = ('timeout', 'The shared planning deadline expired.')
+            else:
+                failure = (error.reason, str(error) if isinstance(error, (codex_provider.Hold, LocalBeforeGeneration)) else None)
         except ValueError as error:
             failure = ('planning_validation', str(error))
         except OSError:

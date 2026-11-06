@@ -246,6 +246,8 @@ def turn(rpc, model, effort, prompt, schema):
             method, p = event.get('method'), event.get('params') or {}
             if 'id' in event or method in {'model/rerouted', 'model/verification', 'account/updated'}:
                 raise Hold('protocol', started=True)
+            if method == 'error' and p.get('willRetry') is True:
+                raise Hold('protocol', started=True)
             if p.get('threadId', thread) != thread or p.get('turnId', turn_id) != turn_id:
                 raise Hold('protocol', started=True)
             if method == 'item/agentMessage/delta' and isinstance(p.get('delta'), str) and p['delta']:

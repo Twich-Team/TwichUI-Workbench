@@ -62,21 +62,40 @@ def body(path=TEST, permission=True):
         regression_tests=dict(acceptance=['Trimming produces the specified result.'], test_paths=[path]))
 
 
+@pytest.mark.parametrize('via_codex', [False, True])
 def test_ordinary_requests_have_one_planning_claim_and_local_run_each(
-    store, client, headers, installed, monkeypatch,
+    store, client, headers, installed, monkeypatch, via_codex,
 ):
     # Fixture helpers are deliberately not production dispatch or transport.
     import local_browser_fixture
     monkeypatch.setattr(local_browser_fixture, "install_offline_guard", lambda: None)
     planner = ControlledPlanner()
+    if via_codex:
+        from workbench import codex_provider
+        from workbench.planning_provider import LocalProvider
+
+        save_codex_policy(store, both=True)
+
+        def unavailable(*args):
+            raise codex_provider.Hold('unavailable')
+
+        def local(self, packet, schema, expected_model):
+            self.diagnostics = {'generation_state': 'finished'}
+            result, _, _ = planner.generate(packet, schema)
+            return result, expected_model, 'local'
+
+        monkeypatch.setattr(codex_provider, 'generate', unavailable)
+        monkeypatch.setattr(LocalProvider, 'generate', local)
     assert client.get('/api/local-work').json()['ready']
     for index, path in enumerate([TEST, CLIENT_TEST], 1):
         request = body(path)
+        if via_codex:
+            request['local_planning'] = 'codex-with-local-fallback'
         response = client.post('/api/intake', headers=headers, json=request)
         assert response.status_code == 200
         item = response.json()
         assert client.post('/api/intake', headers=headers, json=request).json()['id'] == item['id']
-        assert worker.tick(store, planning_adapter=planner)
+        assert worker.tick(store, planning_adapter=None if via_codex else planner)
         assert len(planner.calls) == index
         approve_and_decompose(store, client, headers, item)
         assert worker.tick(store, planning_adapter=planner)  # Application prepares from the saved plan.
@@ -85,6 +104,8 @@ def test_ordinary_requests_have_one_planning_claim_and_local_run_each(
         endpoint = f"/api/intake/{item['id']}/tasks/{task['id']}/run-approval"
         offer = client.get(endpoint).json()
         assert offer['available'] and offer['local_only']
+        if via_codex:
+            assert offer['provider']['fallback_reason'] == 'unavailable'
         command = dict(command_id=str(uuid4()), binding=offer['binding'],
                        scope_approval_id=offer['scope_approval_id'], run_budget=offer['offer']['budget'])
         escalated = {**command, 'run_budget': {**command['run_budget'], 'publication': 'draft-pr'}}
@@ -98,7 +119,8 @@ def test_ordinary_requests_have_one_planning_claim_and_local_run_each(
         local_browser_fixture.advance_local(store, Path(store.url.database), 'pass', planner, example=None)
         result = client.get('/api/real-executions').json()
         assert result['total'] == index
-        history = client.get('/api/intake/' + item['id']).json()['provider_activity']
+        history = [row for row in client.get('/api/intake/' + item['id']).json()['provider_activity']
+                   if row['purpose'] == 'implementation']
         assert [(entry['purpose'], entry['backend']) for entry in history] == [('implementation', 'local')]
         assert history[0]['requested_model'] == everyday.MODEL
         assert 'fallback disabled' in history[0]['routing_reason']
@@ -296,6 +318,34 @@ def test_codex_saved_policy_change_prevents_old_consent_from_starting(
     saved = client.get('/api/intake/' + response.json()['id']).json()
     assert saved['status'] == 'failed'
     assert 'policy changed' in saved['jobs'][0]['message']
+
+
+def test_fallback_cannot_start_after_the_shared_planning_deadline(
+    store, client, headers, installed, monkeypatch,
+):
+    from types import SimpleNamespace
+    from workbench import codex_provider, regression_preparation
+    from workbench.planning_provider import LocalProvider
+
+    save_codex_policy(store, both=True)
+    now = [10]
+    monkeypatch.setattr(regression_preparation, 'time', SimpleNamespace(monotonic=lambda: now[0]))
+    monkeypatch.setenv('WORKBENCH_PLANNING_DEADLINE_S', '120')
+
+    def expired(*_args):
+        now[0] += 120
+        raise codex_provider.Hold('unavailable')
+
+    monkeypatch.setattr(codex_provider, 'generate', expired)
+    monkeypatch.setattr(LocalProvider, 'generate', lambda *_args: pytest.fail('Deadline reset by switch'))
+    saved = client.post('/api/intake', headers=headers, json={**body(), 'local_planning': 'codex-with-local-fallback'})
+    assert saved.status_code == 200
+    assert worker.tick(store)
+    item = client.get('/api/intake/' + saved.json()['id']).json()
+    assert item['status'] == 'failed' and 'shared planning deadline' in item['jobs'][0]['message']
+    with store.connect() as c:
+        row = c.execute(select(planning_jobs)).mappings().one()
+        assert 'provider_switch' not in row['payload']
 
 
 @pytest.mark.parametrize('good_edit,via_qwen', [(True, False), (False, False), (True, True), (False, True)])

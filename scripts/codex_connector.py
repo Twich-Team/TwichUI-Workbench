@@ -1,4 +1,4 @@
-"""Rich's private connector. Start only as an explicitly installed user service."""
+"""Rich's private connector. Start only under an explicitly approved account review."""
 import argparse
 from hashlib import sha256
 import json
@@ -25,17 +25,41 @@ def private_inputs(socket_path, binary, binary_hash, credential):
         raise ValueError('The connector requires its private runtime directory, pinned CLI and owned sign-in file.')
 
 
+def check_account_review(path):
+    info = path.lstat()
+    if (path.resolve() != path or info.st_uid != os.getuid() or info.st_mode & 0o077
+            or not stat.S_ISREG(info.st_mode) or info.st_size > 2048):
+        raise ValueError('The connector requires a private owner account review.')
+    review = json.loads(path.read_text())
+    if (not isinstance(review, dict) or review.get('automatic_reload') != 'off'
+            or type(review.get('additional_usage_credit_balance')) is not int
+            or review['additional_usage_credit_balance'] != 0
+            or review.get('allowance_snapshot_risk_accepted') is not True
+            or not isinstance(review.get('approval_reference'), str)
+            or not review['approval_reference'].strip()):
+        raise ValueError('The connector requires the approved included-allowance account conditions.')
+
+
+def allowed_cgroup(group, uid):
+    if group.is_relative_to('/system.slice/workbench-everyday-worker.service'):
+        return True
+    parent = Path(f'/user.slice/user-{uid}.slice/user@{uid}.service/app.slice')
+    if not group.is_relative_to(parent):
+        return False
+    child = group.relative_to(parent).parts
+    return bool(child and re.fullmatch(r'workbench-real-codex-task-lease-[A-Za-z0-9-]+\.service', child[0]))
+
+
 def handle(connection, argv):
     connection.settimeout(3)
     pid, uid, _ = struct.unpack('3i', connection.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
     if uid != os.getuid():
         return
     try:
-        components = Path(f'/proc/{pid}/cgroup').read_text().strip().split('::', 1)[1].split('/')
+        group = Path(Path(f'/proc/{pid}/cgroup').read_text().strip().split('::', 1)[1])
     except (OSError, IndexError):
         return
-    if not any(part == 'workbench-everyday-worker.service' or re.fullmatch(
-            r'workbench-real-codex-task-lease-[A-Za-z0-9-]+\.service', part) for part in components):
+    if not allowed_cgroup(group, uid):
         return
     started = False
     try:
@@ -75,12 +99,10 @@ def main():
     parser.add_argument('--binary', required=True, type=Path)
     parser.add_argument('--binary-sha256', required=True)
     parser.add_argument('--sign-in-file', required=True, type=Path)
-    parser.add_argument('--included-only-confirmed', action='store_true',
-                        help='Start only after owner review of Automatic reload and the additional usage-credit balance.')
+    parser.add_argument('--account-review', required=True, type=Path)
     args = parser.parse_args()
-    if not args.included_only_confirmed:
-        parser.error('Explicit included-only account confirmation is required.')
     os.umask(0o077)
+    check_account_review(args.account_review)
     private_inputs(args.socket, args.binary, args.binary_sha256, args.sign_in_file)
     argv = codex.command(args.binary, args.sign_in_file, network=True)
     with socket.socket(socket.AF_UNIX) as listener:
@@ -89,6 +111,7 @@ def main():
         while True:
             connection, _ = listener.accept()
             with connection:
+                check_account_review(args.account_review)
                 handle(connection, argv)
 
 

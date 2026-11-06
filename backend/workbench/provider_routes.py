@@ -48,12 +48,13 @@ def approved(c, original):
     key, current = planning_binding(c, choice)
     receipts = c.execute(select(planning_jobs.c.payload).where(
         planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')).scalars()
-    for receipt in receipts:
-        saved = receipt.get('local_planning_receipt', {}).get(key)
-        if saved is not None and {k: v for k, v in saved.items() if k != 'policy_revision'} == {
+    saved_routes = [receipt['local_planning_receipt'][key] for receipt in receipts
+                    if key in receipt.get('local_planning_receipt', {})]
+    for saved in saved_routes:
+        if {k: v for k, v in saved.items() if k != 'policy_revision'} == {
                 k: v for k, v in current.items() if k != 'policy_revision'}:
             return saved
-    if choice == 'qwen-once':
+    if choice == 'qwen-once' and not saved_routes:
         # Requests saved before per-provider consent retained the prior default binding.
         return model_policy.grounded_local_selection(c).model_dump()
     raise ValueError('The saved model policy changed after task consent. Review and submit a new request.')
@@ -80,20 +81,24 @@ def run_selection(c, linked):
     from workbench.db import intakes
 
     selected = approved(c, intake.require(c, intakes, linked['intake_id']))
-    if choice == 'qwen-once':
-        return None
     grounding = (linked['proposal_review'].get('task_contract') or {}).get('scenario_grounding') or {}
     basis = grounding.get('basis')
     reason = grounding.get('fallback_reason')
+    if choice == 'qwen-once' and basis in {None, 'demo'} and not reason:
+        return None  # Legacy or disposable fixture; no Codex authority.
+    if basis == 'local':
+        allowed = ((choice in {'qwen-once', 'qwen-with-codex-fallback'} and not reason)
+                   or (choice == 'codex-with-local-fallback'
+                       and SAFE_CODEX_FALLBACK.get(reason) in selected['fallback']))
+        if allowed and grounding.get('model_selection') == {
+                'model': everyday.MODEL, 'policy_revision': selected['policy_revision']}:
+            return None  # Keep the Qwen producer, including after a planning switch.
+        raise ValueError('The reviewed Qwen selection changed.')
     if choice == 'qwen-with-codex-fallback':
-        if basis == 'local' and not reason:
-            return None
         if basis != 'codex' or reason != 'local_unreachable' or 'unavailable' not in selected['fallback']:
             raise ValueError('No eligible reviewed provider route for this task.')
         selected = {**selected['codex'], 'policy_revision': selected['policy_revision']}
-    elif basis == 'local' and SAFE_CODEX_FALLBACK.get(reason) in selected['fallback']:
-        return None  # The task spent its single pre-generation switch; keep Qwen for execution.
-    elif basis != 'codex' or reason:
+    elif choice not in CODEX_CHOICES or basis != 'codex' or reason:
         raise ValueError('No eligible reviewed provider route for this task.')
     if grounding.get('model_selection') != {
             'model': selected['model'], 'policy_revision': selected['policy_revision']}:

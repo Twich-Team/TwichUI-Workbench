@@ -96,6 +96,7 @@ def test_single_turn_with_exact_model_and_usage():
 @pytest.mark.parametrize('events,reason', [
     ([], 'canceled'), ([{'method': 'model/rerouted'}], 'protocol'),
     ([{'method': 'item/started', 'params': {'item': {'type': 'commandExecution'}}}], 'protocol'),
+    ([{'method': 'error', 'params': {'willRetry': True}}], 'protocol'),
     ([completed()[0], *completed()], 'protocol'), ([completed()[-1]], 'accounting'),
 ])
 def test_uncertain_turn_interrupts_without_replay(events, reason):
