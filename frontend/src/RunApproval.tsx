@@ -26,6 +26,11 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
   useEffect(()=>{if(!review&&current?.available)setReview(current);},[review,current]);
   const shown=review||current;
   const receipt=current?.receipt||saved;
+  const offerRegion=useRef<HTMLElement>(null);
+  const offerVisible=Boolean(shown?.available&&shown.offer&&!receipt);
+  useEffect(()=>{
+    if(offerVisible&&window.location.hash==='#local-run-review')offerRegion.current?.focus();
+  },[offerVisible]);
   const stale=Boolean(current&&(
     (draft&&(draft.binding!==current.binding||draft.scope_approval_id!==current.scope_approval_id||
       draft.run_budget.offer_id!==current.offer?.id||draft.run_budget.offer_fingerprint!==current.offer?.fingerprint||Boolean(draft.run_budget.activate_once)!==Boolean(current.offer?.budget.activate_once)))||
@@ -82,7 +87,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
   const buttonLabel=busy?'Saving approval…':draft?'Retry same task approval':
     !budget.activate_once?'Save approval · Execution unavailable':
     draftPR?'Approve run and draft pull request':'Approve local run';
-  return <section className="soft-callout run-approval" aria-label="Certified task run approval">
+  return <section className="soft-callout run-approval" id="local-run-review" ref={offerRegion} tabIndex={-1} aria-label="Certified task run approval">
     <h3>{testOnly?'Add test coverage in a separate copy':'Run the approved work in a separate copy'}</h3>
     {testOnly?<p>Your installed addon, addon code and existing checks stay as they are.</p>:
       <><ul>{scope?.content.scope.map((s,i)=><li key={i}>{s}</li>)}</ul>

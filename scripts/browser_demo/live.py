@@ -99,11 +99,12 @@ def run(manifest_path, evidence, fingerprint, *, rehearsal=False):
     require_ports([port])
     window = json.loads((evidence / "window.json").read_text())
     start = datetime.fromisoformat(window["start"])
-    minutes = manifest.get("window_minutes", 90)
-    reserve = manifest.get("budget_reserve_minutes", 55)
-    require(type(minutes) is int and type(reserve) is int and 90 <= minutes <= 120
-            and 55 <= reserve < minutes, "The manifest does not specify a supported bounded window.")
+    minutes, reserve, review = layout.window_limits(manifest)
     deadline = start + timedelta(minutes=minutes)
+    if review:
+        require(datetime.fromisoformat(window["deadline"]) == deadline
+                and datetime.fromisoformat(window["review_cutoff"]) == deadline - timedelta(minutes=reserve),
+                "Announced deadlines do not match the frozen trial window.")
     require(start <= utc_now() < deadline - timedelta(minutes=reserve), "The authorized setup window is unavailable.")
     require(not (evidence / "ingress-phase.json").exists(), "This evidence directory already owns a run.")
     database = stage / layout.DATABASE
@@ -192,7 +193,8 @@ def run(manifest_path, evidence, fingerprint, *, rehearsal=False):
         run_owned(stage=stage, database=database, evidence=evidence, port=port, env=env, deadline=deadline,
                   room=room, stopping=lambda: stopped, activate=activate, worker_command=command,
                   stop_worker=stop_worker, verify_worker=lambda _: (evidence / "worker-ready.txt").is_file(),
-                  task=task, budget_reserve_minutes=reserve, owner_submits=manifest.get("owner_submits", False))
+                  task=task, budget_reserve_minutes=reserve, owner_review_minutes=review,
+                  owner_submits=manifest.get("owner_submits", False))
 
 
 if __name__ == "__main__":

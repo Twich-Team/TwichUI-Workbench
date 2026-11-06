@@ -1,10 +1,13 @@
 """Restrict a single isolated demonstration. Forward original browser commands."""
 import asyncio
 from datetime import datetime, timezone
+from html import escape
 import json
 import os
 from pathlib import Path
 from secrets import token_urlsafe
+from uuid import UUID
+from zoneinfo import ZoneInfo
 
 from starlette.responses import HTMLResponse, JSONResponse
 from workbench.model_policy import ExecutionPolicy
@@ -97,10 +100,52 @@ class SingleDemo:
                      "Content-Security-Policy": f"default-src 'none'; script-src 'nonce-{nonce}'; frame-ancestors 'none'"},
         )
 
+    def owner_run_status(self):
+        """A read-only handoff. The ordinary task page still owns the decision."""
+        refresh = ""
+        action = ""
+        deadline = ""
+        try:
+            phase = self.phase()
+            cutoff = datetime.fromisoformat(phase["cutoff"])
+            mountain = cutoff.astimezone(ZoneInfo("America/Denver"))
+            deadline = f'<p>Browser decisions close at <time datetime="{cutoff.isoformat()}">{mountain.strftime("%B %d at %I:%M:%S %p %Z")}</time> (Mountain time).</p>'
+            if (self.evidence / "ingress-budget.json").is_file():
+                title = "Local-run decision saved"
+                detail = "Workbench recorded your decision. Open the task to see whether it has been applied."
+                intake = json.loads((self.evidence / "ingress-submit.json").read_text())
+                action = f'<a href="/intake/{UUID(intake["body"]["request_id"])}">Open your task</a>'
+            elif datetime.now(timezone.utc) >= cutoff or (self.evidence / "supervisor-hold.json").is_file():
+                title = "Local-run review closed"
+                detail = "The trial closed without a saved local-run decision. The earlier plan remains in the record."
+            elif phase["state"] == "budget":
+                identity = UUID(phase["intake"])
+                title = "Your local-run decision is ready"
+                detail = "Review what can change and the run limits. Approve in Workbench only if you want the local run to start."
+                action = f'<a href="/intake/{identity}#local-run-review">Review the local run in Workbench</a>'
+            else:
+                title = "Waiting for the local-run offer"
+                detail = "The local-run decision comes after the plan review and independent checks. This page will update when it is ready."
+                refresh = '<meta http-equiv="refresh" content="3">'
+        except (OSError, ValueError, KeyError, TypeError):
+            title = "Trial status unavailable"
+            detail = "Reload to check the current status before making a decision."
+        return HTMLResponse(
+            '<!doctype html><html lang="en"><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            f'<title>{escape(title)}</title>{refresh}'
+            '<main style="max-width:42rem;margin:2rem auto;padding:0 1rem;font:1.125rem/1.55 system-ui">'
+            f'<h1>{escape(title)}</h1><p>{escape(detail)}</p>{deadline}<p>{action}</p></main></html>',
+            headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
+                     "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'"},
+        )
+
     async def __call__(self, scope, receive, send):
         method = scope.get("method")
         if scope["type"] == "http" and method == "GET" and scope["path"] == "/demo/request":
             return await self.owner_intake_form(scope)(scope, receive, send)
+        if scope["type"] == "http" and method == "GET" and scope["path"] == "/demo/local-run":
+            return await self.owner_run_status()(scope, receive, send)
         if scope["type"] != "http" or method in ("GET", "HEAD"):
             return await self.app(scope, receive, send)
         path = scope["path"]
@@ -122,6 +167,7 @@ class SingleDemo:
                 if allowed and phase["state"] not in {"active", "stopping"}:
                     from browser_demo.stage import require_active_stage
                     require_active_stage()
+                    allowed = datetime.now(timezone.utc) < datetime.fromisoformat(phase["cutoff"])
             except (OSError, ValueError, KeyError, TypeError):
                 allowed = False
             if not allowed:

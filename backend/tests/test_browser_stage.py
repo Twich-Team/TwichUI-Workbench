@@ -12,7 +12,9 @@ from fastapi.testclient import TestClient
 import pytest
 
 from browser_demo import stage
+from browser_demo import gate
 from browser_demo.gate import INTAKE, SingleDemo
+from browser_demo.supervisor import RunHeld, Supervisor
 from workbench import task_sessions
 from workbench.schemas import IntakeInput
 
@@ -199,6 +201,20 @@ def test_owner_draft_waits_for_authenticated_exact_submission(client, tmp_path, 
         assert browser.post("/api/intake", headers=headers, json=payload).status_code == 409
     assert not receipt.exists()
 
+    with monkeypatch.context() as patch:
+        before_cutoff = datetime.now(timezone.utc)
+        cutoff = datetime.fromisoformat(phase["cutoff"])
+        ticks = iter([before_cutoff, cutoff])
+
+        class Clock(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return next(ticks)
+
+        patch.setattr(gate, "datetime", Clock)
+        assert browser.post("/api/intake", headers=headers, json=payload).status_code == 409
+    assert not receipt.exists()
+
     saved = browser.post("/api/intake", headers=headers, json=payload)
     assert saved.status_code == 200
     assert saved.json()["id"] == identity
@@ -209,3 +225,73 @@ def test_owner_draft_waits_for_authenticated_exact_submission(client, tmp_path, 
     phase["cutoff"] = datetime.now(timezone.utc).isoformat()
     phase_file.write_text(json.dumps(phase))
     assert browser.post("/api/intake", headers=headers, json=payload).status_code == 409
+
+
+def test_local_run_handoff_is_read_only_and_tracks_ready_saved_and_closed(client, tmp_path):
+    browser = TestClient(SingleDemo(client.app, tmp_path), base_url="http://127.0.0.1:9187")
+    intake = str(uuid4())
+    future = datetime.now(timezone.utc) + timedelta(minutes=15)
+    phase = tmp_path / "ingress-phase.json"
+
+    def set_phase(state, cutoff=future):
+        phase.write_text(json.dumps(dict(state=state, cutoff=cutoff.isoformat(), intake=intake)))
+
+    set_phase("read-only")
+    waiting = browser.get("/demo/local-run")
+    assert waiting.headers["cache-control"] == "no-store"
+    assert 'http-equiv="refresh"' in waiting.text
+    assert "Waiting for the local-run offer" in waiting.text
+    assert "Review the local run in Workbench" not in waiting.text
+    assert "Mountain time" in waiting.text and future.isoformat() in waiting.text
+
+    set_phase("budget")
+    ready = browser.get("/demo/local-run")
+    assert f'href="/intake/{intake}#local-run-review"' in ready.text
+    assert "Your local-run decision is ready" in ready.text
+    assert browser.post("/demo/local-run", json={}).status_code == 409
+    receipt = tmp_path / "ingress-budget.json"
+    assert not receipt.exists()
+
+    set_phase("budget", future - timedelta(minutes=30))
+    closed = browser.get("/demo/local-run")
+    assert "Local-run review closed" in closed.text
+    assert "Review the local run in Workbench" not in closed.text
+    (tmp_path / "ingress-submit.json").write_text(json.dumps({"body": {"request_id": intake}}))
+    receipt.write_text("{}")
+    saved = browser.get("/demo/local-run")
+    assert "Local-run decision saved" in saved.text
+    assert "whether it has been applied" in saved.text
+    assert f'href="/intake/{intake}"' in saved.text
+
+
+@pytest.mark.parametrize("late", [False, True])
+def test_supervisor_opens_review_only_with_the_full_review_interval(tmp_path, monkeypatch, late):
+    start = datetime.now(timezone.utc)
+    elapsed = timedelta()
+    supervisor = Supervisor(None, tmp_path, "http://127.0.0.1:9187", None, lambda _: {},
+                            lambda: True, lambda: False, start + timedelta(minutes=120),
+                            runtime_root=tmp_path, now=lambda: start + elapsed,
+                            owner_submits=True, budget_reserve_minutes=72, owner_review_minutes=15)
+    assert supervisor.cutoff == start + timedelta(minutes=48)
+    monkeypatch.setattr(supervisor, "check", lambda *_, **__: None)
+    monkeypatch.setattr(supervisor, "wait_owner_intake", lambda: "intake")
+    monkeypatch.setattr(supervisor, "wait_plan", lambda _: dict(id="plan", binding="plan-binding",
+        human_scope={"revision": 1}, task_contract={"behavioral_evidence": {"review_digest": "review"}}))
+    monkeypatch.setattr(supervisor, "wait_scope", lambda: "scope-approval")
+
+    def wait_offer(*_):
+        nonlocal elapsed
+        elapsed = timedelta(minutes=33, seconds=0 if late else -1)
+        return "task", {"binding": "offer-binding", "offer": {"budget": {}}}
+
+    def wait_budget():
+        assert supervisor.read("ingress-phase.json")["state"] == "budget"
+        raise RunHeld("Test reached owner decision")
+
+    monkeypatch.setattr(supervisor, "wait_offer", wait_offer)
+    monkeypatch.setattr(supervisor, "wait_budget", wait_budget)
+    supervisor.write("browser-policy.json", {"revision": 1})
+    with pytest.raises(RunHeld, match="too little time" if late else "reached owner decision"):
+        supervisor.run(lambda _: None, lambda: None, lambda: None)
+    assert (tmp_path / "owner-step-budget.json").exists() is not late
+    assert supervisor.read("ingress-phase.json")["state"] == "read-only"

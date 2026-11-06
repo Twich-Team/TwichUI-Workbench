@@ -45,9 +45,11 @@ for(const width of [1440,390])test(`reviewed certified offer browser approval re
   await expect(page.getByRole('heading',{name:'Task preparation held'})).toBeVisible();
   await expect(page.getByRole('region',{name:'Certified task run approval'})).toHaveCount(0);
   await page.getByRole('region',{name:'Task preparation hold'}).screenshot({path:artifactPath(`reviewed-offers/missing-certification-${width}.png`)});
-  fixture('reviewed-offer-certify');await page.reload();
+  fixture('reviewed-offer-certify');
+  await page.goto(page.url().split(/[?#]/)[0]+'#local-run-review');
   const offer=page.getByRole('region',{name:'Certified task run approval'});
   await expect(offer.getByRole('heading',{name:'Add test coverage in a separate copy'})).toBeVisible();
+  await expect(offer).toBeFocused();
   await expect(offer.getByRole('radio',{name:'Keep the result local',includeHidden:true})).toBeChecked();
   await offer.getByText('Publishing options',{exact:true}).click();
   await offer.getByRole('radio',{name:'Also allow one draft pull request'}).check();

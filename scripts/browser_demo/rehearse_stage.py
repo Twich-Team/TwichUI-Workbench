@@ -15,16 +15,18 @@ from project_env import environment, require_ports
 
 
 def run(manifest, fingerprint, evidence):
-    assert live.preflight(manifest, fingerprint)["mode"] == "offline"
-    task = json.loads(manifest.read_text())["task"]
+    config = live.preflight(manifest, fingerprint)
+    assert config["mode"] == "offline"
+    task = config["task"]
     require_ports([9387])
     evidence.mkdir(mode=0o700)
     (evidence / "rehearsal-task.json").write_text(json.dumps(task))
     (evidence / "inert-key").write_text("inert")
     start = utc_now()
+    minutes, reserve, _ = stage.window_limits(config)
     (evidence / "window.json").write_text(json.dumps(dict(start=start.isoformat(),
-        review_cutoff=(start + timedelta(minutes=33)).isoformat(),
-        deadline=(start + timedelta(minutes=105)).isoformat())))
+        review_cutoff=(start + timedelta(minutes=minutes - reserve)).isoformat(),
+        deadline=(start + timedelta(minutes=minutes)).isoformat())))
     with (evidence / "owner-browser.log").open("x") as log:
         owner = subprocess.Popen(["node", str(stage.ROOT / "scripts/browser_demo/review.cjs"),
             "http://127.0.0.1:9387", str(evidence), "approve"], env=environment(),

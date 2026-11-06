@@ -23,7 +23,7 @@ class RunHeld(RuntimeError):
 class Supervisor:
     def __init__(self, database, evidence, origin, request, room, owners_running, stopping,
                  deadline, *, runtime_root, now=None, pause=None, task=SYNTHETIC_TASK,
-                 budget_reserve_minutes=55, owner_submits=False):
+                 budget_reserve_minutes=55, owner_submits=False, owner_review_minutes=0):
         self.database = database
         self.evidence = evidence
         self.origin = origin
@@ -34,6 +34,7 @@ class Supervisor:
         self.deadline = deadline
         self.runtime_root = runtime_root
         self.cutoff = deadline - timedelta(minutes=budget_reserve_minutes)
+        self.offer_cutoff = self.cutoff - timedelta(minutes=owner_review_minutes)
         self.now = now or (lambda: datetime.now(timezone.utc))
         self.pause = pause or time.sleep
         self.unavailable = set()
@@ -201,11 +202,14 @@ class Supervisor:
             scope_id = self.wait_scope()
             self.phase("read-only")
             task, context = self.wait_offer(identity, proposal, scope_id)
-            self.check(RESERVE, until=self.cutoff)
+            self.check(RESERVE)
+            if self.now() >= self.offer_cutoff:
+                raise RunHeld("The local-run offer left too little time for owner review.")
             self.phase("budget", intake=identity, task=task, binding=context["binding"],
                        scope_id=scope_id, budget=context["offer"]["budget"])
-            self.write("owner-step-budget.json", {"url": url, "cutoff": self.cutoff.isoformat()})
-            print("Ready for owner local-only approval", url, flush=True)
+            review_url = self.origin + "/demo/local-run"
+            self.write("owner-step-budget.json", {"url": review_url, "cutoff": self.cutoff.isoformat()})
+            print("Ready for owner local-only approval", review_url, flush=True)
             budget_id = self.wait_budget()
             self.phase("active", budget_id=budget_id)
             self.monitor(budget_id, identity, task)
@@ -262,8 +266,8 @@ class Supervisor:
 
     def wait_offer(self, identity, proposal, scope_id):
         path = "/api/intake/" + identity
-        while self.now() < self.cutoff:
-            self.check(RESERVE, until=self.cutoff)
+        while self.now() < self.offer_cutoff:
+            self.check(RESERVE, until=self.offer_cutoff)
             rows = self.observe("preparation status", lambda: self.rows(
                 "SELECT kind,message FROM planning_jobs WHERE status='failed'"))
             if rows:
@@ -275,7 +279,7 @@ class Supervisor:
                 break
             self.pause(.65)
         else:
-            raise RunHeld("Independent preparation did not settle before the cutoff.")
+            raise RunHeld("Independent preparation did not finish in time to open the local-run review.")
         view = self.request(path)
         task, = [row for row in view["tasks"] if row["kind"] == "task"]
         context = self.request(path + "/tasks/" + task["id"] + "/run-approval")

@@ -86,12 +86,24 @@ def inputs(stage, manifest):
     }
 
 
+def window_limits(manifest):
+    minutes = manifest.get("window_minutes", 90)
+    reserve = manifest.get("budget_reserve_minutes", 55)
+    review = manifest.get("owner_review_minutes", 0)
+    require(all(type(value) is int for value in (minutes, reserve, review))
+            and 90 <= minutes <= 120 and 55 <= reserve < minutes
+            and 0 <= review < minutes - reserve,
+            "The manifest does not specify a supported bounded window.")
+    return minutes, reserve, review
+
+
 def preflight(stage, fingerprint):
     """Inspect the dormant package without publishing a capability or opening a writer."""
     manifest = sealed_inputs(stage, fingerprint, fresh=True)
     require(not (stage / ACTIVE).exists() and not (stage / ACTIVE).is_symlink(),
             "The capability is already active")
     require(type(manifest.get("owner_submits", False)) is bool, "Invalid browser submission mode")
+    window_limits(manifest)
     require(manifest["task"]["base"] == manifest["fixture_base"], "Approved task base differs")
     db = stage / DATABASE
     require(digest(db) == digest(stage / BACKUP), "Initial store and backup differ")

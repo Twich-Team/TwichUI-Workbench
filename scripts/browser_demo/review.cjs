@@ -36,8 +36,11 @@ async function ready(file, timeout=25000) {
       const scopeSaved = page.waitForResponse(r=>r.url().endsWith('/decisions')&&r.request().method()==='POST');
       await page.getByRole('button',{name:'Approve plan',exact:true}).click();
       assert.equal((await scopeSaved).status(),200);
+      await page.goto(origin+'/demo/local-run');
       await ready('owner-step-budget.json', task.scenario.fixture === 'loaded-client' ? 30*60*1000 : 25000);
-      await page.reload();
+      await page.getByRole('heading',{name:'Your local-run decision is ready'}).waitFor();
+      assert.match(await page.locator('time').innerText(),/M[DS]T/);
+      await page.getByRole('link',{name:'Review the local run in Workbench'}).click();
       const offer=page.getByRole('region',{name:'Certified task run approval'});
       assert.equal(await offer.getByRole('radio',{name:'Keep the result local',includeHidden:true}).isChecked(),true);
       await offer.screenshot({path:join(evidence,'offer-1440.png')});

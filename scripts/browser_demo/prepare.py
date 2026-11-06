@@ -28,6 +28,9 @@ def prepare(args):
     if fixture.resolve() != fixture:
         raise ValueError("Use an existing canonical addon checkout")
     task = json.loads(args.task.read_text())
+    timing = dict(window_minutes=args.window_minutes, budget_reserve_minutes=72,
+                  owner_review_minutes=args.owner_review_minutes)
+    layout.window_limits(timing)
     commit = subprocess.check_output(["git", "rev-parse", "--verify", args.revision + "^{commit}"],
                                      cwd=ROOT, text=True).strip()
     stage.mkdir(mode=0o700)
@@ -70,7 +73,7 @@ def prepare(args):
     names |= layout.files(stage, layout.STATIC) | layout.files(stage, layout.TEMPLATES)
     names |= {str(p) for p in (layout.DATABASE, layout.BACKUP, layout.POLICY, layout.PENDING, layout.PROOF)}
     manifest = dict(version=2, stage=str(stage), checkpoint=commit, fixture=str(fixture), fixture_base=task["base"],
-        task=task, window_minutes=105, budget_reserve_minutes=72, toolchain=toolchain,
+        task=task, **timing, toolchain=toolchain,
         counted_roots=sorted({str(ROOT), *(str(root.resolve()) for root in args.counted_root)}),
         history={str(p.resolve()): layout.digest(p) for p in args.history},
         preserve_checkout=str(args.preserve_checkout.resolve()) if args.preserve_checkout else None,
@@ -100,6 +103,8 @@ def main():
     parser.add_argument("--email", default="workbench@local.invalid")
     parser.add_argument("--template", type=Path, action="append", default=[])
     parser.add_argument("--owner-submits", action="store_true", help="Wait for the owner to submit the prepared browser draft")
+    parser.add_argument("--window-minutes", type=int, default=105)
+    parser.add_argument("--owner-review-minutes", type=int, default=0)
     parser.add_argument("--counted-root", type=Path, action="append", default=[])
     parser.add_argument("--history", type=Path, action="append", default=[])
     parser.add_argument("--preserve-checkout", type=Path)
