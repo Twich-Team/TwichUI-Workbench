@@ -4,6 +4,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import selectors
 import signal
 import socket
@@ -19,6 +20,7 @@ MAX_LINE = 256 << 10
 SECONDS = 120
 # This is a hold after observation, not a provider output-token limit.
 MAX_OBSERVED = 32_768
+PERSONAL_SUBSCRIPTIONS = {'go', 'plus', 'pro', 'prolite', 'promax'}
 FEATURES_OFF = ('shell_tool', 'multi_agent', 'multi_agent_v2', 'hooks', 'plugins',
                 'code_mode_host', 'unified_exec', 'standalone_web_search')
 
@@ -33,6 +35,7 @@ class Hold(PlanningUnavailable):
             'authentication': 'Codex sign-in needs attention.',
             'capacity': 'The included Codex allowance has reached the Workbench reserve.',
             'accounting': 'The included Codex allowance or usage could not be verified.',
+            'credits': 'Codex could not verify that the account has no additional usage credits.',
             'unavailable': 'The approved Codex connector is unavailable.',
             'model_identity': 'The selected Codex model or effort could not be verified.',
             'canceled': 'The Codex operation was stopped.',
@@ -144,17 +147,19 @@ def app_server(argv, stop, deadline):
             child.wait(timeout=4)
 
 
-def check_allowance(result, *, now=None):
-    limits = (result.get('rateLimitsByLimitId') or {}).get('codex') or result.get('rateLimits')
+def check_snapshot(limits, *, now=None):
     if not isinstance(limits, dict) or limits.get('limitId') != 'codex':
         raise Hold('accounting')
     if limits.get('spendControlReached') or limits.get('rateLimitReachedType'):
         raise Hold('capacity')
-    # Never authorize a balance, credits, or paid overage as a fallback.
     credits = limits.get('credits')
-    if credits is not None and (not isinstance(credits, dict) or
-            credits.get('hasCredits') is not False or credits.get('unlimited') is not False):
-        raise Hold('accounting')
+    if (not isinstance(credits, dict) or credits.get('hasCredits') is not False
+            or credits.get('unlimited') is not False):
+        raise Hold('credits')
+    balance = credits.get('balance')
+    if balance is not None and (not isinstance(balance, str) or len(balance) > 32
+                                or not re.fullmatch(r'0+(?:\.0+)?', balance)):
+        raise Hold('credits')
     for name in ('primary', 'secondary'):
         window = limits.get(name)
         if not isinstance(window, dict):
@@ -166,8 +171,17 @@ def check_allowance(result, *, now=None):
             raise Hold('accounting')
         if used >= 90:
             raise Hold('capacity')
+
+
+def check_allowance(result, *, now=None):
+    limits = (result.get('rateLimitsByLimitId') or {}).get('codex') or result.get('rateLimits')
+    if not isinstance(limits, dict) or limits.get('limitId') != 'codex':
+        raise Hold('accounting')
+    if result.get('ordinaryUsageAllowed') is False:
+        raise Hold('capacity')
     if result.get('ordinaryUsageAllowed') is not True:
         raise Hold('accounting')
+    check_snapshot(limits, now=now)
 
 
 def usage(values):
@@ -187,6 +201,8 @@ def turn(rpc, model, effort, prompt, schema):
     account = rpc.call('account/read', {'refreshToken': False}).get('account')
     if not isinstance(account, dict) or account.get('type') != 'chatgpt':
         raise Hold('authentication')
+    if account.get('planType') not in PERSONAL_SUBSCRIPTIONS:
+        raise Hold('accounting')
     check_allowance(rpc.call('account/rateLimits/read', {}))
     catalog = rpc.call('model/list', {'limit': 64, 'includeHidden': False})
     models = [m for m in catalog.get('data', []) if m.get('model') == model and m.get('hidden') is False]
@@ -203,16 +219,24 @@ def turn(rpc, model, effort, prompt, schema):
             or (result.get('sandbox') or {}).get('type') != 'readOnly'
             or result.get('instructionSources')):
         raise Hold('protocol')
-    if rpc.stop() or time.monotonic() >= rpc.deadline:
-        raise Hold('canceled' if rpc.stop() else 'timeout')
     if any('id' in event or event.get('method') in {'model/rerouted', 'model/verification'}
            for event in rpc.events):
         raise Hold('protocol')
     rpc.events[:] = [event for event in rpc.events if event.get('method') != 'account/updated']
+    check_allowance(rpc.call('account/rateLimits/read', {}))
+    for event in rpc.events:
+        if 'id' in event or event.get('method') in {'account/updated', 'model/rerouted', 'model/verification'}:
+            raise Hold('protocol')
+        if event.get('method') == 'account/rateLimits/updated':
+            limits = event['params']['rateLimits']
+            if limits.get('limitId') == 'codex':
+                check_snapshot(limits)
+    if rpc.stop() or time.monotonic() >= rpc.deadline:
+        raise Hold('canceled' if rpc.stop() else 'timeout')
     rpc.started = True  # A lost send or reply is an uncertain attempt, never a fallback.
     response = rpc.call('turn/start', {'threadId': thread, 'model': model,
         'effort': effort, 'input': [{'type': 'text', 'text': prompt, 'text_elements': []}],
-        'outputSchema': schema})
+        'outputSchema': schema, 'serviceTierForTurn': 'default'})
     turn_id = response['turn']['id']
     output = observed = None
     terminal = partial = False
@@ -238,8 +262,10 @@ def turn(rpc, model, effort, prompt, schema):
                     partial = partial or bool(output)
             if method == 'thread/tokenUsage/updated':
                 observed = usage(p['tokenUsage']['total'])
-            if method == 'account/rateLimits/updated' and p.get('rateLimits', {}).get('rateLimitReachedType'):
-                raise Hold('capacity', started=True)
+            if method == 'account/rateLimits/updated':
+                limits = p['rateLimits']
+                if limits.get('limitId') == 'codex':
+                    check_snapshot(limits)
             if method == 'turn/completed':
                 final = p['turn']
                 if final['id'] != turn_id:
