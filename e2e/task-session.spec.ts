@@ -60,8 +60,7 @@ for(const width of [1440,390])test(`reviewed certified offer browser approval re
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();
   await offer.screenshot({path:artifactPath(`reviewed-offers/offer-${width}.png`)});
   await page.screenshot({path:artifactPath(`reviewed-offers/viewport-${width}.png`)});
-  await offer.getByText('Publishing options',{exact:true}).click();
-  await offer.getByRole('radio',{name:'Also allow one draft pull request'}).check();
+  await expect(offer.getByRole('radio',{name:'Also allow one draft pull request'})).toBeChecked();
   await offer.getByRole('checkbox',{name:'I reviewed the run and publishing permission.'}).check();
   const send=page.waitForResponse(r=>r.url().endsWith('/run-approval')&&r.request().method()==='POST');
   await offer.getByRole('button',{name:'Approve run and draft pull request',exact:true}).click();
@@ -83,8 +82,7 @@ for(const width of [1440,390])test(`reviewed certified offer browser approval re
   expect(approval.payload.execution_continuation.owner_provenance.purpose).toBe('browser-reviewed-offer-v1');
   await page.getByRole('region',{name:'Saved task run approval'}).screenshot({path:artifactPath(`reviewed-offers/applied-${width}.png`)});
   fixture('reviewed-offer-stale');await page.reload();
-  const history=page.getByText('Permission for this run',{exact:true});
-  if(await history.isVisible()) await history.click();
+  await page.getByText('Permission for this run',{exact:true}).click();
   await expect(page.getByRole('heading',{name:'Task budget applied'})).toBeVisible();
   await expect(page.getByRole('button',{name:'Approve run and draft pull request',exact:true})).toHaveCount(0);
 });
