@@ -1,6 +1,6 @@
 # A8 signed-in Codex and model routing
 
-November 6, 2026 Mountain time. The bidirectional candidate is `133b485a4a3e67236e2a171d305450fcdded944d`. It supersedes `8167291`, whose fallback could only go from Codex to Qwen. The running app on loopback 9487 still serves the earlier demo build.
+November 6, 2026 Mountain time. The bidirectional candidate is `2613172dce3ac7dcfa43940586bba1911f688073`. It supersedes `8167291`, whose fallback could only go from Codex to Qwen. The running app on loopback 9487 still serves the earlier demo build.
 
 | Task choice | Implemented and checked offline | Live evidence |
 | --- | --- | --- |

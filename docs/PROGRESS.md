@@ -1,3 +1,15 @@
+## November 6, 2026 — Trusted home subnet candidate
+
+- Recorded the owner's decision that every device able to reach Workbench
+  from the verified home subnet may exercise operator controls.
+- Replaced client authentication in the staged HTTPS unit with server
+  authentication. Retained the exact network and browser request checks,
+  task approval and internal model-service boundaries.
+- Rechecked LAN and approval behavior offline and verified the disposable
+  history restore. Preserved the earlier seal and rollback.
+- Kept both Codex account checks pending and live acceptance held. See the
+  [combined request](EVERYDAY_INSTALL_APPROVAL_20261106.md).
+
 ## November 6, 2026 — LAN operator access decision
 
 - Confirmed the sealed candidate still requires a client certificate before

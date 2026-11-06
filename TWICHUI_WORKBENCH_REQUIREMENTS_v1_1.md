@@ -177,6 +177,8 @@ Dashboard login is not required for initial local/private-network use. This does
 
 Owner decision, November 6, 2026. The everyday app must also be usable through the host's private-network IP without an SSH tunnel. Permit the home LAN identified by gateway 10.0.0.1, using the subnet verified from the server interface and routes. Access is not pinned to one device address. Keep model services and credentials private and exclude public ingress and router port forwarding. Maintain a stable installed release separate from development, with deliberate updates that account for active work, stored data, backup and rollback.
 
+Owner decision, November 6, 2026. Trust the verified home subnet `10.0.0.0/24` for Workbench operator access. Any device that can reach Workbench from that subnet may read task history, change model settings, approve work, and use the app's operator controls. Keep HTTPS with server certificate verification. The private-LAN app requires neither client certificates nor a dashboard passphrase. Preserve the task approval, model authentication, internal isolation and cross-origin boundaries. This decision authorizes preparation of a revised package. Installation and network changes require separate approval.
+
 ## A11. Standing local-model priority and control
 
 Owner decision, November 5, 2026: Workbench is the highest-priority user of the existing local model and may have full control of that model for approved project work. Other model clients and maintenance work may wait or be interrupted. Ordinary interruption of those clients is not a reason to request the same permission repeatedly.

@@ -1,4 +1,24 @@
-# Home LAN and Codex billing boundary — November 6, 2026 Mountain time
+# Trusted home subnet candidate — November 6, 2026 Mountain time
+
+The owner chose whole-subnet operator access on `10.0.0.0/24` and accepted
+that any reachable device can exercise Workbench operator controls.
+Candidate `2613172` replaces the earlier `133b485` client-certificate
+proposal. The revised listener uses HTTPS server authentication on
+`10.0.0.9:9487`. Client certificates and dashboard passphrases are outside
+this package. The loopback listener, exact subnet and browser request
+checks, model-service authentication and internal execution boundaries
+remain in place. The older sealed stage remains available.
+
+The [combined installation request](EVERYDAY_INSTALL_APPROVAL_20261106.md)
+binds the revised seal, offline evidence, exact firewall preflight,
+regression-test-only scope, history copy, rollback and bounded acceptance.
+The owner has supplied neither the additional usage-credit balance nor
+Automatic reload status. Both remain pending, and Codex stays held.
+The network decision does not approve billing uncertainty or cutover.
+No live provider call, source transmission, installation, firewall or
+service change, or archive occurred.
+
+# Historical client-certificate LAN package — November 6, 2026 Mountain time
 
 The owner confirmed `10.0.0.0/24` as the intended home LAN. The server
 remains `10.0.0.9/24` on `enp4s0`, with gateway `10.0.0.1`. No firewall
