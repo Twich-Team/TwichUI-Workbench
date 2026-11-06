@@ -377,3 +377,20 @@ def test_worker_restart_waits_for_existing_readiness_then_continues_without_repl
 
     assert sessions.process_one(store, advance=finished) and len(calls) == 1
     assert not sessions.process_one(store, advance=finished)
+
+
+def test_delegated_launch_has_only_owned_non_secret_inputs(monkeypatch):
+    from workbench.task_session import delegated_command
+
+    monkeypatch.setenv("WORKBENCH_RESEARCH_ROOT", "/fixture")
+    monkeypatch.setenv("WORKBENCH_PREPARATION_CONFIG", "/policy")
+    monkeypatch.setenv("TMPDIR", "/scratch with spaces")
+    monkeypatch.setenv("WORKBENCH_LOCAL_KEY", "CONTROLLED_PRIVATE_MARKER")
+    command = ["/venv/python", "/script.py", "owned-run"]
+    options = ["--user", "--property=Delegate=yes"]
+    launched = delegated_command(options, command)
+    assert launched[:4] == ["/usr/bin/systemd-run", "--expand-environment=no", *options]
+    assert launched[4:6] == ["/usr/bin/env", "-i"]
+    assert launched[-6:] == ["WORKBENCH_RESEARCH_ROOT=/fixture",
+                            "WORKBENCH_PREPARATION_CONFIG=/policy", "TMPDIR=/scratch with spaces", *command]
+    assert all("CONTROLLED_PRIVATE_MARKER" not in part for part in launched)

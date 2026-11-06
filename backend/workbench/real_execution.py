@@ -483,6 +483,8 @@ def process_one(engine, runtime=None, stop_event=None):
     except Exception as error:
         result = dict(verification='unknown', inference_ran=None,
                       error=f'{type(error).__name__}: {error}'[:1000])
+        if getattr(runtime, 'check_failure', None):
+            result['check_failure'] = runtime.check_failure
         result.update(failure_observations(runtime, row['id'], fence))
         result = retain_usage(result, returned_result)
         status = 'failed'

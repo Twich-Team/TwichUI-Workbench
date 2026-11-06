@@ -66,7 +66,7 @@ class CheckFeedback:
             log=dict(
                 tool="read_check_log", check_id=check_id, lines=len(lines), start=1, max_lines=80
             ),
-            truncated=len(excerpt) < len(raw),
+            truncated=excerpt != "\n".join(lines),
         )
         while len(json.dumps(feedback, ensure_ascii=True).encode()) > 7000:
             feedback["diagnostic"] = feedback["diagnostic"][len(feedback["diagnostic"]) // 2 :]
@@ -146,3 +146,48 @@ class CheckFeedback:
             ),
             ensure_ascii=True,
         )
+
+
+class RepairFeedback:
+    """Keep an unchanged rejected workspace from cycling through the same evidence."""
+
+    def __init__(self, runtime):
+        self.runtime = runtime
+        self.content = self.writable_content()
+        self.seen = set()
+        self.edit_required = False
+
+    def writable_content(self):
+        return tuple(hashlib.sha256((self.runtime.workspace / path).read_bytes()).digest()
+                     for path in self.runtime.paths)
+
+    def edited(self):
+        content = self.writable_content()
+        if content == self.content:
+            self.edit_required |= bool(getattr(self.runtime, "check_failure", None))
+            return False
+        self.content = content
+        self.seen.clear()
+        self.edit_required = False
+        self.runtime.check_failure = None
+        return True
+
+    def observe(self, key, *, empty=False):
+        if getattr(self.runtime, "check_failure", None) and (empty or key in self.seen):
+            self.edit_required = True
+        self.seen.add(key)
+
+    def checked(self, name, feedback):
+        if feedback["status"] == "fail":
+            self.runtime.check_failure = dict(
+                name=feedback.get("failed_check_name", name),
+                diagnostic=feedback.get("diagnostic") or feedback.get("reason", "Check failed."),
+                context_hint=feedback.get("context_hint"),
+            )
+            feedback = {**feedback, "next_step": (
+                "Use the failure location and previously read source to make a scoped replacement, "
+                "then recheck. Read a focused source window if needed. Checking unchanged code "
+                "or reopening an exhausted log cannot repair the failure."
+            )}
+        self.observe(("check", name, feedback["status"], feedback.get("diagnostic")))
+        return feedback

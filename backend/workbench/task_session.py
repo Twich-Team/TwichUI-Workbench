@@ -21,6 +21,17 @@ from workbench.real_workspace import Runtime, durable, sha, PRELUDE, suite_inven
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def delegated_command(options, command):
+    """Pass only the owned execution inputs into a fresh user service."""
+    inputs = ("WORKBENCH_RESEARCH_ROOT", "WORKBENCH_PREPARATION_CONFIG", "TMPDIR")
+    return [
+        "/usr/bin/systemd-run", "--expand-environment=no", *options,
+        "/usr/bin/env", "-i", "PATH=/usr/bin:/bin", "LANG=C.UTF-8", f"HOME={Path.home()}",
+        *(f"{name}={os.environ[name]}" for name in inputs if name in os.environ),
+        *command,
+    ]
+
+
 def read_config(path, *, allow_expired=False):
     raw = Path(path)
     if (
@@ -358,8 +369,7 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
         )
         if prepare is provision and not ready_before:
             durable(root / "template.json", json.dumps(template, sort_keys=True).encode())
-            command = [
-                "systemd-run",
+            command = delegated_command([
                 "--user",
                 "--unit=workbench-real-prepare-" + root.name,
                 "--property=Delegate=yes",
@@ -370,10 +380,11 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
                 "--property=RuntimeMaxSec=2400",
                 "--wait",
                 "--pipe",
+            ], [
                 str(ROOT / ".venv/bin/python"),
                 str(ROOT / "scripts/provision_task.py"),
                 str(root),
-            ]
+            ])
             with (root / "preparation-controller.log").open("xb") as log:
                 subprocess.run(
                     command, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=2420

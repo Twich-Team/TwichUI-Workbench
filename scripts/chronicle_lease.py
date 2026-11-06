@@ -23,6 +23,7 @@ from workbench.real_package import package_for  # noqa: E402
 from workbench.real_workspace import Runtime, durable, sha  # noqa: E402
 from workbench.db import engine_for, model_attempts, write_transaction  # noqa: E402
 from workbench.service import now  # noqa: E402
+from workbench.task_session import delegated_command  # noqa: E402
 
 
 def workflow(root, instruction=None):
@@ -326,13 +327,14 @@ def controller(root, instruction):
             primary.atomic(private/'certification.json', json.dumps(dict(probe_sha256=sha((root/'probe-result.json').read_bytes()),
                            limit_sha256=checked_limit(root), epoch=primary.epoch())).encode())
             # One bounded call into the existing owned handler; no second attempt/replay.
-            cmd = ['systemd-run', '--user', '--unit=workbench-real-chronicle-'+root.name,
+            cmd = delegated_command(['--user', '--unit=workbench-real-chronicle-'+root.name,
                    '--property=WorkingDirectory='+str(ROOT), '--property=Delegate=yes',
                    '--property=MemoryMax=6G', '--property=MemorySwapMax=0',
                    '--property=TasksMax='+('128' if (root/'real-run/recipe.json').is_file() else '64'),
-                   '--property=CPUQuota=200%', '--property=RuntimeMaxSec=2450', '--wait', '--pipe',
+                   '--property=CPUQuota=200%', '--property=RuntimeMaxSec=2450', '--wait', '--pipe'],
+                   [
                    str(ROOT/'.venv/bin/python'), str(Path(__file__).resolve()), 'attempt',
-                   '--root', str(root), '--private', str(private), '--owner-instruction', str(instruction)]
+                   '--root', str(root), '--private', str(private), '--owner-instruction', str(instruction)])
             with (root/'implementation-controller.log').open('x') as log:
                 child = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, timeout=2500)
             report['implementation_controller_exit'] = child.returncode

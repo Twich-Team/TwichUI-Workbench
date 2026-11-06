@@ -422,7 +422,8 @@ for(const width of [1440,390])test(`unattended recovery explains the held lane a
     message:'Waiting for confirmed cleanup. Saved evidence is retained; no new execution can start.',created_at:'2026-11-05T02:00:00Z',finished_at:null as string|null,verification:'unknown',has_candidate:false};
   const writes:string[]=[];page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push(r.url());});
   await page.route('**/api/real-executions?*',route=>route.fulfill({json:{available:true,items:[row],total:1,page:1,page_size:12,publication_allowed:false}}));
-  await page.route('**/api/real-executions/non-model-recovery',route=>route.fulfill({json:{...row,base:'NON-MODEL',current_grant:false,grant_id:'NON-MODEL',expires_at:'2026-11-05T02:00:00Z',source:'real',publication_allowed:false,result:{inference_ran:false,verification:row.verification,error:row.status==='failed'?'<script>controlled failure</script>':undefined}}}));
+  await page.route('**/api/real-executions/non-model-recovery',route=>route.fulfill({json:{...row,base:'NON-MODEL',current_grant:false,grant_id:'NON-MODEL',expires_at:'2026-11-05T02:00:00Z',source:'real',publication_allowed:false,result:{inference_ran:false,verification:row.verification,error:row.status==='failed'?'<script>controlled failure</script>':undefined,
+    check_failure:row.status==='failed'?{name:'focused',diagnostic:'test_normalize.lua:4: assertion failed <script>controlled output</script>',context_hint:{path:'tests/test_normalize.lua',start:1,end:8}}:undefined}}}));
   await page.goto('/executions');
   const list=page.getByRole('region',{name:'Recorded real task runs'});
   await expect(list.getByText('Waiting for safe recovery',{exact:true})).toBeVisible();
@@ -438,6 +439,10 @@ for(const width of [1440,390])test(`unattended recovery explains the held lane a
   row.message='Failure outcome recovered. Evidence and known usage retained; no attempt will restart.';
   await page.reload();await expect(box.getByText(row.message,{exact:true})).toBeVisible();
   await expect(box.getByRole('alert')).toContainText('<script>controlled failure</script>');
+  const failedCheck=box.getByRole('region',{name:'Last failed check'});
+  await expect(failedCheck).toContainText('focused · tests/test_normalize.lua');
+  await expect(failedCheck).toContainText('test_normalize.lua:4: assertion failed <script>controlled output</script>');
+  expect(await failedCheck.locator('pre').evaluate(el=>el.scrollWidth <= el.clientWidth)).toBe(true);
   await expect(box.locator('script')).toHaveCount(0);
   await expect(box.getByText('Saved evidence is retained.',{exact:false})).toHaveCount(0);
   await page.getByText('Task, grant and candidate provenance',{exact:true}).focus();await page.keyboard.press('Enter');

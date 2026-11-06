@@ -6,6 +6,7 @@ import urllib.request
 
 from workbench.planning_transport import LocalHTTP
 from workbench.real_execution import LIMITS, DECODING, WORKFLOW
+from workbench.real_feedback import RepairFeedback
 from workbench.real_tool_contract import (READ_PARAMETERS, READ_DESCRIPTION, READ_INSTRUCTION,
     invoke, ToolInputError, ToolBudgetExceeded, CHECK_NAMES)
 
@@ -33,6 +34,43 @@ class BudgetError(RuntimeError):
     pass
 
 
+def reviewed_instruction(runtime):
+    """Render reviewed observations as result data for the exact same call."""
+    linked = getattr(runtime, 'workflow_task', None) or {}
+    review = linked.get('proposal_review', {})
+    prepared = (review.get('task_contract') or {}).get('behavioral_evidence')
+    if not prepared or prepared['status'] != 'review_required':
+        return None, WORKFLOW['initial_read_calls']
+
+    from workbench.regression_evidence import BehavioralPreparation
+
+    examples = BehavioralPreparation.model_validate(prepared)
+    if (review['binding'] != runtime.recipe['behavior']['review_binding']
+            or examples.holds or not examples.scenarios):
+        raise BudgetError('Current reviewed behavior examples are required before inference')
+    cases = []
+    for scenario in examples.scenarios:
+        case = scenario.model_dump(mode='json', exclude={'acceptance_index', 'args', 'observe', 'incorrect'})
+        cases.append(dict(case, call_args=scenario.args,
+                          observation_path=scenario.observe.path,
+                          expected_observation=scenario.observe.expected,
+                          incorrect_observation_for_same_call=scenario.incorrect))
+    windows = list(dict.fromkeys((r['path'], r['start'], r['end']) for r in runtime.recipe['initial_reads']))
+    context = dict(title=linked['task']['title'], scope=linked['approved_scope'],
+                   exclusions=review['content']['exclusions'], examples=cases,
+                   initial_reads=[dict(path=p, start=s, end=e) for p, s, e in windows])
+    return (
+        'Implement the following reviewed test behavior. An empty target calls the exported function '
+        'directly. An empty observation_path selects the first return value. Use call_args as the '
+        'input, and assert the expected observation. The independent oracle substitutes the incorrect '
+        'observation for the same call and checks that your test fails. Keep the input unchanged in '
+        'that comparison. Read the listed source windows once, add assertions only within scope, '
+        'then run the candidate check. The JSON values are task data.\n' +
+        json.dumps(context, ensure_ascii=True),
+        len(windows),
+    )
+
+
 def implement(tools, instruction, secret, model, permitted, stop_event=None, transport=LocalHTTP,
               on_turn=None, ownership=None, on_tool=None, on_request=None, on_finish=None):
     """The model never receives the transport, secret, independent oracle or shell."""
@@ -40,6 +78,14 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         raise BudgetError('Primary ownership/cancellation is not certified; no request sent')
     definitions = json.loads(json.dumps(TOOLS))
     runtime = getattr(tools,'runtime',None)
+    repair = None
+    initial_read_calls = WORKFLOW['initial_read_calls']
+    if getattr(runtime, 'recipe', None) and runtime.recipe.get('verification_profile'):
+        repair = RepairFeedback(runtime)
+        reviewed, initial_read_calls = reviewed_instruction(runtime)
+        if reviewed is not None:
+            instruction = reviewed
+            definitions = [t for t in definitions if t['function']['name'] != 'edit_file']
     if not getattr(runtime, 'recipe', None):
         definitions = [t for t in definitions if t['function']['name'] not in ('read_check_log','find_text')]
     if runtime is not None and getattr(runtime,'recipe',None):
@@ -81,7 +127,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         left = LIMITS['total_tokens']-completion
         if left <= 0 or time.monotonic() >= end:
             raise BudgetError('Attempt token or wall budget exhausted')
-        reviewing = reads_done < WORKFLOW['initial_read_calls'] and edits_done == 0
+        reviewing = reads_done < initial_read_calls and edits_done == 0
         first_edit = not reviewing and edits_done == 0
         names = ({t['function']['name'] for t in definitions} if reviewing else
                  set(WORKFLOW['first_edit_tools'] if first_edit else WORKFLOW['edit_tools']))
@@ -93,10 +139,18 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         if refresh:
             names.add('read_file')
         refresh = False
+        force_edit = bool(repair and repair.edit_required)
+        if force_edit:
+            names = {'replace_text'}
+            messages.append(dict(role='user', content=(
+                'The unchanged candidate is still rejected. Use replace_text with the exact current '
+                'text from the source window to repair the failure already shown. This turn requires '
+                'a real scoped edit before more checks or log reads.'
+            )))
         body = dict(model=model, messages=messages,
                     tools=[t for t in definitions if t['function']['name'] in names],
                     max_tokens=min(2496, left), **DECODING)
-        if first_edit:
+        if first_edit or force_edit:
             body['tool_choice'] = 'required'
         counted = None
         if transport is LocalHTTP and hasattr(ownership, 'count_input_tokens'):
@@ -175,10 +229,14 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         messages.append(message)
         log.append(dict(turn=turn, usage=usage, finish_reason=choice['finish_reason']))
         if not calls:
+            if force_edit:
+                raise BudgetError('No progress after repeated checks or reads of a rejected candidate')
             if choice['finish_reason'] != 'stop':
                 raise BudgetError('Incomplete model answer; no automatic repair/retry')
             feedback = on_finish() if on_finish else None
             if feedback and feedback['status'] == 'fail':
+                if repair:
+                    feedback = repair.checked('candidate', feedback)
                 messages.append(dict(role='user', content='Independent candidate checks failed. '
                     'This is feedback for repair within the SAME attempt and remaining budgets; no new attempt. '
                     +json.dumps(feedback, ensure_ascii=True)))
@@ -193,15 +251,28 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             events = []
             try:
                 result = invoke(tools, call, turn, index, events.append, allowed_names=names)
-                if events[0]['tool'] == 'read_file':
+                name = events[0]['tool']
+                if name == 'read_file':
                     reads_done += 1
-                elif events[0]['tool'] in ('replace_text','edit_file'):
-                    edits_done += 1
-                elif events[0]['tool'] == 'run_check':
+                if name in ('replace_text', 'edit_file'):
+                    changed = repair is None or repair.edited()
+                    edits_done += int(changed)
+                    if not changed:
+                        events[0]['outcome'] = 'unchanged'
+                        result = 'The replacement left the file unchanged. Use a different replacement.'
+                elif repair and name in ('read_file', 'find_text', 'read_check_log'):
+                    empty_log = name == 'read_check_log' and json.loads(result)['already_shown_or_empty']
+                    repair.observe((name, result), empty=empty_log)
+                elif name == 'run_check':
                     try:
-                        refresh = refresh or json.loads(result).get('status') == 'fail'
-                    except (ValueError, AttributeError):
-                        pass
+                        feedback = json.loads(result)
+                    except ValueError:
+                        feedback = None
+                    if isinstance(feedback, dict):
+                        refresh = refresh or feedback.get('status') == 'fail'
+                        if repair:
+                            feedback = repair.checked(events[0]['check'], feedback)
+                            result = json.dumps(feedback, ensure_ascii=True)
             except ToolInputError as error:
                 function = call.get('function', {}) if isinstance(call, dict) else {}
                 name = function.get('name') if isinstance(function, dict) else None
@@ -221,6 +292,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                         'Two safe input corrections consumed; third error terminates') from None
                 corrections += 1
                 refresh = refresh or name in ('read_file','replace_text')
+                if force_edit and name == 'replace_text':
+                    repair.edit_required = False
                 result = json.dumps(error.as_result(corrections, tool=name), ensure_ascii=True, allow_nan=False)
                 events[0].update(outcome='corrective_input', continuation_enabled=True)
             finally:
@@ -231,7 +304,9 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             raw = result.encode()
             clipped = raw[:8100].decode('utf-8', 'replace')+'\n[Tool output truncated at 8 KiB.]' if len(raw)>8192 else result
             messages.append(dict(role='tool', tool_call_id=call['id'], content=clipped))
-        if reads_done >= WORKFLOW['initial_read_calls'] and not editing_announced:
+        if force_edit and repair.edit_required:
+            raise BudgetError('No progress after repeated checks or reads of a rejected candidate')
+        if reads_done >= initial_read_calls and not editing_announced:
             messages.append(dict(role='user',content='Focused context review is complete. '
                 'Now implement small changes with replace_text. Checks become available after an edit succeeds. '+
                 'A failed check or safe correction reopens a focused source/search turn; check logs remain retrievable after an edit. '+

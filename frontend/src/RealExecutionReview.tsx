@@ -13,6 +13,7 @@ type View={id:string;title:string;status:string;message:string;base:string;curre
     handler_returned?:boolean;
     authorship?:{kind:string;author:string;parent_author?:string};
     usage?:{status:string;values?:{completion_tokens?:number;prompt_tokens?:number}|null};
+    check_failure?:{name:string;diagnostic:string;context_hint?:{path:string;start:number;end:number}|null};
     files?:components['schemas']['FileComparison'][];
     gates?:{name:string;status:string;evidence:string}[];
     checks?:{status:string;rc:number|null;out:string}[];error?:string}};
@@ -41,6 +42,12 @@ export function RealExecutionReview(){
     {result?.inference_ran===false&&!result.authorship&&<p>{['running','checking'].includes(row.status)&&!result.handler_returned?'Model activity has not yet been reported. The run is still in progress.':'No model implementation ran.'}</p>}
     {result?.inference_ran===null&&<p>Inference completion is uncertain. The attempt remains consumed.</p>}
     {result?.error&&<p role="alert">{result.error}</p>}
+    {result?.check_failure&&<section aria-label="Last failed check">
+      <h3>Last failed check</h3>
+      <p>{result.check_failure.name}{result.check_failure.context_hint&&
+        <> · {result.check_failure.context_hint.path}</>}</p>
+      <pre className="candidate-diff check-diagnostic" tabIndex={0}>{result.check_failure.diagnostic}</pre>
+    </section>}
     {result?.gates&&<ul>{result.gates.map(g=><li key={g.name}>{g.name}: {g.status} — {g.evidence}</li>)}</ul>}
     <h3>Review real changes</h3>
     {result?.files?.length?result.files.map(file=><DiffFile key={file.path} file={file}/>):<p>No frozen real candidate is available.</p>}

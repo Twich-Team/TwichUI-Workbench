@@ -67,7 +67,7 @@ class ControlledLuaRuntime(Runtime):
         return ['test_normalize.lua']
 
 
-def setup(tmp_path, profile=profiles.REGRESSION, oracle=None):
+def setup(tmp_path, profile=profiles.REGRESSION, oracle=None, behavior_id='normalize'):
     source = tmp_path / 'source'
     source.mkdir()
     git(source, 'init', '-q')
@@ -84,7 +84,7 @@ def setup(tmp_path, profile=profiles.REGRESSION, oracle=None):
     spec = template_data()['recipe']
     spec['contract'].update(source=str(source), base=git(source, 'rev-parse', 'HEAD').strip(),
                             paths=[TEST] if profile == profiles.REGRESSION else [PRODUCTION])
-    spec.update(verification_profile=profile, behavior=dict(id='normalize', review_binding=sha(b'Controlled reviewed behavior: trim and lowercase')),
+    spec.update(verification_profile=profile, behavior=dict(id=behavior_id, review_binding=sha(b'Controlled reviewed behavior: trim and lowercase')),
                 controls=copy.deepcopy(profiles.requirements(profile)['controls']), read_paths=[PRODUCTION, TEST], focused_test=TEST,
                 initial_reads=[dict(path=TEST, start=1, end=2) for _ in range(4)])
     raw = (oracle if oracle is not None else REGRESSION_ORACLE if profile == profiles.REGRESSION else BUG_ORACLE).encode()

@@ -225,6 +225,27 @@ def test_listing_discovers_worker_outcomes_filters_and_has_no_effect(store, clie
     assert client.post("/api/real-executions", json={}).status_code != 200
 
 
+def test_rejected_check_survives_worker_handoff_and_review(store, client, runtime, monkeypatch):
+    grant = job.issue(store, "NON-MODEL test", "pytest", runtime)
+    request = job.submit(store, grant["id"], str(uuid4()))
+    failure = dict(name="focused", diagnostic="Controlled assertion failed",
+                   context_hint=dict(path=job.PATHS[2], start=1, end=5))
+
+    def reject(*_args):
+        runtime.check_failure = failure
+        raise ValueError("Controlled failed check")
+
+    monkeypatch.setattr(runtime, "execute", reject)
+    assert job.process_one(store, runtime)
+    view = client.get("/api/real-executions/" + request["id"]).json()
+    assert view["status"] == "failed" and view["result"]["check_failure"] == failure
+    assert not view["result"].get("candidate_id") and not view["publication_allowed"]
+    saved = json.loads((runtime.root / ("outcome-" + request["id"] + ".json")).read_text())
+    assert saved["status"] == "failed" and saved["result"]["check_failure"] == failure
+    assert not list(runtime.root.glob("completion-*.json"))
+    assert not job.process_one(store, runtime)
+
+
 def test_old_store_read_does_not_initialize_or_migrate(tmp_path):
     engine = engine_for(tmp_path / "empty.sqlite3")
     try:

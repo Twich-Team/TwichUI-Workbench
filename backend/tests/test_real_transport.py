@@ -779,3 +779,98 @@ def test_candidate_out_of_scope_change_never_becomes_repair_feedback(tmp_path):
         assert not (out / "working-checks").exists()
     finally:
         shutil.rmtree(runtime.workspace.parent)
+
+
+@pytest.mark.parametrize("outcome", ["repair", "exhausted-log", "scope-violation"])
+def test_reviewed_scenario_repairs_or_stops_with_retained_evidence(http_tape, tmp_path, monkeypatch, outcome):
+    """Scripted responses, real Lua checks, controlled boundary telemetry."""
+    from workbench import verification_profiles
+    from workbench.regression_evidence import compile_plan, patches
+    from workbench.real_tool_contract import ToolDenied
+    from test_verification_profiles import BASE_TEST, GOOD_TEST, PRODUCTION, TEST, boundary, setup
+
+    prepared = dict(status="review_required", holds=[], origin="NON-MODEL",
+                    input_sha256="fixture", scenarios=[
+        dict(id="approved-output", acceptance_index=0, test_path=TEST, fixture="module",
+             source_paths=[PRODUCTION], args=["  ALICE "], observe=dict(expected="alice"),
+             incorrect="ALICE"),
+    ])
+    compiled = compile_plan(prepared)
+    runtime = setup(tmp_path, oracle=compiled["oracle"], behavior_id=compiled["behavior_id"])
+    try:
+        verification_profiles.prepare(runtime, patches(runtime, compiled))
+        runtime.record_controls(boundary(runtime))
+        runtime.workflow_task = dict(
+            intake_id="NON-MODEL", task=dict(id="NON-MODEL-TASK", title="Controlled reviewed scenario",
+                purpose="Fixture", acceptance=["Ambiguous legacy prose, never used as a scenario input"]),
+            approved_scope=["Add assertions to the reviewed test."],
+            proposal_review=dict(binding=runtime.recipe["behavior"]["review_binding"],
+                content=dict(exclusions=["Production code"]), task_contract=dict(behavioral_evidence=prepared)),
+        )
+        runtime.primary = http_tape.adapter
+        monkeypatch.setattr(runtime, "preflight", lambda: [dict(status="passed")])
+        monkeypatch.setattr("workbench.real_workspace.confine.root", lambda: str(tmp_path))
+        wrong = 'assert(normalize("ALICE") ~= "alice")\n'
+
+        def initial(body):
+            instruction = body["messages"][1]["content"]
+            data = json.loads(instruction.split("\n", 1)[1])
+            case, = data["examples"]
+            assert case["call_args"] == ["  ALICE "]
+            assert case["expected_observation"] == "alice"
+            assert case["incorrect_observation_for_same_call"] == "ALICE"
+            assert "Ambiguous legacy prose" not in instruction
+            assert len(data["initial_reads"]) == 1
+            assert "edit_file" not in {tool["function"]["name"] for tool in body["tools"]}
+            return tool_response([("read_file", {"path": TEST}), ("read_file", {"path": PRODUCTION})])
+
+        def after_failure(body):
+            feedback = json.loads(body["messages"][-1]["content"])
+            assert feedback["status"] == "fail" and feedback["failed_check_name"] == "focused"
+            assert "assertion failed" in feedback["diagnostic"]
+            assert feedback["context_hint"]["path"] == TEST and not feedback["truncated"]
+            assert "scoped replacement" in feedback["next_step"]
+            names = {tool["function"]["name"] for tool in body["tools"]}
+            assert {"read_file", "replace_text", "read_check_log"} <= names
+            if outcome == "exhausted-log":
+                return tool_response([("read_check_log", {"check_id": feedback["check_id"]})])
+            if outcome == "scope-violation":
+                return tool_response([("replace_text", dict(path=PRODUCTION, old="return", new="error"))])
+            return tool_response([("run_check", {"name": "candidate"})])
+
+        def forced_repair(body):
+            assert body["tool_choice"] == "required"
+            assert [tool["function"]["name"] for tool in body["tools"]] == ["replace_text"]
+            assert "real scoped edit" in body["messages"][-1]["content"]
+            return tool_response([("replace_text", dict(
+                path=TEST, old=wrong, new="" if outcome == "repair" else wrong))])
+
+        http_tape.steps = [
+            initial,
+            tool_response([("replace_text", dict(path=TEST, old=BASE_TEST, new=BASE_TEST + GOOD_TEST + wrong))]),
+            tool_response([("run_check", {"name": "candidate"})]),
+            after_failure,
+        ]
+        if outcome == "exhausted-log":
+            http_tape.steps.append(tool_response([("read_check_log", {"check_id": "working-00-02"})]))
+        if outcome != "scope-violation":
+            http_tape.steps.append(forced_repair)
+        if outcome == "repair":
+            http_tape.steps.append(final_response())
+            result = runtime.execute("NON-MODEL", "FIXTURE-FENCE", lambda: True)
+            assert result["verification"] == "passed" and runtime.verify_frozen(result)
+            assert [check["status"] for check in result["checks"]] == ["pass"] * 4
+            assert runtime.check_failure is None
+        else:
+            error = BudgetError if outcome == "exhausted-log" else ToolDenied
+            with pytest.raises(error, match="No progress" if outcome == "exhausted-log" else "read-only"):
+                runtime.execute("NON-MODEL", "FIXTURE-FENCE", lambda: True)
+            assert runtime.check_failure["name"] == "focused"
+            assert not (runtime.root / "candidates").exists()
+        assert len(http_tape.bodies) == len(http_tape.steps) < job.LIMITS["turns"]
+        assert runtime.failure_evidence("NON-MODEL", "FIXTURE-FENCE")["usage"]["status"] == "complete"
+        rejected = runtime.root / "working-checks/00"
+        assert wrong in (rejected / "files" / TEST).read_text()
+        assert (runtime.root / "check-logs/working-00-02.json").is_file()
+    finally:
+        shutil.rmtree(runtime.workspace.parent)
