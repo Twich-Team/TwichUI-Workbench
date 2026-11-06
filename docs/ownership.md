@@ -1561,3 +1561,33 @@ Progress reads the existing preparation jobs, session, execution and result
 records. The task shows ongoing cleanup before declaring the run settled.
 No new queue, schema migration, public activation endpoint or publication
 authority is introduced.
+
+## Core addon chunks loaded by the existing Lua client harness
+
+Grounded planning recognizes one literal core-file load in the focused test's
+harness setup. The committed test must create the existing client, load the
+literal path under ROOT, set that chunk's environment to the same client,
+and call the chunk with the core addon name and an empty namespace argument.
+The source must explicitly publish a table into a client namespace. Only
+screened callable signatures from that table can enter this fixture binding.
+The packet binds hashes for the committed runner, harness, test and source,
+and the callable binding. It does not need to send the full harness.
+Dynamic file lists and different load shapes continue to require support.
+
+The existing approved scenario, recipe compiler and Runtime own the first
+return and counterexample. The oracle uses the actual harness and chunk.
+The loaded chunk keeps its caller's client environment and return values.
+In the faulted test, Workbench installs a replacement for the reviewed
+operation only after the chunk publishes it and changes the first return
+only on the reviewed call. The bundled libraries receive real Lua coroutine
+and bit operations and access to the isolated thread globals they request.
+The outer verifier's globals and stack are not exposed. The unchanged
+runner and all existing candidate and control gates still apply.
+
+The worker's existing stop event reaches the running confined preparation
+command and its cgroup cleanup. After run approval, a separate delegated
+preparation can stop through its exact owned user unit. A canceled check
+retains its receipt and cannot certify an offer or start a model. The demo
+launcher restricts ingress to the approved manifest, and the review server
+opens only the closed inode-bound SQLite store in immutable mode. Both
+reuse the existing application owners for decisions, checks and results.

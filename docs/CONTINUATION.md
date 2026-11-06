@@ -1,3 +1,174 @@
+# Real TwichUI browser readiness — November 5, 2026 Mountain time
+
+Workbench now grounds a bounded regression test that uses the addon's
+existing harness, loads a literal core file with `loadfile(ROOT .. "...")`,
+sets the chunk's client environment, and calls a function the chunk
+publishes there. It binds the committed files and callable signatures
+without sending the full harness in the planning request. The independent
+check runs the real addon chunk and bundled libraries and substitutes the
+reviewed incorrect return only for the exact call. Dynamic file lists,
+arbitrary loaders, and broader game-dependent fixtures still require
+separate support. Existing synthetic module and harness-client paths remain
+available.
+
+The newest locally recorded TwichUI `main` is
+`1caf530212bbc6eaf37e41d668902a391aa936c1`, which includes the guild-roster
+merge after `f48b2e0`. Local `main`, `origin/main` and `HEAD` match in the
+clean source checkout at
+`/home/rich/twichui-pilot/checkouts/base-1caf53021`. Workbench uses an
+independent local clone at `.local/real-addon-readiness.uQHL9i/addon`.
+Remote freshness was outside this offline check.
+
+Recommend **Cover the map fade at a single threshold**. The existing map
+exploration test checks a normal fade below, within, and above its interval.
+It leaves the equal-limits branch at the exact boundary uncovered. For
+`MapViewMath.Fade(2, 2, 2)`, the first return must be `1`. The test must
+reject `0` for that same call. Allow additions only to
+`tests/test_map_viewmath_step.lua` and reads of that test and
+`!!!TwichUI/map/ViewMath.lua`. The ordinary runner, harness, file modes and
+addon implementation are fixed. The task adds coverage of existing
+offline arithmetic.
+
+## Verified readiness
+
+The staged Workbench build finished a fresh Chromium intake through two
+scripted browser approvals, application-owned preparation and a sealed local
+result on the real addon. Planning, implementation responses and model
+restoration were simulated. Every Lua check ran under native confinement.
+Both preparation passes ran all four controls against the exact 167-group
+addon suite. The unchanged test, vacuous test and permissive test failed
+the independent behavior check as expected. The positive control and
+candidate passed. The candidate passed Lua syntax, focused regression,
+the independent behavior check and the full suite. The closed grant and
+saved completion seal matched. The result reopened on the immutable
+read-only API, which denied a retry. The proposal and checked result were inspected at desktop and phone
+widths, along with the certified local-only limits in the browser.
+
+The complete native suite took about four minutes per run. Each four-control
+preparation took about 16 minutes. The proposed 105-minute outer window
+accounts for both preparations without increasing the browser's 90-minute
+budget or the model limits. Delegated preparation cancellation retained the
+partial check and removed its cgroup. Earlier rehearsals retained their
+loader, browser confinement, input-drift and transient SQLite lock failures.
+A temporary clone entered counted evidence during one earlier rehearsal.
+The corrected rehearsal used separate bounded scratch and retained the
+failure records. Five closed disposable scratch trees were removed after
+matching any modified test bytes to retained control evidence.
+
+`wb check` and `wb test` passed, with 985 backend tests, one opt-in skip
+and 24 frontend tests. The focused browser suite passed seven tests,
+including local-only success, failure and interruption. Four synthetic
+supervisor cases also passed. The final cancellation changes passed the
+focused safety tests and the exact staged native rehearsal. The installed
+9487 app still serves `fcf74ce`. The 8080 process and configuration matched
+read-only identity checks and port 8765 kept its listener. The staged
+live store is empty and the one-off capability is inactive. The previous
+synthetic real-Qwen result and seal were reverified. All 518 entries in the
+four protected manifests matched. No real-addon browser task has yet
+finished with a real model.
+
+[Checked rehearsal](../artifacts/runs/real-addon-readiness.w4jwzQ/checked-rehearsal.json),
+[staged identity](../artifacts/runs/real-addon-readiness.w4jwzQ/final-staged-identity.json),
+[capacity and archive inventory](../artifacts/runs/real-addon-readiness.w4jwzQ/final-archive-inventory.json),
+[historical evidence](../artifacts/runs/real-addon-readiness.w4jwzQ/historical-preservation.json).
+
+## One authorization for the real-model demonstration
+
+**Approve this package once.** Begin only with owner approval and a free
+loopback port 9187. The earlier synthetic preview's deadline passed and
+the port was free at closeout. An unknown listener holds activation.
+
+1. **Build and isolation.** Use Workbench
+   `87ef1a86271cd4223527c5b3df1d17b5e92232cd`, staged under
+   `.local/real-addon-readiness.uQHL9i/stage` with
+   `index-DaiD6OTB.js` and `index-CzQfAJRs.css`. Verify
+   `browser-demonstration-manifest.json` SHA-256
+   `2879cfe6ff603db03e7e6daca008ffea01eb32fa7301f7188633754baf78abb8`,
+   the stage files, new inode-bound store and backup, clean isolated addon
+   base, installed model/sampler proof, and resource and confinement gates.
+   Confirm owner browser access. Run the stage's supported
+   `PYTHONPATH=scripts:backend .venv/bin/python -m browser_demo.live browser-demonstration-manifest.json <new-private-evidence-dir>`.
+   Create the run's `window.json` with the authorized UTC start before any
+   capacity preparation. Start only the owned worker and gated
+   `127.0.0.1:9187` API. Roll back by closing browser writes, settling and
+   stopping those processes, withdrawing the matching capability and
+   retaining the store and evidence. The installed 9487 app and 8765
+   listener are outside the package.
+2. **Fresh browser request and two decisions.** Submit the manifest's
+   request in Chromium with the example above. Save only preferred
+   `pilot-qwen38-27b` and block fallback. The outer authorization covers
+   the single planning generation. Rich reviews the actual generated
+   proposal, its expectation and file scope, then clicks **Approve
+   proposal**. Workbench prepares and certifies the checks. Rich reviews
+   the certified files, behavior and limits and clicks **Approve local
+   implementation** with **Local implementation only** selected. This
+   second decision authorizes implementation and holds publication.
+3. **Clock and model.** One 105-minute outer window covers capacity
+   preparation, setup, reviews, work, checks and closeout. The browser
+   budget is 90 minutes from its decision, subject to the earlier outer
+   deadline. Require 72 minutes before the budget decision to leave 22
+   minutes for the fresh preparation and 50 before the lease. Require
+   45 minutes before implementation and reserve the final five minutes
+   for restoration. The approved implementation window is 20 minutes
+   and 40 minutes through verification. Use the existing authenticated
+   local llama.cpp service on 8080 for both planning and implementation.
+   Planning gets one request, up to 120 seconds, 2,600 generated tokens
+   and 24,000 bytes each for request and response. The existing controller
+   gets one exclusive lease up to 60 minutes and one cancellation probe
+   up to 30 seconds, 128 counted input tokens and 60 generated tokens.
+   One implementation attempt gets up to 20 requests, 120 seconds each,
+   2,500 generated tokens per response (2,496 on the wire) and 24,000
+   total. Aggregate up to 22 generating requests and 26,660 generated
+   tokens, 21 explicit input counts and the bounded existing metadata,
+   cancellation and restoration exchanges. Keep the 32,768-token
+   context gate, two shared tool-input corrections and check-driven edits
+   within the attempt. Zero replay, extra probe, replacement attempt,
+   extension, paid fallback or automatic retry.
+4. **Capacity.** Keep 512 MiB aggregate counted evidence, 72 MiB counted
+   headroom after backups before planning and again before implementation,
+   64 MiB for the run, 1 GiB scratch and at least 4 GiB physically free.
+   Permit lossless archive `real-addon-browser-preflight-20261105` for
+   only the following closed generated build copies and test report if needed.
+   - `artifacts/runs/m5-unattended-8ragc598/verified-complete/frontend-dist`
+   - `artifacts/runs/m5-task-pr-vrtx62lp/tested-code/frontend-dist`
+   - `artifacts/runs/m5-task-pr-vrtx62lp/presentation-check-copy/frontend-dist`
+   - `artifacts/runs/browser-mYWIXD/report`
+
+   The inventory is 70 files and 27,301,481 bytes. Counted headroom
+   is 51.30 MiB after preparation and projected to be 77.34 MiB
+   before the archive receipt. This leaves room for the control
+   evidence before the second headroom check. Recheck same-user
+   ownership, closure, inventory, external archive space and required
+   reserve. Verify every file, original-path lookup and separate restored
+   copy before pruning only the matching originals. Remeasure headroom.
+   Keep the existing 6 GiB RAM, zero swap, two-core quota, 64 tasks and
+   16 MiB per file for model-side checks, 128 tasks and 128 MiB per file
+   for trusted checks, 45,000 characters read, 150 added lines, 65,536
+   patch bytes, 8 MiB logs, 2 MiB stream, 64 KiB line and 256 KiB assembled
+   response ceilings.
+5. **Proof, holds and restoration.** Require original, positive, vacuous
+   and wrong-behavior controls before the offer and again in the fresh
+   implementation workspace. Require Lua syntax, the focused regression,
+   the frozen behavior check and all 167 original suite groups on the
+   candidate. Require matching sealed candidate, patch, durable result,
+   complete implementation accounting and zero publication records.
+   Hold on scope, base, approval, model identity, time, capacity,
+   confinement, cancellation, usage or verification failure, unknown
+   completion or uncertain restoration. Preserve the actual reason and
+   partial evidence. The existing controller owns locks, temporary
+   authentication and watchdog recovery. Verify original configuration
+   and normal authenticated access and confirm rejection of the temporary
+   credential before reporting completion. These checks cover offline
+   Lua behavior and do not establish in-game visuals.
+6. **Local review.** Show the exact browser outcome, checks and diff at
+   desktop and phone widths and keep the sealed patch on disk. An
+   immutable read-only review may run on loopback through the earlier
+   saved or outer deadline after the write API and worker close. Use
+   `browser_demo.readonly_review:create_app` with the same stage paths,
+   store, policy and evidence, no model key, and a listener lifetime
+   bounded by the deadline. Publication remains held. Any later draft PR
+   requires separate explicit permission.
+
 # Fresh browser task completed with real Qwen — November 5, 2026 Mountain time
 
 **Cover lowercase name normalization** went from one fresh browser request

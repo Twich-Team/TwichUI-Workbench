@@ -1,3 +1,30 @@
+## November 5, 2026 — Real TwichUI browser path staged and rehearsed
+
+Workbench `87ef1a86271cd4223527c5b3df1d17b5e92232cd` supports the
+committed harness and literal core-file load on the newest clean local
+TwichUI `main`, `1caf530212bbc6eaf37e41d668902a391aa936c1`. Only the
+isolated clone was used for testing. The planner binds callable signatures
+and file hashes without transmitting the full harness. Real bundled Lua
+libraries run within the independent oracle. The runner and addon
+production code were preserved.
+
+A fresh browser rehearsal with scripted model responses went through two
+browser decisions, actual confined preparations, the exact 167-group suite,
+and the checked local result with a verified seal. The second approval
+held publication. The immutable review was inspected at desktop and phone
+widths. Native cancellation closed the delegated check and retained the
+partial evidence. The test-only worker now handles transient store locks
+as the live worker does. The earlier synthetic real-model result and
+prior failure records still verify. This was offline engineering and
+rehearsal. The main app is still `fcf74ce`.
+
+The two measured preparations informed the proposed 105-minute outer
+window. No model budget was increased. The proposed archive contains
+closed generated builds and a test report, with original lookup and
+restore required before pruning. Nothing has been archived for this
+package. Exact evidence, stage identity, task and single pending
+authorization are in [CONTINUATION.md](CONTINUATION.md).
+
 # Current progress and operator handoff
 
 ### 2026-11-05 MST — First fresh browser task checked with real model responses

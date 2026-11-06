@@ -2,9 +2,9 @@
 
 Last updated November 5, 2026 (Mountain time).
 
-- **Running app.** Port 9487 still runs build `fcf74ce`. The new build ran in isolation. Only its read-only result preview remains active, until about 9:25 p.m. MST.
-- **Finished results.** One fresh browser task finished end to end with real Qwen planning and implementation, two owner approvals, and independently passing checks. The synthetic patch and review are saved.
-- **Tests and demonstrations.** The result passed Lua syntax, focused regression, the independent behavior check, and all five suite groups. Normal model access was restored and verified.
-- **What is stopping progress.** Real-addon test loading still needs support on a clean, eligible real-addon base.
-- **Next complete outcome.** Take an eligible real-addon task from browser request to independently checked review.
-- **Decision needed.** The completed demonstration is closed. Real-addon work and publication require separate approval.
+- **Running app.** Port 9487 still runs build `fcf74ce`. The real-addon build is staged separately.
+- **Finished results.** One synthetic browser task finished with real Qwen and two owner approvals. Zero real-addon tasks have completed through the browser with a real model.
+- **Tests and demonstrations.** On the real addon, a browser rehearsal with scripted model responses reached a sealed local result. The independent behavior check and all 167 addon test groups passed offline.
+- **What is stopping progress.** The live demonstration awaits approval. Its evidence space needs the named lossless archive first.
+- **Next complete outcome.** Use the browser to add and verify coverage for map opacity at a single fade threshold.
+- **Decision needed.** Approve one isolated local Qwen run, then review the actual proposal and run budget in the browser. Publication stays held.
