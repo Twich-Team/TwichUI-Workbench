@@ -58,7 +58,8 @@ test('C D E · revised proposal, exact approval receipt, one hierarchy, stale re
   await submit(page);fixture('planning');
   await expect(page.getByRole('heading',{name:'The plan',exact:true})).toBeVisible();
   const old=await snapshot(page); const oldProposal=old.proposals[0];
-  await page.getByLabel('Note Required for changes').fill('Preserve keyboard navigation and keep research bounded.');
+  await page.getByText('Add a note or request changes',{exact:true}).click();
+  await page.getByLabel('Note Required when requesting changes').fill('Preserve keyboard navigation and keep research bounded.');
   await page.getByRole('button',{name:'Request changes',exact:true}).click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('apply-planning');fixture('planning');
@@ -154,7 +155,7 @@ test('representative synthetic proposal leads with experience and produces conci
   await expect(page.getByRole('heading',{name:'Know which step the guide is tracking',exact:true})).toBeVisible();
   await expect(page.locator('.planning-context')).not.toHaveAttribute('open');
   await expect(page.getByRole('heading',{name:'Planning progress',exact:true})).not.toBeVisible();
-  await expect(page.getByRole('heading',{name:'What still needs checking',exact:true})).toBeVisible();
+  await expect(page.getByText('Technical plan details',{exact:true})).toBeVisible();
   const approve=page.getByRole('button',{name:'Approve plan',exact:true});
   await expect(approve).toBeDisabled();await expect(approve).toHaveAttribute('aria-describedby','approval-prerequisites');
   await page.setViewportSize({width:390,height:844});await overflow(page);await capture(page,info,'closeout-missing-mockups-390');await page.setViewportSize({width:1440,height:1000});
@@ -194,7 +195,7 @@ for(const width of [1440,390]) {
     await page.getByRole('button',{name:'Submit request',exact:true}).click();
     await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
     fixture('nonvisual-planning');
-    await expect(page.getByRole('heading',{name:'In-game changes',exact:true})).toBeVisible();
+    await expect(page.getByText('In-game scope and attachments',{exact:true})).toBeVisible();
     await expect(page.locator('.scope-conflict')).toContainText('Your visual requirement still applies.');
     await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toBeDisabled();
     await expect(page.locator('#approval-prerequisites')).toContainText('proposed mockup');

@@ -32,18 +32,18 @@ async function ready(file, timeout=25000) {
       await page.goto(step.url);
       await page.getByText('Expected result 1',{exact:true}).waitFor();
       await page.screenshot({path:join(evidence,'proposal-1440.png')});
-      await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').check();
+      await page.getByLabel('The test examples match what I asked for.').check();
       const scopeSaved = page.waitForResponse(r=>r.url().endsWith('/decisions')&&r.request().method()==='POST');
       await page.getByRole('button',{name:'Approve plan',exact:true}).click();
       assert.equal((await scopeSaved).status(),200);
       await ready('owner-step-budget.json', task.scenario.fixture === 'loaded-client' ? 30*60*1000 : 25000);
       await page.reload();
       const offer=page.getByRole('region',{name:'Certified task run approval'});
-      assert.equal(await offer.getByRole('radio',{name:'Local implementation only'}).isChecked(),true);
+      assert.equal(await offer.getByRole('radio',{name:'Keep the result local',includeHidden:true}).isChecked(),true);
       await offer.screenshot({path:join(evidence,'offer-1440.png')});
-      await offer.getByRole('checkbox',{name:/I approve this exact task.*for local implementation/}).check();
+      await offer.getByRole('checkbox',{name:'I reviewed what this run allows.'}).check();
       const budgetSaved=page.waitForResponse(r=>r.url().endsWith('/run-approval')&&r.request().method()==='POST');
-      await offer.getByRole('button',{name:'Approve local implementation',exact:true}).dblclick();
+      await offer.getByRole('button',{name:'Approve local run',exact:true}).dblclick();
       assert.equal((await budgetSaved).status(),200);
     } else {
       const url=origin+'/intake/'+identity;
@@ -76,9 +76,10 @@ async function ready(file, timeout=25000) {
           await page.getByText('Ready for your review',{exact:true}).waitFor();
           if (mode === 'proposal') {
             await page.getByText('Expected result 1',{exact:true}).waitFor();
+            await page.getByText('How this example works',{exact:true}).click();
             assert.equal(await page.getByText('TwichUI.MapViewMath.Fade',{exact:false}).first().isVisible(),true);
             assert.equal(await page.getByRole('button',{name:'Approve plan',exact:true}).isVisible(),true);
-            assert.equal(await page.getByRole('button',{name:'Approve local implementation',exact:true}).count(),0);
+            assert.equal(await page.getByRole('button',{name:'Approve local run',exact:true}).count(),0);
           }
         }
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);

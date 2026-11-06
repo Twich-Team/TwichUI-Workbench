@@ -147,6 +147,7 @@ test('historical successful sample and check remain distinct from current approv
   await expect(box.getByRole('heading',{name:'Sample check passed',exact:true})).toBeVisible();
   const before = (await (await page.request.get(path)).json()).receipts[0].candidate;
   await page.getByText('Read the plan',{exact:true}).click();
+  await page.getByText('In-game scope and attachments',{exact:true}).click();
   await page.getByText('Change what this plan may cover',{exact:true}).click();
   await page.getByLabel('Why are you changing the scope?').fill('A new human scope revision must not inherit historical candidate authority.');
   await page.getByRole('button',{name:'Save and review the updated plan',exact:true}).click();

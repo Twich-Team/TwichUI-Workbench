@@ -605,3 +605,39 @@ th,td { text-align: left; padding: 10px; border-bottom: 1px solid #5e4a34; }
 @media(max-width:640px) {
   .app-shell:has(.task-detail,.result-page) .topbar { min-height:54px; padding-block:.55rem; }
 }
+
+/* Keep decision text as readable as the task it belongs to. */
+:is(.task-create,.task-detail,.result-page) :is(p,li,label,textarea,select,input,legend,summary,dt,dd) {
+  color:#e2d3bf;
+  font-size:1rem;
+  line-height:1.55;
+}
+:is(.task-create,.task-detail,.result-page) :is(.small-text,label span) {
+  color:#cdbda8;
+  font-size:.9375rem;
+}
+:is(.task-create,.task-detail,.result-page) :is(.back-link,summary) { color:#efcf9f; }
+:is(.task-create,.task-detail,.result-page) summary { min-height:44px; padding-block:.55rem; }
+:is(.task-create,.task-detail,.result-page) .button { font-size:.9375rem; white-space:normal; max-width:100%; }
+:is(.task-create,.task-detail,.result-page) h3 { font-size:1.125rem; line-height:1.35; }
+.task-detail :is(.plan-outcome,.question-text), .result-page .result-lead { color:var(--color-foreground); }
+.task-detail .question-text { font-size:1.125rem; font-weight:600; }
+.task-detail .question-panel { border-left:3px solid #c99b62; }
+.task-detail .journey-steps li { font-size:.9375rem; line-height:1.25; }
+.task-detail .journey-steps li[aria-current] { color:var(--color-foreground); }
+.task-detail .journey-title { font:1.3rem/1.35 var(--font-display); }
+.task-detail :is(.run-approval,.task-execution) { margin:0; }
+.task-detail .task-execution { padding:0; border:0; }
+.task-detail .task-execution h3 { margin-top:0; }
+.task-detail .human-scope { margin-block:.4rem; padding:0; }
+.plan-scope { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr)); gap:.65rem 1.5rem; }
+.task-detail .plan-scope ul, .task-detail .permission-outcomes { margin-block:.35rem .7rem; }
+.task-detail .proposal-decisions { margin-top:1.25rem; border-top:1px solid var(--color-border); padding-top:.65rem; }
+.task-detail .example-values { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,7rem),1fr)); gap:.5rem .8rem; margin:.65rem 0 0; }
+.task-detail .example-values dd { margin:0; color:var(--color-foreground); }
+.task-detail .permission-files { overflow-wrap:anywhere; }
+.task-detail .supporting-plan > summary { padding-inline:.6rem; }
+.task-detail .run-approval input, .task-detail .proposal-decisions input { accent-color:#d3a976; }
+.task-lane .record-link strong { font-size:1rem; line-height:1.4; }
+.task-lane .record-link small { font-size:.875rem; color:#cbbba4; }
+.task-lane .record-state { font-size:.875rem; }

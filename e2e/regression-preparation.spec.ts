@@ -54,14 +54,17 @@ test('missing target is explained and clarified without granting permissions',as
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('regression-planning');
   await expect(page.getByRole('heading',{name:'Workbench needs your help'})).toBeVisible();
-  await expect(page.getByText('No paths selected.')).toBeVisible();
+  await expect(page.getByText('No test file selected.')).not.toBeVisible();
+  await page.getByText('Read the supporting plan',{exact:true}).click();
+  await expect(page.getByText('No test file selected.')).toBeVisible();
   await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toHaveCount(0);
   await overflow(page);await capture(page,info,'regression-missing-phone');
   await page.getByLabel('Possible existing test').selectOption('tests/test_share.lua');
   await page.getByRole('button',{name:'Use this test'}).click();
   fixture('regression-planning');
   await page.getByRole('button',{name:'Open current proposal'}).click();
-  await expect(page.getByRole('region',{name:'Proposed test'}).getByText('tests/test_share.lua',{exact:true})).toBeVisible();
+  const testPlan=page.getByRole('region',{name:'Proposed test'});
+  await expect(testPlan.getByText('tests/test_share.lua',{exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Workbench needs your help'})).toHaveCount(0);
   await overflow(page);
 });
@@ -81,28 +84,29 @@ for(const width of [1440,390])test(`generated behavioral examples need independe
   await expect(contract.getByText('Examples to review')).toBeVisible();
   const approve=page.getByRole('button',{name:'Approve plan',exact:true});
   await expect(approve).toBeDisabled();
-  await expect(contract.getByText('Expected first return value "alice"',{exact:true})).toBeVisible();
+  await expect(contract.getByText('"alice"',{exact:true})).toBeVisible();
   if(width===390)await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   await overflow(page);
   await contract.getByText('Examples to review').scrollIntoViewIfNeeded();
   await page.screenshot({path:(await import('./output')).artifactPath(`generated-expectations/expectations-viewport-${width}.png`)});
-  await contract.getByText('Expected first return value "alice"',{exact:true}).scrollIntoViewIfNeeded();
+  await contract.getByText('"alice"',{exact:true}).scrollIntoViewIfNeeded();
   await page.screenshot({path:(await import('./output')).artifactPath(`generated-expectations/observation-viewport-${width}.png`)});
-  await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').scrollIntoViewIfNeeded();
+  await page.getByLabel('The test examples match what I asked for.').scrollIntoViewIfNeeded();
   await page.screenshot({path:(await import('./output')).artifactPath(`generated-expectations/confirmation-viewport-${width}.png`)});
   if(width===390)await page.evaluate(()=>document.documentElement.style.fontSize='');
-  await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').check();
+  await page.getByLabel('The test examples match what I asked for.').check();
   await expect(approve).toBeEnabled();
   const submission=page.waitForResponse(r=>r.url().endsWith('/decisions')&&r.request().method()==='POST');
   await approve.click();expect((await submission).status()).toBe(200);
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('reviewed-offer-scope');fixture('reviewed-offer-scenario-certify');await page.reload();
   const offer=page.getByRole('region',{name:'Certified task run approval'});
-  await expect(offer.getByRole('heading',{name:'Review and approve implementation'})).toBeVisible();
+  await expect(offer.getByRole('heading',{name:'Add test coverage in a separate copy'})).toBeVisible();
   await offer.screenshot({path:(await import('./output')).artifactPath(`generated-expectations/offer-${width}.png`)});
-  await offer.getByRole('radio',{name:'Also authorize one draft PR'}).check();
-  await offer.getByRole('checkbox',{name:'I approve this exact task, expected behavior, scope, limits, and one draft PR.'}).check();
-  await offer.getByRole('button',{name:'Approve implementation and one draft PR',exact:true}).click();
+  await offer.getByText('Publishing options',{exact:true}).click();
+  await offer.getByRole('radio',{name:'Also allow one draft pull request'}).check();
+  await offer.getByRole('checkbox',{name:'I reviewed the run and publishing permission.'}).check();
+  await offer.getByRole('button',{name:'Approve run and draft pull request',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
   const result=JSON.parse(fixture('reviewed-offer-controller'));
   expect(result.controller_calls).toBe(1);expect(result.preparations[0].certified).toBe(true);
@@ -126,7 +130,7 @@ test('generated expectation mismatch stays a specific browser hold after review'
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('reviewed-offer-scenario-wrong-plan');await page.reload();
   // Even an incorrect human confirmation cannot turn mismatching evidence into certification.
-  await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').check();
+  await page.getByLabel('The test examples match what I asked for.').check();
   await page.getByRole('button',{name:'Approve plan',exact:true}).click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('reviewed-offer-scope');
@@ -136,7 +140,7 @@ test('generated expectation mismatch stays a specific browser hold after review'
   const hold=page.getByRole('region',{name:'Task preparation hold'});
   await expect(hold.getByText(/capital-name: the expected observation or fixture setup/)).toBeVisible();
   await expect(page.getByRole('region',{name:'Certified task run approval'})).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'Approve implementation and one draft PR',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Approve run and draft pull request',exact:true})).toHaveCount(0);
   await overflow(page);await hold.screenshot({path:(await import('./output')).artifactPath('generated-expectations/specific-expectation-hold-phone.png')});
 });
 
@@ -161,7 +165,7 @@ for(const width of [1440,390])test(`application worker prepares grounded ordinar
   expect(planned.adapter_calls).toBe(1);await page.reload();
   const contract=page.getByRole('region',{name:'Proposed test'});
   await expect(contract.getByText('Examples to review')).toBeVisible();
-  await expect(contract.getByText(client?'Expected last "bob"':'Expected first return value "alice"',{exact:true})).toBeVisible();
+  await expect(contract.getByText(client?'"bob"':'"alice"',{exact:true})).toBeVisible();
   const approve=page.getByRole('button',{name:'Approve plan',exact:true});
   await expect(approve).toBeDisabled();
   if(client)await page.evaluate(()=>document.documentElement.style.fontSize='200%');
@@ -169,9 +173,9 @@ for(const width of [1440,390])test(`application worker prepares grounded ordinar
   await overflow(page);
   const {artifactPath}=await import('./output');
   await page.screenshot({path:artifactPath(`automatic-scenarios/review-${width}.png`)});
-  await contract.getByText(client?'Expected last "bob"':'Expected first return value "alice"',{exact:true}).scrollIntoViewIfNeeded();
+  await contract.getByText(client?'"bob"':'"alice"',{exact:true}).scrollIntoViewIfNeeded();
   await page.screenshot({path:artifactPath(`automatic-scenarios/observation-${width}.png`)});
-  const confirmation=page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.');
+  const confirmation=page.getByLabel('The test examples match what I asked for.');
   await confirmation.check();await approve.click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   if(client)await page.evaluate(()=>document.documentElement.style.fontSize='');
@@ -182,7 +186,7 @@ for(const width of [1440,390])test(`application worker prepares grounded ordinar
   expect(prepared.model_attempts).toEqual([{source:'demo',outcome:'completed',model:'controlled-scenario-adapter'}]);
   await page.reload();
   const offer=page.getByRole('region',{name:'Certified task run approval'});
-  await expect(offer.getByRole('heading',{name:'Review and approve implementation'})).toBeVisible();
+  await expect(offer.getByRole('heading',{name:'Add test coverage in a separate copy'})).toBeVisible();
   await offer.screenshot({path:artifactPath(`automatic-scenarios/offer-${width}.png`)});
   await page.getByText('Original request, planning history and evidence',{exact:true}).click();
   await page.getByText('Behavioral scenario preparation · Revision 1',{exact:true}).scrollIntoViewIfNeeded();
@@ -198,6 +202,7 @@ test('grounded intake asks for exact example values before opening approval',asy
   fixture('reviewed-offer-automatic-setup');
   await page.goto('/');
   await page.getByRole('link',{name:'Create a task',exact:true}).click();
+  await page.getByText('Task options',{exact:true}).click();
   await page.getByLabel('Title Required').fill('Cover lowercase name normalization');
   await page.getByLabel('Description Required').fill('Synthetic fixture only. In tests/test_normalize.lua cover trimming spaces and lowercasing names.');
   await page.getByLabel('Add a check for existing behavior').check();
@@ -230,7 +235,7 @@ test('grounded intake asks for exact example values before opening approval',asy
   const planned=JSON.parse(fixture('reviewed-offer-automatic-worker'));
   expect(planned.adapter_calls).toBe(1);
   await page.reload();
-  await expect(page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.')).toBeVisible();
+  await expect(page.getByLabel('The test examples match what I asked for.')).toBeVisible();
   await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toBeDisabled();
 });
 
@@ -245,7 +250,7 @@ test('application preparation policy denial is a specific hold without a duplica
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('reviewed-offer-automatic-worker');await page.reload();
-  await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').check();
+  await page.getByLabel('The test examples match what I asked for.').check();
   await page.getByRole('button',{name:'Approve plan',exact:true}).click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   const result=JSON.parse(fixture('reviewed-offer-automatic-denied-worker'));
@@ -265,6 +270,7 @@ async function openLocalOffer(page: import('@playwright/test').Page) {
   fixture('reviewed-offer-automatic-setup');
   await page.goto('/');
   await page.getByRole('link',{name:'Create a task',exact:true}).click();
+  await page.getByText('Task options',{exact:true}).click();
   await page.getByLabel('Title Required').fill('Cover lowercase name normalization');
   await page.getByLabel('Description Required').fill('Cover trimming spaces and lowercasing names.');
   await page.getByLabel('Add a check for existing behavior').check();
@@ -281,11 +287,11 @@ async function openLocalOffer(page: import('@playwright/test').Page) {
   const planned=JSON.parse(fixture('reviewed-offer-automatic-worker'));
   expect(planned.adapter_calls).toBe(1);
   const proposal=page.getByRole('region',{name:'Proposed test'});
-  await expect(proposal.getByText('Expected first return value "alice"')).toBeVisible();
-  await expect(proposal.getByText('Wrong result to catch "ALICE"')).toBeVisible();
+  await expect(proposal.getByText('"alice"')).toBeVisible();
+  await expect(proposal.getByText('"ALICE"')).toBeVisible();
   const approve=page.getByRole('button',{name:'Approve plan',exact:true});
   await expect(approve).toBeDisabled();
-  await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').check();
+  await page.getByLabel('The test examples match what I asked for.').check();
   await approve.click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('reviewed-offer-automatic-tick');
@@ -297,9 +303,9 @@ async function openLocalOffer(page: import('@playwright/test').Page) {
   const prepared=JSON.parse(fixture('reviewed-offer-automatic-worker'));
   expect(prepared).toMatchObject({adapter_calls:0,grants:0,requests:0,publications:0});
   const offer=page.getByRole('region',{name:'Certified task run approval'});
-  await expect(offer.getByRole('radio',{name:'Local implementation only'})).toBeChecked();
-  await expect(offer.getByText(/Publishing, merging, releasing and installing each require separate permission/)).toBeVisible();
-  await expect(offer.getByRole('button',{name:'Approve local implementation',exact:true})).toBeDisabled();
+  await expect(offer.getByRole('radio',{name:'Keep the result local',includeHidden:true})).toBeChecked();
+  await expect(offer.getByText(/Result stays local/)).toBeVisible();
+  await expect(offer.getByRole('button',{name:'Approve local run',exact:true})).toBeDisabled();
   await expect(offer.getByText('tests/test_normalize.lua',{exact:true})).toBeVisible();
   return offer;
 }
@@ -307,12 +313,13 @@ async function openLocalOffer(page: import('@playwright/test').Page) {
 for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-only approval reaches the worker and retains ${outcome}`,async({page})=>{
   test.setTimeout(45000);
   const offer=await openLocalOffer(page);
-  const button=offer.getByRole('button',{name:'Approve local implementation',exact:true});
-  const confirm=offer.getByRole('checkbox',{name:/I approve this exact task.*for local implementation/});
+  const button=offer.getByRole('button',{name:'Approve local run',exact:true});
+  const confirm=offer.getByRole('checkbox',{name:'I reviewed what this run allows.'});
   await confirm.check();
-  await offer.getByRole('radio',{name:'Also authorize one draft PR'}).check();
-  await expect(offer.getByRole('button',{name:'Approve implementation and one draft PR'})).toBeDisabled();
-  await offer.getByRole('radio',{name:'Local implementation only'}).check();
+  await offer.getByText('Publishing options',{exact:true}).click();
+  await offer.getByRole('radio',{name:'Also allow one draft pull request'}).check();
+  await expect(offer.getByRole('button',{name:'Approve run and draft pull request'})).toBeDisabled();
+  await offer.getByRole('radio',{name:'Keep the result local'}).check();
   await expect(button).toBeDisabled();
   await confirm.check();
   if(outcome==='pass'){
@@ -368,6 +375,7 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
   if(outcome==='pass'){
     await expect(review.getByRole('heading',{name:'Test changes checked'})).toBeVisible();
     await review.getByText('See the changes in code',{exact:true}).click();
+    await review.getByText('Check details',{exact:true}).click();
     await expect(review.getByLabel('Unified diff for tests/test_normalize.lua')).toContainText('assert(normalize("  ALICE ") == "alice")');
     await expect(review.locator('.check-summary').getByText('Passed',{exact:true})).toHaveCount(4);
     await expect(review.getByText('Technical results and run details',{exact:true})).toBeVisible();
@@ -405,13 +413,13 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
 test('browser approval refuses changed certified evidence before saving a run',async({page})=>{
   test.setTimeout(45000);
   const offer=await openLocalOffer(page);
-  await offer.getByRole('checkbox',{name:/I approve this exact task.*for local implementation/}).check();
+  await offer.getByRole('checkbox',{name:'I reviewed what this run allows.'}).check();
   await page.route('**/run-approval',async route=>{
     if(route.request().method()==='POST')fixture('reviewed-offer-stale');
     await route.continue();
   });
   const sent=page.waitForResponse(r=>r.url().endsWith('/run-approval')&&r.request().method()==='POST');
-  await offer.getByRole('button',{name:'Approve local implementation',exact:true}).click();
+  await offer.getByRole('button',{name:'Approve local run',exact:true}).click();
   expect((await sent).status()).toBe(409);
   await expect(offer.getByRole('alert').filter({hasText:'offer changed'}).first()).toBeVisible();
   await offer.getByRole('button',{name:'Review current offer'}).click();
@@ -424,14 +432,14 @@ test('expired local approval holds the task without starting a run', async ({pag
   test.setTimeout(45000);
   const offer=await openLocalOffer(page);
   const task=new URL(page.url()).pathname;
-  await offer.getByRole('checkbox',{name:/I approve this exact task.*for local implementation/}).check();
-  await offer.getByRole('button',{name:'Approve local implementation',exact:true}).click();
+  await offer.getByRole('checkbox',{name:'I reviewed what this run allows.'}).check();
+  await offer.getByRole('button',{name:'Approve local run',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
   const expired=JSON.parse(fixture('reviewed-offer-automatic-local-expire'));
   expect(expired).toMatchObject({grants:0,requests:0,publications:0});
   await page.reload();
   await expect(page.getByRole('region',{name:'Task implementation progress'}).getByRole('heading',{name:'Run approval expired',exact:true})).toBeVisible();
-  await expect(page.getByRole('button',{name:'Approve local implementation',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Approve local run',exact:true})).toHaveCount(0);
   await page.goto('/');
   await expect(page.getByRole('heading',{name:'Needs your attention'})).toBeVisible();
   await expect(page.locator('.task-lane').filter({has:page.getByRole('heading',{name:'Needs your attention'})}).locator(`a[href="${task}"]`)).toBeVisible();

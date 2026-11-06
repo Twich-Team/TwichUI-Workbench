@@ -31,7 +31,8 @@ export function TaskExecution({intakeId,taskId,separateApproval,showWaiting=fals
     {separateApproval&&waiting&&!expired&&<RunApproval intakeId={intakeId} taskId={taskId}/>}
     {showProgress&&<section className="task-execution" aria-label="Task implementation progress">
       <h3>{expired?'Run approval expired':progress?.title||(waiting?'Waiting to start':runStage[data.stage]||'Progress unavailable')}</h3>
-      <p role="status">{data.message}</p>
+      {data.message.replace(/[.!]$/, '').trim()!==progress?.title &&
+        <p role="status">{data.message}</p>}
       {expired && <p>The saved plan is still available. Continuing needs fresh authorization for a supported run.</p>}
       {waiting && !data.run_budget && !separateApproval && <p>The plan is saved. This ready-made task needs its run permission before work can start.</p>}
       {data.session?.can_stop&&!query.isError&&<StopRun key={data.session.id} id={data.session.id} session onSaved={()=>void query.refetch()}/>}

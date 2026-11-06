@@ -59,7 +59,9 @@ export function TaskJourney({item}: {item: Intake}) {
   return <section className="panel task-journey" aria-label="Task progress">
     <ol className="journey-steps">{['Understand', 'Review plan', 'Do the work', 'Check', 'Result'].map((step, i) =>
       <li key={step} aria-current={i === progress.step ? 'step' : undefined}><span>{i + 1}</span>{step}</li>)}</ol>
-    <div role="status"><p className="journey-title"><strong>{progress.title}</strong></p><p>{progress.next}</p></div>
+    {(!execution.data || execution.data.stage==='waiting' || item.decisions.some(d=>d.status==='pending')) &&
+      <div role="status"><p className="journey-title"><strong>{progress.title}</strong></p>
+        {item.status!=='waiting_for_information' && <p>{progress.next}</p>}</div>}
   </section>;
 }
 
@@ -85,7 +87,7 @@ export function TaskOverview({preview = false, page = 1}: {preview?: boolean; pa
   }));
   return <div className={`task-overview${preview?" task-overview-preview":""}`}>
     {query.isError && <p className="form-error" role="alert">Refresh unavailable. Showing the last loaded tasks.</p>}
-    {([['attention', 'Needs your attention'], ['current', 'Open work'], ['results', 'Recent outcomes']] as const).map(([group, title]) => {
+    {([['attention', 'Needs your attention'], ['current', 'Active work'], ['results', 'Recent outcomes']] as const).map(([group, title]) => {
       const matches = rows.filter(row => row.progress.group === group);
       if (!matches.length && !preview) return null;
       return <section className="panel task-lane" key={group}>

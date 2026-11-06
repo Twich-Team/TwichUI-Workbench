@@ -131,7 +131,7 @@ class Demo:
                 message='Illustration of a checked result.', verification='passed', has_candidate=True, created_at=now())])
         if route == '/api/real-executions/'+RESULT:
             return dict(id=RESULT, title=self.samples['sample-result']['original']['title'], status='checked',
-                        current_grant=False, current_task=True, base='Sample source', grant_id='Sample only',
+                        current_grant=False, current_task=True, behavior_checked=[EXPECTED], base='Sample source', grant_id='Sample only',
                         expires_at='Not applicable', workflow_task=dict(intake_id='sample-result', task_id='sample-result-work'),
                         message='Simulated result. No actual checks ran.', result=dict(inference_ran=False,
                         verification='passed', candidate_id='Sample only', files=[dict(path=FILE, kind='modified',
@@ -152,7 +152,7 @@ class Demo:
         if parts[5]=='execution':
             stage, message = {
                 'sample-approval': ('waiting', 'Review the example run permission below.'),
-                'sample-progress': ('checking', 'In this example, the change is ready and Workbench is checking it.'),
+                'sample-progress': ('checking', 'The focused label-spacing test passed. Workbench is now checking the other tests in this example.'),
                 'sample-result': ('checked', 'The sample checks passed.'),
             }[identity]
             runs = [dict(id=RESULT, status='checked', verification='passed', current_task=True, candidate_id='sample')] if stage=='checked' else []

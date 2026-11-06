@@ -11,6 +11,7 @@ import type {components} from './api.generated';
 type View={id:string;title:string;status:string;message:string;base:string;current_grant:boolean;
   recovery_pending?:boolean;publication_requested?:boolean;
   grant_id:string;expires_at:string;publication_allowed:false;source:'real';
+  behavior_checked?:string[];
   workflow_task?:{intake_id:string;task_id:string;binding:string}|null;current_task?:boolean|null;
   result:null|{inference_ran?:boolean|null;verification?:string;candidate_id?:string;
     handler_returned?:boolean;
@@ -49,23 +50,23 @@ export function RealExecutionReview(){
       {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded result.</p>}
       {row.current_task===false&&<p className="soft-callout">This result belongs to an earlier plan. The current task still needs its own review and checks.</p>}
       <h2>{row.recovery_pending?'Waiting for safe recovery':checked?(testOnly?'Test changes checked':'Changes checked'):row.status==='checked'?'Run result saved':runStage[row.status]||'Recorded result'}</h2>
-      {checked?<><p>{testOnly?'Workbench changed only test files.':'Workbench completed and checked the changes in a separate copy.'} Review the checks and changes below.</p>
-        <p>{row.publication_requested?'This run included permission to attempt draft delivery. See its recorded status below.':'This result is saved locally. This run did not authorize publication.'}</p></>
+      {checked?<><p className="result-lead">{testOnly?'Only test files changed.':'The changes passed checks in a separate copy.'}</p>
+        {Boolean(row.behavior_checked?.length) && <><h3>Behavior checked</h3><ul>{row.behavior_checked?.map((behavior,i)=><li key={i}>{behavior}</li>)}</ul></>}
+        <p>{row.publication_requested?'The checked copy is saved locally. See the separate draft delivery status below.':'Saved locally. This run did not install or publish the result.'}</p></>
         :<p>{row.message}</p>}
       {row.recovery_pending?<p>Workbench is waiting to confirm cleanup. It will keep the evidence and will not run the work again.</p>
         :!checked&&!active&&<p>Review the saved reason and any check results below. Another attempt needs fresh permission.</p>}
-      {result?.inference_ran===false && !active && !result.authorship && <p>No model implementation ran.</p>}
+      {result?.inference_ran===false && !active && !checked && !result.authorship && <p>No model implementation ran.</p>}
       {result?.inference_ran===null&&<p>Workbench could not confirm how the model call ended. This attempt has been used.</p>}
       {result?.authorship?.kind==='explicit-current-session'&&<p>Codex finished the work in a separately approved session using contributions from the earlier attempt.</p>}
       {result?.check_failure&&<section aria-label="Last failed check"><h3>Last failed check</h3>
         <p>{result.check_failure.name}{result.check_failure.context_hint&&<> · {result.check_failure.context_hint.path}</>}</p>
         <details><summary>See the failure output</summary><pre className="candidate-diff check-diagnostic" tabIndex={0}>{result.check_failure.diagnostic}</pre></details>
       </section>}
-      <h3>What was checked</h3>
-      {result?.checks?.length?<ul className="check-summary">{result.checks.map((c,i)=><li key={i}>
+      <p className="soft-callout">Checks here are offline. In-game and simulator behavior still need separate verification.</p>
+      {result?.checks?.length?<details><summary>Check details</summary><ul className="check-summary">{result.checks.map((c,i)=><li key={i}>
         <strong>{checkName(c.command,i)}</strong><StateBadge value={c.status==='pass'&&c.rc===0?'Passed':c.status==='fail'||(c.rc!==null&&c.rc!==0)?'Failed':'Outcome unavailable'}/>
-      </li>)}</ul>:<p>{active?'Checks are still pending or have yet to report.':'No completed checks are recorded for this run.'}</p>}
-      <p className="soft-callout">These are offline checks. Simulator and in-game behavior were not verified by this run.</p>
+      </li>)}</ul></details>:<p>{active?'Checks are still pending or have yet to report.':'No completed checks are recorded for this run.'}</p>}
       <h3>What changed</h3>
       {result?.files?.length ? <><ul>{result.files.map(file=><li key={file.path}>{file.path}</li>)}</ul>
         <details><summary>See the changes in code</summary>{result.files.map(file=><DiffFile key={file.path} file={file}/>)}</details></>

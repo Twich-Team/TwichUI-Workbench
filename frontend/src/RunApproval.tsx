@@ -3,7 +3,7 @@ import {useQuery} from '@tanstack/react-query';
 import {mutate} from './api';
 import {Button} from './components/ui/button';
 import {approvalQuery} from './TaskOverview';
-import {RunLimits} from './RunLimits';
+import {ExactRunLimits, RunLimits} from './RunLimits';
 import {minutes, type RunApprovalContext as Context} from './taskProgress';
 import type {components} from './api.generated';
 
@@ -76,48 +76,46 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
   </section>;
   const {offer,scope}=shown;
   const budget=offer.budget;
-  const testOnly=scope?.task_contract?.category==='lua-regression-tests';
-  const mode=draft?.run_budget.publication??publication;
-  const draftPR=mode==='draft-pr';
+  const testOnly=scope?.task_contract?.category==='lua-regression-tests' &&
+    offer.paths.length>0 && offer.paths.every(path=>path.startsWith('tests/'));
+  const draftPR=(draft?.run_budget.publication??publication)==='draft-pr';
+  const buttonLabel=busy?'Saving approval…':draft?'Retry same task approval':
+    !budget.activate_once?'Save approval · Execution unavailable':
+    draftPR?'Approve run and draft pull request':'Approve local run';
   return <section className="soft-callout run-approval" aria-label="Certified task run approval">
-    <h3>Review and approve implementation</h3>
-    <p>{offer.title}</p>
-    <p>Plan approval prepared this task. This decision gives Workbench permission for one run in a separate copy.</p>
-    <h4>What Workbench can change</h4>
-    {testOnly?<p>Add checks to the existing test files below.</p>:<ul>{scope?.content.scope.map((s,i)=><li key={i}>{s}</li>)}</ul>}
-    <ul>{offer.paths.map(p=><li key={p}><code>{p}</code></li>)}</ul>
-    <h4>What stays outside the work</h4>
-    {testOnly?<p>Addon code, existing checks and shared testing tools stay as they are.</p>:<ul>{scope?.content.exclusions.map((s,i)=><li key={i}>{s}</li>)}</ul>}
-    <h4>What the checks should show</h4>
-    <ul>{scope?.content.acceptance.map((s,i)=><li key={i}>{s}</li>)}</ul>
-    <h4>Limits for this run</h4>
+    <h3>{testOnly?'Add test coverage in a separate copy':'Run the approved work in a separate copy'}</h3>
+    {testOnly?<p>Your installed addon, addon code and existing checks stay as they are.</p>:
+      <><ul>{scope?.content.scope.map((s,i)=><li key={i}>{s}</li>)}</ul>
+        <p><strong>Outside this run</strong></p><ul>{scope?.content.exclusions.map((s,i)=><li key={i}>{s}</li>)}</ul></>}
+    <p className="permission-files"><strong>Files that may change</strong> {offer.paths.map((path,i)=><span key={path}>{i>0?', ':''}<code>{path}</code></span>)}</p>
+    {scope?.content.acceptance.length ? <ul className="permission-outcomes" aria-label="What the run should check">{scope.content.acceptance.map((s,i)=><li key={i}>{s}</li>)}</ul> : null}
     <RunLimits budget={budget}/>
-    <details><summary>Technical run details</summary>
-      <p>{current.message}</p>
+    {query.isError&&<p role="alert">The run offer could not be refreshed. Refresh before approving.</p>}
+    {error&&<p role="alert">{error}{!stale&&draft?' You can retry the same decision.':''}</p>}
+    {stale?<><p role="alert">This run offer changed or is no longer available. Review the current task before deciding.</p>
+      <Button variant="secondary" disabled={busy} onClick={reviewAgain}>Review current offer</Button></>:<>
+      <p><strong>{draftPR?'One draft pull request allowed':'Result stays local.'}</strong>{draftPR?
+        <> After checks pass, Workbench may push a branch and open one draft pull request at {offer.repository} / {offer.base_branch}. Delivery has up to {minutes(budget.publication_seconds)}. Merging, releasing and installing need separate decisions.</>:null}</p>
+      <details open={draftPR || undefined}>
+        <summary>Publishing options</summary>
+        <fieldset disabled={busy||Boolean(draft)} aria-label="Where the result may go">
+          <label className="check-label"><input type="radio" name={key} checked={!draftPR} onChange={()=>choose('hold')}/>Keep the result local</label>
+          <label className="check-label"><input type="radio" name={key} checked={draftPR} onChange={()=>choose('draft-pr')}/>Also allow one draft pull request</label>
+        </fieldset>
+      </details>
+      <label className="check-label"><input type="checkbox" checked={accepted||Boolean(draft)} disabled={busy||Boolean(draft)} onChange={e=>setAccepted(e.target.checked)}/>
+        {draftPR?'I reviewed the run and publishing permission.':'I reviewed what this run allows.'}
+      </label>
+      <Button disabled={busy||query.isError||(!accepted&&!draft)} onClick={()=>void approve()}>{buttonLabel}</Button>
+    </>}
+    <details>
+      <summary>Technical run details</summary>
+      <p>{current.message}</p><ExactRunLimits budget={budget}/>
+      <p>If the run starts, Workbench checks that it can cancel its own work and restores normal model access afterward.</p>
       <h4>Exact plan scope and exclusions</h4><ul>{[...(scope?.content.scope || []),...(scope?.content.exclusions || [])].map((s,i)=><li key={i}>{s}</li>)}</ul>
       <p>Repository {offer.repository} · Base {offer.base}</p>
       <h4>Required checks</h4><ul>{offer.checks.map((c,i)=><li key={i}>{c.purpose} <code>{c.argv.join(' ')}</code> (from {c.cwd})</li>)}</ul>
-      <p>At most {budget.response_tokens.toLocaleString()} tokens per response.</p>
       <pre>{JSON.stringify(offer.limits,null,2)}</pre><p>Offer fingerprint {offer.fingerprint}</p>
     </details>
-    {query.isError&&<p role="alert">Offer refresh failed. Refresh before approving.</p>}
-    {error&&<p role="alert">{error}{!stale&&draft?' Your exact decision is retained for retry.':''}</p>}
-    {stale?<><p role="alert">This run offer changed or is no longer available. Review the current task before deciding.</p>
-      <Button variant="secondary" disabled={busy} onClick={reviewAgain}>Review current offer</Button></>:<>
-      <fieldset disabled={busy||Boolean(draft)}>
-        <legend>Where the result may go</legend>
-        <label className="check-label"><input type="radio" name={key} checked={!draftPR} onChange={()=>choose('hold')}/>Local implementation only</label>
-        <label className="check-label"><input type="radio" name={key} checked={draftPR} onChange={()=>choose('draft-pr')}/>Also authorize one draft PR</label>
-      </fieldset>
-      {draftPR?<p>After the checks pass, Workbench may push a branch and open one draft pull request in {offer.repository} / {offer.base_branch} for review. Delivery has up to {minutes(budget.publication_seconds)} within the overall limit. Merging, releasing and installing require separate decisions.</p>:
-        <p>Workbench can make and check the change locally. Publishing, merging, releasing and installing each require separate permission.</p>}
-      <label className="check-label"><input type="checkbox" checked={accepted||Boolean(draft)} disabled={busy||Boolean(draft)} onChange={e=>setAccepted(e.target.checked)}/>
-        {draftPR?'I approve this exact task, expected behavior, scope, limits, and one draft PR.':'I approve this exact task, expected behavior, scope, and limits for local implementation.'}
-      </label>
-      <Button disabled={busy||query.isError||(!accepted&&!draft)} onClick={()=>void approve()}>
-        {busy?'Saving approval…':draft?'Retry same task approval':!budget.activate_once?'Save approval · Execution unavailable':draftPR?'Approve implementation and one draft PR':'Approve local implementation'}
-      </Button>
-    </>}
-    <p className="small-text">Workbench saves the decision before applying it. You can leave the task unapproved if you want work to stay paused.</p>
   </section>;
 }

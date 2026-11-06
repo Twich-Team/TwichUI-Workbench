@@ -113,6 +113,7 @@ test('an admitted historical receipt does not represent current authority after 
   await expect(box.getByRole('heading',{name:'Approval check passed'})).toBeVisible();
   const before = (await (await page.request.get(path)).json()).receipts[0];
   await page.getByText('Read the plan',{exact:true}).click();
+  await page.getByText('In-game scope and attachments',{exact:true}).click();
   await page.getByText('Change what this plan may cover',{exact:true}).click();
   await page.getByLabel('Why are you changing the scope?').fill('A new explicit human scope revision needs a new approval.');
   await page.getByRole('button',{name:'Save and review the updated plan',exact:true}).click();

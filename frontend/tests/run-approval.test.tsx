@@ -9,7 +9,7 @@ const budget={
   publication:'hold',activate_once:true,overall_seconds:5400,turns:20,generated_tokens:24000,
   response_tokens:2500,implementation_seconds:1200,complete_run_seconds:2400,publication_seconds:900,
 };
-const available={available:true,message:'Runtime configured; current gates still required.',binding:'b'.repeat(64),scope_approval_id:'e0216d41-14ef-4a97-9567-39d742109a88',scope:{content:{scope:['Add exact regression coverage.'],acceptance:['Reject case faults.'],exclusions:['No production changes.']}},offer:{id:budget.offer_id,fingerprint:budget.offer_fingerprint,title:'Reviewed regression',repository:'Twich-Team/TwichUI',base_branch:'main',base:'c'.repeat(40),paths:['tests/test_normalize.lua'],checks:[{argv:['bash','tests/run.sh'],cwd:'.'}],limits:{turns:20},budget}};
+const available={available:true,message:'Runtime configured; current gates still required.',binding:'b'.repeat(64),scope_approval_id:'e0216d41-14ef-4a97-9567-39d742109a88',scope:{task_contract:{category:'lua-regression-tests'},content:{scope:['Add exact regression coverage.'],acceptance:['Reject case faults.'],exclusions:['No production changes.']}},offer:{id:budget.offer_id,fingerprint:budget.offer_fingerprint,title:'Reviewed regression',repository:'Twich-Team/TwichUI',base_branch:'main',base:'c'.repeat(40),paths:['tests/test_normalize.lua'],checks:[{argv:['bash','tests/run.sh'],cwd:'.'}],limits:{turns:20},budget}};
 function form(){const client=new QueryClient({defaultOptions:{queries:{retry:false}}});const view=render(<QueryClientProvider client={client}><RunApproval intakeId="request" taskId="task"/></QueryClientProvider>);return {client,view};}
 afterEach(()=>{vi.unstubAllGlobals();localStorage.clear();});
 
@@ -21,10 +21,15 @@ it.each(['hold','draft-pr'])('requires explicit %s consent and replays the exact
     return {ok:true,json:async()=>available};
   }));
   const {view}=form();
-  await screen.findByRole('radio',{name:'Local implementation only'});
-  expect(screen.getByRole('radio',{name:'Local implementation only'})).toBeChecked();
-  if(publication==='draft-pr')await userEvent.click(screen.getByRole('radio',{name:'Also authorize one draft PR'}));
-  const button=screen.getByRole('button',{name:publication==='hold'?'Approve local implementation':'Approve implementation and one draft PR'});
+  await screen.findByText('Result stays local.');
+  expect(screen.getByRole('heading',{name:'Add test coverage in a separate copy'})).toBeVisible();
+  expect(screen.getByText(/installed addon, addon code and existing checks/)).toBeVisible();
+  expect(screen.getByText(/Other local model users may have to wait/)).toBeVisible();
+  expect(screen.getByText(/24,000 generated tokens/)).not.toBeVisible();
+  await userEvent.click(screen.getByText('Publishing options'));
+  expect(screen.getByRole('radio',{name:'Keep the result local'})).toBeChecked();
+  if(publication==='draft-pr')await userEvent.click(screen.getByRole('radio',{name:'Also allow one draft pull request'}));
+  const button=screen.getByRole('button',{name:publication==='hold'?'Approve local run':'Approve run and draft pull request'});
   expect(button).toBeDisabled();expect(sent).toHaveLength(0);
   await userEvent.click(screen.getByRole('checkbox'));
   expect(button).toBeEnabled();expect(sent).toHaveLength(0);
@@ -39,10 +44,10 @@ it('freezes reviewed evidence and requires refreshed review if the offer changes
   vi.stubGlobal('fetch',vi.fn(async()=>({ok:true,json:async()=>available})));
   const {client}=form();await screen.findByRole('checkbox');await userEvent.click(screen.getByRole('checkbox'));
   client.setQueryData(['task-run-approval','request','task'],{...available,binding:'d'.repeat(64),offer:{...available.offer,fingerprint:'e'.repeat(64)}});
-  await screen.findByRole('alert');expect(screen.queryByRole('button',{name:'Approve local implementation'})).not.toBeInTheDocument();
+  await screen.findByRole('alert');expect(screen.queryByRole('button',{name:'Approve local run'})).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole('button',{name:'Review current offer'}));
   expect(screen.getByRole('checkbox')).not.toBeChecked();
-  expect(screen.getByRole('button',{name:'Approve local implementation'})).toBeDisabled();
+  expect(screen.getByRole('button',{name:'Approve local run'})).toBeDisabled();
 });
 
 it('explains missing certification without an approval control',async()=>{
@@ -55,7 +60,7 @@ it('requires refreshed consent when runtime availability changes without a scope
   vi.stubGlobal('fetch',vi.fn(async()=>({ok:true,json:async()=>available})));
   const {client}=form();await screen.findByRole('checkbox');await userEvent.click(screen.getByRole('checkbox'));
   client.setQueryData(['task-run-approval','request','task'],{...available,message:'Execution unavailable.',offer:{...available.offer,budget:{...budget,activate_once:false}}});
-  await screen.findByRole('alert');expect(screen.queryByRole('button',{name:'Approve local implementation'})).not.toBeInTheDocument();
+  await screen.findByRole('alert');expect(screen.queryByRole('button',{name:'Approve local run'})).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole('button',{name:'Review current offer'}));
   expect(screen.getByRole('button',{name:'Save approval · Execution unavailable'})).toBeDisabled();
   expect(screen.getByRole('checkbox')).not.toBeChecked();
@@ -66,4 +71,13 @@ it('displays an applied receipt as history while explaining current certificatio
   form();await screen.findByRole('heading',{name:'Task budget applied'});
   await waitFor(()=>expect(screen.getByText('Certification changed; execution held.')).toBeVisible());
   expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+});
+
+it('shows the exact broader scope when an offer can change addon code',async()=>{
+  const offer={...available.offer,paths:['!!!TwichUI/example.lua']};
+  vi.stubGlobal('fetch',vi.fn(async()=>({ok:true,json:async()=>({...available,offer})})));
+  form();
+  await screen.findByRole('heading',{name:'Run the approved work in a separate copy'});
+  expect(screen.getByText('!!!TwichUI/example.lua')).toBeVisible();
+  expect(screen.queryByText(/Your installed addon, addon code/)).not.toBeInTheDocument();
 });
