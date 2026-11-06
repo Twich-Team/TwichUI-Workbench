@@ -69,14 +69,14 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
   if(receipt)return <section className="soft-callout" aria-label="Saved task run approval">
     <h3>{receipt.status==='pending'?'Task budget saved · Waiting to apply':receipt.status==='applied'?'Task budget applied':'Task budget held'}</h3>
     <p role="status">{receipt.status==='pending'?'Workbench saved your permission. It will check the offer again before applying it.':receipt.status==='applied'?'Your decision is recorded for this one attempt.':receipt.message}</p>
-    <p>{receipt.payload.run_budget?.publication==='draft-pr'?'One draft PR was authorized for this run.':'Local implementation only. Publication requires separate approval.'}</p>
+    <p>{receipt.payload.run_budget?.publication==='draft-pr'?'One draft PR was authorized for this run.':'The result stays in Workbench. Publication requires separate approval.'}</p>
     {current.approval_hold && <p>{current.approval_hold}</p>}
     {(!receipt.payload.run_budget?.activate_once||!current.available)&&!current.approval_hold&&<p>{current.message}</p>}
     <p>Reloading keeps this decision. This approval cannot create another attempt.</p>
     <details><summary>Technical approval record</summary><p>{receipt.message}</p><pre>{JSON.stringify(receipt,null,2)}</pre></details>
   </section>;
-  if(current.local_only&&!current.available)return <section className="soft-callout" aria-label="Local run waiting">
-    <h3>Local run is waiting</h3><p role="status">{current.message}</p>
+  if(current.local_only&&!current.available)return <section className="soft-callout" aria-label="Run waiting">
+    <h3>Run is waiting</h3><p role="status">{current.message}</p>
     <p>The reviewed test and plan are saved. The run decision will be available when Workbench can start it safely.</p>
   </section>;
   if(!shown?.available||!shown.offer)return <section className="soft-callout" aria-label="Task preparation hold">

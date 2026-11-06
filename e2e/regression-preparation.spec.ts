@@ -355,7 +355,7 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
   await expect(page.getByRole('heading',{name:'Preparing approved task'})).toBeVisible();
   await page.getByText('Permission for this run',{exact:true}).click();
   await expect(page.getByRole('heading',{name:'Task budget applied'})).toBeVisible();
-  await expect(page.getByText('Local implementation only. Publication requires separate approval.')).toBeVisible();
+  await expect(page.getByText('The result stays in Workbench. Publication requires separate approval.')).toBeVisible();
   const result=JSON.parse(fixture('reviewed-offer-automatic-local-'+outcome));
   expect(result).toMatchObject({adapter_calls:0,grants:1,requests:1,publications:0});
   if(outcome==='interrupt'){
