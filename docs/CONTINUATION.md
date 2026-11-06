@@ -1,3 +1,51 @@
+# Everyday local test workflow prepared — November 6, 2026 Mountain time
+
+The worktree branch `codex/everyday-workbench` carries candidate
+`0a763ab7019e19b2526bf784cbe7b68d18a179d5`. Its application code descends
+from the trial checkpoint and retains the simpler screens. The original
+checkout was at `f0314d6` with owner edits to AGENTS, this handoff and
+PROGRESS. Those edits were preserved. The everyday listener on 9487 is
+still the earlier `fcf74ce` installation and demo planner. All 54
+coordinated-trial seals matched, including the checked map-fade patch
+and the model restoration receipt. This establishes one finished
+isolated real result and zero fresh finished everyday results.
+
+The candidate saves one time-limited local planning decision per request,
+keeps the existing independent scope and run reviews, and dispatches
+grounding, checks, isolated work and retention through the existing
+worker. Workbench reports worker and storage availability and makes
+saved decisions visible. Successful work removes only its own recorded
+scratch copy. Unknown interrupted work keeps its original claim and
+diagnostics. The independent restoration watcher uses a separate named
+user service. Its startup was tested with synthetic completed state
+and network denied. A new live lease and its recovery remain unverified
+on this build. The old trial does not validate the changed worker,
+capacity, scratch and cancellation paths.
+
+`wb check` passed. The full test pass recorded 1,025 backend passes,
+one skip and 25 frontend passes. The later focused backend run passed
+98 cases. One browser case completed two distinct scripted tasks in
+the same disposable history at 1440 and 390 px. Focused browser tests
+covered a rejected patch, interrupted and recovered work, changed
+certification and an expired run decision. A test-only selector that
+expected a pending session during recovery was corrected, and the
+interrupted case passed on recheck. All ten visual comparisons passed.
+Intake, offer and result images from both widths were inspected. The
+full Chromium suite was not repeated for this focused change. The
+restore rehearsal opened the same verified `0012` snapshot with both
+builds, checked the delegated worker, and confirmed availability dropped
+when the worker stopped.
+
+The [combined installation and acceptance request](EVERYDAY_INSTALL_APPROVAL_20261106.md)
+binds the sealed candidate, exact services, verified copy and rollback,
+27 closed evidence directories and one new Qwen map-tile task through
+the normal app. The 67.39 MiB measured headroom is below the new-work
+reserve. The proposed archive and setup project 101.92 MiB. The owner
+must decide whether to take the limited local release now. The full
+Phase A requirements still apply. No archive, live install, live-store
+migration, model request, probe, lease, addon install or publication
+was performed in this assignment.
+
 # Coordinated map-fade trial completed with real Qwen — November 6, 2026 Mountain time
 
 The owner approved the exact [coordinated request](COORDINATED_MAP_FADE_TRIAL_REQUEST_20261106.md)

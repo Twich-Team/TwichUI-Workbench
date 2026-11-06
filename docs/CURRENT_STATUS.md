@@ -2,8 +2,8 @@
 
 Last updated November 6, 2026 (Mountain time).
 
-- **Running app.** The everyday app still serves the earlier build. The installed addon is unchanged.
-- **Finished result.** One real Qwen task completed from request through a checked local result in the reviewed simpler screens. It added a test that expects full opacity exactly at the map-fade threshold. The checked patch is saved locally.
-- **Verification.** All independent checks passed, including all 167 existing addon test groups. The earlier build passed 107 Chromium and 10 visual cases. The new review link and timing passed focused offline checks and the live trial.
-- **Closeout.** Execution services closed and permission was withdrawn. Normal authenticated model access was restored and the temporary credential was rejected. A read-only result view was scheduled to close at 12:59:09 p.m. MST.
-- **Decision needed.** Installing the verified Workbench build into the everyday app needs separate owner approval and a checked installation and rollback procedure.
+- The normal app at 127.0.0.1:9487 still serves the earlier demo build. The everyday candidate is staged.
+- One real Qwen task finished in the isolated app. It produced a checked map-fade test patch and restored normal model access. Zero fresh tasks have completed from request to result in the normal app.
+- Offline, two different requests reached saved checked results through the simpler screens. Desktop and phone checks passed. The backup and rollback rehearsal preserved the existing history.
+- The proposed first release adds coverage to supported existing Lua tests and keeps results local. Bug fixes, new features, inspections, simulator work, Codex and draft PR delivery remain unfinished for everyday use.
+- Next, install the candidate at the normal address and complete a fresh map-tile test there. Owner approval is needed for the limited release, service switch, verified history copy, one evidence archive, one bounded Qwen run and rollback if needed.

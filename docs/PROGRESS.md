@@ -1,3 +1,32 @@
+## Everyday local operation preparation — November 6, 2026
+
+Followed the Project Working Philosophy by carrying the working path
+through ordinary intake, repeat use, browser review, deployment staging
+and rollback rehearsal. Kept development in a separate worktree because
+the older live process loads from the original checkout.
+
+- Reused the intake, job, model attempt, scope decision and run-budget
+  owners. The ordinary planning receipt binds the submitted request and
+  its 30-minute expiry. One claim is allowed. Local Qwen is the only
+  operational model for this slice. The worker denies publication and
+  legacy prebuilt execution offers in everyday mode.
+- The installation policy binds the database inode and counted evidence
+  and scratch locations. A 72 MiB reserve gates new work. A separate
+  watcher stops owned work before settlement headroom runs out. Certified
+  output remains usable after an owned scratch copy is cleaned.
+- Existing expiry, replay, frozen output, model isolation and restoration
+  gates remain. The restoration watcher has a dedicated user service
+  for worker restart isolation. Restart preserves saved claims and
+  suppresses repeat generation. If restoration is uncertain, the
+  application keeps the lane held and retains its private recovery state.
+- The saved store opened from the independently checked backup on the
+  old and candidate builds. No schema change or in-place data transfer
+  is needed. The old store remains the rollback source.
+- Staged candidate `0a763ab` and the sealed procedure are recorded in
+  [the combined request](EVERYDAY_INSTALL_APPROVAL_20261106.md). Tests
+  used disposable stores and scripted model transport. Live installation,
+  the proposed storage batch and the fresh installed task are pending.
+
 ## November 6, 2026 — real map-fade trial completed through the simpler screens
 
 Candidate `fb1830e` passed the coordinated live trial. The owner submitted
