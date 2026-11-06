@@ -1,3 +1,76 @@
+# Real Qwen map-fade trial held before the local run — November 6, 2026 Mountain time
+
+The owner approved the exact [verified trial request](VERIFIED_MAP_FADE_TRIAL_REQUEST_20261106.md)
+from checkpoint `a040561`, SHA-256
+`39f44da7c60b446282225e89bed1bb535381b810c5fdbae169eb1883a840a399`.
+The staged candidate was `17ad1ac4658b26dcb3eba3fa44891a53d8310c97`.
+The reviewed assets, 318 frozen inputs, and offline proof were verified.
+Both protected addon checkouts were clean at `1caf530212bbc6eaf37e41d668902a391aa936c1`.
+The original test lacked the threshold assertion. The historical result
+was kept out of the fresh plan.
+
+The archive ran from 11:08:50 to 11:11:41 a.m. MST. Only the 22 named
+closed folders, comprising 197 files and 46,009,747 bytes, were copied.
+Their hashes, paths, modes, and timestamps matched in the private archive
+and separate restore. All original-path lookups passed before and after
+matching-original removal. Same-user process and lsof checks found no
+references, with documented kernel visibility limits for the existing
+systemd, PAM, and SSH session managers. The
+[archive receipt](../.local/runs/workflow-verified-map-fade-20261106-archive/archive-verification.json)
+records both private destinations and fingerprints. The
+[lookup index](../artifacts/archive-index/workflow-verified-map-fade-20261106.json)
+preserves recovery from the original paths.
+
+The owner confirmed browser access before the trial started at
+11:12:45 a.m. MST. The browser-action cutoff was 11:45:45 a.m. and the
+outer deadline was 12:57:45 p.m. The owner submitted through Workbench at
+11:15:14 a.m. and approved the fresh plan at 11:21:44 a.m. The
+[Qwen plan](../artifacts/runs/workflow-owner-acceptance-20261106-live/browser-proposal.json)
+proposed adding only regression assertions to `tests/test_map_viewmath_step.lua`
+for `Fade(2,2,2)`, with first result 1 and rejection of 0. Qwen used one
+planning generation with 3,454 input and 322 generated tokens.
+
+Independent preparation checked the original test, a known-good assertion,
+an always-passing assertion, and a wrong assertion. The original and both
+negative controls failed the new behavior check as expected, and the
+known-good assertion passed. Syntax, the existing focused test, and all
+167 existing suite groups passed for each control. Pure recertification
+after shutdown matched the worker's original certificate. The resulting
+[local-only offer](../artifacts/runs/workflow-owner-acceptance-20261106-live/certified-offer.json)
+was ready at 11:37:59 a.m. The separate local-run approval was absent
+at the 11:45:45 a.m. cutoff. The launcher held the task and closed at
+11:45:46 a.m. No implementation session, probe, lease, grant, patch,
+publication, or PR preparation was created. This trial is closed.
+
+The [terminal audit](../artifacts/runs/workflow-owner-acceptance-20261106-live/terminal-verification.json)
+verified the closed database, 222 sealed historical files, and both
+protected addon checkouts. Normal authenticated model access was confirmed
+by the successful authenticated planning request and the post-closeout
+match of the original running process, credential, configuration, and
+permissions. No credential switch occurred, so a restoration restart and
+temporary-credential rejection test were unnecessary. The isolated worker
+and write API stopped, their unit and cgroup settled, and the matching
+runtime capability was withdrawn. Ports 9487, 8765, and 8080 kept their
+original listeners. Port 9187 closed. Earlier simulated previews on
+9188 and 9189 expired on schedule. The everyday app and installed addon
+were left in place.
+
+The [closeout](../artifacts/runs/workflow-owner-acceptance-20261106-live/closeout-safeguards.json)
+seals the available receipts and records the original retry trace hash.
+Trial evidence grew by 1,482,478 bytes (1.41 MiB), including receipts.
+Aggregate headroom was 89,308,916 bytes (85.17 MiB), minimum physical
+free space was 28,950,048,768 bytes, and peak measured scratch was
+176,518,565 bytes. Both 72 MiB readiness gates passed. The launcher
+retained the private, inactive preparation checkout for review. No
+result preview was opened. No frozen inputs were edited.
+
+The complete offline acceptance for the reviewed build still applies.
+The real trial proved fresh planning, owner plan approval, and the checked
+offer through those screens. Zero real tasks have reached a finished
+result through the reviewed simpler screens. A further live attempt and
+installing Workbench into the everyday app each require separate owner
+authorization.
+
 # Offline acceptance completed for the reviewed workflow — November 6, 2026 Mountain time
 
 The fresh 30-minute offline window opened at 10:52:53 a.m. MST with an

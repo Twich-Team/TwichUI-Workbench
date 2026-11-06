@@ -2,9 +2,9 @@
 
 Last updated November 6, 2026 (Mountain time).
 
-- **Running app.** The everyday app still serves the earlier build. The simulated preview on port 9189 is scheduled to close at about 11:33 a.m. MST on November 6.
-- **Owner review.** The owner accepted the current usability direction. The reviewed candidate passed offline browser and visual verification.
-- **Finished results.** One real addon task and one synthetic task reached checked local results with Qwen through earlier screens. Zero real-model tasks have completed through the reviewed simpler screens.
-- **Offline acceptance.** All 107 Chromium cases and 10 visual cases passed. Both repaired cases passed, all remaining cases ran, and all 12 screenshot references matched without updates.
-- **Closeout.** New evidence peaked at about 13.5 MiB, within the 24 MiB allowance and the evidence reserves. Test services closed and no model requests were made.
-- **Decision needed.** The proposed real trial needs fresh authorization for verified archival and one isolated map-fade task. Workbench installation and applying any addon patch are separate decisions.
+- **Running app.** The everyday app still serves the earlier build. The installed addon was left in place and the temporary previews are closed.
+- **Offline acceptance.** The owner-reviewed build passed all 107 Chromium cases and 10 visual cases. All 12 desktop and phone screenshot references matched.
+- **Real-model trial.** The owner submitted the map-fade task and approved a fresh Qwen plan. Independent checks confirmed the offer for a local test-only change. The browser window closed before the separate local-run approval, so implementation never started and no patch was produced.
+- **Finished results.** Earlier screens completed one real addon task and one synthetic task with Qwen. Zero real-model tasks have completed from request to finished result through the reviewed simpler screens.
+- **Closeout.** The 22 approved evidence folders were archived and verified restorable. Trial services closed, normal authenticated model access was verified, and no temporary credential or execution grant was issued.
+- **Decision needed.** To demonstrate a finished result through the simpler screens, a new bounded trial would need separate authorization. Installing the verified Workbench build is a separate owner decision.

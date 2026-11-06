@@ -1,3 +1,21 @@
+## November 6, 2026 — real Qwen plan and checked offer, trial closed at the cutoff
+
+Verified and independently restored the 22 approved archive folders.
+The owner submitted the map-fade task and approved one fresh Qwen plan
+through the reviewed candidate. The original, known-good, always-passing,
+and wrong-assertion checks certified the one-file local offer. The
+33-minute browser cutoff passed without the separate local-run approval.
+The trial closed before implementation. No probe, lease, execution
+grant, addon patch, or publication was created.
+
+The terminal audit verified normal authenticated model access, the
+original listeners, the withdrawn runtime capability, closed isolated
+services, and preserved historical evidence. The planning call used
+3,454 input and 322 generated tokens. Trial evidence grew by 1.41 MiB
+with 85.17 MiB of aggregate headroom at closeout. The accepted product
+candidate and offline test results are unchanged. See CONTINUATION for
+the exact receipts.
+
 ## November 6, 2026 — complete offline Chromium and visual acceptance
 
 Both repaired cases and all 23 previously unrun Chromium cases passed.
