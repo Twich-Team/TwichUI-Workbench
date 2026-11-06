@@ -46,7 +46,7 @@ class Scenario(Data):
     id: Annotated[str, Field(pattern=r'^[a-z][a-z0-9-]{0,47}$')]
     acceptance_index: Annotated[int, Field(ge=0, le=7)]
     test_path: TestPath
-    fixture: Literal['module', 'client']
+    fixture: Literal['module', 'client', 'loaded-client']
     source_paths: Annotated[list[LuaPath], Field(min_length=1, max_length=4)]
     # Module fixture: the first source file returns a function or a table.
     target: Annotated[list[Key], Field(max_length=8)] = []
@@ -81,10 +81,14 @@ class Scenario(Data):
             raise ValueError('Unsafe fixture path')
         if any('..' in Path(p).parts for p in self.source_paths):
             raise ValueError('Source traversal refused')
-        if self.fixture == 'client' and not self.target:
+        if self.fixture in ('client', 'loaded-client') and not self.target:
             raise ValueError('A client scenario needs an exported target function')
-        if self.fixture == 'module' and (self.setup or self.observe.path):
-            raise ValueError('Module scenarios support a scalar first return only')
+        if self.fixture in ('module', 'loaded-client') and (self.setup or self.observe.path):
+            label = 'Module' if self.fixture == 'module' else 'Loaded-client'
+            raise ValueError(f'{label} scenarios support a scalar first return only')
+        if self.fixture == 'loaded-client' and (len(self.source_paths) != 1
+                or self.addons != ['!!!TwichUI'] or not self.source_paths[0].startswith('!!!TwichUI/')):
+            raise ValueError('A loaded client needs one core addon source')
         if self.method and not self.target:
             raise ValueError('A method needs a receiver path')
         if self.observe.expected == self.incorrect:
@@ -211,8 +215,12 @@ def addition(scenarios, *, assert_behavior):
     lines = ['\n-- Generated behavioral control: data compiler, not a hand-authored solution.']
     for s in scenarios:
         lines.append('do')
-        if s.fixture == 'client':
+        if s.fixture in ('client', 'loaded-client'):
             lines += ['  dofile(TESTS .. "harness.lua")', f'  local c = MakeClient({lua(s.name)}, {lua(s.addons)})']
+            if s.fixture == 'loaded-client':
+                relative = s.source_paths[0].removeprefix('!!!TwichUI/')
+                lines += [f'  local chunk = assert(loadfile(ROOT .. {lua(relative)}))',
+                          '  setfenv(chunk, c)', f'  chunk({lua(s.addons[0])}, {{}})']
         else:
             lines.append(f'  local c = dofile({lua("../"+s.source_paths[0])})')
         for step in s.setup:

@@ -4,7 +4,7 @@
 -- verdict/exit primitives or inspect its scenario/wrapper upvalues. OS confinement
 -- and the unchanged ordinary suite remain separate Runtime requirements.
 local assert, error, type, rawget, pairs, ipairs, select, unpack = assert, error, type, rawget, pairs, ipairs, select, unpack
-local pcall, setfenv, getmetatable, loadfile, loadstring = pcall, setfenv, getmetatable, loadfile, loadstring
+local pcall, getfenv, setfenv, getmetatable, loadfile, loadstring = pcall, getfenv, setfenv, getmetatable, loadfile, loadstring
 local print, exit, match, max = print, os.exit, string.match, math.max
 local function copy(source)
   local result = {}
@@ -17,6 +17,7 @@ local safe = {next=next, tostring=tostring, tonumber=tonumber, rawset=rawset, ra
   setfenv=setfenv, print=print, ROOT=ROOT, REPO=REPO, TESTS=TESTS}
 local readfile = io.open
 local math_source, string_source, table_source, bit_source = copy(math), copy(string), copy(table), copy(require('bit'))
+local coroutine_source = copy(coroutine)
 string_source.dump = nil
 local os_source = {clock=os.clock, time=os.time, date=os.date, difftime=os.difftime}
 local function pack(...) return {n = select('#', ...), ...} end
@@ -45,6 +46,16 @@ end
 local function environment(s, mutate)
   local env = copy(safe)
   env.math, env.string, env.table, env.os = copy(math_source), copy(string_source), copy(table_source), copy(os_source)
+  if s.fixture == 'loaded-client' then
+    env.coroutine = copy(coroutine_source)
+    env.bit = copy(bit_source)
+    -- The bundled media library asks for the thread globals. Return the
+    -- isolated test globals and keep stack/function inspection unavailable.
+    env.getfenv = function(level)
+      if level ~= 0 then error('scenario adapter exposes only the test globals') end
+      return env
+    end
+  end
   env.getmetatable = function(value)
     if type(value) == 'string' then return {__index=env.string} end
     return getmetatable(value)
@@ -56,7 +67,7 @@ local function environment(s, mutate)
   env.os.exit = function() error('scenario test exited before its expectations could be checked') end
   env.require = function(name)
     if name ~= 'bit' then error('scenario adapter supports only the existing bit module') end
-    return copy(bit_source)
+    return env.bit or copy(bit_source)
   end
   env._G = env
   local hits, failed_assertion = 0, false
@@ -104,10 +115,26 @@ local function environment(s, mutate)
     end
     return result
   end
+  local client_source = s.fixture == 'loaded-client' and ROOT .. match(s.source_paths[1], '^[^/]+/(.+)$')
   env.loadfile = function(path)
     local chunk, reason = loadfile(path)
-    if chunk then setfenv(chunk, env) end
-    return chunk, reason
+    if not chunk then return nil, reason end
+    if mutate and path == client_source then
+      -- The test sets the chunk's client environment before calling it. Install
+      -- the fault only after the real chunk has published its functions there.
+      local proxy
+      local function loaded(client, ...)
+        wrap(client)
+        return ...
+      end
+      proxy = function(...)
+        local client = getfenv(proxy)
+        setfenv(chunk, client)
+        return loaded(client, chunk(...))
+      end
+      return setfenv(proxy, env)
+    end
+    return setfenv(chunk, env), reason
   end
   env.loadstring = function(text, name)
     local chunk, reason = loadstring(text, name)
@@ -123,6 +150,11 @@ local function exercise(s)
   else
     env.dofile((TESTS or './') .. 'harness.lua')
     root = env.MakeClient(s.name, s.addons)
+    if s.fixture == 'loaded-client' then
+      local chunk = assert(env.loadfile(ROOT .. match(s.source_paths[1], '^[^/]+/(.+)$')))
+      setfenv(chunk, root)
+      chunk(s.addons[1], {})
+    end
   end
   for _, step in ipairs(s.setup) do
     if step.op == 'set' then

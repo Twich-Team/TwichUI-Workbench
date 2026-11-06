@@ -31,12 +31,31 @@ def run_worker():
     from local_browser_fixture import advance_local
 
     install_offline_guard()
+    native = os.environ["WB_REHEARSAL_OUTCOME"] == "addon"
+    # Only the supported rehearsal runs the native Lua suite, in its own
+    # delegated worker group. Transport is scripted in either mode.
+    if native:
+        group = Path("/sys/fs/cgroup" + Path("/proc/self/cgroup").read_text().strip().split("::", 1)[1])
+        assert group.name == os.environ["WB_REHEARSAL_UNIT"] + ".service"
+        assert group.stat().st_uid == os.getuid()
+        main = group / "main"
+        main.mkdir()
+        (main / "cgroup.procs").write_text(str(os.getpid()))
+        (group / "cgroup.subtree_control").write_text("+memory +pids +cpu")
+        os.environ["WORKBENCH_CG_ROOT"] = str(group)
+        from workbench.real_confine import root
+        root()
     stopped = Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, lambda *_: stopped.set())
 
     def exact_example(value, packet):
         example, = packet["examples"]
+        if native:
+            expected = json.loads((evidence / "rehearsal-task.json").read_text())["scenario"]
+            value["draft"]["scenarios"] = [dict(expected, id="fade-threshold")]
+            assert example["args"] == expected["args"]
+            return
         assert example["args"] == [" ALICE "]
         value["draft"]["scenarios"][0]["args"] = example["args"]
 
@@ -83,15 +102,16 @@ def run_worker():
 
     planning_provider.LocalHTTP = NoWire
     planning_provider.local_slot = nullcontext
-    trusted_preparation.Runtime = ControlledPreparer
+    if not native:
+        trusted_preparation.Runtime = ControlledPreparer
     engine = engine_for()
     (evidence / "worker-ready").touch()
     while not stopped.is_set():
         if (evidence / "ingress-budget.json").is_file():
             # The existing offline transport/candidate fixture consumes the real
             # browser decision through worker ticks and verifies real Lua.
-            advance_local(engine, database, "wait", None, example=" ALICE ")
-            advance_local(engine, database, "pass", None, example=" ALICE ")
+            advance_local(engine, database, "wait", None, example=" ALICE ", native=native)
+            advance_local(engine, database, "pass", None, example=" ALICE ", native=native)
             stopped.wait(20)
             return
         if not (evidence / "certified-offer.json").exists():

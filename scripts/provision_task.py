@@ -3,7 +3,9 @@
 import json
 import os
 from pathlib import Path
+import signal
 import sys
+from threading import Event
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
@@ -12,6 +14,9 @@ from workbench.real_workspace import Runtime  # noqa: E402
 
 
 def main():
+    stopped = Event()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(sig, lambda *_: stopped.set())
     root = Path(sys.argv[1]).resolve()
     if not (
         (root.parent == ROOT / "artifacts/runs" and root.name.startswith("task-lease-"))
@@ -42,7 +47,7 @@ def main():
             sort_keys=True,
         ).encode(),
     )
-    provision(Runtime(root / "real-run"), json.loads((root / "template.json").read_text()))
+    provision(Runtime(root / "real-run", stop_event=stopped), json.loads((root / "template.json").read_text()))
 
 
 if __name__ == "__main__":

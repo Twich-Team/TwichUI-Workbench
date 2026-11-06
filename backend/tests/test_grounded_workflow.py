@@ -32,10 +32,39 @@ from test_regression_evidence import ControlledPreparer, approve
 from test_reviewed_offers import source, authority_counts
 from test_verification_profiles import PRODUCTION, TEST, git
 from workbench import verification_profiles as profiles
+from workbench import grounded_scenarios
 
 CLIENT_TEST = "tests/test_client.lua"
 FLOOR_TEST = "tests/test_floor.lua"
 FLOOR_SOURCE = "!!!TwichUI/floor.lua"
+
+
+def test_committed_client_chunk_requires_literal_load_and_matching_environment():
+    test = """-- A real harness loads the client first.
+dofile(TESTS .. "harness.lua")
+local client = MakeClient("Rich", {"!!!TwichUI"})
+local run = assert(loadfile(ROOT .. "map/ViewMath.lua")); setfenv(run, client); run("!!!TwichUI", {})
+"""
+    assert grounded_scenarios.client_chunk(test) == "!!!TwichUI/map/ViewMath.lua"
+    assert grounded_scenarios.client_chunk("--[=[\n" + test + "]=]") is None
+    assert grounded_scenarios.client_chunk("local text = [=[\n" + test + "]=]") is None
+    assert grounded_scenarios.client_chunk(test.replace('ROOT .. "map/ViewMath.lua"', "ROOT .. file")) is None
+    assert grounded_scenarios.client_chunk(test.replace("setfenv(run, client)", "setfenv(run, other)")) is None
+
+
+def test_client_chunk_exports_only_the_published_namespace():
+    source = """local addon = TwichUI
+local math = {}
+addon.MapViewMath = math
+function math.Fade(value, low, high) end
+function unrelated.Other() end
+"""
+    assert grounded_scenarios.chunk_operations("!!!TwichUI/map/ViewMath.lua", source) == [
+        dict(defined_in="!!!TwichUI/map/ViewMath.lua", target=["TwichUI", "MapViewMath", "Fade"],
+             method=False, parameters=["value", "low", "high"], variadic=False),
+    ]
+    assert grounded_scenarios.chunk_operations("!!!TwichUI/map/ViewMath.lua",
+                                              source.replace("addon.MapViewMath = math", "")) == []
 
 
 def controlled_source(tmp_path):
@@ -756,7 +785,9 @@ def test_existing_local_adapter_uses_scenario_schema_and_instructions_with_contr
             assert defs["ClarificationDraft"]["properties"]["scenarios"]["maxItems"] == 0
             assert defs["ClarificationDraft"]["properties"]["unresolved"]["minItems"] == 1
             variants = defs["GroundedDraft"]["properties"]["scenarios"]["items"]["oneOf"]
-            assert {v["$ref"] for v in variants} == {"#/$defs/ModuleScenario", "#/$defs/ClientScenario"}
+            assert {v["$ref"] for v in variants} == {
+                "#/$defs/ModuleScenario", "#/$defs/ClientScenario", "#/$defs/LoadedClientScenario"
+            }
             module = defs["ModuleScenario"]["properties"]
             assert module["fixture"]["const"] == "module"
             assert module["setup"]["maxItems"] == 0
@@ -767,6 +798,10 @@ def test_existing_local_adapter_uses_scenario_schema_and_instructions_with_contr
             assert client["target"]["minItems"] == 1 and "target" in defs["ClientScenario"]["required"]
             assert all("args" in defs[name]["required"] for name in ("ModuleScenario", "ClientScenario"))
             assert client["setup"]["maxItems"] > 0
+            loaded = defs["LoadedClientScenario"]["properties"]
+            assert loaded["fixture"]["const"] == "loaded-client"
+            assert loaded["setup"]["maxItems"] == 0 and loaded["target"]["minItems"] == 1
+            assert loaded["source_paths"]["minItems"] == loaded["source_paths"]["maxItems"] == 1
             assert defs["Observation"]["properties"]["path"]["maxItems"] > 0
             instructions = payload["messages"][0]["content"]
             assert (

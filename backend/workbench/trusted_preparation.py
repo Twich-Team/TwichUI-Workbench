@@ -86,7 +86,7 @@ def register(engine, ref, evidence_root, *, recovery_id=None):
     )
 
 
-def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=None, recovery=None):
+def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=None, recovery=None, stop_event=None):
     """Reusable offline bridge; no task-specific Lua/patch/registration code.
 
     The existing application worker supplies reviewed scenario data and private
@@ -120,7 +120,7 @@ def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=
     try:
         if validate_policy:
             validate_policy()
-        runtime = Runtime(root)
+        runtime = Runtime(root, stop_event=stop_event)
         task_session.provision(runtime, dict(scenario_preparation=prepared))
         if validate_policy:
             validate_policy()
@@ -379,7 +379,7 @@ def _hold(error):
     return dict(status='hold', message=str(detail)[:1600], execution_authorized=False)
 
 
-def process_one(engine):
+def process_one(engine, *, stop_event=None):
     """Dispatch from the existing job journal, with one durable external-work claim.
 
     Completed artifacts can reconcile after receipt loss. Uncertain interrupted
@@ -424,7 +424,7 @@ def process_one(engine):
             c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(status='completed' if result['status']=='prepared' else 'failed',
                 payload={**payload, 'preparation_result':result}, finished_at=intake.now(), message=result['message']))
             return True
-    result = _run_claim(engine, ref, claim, recovering)
+    result = _run_claim(engine, ref, claim, recovering, stop_event=stop_event)
     with write_transaction(engine) as c:
         current = intake.require(c, planning_jobs, job['id'])
         if current['payload'].get('preparation_claim') != claim:
@@ -441,7 +441,7 @@ def process_one(engine):
     return True
 
 
-def _run_claim(engine, ref, claim, reconciling, *, recovery=None):
+def _run_claim(engine, ref, claim, reconciling, *, recovery=None, stop_event=None):
     try:
         # Claim commits before any output/check process starts.
         def validate_policy():
@@ -457,7 +457,7 @@ def _run_claim(engine, ref, claim, reconciling, *, recovery=None):
         else:
             root.mkdir(mode=0o700)
             selected = prepare_regression(engine, ref, root, claim['identity'],
-                                          validate_policy=validate_policy, recovery=recovery)
+                                          validate_policy=validate_policy, recovery=recovery, stop_event=stop_event)
         result = dict(status='prepared', message='Reviewed scenarios independently checked; a certified run offer is ready for its separate budget review.',
             offer_id=selected['id'], review_binding=claim['review_binding'], execution_authorized=False)
     except SubprocessError:

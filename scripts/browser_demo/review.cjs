@@ -5,8 +5,9 @@ const fs = require('node:fs');
 const {join} = require('node:path');
 const [origin, evidence, mode, identity, expected] = process.argv.slice(2);
 
-async function ready(file) {
-  const end = Date.now() + 25000;
+const task = JSON.parse(fs.readFileSync(join(evidence,'rehearsal-task.json')));
+async function ready(file, timeout=25000) {
+  const end = Date.now() + timeout;
   while (Date.now() < end) {
     if (fs.existsSync(join(evidence,file))) return;
     await new Promise(resolve => setTimeout(resolve, 75));
@@ -25,14 +26,17 @@ async function ready(file) {
       await ready('owner-step-scope.json');
       const step = JSON.parse(fs.readFileSync(join(evidence,'owner-step-scope.json')));
       await page.goto(step.url);
+      await page.getByText('Expected result 1:',{exact:false}).click();
+      await page.screenshot({path:join(evidence,'proposal-1440.png')});
       await page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.').check();
       const scopeSaved = page.waitForResponse(r=>r.url().endsWith('/decisions')&&r.request().method()==='POST');
       await page.getByRole('button',{name:'Approve proposal',exact:true}).click();
       assert.equal((await scopeSaved).status(),200);
-      await ready('owner-step-budget.json');
+      await ready('owner-step-budget.json', task.scenario.fixture === 'loaded-client' ? 30*60*1000 : 25000);
       await page.reload();
       const offer=page.getByRole('region',{name:'Certified task run approval'});
       assert.equal(await offer.getByRole('radio',{name:'Local implementation only'}).isChecked(),true);
+      await offer.screenshot({path:join(evidence,'offer-1440.png')});
       await offer.getByRole('checkbox',{name:/I approve this exact task.*for local implementation/}).check();
       const budgetSaved=page.waitForResponse(r=>r.url().endsWith('/run-approval')&&r.request().method()==='POST');
       await offer.getByRole('button',{name:'Approve local implementation',exact:true}).dblclick();
@@ -42,9 +46,9 @@ async function ready(file) {
       for (const width of [1440,390]) {
         await page.setViewportSize({width,height:1000});
         await page.goto(url);
-        await page.getByRole('heading',{name:'Cover lowercase name normalization',exact:true,level:1}).waitFor();
+        await page.getByRole('heading',{name:task.intake.title,exact:true,level:1}).waitFor();
         const view=await page.request.get(origin+'/api/intake/'+identity).then(r=>r.json());
-        assert.equal(view.original.regression_tests.text_example.input,' ALICE ');
+        assert.equal(view.original.description,task.intake.description);
         if (mode==='checked') {
           await page.getByRole('link',{name:'Review changes and checks'}).click();
           await page.getByRole('heading',{name:'Real candidate checked'}).waitFor();

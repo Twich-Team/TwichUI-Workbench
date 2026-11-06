@@ -42,24 +42,28 @@ const [step, output, origin] = process.argv.slice(2);
       fs.writeFileSync(path.join(output,'browser-policy.json'),JSON.stringify(await result.json(),null,2)+'\n',{flag:'wx',mode:0o600});
     } else {
       assert.equal(step,'submit');
-      await page.goto(origin+'/intake/new?kind=feature');
-      await page.getByLabel('Title Required').fill('Cover lowercase name normalization');
-      await page.getByLabel('Description Required').fill('In the synthetic fixture, cover trimming surrounding spaces and lowercasing names.');
+      const {intake_payload: intake} = JSON.parse(fs.readFileSync(path.join(output,'ingress-phase.json'),'utf8'));
+      const regression = intake.regression_tests;
+      await page.goto(origin+'/intake/new?kind='+intake.kind);
+      await page.getByLabel('Title Required').fill(intake.title);
+      await page.getByLabel('Description Required').fill(intake.description);
       await page.getByLabel('Prepare a Lua regression-test task').check();
-      await page.getByLabel('Expected test results').fill('The first result for a spaced uppercase name is the trimmed lowercase name.');
-      await page.getByLabel('Existing test paths').fill('tests/test_normalize.lua');
-      await page.getByLabel('Add a text example for the first expected result').check();
-      await page.getByLabel('Example input',{exact:true}).fill(' ALICE ');
-      await page.getByLabel('Expected example result',{exact:true}).fill('alice');
-      await page.getByLabel('Incorrect example result to reject',{exact:true}).fill('ALICE');
-      await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+      await page.getByLabel('Expected test results').fill(regression.acceptance.join('\n'));
+      await page.getByLabel('Existing test paths').fill(regression.test_paths.join('\n'));
+      if (regression.text_example) {
+        await page.getByLabel('Add a text example for the first expected result').check();
+        await page.getByLabel('Example input',{exact:true}).fill(regression.text_example.input);
+        await page.getByLabel('Expected example result',{exact:true}).fill(regression.text_example.expected);
+        await page.getByLabel('Incorrect example result to reject',{exact:true}).fill(regression.text_example.incorrect);
+      }
+      await page.getByLabel('Does this request change the interface?').selectOption(intake.visual_requirement);
       const response=page.waitForResponse(r=>r.url()===origin+writing[1]&&r.request().method()===writing[0]);
       await page.getByRole('button',{name:'Submit request',exact:true}).click();
       const result=await response;assert.equal(result.status(),200,await result.text());
-      const intake=await result.json();
+      const saved=await result.json();
       await page.getByText('Request received and saved.',{exact:false}).waitFor();
-      assert.equal(new URL(page.url()).pathname,'/intake/'+intake.id);
-      fs.writeFileSync(path.join(output,'browser-intake.json'),JSON.stringify({id:intake.id,url:origin+'/intake/'+intake.id},null,2)+'\n',{flag:'wx',mode:0o600});
+      assert.equal(new URL(page.url()).pathname,'/intake/'+saved.id);
+      fs.writeFileSync(path.join(output,'browser-intake.json'),JSON.stringify({id:saved.id,url:origin+'/intake/'+saved.id},null,2)+'\n',{flag:'wx',mode:0o600});
       await page.screenshot({path:path.join(output,'browser-submitted.png')});
     }
   } finally {

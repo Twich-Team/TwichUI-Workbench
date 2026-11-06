@@ -337,6 +337,7 @@ class Runtime:
             verification = VerificationProcess(tuple(argv), str(self.workspace))
         result = confine.run(argv, str(cwd), min(timeout, left), ro=[str(self.workspace), *map(str, ro)],
                            env={'PATH': '/usr/bin:/bin', 'HOME': '/nonexistent', 'LANG': 'C.UTF-8'},
+                           stop_event=self.stop_event,
                            private_loopback=private_loopback, **({'verification':verification} if verification else {}))
         result['network_mode'] = 'private-loopback' if private_loopback else 'denied'
         result['command'] = argv

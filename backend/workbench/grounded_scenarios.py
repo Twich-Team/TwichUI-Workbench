@@ -36,12 +36,15 @@ class ModuleObservation(behavior.Observation):
     path: Annotated[list[behavior.Key], Field(max_length=0)] = []
 
 
-class ModuleScenario(behavior.Scenario):
-    fixture: Literal["module"]
+class ScalarReturnScenario(behavior.Scenario):
     args: Arguments
     source_paths: Annotated[list[behavior.LuaPath], Field(min_length=1, max_length=1)]
     setup: Annotated[list[behavior.Setup], Field(max_length=0)] = []
     observe: ModuleObservation
+
+
+class ModuleScenario(ScalarReturnScenario):
+    fixture: Literal["module"]
 
 
 class ClientScenario(behavior.Scenario):
@@ -50,11 +53,16 @@ class ClientScenario(behavior.Scenario):
     target: behavior.Keys
 
 
+class LoadedClientScenario(ScalarReturnScenario):
+    fixture: Literal["loaded-client"]
+    target: behavior.Keys
+
+
 class GroundedDraft(behavior.Data):
     # Expose existing compiler and mapping constraints to structured generation.
     # Reviewed/stored drafts keep the shared scenario representation.
     scenarios: Annotated[
-        list[Annotated[ModuleScenario | ClientScenario, Field(discriminator="fixture")]],
+        list[Annotated[ModuleScenario | ClientScenario | LoadedClientScenario, Field(discriminator="fixture")]],
         Field(min_length=1, max_length=3),
     ]
     unresolved: Annotated[list[behavior.Question], Field(max_length=0)] = []
@@ -81,11 +89,18 @@ def context(original, feedback, contract, policy):
     selected = [(e["path"], e["git_blob"]) for e in contract["evidence"]]
     framework = {path: preparation.blob(root, oid) for path, oid in selected}
     harness = framework["tests/harness.lua"].decode()
+    loaded = {}
     references = set()
     for path in paths:
         test = framework[path].decode()
-        references.update(loaders(test))
-        if uses_client(test, harness):
+        literal = loaders(test)
+        if len(paths) == 1 and not literal and uses_client(test, harness):
+            if source := client_chunk(test):
+                loaded[path] = source
+        references.update(literal)
+        if path in loaded:
+            references.add(loaded[path])
+        elif uses_client(test, harness):
             references.update(loaders(harness))
     sources = committed_sources(root, base, references)
     selected += sources
@@ -94,14 +109,24 @@ def context(original, feedback, contract, policy):
     for path, oid in selected:
         raw = framework[path] if path in framework else preparation.blob(root, oid)
         total += len(raw)
-        if len(raw) > 12000 or total > 18000:
+        if not loaded and (len(raw) > 12000 or total > 18000):
             raise ValueError(
                 "Relevant committed source exceeds the scenario context bound; narrow the source/test selection."
             )
         evidence.append(
             dict(path=path, git_blob=oid, sha256=hashlib.sha256(raw).hexdigest(), text=raw.decode())
         )
-    bindings = fixture_bindings(paths, [path for path, _ in sources], evidence)
+    if loaded:
+        path, source = next(iter(loaded.items()))
+        module = next((e["text"] for e in evidence if e["path"] == source), "")
+        exports = chunk_operations(source, module)
+        bindings = [dict(test_path=path, fixture="loaded-client", source_paths=[source],
+                         observation="scalar first return", operations=exports)] if exports else []
+        # The planner needs the committed callable signatures and explicit examples.
+        # Whole client harnesses and unrelated source bodies consume the wire budget.
+        evidence = [{k: v for k, v in entry.items() if k != "text"} for entry in evidence]
+    else:
+        bindings = fixture_bindings(paths, [path for path, _ in sources], evidence)
     return dict(
         purpose="propose-regression-scenarios",
         original=original,
@@ -111,7 +136,7 @@ def context(original, feedback, contract, policy):
         writable_paths=paths,
         input_sha256=behavior.input_binding(original, feedback, base, paths),
         evidence=evidence,
-        evidence_sha256=digest(evidence),
+        evidence_sha256=digest(dict(files=evidence, bindings=bindings) if loaded else evidence),
         fixture_bindings=bindings,
         examples=concrete_examples(original, feedback),
         policy_sha256=digest(policy),
@@ -188,8 +213,8 @@ def require_plannable(packet):
         raise ScenarioInputRequired("Select one existing focused test for these behavioral examples.")
     if not packet["fixture_bindings"]:
         raise ValueError(
-            f"For {packet['writable_paths'][0]}, identify a literal module loader and exported operation "
-            "or an existing test that uses the harness client."
+            f"For {packet['writable_paths'][0]}, choose an existing test with a supported "
+            "module loader or harness client and a committed exported operation."
         )
     acceptance = packet["original"]["regression_tests"]["acceptance"]
     if len(acceptance) > 3:
@@ -259,6 +284,54 @@ def uses_client(test, harness):
 
 IDENTIFIER = r"[A-Za-z_]\w*"
 DIRECT_FUNCTION = re.compile(r"^\s*return\s+function\s*\(([^()]*)\)")
+
+
+def client_chunk(text):
+    """Recognize a literal ROOT load into the existing harness client."""
+    literals = []
+
+    def mask(token):
+        if token[0].startswith("--"):
+            return " "
+        literals.append(token[0][1:-1] if token[0][0] in "\"'" else None)
+        return f"@{len(literals) - 1}@"
+
+    match = re.match(
+        rf"\s*dofile\s*\(\s*TESTS\s*\.\.\s*@(\d+)@\s*\)\s*;?\s*"
+        rf"local\s+(?P<client>{IDENTIFIER})\s*=\s*MakeClient\s*\(\s*@\d+@\s*,\s*\{{\s*@(\d+)@\s*\}}\s*\)\s*;?\s*"
+        rf"local\s+(?P<chunk>{IDENTIFIER})\s*=\s*assert\s*\(\s*loadfile\s*\(\s*ROOT\s*\.\.\s*@(\d+)@\s*\)\s*\)\s*;?\s*"
+        r"setfenv\s*\(\s*(?P=chunk)\s*,\s*(?P=client)\s*\)\s*;?\s*"
+        r"(?P=chunk)\s*\(\s*@(\d+)@\s*,\s*\{\s*\}\s*\)",
+        LITERALS.sub(mask, text),
+    )
+    if not match:
+        return None
+    harness, client, source, addon = (literals[int(match[i])] for i in (1, 3, 5, 6))
+    if (harness == "harness.lua" and client == addon == "!!!TwichUI"
+            and source and re.fullmatch(r"[A-Za-z0-9_/-]+\.lua", source)
+            and not source.startswith("/")):
+        return "!!!TwichUI/" + source
+
+
+def chunk_operations(path, text):
+    # This subset requires an explicit namespace published in the client's
+    # globals. Function signatures are screened here and exercised in Lua.
+    match = re.match(
+        rf"\s*local\s+(?P<alias>{IDENTIFIER})\s*=\s*(?P<global_name>{IDENTIFIER})\s*"
+        rf"local\s+(?P<table>{IDENTIFIER})\s*=\s*\{{\s*\}}\s*"
+        rf"(?P=alias)\s*\.\s*(?P<namespace>{IDENTIFIER})\s*=\s*(?P=table)\b",
+        code(text),
+    )
+    if not match:
+        return []
+    prefix = [match["global_name"], match["namespace"]]
+    if any(key in behavior.FORBIDDEN or key.startswith("__") for key in prefix):
+        return []
+    return [
+        dict(op, target=prefix + op["target"])
+        for op in operations(path, text, match["table"])
+        if len(prefix) + len(op["target"]) <= 8
+    ]
 
 
 def operation(path, target, params, method=False):
@@ -376,7 +449,7 @@ def validate_generation(draft, packet):
 
 
 def validate_mapping(draft, packet):
-    files = {e["path"]: e["text"] for e in packet["evidence"]}
+    files = {e["path"]: e.get("text", "") for e in packet["evidence"]}
     for s in draft.scenarios:
         if s.test_path not in packet["writable_paths"] or any(
             p not in files for p in s.source_paths
@@ -387,7 +460,11 @@ def validate_mapping(draft, packet):
         test = files[s.test_path]
         source = "\n".join(files[p] for p in s.source_paths)
         symbols = code(source)
-        if s.fixture == "module":
+        if s.fixture == "loaded-client":
+            if s.addons != ["!!!TwichUI"]:
+                raise ValueError(f"Example {s.id}: use the addon loaded by the committed client test.")
+            # validate_generation requires an exact committed callable binding.
+        elif s.fixture == "module":
             if len(s.source_paths) != 1 or s.source_paths[0] not in loaders(test):
                 raise ValueError(
                     f"Example {s.id}: the selected test does not map to this module source; clarify the fixture mapping."

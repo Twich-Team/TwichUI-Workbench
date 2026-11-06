@@ -106,7 +106,7 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
         or real_execution.process_one(engine, runtime=runtime, stop_event=stop_event)
         or planning_worker.apply_one(engine)
         or planning_worker.process_one(engine, stop_event=stop_event, adapter=planning_adapter)
-        or trusted_preparation.process_one(engine)
+        or trusted_preparation.process_one(engine, stop_event=stop_event)
     )
 
 

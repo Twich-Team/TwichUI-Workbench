@@ -244,6 +244,8 @@ def prepare(runtime, control_patches):
                                    private_loopback=i == len(commands)-1)
             checks.append(result)
             durable(folder / f'check-{i:02}.json', json.dumps(result, sort_keys=True).encode())
+            if result['status'] == 'canceled':
+                raise ValueError('Worker stopped during independent preparation. Partial checks were retained.')
         if tree(runtime.workspace) != current or binding(runtime) != bundle['binding']:
             raise ValueError('Control inputs changed during checks')
         record = dict(tree=current, patch_sha256=sha(patch.encode()), checks=checks)

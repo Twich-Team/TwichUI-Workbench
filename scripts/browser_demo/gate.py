@@ -20,6 +20,10 @@ INTAKE = dict(kind="feature", title=TITLE,
     regression_tests=dict(test_paths=[TARGET],
         acceptance=["The first result for a spaced uppercase name is the trimmed lowercase name."],
         text_example=dict(input=" ALICE ", expected="alice", incorrect="ALICE")))
+SYNTHETIC_TASK = dict(base=BASE, intake=INTAKE, scenario=dict(
+    args=[" ALICE "], observe=dict(path=[], expected="alice"), incorrect="ALICE",
+    fixture="module", target=[], method=False, setup=[], addons=["!!!TwichUI"],
+    source_paths=[SOURCE], test_path=TARGET, acceptance_index=0))
 
 class SingleDemo:
     def __init__(self, app, evidence):
@@ -47,7 +51,7 @@ class SingleDemo:
         if state == "submit" and method == "POST" and path == "/api/intake":
             body = IntakeInput.model_validate(raw).model_dump(mode="json")
             body.pop("request_id")
-            return body == INTAKE
+            return body == phase["intake_payload"]
         root = "/api/intake/" + phase.get("intake", "")
         if state == "scope" and method == "POST" and path == root + "/decisions":
             body = ProposalDecisionInput.model_validate(raw)

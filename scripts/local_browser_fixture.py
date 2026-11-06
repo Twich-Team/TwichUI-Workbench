@@ -13,10 +13,10 @@ from workbench.db import real_execution_grants, real_execution_requests, real_pu
 from workbench.real_workspace import durable
 
 
-def advance_local(engine, database, outcome, planner, *, example="  ALICE "):
+def advance_local(engine, database, outcome, planner, *, example="  ALICE ", native=False):
     from test_regression_evidence import ControlledPreparer
     from test_real_transport import final_response, scripted_http, tool_response
-    from test_verification_profiles import PRODUCTION, TEST
+    from test_verification_profiles import TEST
 
     install_offline_guard()
     if outcome == 'wait':
@@ -30,10 +30,10 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE "):
 
     original = task_session.process_one
     sandbox = database.parent
-    scratch = sandbox / 'implementation-scratch'
+    scratch = Path(tempfile.gettempdir() if native else sandbox) / 'implementation-scratch'
     scratch.mkdir(mode=0o700, exist_ok=True)
 
-    class SimulatedRuntime(ControlledPreparer):
+    class SimulatedRuntime(real_workspace.Runtime if native else ControlledPreparer):
         def preflight(self):
             # Real preparation checks, with the service/auth boundary simulated.
             return self.static_preflight()
@@ -51,6 +51,16 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE "):
         def scripted_edit(body):
             rendered = json.loads(body['messages'][1]['content'].split('\n', 1)[1])
             scenario, = rendered['examples']
+            if native:
+                # This fixture sends a generated positive control through the
+                # implementation parser. It is never supplied to a live model.
+                from workbench.regression_evidence import compile_plan
+                prepared = runtime.workflow_task['proposal_review']['task_contract']['behavioral_evidence']
+                compiled = compile_plan(prepared)
+                assert compiled['focused_test'] == test and scenario['source_paths'] == sources
+                old = (runtime.workspace / test).read_text()
+                addition = compiled['additions']['known-good-oracle-control']
+                return tool_response([('replace_text', dict(path=test, old=old, new=old + addition))])
             assert (scenario['call_args'], scenario['expected_observation'],
                     scenario['incorrect_observation_for_same_call']) == ([example], 'alice', 'ALICE')
             old = (runtime.workspace / TEST).read_text()
@@ -58,7 +68,9 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE "):
             assertion = f"assert(normalize({json.dumps(scenario['call_args'][0])}) == {json.dumps(expected)})\n"
             return tool_response([('replace_text', dict(path=TEST, old=old, new=old + assertion))])
 
-        read = tool_response([('read_file', dict(path=TEST)), ('read_file', dict(path=PRODUCTION))])
+        test, sources = runtime.recipe['focused_test'], [
+            path for path in runtime.recipe['read_paths'] if path != runtime.recipe['focused_test']]
+        read = tool_response([('read_file', dict(path=path)) for path in (test, *sources)])
         check = tool_response([('run_check', dict(name='candidate'))])
         tape.steps = [read, scripted_edit, check, final_response()]
         if outcome == 'fail':
@@ -91,7 +103,8 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE "):
     with MonkeyPatch.context() as isolated:
         isolated.delenv('WORKBENCH_LOCAL_KEY', raising=False)
         isolated.setattr(tempfile, 'tempdir', str(scratch))
-        isolated.setattr(real_workspace.confine, 'root', lambda: str(sandbox / 'simulated-cgroup'))
+        if not native:
+            isolated.setattr(real_workspace.confine, 'root', lambda: str(sandbox / 'simulated-cgroup'))
         # Installed sampler, credential lease, and cgroup control remain out of this fixture.
         with (patch('runpy.run_path', return_value={'checked_limit': lambda _root: None}),
               patch.object(task_session, 'process_one', advance)):

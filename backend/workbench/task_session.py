@@ -369,15 +369,17 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
         )
         if prepare is provision and not ready_before:
             durable(root / "template.json", json.dumps(template, sort_keys=True).encode())
+            unit = "workbench-real-prepare-" + root.name
             command = delegated_command([
                 "--user",
-                "--unit=workbench-real-prepare-" + root.name,
+                "--unit=" + unit,
                 "--property=Delegate=yes",
                 "--property=MemoryMax=6G",
                 "--property=MemorySwapMax=0",
                 "--property=TasksMax=128",
                 "--property=CPUQuota=200%",
                 "--property=RuntimeMaxSec=2400",
+                "--property=TimeoutStopSec=15",
                 "--wait",
                 "--pipe",
             ], [
@@ -386,9 +388,23 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
                 str(root),
             ])
             with (root / "preparation-controller.log").open("xb") as log:
-                subprocess.run(
-                    command, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=2420
-                )
+                child = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT,
+                                         stdin=subprocess.DEVNULL)
+                preparation_end = time.monotonic() + 2420
+                while child.poll() is None:
+                    stopped = stop_event is not None and stop_event.wait(0.2)
+                    if stop_event is None:
+                        time.sleep(0.2)
+                    expired = (time.monotonic() >= preparation_end
+                               or datetime.now(timezone.utc) >= datetime.fromisoformat(config["deadline"]))
+                    if (stopped or expired) and child.poll() is None:
+                        subprocess.run(["/usr/bin/systemctl", "--user", "stop", unit + ".service"],
+                                       stdout=log, stderr=subprocess.STDOUT, check=True, timeout=20)
+                        child.wait(timeout=5)
+                        return finish(engine, config, "cancelled" if stopped else "expired",
+                                      "Stopped during readiness checks. Partial evidence is retained; no model started.")
+                if child.returncode:
+                    raise subprocess.CalledProcessError(child.returncode, command)
         elif prepare is not provision:
             prepare(runtime, template)
         if (root / "workflow-link.json").exists():

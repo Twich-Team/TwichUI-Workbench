@@ -208,6 +208,7 @@ class LocalProvider:
             'For a module, compare only the first return to the scalar observe.expected. '
             'Omit setup and observe.path or leave them empty. Module fixtures cannot observe fields or later return values. '
             'For fixture="client", use an exported target on the established harness client. '
+            'For fixture="loaded-client", use the callable published by the one bound chunk, with no setup or observe.path. '
             'Set addons to the addon directories of the selected sources. '
             'Its observe.path is empty for the first return or names a scalar field on the client. '
             'For ambiguous intent or behavior these fixtures cannot express, return specific unresolved questions only, with no scenarios. '

@@ -87,7 +87,8 @@ def _kill_and_wait(cg, wait=10.0):
 
 
 def run(
-    cmd, cwd, timeout, env=None, ro=(), rw=(), net=False, label="cmd", limits=None, sandbox=True, private_loopback=False, verification=None
+    cmd, cwd, timeout, env=None, ro=(), rw=(), net=False, label="cmd", limits=None, sandbox=True,
+    private_loopback=False, verification=None, stop_event=None
 ):
     """-> dict(status, rc, out, secs, usage). status: pass|fail|timeout|oom|error. `sandbox=False` = cgroup limits + cleanup only (simulator).
     Output goes to files on a tmpfs charged to the command's own cgroup, so a runaway writer hits its memory limit, not the disk."""
@@ -207,6 +208,9 @@ def run(
         )
         try:
             while True:
+                if stop_event is not None and stop_event.is_set():
+                    status = "canceled"
+                    break
                 try:
                     rc = p.wait(timeout=min(.1, max(.001, timeout-(time.time()-t0))))
                     status = "pass" if rc == 0 else ("crash" if rc < 0 else "fail")
@@ -227,6 +231,14 @@ def run(
     finally:
         if marker is not None:
             marker.close()
+        if status == "canceled" and p is not None and p.poll() is None:
+            # The launcher could still be joining the group. Reap it before
+            # treating an empty group as proof there are no more descendants.
+            p.kill()
+            try:
+                p.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                pass
         clean = (
             _kill_and_wait(cg) if os.path.isdir(cg) else True
         )  # reaps every descendant, including daemonised ones

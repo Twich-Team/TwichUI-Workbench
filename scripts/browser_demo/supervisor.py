@@ -9,7 +9,8 @@ import time
 from urllib.error import HTTPError, URLError
 from uuid import uuid4
 
-from browser_demo.gate import BASE, INTAKE, MODEL, SOURCE, TARGET
+from browser_demo.gate import MODEL, SYNTHETIC_TASK
+from workbench.visual_scope import digest
 
 RESERVE = 72 << 20
 ACTIVE = {"pending", "active", "waiting_recovery"}
@@ -21,7 +22,8 @@ class RunHeld(RuntimeError):
 
 class Supervisor:
     def __init__(self, database, evidence, origin, request, room, owners_running, stopping,
-                 deadline, *, runtime_root, now=None, pause=None):
+                 deadline, *, runtime_root, now=None, pause=None, task=SYNTHETIC_TASK,
+                 budget_reserve_minutes=55):
         self.database = database
         self.evidence = evidence
         self.origin = origin
@@ -31,10 +33,11 @@ class Supervisor:
         self.stopping = stopping
         self.deadline = deadline
         self.runtime_root = runtime_root
-        self.cutoff = deadline - timedelta(minutes=55)
+        self.cutoff = deadline - timedelta(minutes=budget_reserve_minutes)
         self.now = now or (lambda: datetime.now(timezone.utc))
         self.pause = pause or time.sleep
         self.unavailable = set()
+        self.task = task
 
     def read(self, name):
         return json.loads((self.evidence / name).read_text())
@@ -150,21 +153,19 @@ class Supervisor:
                 or not (0 < prompt and 0 < generated <= 2600 and total == prompt + generated <= 32768)):
             raise RunHeld("The planning token record was missing, incomplete or outside the approved limits.")
         original = {k: v for k, v in view["original"].items() if k != "request_id"}
-        if original != INTAKE or view["decisions"] or view["tasks"] or len(view["proposals"]) != 1:
+        if original != self.task["intake"] or view["decisions"] or view["tasks"] or len(view["proposals"]) != 1:
             raise RunHeld("The saved request or decisions did not match the approved browser step.")
         proposal, = view["proposals"]
         contract = proposal["task_contract"]
         prepared = contract["behavioral_evidence"]
-        if (proposal["revision"] != 1 or proposal["approval_blockers"] or contract["resolved_base"] != BASE
-                or contract["writable_paths"] != [TARGET]
+        if (proposal["revision"] != 1 or proposal["approval_blockers"] or contract["resolved_base"] != self.task["base"]
+                or contract["writable_paths"] != self.task["intake"]["regression_tests"]["test_paths"]
                 or contract["scenario_grounding"]["model_selection"] != {"model": MODEL, "policy_revision": 1}
                 or prepared["origin"] != MODEL or prepared["holds"] or len(prepared["scenarios"]) != 1):
             raise RunHeld("The proposal did not match the approved scope and evidence.")
         scenario, = prepared["scenarios"]
-        if (scenario["args"] != [" ALICE "] or scenario["observe"] != {"path": [], "expected": "alice"}
-                or scenario["fixture"] != "module" or scenario["target"] or scenario["setup"]
-                or scenario["incorrect"] != "ALICE" or scenario["source_paths"] != [SOURCE]
-                or scenario["test_path"] != TARGET):
+        expected = self.task["scenario"]
+        if digest({key: scenario[key] for key in expected}) != digest(expected):
             raise RunHeld("The plan did not preserve the submitted example and file scope.")
         self.write("planning-usage.json", dict(values=values, model=MODEL, attempt_id=attempt["id"], requests=1))
         self.write("browser-proposal.json", view)
@@ -181,7 +182,7 @@ class Supervisor:
             start_worker()
             self.check(RESERVE, until=self.cutoff)
             self.write("pre-planning-capacity.json", self.room(RESERVE))
-            self.phase("submit")
+            self.phase("submit", intake_payload=self.task["intake"])
             browser("submit")
             self.phase("read-only")
             identity = self.read("browser-intake.json")["id"]
@@ -262,7 +263,8 @@ class Supervisor:
         budget = {k: v for k, v in offer["budget"].items() if k not in {"offer_id", "offer_fingerprint"}}
         if (not context["available"] or not context["runtime_ready"] or context["receipt"] is not None
                 or context["scope_approval_id"] != scope_id or context["scope"]["binding"] != proposal["binding"]
-                or offer["paths"] != [TARGET] or offer["base"] != BASE or budget != dict(
+                or offer["paths"] != self.task["intake"]["regression_tests"]["test_paths"]
+                or offer["base"] != self.task["base"] or budget != dict(
                     activate_once=True, overall_seconds=5400, implementation_attempts=1, turns=20,
                     generated_tokens=24000, response_tokens=2500, implementation_seconds=1200,
                     complete_run_seconds=2400, publication_seconds=900, publication="hold", fallback=False)):

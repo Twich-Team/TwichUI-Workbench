@@ -17,6 +17,7 @@ import time
 import runpy
 
 from browser_demo.launch import run_owned, utc_now
+from browser_demo.gate import SYNTHETIC_TASK
 from browser_demo.supervisor import RESERVE, RunHeld
 from project_env import ARTIFACT_LIMIT, artifact_bytes, require_ports
 
@@ -74,6 +75,8 @@ def owned_scratch(evidence):
 
 def run(manifest_path, evidence):
     manifest = json.loads(manifest_path.read_text())
+    task = manifest.get("task", SYNTHETIC_TASK)
+    require(task["base"] == manifest["fixture_base"], "The approved browser task has a different source base.")
     stage = manifest_path.parent.resolve()
     require(Path(__file__).resolve().parents[2] == stage, "Use the supervisor from the tested staged source.")
     require(evidence.is_dir() and evidence.stat().st_uid == os.getuid() and evidence.stat().st_mode & 0o077 == 0,
@@ -81,8 +84,12 @@ def run(manifest_path, evidence):
     require_ports([9187])
     window = json.loads((evidence / "window.json").read_text())
     start = datetime.fromisoformat(window["start"])
-    deadline = start + timedelta(minutes=90)
-    require(start <= utc_now() < deadline - timedelta(minutes=55), "The authorized setup window is unavailable.")
+    minutes = manifest.get("window_minutes", 90)
+    reserve = manifest.get("budget_reserve_minutes", 55)
+    require(type(minutes) is int and type(reserve) is int and 90 <= minutes <= 120
+            and 55 <= reserve < minutes, "The manifest does not specify a supported bounded window.")
+    deadline = start + timedelta(minutes=minutes)
+    require(start <= utc_now() < deadline - timedelta(minutes=reserve), "The authorized setup window is unavailable.")
     require(not (evidence / "ingress-phase.json").exists(), "This evidence directory already owns a run.")
     for name, checksum in manifest["sha256"].items():
         path = stage / name
@@ -170,6 +177,7 @@ def run(manifest_path, evidence):
             "/usr/bin/systemd-run", "--expand-environment=no", "--user", "--wait", "--pipe",
             "--collect", "--unit=" + unit, "--property=Delegate=yes", "--property=MemoryMax=6G",
             "--property=MemorySwapMax=0", "--property=CPUQuota=200%", "--property=TasksMax=128",
+            "--property=TimeoutStopSec=15",
             "--property=IPAddressDeny=any", "--property=IPAddressAllow=localhost",
             "--working-directory=" + str(stage), "/usr/bin/env", "-i",
             *(f"{key}={value}" for key, value in worker_env.items()), "/bin/bash",
@@ -184,7 +192,8 @@ def run(manifest_path, evidence):
 
         run_owned(stage=stage, database=database, evidence=evidence, port=9187, env=env, deadline=deadline,
                   room=room, stopping=lambda: stopped, activate=activate, worker_command=command,
-                  stop_worker=stop_worker, verify_worker=lambda _: (evidence / "worker-ready.txt").is_file())
+                  stop_worker=stop_worker, verify_worker=lambda _: (evidence / "worker-ready.txt").is_file(),
+                  task=task, budget_reserve_minutes=reserve)
 
 
 if __name__ == "__main__":
