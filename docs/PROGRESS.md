@@ -1,3 +1,14 @@
+## Release reconciliation and rollback readiness — November 6, 2026
+
+The A8 review is complete within offline scope. The release recommendation
+is to hold for A8, with a separate option to install interim local test
+coverage. Preserved both earlier bundles and history evidence. The reconciled
+bundle prepares rollback even when candidate setup cannot create its
+database. Launch definitions pass only named settings from a clean
+environment. Checked both rollout fixes offline without starting services.
+The browser and backend evidence carries forward because application bytes
+match. The combined record lists the fresh installation and live checks.
+
 ## A8 selection and fallback audit — November 6, 2026
 
 Followed the Project Working Philosophy by tracing the Models screen

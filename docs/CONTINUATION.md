@@ -1,3 +1,22 @@
+# Reconciled release decision after A8 — November 6, 2026 Mountain time
+
+Recommend holding installation for A8. The [reconciled package](EVERYDAY_INSTALL_APPROVAL_20261106.md)
+preserves an explicit Qwen-only interim option and lists the initial-product
+requirements still open, including deliberate Codex use, bounded fallback
+and authorized draft PR acceptance. The exact everyday task breadth remains
+an owner decision. No current message approved cutover or a live run.
+
+The release and rollback application bytes match the prior A8 package.
+Preserved the previous seal and staged a separate package. Its rollout files
+prepare rollback independently of candidate setup and pass an explicit
+environment to each launcher. Offline validation checked the new seal,
+all four unit definitions and launch arguments, and both rollback launch
+definitions against the disposable restored history with candidate setup
+absent. Verified the closed archive inventory without running the archive.
+The [acceptance record](EVERYDAY_INSTALL_APPROVAL_20261106.md) separates
+reusable evidence from the checks due at the actual cutover. The app and
+model listener ownership remain as recorded. No new provider calls were made.
+
 # A8 model-routing audit and offline readiness — November 6, 2026 Mountain time
 
 The [A8 readiness report](A8_MODEL_ROUTING_READINESS_20261106.md)
