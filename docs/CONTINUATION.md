@@ -1,3 +1,108 @@
+# Staging reliability repaired and verified offline — November 6, 2026 Mountain time
+
+Checkpoint `2912fb7` recorded a successful real-Qwen proposal, the
+first owner approval, and four preparation controls. Its 110 sealed
+entries still match. The stale template path survived because stage
+configuration was copied manually, startup checked only the store
+binding and file hashes, and the offline fixture created a separately
+rooted capability. The offer gate correctly refused activation.
+
+`browser_demo.prepare` builds from an exact Git revision and derives
+the store and backup, capability, template inventory, preparation
+policy, sampler proof copy, static output and worker paths from the
+new stage. The launcher takes the external approved manifest fingerprint.
+It checks the immutable files and uses the real runtime and preparation
+policy readers against the dormant configuration. That preflight uses a
+read-only store and publishes no active capability. Browser writes,
+the planning claim and controller entry recheck the stage and active
+capability. The worker still revalidates the saved proposal, budget,
+capability hash and independent checks where those inputs exist.
+The terminal verifier now uses the same frozen layout and checks the
+manifest-bound historical receipts.
+
+The actual launcher rejected a self-consistent stale template root
+before startup. The actual browser gate and controller rejected an
+input removed after preflight, with zero model or authority records.
+The test suite also covered missing, changed, mismatched and escaped
+inputs. The final source passed 1,018 backend and 24 frontend tests,
+with one backend skip.
+
+The retained real proposal was replayed with fresh scripted browser
+decisions in an isolated stage. The real worker reached both control
+rounds and the real controller preflight, then ran all four native
+candidate checks and all 167 suite groups with scripted model transport.
+The rehearsal used a worker cgroup name that the cleanup guard correctly
+refused. The existing recovery path settled the same sealed candidate
+after that cgroup closed, with no repeat request. The rehearsal-only
+cgroup naming was corrected. Two independently generated synthetic
+stages of the final build then reached both browser decisions, native
+checks and sealed results directly. The approval, capability, grant and
+token ledgers matched in all checked rehearsals. The map-fade result
+is offline simulation evidence and supplies no live approval or patch
+for installation.
+
+The [staging evidence](../artifacts/runs/staging-reliability.SErb6B/)
+includes the [native map-fade audit](../artifacts/runs/staging-reliability.SErb6B/final-addon/offline-result-audit.json),
+the [recovered browser review](../artifacts/runs/staging-reliability.SErb6B/final-addon/recovered-review/),
+the [first final-build stage](../artifacts/runs/staging-reliability.SErb6B/native-synthetic/offline-result-audit.json),
+the [second final-build stage](../artifacts/runs/staging-reliability.SErb6B/native-synthetic-second/offline-result-audit.json),
+and the [seal](../artifacts/runs/staging-reliability.SErb6B/SHA256.json).
+No model service call, live probe, lease or restart was made. The
+main app and addon were untouched.
+
+## Proposed one fresh live run
+
+Use build `1a2dbd9f8889c538be4d5ee4f900e528a3195988` in
+`/home/rich/TwichUI-Workbench/.local/staging-reliability.qo59J2/live-final`
+with manifest SHA-256
+`aa174f49950c08e5c112943dd87db42317b05eedb3e4072050febba2c7e307f3`.
+All 311 frozen inputs and both dormant policies passed read-only preflight.
+The terminal verifier rechecked all 680 protected prior entries. The
+empty store and backup share SHA-256
+`04906fe401b8c6309a617e33e2fde40d337b53bbc19ba2b69f29a15d4427d5ee`.
+Use the staged `python -m browser_demo.live` with the manifest path,
+the approved fingerprint and a fresh private evidence directory, after
+explicit owner approval and access-page confirmation. The same command
+accepts `--preflight` without a run directory for read-only preflight.
+Use the staged `scripts/browser_demo/verify_terminal.py` with the
+evidence directory and approved fingerprint at closeout.
+
+The approved task proposed is **Cover the map fade at a single
+threshold** at `1caf530212bbc6eaf37e41d668902a391aa936c1`.
+Read `!!!TwichUI/map/ViewMath.lua` and
+`tests/test_map_viewmath_step.lua`. Write additions only to that
+existing test in the isolated workspace. Test
+`TwichUI.MapViewMath.Fade(2,2,2)` for first return `1` and reject `0`.
+The earlier combined clock, budgets, browser decisions, confinement,
+checks and restoration terms still apply. The old authorization is
+spent. Hold before planning on any stage preflight failure. On planning
+validation failure, retain the actual evidence and stop with no retry.
+
+The proposed archive is `staging-reliability-preflight-20261106` under
+`/home/rich/.local/share/TwichUI-Workbench/evidence-archives`.
+The exact proposed targets are these closed generated directories.
+They contain 110 files and 16,175,759 logical bytes.
+
+- `artifacts/runs/m5-usage-demo-xqmers17/chromium-generated` (90 files, 5,470,516 bytes)
+- `artifacts/runs/browser-XtNDXm/results` (3 files, 2,543,712 bytes)
+- `artifacts/runs/browser-RNtVpX/results` (3 files, 2,546,614 bytes)
+- `artifacts/runs/browser-BBlThc/results` (8 files, 2,067,304 bytes)
+- `artifacts/runs/browser-JGKJXq/results` (4 files, 2,497,485 bytes)
+- `artifacts/runs/browser-xQ0VCT/report` (1 file, 522,596 bytes)
+- `artifacts/runs/browser-dPzbfC/report` (1 file, 527,532 bytes)
+
+Counted headroom was 62,839,966 bytes, projected to 79,015,725 bytes
+before archival receipts. Physical free space was 28,671,848,448 bytes.
+No archive was made. Check the [inventory](../artifacts/runs/staging-reliability.SErb6B/proposed-archive-inventory.json)
+and [capacity](../artifacts/runs/staging-reliability.SErb6B/live-final-capacity.json).
+Verify the archive, metadata, lookup and a separate restore before
+pruning matching originals. Remeasure after backups and receipts.
+The earlier read-only `workbench-addon-review-OdbU15.service` may still
+own port 9187. Verify ownership and retained evidence before stopping
+it. Hold for another owner. Preserve ports 9487 and 8765. Report the
+actual Mountain-time start, review cutoff and outer deadline at
+activation. Publication remains held.
+
 # Fresh real-addon planning passed, implementation held — November 6, 2026 Mountain time
 
 The owner approved one isolated local browser run of **Cover the map fade

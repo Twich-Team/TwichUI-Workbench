@@ -1,3 +1,16 @@
+## November 6, 2026 — staged execution preflight verified offline
+
+The stage builder now derives the store, policies, template root,
+proof and worker settings from the current stage. The actual
+capability reader rejects stale references before planning, and the
+browser and controller recheck immutable inputs at their gates.
+The real proposal replay reached both scripted approvals and passed
+all 167 native suite groups. Recovery settled the same candidate
+after a rehearsal-only cgroup name blocked cleanup. The corrected
+final build completed two fresh synthetic stages directly. The next
+live package is empty and frozen. Its capacity requires the named
+archive and a new owner authorization. No live implementation occurred.
+
 ## November 6, 2026 — real-addon planning passed and implementation held
 
 The real Qwen proposal matched the map-fade task, Rich approved it in
