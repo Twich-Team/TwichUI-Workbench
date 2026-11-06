@@ -17,6 +17,10 @@ async function ready(file, timeout=25000) {
 
 (async () => {
   const browser = await chromium.launch({args:['--disable-dev-shm-usage','--disable-background-networking']});
+  process.once('SIGTERM', async () => {
+    await browser.close();
+    process.exit(143);
+  });
   try {
     const context = await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
     await context.route('**/*',route=>new URL(route.request().url()).origin===origin?route.continue():route.abort());

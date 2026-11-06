@@ -213,7 +213,10 @@ def run(
                     break
                 try:
                     rc = p.wait(timeout=min(.1, max(.001, timeout-(time.time()-t0))))
-                    status = "pass" if rc == 0 else ("crash" if rc < 0 else "fail")
+                    if stop_event is not None and stop_event.is_set():
+                        status = "canceled"
+                    else:
+                        status = "pass" if rc == 0 else ("crash" if rc < 0 else "fail")
                     break
                 except subprocess.TimeoutExpired:
                     if sum(os.fstat(f.fileno()).st_size for f in (so, se)) > 8 << 20:

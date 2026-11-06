@@ -380,6 +380,7 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
                 "--property=CPUQuota=200%",
                 "--property=RuntimeMaxSec=2400",
                 "--property=TimeoutStopSec=15",
+                "--property=KillMode=mixed",
                 "--wait",
                 "--pipe",
             ], [
