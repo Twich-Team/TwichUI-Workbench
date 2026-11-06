@@ -1,10 +1,18 @@
 # TwichUI Workbench
 
+Read [PROJECT_WORKING_PHILOSOPHY.md](PROJECT_WORKING_PHILOSOPHY.md) before each
+assignment. It governs working methods and communication. Read
+[TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md](TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md)
+for current product requirements, release priorities and recorded owner
+decisions. Use [CONTINUATION](docs/CONTINUATION.md) and verified receipts for
+implementation status. Requirements and roadmap items do not authorize a run.
+
 Read shared guidance in this order:
 1. [EXECUTION](docs/EXECUTION.md): authorization, safety, limits and terminal states.
 2. [PLAN](docs/PLAN.md): one milestone plan; only the explicitly approved milestone.
 3. [PROGRESS](docs/PROGRESS.md): current facts, decisions, gaps and evidence.
-4. [PRODUCT_PRINCIPLES](docs/PRODUCT_PRINCIPLES.md), [DESIGN_SYSTEM](docs/DESIGN_SYSTEM.md).
+4. [PRODUCT_PRINCIPLES](docs/PRODUCT_PRINCIPLES.md) for earlier product direction and
+   [DESIGN_SYSTEM](docs/DESIGN_SYSTEM.md) for the implemented design system.
 5. [Ownership](docs/ownership.md) before any state transition or pilot adapter.
 
 React/TS/Vite → FastAPI → SQLAlchemy/SQLite, separate durable Python worker.

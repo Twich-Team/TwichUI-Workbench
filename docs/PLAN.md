@@ -49,9 +49,13 @@ reference checks; unchanged512MiB cap. After verified archival reserve64MiB for
 focused tests, actual desktop/phone inspection and handoff. Preserve prior incomplete
 browser acceptance and all protected evidence/recovery/runtime roots.
 
-One plan, one changing status record: `PROGRESS.md`. Product authority is
-`PRODUCT_PRINCIPLES.md`, supplied by the owner on 2026-11-03. Proposed product
-features do not grant execution, publication, capacity or deployment permission.
+One plan, one changing status record: `PROGRESS.md`. Current product authority
+is [Workbench requirements v1.1](../TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md).
+`PRODUCT_PRINCIPLES.md` preserves the earlier direction. The v1.1 initial
+product includes deliberate Codex selection and bounded fallback, with the
+broader dashboard redesign and advanced automation following initial acceptance.
+Product requirements do not grant execution, publication, capacity or
+deployment permission.
 The setup authorization covered setup and narrow Phase 1 repairs. The owner subsequently
 approved Milestone 2 for direct execution in the existing chat; see PROGRESS.md.
 

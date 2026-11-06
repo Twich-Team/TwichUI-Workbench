@@ -8,8 +8,12 @@ never supplies new execution permission. Do not start Milestone 2 under setup.
 
 ## Shared records and precedence
 
-- `PRODUCT_PRINCIPLES.md`: supplied Product Direction and Goals, preserved as the
-  canonical product requirements rather than an inventory of implemented features.
+- [Project Working Philosophy](../PROJECT_WORKING_PHILOSOPHY.md): owner guidance
+  for working methods, communication and safeguards.
+- [Workbench requirements v1.1](../TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md):
+  current product requirements, release priorities and standing owner decisions.
+- `PRODUCT_PRINCIPLES.md`: earlier Product Direction and Goals, preserved as
+  context where consistent with v1.1.
 - `DESIGN_SYSTEM.md`: shared implemented tokens, components, responsive and visual rules.
 - `PLAN.md`: the one delivery plan and bounded Milestone 2 acceptance contract.
 - `PROGRESS.md`: the one changing progress/handoff record, decisions and acceptance gaps.
