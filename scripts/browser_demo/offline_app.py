@@ -8,6 +8,8 @@ import signal
 from threading import Event
 import time
 
+from sqlalchemy.exc import OperationalError
+
 from acceptance_transport_guard import install_offline_guard
 from workbench import planning_provider, task_session, task_sessions, trusted_preparation, worker
 from workbench.db import engine_for
@@ -115,7 +117,15 @@ def run_worker():
             stopped.wait(20)
             return
         if not (evidence / "certified-offer.json").exists():
-            worker.tick(engine, stop_event=stopped)
+            try:
+                worker.tick(engine, stop_event=stopped)
+            except OperationalError as error:
+                # Match the production worker's busy handling. A rolled-back
+                # transaction can leave a command pending; the original claim
+                # still prevents a duplicate planning or preparation run.
+                if getattr(error.orig, "sqlite_errorcode", 0) & 0xFF not in {5, 6}:
+                    raise
+                stopped.wait(.6)
         if os.environ.get("WB_REHEARSAL_RECOVERY") and not stopped.is_set():
             for _ in range(3):
                 assert not worker.tick(engine, stop_event=stopped)
