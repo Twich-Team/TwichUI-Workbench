@@ -63,12 +63,26 @@ async function ready(file, timeout=25000) {
           assert.equal(await page.getByText('Waiting for information',{exact:true}).count(),0);
           assert.equal(await page.getByRole('button',{name:'Send information'}).count(),0);
           assert.equal(await page.getByRole('button',{name:'Approve proposal',exact:true}).count(),0);
-          assert.equal(await page.getByText('" ALICE "',{exact:true}).isVisible(),true);
+          if (task.scenario.fixture === 'loaded-client') {
+            await page.getByText(view.jobs[0].message,{exact:true}).waitFor();
+            assert.match(view.jobs[0].message,/verified addon operation|one core addon source/);
+            assert.equal(await page.getByRole('button',{name:'Retry planning'}).count(),0);
+            assert.equal(await page.getByText('Example 1:',{exact:false}).isVisible(),true);
+          } else {
+            assert.equal(await page.getByText('" ALICE "',{exact:true}).isVisible(),true);
+          }
         } else {
           await page.getByText('Ready to review',{exact:true}).waitFor();
+          if (mode === 'proposal') {
+            const expected = page.getByText('Expected result 1:',{exact:false});
+            await expected.click();
+            assert.equal(await page.getByText('TwichUI.MapViewMath.Fade',{exact:false}).first().isVisible(),true);
+            assert.equal(await page.getByRole('button',{name:'Approve proposal',exact:true}).isVisible(),true);
+            assert.equal(await page.getByRole('button',{name:'Approve local implementation',exact:true}).count(),0);
+          }
         }
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-        await page.screenshot({path:join(evidence,`review-${width}.png`)});
+        await page.screenshot({path:join(evidence,`review-${width}.png`),fullPage:mode==='failure'});
       }
     }
   } finally {

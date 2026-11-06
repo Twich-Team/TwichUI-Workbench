@@ -21,6 +21,8 @@ SCENARIO_FAILURE_MESSAGES = {
     "provider_rejection": "The local model service rejected the planning request.",
     "contention": "Workbench could not get access to the local model.",
     "credential_or_lock": "Workbench could not verify access to the local model.",
+    "loaded_client_schema": "The model did not return a complete proposal selecting a verified addon operation.",
+    "loaded_client_core_source": "The model's proposal did not bind its example to the one core addon source loaded by the selected test.",
 }
 
 

@@ -298,6 +298,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     adapter_used, failure, question, packet, model, basis = None, None, None, None, None, None
     model_selection = None
     claimed_generation = False
+    loaded_selection = False
     generation = job['kind'] == 'planning' and scenario_response is None and bool(os.environ.get('WORKBENCH_PREPARATION_CONFIG'))
     if generation:
         from workbench import grounded_scenarios, model_policy, trusted_preparation, planning_worker
@@ -315,7 +316,9 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 raise ValueError('Workbench could not verify the configured source checkout for planning.')
             packet = grounded_scenarios.context(original['payload'], feedback, base_contract, policy)
             grounded_scenarios.require_plannable(packet)
-            if len(json.dumps(packet).encode()) > 24000:
+            schema, wire = grounded_scenarios.planning_request(packet)
+            loaded_selection = schema is grounded_scenarios.LoadedClientResponse
+            if len(json.dumps(wire).encode()) > 24000:
                 raise ValueError('Grounded scenario context exceeds the planning input budget; narrow the request.')
             # Same job/lease and accounting owners; duplicate workers never call an
             # adapter for an already claimed job. No automatic inference retry.
@@ -345,16 +348,12 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 original['status'] = 'investigating'
             claimed_generation = True
             if model_selection:
-                raw, model, basis = adapter_used.generate(packet, grounded_scenarios.Response, expected_model=model_selection.model)
+                raw, model, basis = adapter_used.generate(wire, schema, expected_model=model_selection.model)
             else:
-                raw, model, basis = adapter_used.generate(packet, grounded_scenarios.Response)
+                raw, model, basis = adapter_used.generate(wire, schema)
             if len(json.dumps(raw, allow_nan=False).encode()) > 24000 or basis not in {'demo', 'local'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
                 raise ValueError('Invalid bounded scenario provider response')
-            parsed = grounded_scenarios.Response.model_validate(raw)
-            if (parsed.input_sha256 != packet['input_sha256'] or parsed.evidence_sha256 != packet['evidence_sha256']
-                    or parsed.policy_sha256 != packet['policy_sha256']):
-                raise ValueError('Generated scenario evidence/request/policy bindings are stale; prepare a fresh proposal.')
-            grounded_scenarios.validate_generation(parsed.draft, packet)
+            parsed = grounded_scenarios.resolve_response(raw, schema, wire, packet)
             # Re-read committed evidence and private policy after the response.
             if grounded_scenarios.context(original['payload'], feedback, prepare(original['payload'], feedback),
                     trusted_preparation.configuration(engine)) != packet:
@@ -364,14 +363,16 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
         except grounded_scenarios.ScenarioInputRequired as error:
             question = str(error)
         except ValidationError as error:
-            issues = error.errors(include_input=False, include_context=False)
-            # A malformed clarification has a more useful error on that branch.
-            # Keep scenario-specific diagnostics for responses proposing examples.
-            draft = raw.get('draft') if isinstance(raw, dict) else None
-            branch = 'GroundedDraft' if isinstance(draft, dict) and draft.get('scenarios') else 'ClarificationDraft'
-            issue = next((e for e in issues if e['loc'][:2] == ('draft', branch)), issues[0])
-            location = '.'.join(map(str, issue['loc'])) or 'response'
-            failure = ('schema_validation', f'Planning returned an invalid example at {location}: {issue["msg"]}')
+            if loaded_selection:
+                # Provider-controlled keys and values must not reach the review UI or ledger.
+                failure = ('loaded_client_schema', None)
+            else:
+                issues = error.errors(include_input=False, include_context=False)
+                draft = raw.get('draft') if isinstance(raw, dict) else None
+                branch = 'GroundedDraft' if isinstance(draft, dict) and draft.get('scenarios') else 'ClarificationDraft'
+                issue = next((e for e in issues if e['loc'][:2] == ('draft', branch)), issues[0])
+                location = '.'.join(map(str, issue['loc'])) or 'response'
+                failure = ('schema_validation', f'Planning returned an invalid example at {location}: {issue["msg"]}')
         except PlanningUnavailable as error:
             failure = (error.reason, None)
         except ValueError as error:
@@ -421,6 +422,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             diagnostics = {k: v for k, v in getattr(adapter_used, 'diagnostics', {}).items()
                            if k != 'usage'}
             diagnostics['category'] = category
+            if loaded_selection and claimed_generation:
+                diagnostics['retained_failure'] = 1
             c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
                 status='failed', finished_at=intake.now(), lease=None, lease_until=None,
                 payload={**job['payload'], 'diagnostics': diagnostics},

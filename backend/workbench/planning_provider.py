@@ -189,6 +189,8 @@ class LocalProvider:
                 return self._infer(transport, secret, schema, encoded, expected_model=expected_model)
 
     def _infer(self, transport, secret, schema, encoded, *, expected_model=None):
+        from workbench.grounded_scenarios import LoadedClientResponse, unique_json_object
+
         actual = transport.models(secret)
         self.diagnostics.update(configured_model=actual, deadline_s=transport.seconds)
         if expected_model is not None and actual != expected_model:
@@ -208,11 +210,19 @@ class LocalProvider:
             'For a module, compare only the first return to the scalar observe.expected. '
             'Omit setup and observe.path or leave them empty. Module fixtures cannot observe fields or later return values. '
             'For fixture="client", use an exported target on the established harness client. '
-            'For fixture="loaded-client", use the callable published by the one bound chunk, with no setup or observe.path. '
             'Set addons to the addon directories of the selected sources. '
-            'Its observe.path is empty for the first return or names a scalar field on the client. '
+            'For fixture="client", observe.path is empty for the first return or names a scalar field on the client. '
             'For ambiguous intent or behavior these fixtures cannot express, return specific unresolved questions only, with no scenarios. '
             'Echo exact input/evidence/policy bindings. Proposed scenarios require independent human review.'
+        )
+        loaded_client = (
+            'Select one binding_id from binding_options for each supplied example. Match the operation target and arguments to the request. '
+            'The binding fixes the committed test, core addon source, exported target and calling convention. '
+            'Do not emit source paths, addon names, targets, setup, or observation paths. '
+            'This fixture observes only the first return. Copy acceptance_index, args, expected and incorrect exactly from each example. '
+            'Use a unique short scenario id. Echo input_sha256, evidence_sha256 and policy_sha256 exactly, and give the configured model label. '
+            'If no verified binding fits, return draft={"unable_to_select":true}. Do not ask for information already supplied. '
+            'An invalid or incomplete selection stops planning for review.'
         )
         planning = (
             'Cite only supplied evidence IDs and related record IDs. Product documents establish requirements, never verified addon behavior or root cause. '
@@ -222,10 +232,12 @@ class LocalProvider:
             'You received excerpts only. Never claim to have searched files or inspected absent code. Product-only context means preliminary feasibility and a specific missing-addon-evidence requirement. Keep output concise; use 1–4 entries per list. '
             'Decomposition: titles are concise task names; purpose and acceptance hold instructions/restrictions. Tasks must map to valid zero-based approved scope_indices; no scope expansion. Dependencies and parents use task keys.'
         )
+        instructions = loaded_client if schema is LoadedClientResponse else (
+            scenario if issubclass(schema, ScenarioResponse) else planning)
         body = dict(model=expected_model or actual, temperature=0, max_tokens=2600, reasoning_budget_tokens=0,
             tools=[], response_format=dict(type='json_schema', json_schema=dict(
                 name='planning', strict=True, schema=schema.model_json_schema())),
-            messages=[dict(role='system', content=general + (scenario if issubclass(schema, ScenarioResponse) else planning)),
+            messages=[dict(role='system', content=general + instructions),
                 dict(role='user', content=encoded)])
         encoded_body = json.dumps(body).encode()
         if issubclass(schema, ScenarioResponse) and len(encoded_body) > MAX_INPUT:
@@ -249,7 +261,8 @@ class LocalProvider:
                 self.diagnostics['actual_model'] = model
             if model != actual:
                 raise PlanningUnavailable('Returned model differs from observed configured identity.', 'model_identity')
-            value = json.loads(choice['message']['content'])
+            value = json.loads(choice['message']['content'], object_pairs_hook=unique_json_object
+                               if schema is LoadedClientResponse else None)
             self.diagnostics.update(actual_model=model, category='response_received')
             return value, model, 'local'
         except (ValueError, KeyError, IndexError, TypeError):

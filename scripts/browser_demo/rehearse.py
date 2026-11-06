@@ -29,6 +29,8 @@ PYTHON = ROOT / ".venv/bin/python"
 CASES = {
     "pass": ("checked", ""),
     "addon": ("checked", ""),
+    "addon-plan": ("proposal", ""),
+    "addon-invalid": ("failure", "Planning failed"),
     "incomplete": ("failure", "Planning failed"),
     "blind": ("failure", "Planning interrupted"),
     "ledger": ("failure", "Planning interrupted"),
@@ -162,7 +164,7 @@ def run(case, source, backup, output, task=SYNTHETIC_TASK):
                         connection.execute("INSERT INTO fake_publications VALUES ('unexpected','sentinel','{}','hash','now')")
                 if case == "deadline":
                     simulated_late = True
-                if case in {"pass", "addon", "incomplete", "accounting"}:
+                if case in {"pass", "addon", "addon-plan", "addon-invalid", "incomplete", "accounting"}:
                     (root / "return-response").touch()
                 if case == "pass":
                     with store(database) as connection:
@@ -183,7 +185,9 @@ def run(case, source, backup, output, task=SYNTHETIC_TASK):
                 env=environment() | {"TMPDIR": str(scratch)})
         try:
             run_owned(stage=ROOT, database=database, evidence=root, port=PORT, env=env,
-                      deadline=deadline, room=room, stopping=lambda: False, activate=activate,
+                      deadline=deadline, room=room,
+                      stopping=lambda: case == "addon-plan" and (root / "owner-step-scope.json").exists(),
+                      activate=activate,
                       worker_command=worker_command, stop_worker=stop_worker,
                       verify_worker=lambda _: (root / "worker-ready").is_file(),
                       api_app=APP, now=now, request_wrapper=wrap, runtime_root=runtime_root, task=task)
@@ -191,6 +195,7 @@ def run(case, source, backup, output, task=SYNTHETIC_TASK):
             assert owner.wait(timeout=10) == 0
         except RunHeld as error:
             expected = dict(incomplete="reviewable proposal", capacity="capacity", publication="publication",
+                            **{"addon-invalid": "reviewable proposal", "addon-plan": "stop"},
                             deadline="deadline", crash="worker stopped", accounting="token record",
                             isolation="isolation and readiness", blind="planning deadline",
                             ledger="limits could not be verified")
@@ -223,8 +228,8 @@ def run(case, source, backup, output, task=SYNTHETIC_TASK):
         intake, = c.execute("SELECT id FROM intakes").fetchone()
         attempts = c.execute("SELECT outcome,usage FROM model_attempts WHERE purpose='planning'").fetchall()
         assert len(attempts) == 1
-        expected = ("completed" if case in {"pass", "addon", "accounting"} else
-                    "failed" if case == "incomplete" else "interrupted_unknown")
+        expected = ("completed" if case in {"pass", "addon", "addon-plan", "accounting"} else
+                    "failed" if case in {"addon-invalid", "incomplete"} else "interrupted_unknown")
         assert attempts[0][0] == expected, (case, attempts)
         if case == "incomplete":
             assert json.loads(attempts[0][1])["values"]["total_tokens"] == 120
@@ -270,6 +275,6 @@ if __name__ == "__main__":
     os.umask(0o077)
     source, backup, output = (Path(arg).resolve() for arg in sys.argv[1:4])
     assert output.is_dir() and not list(output.iterdir())
-    for case in sys.argv[4:] or [case for case in CASES if case != "addon"]:
+    for case in sys.argv[4:] or [case for case in CASES if not case.startswith("addon")]:
         run(case, source, backup, output)
         print(case + " passed", flush=True)

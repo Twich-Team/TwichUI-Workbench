@@ -1,0 +1,23 @@
+{
+  "original": {
+    "visual_requirement": "nonvisual",
+    "kind": "feature",
+    "regression_tests": {
+      "test_paths": [
+        "tests/test_map_viewmath_step.lua"
+      ],
+      "acceptance": [
+        "The fade returns opacity 1 exactly at a threshold of 2 when both limits are 2. Reject opacity 0 for the same call."
+      ]
+    },
+    "title": "Cover the map fade at a single threshold",
+    "description": "Add regression coverage for map overlay opacity when the fade start and end are the same. At that exact threshold, the map overlay should already be fully opaque. Add assertions in the existing map easing test.\n\nExample 1: {\"args\":[2,2,2],\"expected\":1,\"incorrect\":0}",
+    "lua_error": ""
+  },
+  "diagnostics": {
+    "category": "schema_validation",
+    "input_bytes": 6265,
+    "output_bytes": 1620
+  },
+  "message": "Planning returned an invalid example at draft.GroundedDraft.scenarios.0.loaded-client: Value error, A loaded client needs one core addon source Your original request and any example are saved."
+}

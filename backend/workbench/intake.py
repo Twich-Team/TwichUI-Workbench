@@ -130,6 +130,16 @@ def retained_planning_failure(row, jobs):
         and not job['payload'].get('task_contract', {}).get('scenario_grounding')), None)
 
 
+def retained_source_failure(job):
+    diagnostics = job['payload'].get('diagnostics', {})
+    if job['kind'] != 'planning' or job['status'] != 'failed':
+        return False
+    return bool(diagnostics.get('retained_failure') or (
+        diagnostics.get('category') == 'schema_validation'
+        and 'A loaded client needs one core addon source' in job['message']
+    ))
+
+
 def view_in(connection, identity):
     row = require(connection, intakes, identity)
     jobs = [dict(j) for j in connection.execute(select(planning_jobs).where(
@@ -142,6 +152,12 @@ def view_in(connection, identity):
         }
         retained['status'] = 'failed'
         retained['message'] = scenario_failure_message(diagnostics.get('category'))
+    for job in jobs:
+        if retained_source_failure(job):
+            diagnostics = job['payload']['diagnostics']
+            if not diagnostics.get('retained_failure'):
+                job['message'] = scenario_failure_message('loaded_client_core_source')
+                job['payload']['diagnostics'] = {**diagnostics, 'retained_failure': 1}
     planned = [dict(t) for t in connection.execute(select(backlog_items).where(backlog_items.c.intake_id == identity)).mappings()]
     for item in planned:
         item['scope_review_required'] = task_needs_scope_review(connection, item)
@@ -304,6 +320,8 @@ def retry(engine, identity, job_id):
             raise HTTPException(404, 'Job not found for this request.')
         if job['kind'] == 'behavioral_preparation':
             raise HTTPException(409, 'Preparation retains one durable claim. Inspect its outcome or recovery hold; retry cannot launch duplicate preparation.')
+        if retained_source_failure(job):
+            raise HTTPException(409, 'This addon planning result is retained. Retry cannot start another generation for this request.')
         if job['kind'] == 'decomposition':
             validate_approval(connection, require(connection, proposal_decisions, job['payload']['approval_id']))
         if job['payload'].get('scope_revision', 0) != human_scope(connection, identity)['revision']:

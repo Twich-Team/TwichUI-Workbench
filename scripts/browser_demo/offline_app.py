@@ -33,7 +33,8 @@ def run_worker():
     from local_browser_fixture import advance_local
 
     install_offline_guard()
-    native = os.environ["WB_REHEARSAL_OUTCOME"] == "addon"
+    mode = os.environ["WB_REHEARSAL_OUTCOME"]
+    native = mode == "addon"
     # Only the supported rehearsal runs the native Lua suite, in its own
     # delegated worker group. Transport is scripted in either mode.
     if native:
@@ -53,10 +54,14 @@ def run_worker():
 
     def exact_example(value, packet):
         example, = packet["examples"]
-        if native:
+        if mode.startswith("addon"):
             expected = json.loads((evidence / "rehearsal-task.json").read_text())["scenario"]
-            value["draft"]["scenarios"] = [dict(expected, id="fade-threshold")]
-            assert example["args"] == expected["args"]
+            binding, = [option for option in packet["binding_options"] if option["target"] == expected["target"]]
+            assert binding["source_path"] in expected["source_paths"] and binding["test_path"] == expected["test_path"]
+            selected = {key: example[key] for key in ("acceptance_index", "args", "expected", "incorrect")}
+            if mode == "addon-invalid":
+                selected["source_paths"] = ["TwichUI_Settings/map/ViewMath.lua"]
+            value["draft"]["scenarios"] = [dict(selected, id="fade-threshold", binding_id=binding["binding_id"])]
             return
         assert example["args"] == [" ALICE "]
         value["draft"]["scenarios"][0]["args"] = example["args"]
@@ -96,7 +101,6 @@ def run_worker():
                     raise planning_provider.PlanningUnavailable("Controlled cancellation", "canceled")
             assert (evidence / "return-response").exists()
             response, _, _ = planner.generate(packet, None)
-            mode = os.environ["WB_REHEARSAL_OUTCOME"]
             usage = {} if mode == "accounting" else dict(prompt_tokens=90, completion_tokens=30, total_tokens=120)
             reason = "length" if mode == "incomplete" else "stop"
             return json.dumps(dict(model=MODEL, usage=usage,

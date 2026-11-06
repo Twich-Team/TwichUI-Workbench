@@ -79,6 +79,77 @@ class Response(behavior.ScenarioResponse):
     policy_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
 
+class BindingSelection(behavior.Data):
+    id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9-]{0,47}$")]
+    binding_id: Annotated[int, Field(ge=1)]
+    acceptance_index: Annotated[int, Field(ge=0, le=2)]
+    args: Arguments
+    expected: behavior.Scalar
+    incorrect: behavior.Scalar
+
+
+class LoadedClientDraft(behavior.Data):
+    scenarios: Annotated[list[BindingSelection], Field(min_length=1, max_length=3)]
+
+
+class NoBindingDraft(behavior.Data):
+    unable_to_select: Literal[True]
+
+
+class LoadedClientResponse(Response):
+    # The provider selects an operation. Only Workbench can supply source fields.
+    draft: LoadedClientDraft | NoBindingDraft
+
+
+def planning_request(packet):
+    bindings = packet["fixture_bindings"]
+    if not any(binding["fixture"] == "loaded-client" for binding in bindings):
+        return Response, packet
+    options = []
+    for binding in bindings:
+        source, = binding["source_paths"]
+        for op in binding["operations"]:
+            if op["defined_in"] != source:
+                raise ValueError("A loaded-client operation must come from its bound core addon source.")
+            options.append(dict(binding_id=len(options) + 1, test_path=binding["test_path"],
+                                fixture=binding["fixture"], source_path=source, **op))
+    return LoadedClientResponse, {
+        **{key: value for key, value in packet.items() if key != "fixture_bindings"},
+        "binding_options": options,
+        "supported_schema": "One existing test, up to three scalar first returns from verified addon callables.",
+    }
+
+
+def resolve_response(raw, schema, wire, packet):
+    parsed = schema.model_validate(raw)
+    if any(getattr(parsed, key) != packet[key] for key in
+           ("input_sha256", "evidence_sha256", "policy_sha256")):
+        raise ValueError("Generated scenario evidence/request/policy bindings are stale; prepare a fresh proposal.")
+    if schema is LoadedClientResponse:
+        if isinstance(parsed.draft, NoBindingDraft):
+            raise ValueError("The model could not match the supplied example to a verified addon operation.")
+        options = {option["binding_id"]: option for option in wire["binding_options"]}
+        scenarios = []
+        for selection in parsed.draft.scenarios:
+            option = options.get(selection.binding_id)
+            if option is None:
+                raise ValueError("The proposal selected a callable outside the verified source bindings.")
+            scenarios.append(LoadedClientScenario(
+                id=selection.id, acceptance_index=selection.acceptance_index,
+                test_path=option["test_path"], fixture=option["fixture"],
+                source_paths=[option["source_path"]], target=option["target"], method=option["method"],
+                args=selection.args, observe=ModuleObservation(expected=selection.expected),
+                incorrect=selection.incorrect,
+            ))
+        if len({s.acceptance_index for s in scenarios}) != len(scenarios):
+            raise ValueError("The proposal selected more than one callable for the same example.")
+        parsed = Response(input_sha256=parsed.input_sha256, evidence_sha256=parsed.evidence_sha256,
+                          policy_sha256=parsed.policy_sha256, model=parsed.model,
+                          draft=GroundedDraft(scenarios=scenarios))
+    validate_generation(parsed.draft, packet)
+    return parsed
+
+
 def context(original, feedback, contract, policy):
     root, base, _ = preparation.repository()
     if base != contract["resolved_base"] or contract["scope_missing"]:
@@ -230,6 +301,8 @@ def require_plannable(packet):
                 "and use [] for a call with no arguments."
             )
         count = len(supplied[index]["args"])
+        if supplied[index]["setup"] and any(b["fixture"] == "loaded-client" for b in packet["fixture_bindings"]):
+            raise ValueError("The selected addon fixture observes a first return and cannot run the supplied setup.")
         if not any(accepts_argument_count(op, count) for binding in packet["fixture_bindings"]
                    for op in binding["operations"]):
             raise ScenarioInputRequired(
