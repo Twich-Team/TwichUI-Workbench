@@ -1,3 +1,62 @@
+# Repaired normalization passed with local Qwen — November 6, 2026
+
+The owner-approved synthetic proposal `f9f53de6-7906-5e59-84b3-1df79f75e240`,
+revision 1, finished on isolated app and worker checkpoint
+`4baa0548966f9a2e090d8d64e0762babc5c6c968`. Qwen added one assertion to
+`tests/test_normalize.lua` at fixture base
+`ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. It checks that the first result
+for `" ALICE "` is `"alice"`. Syntax, focused regression, the independent
+behavior check and the exact five-group suite all passed. The independent
+check rejected the unchanged, vacuous and wrong-behavior controls. The
+candidate seal, usage receipts and saved result matched. No human edit,
+fallback, replacement run, addon change or publication occurred.
+
+The prior preview expired on its own. The recorded 90-minute window began
+at **01:12:26 UTC** and ends at **02:42:26 UTC**. The archive of
+`artifacts/runs/browser-JVsm47/report` preserved 22 files and their original
+paths. I verified a separate restore before pruning the matching originals.
+After backups and fresh certification, the measured headroom was
+76,340,286 bytes (72.80 MiB). All 210 earlier failure evidence hashes still
+match. The first operator precheck incorrectly expected the pinned policy
+to disable scenario generation globally. I retained the exact grounded
+policy, verified its digest and empty planning queue, and used the demo
+planner with deterministic decomposition. No service or authority had
+started at that precheck, and its correction kept the original clock.
+
+One cancellation probe passed. One implementation attempt used four
+generating requests and 257 generated tokens, with zero input corrections.
+There were five generating requests and five non-generating input counts
+including the probe. The cancelled probe's exact token count is unavailable.
+Its busy observation and enforced limit bound it from 1 to 60 tokens. The
+exclusive authentication interval lasted about 42 seconds. The controller
+verified the original configuration and normal access, and confirmed that
+the temporary credential was rejected. Closeout independently matched the
+running process to the normal credential, configuration, unit and binary.
+The write API and worker stopped and the private one-off capability was
+removed. The installed app and worker on 9487 and the service on 8765 were
+preserved.
+
+The [read-only local review](http://127.0.0.1:9187/executions/944e8491-edeb-5854-ad5c-e3423de5fae4)
+binds to loopback and expires by 02:42:26 UTC. The frozen
+[patch](../artifacts/runs/normalization-repaired-run-M6t70k/checked-normalization.patch),
+[desktop capture](../artifacts/runs/normalization-repaired-run-M6t70k/browser/execution-result-1440.png),
+[phone capture](../artifacts/runs/normalization-repaired-run-M6t70k/browser/execution-result-390.png),
+[terminal audit](../artifacts/runs/normalization-repaired-run-M6t70k/terminal-verification.json),
+and [safeguard audit](../artifacts/runs/normalization-repaired-run-M6t70k/run-safeguards.json)
+stay available locally. Archive mapping and checks are retained in
+[the archive index](../artifacts/archive-index/normalization-approved-browser-JVsm47.json).
+The interface uses “Real task” for the real execution mode. This run's
+repository content was a synthetic fixture.
+
+An ordinary browser request still needs one continuous demonstration from
+a fresh submission and grounded proposal through browser approval,
+implementation, checks and local review. This run used an offline replay
+for the proposal and an API approval to hold publication. The browser
+button currently bundles draft-PR consent, so the local-only path needs
+its own browser action and an approved installation before that demonstration.
+The real addon's committed test-loading patterns remain a separate
+eligibility issue. Publication remains a separate owner decision.
+
 # Original preparation recovered and certified — November 5, 2026
 
 **Cover lowercase name normalization** finished its preparation checks on the

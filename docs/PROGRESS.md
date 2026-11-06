@@ -1,5 +1,20 @@
 # Current progress and operator handoff
 
+### 2026-11-06 — Repaired synthetic normalization checked with real Qwen
+
+The exact approved synthetic proposal passed independent preparation and
+one bounded local Qwen implementation on isolated checkpoint `4baa054`.
+Qwen added one regression assertion. All four checks and the exact five-group
+suite passed, and the frozen result is saved. The sole cancellation probe
+passed. The controller restored and verified normal 8080 authentication and
+rejection of the temporary credential. The isolated write API and worker
+stopped. The read-only 9187 review passed desktop and phone inspection and
+expires within the recorded window. The archive and 210 prior failure
+evidence hashes were verified. The installed 9487 workflow was preserved.
+The remaining product gap is a fresh ordinary browser request through a
+local-only approval and checked result. Real-addon loader support is a
+separate issue. [Handoff and evidence](CONTINUATION.md).
+
 Updated 2026-11-05. **Models and the controlled sample workflow are accepted and closed. The exact bounded Chronicle fix is accepted, with frozen independent checks and owner-reported live smoke verification retained. This does not accept the runner machinery, release scope or full M5. Historical generated-artifact loss and its evidence limitations remain documented. The connected real-model workflow test has now passed on 9487: one owner-approved task, one local Qwen attempt with automatic in-attempt repair, independent checks, and a durable linked result. The original model service is restored, the one-off grant is closed, and normal execution/fallback/publication remain disabled. This replay does not replace the accepted Chronicle fix or complete M5. Final evidence is recorded below. Earlier status sections/counts are historical and are superseded by the final acceptance and current-package entries.**
 
 Implemented directly in the existing session; no launcher timeout or terminal-status
