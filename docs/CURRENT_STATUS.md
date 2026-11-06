@@ -2,8 +2,8 @@
 
 Last updated November 6, 2026 (Mountain time).
 
-- The normal app at 127.0.0.1:9487 still serves the earlier demo build. The everyday candidate is staged.
-- One real Qwen task finished in the isolated app. It produced a checked map-fade test patch and restored normal model access. Zero fresh tasks have completed from request to result in the normal app.
-- Offline, two different requests reached saved checked results through the simpler screens. Desktop and phone checks passed. The backup and rollback rehearsal preserved the existing history.
-- The proposed first release adds coverage to supported existing Lua tests and keeps results local. Bug fixes, new features, inspections, simulator work, Codex and draft PR delivery remain unfinished for everyday use.
-- Next, install the candidate at the normal address and complete a fresh map-tile test there. Owner approval is needed for the limited release, service switch, verified history copy, one evidence archive, one bounded Qwen run and rollback if needed.
+- The normal app at 127.0.0.1:9487 serves the earlier demo build. Zero fresh tasks have finished from request to checked result there.
+- One real Qwen task finished in the isolated app, with a checked map-fade test patch and verified restoration. Two different requests reached saved checked results offline. The updated candidate honors the saved Qwen choice and shows provider activity.
+- Codex and fallback settings save preferences and support previews. Workbench has no working Codex executor or cross-provider budget. Both deliberate Codex use and bounded fallback remain initial-product requirements.
+- The choice is an interim Qwen-only test-coverage release or holding installation for A8. Codex also needs an approved access method, secure credentials, permission to send source, and enforceable usage and spending limits.
+- The installation request covers the verified history copy, service switch, one evidence archive, one bounded Qwen run and rollback for the interim option.

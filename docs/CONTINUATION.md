@@ -1,3 +1,36 @@
+# A8 model-routing audit and offline readiness — November 6, 2026 Mountain time
+
+The [A8 readiness report](A8_MODEL_ROUTING_READINESS_20261106.md)
+distinguishes saved preferences, synthetic routing previews, the real
+isolated Qwen run and the app installed on 9487. Workbench has no
+Codex executor or shared cross-provider retry and spending guard. The
+development CLI and historical human-authored Codex work do not
+exercise provider switching. No provider calls were made in this review.
+
+Staged candidate `b6ffac9` now checks the saved Qwen preference at
+planning and before applying or starting a run. An ineligible choice
+holds unstarted work. The task page reads the existing attempt journal
+for the provider and reason. New local planning, cancellation check
+and implementation attempts share the request ID. The grant still
+owns active execution, and the independent checks still own results.
+The initial product still requires deliberate Codex selection and
+bounded fallback. The interim build offers local Qwen test coverage.
+
+`wb check`, 177 focused backend tests, the two-task browser journey
+and all ten visual comparisons passed. Inspected both widths of the
+provider approval screen. The local preference guard, stale decision,
+zero additional execution grants and model attribution were checked
+with simulated responses. The previous real Qwen evidence verifies
+its saved planning model at policy revision 1. The revised build has
+offline evidence for its new behavior.
+
+The [revised combined request](EVERYDAY_INSTALL_APPROVAL_20261106.md)
+binds the interim build and adds the release decision and the precise
+Codex access, source and budget blockers. The revised package seal
+and service definitions passed local verification. The revised API read
+the restored history from a read-only connection. No app, service,
+store, model credential or archive was activated.
+
 # Everyday local test workflow prepared — November 6, 2026 Mountain time
 
 The worktree branch `codex/everyday-workbench` carries candidate

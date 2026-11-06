@@ -1,3 +1,13 @@
+## A8 selection and fallback audit — November 6, 2026
+
+Followed the Project Working Philosophy by tracing the Models screen
+to the saved preference, worker and attempt journal. Reused the existing
+Qwen admission and run-budget gates. Preference changes fence work
+before activation and cannot redirect an active approval. Grouped new
+local phases under the existing request ID. Kept the fallback preview
+clearly separate from operational execution. See the [A8 matrix and
+access blockers](A8_MODEL_ROUTING_READINESS_20261106.md).
+
 ## Everyday local operation preparation — November 6, 2026
 
 Followed the Project Working Philosophy by carrying the working path
