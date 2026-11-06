@@ -347,13 +347,13 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         or intake.human_scope(c, original['id']) != scope
                         or (stop_event is not None and stop_event.is_set())):
                     return True
+                selected = None
                 if everyday_mode:
                     everyday.check_planning(c, original)
+                    selected = everyday.local_selection(c)
                 adapter_used = adapter or (LocalProvider(stop_event) if everyday_mode else provider(stop_event))
                 if isinstance(adapter_used, LocalProvider):
-                    model_selection = model_policy.grounded_local_selection(c)
-                    if everyday_mode and model_selection.model != everyday.MODEL:
-                        raise ValueError('Choose the installed Qwen model in Models before starting a new task.')
+                    model_selection = selected or model_policy.grounded_local_selection(c)
                 lease = str(uuid4())
                 job['payload'].pop('diagnostics', None)
                 job['payload']['scenario_generation_claim'] = owner_identity()

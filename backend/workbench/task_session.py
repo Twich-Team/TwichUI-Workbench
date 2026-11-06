@@ -318,6 +318,7 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
             c,
             approval,
             require_current=not (Path(config["run_root"]) / "session-claimed.json").exists(),
+            admitting=True,
         )
         if not budget or execution.digest(budget) != config["task_budget_fingerprint"]:
             raise ValueError("Current explicit owner task budget differs from session")

@@ -406,14 +406,21 @@ def process_one(engine, runtime=None, stop_event=None):
         current = c.execute(select(grants).where(grants.c.id == row['grant_id'])).mappings().one()
         if row['status'] != 'pending':
             return False
+        from workbench import everyday
+
+        linked = current['snapshot'].get('workflow_task')
         try:
+            if linked and everyday.enabled():
+                try:
+                    everyday.local_selection(c)
+                except ValueError as error:
+                    raise task_execution.Waiting(str(error)) from None
             task_execution.validate(c, current)
             task_ready = True
             task_message = ''
         except task_execution.Waiting as error:
             task_ready = False
             task_message = str(error)
-        linked = current['snapshot'].get('workflow_task')
         if linked and valid(current) and identity_matches and task_ready and not ready:
             blocked = [g['name'] for g in gates if g['status'] != 'passed']
             c.execute(requests.update().where(requests.c.id == row['id']).values(
@@ -438,8 +445,9 @@ def process_one(engine, runtime=None, stop_event=None):
         c.execute(requests.update().where(requests.c.id == row['id']).values(
             status='running', fence=fence, started_at=now(), message='Implementing in isolation.',
             result={'owner': owner, 'inference_ran': False}))
+        task_id = linked['intake_id'] if linked and everyday.enabled() else (linked or {}).get('task', {}).get('id', TASK)
         c.execute(model_attempts.insert().values(id=fence, job_id=None, execution_id=row['id'],
-            task_id=current['snapshot'].get('workflow_task', {}).get('task', {}).get('id', TASK),
+            task_id=task_id,
             source='workbench', backend=getattr(runtime,'execution_contract',contract())['provider'], purpose='implementation',
             requested_model=getattr(runtime,'execution_contract',contract())['model'], actual_model=runtime.identity()['model'],
             routing_reason='Explicit one-task owner grant; fallback disabled.',

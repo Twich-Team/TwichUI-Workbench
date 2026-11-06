@@ -41,7 +41,7 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
                 linked = task_execution.snapshot(connection, **ref)
                 from workbench.schemas import TaskBudget
                 selected = task_budget.validate_selection(connection, receipt['proposal_id'],
-                    TaskBudget.model_validate(budget))
+                    TaskBudget.model_validate(budget), admitting=True)
                 if (request['binding'] != task_budget.digest(dict(scope=linked, offer=selected['fingerprint']))
                         or selected['snapshot'].get('reviewed_task', {}).get('ref') != ref):
                     raise ValueError('Scope or certified offer changed before application')
@@ -52,7 +52,7 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
                            if budget['publication'] == 'hold' else
                            'Implementation and one draft PR approved. Approval applied.')
             except (HTTPException, ValueError, KeyError, TypeError):
-                status, message = 'stale', 'Scope, certification, runtime or budget changed/expired. This saved decision cannot start execution.'
+                status, message = 'stale', 'Scope, model preference, certification, runtime or budget changed/expired. This saved decision cannot start execution.'
             connection.execute(proposal_decisions.update().where(proposal_decisions.c.id == receipt['id']).values(
                 status=status, message=message, finished_at=now()))
             if fail_before_commit:

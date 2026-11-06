@@ -10,7 +10,7 @@ from fastapi import HTTPException
 from sqlalchemy import select, func
 
 from workbench.db import (intakes, planning_jobs, proposals, proposal_artifacts, proposal_decisions,
-                          backlog_items, backlog_dependencies, intake_scopes, write_transaction)
+                          backlog_items, backlog_dependencies, intake_scopes, model_attempts, write_transaction)
 from workbench.service import now
 from workbench.planning_provider import configured_mode
 from workbench.planning_transport import scenario_failure_message
@@ -178,7 +178,16 @@ def view_in(connection, identity):
         item['dependencies'] = list(connection.execute(select(backlog_dependencies.c.requires_id).where(
             backlog_dependencies.c.item_id == item['id'])).scalars())
     results = [j for j in jobs if j['kind'] == 'planning' and j['status'] == 'completed']
-    return dict(human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
+    activity = []
+    if row['payload'].get('local_planning'):
+        activity = connection.execute(select(
+            model_attempts.c.id, model_attempts.c.purpose, model_attempts.c.backend,
+            model_attempts.c.requested_model, model_attempts.c.actual_model,
+            model_attempts.c.outcome, model_attempts.c.routing_reason,
+        ).where(model_attempts.c.task_id == identity, model_attempts.c.source == 'workbench',
+                model_attempts.c.backend.is_not(None))
+            .order_by(model_attempts.c.started_at.desc(), model_attempts.c.id).limit(10)).mappings().all()
+    return dict(provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
         created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, diagnostics=j['payload'].get('diagnostics', {})) for j in jobs],
         proposals=[proposal_view(connection, dict(p)) for p in connection.execute(select(proposals).where(
             proposals.c.intake_id == identity).order_by(proposals.c.revision.desc())).mappings()

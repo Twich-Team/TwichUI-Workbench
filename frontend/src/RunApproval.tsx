@@ -99,6 +99,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
         <p><strong>Outside this run</strong></p><ul>{scope?.content.exclusions.map((s,i)=><li key={i}>{s}</li>)}</ul></>}
     <p className="permission-files"><strong>Files that may change</strong> {offer.paths.map((path,i)=><span key={path}>{i>0?', ':''}<code>{path}</code></span>)}</p>
     {scope?.content.acceptance.length ? <ul className="permission-outcomes" aria-label="What the run should check">{scope.content.acceptance.map((s,i)=><li key={i}>{s}</li>)}</ul> : null}
+    {current.local_only&&<p><strong>Provider</strong> Local Qwen is the saved choice for this supported test. This approval allows one Qwen run.</p>}
     <RunLimits budget={budget}/>
     {query.isError&&<p role="alert">The run offer could not be refreshed. Refresh before approving.</p>}
     {error&&<p role="alert">{error}{!stale&&draft?' You can retry the same decision.':''}</p>}

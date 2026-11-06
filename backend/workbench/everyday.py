@@ -196,6 +196,22 @@ def clean_workspace(evidence):
         return False
 
 
+def local_selection(connection):
+    """Resolve the only model eligible for an everyday run before it starts."""
+    from workbench.model_policy import grounded_local_selection
+
+    try:
+        selected = grounded_local_selection(connection)
+        if selected.model == MODEL:
+            return selected
+    except ValueError:
+        pass
+    raise ValueError(
+        'This task requires local Qwen as the saved preferred model, with effort unspecified. '
+        'Choose it in Models to continue. Codex and fallback are unavailable here.'
+    )
+
+
 def planning_receipt(original, created_at):
     from workbench.intake import digest
 

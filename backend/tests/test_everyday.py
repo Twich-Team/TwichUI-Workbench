@@ -9,7 +9,9 @@ from sqlalchemy import select
 
 from workbench import everyday, intake, real_execution, task_session, task_sessions, worker
 from workbench.db import model_attempts, planning_jobs, proposal_decisions, real_execution_grants
-from test_grounded_workflow import CLIENT_TEST, TEST, ControlledPlanner, configure, approve_and_decompose
+from test_grounded_workflow import (
+    CLIENT_TEST, TEST, ControlledPlanner, configure, approve_and_decompose, save_local_policy,
+)
 
 
 def write_policy(path, value):
@@ -22,6 +24,7 @@ def write_policy(path, value):
 def installed(store, tmp_path, monkeypatch):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / 'scripts'))
     configure(store, tmp_path, monkeypatch)
+    save_local_policy(store, model=everyday.MODEL)
     local = tmp_path / '.local'
     local.mkdir()
     scratch = tmp_path / 'scratch'
@@ -95,6 +98,10 @@ def test_ordinary_requests_have_one_planning_claim_and_local_run_each(
         local_browser_fixture.advance_local(store, Path(store.url.database), 'pass', planner, example=None)
         result = client.get('/api/real-executions').json()
         assert result['total'] == index
+        history = client.get('/api/intake/' + item['id']).json()['provider_activity']
+        assert [(entry['purpose'], entry['backend']) for entry in history] == [('implementation', 'local')]
+        assert history[0]['requested_model'] == everyday.MODEL
+        assert 'fallback disabled' in history[0]['routing_reason']
         assert not list(installed.glob('workbench-verify-*'))
     with store.connect() as c:
         assert len(c.execute(select(model_attempts).where(model_attempts.c.purpose == 'planning')).all()) == 2
@@ -142,3 +149,63 @@ def test_worker_ownership_prevents_overlap(store, client, installed):
     write_policy(marker, receipt)
     assert not client.get('/api/local-work').json()['ready']
     assert real_execution.alive(real_execution.owner_identity())
+
+
+def test_codex_preference_holds_qwen_planning_even_with_fallback_enabled(
+    store, client, headers, installed,
+):
+    planner = ControlledPlanner()
+    item = client.post('/api/intake', headers=headers, json=body()).json()
+    save_local_policy(store, model=everyday.MODEL, preferred='codex')
+    assert worker.tick(store, planning_adapter=planner)
+    held = client.get('/api/intake/' + item['id']).json()
+    assert held['status'] == 'failed'
+    assert 'Codex and fallback are unavailable' in held['jobs'][0]['message']
+    assert not planner.calls
+    with store.connect() as c:
+        assert not c.execute(select(model_attempts)).first()
+
+
+def test_saved_qwen_selection_reaches_adapter_and_changed_preference_fences_run(
+    store, client, headers, installed, monkeypatch,
+):
+    from workbench.planning_provider import LocalProvider
+
+    planner = ControlledPlanner()
+
+    def offline_request(self, schema, packet, key_path, expected_model):
+        assert expected_model == everyday.MODEL
+        response, _, _ = planner.generate(json.loads(packet), schema)
+        return response, expected_model, 'local'
+
+    monkeypatch.setenv('WORKBENCH_LOCAL_KEY', '/unused-offline')
+    monkeypatch.setattr(LocalProvider, '_request', offline_request)
+    item = client.post('/api/intake', headers=headers, json=body()).json()
+    assert worker.tick(store)
+    current = client.get('/api/intake/' + item['id']).json()
+    assert current['provider_activity'][0]['actual_model'] == everyday.MODEL
+    assert 'Saved preferred local' in current['provider_activity'][0]['routing_reason']
+    monkeypatch.delenv('WORKBENCH_LOCAL_KEY')
+    approve_and_decompose(store, client, headers, item)
+    assert worker.tick(store)
+    current = client.get('/api/intake/' + item['id']).json()
+    task, = (task for task in current['tasks'] if task['kind'] == 'task')
+    endpoint = f"/api/intake/{item['id']}/tasks/{task['id']}/run-approval"
+    offer = client.get(endpoint).json()
+    command = dict(command_id=str(uuid4()), binding=offer['binding'],
+                   scope_approval_id=offer['scope_approval_id'], run_budget=offer['offer']['budget'])
+    saved = client.post(endpoint, headers=headers, json=command)
+    assert saved.status_code == 200 and saved.json()['status'] == 'pending'
+
+    save_local_policy(store, model=everyday.MODEL, preferred='codex')
+    held = client.get(endpoint).json()
+    assert not held['available'] and 'Codex and fallback are unavailable' in held['message']
+    assert client.post(endpoint, headers=headers, json=command).json() == saved.json()
+    denied = client.post(endpoint, headers=headers, json={**command, 'command_id': str(uuid4())})
+    assert denied.status_code == 409
+    assert worker.tick(store)  # Pending decision is fenced before it applies.
+    assert not worker.tick(store)
+    assert client.get(endpoint).json()['receipt']['status'] == 'stale'
+    with store.connect() as c:
+        assert len(c.execute(select(model_attempts)).all()) == 1
+        assert not c.execute(select(real_execution_grants)).first()

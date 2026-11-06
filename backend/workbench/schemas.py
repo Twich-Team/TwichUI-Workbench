@@ -559,7 +559,18 @@ class ClarificationView(StrictModel):
     revision: int
 
 
+class TaskProviderActivity(StrictModel):
+    id: str
+    purpose: str
+    backend: str
+    requested_model: str | None
+    actual_model: str | None
+    outcome: str
+    routing_reason: str
+
+
 class IntakeView(StrictModel):
+    provider_activity: list[TaskProviderActivity] = Field(default_factory=list, exclude_if=lambda value: not value)
     human_scope: HumanScope
     scope_history: list[HumanScope]
     id: str

@@ -451,6 +451,10 @@ test('everyday intake completes two different local tasks in one saved history',
   fixture('reviewed-offer-automatic-setup');
   const {artifactPath}=await import('./output');
   const results:string[]=[];
+  await page.goto('/models/configure?provider=local');
+  await page.getByLabel('Preferred model · Local LLM').selectOption('pilot-qwen38-27b');
+  await page.getByRole('button',{name:'Save model preferences'}).click();
+  await expect(page.getByText('Configuration saved; not activated.')).toBeVisible();
   for(const width of [1440,390]){
     const module=width===1440;
     const path=module?'tests/test_normalize.lua':'tests/test_client.lua';
@@ -479,6 +483,7 @@ test('everyday intake completes two different local tasks in one saved history',
     const offer=page.getByRole('region',{name:'Certified task run approval'});
     const run=offer.getByRole('button',{name:'Approve local run',exact:true});
     await expect(run).toBeDisabled();
+    await expect(offer.getByText(/Local Qwen is the saved choice/)).toBeVisible();
     await expect(offer.getByText('Publishing options')).toHaveCount(0);
     await offer.screenshot({path:artifactPath(`everyday/approval-${width}.png`)});
     await offer.getByRole('checkbox',{name:'I reviewed what this run allows.'}).check();
@@ -490,6 +495,8 @@ test('everyday intake completes two different local tasks in one saved history',
     fixture('reviewed-offer-automatic-tick');
     await expect(page.getByRole('heading',{name:'Preparing approved task'})).toBeVisible();
     fixture('reviewed-offer-automatic-local-pass');
+    const activity=page.getByRole('region',{name:'Task model activity'});
+    await expect(activity.getByText(/Explicit one-task owner grant; fallback disabled/)).toBeVisible();
     await page.getByRole('link',{name:'Review changes and checks'}).click();
     const result=page.getByRole('region',{name:'Run result and checks'});
     await expect(result.getByRole('heading',{name:'Test changes checked'})).toBeVisible();

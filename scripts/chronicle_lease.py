@@ -71,7 +71,7 @@ def store(root):
                 from workbench.task_budget import permission
                 from workbench.db import proposal_decisions
                 approved = c.execute(select(proposal_decisions).where(proposal_decisions.c.id==ref['approval_id'])).mappings().one()
-                budget = permission(c, approved)
+                budget = permission(c, approved, admitting=True)
                 if job.digest(budget)!=linked.get('task_budget_fingerprint'):
                     raise ValueError('Selected task budget differs from the workflow link')
             elif pinned['decomposition']['payload']['owner_provenance']['authorization_sha256'] != linked['authorization_sha256']:
@@ -311,10 +311,14 @@ def controller(root, instruction, stop_event=None):
             save(root/'probe-input-count.json', dict(input_tokens=counted, limit=128, generation=False))
             if type(counted) is not int or not 0 < counted <= 128:
                 raise RuntimeError('Probe input token ceiling not verified')
+            from workbench import everyday
+
             probe_id = str(uuid4())
+            probe_task = linked['task'] if linked else None
+            task_id = (probe_task['intake_id'] if everyday.enabled() else probe_task['task_id']) if probe_task else job.TASK
             with write_transaction(engine) as c:
                 c.execute(model_attempts.insert().values(id=probe_id, job_id=None, execution_id=None,
-                    task_id=linked['task']['task_id'] if linked else job.TASK,
+                    task_id=task_id,
                     source='workbench', backend='local', purpose='capability_validation',
                     requested_model=body['model'], actual_model=body['model'],
                     routing_reason='Owner-authorized single cancellation probe; separate from implementation.',

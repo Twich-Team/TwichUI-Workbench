@@ -238,7 +238,7 @@ def preparation_inputs(c, selected):
                                  for name in profile if name != 'original'})
 
 
-def validate_selection(c, proposal_id, budget):
+def validate_selection(c, proposal_id, budget, *, admitting=False):
     selected = offer(c, proposal_id)
     if (
         not selected
@@ -257,6 +257,11 @@ def validate_selection(c, proposal_id, budget):
         original = intake.require(c, intakes, review['ref']['intake_id'])
         if original['payload'].get('local_planning') != 'qwen-once':
             raise HTTPException(409, 'This offer belongs to an earlier workflow. Start an ordinary locally approved test task.')
+        if admitting:
+            try:
+                everyday.local_selection(c)
+            except ValueError as error:
+                raise HTTPException(409, str(error)) from None
     if budget.activate_once:
         from workbench.task_sessions import capability
 
@@ -267,7 +272,7 @@ def validate_selection(c, proposal_id, budget):
     return selected
 
 
-def permission(c, approval, *, require_current=True):
+def permission(c, approval, *, require_current=True, admitting=False):
     raw = approval["payload"].get("run_budget")
     if not raw:
         return None
@@ -289,7 +294,7 @@ def permission(c, approval, *, require_current=True):
                     "This one-off task run was stopped or expired. Saved scope and history remain; no execution or publication starts."
                 )
     if require_current:
-        selected = validate_selection(c, approval["proposal_id"], budget)
+        selected = validate_selection(c, approval["proposal_id"], budget, admitting=admitting)
     else:
         # Historical outcome provenance must survive a newer explicit budget.
         # This branch grants no current execution/publication permission.
@@ -347,12 +352,18 @@ def offer_view(c, proposal, selected):
     from workbench import everyday
     readiness = everyday.status(c.engine) if everyday.enabled() else None
     one_off = readiness.ready if readiness else capability(c.engine) is not None
+    hold = readiness.message if readiness and not one_off else None
+    if readiness and one_off:
+        try:
+            everyday.local_selection(c)
+        except ValueError as error:
+            one_off, hold = False, str(error)
     reviewed = selected["snapshot"].get("reviewed_task")
     return dict(
         runtime_ready=one_off,
         local_only=True if readiness else None,
         available=one_off or not readiness,
-        message=("The task is ready for your decision. The worker will check readiness again before it starts." if one_off else readiness.message if readiness else "Execution is unavailable here. Saving approval records your decision without starting a run."),
+        message=("The task is ready for your decision. The worker will check readiness again before it starts." if one_off else hold or "Execution is unavailable here. Saving approval records your decision without starting a run."),
         offer=dict(
             id=selected["id"],
             fingerprint=selected["fingerprint"],
@@ -484,7 +495,7 @@ def approve_run(engine, intake_id, task_id, body):
         parent = intake.require(c, proposal_decisions, ref['approval_id'])
         if parent['payload'].get('execution_continuation') or parent['payload'].get('run_budget'):
             raise HTTPException(409, 'A first scope-only approval is required; earlier budgets cannot be reset')
-        selected = validate_selection(c, parent['proposal_id'], body.run_budget)
+        selected = validate_selection(c, parent['proposal_id'], body.run_budget, admitting=True)
         from workbench import everyday
         if everyday.enabled():
             readiness = everyday.status(engine)
