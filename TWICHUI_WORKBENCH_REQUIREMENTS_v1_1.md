@@ -153,6 +153,8 @@ Before implementation, verify the actual subscription/access arrangement and sup
 
 Owner decision, November 6, 2026. Use the existing signed-in Codex subscription on the Workbench host through a supported local interface. The connection must use included subscription allowance. An API key, separately billed fallback, paid overages and changes to the owner's login require separate authority.
 
+Owner clarification, November 6, 2026. The user chooses Qwen alone, Codex alone, Qwen first with explicitly enabled bounded Codex fallback, or Codex first with explicitly enabled bounded Qwen fallback. The app must distinguish unavailability before generation, a finished failure, partial output and uncertain or active work. It must preserve cancellation, accounting, independent checks, binding and duplicate protection when switching. Uncertain work holds for review.
+
 Basic deliberate Codex use belongs in Phase A. Automatic allowance monitoring and percentage-based allocation belong in Phase C unless separately promoted.
 
 ## A9. Recovery and continuity

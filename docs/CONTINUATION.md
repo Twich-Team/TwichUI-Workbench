@@ -1,4 +1,25 @@
-# Signed-in Codex candidate staged — November 6, 2026 Mountain time
+# Bidirectional fallback candidate staged — November 6, 2026 Mountain time
+
+The owner clarified the four A8 choices. Application checkpoint `3404a29`
+supersedes `8167291` as the proposed installation. All four choices work
+in disposable verification. For eligible existing Lua regression tests,
+Workbench can switch once before generation in either direction with saved
+policy and task consent. Qwen can switch only when its read-only readiness
+connection is refused. Codex can switch on proven pre-generation
+unavailability or the allowed included allowance reserve. Finished failures,
+partial output and uncertain or active work hold. The reviewed provider
+stays bound to any separately approved implementation.
+
+The [combined request](EVERYDAY_INSTALL_APPROVAL_20261106.md) binds the new
+seal, source, scope, service changes, exact private access, original history
+and rollback. The previous stage and its seal remain intact. The normal app
+still serves the earlier demo. The actual signed-in account and both live
+switches remain unverified. No live Workbench call, source transmission,
+installation, service or firewall change, or archive occurred. Obtain the
+owner device's private IPv4, confirmation of included-only account settings
+and one approval for the bound package before cutover.
+
+# Historical one-direction Codex candidate staged — November 6, 2026 Mountain time
 
 The owner held the Qwen-only interim package and selected the existing
 ChatGPT CLI sign-in for A8. Application checkpoint `8167291` and the sealed

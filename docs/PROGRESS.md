@@ -1,3 +1,18 @@
+## November 6, 2026 — Bidirectional fallback
+
+- Bound both optional directions to the saved per-task selection and original
+  planning claim. Preserved legacy settings unless the owner saves a
+  separate choice for eligible tests.
+- Treated only a refused Qwen readiness connection as eligible for the new
+  switch. A refused generation request may already have reached the provider
+  and is held. Kept failed, partial and uncertain outcomes separate.
+- Verified the switched provider reaches the same independent approval and
+  verification path in the disposable fixture. Preserved reported usage and
+  stopped on unavailable accounting or a changed binding.
+- Prepared the updated combined decision with an isolated worker check for
+  Qwen-to-Codex acceptance. Preserved the prior release, history and rollback.
+  See the [A8 readiness report](A8_MODEL_ROUTING_READINESS_20261106.md).
+
 ## November 6, 2026 — A8 signed-in candidate
 
 - Owner held the Qwen-only interim install and chose existing ChatGPT CLI
