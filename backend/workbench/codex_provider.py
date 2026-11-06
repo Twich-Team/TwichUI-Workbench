@@ -45,7 +45,10 @@ def command(binary, credential, *, network=False):
             '--ro-bind', str(credential), '/codex/auth.json', '--tmpfs', '/work',
             '--chdir', '/work', '--dev', '/dev', '--proc', '/proc',
             '--setenv', 'HOME', '/work', '--setenv', 'CODEX_HOME', '/codex',
-            '--setenv', 'PATH', '/nonexistent']
+            '--setenv', 'PATH', '/nonexistent',
+            # Pinned CLI honors these endpoint overrides. Never let this process rotate the owner's login.
+            '--setenv', 'CODEX_REFRESH_TOKEN_URL_OVERRIDE', 'http://127.0.0.1:0',
+            '--setenv', 'CODEX_REVOKE_TOKEN_URL_OVERRIDE', 'http://127.0.0.1:0']
     if network:
         argv += ['--share-net', '--ro-bind', '/etc/resolv.conf', '/etc/resolv.conf',
                  '--ro-bind', '/etc/ssl/certs', '/etc/ssl/certs']

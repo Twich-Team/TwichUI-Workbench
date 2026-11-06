@@ -416,7 +416,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(payload=job['payload']))
                         c.execute(model_attempts.update().where(model_attempts.c.id == job['lease']).values(
                             backend='local', requested_model=everyday.MODEL, requested_effort=None,
-                            routing_reason='Approved fallback to Qwen after Codex held before generation.'))
+                            routing_reason=f'{error} The approved Qwen fallback started before any Codex generation.'))
                     model_selection = model_selection.model_copy(update={'model': everyday.MODEL})
                     adapter_used = LocalProvider(stop_event)
                     raw, model, basis = adapter_used.generate(wire, schema, expected_model=everyday.MODEL)
