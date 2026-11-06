@@ -1,4 +1,24 @@
-# Qwen-only installation decision — November 6, 2026 Mountain time
+# Approved Qwen-only interim release — November 6, 2026 Mountain time
+
+The owner approved the limited installation of sealed candidate `2613172`
+against the exact [installation and acceptance record](EVERYDAY_INSTALL_APPROVAL_20261106.md)
+at checkpoint `cd74f54`. The approval covers the bound cutover, one deliberate
+Qwen trial, and cleanup or rollback. Confirm owner availability before starting
+the timed window or sending the planning request. The owner still makes both
+task decisions in the browser. Live Codex and all provider switching stay held.
+
+The owner chose the interim release to enable use now. A8 remains open and
+required for the initial product. It requires operational signed-in Codex
+selection and explicit bounded fallback in both directions. Included
+subscription allowance only, no API-key billing, no extra credits, and no
+purchases, automatic reload or upgrades remain binding. The current
+App Server's snapshot-only allowance check leaves enforcement unresolved.
+Investigate a supported way to establish eligibility and carry this gap into
+the full requirements audit after visual styling. General addon bug fixing
+and the broader initial product remain unfinished. Neither follow-up phase is
+authorized by this installation decision.
+
+# Earlier Qwen-only installation proposal — November 6, 2026 Mountain time
 
 The owner reports a zero additional usage-credit balance and Automatic
 reload Off. These are owner-reported settings, with no independent

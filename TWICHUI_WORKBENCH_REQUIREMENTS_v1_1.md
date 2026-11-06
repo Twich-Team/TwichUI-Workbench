@@ -157,6 +157,8 @@ Owner clarification, November 6, 2026. The user chooses Qwen alone, Codex alone,
 
 Basic deliberate Codex use belongs in Phase A. Automatic allowance monitoring and percentage-based allocation belong in Phase C unless separately promoted.
 
+Owner decision, November 6, 2026. The Qwen-only installation is an interim release chosen to enable use now. A8 remains open for the initial product, including operational selection through the existing Codex sign-in and explicit bounded fallback in both directions. The included-subscription-only policy above still applies. The installed App Server exposes allowance snapshots and lacks a verified per-turn included-allowance lock. Investigate how to enforce the policy and keep live Codex held while eligibility cannot be established. Carry this open issue into the full requirements audit after visual styling. General addon bug fixing remains unfinished, and the interim release does not satisfy the broader initial product.
+
 ## A9. Recovery and continuity
 
 Reloads, restarts, duplicate clicks, and repeated decisions must not duplicate work, approvals, or publication.
