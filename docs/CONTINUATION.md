@@ -1,3 +1,70 @@
+# Coordinated map-fade trial completed with real Qwen — November 6, 2026 Mountain time
+
+The owner approved the exact [coordinated request](COORDINATED_MAP_FADE_TRIAL_REQUEST_20261106.md)
+as saved in `528465a`, SHA-256
+`1d27739593f3ede1fac2af6a4f60465d509d6569c90c43616e306f3216952495`.
+The trial used only candidate `fb1830e3e24e0bad3f6691eb28c996b9eace6ae4`
+and the bound manifest SHA-256
+`c3e5a9e64a1f40c6faf61246944de25f44654461e6f8eb8e6257a1a56c8fe2d3`.
+All 320 frozen inputs, the prior full offline receipt, both historical
+seals and the original retry trace matched. The full offline browser and
+visual suites were run on the earlier build. Focused tests and the staged
+rehearsal cover this candidate's changed handoff, timing and approval
+routing. No inputs or policies changed beneath the live trial.
+
+The owner confirmed availability and loaded the loopback access check
+before activation. The trial started at 12:07:01 p.m. MST. The latest
+offer time was 12:40:01 p.m., browser cutoff 12:55:01 p.m., and outer
+deadline 2:07:01 p.m. The owner submitted at 12:07:36 and separately
+approved the fresh Qwen plan at 12:08:04. The status page became ready
+at 12:24:22. The ready notice left 30 minutes 24 seconds before cutoff.
+The owner reached the ordinary approval form and saved the local-only
+decision at 12:25:41. It applied at 12:25:42. The two decisions and their
+bindings are preserved in the browser receipts.
+
+Qwen added six lines to the existing `tests/test_map_viewmath_step.lua`
+with no deletions. The assertion verifies that the first result of
+`TwichUI.MapViewMath.Fade(2,2,2)` is 1. Independent checks confirmed it
+rejects 0. Original, known-good, always-passing and wrong-value controls
+behaved as expected before the offer and in the fresh run workspace.
+The final candidate passed Lua syntax, the focused regression,
+independent behavior and all 167 existing suite groups. The independent
+terminal verifier passed and retained the
+[checked patch](../artifacts/runs/workflow-map-fade-coordinated-20261106-live/checked-map-fade.patch),
+SHA-256 `72b2038ed8a802c82e0c843186c7c77ddb1945b18dda64d646e8d48119f705d5`.
+A read-only apply check passed against the pinned base. Both protected
+addon checkouts remained clean.
+
+One planning request used 3,447 input and 323 generated tokens. The
+single cancellation probe passed with 64 counted input tokens and a
+60-token generation ceiling. Four implementation exchanges used 15,008
+input and 382 generated tokens with zero corrections. The exclusive lease
+lasted about 5 minutes 44 seconds. There was one execution request, one
+revoked grant, and zero publication or PR preparation records.
+
+The execution services closed at 12:47:50 p.m. MST. The
+[terminal audit](../artifacts/runs/workflow-map-fade-coordinated-20261106-live/terminal-verification.json)
+verified the original model configuration, permissions, authenticated
+access, and rejection of the temporary credential. It verified the
+matching grant was revoked and the runtime capability was removed.
+The owned worker and readiness cgroups settled, both everyday listeners
+kept their owners, and the installed addon and everyday app were left
+in place. A separate loopback-only result view opened after closeout
+and was scheduled to stop at 12:59:09 p.m. MST. It used the closed
+database and rejected writes with HTTP 405. The patch and audit remain
+available after that view closes.
+
+The [closeout receipt](../artifacts/runs/workflow-map-fade-coordinated-20261106-live/closeout-safeguards.json)
+seals 54 files. Trial evidence was 3,864,927 bytes (3.69 MiB) after the
+receipt, leaving 82,646,107 bytes (78.82 MiB) of aggregate headroom at
+measurement. The minimum physical free space was 28,662,136,832 bytes.
+Scratch peaked at 353,036,714 bytes and the two inactive private
+verification checkouts were retained. No archival, cap change, or
+installation was needed. The real-model path through the reviewed screens
+has now completed once. The everyday build remains earlier. Installing
+the verified Workbench build needs separate owner approval and the checked
+installation and rollback procedure.
+
 # Missed approval reviewed and a coordinated trial prepared — November 6, 2026 Mountain time
 
 The [approval investigation](MAP_FADE_APPROVAL_REVIEW_20261106.md) reconciles

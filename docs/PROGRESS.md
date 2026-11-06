@@ -1,3 +1,18 @@
+## November 6, 2026 — real map-fade trial completed through the simpler screens
+
+Candidate `fb1830e` passed the coordinated live trial. The owner submitted
+the request and made both browser decisions. The ready notice left over
+30 minutes for the second review. Qwen added one threshold assertion in
+the existing Lua test. Four independent checks passed, including all 167
+existing suite groups, and the checked patch was retained locally.
+
+The isolated write API, worker and readiness unit closed. The grant and
+runtime capability were withdrawn, and the terminal audit verified normal
+authenticated model access and rejection of the temporary credential.
+Evidence stayed within limits. The earlier full offline result and the
+candidate's focused verification are preserved. The everyday app and
+installed addon stayed in place. See CONTINUATION for the patch and audit.
+
 ## November 6, 2026 — missed implementation approval investigated
 
 The certified offer opened with 7 minutes 46 seconds left. The server
