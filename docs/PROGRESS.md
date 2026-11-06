@@ -1,3 +1,20 @@
+## November 6, 2026 — reviewed interface frozen for one proposed map-fade trial
+
+The owner accepted the usability direction. Reviewed UI assets match the
+frozen trial byte for byte. Trial-only intake now preloads the approved draft
+in the normal task form and waits for the owner’s Submit action. Fresh plan
+review and local-run approval remain separate. The frozen stage has an empty
+store and verified backup. Its capability is dormant.
+
+The Chromium intake smoke used the exact prepared text with a disposable
+store and no worker. Focused offline checks covered real API enforcement,
+held and failed work, interruption, and checked results. Changed frozen inputs
+were rejected before planning, at browser ingress and at controller entry.
+The exact archive and capacity estimates are bound in the combined request.
+The full browser and visual runs and all live steps await authorization.
+The prior real-addon seal still matches and the everyday app is on the
+earlier installed build. See CONTINUATION for the checkpoint and stage.
+
 ## November 6, 2026 — practical task decisions and readable results
 
 Owner feedback is recorded as guidance about what to show first. The updated

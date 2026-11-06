@@ -43,6 +43,7 @@ This example does not limit the product to bug reports. Retain the full intended
 - Keep technical detail in advanced views and supporting reports. Deterministic explanations are the baseline. Model-assisted explanations are optional, require their own authorization where applicable, and confer no authority.
 - Let outcomes fit the request. Show findings, test results, proposed changes or completed checked work. State what was checked and what still needs evidence, and explain why held work stopped and what the owner can do.
 - Treat workflow examples and controls as illustrations of the desired simplicity. The layout and interaction can evolve as long as they satisfy these principles.
+- On November 6, 2026, the owner accepted the current usability direction after reviewing the simpler task screens. Final visual acceptance and a real-model result through those screens are still pending.
 - Preserve the addon's general colors, artwork, and theme. Use the current frameless WoW-inspired visual baseline for the dashboard phase.
 - Automate routine investigation, preparation, debugging, testing, recovery, and housekeeping.
 - Ask Rich only for genuine decisions, unavailable access, changed scope, or consequential permission.

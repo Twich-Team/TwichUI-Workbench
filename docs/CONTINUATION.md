@@ -1,3 +1,52 @@
+# Owner usability direction accepted and map-fade trial prepared — November 6, 2026 Mountain time
+
+The owner reviewed the simpler interface and said it looks good for now.
+This accepts the usability direction. The final browser and visual review
+and the first real-model result through these screens are still pending.
+The accepted preview [on port 9189](http://127.0.0.1:9189/) remains simulated
+and is scheduled to close at 11:33:27 a.m. MST. Port 9487 serves the earlier
+installed build. Port 8765 and the existing local model kept their owners.
+The older 9187 review expired on schedule.
+
+Reviewed source is `cd46482c4a9f031b3bc777cbe4763b5db30660aa`. Trial checkpoint
+`17ad1ac4658b26dcb3eba3fa44891a53d8310c97` builds byte-identical reviewed HTML,
+JavaScript and CSS. The trial launcher now waits for the owner to submit a
+prefilled request in the actual task form. It then waits for separate owner
+decisions on the fresh plan and the independently checked local-run offer.
+The everyday form and workflow code are unchanged. The result stays local.
+
+The private stage is `.local/workflow-acceptance-20261106`. Its manifest SHA-256
+is `507049cbc6f2a28c858fb2c3321f44d1a5593af32249548510d0506637f5b1ff`.
+Read-only preflight verified 318 inputs, the empty store and its matching
+backup, stage-owned paths, policy and existing model identity. No service
+contact or capability activation was involved. The frozen production build,
+25 frontend tests and 224 focused backend tests passed. Fourteen stage tests
+were rerun after the final launcher changes and passed. A disposable Chromium
+test with the exact map-fade draft verified explicit submission and a matching
+saved request with no approval. A changed manifest was rejected before the
+actual planning claim reached its offline adapter. Offline tests checked
+changed frozen inputs at browser ingress and controller entry, along with
+approval scope, expiry, stale offers, interrupted and failed runs, and
+checked results. The temporary recording-disabled suite configuration stopped
+at an import before any cases ran. A full staged trial remains pending.
+
+The addon base `1caf530212bbc6eaf37e41d668902a391aa936c1` is clean. The existing
+test lacks the threshold assertion. The historical patch still applies in a
+read-only check and was kept out of the prepared model inputs. The previous
+real-addon run's 222 files match their seal, including the checked result and
+restoration records. It remains evidence for an earlier build and spent run.
+
+The [combined request](WORKFLOW_ACCEPTANCE_REQUEST_20261106.md) binds the exact
+36 closed evidence directories, verified copy and restore before removal,
+the outstanding complete Chromium project and final desktop and phone visual
+comparisons, and one subsequent isolated local-model trial with verified
+cleanup. The stage and workspace use 535,957,739 counted bytes, leaving
+913,173 bytes under the existing cap. The proposed archive would free
+125,356,114 bytes and leave about 75.08 MiB after the setup and offline
+allowances. No archive, live clock, model call, probe, lease, or installation
+has started. Installing Workbench and applying an addon patch are distinct
+owner decisions.
+
 # Usability pass available for local review — November 6, 2026 Mountain time
 
 Open [127.0.0.1:9189](http://127.0.0.1:9189/) on the Workbench host or through
