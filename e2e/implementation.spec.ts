@@ -132,6 +132,7 @@ for(const change of ['revoke','stale']) test(`changed authority ${change} after 
   await box.getByRole('button',{name:'Make sample',exact:true}).click();
   await expect(box.getByRole('heading',{name:'Sample request saved',exact:true})).toBeVisible();
   fixture('admission-'+change);fixture('worker');
+  if (change==='revoke') await page.getByText('Original request, planning history and evidence',{exact:true}).click();
   await expect(box.getByRole('heading',{name:change==='revoke'?'Sample needs an approved plan':'Sample request is out of date',exact:true})).toBeVisible();
   const receipt = (await (await page.request.get(path)).json()).receipts[0];
   expect(receipt.attempt).toBeNull();expect(receipt.candidate).toBeNull();

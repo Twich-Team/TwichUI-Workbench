@@ -30,5 +30,6 @@ export async function capture(page: Page, info: TestInfo, name: string) {
   const path = artifactPath(`screenshots/${name}.png`);
   if (!(await page.getByRole('dialog').isVisible())) await page.evaluate(() => window.scrollTo(0,0));
   await page.screenshot({ path, fullPage: !(await page.getByRole('dialog').isVisible()) });
-  await info.attach(name, { path, contentType: 'image/png' });
+  if (process.env.WORKBENCH_E2E_LINE_ONLY !== '1')
+    await info.attach(name, { path, contentType: 'image/png' });
 }

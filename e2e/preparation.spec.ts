@@ -132,6 +132,8 @@ test('rejection, changed settings and historical success remain separate from cu
   await box.getByRole('button',{name:'Prepare sample PR',exact:true}).click();fixture('worker');
   await expect(box.getByRole('heading',{name:'Sample PR prepared',exact:true})).toBeVisible();
   fixture('admission-revoke');
+  await page.getByText('Original request, planning history and evidence',{exact:true}).click();
+  await box.getByRole('button',{name:'Review changes',exact:true}).click();
   await expect(box.getByText('Historical result only.',{exact:false})).toBeVisible();
   await shot(page,'historical-current-invalid');
   await box.getByText('Sample PR history (2)',{exact:true}).click();
@@ -146,6 +148,8 @@ test('changed approval after save holds preparation; missing comparison is expli
   const {box} = await ready(page);
   await box.getByRole('button',{name:'Prepare sample PR',exact:true}).click();
   fixture('admission-revoke');fixture('worker');
+  await page.getByText('Original request, planning history and evidence',{exact:true}).click();
+  await box.getByRole('button',{name:'Review changes',exact:true}).click();
   await expect(box.getByRole('heading',{name:'Sample PR needs attention',exact:true})).toBeVisible();
   await shot(page,'approval-held-390');
   fixture('sample-artifact-missing');

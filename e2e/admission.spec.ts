@@ -98,6 +98,7 @@ for (const change of ['revoke','stale']) test(`authority ${change} after save pr
   await box.getByRole('button',{name:'Check this task’s approval',exact:true}).click();
   await expect(box.getByRole('heading',{name:'Waiting for approval check'})).toBeVisible();
   fixture('admission-'+change);fixture('worker');
+  if (change==='revoke') await page.getByText('Original request, planning history and evidence',{exact:true}).click();
   await expect(box.getByRole('heading',{name:change==='revoke'?'Approval check couldn’t pass':'This check is out of date'})).toBeVisible();
   await expect(box.getByText('This task needs attention',{exact:true})).toBeVisible();
   await expect(box.getByText('Previous check · Does not confirm approval of the current task.',{exact:true})).toBeVisible();
