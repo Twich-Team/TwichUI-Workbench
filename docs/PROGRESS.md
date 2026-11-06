@@ -1,3 +1,17 @@
+## November 6, 2026 — first authorized real-addon browser run closed
+
+Exact frozen stage and addon base matched. The owner confirmed browser access,
+the named archive verified against a separate restore, and the 72 MiB reserve
+passed. One authentic Qwen planning request from Chromium reported 2,718 input
+and 406 generated tokens. Workbench rejected its loaded-client proposal for
+the core-addon source rule. The raw field mismatch is unavailable. The store
+retains the failed intake with zero approvals, offers, grants, implementation,
+or publication records. There was no model lease or temporary key. The
+original configuration and authenticated access were verified. The isolated
+write API and worker closed and the capability was withdrawn. The failed
+outcome is sealed and available for bounded read-only review. This approval
+is spent. See [CONTINUATION.md](CONTINUATION.md) for links and the next outcome.
+
 ## November 5, 2026 — Real TwichUI browser path staged and rehearsed
 
 Workbench `87ef1a86271cd4223527c5b3df1d17b5e92232cd` supports the

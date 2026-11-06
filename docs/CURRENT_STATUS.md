@@ -1,10 +1,10 @@
 # TwichUI Workbench current status
 
-Last updated November 5, 2026 (Mountain time).
+Last updated November 6, 2026 (Mountain time).
 
-- **Running app.** Port 9487 still runs build `fcf74ce`. The real-addon build is staged separately.
+- **Running app.** Port 9487 still runs build `fcf74ce`. The real-addon demonstration used a separate build.
 - **Finished results.** One synthetic browser task finished with real Qwen and two owner approvals. Zero real-addon tasks have completed through the browser with a real model.
-- **Tests and demonstrations.** On the real addon, a browser rehearsal with scripted model responses reached a sealed local result. The independent behavior check and all 167 addon test groups passed offline.
-- **What is stopping progress.** The live demonstration awaits approval. Its evidence space needs the named lossless archive first.
-- **Next complete outcome.** Use the browser to add and verify coverage for map opacity at a single fade threshold.
-- **Decision needed.** Approve one isolated local Qwen run, then review the actual proposal and run budget in the browser. Publication stays held.
+- **Tests and demonstrations.** A scripted rehearsal on the real addon reached a sealed result and passed all 167 offline test groups. The first real Qwen run stopped at planning and produced no patch.
+- **What is stopping progress.** Workbench rejected the real proposal because its example failed the core-addon source rule. The failed intake is saved, the isolated write services are closed, and normal model access was verified.
+- **Next complete outcome.** Resolve the planning validation problem and take the map fade regression task through browser approval to an independently checked patch.
+- **Decision needed.** A fresh real-model run requires separate approval. Installation, in-game verification, and publication are separate.

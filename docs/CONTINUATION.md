@@ -1,3 +1,57 @@
+# First real TwichUI browser demonstration closed at planning — November 6, 2026 Mountain time
+
+The approved one-off task was **Cover the map fade at a single threshold**.
+The exact frozen Workbench build was `87ef1a86271cd4223527c5b3df1d17b5e92232cd`,
+manifest SHA-256 `2879cfe6ff603db03e7e6daca008ffea01eb32fa7301f7188633754baf78abb8`,
+on TwichUI base `1caf530212bbc6eaf37e41d668902a391aa936c1`. The original
+combined approval below is spent. The run started at 5:50:44 a.m. MST,
+the shared review cutoff was 6:23:44 a.m., and the outer deadline was
+7:35:44 a.m. The owner confirmed the access page before submission.
+
+The named archive preserved 70 files and 27,301,481 bytes. Original-path
+lookup, file contents and metadata, and a separate isolated restore matched
+before pruning matching originals. Post-archive headroom was 81,078,544
+bytes, with more than 4 GiB physically free. The pre-planning reserve
+also passed. No other archive targets were used.
+
+The fresh Chromium intake used the existing authenticated local Qwen.
+The one planning request returned in about 22 seconds and reported
+2,718 input and 406 generated tokens. Workbench rejected the proposal at
+5:53:33 a.m. because its loaded-client example did not satisfy the bound
+core-addon source rule. That rule requires one core source path and the
+exact core addon list. The retained diagnostic does not identify which
+field was wrong. The saved original request and example are intact.
+
+There was no reviewable proposal, so the two owner approvals were never
+presented. The store has zero offers, decisions, grants, implementation
+requests, and publication records. The implementation and its independent
+checks never began, and there is no patch. The earlier native Lua results
+remain rehearsal evidence. No replacement attempt was started.
+
+The model lease was never opened and no temporary credential existed.
+Authenticated planning and the recheck of the original process, credential,
+configuration and sampler proof verified normal model access. Restoration
+and temporary-key rejection were inapplicable. The worker, delegated
+cgroup, write API and temporary access page are closed. The one-off
+capability was withdrawn and its empty scratch was removed. The original
+listeners on 9487, 8765 and 8080 matched, both addon checkouts stayed clean,
+and all 518 protected historical manifest entries matched. All frozen
+stage files matched after closeout except the intentionally written run
+store, which is now sealed separately in the evidence manifest.
+
+The [read-only failed intake](http://127.0.0.1:9187/intake/438f0a75-17ca-416b-9a71-dc8110bd09f9)
+expires by 7:35:44 a.m. MST. It serves the original inode-bound store with
+writes denied. The [saved outcome](../artifacts/runs/browser-real-addon.A3XE0s/planning-hold.json),
+[terminal verification](../artifacts/runs/browser-real-addon.A3XE0s/terminal-verification.json),
+[cleanup receipt](../artifacts/runs/browser-real-addon.A3XE0s/closeout-safeguards.json),
+[desktop](../artifacts/runs/browser-real-addon.A3XE0s/browser/intake-result-1440.png),
+and [phone](../artifacts/runs/browser-real-addon.A3XE0s/browser/intake-result-390.png)
+are retained on disk. The next milestone is to resolve the loaded-client
+planning validation problem and verify a real proposal in a separately
+authorized run before proceeding through browser approvals and patch checks.
+Installation, any game verification, broader acceptance and publication
+remain separate.
+
 # Real TwichUI browser readiness — November 5, 2026 Mountain time
 
 Workbench now grounds a bounded regression test that uses the addon's
