@@ -151,7 +151,7 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
     {localWork.data.codex_configured ? <>
       {!localWork.data.codex_available&&<p className="detail-copy">The Codex connector is unavailable. If you choose Codex first, planning can proceed with Qwen only if you allow that switch.</p>}
       {body.local_planning?.startsWith('qwen-')&&<>
-        <label className="check-label"><input type="checkbox" checked={body.local_planning==='qwen-with-codex-fallback'}
+        <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning==='qwen-with-codex-fallback'}
           onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-with-codex-fallback':'qwen-once'})}/><span>Allow one switch to signed-in Codex if Qwen cannot connect before generation</span></label>
         {body.local_planning==='qwen-with-codex-fallback'&&<p className="detail-copy">If Qwen cannot start and Models allows the switch, this permits sending your request, clarification and relevant committed source excerpts to OpenAI after the account and included allowance are checked.</p>}
       </>}
@@ -159,7 +159,7 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
         onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-once':null})}/><span>Allow one signed-in Codex turn to plan this task</span></label>
       {body.local_planning?.startsWith('codex-')&&<>
         <p className="detail-copy">This sends the request, clarification and relevant committed source excerpts to OpenAI through the configured ChatGPT sign-in. Workbench will check the saved model and included allowance before sending task content.</p>
-        <label className="check-label"><input type="checkbox" checked={body.local_planning==='codex-with-local-fallback'}
+        <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning==='codex-with-local-fallback'}
           onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-with-local-fallback':'codex-once'})}/><span>Allow one switch to local Qwen if Codex is unavailable or reaches its included allowance reserve before generation</span></label>
       </>}
     </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
