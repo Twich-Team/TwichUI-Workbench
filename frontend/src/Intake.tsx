@@ -102,7 +102,7 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   <p className="small-text">Tell Workbench what you want to happen. For a bug, say what happens today and what you expected.</p>
   {localWork.data?.enabled&&<div className="soft-callout">
     <p><strong>Available for local execution</strong> Add coverage to an existing TwichUI Lua test for a concrete example. Workbench saves the checked result here.</p>
-    <p>Bug fixes, features, inspections, simulator work, Codex and publishing still need a separate workflow.</p>
+    <p>Bug fixes, features, inspections, simulator work and publishing still need a separate workflow.</p>
     <p role="status">{localWork.data.message}</p>
     {localWork.data.headroom_bytes!=null&&<p className="small-text">{Math.max(0,Math.floor(localWork.data.headroom_bytes/1048576))} MiB available for saved evidence. Workbench needs {localWork.data.reserve_bytes/1048576} MiB free before starting.</p>}
   </div>}
@@ -148,10 +148,20 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   {localWork.data?.enabled&&regression&&<>
     <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning==='qwen-once'} disabled={body.visual_requirement!=='nonvisual'}
       onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>Allow one local Qwen request to plan this task</span></label>
+    {localWork.data.codex_configured ? <>
+      {!localWork.data.codex_available&&<p className="detail-copy">The Codex connector is unavailable. A request with fallback disabled will be held. Workbench can switch to Qwen only with your explicit approval and saved fallback policy.</p>}
+      <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('codex-')||false} disabled={body.visual_requirement!=='nonvisual'}
+        onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-once':null})}/><span>Allow one signed-in Codex turn to plan this task</span></label>
+      {body.local_planning?.startsWith('codex-')&&<>
+        <p className="detail-copy">This sends the request, clarification and relevant committed source excerpts to OpenAI through the configured ChatGPT sign-in. Workbench will check the saved model and included allowance before sending task content.</p>
+        <label className="check-label"><input type="checkbox" checked={body.local_planning==='codex-with-local-fallback'}
+          onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-with-local-fallback':'codex-once'})}/>Allow one switch to local Qwen if a condition configured in Models stops Codex before generation</label>
+      </>}
+    </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
     <p className="detail-copy">Choose “Does not change the interface” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. Permission expires after 30 minutes. Planning can take up to two minutes. You review the plan and approve any run separately.</p>
   </>}
 </fieldset>
-  <p className="detail-copy">{localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':'Your request will be saved. Local model planning requires the test coverage option and your permission.'):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.title.trim() || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
+  <p className="detail-copy">{localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':'Your request will be saved. Model planning requires the test coverage option and your permission.'):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.title.trim() || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
 }
 
 export function IntakeDetail() {

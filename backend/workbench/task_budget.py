@@ -252,14 +252,11 @@ def validate_selection(c, proposal_id, budget, *, admitting=False):
         if (budget.publication != 'hold' or not selected['snapshot'].get('certified_preparation')
                 or not review or not review.get('ref')):
             raise HTTPException(409, 'This Workbench installation runs certified test coverage and keeps results local.')
-        from workbench import intake
-        from workbench.db import intakes
-        original = intake.require(c, intakes, review['ref']['intake_id'])
-        if original['payload'].get('local_planning') != 'qwen-once':
-            raise HTTPException(409, 'This offer belongs to an earlier workflow. Start an ordinary locally approved test task.')
         if admitting:
+            from workbench import provider_routes, task_execution
+
             try:
-                everyday.local_selection(c)
+                provider_routes.run_selection(c, task_execution.snapshot(c, **review['ref']))
             except ValueError as error:
                 raise HTTPException(409, str(error)) from None
     if budget.activate_once:
@@ -353,14 +350,26 @@ def offer_view(c, proposal, selected):
     readiness = everyday.status(c.engine) if everyday.enabled() else None
     one_off = readiness.ready if readiness else capability(c.engine) is not None
     hold = readiness.message if readiness and not one_off else None
+    reviewed = selected["snapshot"].get("reviewed_task")
+    provider = None
     if readiness and one_off:
+        from workbench import codex_provider, provider_routes, task_execution
+
         try:
-            everyday.local_selection(c)
+            linked = task_execution.snapshot(c, **reviewed['ref'])
+            route = provider_routes.run_selection(c, linked)
+            grounding = linked['proposal_review']['task_contract'].get('scenario_grounding') or {}
+            provider = dict(backend='codex' if route else 'local',
+                            model=route['model'] if route else everyday.MODEL,
+                            effort=route['effort'] if route else None,
+                            fallback_reason=grounding.get('fallback_reason'))
+            if route and not codex_provider.connector_path():
+                one_off, hold = False, 'The approved Codex connector is unavailable. No model starts.'
         except ValueError as error:
             one_off, hold = False, str(error)
-    reviewed = selected["snapshot"].get("reviewed_task")
     return dict(
         runtime_ready=one_off,
+        provider=provider,
         local_only=True if readiness else None,
         available=one_off or not readiness,
         message=("The task is ready for your decision. The worker will check readiness again before it starts." if one_off else hold or "Execution is unavailable here. Saving approval records your decision without starting a run."),

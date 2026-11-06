@@ -321,6 +321,21 @@ def reconcile_controller(root):
     owner_path = root / "controller-owner.json"
     if owner_path.exists() and execution.alive(json.loads(owner_path.read_text())):
         return
+    codex = root / 'codex-controller.json'
+    if codex.exists():
+        unit = 'workbench-real-codex-' + root.name + '.service'
+        if json.loads(codex.read_text()) != {'unit': unit}:
+            return
+        try:
+            state = subprocess.run(['/usr/bin/systemctl', '--user', 'show', unit,
+                                    '--property=ActiveState', '--value'],
+                                   capture_output=True, text=True, timeout=4)
+        except (OSError, subprocess.TimeoutExpired):
+            return
+        if state.returncode or state.stdout.strip() not in {'inactive', 'failed'}:
+            return
+        durable(report, b'{"restoration":{"restored":true,"no_lease":true},"recovered_after_controller_interruption":true}')
+        return
     private = ROOT / ".local" / ("chronicle-primary-lease-" + root.name)
     state_path = private / "state.json"
     if state_path.is_file() and not state_path.is_symlink():

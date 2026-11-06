@@ -151,19 +151,16 @@ def test_worker_ownership_prevents_overlap(store, client, installed):
     assert real_execution.alive(real_execution.owner_identity())
 
 
-def test_codex_preference_holds_qwen_planning_even_with_fallback_enabled(
+def test_explicit_qwen_is_independent_of_the_default_provider(
     store, client, headers, installed,
 ):
     planner = ControlledPlanner()
     item = client.post('/api/intake', headers=headers, json=body()).json()
     save_local_policy(store, model=everyday.MODEL, preferred='codex')
     assert worker.tick(store, planning_adapter=planner)
-    held = client.get('/api/intake/' + item['id']).json()
-    assert held['status'] == 'failed'
-    assert 'Codex and fallback are unavailable' in held['jobs'][0]['message']
-    assert not planner.calls
-    with store.connect() as c:
-        assert not c.execute(select(model_attempts)).first()
+    result = client.get('/api/intake/' + item['id']).json()
+    assert result['status'] == 'completed'
+    assert len(planner.calls) == 1
 
 
 def test_saved_qwen_selection_reaches_adapter_and_changed_preference_fences_run(
@@ -184,7 +181,7 @@ def test_saved_qwen_selection_reaches_adapter_and_changed_preference_fences_run(
     assert worker.tick(store)
     current = client.get('/api/intake/' + item['id']).json()
     assert current['provider_activity'][0]['actual_model'] == everyday.MODEL
-    assert 'Saved preferred local' in current['provider_activity'][0]['routing_reason']
+    assert 'Saved local planning model' in current['provider_activity'][0]['routing_reason']
     monkeypatch.delenv('WORKBENCH_LOCAL_KEY')
     approve_and_decompose(store, client, headers, item)
     assert worker.tick(store)
@@ -197,9 +194,9 @@ def test_saved_qwen_selection_reaches_adapter_and_changed_preference_fences_run(
     saved = client.post(endpoint, headers=headers, json=command)
     assert saved.status_code == 200 and saved.json()['status'] == 'pending'
 
-    save_local_policy(store, model=everyday.MODEL, preferred='codex')
+    save_local_policy(store, model=everyday.MODEL, enabled=False)
     held = client.get(endpoint).json()
-    assert not held['available'] and 'Codex and fallback are unavailable' in held['message']
+    assert not held['available'] and 'Enable the installed local Qwen model' in held['message']
     assert client.post(endpoint, headers=headers, json=command).json() == saved.json()
     denied = client.post(endpoint, headers=headers, json={**command, 'command_id': str(uuid4())})
     assert denied.status_code == 409
@@ -209,3 +206,178 @@ def test_saved_qwen_selection_reaches_adapter_and_changed_preference_fences_run(
     with store.connect() as c:
         assert len(c.execute(select(model_attempts)).all()) == 1
         assert not c.execute(select(real_execution_grants)).first()
+
+
+def save_codex_policy(store):
+    from workbench import model_policy
+
+    policy = model_policy.read(store)
+    policy.preferred = 'codex'
+    policy.fallback = ['local']
+    policy.fallback_on = ['capacity', 'unavailable']
+    policy.providers['codex'].model = 'simulated-codex'
+    return model_policy.save(store, policy, model_policy.CapabilityReport(executors=[]))
+
+
+@pytest.mark.parametrize('choice,failure,started,expected', [
+    ('codex-once', 'authentication', False, None),
+    ('codex-with-local-fallback', 'authentication', False, 'local'),
+    ('codex-with-local-fallback', 'capacity', False, 'local'),
+    ('codex-with-local-fallback', 'capacity', True, None),
+    ('codex-with-local-fallback', 'accounting', False, None),
+    ('codex-with-local-fallback', 'canceled', True, None),
+    ('codex-once', None, False, 'codex'),
+])
+def test_codex_planning_route_is_bounded_and_deduplicated(
+    store, client, headers, installed, monkeypatch, choice, failure, started, expected,
+):
+    from workbench import codex_provider
+    from workbench.planning_provider import LocalProvider
+
+    policy = save_codex_policy(store)
+    planner, calls = ControlledPlanner(), []
+    counted = dict(prompt_tokens=40, completion_tokens=10, reasoning_tokens=0, total_tokens=50)
+
+    def generate(model, effort, prompt, schema, stop):
+        assert model == policy.providers['codex'].model and effort is None and not stop()
+        calls.append('codex')
+        if failure:
+            raise codex_provider.Hold(failure, started=started)
+        raw, _, _ = planner.generate(json.loads(prompt.split('Untrusted task data:\n')[1]), None)
+        return raw, counted
+
+    def local(self, packet, schema, expected_model):
+        assert expected_model == everyday.MODEL
+        calls.append('local')
+        raw, _, _ = planner.generate(packet, schema)
+        return raw, expected_model, 'local'
+
+    monkeypatch.setattr(codex_provider, 'generate', generate)
+    monkeypatch.setattr(LocalProvider, 'generate', local)
+    request = {**body(), 'local_planning': choice}
+    saved = client.post('/api/intake', headers=headers, json=request)
+    assert saved.status_code == 200, saved.text
+    item = saved.json()
+    assert client.post('/api/intake', headers=headers, json=request).json()['id'] == item['id']
+    assert worker.tick(store)
+    assert not worker.tick(store)
+    assert calls == (['codex', 'local'] if expected == 'local' else ['codex'])
+    result = client.get('/api/intake/' + item['id']).json()
+    with store.connect() as c:
+        row = c.execute(select(model_attempts)).mappings().one()
+        planning = c.execute(select(planning_jobs)).mappings().one()
+    assert row['backend'] == (expected or 'codex')
+    if expected:
+        assert result['proposals'][0]['task_contract']['scenario_grounding']['basis'] == expected
+    else:
+        assert result['status'] == 'failed'
+    if expected == 'local':
+        assert planning['payload']['provider_switch']['reason'] == failure
+        assert planning['payload']['provider_switch']['codex_generation_started'] is False
+
+
+def test_codex_saved_policy_change_prevents_old_consent_from_starting(
+    store, client, headers, installed, monkeypatch,
+):
+    from workbench import codex_provider
+
+    save_codex_policy(store)
+    response = client.post('/api/intake', headers=headers, json={**body(), 'local_planning': 'codex-once'})
+    assert response.status_code == 200
+    from workbench import model_policy
+
+    policy = model_policy.read(store)
+    policy.providers['codex'].model = 'changed-codex-model'
+    model_policy.save(store, policy, model_policy.CapabilityReport(executors=[]))
+    monkeypatch.setattr(codex_provider, 'generate', lambda *_: pytest.fail('Stale authority invoked Codex'))
+    assert worker.tick(store)
+    saved = client.get('/api/intake/' + response.json()['id']).json()
+    assert saved['status'] == 'failed'
+    assert 'policy changed' in saved['jobs'][0]['message']
+
+
+@pytest.mark.parametrize('good_edit', [True, False])
+def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
+    store, client, headers, installed, monkeypatch, good_edit,
+):
+    from workbench import codex_provider, provider_routes, task_execution
+    from workbench.codex_runtime import CodexRuntime
+    from workbench.db import real_execution_requests, real_publications
+    from workbench.real_workspace import confine, durable
+    from test_regression_evidence import ControlledPreparer
+
+    policy = save_codex_policy(store)
+    planner = ControlledPlanner()
+    counted = dict(prompt_tokens=40, completion_tokens=10, reasoning_tokens=0, total_tokens=50)
+    calls = []
+    monkeypatch.setattr(codex_provider, 'connector_path', lambda: installed / 'simulated.sock')
+
+    def generate(model, effort, prompt, schema, stop):
+        assert (model, effort) == (policy.providers['codex'].model, None) and not stop()
+        if 'Untrusted task data:\n' in prompt:
+            calls.append('planning')
+            value, _, _ = planner.generate(json.loads(prompt.split('Untrusted task data:\n')[1]), schema)
+            return value, counted
+        calls.append('implementation')
+        old = 'assert(normalize("alice") == "alice")'
+        expected = 'alice' if good_edit else 'ALICE'
+        return {'old': old, 'new': f'assert(normalize("  ALICE ") == "{expected}")\n{old}'}, counted
+
+    monkeypatch.setattr(codex_provider, 'generate', generate)
+    saved = client.post('/api/intake', headers=headers, json={**body(), 'local_planning': 'codex-once'})
+    assert saved.status_code == 200
+    item = saved.json()
+    assert worker.tick(store)
+    approve_and_decompose(store, client, headers, item)
+    assert worker.tick(store)
+    item = client.get('/api/intake/' + item['id']).json()
+    task, = (task for task in item['tasks'] if task['kind'] == 'task')
+    path = f"/api/intake/{item['id']}/tasks/{task['id']}/run-approval"
+    offer = client.get(path).json()
+    assert offer['available'] and offer['provider']['model'] == policy.providers['codex'].model
+    body_approval = dict(command_id=str(uuid4()), binding=offer['binding'],
+                         scope_approval_id=offer['scope_approval_id'], run_budget=offer['offer']['budget'])
+    response = client.post(path, headers=headers, json=body_approval)
+    assert response.status_code == 200, response.text
+    assert client.post(path, headers=headers, json=body_approval).json() == response.json()
+    assert calls == ['planning']
+    assert worker.tick(store)
+    assert worker.tick(store)
+
+    class Runtime(CodexRuntime, ControlledPreparer):
+        def preflight(self):
+            return self.static_preflight()
+
+    def launch(command):
+        assert 'codex_task.py' in command[-2]
+        cycle = Path(command[-1])
+        ref = json.loads((cycle / 'workflow-link.json').read_text())['task']
+        with store.connect() as c:
+            route = provider_routes.run_selection(c, task_execution.snapshot(c, **ref))
+        runtime = Runtime(cycle / 'real-run', route)
+        runtime.task_ref = ref
+        monkeypatch.setattr(confine, 'root', lambda: str(installed / 'simulated-cgroup'))
+        assert real_execution.process_one(store, runtime)
+        assert not real_execution.process_one(store, runtime)
+        durable(cycle / 'lease-controller-result.json', b'{"restoration":{"restored":true},"simulated":true}')
+
+    def prepare(runtime, template):
+        task_session.provision(ControlledPreparer(runtime.root), template)
+
+    def advance(engine, path, stop_event=None):
+        return task_session.process_one(engine, path, stop_event, prepare=prepare, launch=launch)
+
+    monkeypatch.setattr('runpy.run_path', lambda _path: {'checked_limit': lambda _root: None})
+    assert task_sessions.process_one(store, advance=advance)
+    assert calls == ['planning', 'implementation']
+    with store.connect() as c:
+        execution = c.execute(select(real_execution_requests)).mappings().one()
+        assert not c.execute(select(real_publications)).first()
+        attempts = c.execute(select(model_attempts).order_by(model_attempts.c.started_at)).mappings().all()
+    assert [(a['task_id'], a['backend']) for a in attempts] == [(item['id'], 'codex')] * 2
+    assert execution['result']['usage']['values'] == counted
+    assert execution['status'] == ('checked' if good_edit else 'failed'), execution['result']
+    if good_edit:
+        assert len(execution['result']['checks']) >= 4
+    else:
+        assert not execution['result'].get('candidate_id')

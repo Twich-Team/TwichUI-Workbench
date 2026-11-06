@@ -91,7 +91,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
   const draftPR=(draft?.run_budget.publication??publication)==='draft-pr';
   const buttonLabel=busy?'Saving approval…':draft?'Retry same task approval':
     !budget.activate_once?'Save approval · Execution unavailable':
-    draftPR?'Approve run and draft pull request':'Approve local run';
+    draftPR?'Approve run and draft pull request':shown.provider?.backend==='codex'?'Approve Codex run':'Approve local run';
   return <section className="soft-callout run-approval" id="local-run-review" ref={offerRegion} tabIndex={-1} aria-label="Certified task run approval">
     <h3>{testOnly?'Add test coverage in a separate copy':'Run the approved work in a separate copy'}</h3>
     {testOnly?<p>Your installed addon, addon code and existing checks stay as they are.</p>:
@@ -99,8 +99,10 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
         <p><strong>Outside this run</strong></p><ul>{scope?.content.exclusions.map((s,i)=><li key={i}>{s}</li>)}</ul></>}
     <p className="permission-files"><strong>Files that may change</strong> {offer.paths.map((path,i)=><span key={path}>{i>0?', ':''}<code>{path}</code></span>)}</p>
     {scope?.content.acceptance.length ? <ul className="permission-outcomes" aria-label="What the run should check">{scope.content.acceptance.map((s,i)=><li key={i}>{s}</li>)}</ul> : null}
-    {current.local_only&&<p><strong>Provider</strong> Local Qwen is the saved choice for this supported test. This approval allows one Qwen run.</p>}
-    <RunLimits budget={budget}/>
+    {shown.local_only&&<p><strong>Provider</strong> {shown.provider?.backend==='codex'
+      ? <>Codex · {shown.provider.model}{shown.provider.effort ? ' · '+shown.provider.effort : ''}. One signed-in turn sends the approved test and relevant committed source excerpts to OpenAI. Workbench checks the proposed change independently.</>
+      : <>Local Qwen is the saved choice for this run. {shown.provider?.fallback_reason ? 'The approved switch occurred before Codex generated a plan. ' : ''}This approval allows one Qwen run.</>}</p>}
+    <RunLimits budget={budget} codex={shown.provider?.backend==='codex'}/>
     {query.isError&&<p role="alert">The run offer could not be refreshed. Refresh before approving.</p>}
     {error&&<p role="alert">{error}{!stale&&draft?' You can retry the same decision.':''}</p>}
     {stale?<><p role="alert">This run offer changed or is no longer available. Review the current task before deciding.</p>
@@ -121,7 +123,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
     </>}
     <details>
       <summary>Technical run details</summary>
-      <p>{current.message}</p><ExactRunLimits budget={budget}/>
+      <p>{current.message}</p><ExactRunLimits budget={budget} codex={shown.provider?.backend==='codex'}/>
       <p>If the run starts, Workbench checks that it can cancel its own work and restores normal model access afterward.</p>
       <h4>Exact plan scope and exclusions</h4><ul>{[...(scope?.content.scope || []),...(scope?.content.exclusions || [])].map((s,i)=><li key={i}>{s}</li>)}</ul>
       <p>Repository {offer.repository} · Base {offer.base}</p>

@@ -409,10 +409,15 @@ def process_one(engine, runtime=None, stop_event=None):
         from workbench import everyday
 
         linked = current['snapshot'].get('workflow_task')
+        route = None
         try:
             if linked and everyday.enabled():
                 try:
-                    everyday.local_selection(c)
+                    from workbench import provider_routes
+
+                    route = provider_routes.run_selection(c, linked)
+                    if route != getattr(runtime, 'codex_selection', None):
+                        raise ValueError('The prepared runtime differs from the reviewed provider route.')
                 except ValueError as error:
                     raise task_execution.Waiting(str(error)) from None
             task_execution.validate(c, current)
@@ -443,14 +448,16 @@ def process_one(engine, runtime=None, stop_event=None):
         fence = str(uuid4())
         owner = owner_identity()
         c.execute(requests.update().where(requests.c.id == row['id']).values(
-            status='running', fence=fence, started_at=now(), message='Implementing in isolation.',
+            status='running', fence=fence, started_at=now(), message='Implementing with Codex in isolation.' if route else 'Implementing in isolation.',
             result={'owner': owner, 'inference_ran': False}))
         task_id = linked['intake_id'] if linked and everyday.enabled() else (linked or {}).get('task', {}).get('id', TASK)
         c.execute(model_attempts.insert().values(id=fence, job_id=None, execution_id=row['id'],
             task_id=task_id,
-            source='workbench', backend=getattr(runtime,'execution_contract',contract())['provider'], purpose='implementation',
-            requested_model=getattr(runtime,'execution_contract',contract())['model'], actual_model=runtime.identity()['model'],
-            routing_reason='Explicit one-task owner grant; fallback disabled.',
+            source='workbench', backend='codex' if route else getattr(runtime,'execution_contract',contract())['provider'],
+            purpose='implementation', requested_model=route['model'] if route else getattr(runtime,'execution_contract',contract())['model'],
+            requested_effort=route['effort'] if route else None, policy_revision=route['policy_revision'] if route else None,
+            actual_model=None if route else runtime.identity()['model'],
+            routing_reason='Reviewed Codex route and explicit run approval.' if route else 'Explicit one-task owner grant; fallback disabled.',
             started_at=now(), outcome='running'))
 
     def permitted():
@@ -461,7 +468,9 @@ def process_one(engine, runtime=None, stop_event=None):
             r = c.execute(select(requests).where(requests.c.id == row['id'])).mappings().one()
             try:
                 task_execution.validate(c, g)
-            except task_execution.Waiting:
+                if linked and everyday.enabled() and route != provider_routes.run_selection(c, linked):
+                    return False
+            except (task_execution.Waiting, ValueError):
                 return False
         return valid(g) and r['fence'] == fence and r['status'] in {'running', 'checking'}
 
@@ -522,11 +531,12 @@ def process_one(engine, runtime=None, stop_event=None):
             c.execute(requests.update().where(requests.c.id == row['id']).values(
                 status=status, result=result, finished_at=completed_at,
                 message=('Changes completed and independently checked. Nothing accepted or published.' if status == 'checked'
-                         else 'This run could not finish. Its evidence is saved; it will not restart automatically.') if linked else
+                         else result.get('provider_message') or 'This run could not finish. Its evidence is saved; it will not restart automatically.') if linked else
                         ('Real candidate independently checked. Nothing published.' if status == 'checked'
                          else 'Real attempt did not qualify and is consumed. No replay under this grant.')))
             c.execute(model_attempts.update().where(model_attempts.c.id == fence).values(
-                outcome=status, verification=result.get('verification'), usage=result.get('usage'), finished_at=completed_at))
+                outcome=status, verification=result.get('verification'), usage=result.get('usage'), finished_at=completed_at,
+                **({'actual_model': route['model']} if route and result.get('usage', {}).get('status') == 'complete' else {})))
         return True
     try:
         if not commit_result():

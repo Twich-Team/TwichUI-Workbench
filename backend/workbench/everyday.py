@@ -26,6 +26,8 @@ class LocalWorkStatus(StrictModel):
     message: str
     headroom_bytes: int | None = None
     reserve_bytes: int = START_RESERVE
+    codex_configured: bool = False
+    codex_available: bool = False
 
 
 class Installation(StrictModel):
@@ -125,7 +127,10 @@ def status(engine):
         return LocalWorkStatus(enabled=True, ready=False, message=str(error), headroom_bytes=error.headroom)
     except (OSError, ValueError, RuntimeError):
         return LocalWorkStatus(enabled=True, ready=False, message='Workbench could not measure storage capacity.')
+    from workbench.codex_provider import connector_path
     return LocalWorkStatus(enabled=True, ready=True, headroom_bytes=remaining,
+                           codex_configured=bool(os.environ.get('WORKBENCH_CODEX_SOCKET')),
+                           codex_available=connector_path() is not None,
                            message='The worker is available. It checks model access before any approved work starts.')
 
 
@@ -198,18 +203,14 @@ def clean_workspace(evidence):
 
 def local_selection(connection):
     """Resolve the only model eligible for an everyday run before it starts."""
-    from workbench.model_policy import grounded_local_selection
+    from workbench.model_policy import read_connection
+    from workbench.schemas import ScenarioModelSelection
 
-    try:
-        selected = grounded_local_selection(connection)
-        if selected.model == MODEL:
-            return selected
-    except ValueError:
-        pass
-    raise ValueError(
-        'This task requires local Qwen as the saved preferred model, with effort unspecified. '
-        'Choose it in Models to continue. Codex and fallback are unavailable here.'
-    )
+    saved = read_connection(connection)
+    local = saved.providers['local']
+    if saved.revision and local.enabled and local.model == MODEL and local.effort is None:
+        return ScenarioModelSelection(policy_revision=saved.revision, model=local.model)
+    raise ValueError('Enable the installed local Qwen model in Models and leave its effort unspecified.')
 
 
 def planning_receipt(original, created_at):
@@ -223,11 +224,12 @@ def check_planning(c, original):
     from workbench.db import planning_jobs
     jobs = c.execute(select(planning_jobs.c.payload).where(
         planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')).scalars().all()
+    from workbench.provider_routes import CHOICES
     expected = planning_receipt(original['payload'], original['created_at'])
-    if (original['payload'].get('local_planning') != 'qwen-once'
-            or not any(job.get('local_planning_receipt') == expected for job in jobs)):
-        raise ValueError('A saved one-request local planning approval is required. Open a new task to give that permission.')
+    if (original['payload'].get('local_planning') not in CHOICES
+            or not any(all(job.get('local_planning_receipt', {}).get(k) == v for k, v in expected.items()) for job in jobs)):
+        raise ValueError('A saved one-request planning approval is required. Open a new task to give that permission.')
     if any(job.get('scenario_generation_claim') for job in jobs):
         raise ValueError('The one approved planning request has already been claimed. Start a new task with updated details.')
     if datetime.now(timezone.utc) + timedelta(seconds=120) >= datetime.fromisoformat(expected['expires_at']):
-        raise ValueError('The local planning approval expired before the worker could start. Start a new task to approve planning again.')
+        raise ValueError('The planning approval expired before the worker could start. Start a new task to approve planning again.')

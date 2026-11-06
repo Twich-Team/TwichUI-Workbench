@@ -277,7 +277,7 @@ class IntakeInput(StrictModel):
     kind: Literal['issue', 'feature']
     supported_task: Annotated[str | None, Field(pattern=r'^[a-f0-9]{64}$', exclude_if=lambda value: value is None)] = None
     regression_tests: RegressionTestRequest | None = Field(default=None, exclude_if=lambda value: value is None)
-    local_planning: Literal['qwen-once'] | None = Field(default=None, exclude_if=lambda value: value is None)
+    local_planning: Literal['qwen-once', 'codex-once', 'codex-with-local-fallback'] | None = Field(default=None, exclude_if=lambda value: value is None)
     title: Annotated[str, Field(min_length=1, max_length=160)]
     description: Annotated[str, Field(min_length=1, max_length=6000)]
     lua_error: Annotated[str, Field(max_length=6000)] = ''
@@ -455,7 +455,9 @@ class ScenarioModelSelection(StrictModel):
 class ScenarioGrounding(StrictModel):
     evidence_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
     policy_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
-    basis: Literal['demo', 'local']
+    basis: Literal['demo', 'local', 'codex']
+    fallback_reason: Literal['authentication', 'unavailable', 'capacity'] | None = Field(
+        default=None, exclude_if=lambda value: value is None)
     model_selection: ScenarioModelSelection | None = Field(default=None, exclude_if=lambda value: value is None)
 
 

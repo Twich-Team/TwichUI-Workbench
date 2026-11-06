@@ -356,13 +356,15 @@ def process_one(engine, adapter=None, fail_before_commit=False, stop_event=None,
 
 
 def finish_attempt(connection, job, adapter, model, basis, outcome):
+    from workbench.codex_provider import Planner
     from workbench.planning_provider import DemoProvider, LocalProvider
     diagnostics = getattr(adapter, 'diagnostics', {})
     is_demo = isinstance(adapter, DemoProvider) or basis == 'demo'
     is_local = isinstance(adapter, LocalProvider) or basis == 'local'
+    is_codex = isinstance(adapter, Planner) or basis == 'codex'
     connection.execute(model_attempts.update().where(model_attempts.c.id == job['lease']).values(
-        source='demo' if is_demo else 'workbench' if is_local else 'unknown',
-        backend='local' if is_local else None,
+        source='demo' if is_demo else 'workbench' if is_local or is_codex else 'unknown',
+        backend='codex' if is_codex else 'local' if is_local else None,
         requested_model=func.coalesce(model_attempts.c.requested_model, diagnostics.get('configured_model')),
         actual_model=diagnostics.get('actual_model') or model,
         finished_at=now(), outcome=outcome, usage=diagnostics.get('usage')))

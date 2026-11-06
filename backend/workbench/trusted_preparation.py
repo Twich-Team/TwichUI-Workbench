@@ -243,7 +243,8 @@ def _terminal_inputs(c, job, binding):
 
 def _validate_model_selection(c, reviewed):
     selection = (reviewed.get('scenario_grounding') or {}).get('model_selection')
-    if selection:
+    if selection and (reviewed.get('scenario_grounding') or {}).get('basis') == 'local' and not (
+            reviewed.get('scenario_grounding') or {}).get('fallback_reason'):
         from workbench.model_policy import grounded_local_selection
         if grounded_local_selection(c).model_dump() != selection:
             raise ValueError('The saved grounding model policy changed. Request a fresh review.')
@@ -417,7 +418,8 @@ def process_one(engine, *, stop_event=None):
                 if everyday.enabled():
                     from workbench.db import intakes
                     original = intake.require(c, intakes, ref['intake_id'])
-                    if original['payload'].get('local_planning') != 'qwen-once':
+                    from workbench.provider_routes import CHOICES
+                    if original['payload'].get('local_planning') not in CHOICES:
                         raise ValueError('Only locally approved everyday requests can prepare checks.')
                     try:
                         everyday.require_room(everyday.configuration(engine))

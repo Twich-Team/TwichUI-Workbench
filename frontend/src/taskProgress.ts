@@ -3,6 +3,7 @@ import type {components} from './api.generated';
 type Intake = components['schemas']['IntakeView'];
 type Execution = components['schemas']['TaskExecutionContext'];
 export type RunApprovalContext = {
+  provider?: {backend: 'codex'|'local'; model: string; effort?: string; fallback_reason?: string} | null;
   local_only?: boolean; approval_hold?: string; available: boolean; preparing?: boolean; message: string; binding?: string; scope_approval_id?: string;
   scope?: components['schemas']['ProposalView']; receipt?: components['schemas']['ProposalReceipt'] | null;
   offer: null | {id: string; fingerprint: string; title: string; repository: string; base_branch: string;

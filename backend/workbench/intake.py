@@ -76,7 +76,16 @@ def submit(engine, body, *, owner_provenance=None):
                     everyday.configuration(engine)
                 except (OSError, ValueError, RuntimeError):
                     raise HTTPException(503, 'The Workbench installation needs attention before saving model approval.') from None
-                planning['local_planning_receipt'] = everyday.planning_receipt(original, at)
+                receipt = everyday.planning_receipt(original, at)
+                from workbench import provider_routes
+                try:
+                    if body.local_planning in provider_routes.CODEX_CHOICES:
+                        receipt['codex_route'] = provider_routes.codex_choice(connection, body.local_planning)
+                    else:
+                        receipt['local_route'] = everyday.local_selection(connection).model_dump()
+                except ValueError as error:
+                    raise HTTPException(409, str(error)) from None
+                planning['local_planning_receipt'] = receipt
             connection.execute(intakes.insert().values(id=identity, payload=original, status='queued',
                 revision=0, created_at=at, priority_override=None))
             connection.execute(intake_scopes.insert().values(intake_id=identity, revision=1, command_id=identity,

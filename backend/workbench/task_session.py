@@ -26,7 +26,7 @@ def delegated_command(options, command):
     inputs = ("WORKBENCH_RESEARCH_ROOT", "WORKBENCH_PREPARATION_CONFIG", "TMPDIR")
     from workbench import everyday
     if everyday.enabled():
-        inputs += ("WORKBENCH_PLANNER", "WORKBENCH_EVERYDAY_CONFIG")
+        inputs += ("WORKBENCH_PLANNER", "WORKBENCH_EVERYDAY_CONFIG", "WORKBENCH_CODEX_SOCKET")
         options = [*options, '--property=IPAddressDeny=any', '--property=IPAddressAllow=localhost']
     return [
         "/usr/bin/systemd-run", "--expand-environment=no", *options,
@@ -305,6 +305,9 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
     ref = config["task"]
     if (Path(config["run_root"]) / "session-finished.json").exists():
         return False
+    from workbench import everyday, provider_routes
+
+    codex_route = None
     with engine.connect() as c:
         linked = task_execution.snapshot(c, ref["intake_id"], ref["task_id"], ref["approval_id"])
         approval = (
@@ -320,6 +323,8 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
             require_current=not (Path(config["run_root"]) / "session-claimed.json").exists(),
             admitting=True,
         )
+        if everyday.enabled() and not (Path(config['run_root']) / 'session-claimed.json').exists():
+            codex_route = provider_routes.run_selection(c, linked)
         if not budget or execution.digest(budget) != config["task_budget_fingerprint"]:
             raise ValueError("Current explicit owner task budget differs from session")
     root = Path(config["run_root"])
@@ -470,7 +475,18 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
             "--owner-instruction",
             config["owner_instruction"],
         ]
-        if config.get('authoring_mode') == 'explicit-current-session':
+        codex_unit = None
+        if codex_route:
+            codex_unit = 'workbench-real-codex-' + root.name
+            durable(root / 'codex-controller.json', json.dumps({'unit': codex_unit + '.service'}).encode())
+            command = delegated_command([
+                '--user', '--unit=' + codex_unit, '--property=Delegate=yes',
+                '--property=MemoryMax=6G', '--property=MemorySwapMax=0',
+                '--property=TasksMax=128', '--property=CPUQuota=200%',
+                '--property=RuntimeMaxSec=2400', '--property=TimeoutStopSec=15',
+                '--property=KillMode=mixed', '--wait', '--pipe',
+            ], [str(ROOT / '.venv/bin/python'), str(ROOT / 'scripts/codex_task.py'), str(root)])
+        elif config.get('authoring_mode') == 'explicit-current-session':
             command = ['systemd-run','--user','--unit=workbench-real-authored-'+root.parent.name,
                 '--property=WorkingDirectory='+str(ROOT),'--property=Delegate=yes','--property=MemoryMax=6G',
                 '--property=MemorySwapMax=0','--property=TasksMax=128','--property=CPUQuota=200%',
@@ -501,8 +517,11 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
                         ) >= datetime.fromisoformat(config["deadline"]):
                             import signal
 
-                            signal.pidfd_send_signal(descriptor, signal.SIGTERM)
-                            from workbench import everyday
+                            if codex_unit:
+                                subprocess.run(['/usr/bin/systemctl', '--user', 'stop', codex_unit + '.service'],
+                                               stdout=log, stderr=subprocess.STDOUT, timeout=20, check=True)
+                            else:
+                                signal.pidfd_send_signal(descriptor, signal.SIGTERM)
                             child.wait(timeout=225 if everyday.enabled() else 15)
                             break
                         time.sleep(0.1)

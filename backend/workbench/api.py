@@ -9,7 +9,7 @@ from fastapi.exceptions import RequestValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import OperationalError
 
-from workbench import verification, admission, implementation, pr_preparation
+from workbench import verification, admission, implementation, pr_preparation, private_lan
 from workbench import catalog, monitoring, preferences, intake, model_policy, model_accounting
 from workbench.schemas import DisplaySettings, Resources, Policy, ActivityDistribution
 from workbench.schemas import CatalogPage, CatalogDetail, WorkOverview, HistoryPage
@@ -21,7 +21,7 @@ from workbench.service import get_task, submit, task_view
 from workbench.real_execution import RunPage, StopRequest
 from workbench.task_execution import TaskExecutionContext
 
-# Exact authorities only. No forwarded-header trust, wildcard CORS or remote binding.
+# Exact authorities only. The dedicated LAN service supplies TLS and requires a client certificate.
 AUTHORITIES = {"127.0.0.1:8787", "localhost:8787", "127.0.0.1:5180", "localhost:5180",
                "127.0.0.1:9187", "127.0.0.1:5280", "127.0.0.1:9287", "127.0.0.1:5380", "127.0.0.1:9387", "127.0.0.1:9487", "testserver"}
 
@@ -34,14 +34,19 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     app.state.policy_path = policy_path if policy_path is not None else os.environ.get('WORKBENCH_POLICY_DB')
     app.state.capabilities_path = capabilities_path
     token = secrets.token_urlsafe(32)
+    lan = private_lan.configured()
 
     @app.middleware("http")
     async def boundary(request: Request, call_next):
         hosts = request.headers.getlist("host")
         origins = request.headers.getlist("origin")
-        if len(hosts) != 1 or hosts[0] not in AUTHORITIES:
+        authority = lan[0] if lan else None
+        if len(hosts) != 1 or (hosts[0] != authority if lan else hosts[0] not in AUTHORITIES):
             return JSONResponse({"detail": "Unrecognized host."}, status_code=400)
-        expected_origin = "http://" + hosts[0]
+        if lan and (not request.client or request.client.host != lan[1]
+                    or request.scope['scheme'] != 'https'):
+            return JSONResponse({"detail": "Private Workbench access is restricted."}, status_code=403)
+        expected_origin = ('https://' if lan else 'http://') + hosts[0]
         if origins and (len(origins) != 1 or origins[0] != expected_origin):
             return JSONResponse({"detail": "Use this application's own address."}, status_code=403)
         if request.method not in {"GET", "HEAD"}:
