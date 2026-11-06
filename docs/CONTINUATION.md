@@ -1,3 +1,102 @@
+# Loaded-addon planning repaired offline — November 6, 2026 Mountain time
+
+The first live map-fade intake reached Qwen and was rejected before a
+proposal or either owner decision. Its sealed store and receipts match
+all 52 original hashes. The saved browser input included the literal
+`[2,2,2]`, expected `1` and rejected `0`. The original 6,265-byte user
+packet and 17,831-byte request body were reconstructed from the frozen
+build, original intake, committed source and bound policy, without
+sending a request. Qwen returned 406 generated tokens and its decoded
+example reached the loaded-client validator. The 1,620-byte provider
+response and parsed values were not retained. The diagnostic establishes
+an incorrect addon list, a non-core source prefix, or both. It does not
+identify the submitted values. The old schema already enforced one
+source entry, but did not encode the literal `["!!!TwichUI"]` rule or
+restrict the source to the core addon. The prompt asked the model to
+derive the addon list. The scripted rehearsal copied the canonical
+scenario, including both source fields, so it exercised downstream
+validation and checks without testing this model-facing choice.
+
+Workbench now derives callable choices from the committed loader and
+chunk. The model selects one ID per explicit example and echoes its
+arguments and outcomes. Workbench resolves the test path, core addon
+source, operation and calling convention and runs the existing canonical
+validation. Unknown, ambiguous and incomplete selections fail closed.
+The model can report that it found no matching operation. Failed
+generation keeps the original request, shows the cause in the browser,
+and leaves no proposal, retry or execution authority. The old failure
+stays rejected and gets the clearer message when read by this build.
+The approved task, canonical scenario, approval bindings, verifier
+rules, implementation limits and independent controls are the same.
+
+The [offline evidence](../artifacts/runs/loaded-client-offline.ahgN8K/)
+includes the reconstructed request, original-store browser review,
+controlled real-addon proposal and rejection, and checked synthetic
+browser run. The saved real rejection was displayed at 1440 and 390 px
+from a read-only copy. The raw response could not be replayed. Tests
+reproduced the precise retained diagnostic from both representative old
+failure shapes, and the connected transport tests used the pinned
+addon to verify valid choices, wrong files and sources, traversal,
+invented and ambiguous bindings, stale bindings and incomplete output.
+The full tests passed with 1,005 backend passes, one skip and 24 frontend
+passes. The prior 167-group real-addon result remains scripted evidence.
+No new real-model call, lease, cancellation probe, service restart or
+addon change occurred.
+
+## Proposed fresh browser authorization
+
+One local-only run for **Cover the map fade at a single threshold**.
+The build is `8073673a0ca918530ba2626a058f72a55df96dfb`, with manifest
+SHA-256 `baafd5592ad5b68231fd8fb297a586c32ee7171d23e4c6c935fca0b6536865d7`.
+The 305 frozen entries live in
+`/home/rich/TwichUI-Workbench/.local/loaded-client-ready.XJsOWw/stage`.
+The bound store and backup are empty, with initial SHA-256
+`5331c0f2815ff68d8b8c483a7035da2313e56dd1bd144a29f153b145e6c8ae76`.
+The stage includes the independent terminal verifier
+`.local/verify-terminal.py`, invoked with the new evidence directory and
+the approved manifest SHA-256. Its empty-store audit confirmed the model
+configuration from local files and verified 570 protected prior hashes.
+This is not a live authentication test.
+
+The isolated source stays on addon base
+`1caf530212bbc6eaf37e41d668902a391aa936c1`. The two model-readable files are
+`!!!TwichUI/map/ViewMath.lua` and `tests/test_map_viewmath_step.lua`. Only
+additions to the existing test in the isolated task workspace are
+permitted. The exact first return is `TwichUI.MapViewMath.Fade(2,2,2)`
+equal to `1`, with `0` rejected. The two actual browser decisions and all
+clock, model, resource, control, restoration and local delivery terms in
+the earlier combined package below apply, except for the new build,
+manifest, store, archive and obsolete preview identified here. The
+prior authorization is spent. If planning fails, preserve the actual
+outcome and usage and close. Zero repair generations, replays or retries.
+
+Propose only the closed generated report
+`artifacts/runs/browser-lKucD8/report` (4 files, 3,091,792 bytes) for
+`/home/rich/.local/share/TwichUI-Workbench/evidence-archives/loaded-client-browser-preflight-20261106`.
+No archive has been made. The same counted evidence rules apply. Count
+the new stage, repository, previous real-addon stage and four other
+historical roots listed in the new manifest. After sealing the offline
+evidence, counted headroom was 76,398,929 bytes with 32,407,216,128
+bytes physically free. Projected headroom is 79,490,721 bytes before
+archival receipts. The initial measurement and stage checks are in the
+[readiness receipt](../artifacts/runs/loaded-client-offline.ahgN8K/next-run-readiness.json).
+After approval, verify archive contents, metadata, original-path lookup
+and a separate restoration before pruning matching originals, then
+verify again and remeasure with receipts and backups.
+
+The prior owned preview observed on 9187 was
+`workbench-addon-review-A3XE0s.service`. Match the unit, listener,
+read-only app, closed store, disabled write capability and sealed
+evidence before gracefully stopping it if it is still present. Hold for
+any other or unidentified listener. Preserve ports 9487 and 8765.
+Waiting for authorization does not start the clock. After approval and
+port clearance, record the actual start and announce both browser review
+cutoffs and the outer deadline in Mountain time. Confirm owner access
+before the one planning generation. The next outcome is a real-model
+checked patch with both owner approvals and verified cleanup.
+Installation, in-game verification, broader acceptance and publication
+remain separate.
+
 # First real TwichUI browser demonstration closed at planning — November 6, 2026 Mountain time
 
 The approved one-off task was **Cover the map fade at a single threshold**.

@@ -1,3 +1,23 @@
+## November 6, 2026 — loaded-addon planning repaired and verified offline
+
+The sealed real-addon planning failure remains a failure. The exact
+browser input and validation diagnostic survived, and the original wire
+request could be reconstructed from the bound build and store. The
+model's raw response was not retained. The old wire schema left a
+core-addon source rule for the model to infer, while the scripted
+rehearsal supplied the canonical fields.
+
+Loaded-addon planning now selects a committed callable binding and
+resolves source fields in Workbench. The canonical scenario and checks
+remain unchanged. The browser retains failed planning without asking
+for the supplied example again or offering a retry. Transport tests on
+the pinned addon, representative malformed responses, the original
+sealed-store browser review at desktop and phone widths, and the full
+synthetic browser path passed offline. The new build and empty frozen
+stage are recorded in CONTINUATION. A separately approved fresh
+real-model browser run is the next outcome. Zero real-addon model tasks
+have completed and publication is held.
+
 ## November 6, 2026 — first authorized real-addon browser run closed
 
 Exact frozen stage and addon base matched. The owner confirmed browser access,
