@@ -1,3 +1,19 @@
+## November 6, 2026 — owner review preview and combined verification request
+
+The existing 9187 result review shows an earlier build. A separate 9188
+loopback preview serves the simplified candidate with a clear simulation
+banner, disabled approval controls and in-memory practice inputs. Chromium
+checked the walkthrough without retaining media. The preview closes after
+two hours or when its named user service is stopped. The installed app,
+historical review and local model stayed under their existing owners.
+
+The combined request binds an exact, verified-inventory proposal for old
+browser output, complete offline Chromium and visual checks, and one later
+isolated map-fade trial with fresh browser decisions and guarded restoration.
+The archive was inventoried only. The prior real result's 222 files still
+match their seal. The owner's Codex development selection was recorded as
+supplied. See CONTINUATION for the review link, expiry and authorization record.
+
 ## November 6, 2026 — owner-facing task workflow ready for offline review
 
 The development build connects Work and the task page to the saved

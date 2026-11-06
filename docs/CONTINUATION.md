@@ -1,3 +1,45 @@
+# Owner review preview open — November 6, 2026 Mountain time
+
+Review the simpler task screens at [127.0.0.1:9188](http://127.0.0.1:9188/).
+Use that address on the Workbench host or through the owner's existing SSH
+loopback forwarding. The transient user service `workbench-owner-preview-9188.service`
+opened at 9:19:36 a.m. MST and expires at approximately 11:19:36 a.m. MST on
+November 6. To close it sooner, run
+`systemctl --user stop workbench-owner-preview-9188.service`. Practice
+input disappears when it stops.
+
+Start with **Create a task** and submit a practice description to see a sample
+plan. The preview shortcuts lead to **Run permission**, **Progress**,
+**Needs attention** and **Checked result**. Answer the sample question to see
+it return to plan review. Open **Technical results and run details** on the
+result to inspect supporting information. Progress and checks are scripted
+examples. Practice descriptions receive a fixed sample plan.
+
+The loopback process loads the actual candidate's static assets in bounded
+memory and adds a preview banner and inactive approval controls. It has no
+Workbench backend, model adapter, database, execution worker, or credentials
+from the live app. Only practice intake and a sample reply can change
+in-memory data. The server rejects approval, run, stop, and model settings
+writes even with a valid preview token. Chromium confirmed the phone-width
+walkthrough, disabled approval buttons and technical disclosures. A separate
+in-memory exercise confirmed practice intake and reply handling. No screenshots,
+recordings or counted test artifacts were produced. The workspace count stayed
+at 535,213,615 bytes with 1,657,297 bytes free.
+
+The everyday app on 9487 still serves its earlier installed assets. Port 8765
+and the earlier immutable result review on 9187 kept their existing owners.
+The local model service remains running. This session observed service
+metadata only. All 222 files in the earlier real-addon seal matched.
+
+The [combined approval request](WORKFLOW_ACCEPTANCE_REQUEST_20261106.md)
+binds the exact local archive inventory, offline checks, map-fade trial,
+restoration, and service closeout. It is proposed and unspent. Archive
+preparation consisted of reads and fingerprinting. Installation is separate.
+
+The [Codex development selection](../CODEX_MODEL_REFERENCE.md) records the
+owner-provided GPT-6.1 Sol and High setting. Workbench's Qwen runtime is
+separate.
+
 # Plain-English task workflow ready for offline review — November 6, 2026 Mountain time
 
 Development checkpoint `a943707905ed67344e4276a82527a3dbb4066247` builds
