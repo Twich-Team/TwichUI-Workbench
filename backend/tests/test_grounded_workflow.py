@@ -327,11 +327,18 @@ def test_invalid_generated_content_holds_before_approval_and_preparation(
     adapter = ControlledPlanner(mutate)
     assert worker.tick(store, planning_adapter=adapter)
     view = current(client, item)
-    p = view["proposals"][0]
-    assert p["task_contract"]["behavioral_evidence"]["status"] == "hold"
-    assert p["approval_blockers"] or p["task_contract"]["behavioral_evidence"]["holds"]
-    denied, _ = approve(store, client, headers, view)
-    assert denied.status_code in {409, 422}
+    if fault == "ambiguous":
+        assert view["status"] == "waiting_for_information"
+        assert view["result"]["clarification"]
+        denied, _ = approve(store, client, headers, view)
+        assert denied.status_code in {409, 422}
+    else:
+        assert view["status"] == "failed" and not view["proposals"]
+        assert view["jobs"][0]["status"] == "failed" and view["result"] is None
+        assert client.post("/api/intake/" + item["id"] + "/clarification", headers=headers,
+            json=dict(command_id=str(uuid4()), revision=view["revision"], text="Repeat the example.")).status_code == 409
+    assert not worker.tick(store, planning_adapter=adapter)
+    assert len(adapter.calls) == 1
     assert not view["tasks"] and not view["decisions"]
     with store.connect() as c:
         assert not c.execute(select(task_run_offers)).first()
@@ -569,8 +576,8 @@ def test_source_drift_during_generation_discards_response(
     item = submit(client, headers)
     assert worker.tick(store, planning_adapter=ControlledPlanner(drift))
     view = current(client, item)
-    assert view["status"] == "waiting_for_information"
-    assert "changed during generation" in str(view)
+    assert view["status"] == "failed"
+    assert not view["proposals"] and "changed during generation" in view["jobs"][0]["message"]
     assert not view["tasks"]
 
 
@@ -915,21 +922,24 @@ def test_9187_scenario_shape_through_local_parser_and_preparation(
         item = submit(client, headers)
     assert worker.tick(store)
     view = current(client, item)
-    contract = view["proposals"][0]["task_contract"]
-    prepared = contract["behavioral_evidence"]
     with store.connect() as c:
         attempt = c.execute(select(model_attempts)).mappings().one()
     assert len(planner.calls) == 1 and attempt["actual_model"] == selected
-    if field:
-        assert attempt["outcome"] == ("completed" if fault == "clarification" else "failed")
+    if field and fault != "clarification":
+        assert attempt["outcome"] == "failed"
+        assert view["status"] == "failed" and not view["proposals"] and view["result"] is None
+        assert field in view["jobs"][0]["message"]
+        assert not view["tasks"] and not list(output.iterdir())
+    elif fault == "clarification":
+        assert attempt["outcome"] == "completed"
         assert view["status"] == "waiting_for_information"
-        assert prepared["status"] == "hold" and prepared["scenarios"] == []
-        assert any(field in hold for hold in prepared["holds"])
-        assert ("scenario_grounding" in contract) == (fault == "clarification")
+        assert field in view["result"]["clarification"]
         denied, _ = approve(store, client, headers, view)
         assert denied.status_code in {409, 422}
         assert not view["tasks"] and not list(output.iterdir())
     else:
+        contract = view["proposals"][0]["task_contract"]
+        prepared = contract["behavioral_evidence"]
         assert attempt["outcome"] == "completed" and prepared["status"] == "review_required"
         (scenario,) = prepared["scenarios"]
         assert scenario["args"] == args and scenario["incorrect"] == incorrect
@@ -1015,7 +1025,6 @@ def test_saved_model_pinned_before_transport_and_through_review(
     item = submit(client, headers)
     assert worker.tick(store)
     view = current(client, item)
-    contract = view["proposals"][0]["task_contract"]
     with store.connect() as c:
         attempt = c.execute(select(model_attempts)).mappings().one()
     assert attempt["policy_revision"] == saved.revision and attempt["requested_model"] == selected
@@ -1027,10 +1036,11 @@ def test_saved_model_pinned_before_transport_and_through_review(
         assert model_policy.read(store).revision == saved.revision + 1
         assert attempt["actual_model"] == (other if fault else selected)
     if fault:
-        assert attempt["outcome"] == "failed" and "scenario_grounding" not in contract
-        assert view["status"] == "waiting_for_information"
+        assert attempt["outcome"] == "failed"
+        assert view["status"] == "failed" and not view["proposals"]
         assert not worker.tick(store)
     else:
+        contract = view["proposals"][0]["task_contract"]
         assert attempt["outcome"] == "completed"
         assert contract["scenario_grounding"]["model_selection"] == dict(
             policy_revision=saved.revision, model=selected

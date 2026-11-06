@@ -10,6 +10,24 @@ import urllib.error
 import urllib.request
 
 MAX_DEADLINE = 120
+SCENARIO_FAILURE_MESSAGES = {
+    "canceled": "The worker stopped before the local model finished planning. The model’s final usage is unknown.",
+    "interrupted_unknown": "The worker stopped during planning. Model completion is unknown.",
+    "incomplete_output": "The local model stopped before it returned a complete plan.",
+    "timeout": "The local model did not finish planning before the time limit.",
+    "invalid_json": "The local model returned a response Workbench could not read.",
+    "model_identity": "The model service did not match the selected planning model.",
+    "transport": "Workbench lost its connection to the local model while planning.",
+    "provider_rejection": "The local model service rejected the planning request.",
+    "contention": "Workbench could not get access to the local model.",
+    "credential_or_lock": "Workbench could not verify access to the local model.",
+}
+
+
+def scenario_failure_message(category, detail=None):
+    cause = SCENARIO_FAILURE_MESSAGES.get(category, detail or
+        "Workbench could not validate the local planning response.")
+    return f"{cause} Your original request and any example are saved."
 
 
 class PlanningUnavailable(Exception):

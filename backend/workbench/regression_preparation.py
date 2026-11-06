@@ -20,6 +20,7 @@ from sqlalchemy import select
 
 from workbench import intake
 from workbench.db import intakes, planning_jobs, proposals, model_attempts, write_transaction
+from workbench.planning_transport import scenario_failure_message
 from workbench.schemas import ProposalContent, RegressionTaskContract
 from workbench.real_execution import LIMITS
 from workbench.real_workspace import PRELUDE
@@ -270,8 +271,9 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             owner = active['payload'].get('scenario_generation_claim')
             if owner and not alive(owner):
                 c.execute(planning_jobs.update().where(planning_jobs.c.id == active['id']).values(
-                    status='failed', finished_at=intake.now(), lease_until=None,
-                    message='Scenario generation was interrupted; provider completion is unknown. No automatic replay or fallback. Review retained input before an explicit retry.'))
+                    status='failed', finished_at=intake.now(), lease=None, lease_until=None,
+                    payload={**active['payload'], 'diagnostics': {'category': 'interrupted_unknown'}},
+                    message=scenario_failure_message('interrupted_unknown')))
                 c.execute(model_attempts.update().where(model_attempts.c.id == active['lease']).values(
                     outcome='interrupted_unknown', finished_at=intake.now()))
                 current = intake.require(c, intakes, active['intake_id'])
@@ -293,7 +295,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning',
             planning_jobs.c.revision <= job['revision']).order_by(planning_jobs.c.revision.desc()).limit(9)).scalars())
     feedback = '\n'.join(dict.fromkeys(p['feedback'] for p in reversed(notes) if p.get('feedback')))
-    adapter_used, generated_failure, packet, model, basis = None, None, None, None, None
+    adapter_used, failure, question, packet, model, basis = None, None, None, None, None, None
     model_selection = None
     claimed_generation = False
     generation = job['kind'] == 'planning' and scenario_response is None and bool(os.environ.get('WORKBENCH_PREPARATION_CONFIG'))
@@ -309,6 +311,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     or job['revision'] <= original['revision']):
                 raise ValueError('Human scope or proposal changed before scenario generation; review the current request.')
             base_contract = prepare(original['payload'], feedback)
+            if not base_contract['resolved_base']:
+                raise ValueError('Workbench could not verify the configured source checkout for planning.')
             packet = grounded_scenarios.context(original['payload'], feedback, base_contract, policy)
             grounded_scenarios.require_plannable(packet)
             if len(json.dumps(packet).encode()) > 24000:
@@ -316,13 +320,17 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             # Same job/lease and accounting owners; duplicate workers never call an
             # adapter for an already claimed job. No automatic inference retry.
             with write_transaction(engine) as c:
-                if intake.require(c, planning_jobs, job['id']) != job:
+                if (intake.require(c, planning_jobs, job['id']) != job
+                        or intake.require(c, intakes, original['id']) != original
+                        or intake.human_scope(c, original['id']) != scope
+                        or (stop_event is not None and stop_event.is_set())):
                     return True
                 adapter_used = adapter or provider(stop_event)
                 if isinstance(adapter_used, LocalProvider):
                     model_selection = model_policy.grounded_local_selection(c)
                 lease = str(uuid4())
-                job['payload'] = {**job['payload'], 'scenario_generation_claim': owner_identity()}
+                job['payload'].pop('diagnostics', None)
+                job['payload']['scenario_generation_claim'] = owner_identity()
                 job.update(status='running', lease=lease, attempts=job['attempts']+1, message='Preparing grounded behavioral examples for independent review.')
                 c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
                     status='running', lease=lease, payload=job['payload'], attempts=job['attempts'], message=job['message']))
@@ -333,6 +341,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     requested_model=model_selection.model if model_selection else None,
                     routing_reason=('Saved preferred local planning model; fixed decoding, no fallback.' if model_selection else
                                     'Controlled planning adapter; no saved model selection consumed.')))
+                c.execute(intakes.update().where(intakes.c.id == original['id']).values(status='investigating'))
+                original['status'] = 'investigating'
             claimed_generation = True
             if model_selection:
                 raw, model, basis = adapter_used.generate(packet, grounded_scenarios.Response, expected_model=model_selection.model)
@@ -351,6 +361,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 raise ValueError('Committed source or preparation policy changed during generation; review fresh evidence.')
             scenario_response = parsed.model_dump(exclude={'evidence_sha256', 'policy_sha256'})
             scenario_response['model'] = model  # Actual adapter attribution, never a generated identity claim.
+        except grounded_scenarios.ScenarioInputRequired as error:
+            question = str(error)
         except ValidationError as error:
             issues = error.errors(include_input=False, include_context=False)
             # A malformed clarification has a more useful error on that branch.
@@ -359,33 +371,40 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             branch = 'GroundedDraft' if isinstance(draft, dict) and draft.get('scenarios') else 'ClarificationDraft'
             issue = next((e for e in issues if e['loc'][:2] == ('draft', branch)), issues[0])
             location = '.'.join(map(str, issue['loc'])) or 'response'
-            generated_failure = f'Scenario preparation rejected structured data at {location}: {issue["msg"]}'[:1200]
-        except (ValueError, OSError, PlanningUnavailable) as error:
-            generated_failure = str(error)[:1200]
-    contract = prepare(original['payload'], feedback, scenario_response) if job['kind'] == 'planning' else None
-    if generation and packet and not generated_failure:
+            failure = ('schema_validation', f'Planning returned an invalid example at {location}: {issue["msg"]}')
+        except PlanningUnavailable as error:
+            failure = (error.reason, None)
+        except ValueError as error:
+            failure = ('planning_validation', str(error))
+        except OSError:
+            failure = ('planning_io', 'Workbench could not read the files it needs for planning.')
+    contract = prepare(original['payload'], feedback, scenario_response) if job['kind'] == 'planning' and not failure else None
+    if generation and scenario_response is not None:
         contract['scenario_grounding'] = dict(evidence_sha256=packet['evidence_sha256'],
             policy_sha256=packet['policy_sha256'], basis=basis)
         if model_selection:
             contract['scenario_grounding']['model_selection'] = model_selection.model_dump()
-    if contract and generated_failure:
+    if contract and question:
         from workbench.regression_evidence import expectation_digest
         prepared = contract['behavioral_evidence']
-        prepared['holds'].insert(0, generated_failure)
+        prepared['holds'].insert(0, question)
         prepared['status'] = 'hold'
         prepared['review_digest'] = expectation_digest(prepared)
-        contract['execution_blockers'].append(generated_failure)
-        contract['scope_missing'].append(generated_failure)
-    if generation and contract['behavioral_evidence']['holds']:
+        contract['execution_blockers'].append(question)
+        contract['scope_missing'].append(question)
+    if generation and contract and contract['behavioral_evidence']['holds']:
         # New generated ambiguity needs clarification, not a scope-only approval
         # of guessed behavior. Historical deterministic scope reviews stay intact.
-        contract['scope_missing'] = list(dict.fromkeys([*contract['scope_missing'], *contract['behavioral_evidence']['holds']]))
+        if question or scenario_response['draft']['unresolved']:
+            contract['scope_missing'] = list(dict.fromkeys([*contract['scope_missing'], *contract['behavioral_evidence']['holds']]))
+        else:
+            failure = ('planning_validation', contract['behavioral_evidence']['holds'][0])
     if contract and len(notes) > 8:
         requirement = 'More than eight preparation revisions need an explicit consolidated request; older requirements must not be silently dropped.'
         contract['scope_missing'].append(requirement)
         contract['execution_blockers'].append(requirement)
     message = 'Reusable Lua regression-test scope prepared. No model, run offer or execution permission created.'
-    if generation:
+    if generation and contract:
         message = ('Behavioral planning needs more information; no examples are ready for approval.'
                    if contract['scope_missing'] else
                    'Grounded behavioral proposal prepared for independent review; no certification or execution authority.')
@@ -395,7 +414,25 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
         if current != job:
             return True
         fresh = intake.require(c, intakes, original['id'])
-        scope_changed = fresh != original or intake.human_scope(c, original['id']) != scope
+        scope_changed = (any(fresh[field] != original[field] for field in ('revision', 'status', 'payload'))
+                         or intake.human_scope(c, original['id']) != scope)
+        if failure:
+            category, detail = failure
+            diagnostics = {k: v for k, v in getattr(adapter_used, 'diagnostics', {}).items()
+                           if k != 'usage'}
+            diagnostics['category'] = category
+            c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
+                status='failed', finished_at=intake.now(), lease=None, lease_until=None,
+                payload={**job['payload'], 'diagnostics': diagnostics},
+                message=scenario_failure_message(category, detail[:600] if detail else None)))
+            if not scope_changed:
+                c.execute(intakes.update().where(intakes.c.id == original['id']).values(status='failed'))
+            if claimed_generation:
+                outcome = 'superseded' if scope_changed else 'interrupted_unknown' if category == 'canceled' else 'failed'
+                planning_worker.finish_attempt(c, job, adapter_used, model, basis, outcome)
+            if fail_before_commit:
+                raise RuntimeError('Simulated preparation crash before commit')
+            return True
         try:
             if (scope_changed
                     or job['payload'].get('scope_revision') != scope['revision']
@@ -406,7 +443,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     raise ValueError('A newer proposal supersedes this preparation job.')
                 content = proposal_content(original['payload'], contract)
                 clarification = contract['scope_missing']
-                if generation and generated_failure:
+                if question:
                     clarification = clarification[:1]
                 elif generation and (questions := scenario_response['draft']['unresolved']):
                     clarification = contract['behavioral_evidence']['holds'][:len(questions)]
@@ -438,7 +475,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             if not scope_changed:
                 c.execute(intakes.update().where(intakes.c.id == original['id']).values(status='failed'))
         if claimed_generation:
-            outcome = 'superseded' if scope_changed else 'failed' if generated_failure or publication_failed else 'completed'
+            outcome = 'superseded' if scope_changed else 'failed' if publication_failed else 'completed'
             planning_worker.finish_attempt(c, job, adapter_used, model, basis, outcome)
         if fail_before_commit:
             raise RuntimeError('Simulated preparation crash before commit')

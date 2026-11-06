@@ -179,9 +179,13 @@ def concrete_examples(original, feedback):
     ]
 
 
+class ScenarioInputRequired(ValueError):
+    """A concrete question the requester can answer before planning."""
+
+
 def require_plannable(packet):
     if len(packet["writable_paths"]) != 1:
-        raise ValueError("Select one existing focused test for these behavioral examples.")
+        raise ScenarioInputRequired("Select one existing focused test for these behavioral examples.")
     if not packet["fixture_bindings"]:
         raise ValueError(
             f"For {packet['writable_paths'][0]}, identify a literal module loader and exported operation "
@@ -189,11 +193,11 @@ def require_plannable(packet):
         )
     acceptance = packet["original"]["regression_tests"]["acceptance"]
     if len(acceptance) > 3:
-        raise ValueError("Split this request into at most three expected results for one focused test.")
+        raise ScenarioInputRequired("Split this request into at most three expected results for one focused test.")
     supplied = {example["acceptance_index"]: example for example in packet["examples"]}
     for index, result in enumerate(acceptance):
         if index not in supplied:
-            raise ValueError(
+            raise ScenarioInputRequired(
                 f'For expected result {index + 1} ("{result[:250]}"), what exact arguments should the test '
                 "pass, what should it observe, and which incorrect outcome should it reject? "
                 f'Use one line: Example {index + 1}: {{"args": [<values>], "expected": <value>, '
@@ -203,7 +207,7 @@ def require_plannable(packet):
         count = len(supplied[index]["args"])
         if not any(accepts_argument_count(op, count) for binding in packet["fixture_bindings"]
                    for op in binding["operations"]):
-            raise ValueError(
+            raise ScenarioInputRequired(
                 f"For expected result {index + 1}, no committed callable matches the {count} explicit "
                 f"arguments in Example {index + 1}. What exact arguments should the test pass? "
                 "Include each parameter value or null for an explicit Lua nil."

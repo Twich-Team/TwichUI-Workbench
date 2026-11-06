@@ -13,7 +13,7 @@ from workbench.db import real_execution_grants, real_execution_requests, real_pu
 from workbench.real_workspace import durable
 
 
-def advance_local(engine, database, outcome, planner):
+def advance_local(engine, database, outcome, planner, *, example="  ALICE "):
     from test_regression_evidence import ControlledPreparer
     from test_real_transport import final_response, scripted_http, tool_response
     from test_verification_profiles import PRODUCTION, TEST
@@ -52,7 +52,7 @@ def advance_local(engine, database, outcome, planner):
             rendered = json.loads(body['messages'][1]['content'].split('\n', 1)[1])
             scenario, = rendered['examples']
             assert (scenario['call_args'], scenario['expected_observation'],
-                    scenario['incorrect_observation_for_same_call']) == (['  ALICE '], 'alice', 'ALICE')
+                    scenario['incorrect_observation_for_same_call']) == ([example], 'alice', 'ALICE')
             old = (runtime.workspace / TEST).read_text()
             expected = scenario['expected_observation'] if outcome == 'pass' else scenario['incorrect_observation_for_same_call']
             assertion = f"assert(normalize({json.dumps(scenario['call_args'][0])}) == {json.dumps(expected)})\n"

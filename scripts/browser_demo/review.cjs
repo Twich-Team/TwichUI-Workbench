@@ -1,0 +1,69 @@
+/* Test-only browser interaction for the offline supervisor rehearsal. */
+const {chromium} = require('playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const {join} = require('node:path');
+const [origin, evidence, mode, identity, expected] = process.argv.slice(2);
+
+async function ready(file) {
+  const end = Date.now() + 25000;
+  while (Date.now() < end) {
+    if (fs.existsSync(join(evidence,file))) return;
+    await new Promise(resolve => setTimeout(resolve, 75));
+  }
+  throw Error(file + ' did not appear');
+}
+
+(async () => {
+  const browser = await chromium.launch({args:['--disable-dev-shm-usage','--disable-background-networking']});
+  try {
+    const context = await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
+    await context.route('**/*',route=>new URL(route.request().url()).origin===origin?route.continue():route.abort());
+    const page=await context.newPage();
+    page.setDefaultTimeout(12000);
+    if (mode==='approve') {
+      await ready('owner-step-scope.json');
+      const step = JSON.parse(fs.readFileSync(join(evidence,'owner-step-scope.json')));
+      await page.goto(step.url);
+      await page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.').check();
+      const scopeSaved = page.waitForResponse(r=>r.url().endsWith('/decisions')&&r.request().method()==='POST');
+      await page.getByRole('button',{name:'Approve proposal',exact:true}).click();
+      assert.equal((await scopeSaved).status(),200);
+      await ready('owner-step-budget.json');
+      await page.reload();
+      const offer=page.getByRole('region',{name:'Certified task run approval'});
+      assert.equal(await offer.getByRole('radio',{name:'Local implementation only'}).isChecked(),true);
+      await offer.getByRole('checkbox',{name:/I approve this exact task.*for local implementation/}).check();
+      const budgetSaved=page.waitForResponse(r=>r.url().endsWith('/run-approval')&&r.request().method()==='POST');
+      await offer.getByRole('button',{name:'Approve local implementation',exact:true}).dblclick();
+      assert.equal((await budgetSaved).status(),200);
+    } else {
+      const url=origin+'/intake/'+identity;
+      for (const width of [1440,390]) {
+        await page.setViewportSize({width,height:1000});
+        await page.goto(url);
+        await page.getByRole('heading',{name:'Cover lowercase name normalization',exact:true,level:1}).waitFor();
+        const view=await page.request.get(origin+'/api/intake/'+identity).then(r=>r.json());
+        assert.equal(view.original.regression_tests.text_example.input,' ALICE ');
+        if (mode==='checked') {
+          await page.getByRole('link',{name:'Review changes and checks'}).click();
+          await page.getByRole('heading',{name:'Real candidate checked'}).waitFor();
+          assert.equal(await page.getByText(/Check [1-4]: pass · exit 0/).count(),4);
+        } else if (mode==='failure') {
+          await page.getByText(expected,{exact:true}).waitFor();
+          await page.getByText('Your original request and any example are saved.',{exact:false}).waitFor();
+          assert.equal(await page.getByText('Waiting for information',{exact:true}).count(),0);
+          assert.equal(await page.getByRole('button',{name:'Send information'}).count(),0);
+          assert.equal(await page.getByRole('button',{name:'Approve proposal',exact:true}).count(),0);
+          assert.equal(await page.getByText('" ALICE "',{exact:true}).isVisible(),true);
+        } else {
+          await page.getByText('Ready to review',{exact:true}).waitFor();
+        }
+        assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+        await page.screenshot({path:join(evidence,`review-${width}.png`)});
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+})().catch(error=>{console.error(error);process.exitCode=1;});

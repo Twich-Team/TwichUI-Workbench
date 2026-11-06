@@ -13,6 +13,7 @@ from workbench.db import (intakes, planning_jobs, proposals, proposal_artifacts,
                           backlog_items, backlog_dependencies, intake_scopes, write_transaction)
 from workbench.service import now
 from workbench.planning_provider import configured_mode
+from workbench.planning_transport import scenario_failure_message
 from workbench.schemas import IntakeInput
 from workbench.visual_scope import (digest as digest, human_scope, scope_history, proposal_review as proposal_view, artifact_rows,
                                     approval_needs_scope_review,
@@ -118,24 +119,44 @@ def view(engine, identity):
         return view_in(connection, identity)
 
 
+def retained_planning_failure(row, jobs):
+    # Older workers saved failed grounded responses as completed clarification
+    # drafts. The claim and missing grounding distinguish those from real questions.
+    if row['status'] != 'waiting_for_information':
+        return None
+    return next((job for job in jobs if job['kind'] == 'planning'
+        and job['revision'] == row['revision'] and job['status'] == 'completed'
+        and job['payload'].get('scenario_generation_claim')
+        and not job['payload'].get('task_contract', {}).get('scenario_grounding')), None)
+
+
 def view_in(connection, identity):
     row = require(connection, intakes, identity)
     jobs = [dict(j) for j in connection.execute(select(planning_jobs).where(
         planning_jobs.c.intake_id == identity).order_by(planning_jobs.c.created_at)).mappings()]
+    retained = retained_planning_failure(row, jobs)
+    if retained:
+        diagnostics = retained['payload'].get('scenario_generation', {}).get('diagnostics', {})
+        retained['payload']['diagnostics'] = {
+            **{k: v for k, v in diagnostics.items() if k != 'usage'}, 'retained_failure': 1,
+        }
+        retained['status'] = 'failed'
+        retained['message'] = scenario_failure_message(diagnostics.get('category'))
     planned = [dict(t) for t in connection.execute(select(backlog_items).where(backlog_items.c.intake_id == identity)).mappings()]
     for item in planned:
         item['scope_review_required'] = task_needs_scope_review(connection, item)
         item['dependencies'] = list(connection.execute(select(backlog_dependencies.c.requires_id).where(
             backlog_dependencies.c.item_id == item['id'])).scalars())
     results = [j for j in jobs if j['kind'] == 'planning' and j['status'] == 'completed']
-    return dict(human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status=row['status'], revision=row['revision'],
+    return dict(human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
         created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, diagnostics=j['payload'].get('diagnostics', {})) for j in jobs],
         proposals=[proposal_view(connection, dict(p)) for p in connection.execute(select(proposals).where(
-            proposals.c.intake_id == identity).order_by(proposals.c.revision.desc())).mappings()],
+            proposals.c.intake_id == identity).order_by(proposals.c.revision.desc())).mappings()
+            if not retained or p['revision'] != retained['revision']],
         decisions=[dict({k:v for k,v in d.items() if k not in {'snapshot','intake_id'}},
             scope_review_required=approval_needs_scope_review(connection, d)) for d in connection.execute(select(proposal_decisions).where(
             proposal_decisions.c.intake_id == identity).order_by(proposal_decisions.c.created_at.desc())).mappings()],
-        result=results[-1]['payload'].get('result') if results else None,
+        result=results[-1]['payload'].get('result') if results and not retained else None,
         evidence=next((j['payload']['evidence'] for j in reversed(jobs) if j['kind']=='planning' and 'evidence' in j['payload']), []), tasks=[{k:v for k,v in t.items() if k not in {'intake_id','created_at'}} for t in planned], priority=priority(row, sum(len(t['dependencies']) for t in planned)))
 
 
@@ -307,7 +328,8 @@ def clarify(engine, identity, body):
                 if job['payload'].get('feedback') != body.text:
                     raise HTTPException(409, 'Clarification ID already used.')
                 return
-        if row['status'] != 'waiting_for_information' or row['revision'] != body.revision:
+        if (row['status'] != 'waiting_for_information' or row['revision'] != body.revision
+                or retained_planning_failure(row, jobs)):
             raise HTTPException(409, 'The request changed. Refresh before answering.')
         enqueue(connection, identity, 'planning', row['revision']+1,
                 {'feedback': body.text, 'clarification_id': str(body.command_id)})
