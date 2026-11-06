@@ -1,3 +1,30 @@
+# System-manager installation and A8 acceptance — November 6, 2026 Mountain time
+
+The current [combined request](EVERYDAY_SYSTEM_INSTALL_APPROVAL_20261106.md)
+binds application `92094bc` and the new private seal. Keep the earlier
+`2613172` candidate and approved `cd74f54` record as historical evidence.
+The running loopback build and its model are still the originals. The
+disposable copy and rollback both match the original 79-row history.
+
+The owner reports zero extra credits and Automatic reload Off and accepts
+the residual uncertainty of allowance snapshots. Continue to hold on
+ineligible or missing required account signals and keep API-key billing,
+extra credits, purchases, reset redemption, auto reload and upgrades out
+of Workbench. Live signed-in account and model checks are still pending.
+The absence of an atomic included-allowance reservation alone is no
+longer a reason to block the connector.
+
+The revised system units run as Rich. The system manager must demonstrate
+effective host filtering, socket isolation and the controlled worker
+network namespace before the original app stops. Disposable application
+TLS, origin and peer checks, private sandbox checks, rollback, and both
+provider routes with controlled responses passed. Actual LAN access,
+effective host filters, signed-in execution and four installed real tasks
+await the combined approval. All four trials keep the reviewed plan's
+provider through a separate approved run and independent checks. Retain
+the gap for general addon bug fixing and broader initial-product acceptance.
+Visual styling and the subsequent full audit remain later phases.
+
 # Approved Qwen-only interim release — November 6, 2026 Mountain time
 
 **Cutover held in preflight.** The approved record says systemd enforces

@@ -1,3 +1,18 @@
+## November 6, 2026 — System installation and A8 package
+
+- Recorded the owner acceptance of snapshot uncertainty and retained
+  the included-use and no-extra-credit policy. Bound the connector to a
+  verified private account-review marker and exact worker cgroups.
+- Put both planning paths under one clock and confirmed the reviewed
+  producer stays bound through the separate implementation approval.
+  Passed 1,077 backend tests with one skipped, 25 frontend tests, and four browser fixture cases. Inspected
+  desktop and phone consent screenshots. No live provider operation ran.
+- Sealed a separate system-manager deployment with all services running
+  as Rich. Verified unit definitions, disposable TLS and rollback with
+  the copied history. The [combined request](EVERYDAY_SYSTEM_INSTALL_APPROVAL_20261106.md)
+  includes real host filtering proofs before cutover, scoped firewall,
+  four bounded acceptance tasks and two exact evidence archives.
+
 ## November 6, 2026 — Approved interim cutover held in preflight
 
 - Preserved sealed candidate `2613172` and the exact request at `cd74f54`.

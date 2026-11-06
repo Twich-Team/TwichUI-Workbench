@@ -1,5 +1,27 @@
 # A8 signed-in Codex and model routing
 
+## Current installation candidate
+
+The [system installation and acceptance request](EVERYDAY_SYSTEM_INSTALL_APPROVAL_20261106.md)
+binds `92094bc` and replaces the proposed user-manager cutover. The owner
+reports zero additional usage credits and Automatic reload Off and accepts
+the residual risk of allowance snapshots without a per-request billing
+guarantee. The connector still checks sign-in, ordinary usage, current
+allowance and credit signals. A missing required signal or disqualifying
+state holds. This supersedes the previous blanket hold on snapshot risk.
+The four actual tasks require fresh cutover and trial approval.
+
+The revised candidate shares one planning deadline across providers,
+fences the reviewed producer at run admission, and interrupts when the
+connector observes a retry notification. Both switch directions reached
+provider-bound implementation and independent checks using controlled
+responses. The existing isolated real Qwen result is the only real-provider
+result in these records. CLI sign-in was observed locally. App Server
+initialization worked in the network-disabled sandbox, where its account
+read timed out. Live eligibility and all four installed journeys are pending.
+
+## Prior offline candidate and Qwen-only decision
+
 November 6, 2026 Mountain time. The bidirectional candidate is `2613172dce3ac7dcfa43940586bba1911f688073`. It supersedes `8167291`, whose fallback could only go from Codex to Qwen. The running app on loopback 9487 still serves the earlier demo build.
 
 | Task choice | Implemented and checked offline | Live evidence |
