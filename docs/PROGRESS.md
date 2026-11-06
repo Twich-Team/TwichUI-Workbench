@@ -1,5 +1,29 @@
 # Current progress and operator handoff
 
+### 2026-11-05 MST — Repaired browser supervision and honest planning outcomes
+
+Started at `cf83907` and preserved the unrelated working edits. The sealed
+historical trace and staged schema confirmed that querying the sample
+publication table's missing `id` column triggered cleanup and cancelled
+the only Qwen planning call. The model slot was released and the original
+example remained saved. That attempt's token usage is unknown.
+
+Checkpoint `d98cd1b` separates optional status reads from required safety
+reads and records status outages and recovery. The shared gated supervisor
+handles browser steps and shutdown. Failed grounded planning saves a
+failed job and its real cause. The historical cancellation is rendered
+from its saved evidence without a database rewrite. Actual clarification
+requests still work, and dead planning claims close without automatic replay.
+
+The exact staged build passed ten connected offline supervisor cases,
+including two browser approvals and a checked Lua result after a failed
+status read. The native delegated isolation preflight, 983 backend tests
+with one skip, 24 frontend tests and four focused Chromium tests passed.
+Desktop and phone captures were inspected. All 451 protected evidence
+hashes matched. No model request, lease, probe, service restart or
+activation occurred. The next package needs fresh authorization and
+verified archival for the 72 MiB reserve. See [Continuation](CONTINUATION.md).
+
 ### 2026-11-05 MST — Real browser planning held and closed
 
 The owner authorized graceful early stop of the verified preceding read-only

@@ -1,3 +1,166 @@
+# Browser planning readiness repaired offline — November 5, 2026 Mountain time
+
+The checkout started at `cf83907`. Later working edits in AGENTS, this
+handoff and Progress were preserved. The application and supervisor fix
+is in `d98cd1b3d6228ba02c6c08839419ad18971d43ba`.
+
+The last browser run started one Qwen planning request. Its supervisor
+queried `fake_publications.id`, but the staged migration 0012 schema uses
+`binding` as that table's primary key. The SQLite exception escaped through
+the supervisor's cleanup, which stopped the worker. Worker shutdown
+cancelled the response and the model slot was released. The original
+request and example were saved. The worker had recorded the missing
+response as a clarification, so the browser wrongly asked for information.
+Final token usage from that attempt is unknown. Its authorization is spent.
+
+The offline query correction passed on the exact staged schema. The shared
+supervisor now reads publication and planning limits in one required
+read-only snapshot using row existence. Optional status reads report an
+outage and recovery while independent safety and time checks continue.
+Authorization, worker isolation, unreadable safety evidence, unexpected
+work, accounting, deadlines and capacity still hold the run. The same
+supervisor owns browser ingress, approval boundaries and cleanup.
+
+Failed and interrupted planning now save the blocker and attempt without
+creating a new proposal or asking for the example again. The existing
+clarification workflow remains for genuine questions. On a worker restart,
+an interrupted grounded planning claim closes with unknown completion
+without sending it again. The current app also reads the historical
+cancelled request as an interruption without rewriting its store.
+
+The exact stage passed its build and migration checks and all ten offline
+supervisor cases. Chromium submitted the ordinary request and made both
+test approvals through the demonstration's actual gate. A status read
+failed during planning, recovered, and the task reached a sealed result
+with four real Lua checks. Other cases exercised persistent status
+unavailability, an unreadable safety query, an unexpected publication
+record, low capacity, elapsed deadline, incomplete output, worker death,
+missing usage and failed worker readiness. Restart and reload preserved
+one planning claim and no new work. The native delegated run separately
+confirmed actual filesystem and network confinement. The repository
+suite passed 983 backend tests with one skip, 24 frontend tests and four
+focused Chromium tests. Desktop and phone captures were inspected.
+
+[Build receipt](../artifacts/runs/browser-supervision-readiness.zTxmjk/build.json),
+[supervisor rehearsal](../artifacts/runs/browser-supervision-readiness.zTxmjk/rehearsal.log),
+[native isolation](../artifacts/runs/browser-supervision-readiness.zTxmjk/native-isolation.log),
+[historical hold desktop](../artifacts/runs/browser-supervision-readiness.zTxmjk/retained-request/review-1440.png),
+[historical hold phone](../artifacts/runs/browser-supervision-readiness.zTxmjk/retained-request/review-390.png),
+and [offline checked review](../artifacts/runs/browser-supervision-readiness.zTxmjk/pass/review-1440.png).
+
+All 71 interrupted-browser, 170 earlier checked and 210 earlier failed
+evidence files matched. Read-only inspection matched the running model
+process and sampler proof. This assignment made zero model requests and
+performed no probes, leases or restarts. Port 9487 still serves build
+`fcf74ce`. Port 8765 and the old 9187 preview were preserved. The corrected
+build is staged with an empty store and an inactive capability. The
+complete real-model browser path and real-addon test loading remain unproven.
+
+## Combined authorization pending for one fresh browser demonstration
+
+1. **Activation and rollback.** Activate only isolated checkpoint
+   `d98cd1b3d6228ba02c6c08839419ad18971d43ba` with
+   `index-Btgl0O1K.js` and `index-CzQfAJRs.css` in
+   `.local/browser-supervision-ready.vHfhpk`. Verify the manifest SHA-256
+   `6a5c34a9188cfd49fdba42cad03cf59373fc961e98d04b7f4ca850c9073c0b66`,
+   its files, empty inode-bound store and backup, policy, fixture, model
+   identity, sampler proof and native launcher. Once authorized, use
+   `PYTHONPATH=scripts:backend .venv/bin/python -m browser_demo.live
+   browser-demonstration-manifest.json <new-private-evidence-directory>`
+   from that stage. Start only the gated loopback API at 127.0.0.1:9187
+   and the owned worker. Use the private one-off capability and exact
+   same-origin browser checks. At closeout freeze writes, settle owned
+   work, stop the owned worker and write API, remove the matching
+   capability and preserve the store. Keep the main app and its store
+   on 9487 and preserve 8765.
+2. **Obsolete preview.** If still present, verify that the port 9187
+   listener belongs to `workbench-browser-real-review-Ldasz8.service`,
+   running the exact read-only server and store recorded in
+   `browser-real-demonstration-Ldasz8/review-server.json`. Reconfirm that
+   the write API and worker are stopped and all 71 evidence files match.
+   Authorize graceful stop of only that preview, preserving its store
+   and evidence. If the preview expired, use the free port. An unknown
+   occupant holds activation.
+3. **Task and owner reviews.** Submit one nonvisual Lua regression
+   request titled **Cover lowercase name normalization**, with description
+   “In the synthetic fixture, cover trimming surrounding spaces and
+   lowercasing names.” Use fixture `main` at
+   `ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. The first result for
+   `" ALICE "` must be `"alice"`. Reject `"ALICE"` for the same call.
+   Allow additions only to `tests/test_normalize.lua` and reads of it
+   and `!!!TwichUI/normalize.lua`. Preserve existing tests, runner,
+   harness, production code and file modes. Set only the preferred local
+   model in the browser, with fallback blocked. After identity, usage
+   and scope match, Rich reviews the actual generated proposal and its
+   exact example, then clicks **Approve proposal**. Workbench certifies
+   the independent checks. Rich then reviews the certified task, files,
+   expected behavior and limits and clicks **Approve local
+   implementation** with **Local implementation only** selected. The
+   outer authorization permits planning. The second browser decision
+   alone permits implementation. Publication stays held.
+4. **Budget.** Use existing local `pilot-qwen38-27b` on 8080 and the
+   standing model-priority permission. Allow one authenticated planning
+   generation with a 120-second deadline, fixed decoding with reasoning
+   disabled, 2,600 generated tokens and 24,000 bytes each for the request
+   and response. Decomposition is deterministic. After the browser
+   approvals permit one controller lease of up to 60 minutes, including
+   five minutes reserved for restoration. Allow one cancellation probe
+   of up to 30 seconds, 128 input and 60 generated tokens. Permit one
+   implementation attempt of up to 20 requests, 120 seconds each, 2,500
+   generated tokens per response (2,496 on the wire), 24,000 generated
+   tokens total and the existing 32,768-token context gate. Aggregate
+   limit is 22 generating requests and 26,660 generated tokens plus up
+   to 21 input counts and the existing bounded non-generating metadata,
+   readiness, cancellation and restoration exchanges. Allow two shared
+   safe tool-input corrections and check-driven edits within the original
+   attempt. Zero replay, replacement attempt, extra probe, lease
+   extension, automatic retry or fallback.
+5. **Time, space and archival.** Start a single 90-minute clock when
+   9187 is free and authorized work begins. Include archival, preflight,
+   planning, reviews, implementation, checks, restoration and closeout.
+   Keep 20 minutes for implementation and 40 through verification.
+   Require at least 55 minutes before budget approval, 50 before lease
+   start and 45 before attempt start. Require at least 72 MiB counted
+   headroom after backups before planning and again before implementation,
+   512 MiB aggregate ceiling, 4 GiB free and at most 1 GiB scratch. Retain
+   6 GiB RAM, zero swap, two cores, model-side limits of 64 tasks and
+   16 MiB/file, trusted-check limits of 128 tasks and 128 MiB/file, plus
+   the 45,000-character source read, 150 added lines, 65,536 patch bytes,
+   8 MiB log, 2 MiB stream, 64 KiB line and 256 KiB assembled response caps.
+   Authorize only archive `browser-supervision-demo-preflight-20261105`
+   of these closed generated directories if needed for the reserve.
+   - `artifacts/runs/browser-7trH8t/results`
+   - `artifacts/runs/browser-r2Vnbs/results`
+   - `artifacts/runs/browser-4d7aou/results`
+   - `artifacts/runs/browser-dTJ9hw/results`
+
+   The inventory is 33 files and 12,240,769 bytes. Current counted
+   headroom is about 62.3 MiB and projected headroom is about 74.0 MiB.
+   Recheck ownership, closure and exact inventory. Verify the lossless
+   archive, original path lookup and a separate restore before pruning
+   only matching originals. Verify again and remeasure. Keep stores,
+   failed-run evidence, approvals and baselines. Stop if reserves fail.
+   [Capacity receipt](../artifacts/runs/browser-supervision-readiness.zTxmjk/capacity.json).
+6. **Checks, stop and restoration.** Require independent original,
+   positive, vacuous and wrong-behavior controls, Lua syntax, focused
+   regression, the frozen independent oracle and exact five-group
+   suite. Require matching candidate seal, patch, durable result and
+   usage, with zero publication records. Hold for denied or changed
+   bindings, inadequate accounting, unqualified planning, failed
+   isolation, unavailable owner reviews, resource or time limits,
+   failed cancellation or verification, unknown completion or uncertain
+   restoration. Preserve the actual attempt and its cause. The existing
+   authenticated controller owns the exclusive interval and restores
+   original settings and normal access on every exit, with guarded
+   watchdog recovery. Verify original configuration, normal
+   authentication and rejection of the temporary credential before
+   reporting a completed result.
+7. **Local review.** Show the exact browser outcome, checks, diff and
+   durable patch for a passing result with desktop and phone captures.
+   A read-only loopback preview may serve the retained outcome through
+   the earlier saved or outer deadline. Keep the evidence after expiry.
+   Keep delivery local and publication held.
+
 # Fresh browser demonstration held during planning — November 5, 2026 Mountain time
 
 The owner approved the isolated demonstration at app and worker checkpoint
