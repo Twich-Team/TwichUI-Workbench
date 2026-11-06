@@ -100,7 +100,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
     <p className="permission-files"><strong>Files that may change</strong> {offer.paths.map((path,i)=><span key={path}>{i>0?', ':''}<code>{path}</code></span>)}</p>
     {scope?.content.acceptance.length ? <ul className="permission-outcomes" aria-label="What the run should check">{scope.content.acceptance.map((s,i)=><li key={i}>{s}</li>)}</ul> : null}
     {shown.local_only&&<p><strong>Provider</strong> {shown.provider?.backend==='codex'
-      ? <>Codex · {shown.provider.model}{shown.provider.effort ? ' · '+shown.provider.effort : ''}. One signed-in turn sends the approved test and relevant committed source excerpts to OpenAI. Workbench checks the proposed change independently.</>
+      ? <>Codex · {shown.provider.model}{shown.provider.effort ? ' · '+shown.provider.effort : ''}. {shown.provider.fallback_reason==='local_unreachable' ? 'Qwen was unreachable before generation, so Codex prepared the plan. ' : ''}One signed-in turn sends the approved test and relevant committed source excerpts to OpenAI. Workbench checks the proposed change independently.</>
       : <>Local Qwen is the saved choice for this run. {shown.provider?.fallback_reason ? 'The approved switch occurred before Codex generated a plan. ' : ''}This approval allows one Qwen run.</>}</p>}
     <RunLimits budget={budget} codex={shown.provider?.backend==='codex'}/>
     {query.isError&&<p role="alert">The run offer could not be refreshed. Refresh before approving.</p>}

@@ -511,3 +511,35 @@ test('everyday intake completes two different local tasks in one saved history',
   const history=await page.request.get('/api/real-executions').then(r=>r.json());
   expect(history.total).toBe(2);
 });
+
+test('planning provider consent shows both fallback directions on desktop and phone',async({page})=>{
+  await page.route('**/api/local-work',route=>route.fulfill({json:{
+    enabled:true,ready:true,codex_configured:true,codex_available:true,message:'Disposable browser fixture.',
+  }}));
+  const {artifactPath}=await import('./output');
+  for(const width of [1440,390]){
+    await page.setViewportSize({width,height:1000});
+    await page.goto('/intake/new');
+    await page.getByLabel('Add a check for existing behavior').check();
+    await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+    const providers=page.getByRole('group',{name:'Planning provider'});
+    const qwen=providers.getByLabel('Allow one local Qwen request to plan this task');
+    const codex=providers.getByLabel('Allow one signed-in Codex turn to plan this task');
+    const toCodex=providers.getByLabel(/Allow one switch to signed-in Codex/);
+    const toQwen=providers.getByLabel(/Allow one switch to local Qwen/);
+    await qwen.check();
+    await expect(toCodex).not.toBeChecked();
+    await toCodex.check();
+    await expect(providers.getByText(/this permits sending your request/)).toBeVisible();
+    await expect(codex).not.toBeChecked();
+    await overflow(page);
+    await providers.screenshot({path:artifactPath(`fallback/qwen-first-${width}.png`)});
+    await codex.check();
+    await expect(qwen).not.toBeChecked();
+    await expect(toQwen).not.toBeChecked();
+    await toQwen.check();
+    await expect(providers.getByText(/Failed, partial or uncertain generation/)).toBeVisible();
+    await overflow(page);
+    await providers.screenshot({path:artifactPath(`fallback/codex-first-${width}.png`)});
+  }
+});

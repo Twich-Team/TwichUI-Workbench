@@ -208,13 +208,15 @@ def test_saved_qwen_selection_reaches_adapter_and_changed_preference_fences_run(
         assert not c.execute(select(real_execution_grants)).first()
 
 
-def save_codex_policy(store):
+def save_codex_policy(store, *, both=False):
     from workbench import model_policy
 
     policy = model_policy.read(store)
     policy.preferred = 'codex'
     policy.fallback = ['local']
     policy.fallback_on = ['capacity', 'unavailable']
+    if both:
+        policy.test_fallback = 'both'
     policy.providers['codex'].model = 'simulated-codex'
     return model_policy.save(store, policy, model_policy.CapabilityReport(executors=[]))
 
@@ -296,9 +298,9 @@ def test_codex_saved_policy_change_prevents_old_consent_from_starting(
     assert 'policy changed' in saved['jobs'][0]['message']
 
 
-@pytest.mark.parametrize('good_edit', [True, False])
+@pytest.mark.parametrize('good_edit,via_qwen', [(True, False), (False, False), (True, True), (False, True)])
 def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
-    store, client, headers, installed, monkeypatch, good_edit,
+    store, client, headers, installed, monkeypatch, good_edit, via_qwen,
 ):
     from workbench import codex_provider, provider_routes, task_execution
     from workbench.codex_runtime import CodexRuntime
@@ -306,7 +308,7 @@ def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
     from workbench.real_workspace import confine, durable
     from test_regression_evidence import ControlledPreparer
 
-    policy = save_codex_policy(store)
+    policy = save_codex_policy(store, both=via_qwen)
     planner = ControlledPlanner()
     counted = dict(prompt_tokens=40, completion_tokens=10, reasoning_tokens=0, total_tokens=50)
     calls = []
@@ -324,10 +326,22 @@ def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
         return {'old': old, 'new': f'assert(normalize("  ALICE ") == "{expected}")\n{old}'}, counted
 
     monkeypatch.setattr(codex_provider, 'generate', generate)
-    saved = client.post('/api/intake', headers=headers, json={**body(), 'local_planning': 'codex-once'})
-    assert saved.status_code == 200
+    choice = 'qwen-with-codex-fallback' if via_qwen else 'codex-once'
+    if via_qwen:
+        from workbench.planning_provider import LocalBeforeGeneration, LocalProvider
+
+        def unavailable(self, *args):
+            calls.append('qwen-readiness')
+            raise LocalBeforeGeneration()
+
+        monkeypatch.setattr(LocalProvider, '_request', unavailable)
+        monkeypatch.setenv('WORKBENCH_LOCAL_KEY', '/fixture-only-unused')
+    saved = client.post('/api/intake', headers=headers, json={**body(), 'local_planning': choice})
+    assert saved.status_code == 200, saved.text
     item = saved.json()
     assert worker.tick(store)
+    if via_qwen:
+        monkeypatch.delenv('WORKBENCH_LOCAL_KEY')
     approve_and_decompose(store, client, headers, item)
     assert worker.tick(store)
     item = client.get('/api/intake/' + item['id']).json()
@@ -335,12 +349,14 @@ def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
     path = f"/api/intake/{item['id']}/tasks/{task['id']}/run-approval"
     offer = client.get(path).json()
     assert offer['available'] and offer['provider']['model'] == policy.providers['codex'].model
+    assert offer['provider']['fallback_reason'] == ('local_unreachable' if via_qwen else None)
     body_approval = dict(command_id=str(uuid4()), binding=offer['binding'],
                          scope_approval_id=offer['scope_approval_id'], run_budget=offer['offer']['budget'])
     response = client.post(path, headers=headers, json=body_approval)
     assert response.status_code == 200, response.text
     assert client.post(path, headers=headers, json=body_approval).json() == response.json()
-    assert calls == ['planning']
+    expected = ['qwen-readiness', 'planning'] if via_qwen else ['planning']
+    assert calls == expected
     assert worker.tick(store)
     assert worker.tick(store)
 
@@ -369,7 +385,7 @@ def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
 
     monkeypatch.setattr('runpy.run_path', lambda _path: {'checked_limit': lambda _root: None})
     assert task_sessions.process_one(store, advance=advance)
-    assert calls == ['planning', 'implementation']
+    assert calls == [*expected, 'implementation']
     with store.connect() as c:
         execution = c.execute(select(real_execution_requests)).mappings().one()
         assert not c.execute(select(real_publications)).first()
@@ -381,3 +397,80 @@ def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
         assert len(execution['result']['checks']) >= 4
     else:
         assert not execution['result'].get('candidate_id')
+
+@pytest.mark.parametrize('condition,route,outcome', [
+    ('refused', 'qwen-once', 'unavailable'),
+    ('refused', 'qwen-with-codex-fallback', 'completed'),
+    ('post-refused', 'qwen-with-codex-fallback', 'interrupted_unknown'),
+    ('partial', 'qwen-with-codex-fallback', 'incomplete_output'),
+    ('failed', 'qwen-with-codex-fallback', 'failed'),
+    ('canceled', 'qwen-with-codex-fallback', 'interrupted_unknown'),
+    ('changed', 'qwen-with-codex-fallback', 'unavailable'),
+])
+def test_qwen_only_switches_on_a_proven_pre_generation_refusal(
+    store, client, headers, installed, monkeypatch, condition, route, outcome,
+):
+    from workbench import codex_provider, model_policy
+    from workbench.planning_provider import LocalProvider
+    from workbench.planning_transport import PlanningUnavailable
+
+    save_codex_policy(store, both=True)
+    planner = ControlledPlanner()
+    calls = []
+    reported = dict(prompt_tokens=6, completion_tokens=5, total_tokens=11)
+    monkeypatch.setenv('WORKBENCH_LOCAL_KEY', '/fixture-only-unused')
+
+    class Transport:
+        seconds = 120
+
+        def models(self, secret):
+            calls.append('readiness')
+            if condition == 'changed':
+                policy = model_policy.read(store)
+                policy.test_fallback = 'off'
+                model_policy.save(store, policy, model_policy.CapabilityReport(executors=[]))
+            if condition in {'refused', 'changed'}:
+                raise PlanningUnavailable('refused', 'transport', {'connection_refused': True})
+            return everyday.MODEL
+
+        def read(self, request, limit):
+            calls.append('generation')
+            if condition in {'post-refused', 'canceled'}:
+                raise PlanningUnavailable('lost', 'canceled' if condition == 'canceled' else 'transport',
+                                          {'connection_refused': True})
+            return json.dumps(dict(usage=reported, choices=[dict(
+                finish_reason='length' if condition == 'partial' else 'stop',
+                message=dict(content='invalid provider JSON'))], model=everyday.MODEL)).encode()
+
+    def local(self, schema, encoded, key_path, expected_model):
+        return self._infer(Transport(), '', schema, encoded, expected_model=expected_model)
+
+    def codex(model, effort, prompt, schema, stop):
+        assert outcome == 'completed' and not stop()
+        calls.append('codex')
+        value, _, _ = planner.generate(json.loads(prompt.split('Untrusted task data:\n')[1]), schema)
+        return value, reported
+
+    monkeypatch.setattr(LocalProvider, '_request', local)
+    monkeypatch.setattr(codex_provider, 'generate', codex)
+    request = {**body(), 'local_planning': route}
+    saved = client.post('/api/intake', headers=headers, json=request)
+    assert saved.status_code == 200, saved.text
+    item = saved.json()
+    assert client.post('/api/intake', headers=headers, json=request).json()['id'] == item['id']
+    assert worker.tick(store)
+    assert not worker.tick(store)
+    with store.connect() as c:
+        attempt = c.execute(select(model_attempts)).mappings().one()
+        planning = c.execute(select(planning_jobs)).mappings().one()
+    assert attempt['outcome'] == outcome
+    if outcome == 'completed':
+        assert calls == ['readiness', 'codex']
+        assert planning['payload']['provider_switch'] == dict(from_provider='local', to_provider='codex',
+            reason='local_unreachable', local_generation_started=False)
+        assert attempt['backend'] == 'codex'
+    else:
+        assert 'codex' not in calls and 'provider_switch' not in planning['payload']
+        assert attempt['backend'] == 'local'
+    if condition in {'partial', 'failed'}:
+        assert attempt['usage']['values'] == reported

@@ -102,7 +102,11 @@ class CodexRuntime(Runtime):
                                                        receipt_sha256=sha(record.read_bytes()))),
                             inference_ran=True, correction_count=0, read_input_errors=0)
         failure = self.provider_failure
-        return dict(usage=dict(status='unavailable', units='tokens', values=None),
-                    inference_ran=False if failure and not failure.started else None,
+        counted = failure.counted if failure else None
+        return dict(usage=dict(status='partial' if counted else 'unavailable', units='tokens', values=None,
+                               **({'known_values': counted} if counted else {})),
+                    inference_ran=False if failure and not failure.started else True if counted else None,
+                    provider_terminal=failure.terminal if failure else False,
+                    provider_partial_output=failure.partial if failure else False,
                     provider_message=str(failure) if failure else
                     'Codex completion or usage is uncertain. The attempt will not restart automatically.')

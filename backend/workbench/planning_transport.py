@@ -155,7 +155,9 @@ class LocalHTTP:
             else:
                 reason = "transport"
             raise PlanningUnavailable(
-                "Local planning transport did not complete.", reason
+                "Local planning transport did not complete.", reason,
+                {"connection_refused": True} if reason == "transport" and isinstance(
+                    getattr(error, "reason", error), ConnectionRefusedError) else None,
             ) from None
 
     def models(self, secret):

@@ -59,7 +59,8 @@ def handle(connection, argv):
             finally:
                 started = rpc.started
     except codex.Hold as error:
-        result = {'error': error.reason, 'started': started or error.started}
+        result = dict(error=error.reason, started=started or error.started, terminal=error.terminal,
+                      partial=error.partial, counted=error.counted)
     except (KeyError, TypeError, ValueError, OSError):
         result = {'error': 'protocol', 'started': started}
     try:

@@ -149,13 +149,19 @@ class DemoProvider:
         return value, 'deterministic-demo-v1', 'demo'
 
 
+class LocalBeforeGeneration(PlanningUnavailable):
+    def __init__(self):
+        super().__init__('Qwen refused the connection during its readiness check. No generation started.',
+                         'local_unreachable')
+
+
 class LocalProvider:
     def __init__(self, stop_event=None):
         self.stop_event = stop_event
         self.diagnostics = {}
 
     def generate(self, packet, schema, *, expected_model=None):
-        self.diagnostics = {}
+        self.diagnostics = {'generation_state': 'not_started'}
         if issubclass(schema, ScenarioResponse) and expected_model is None:
             raise PlanningUnavailable('Grounded local planning requires a saved model selection.', 'model_policy')
         encoded = json.dumps(packet, ensure_ascii=True)
@@ -167,7 +173,7 @@ class LocalProvider:
         if not key_path:
             raise PlanningUnavailable('Local planning requires an explicitly configured local key file.')
         started = time.monotonic()
-        self.diagnostics = {'endpoint':'/v1/chat/completions', 'input_bytes':len(encoded.encode())}
+        self.diagnostics.update(endpoint='/v1/chat/completions', input_bytes=len(encoded.encode()))
         try:
             return self._request(schema, encoded, key_path, expected_model)
         except BlockingIOError:
@@ -191,7 +197,12 @@ class LocalProvider:
     def _infer(self, transport, secret, schema, encoded, *, expected_model=None):
         from workbench.grounded_scenarios import LoadedClientResponse, unique_json_object
 
-        actual = transport.models(secret)
+        try:
+            actual = transport.models(secret)
+        except PlanningUnavailable as error:
+            if error.reason == 'transport' and error.metadata.get('connection_refused') is True:
+                raise LocalBeforeGeneration() from None
+            raise
         self.diagnostics.update(configured_model=actual, deadline_s=transport.seconds)
         if expected_model is not None and actual != expected_model:
             raise PlanningUnavailable('The available local model differs from the saved planning selection. No generation started.', 'model_identity')
@@ -244,6 +255,7 @@ class LocalProvider:
             raise PlanningUnavailable('Serialized grounded request exceeds the input budget; narrow the request.')
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
             encoded_body, {'Authorization': 'Bearer '+secret, 'Content-Type': 'application/json'})
+        self.diagnostics['generation_state'] = 'uncertain'
         raw = transport.read(request, MAX_OUTPUT)
         self.diagnostics['output_bytes'] = len(raw)
         try:
@@ -254,7 +266,12 @@ class LocalProvider:
                 if tokens:
                     self.diagnostics['usage'] = {'source':'local llama.cpp response', 'units':'tokens', 'observed_at':datetime.now(timezone.utc).isoformat(), 'values':tokens}
             choice = result['choices'][0]
-            if choice.get('finish_reason') != 'stop':
+            reason = choice.get('finish_reason')
+            if reason == 'length':
+                self.diagnostics['generation_state'] = 'partial'
+            elif reason in {'stop', 'content_filter'}:
+                self.diagnostics['generation_state'] = 'finished'
+            if reason != 'stop':
                 raise PlanningUnavailable('Generation stopped before a complete proposal.', 'incomplete_output')
             model = result.get('model')
             if isinstance(model, str) and len(model) <= 160 and re.fullmatch(r'[A-Za-z0-9_.:/-]+', model):

@@ -39,6 +39,8 @@ class ExecutionPolicy(StrictModel):
     providers: dict[Backend, BackendPreference] = Field(default_factory=lambda: {
         'local': BackendPreference(), 'codex': BackendPreference(), 'claude': BackendPreference(enabled=False)})
     substitution: Literal['deny', 'configured_fallback_only'] = 'deny'
+    test_fallback: Literal['off', 'qwen-to-codex', 'codex-to-qwen', 'both'] | None = Field(
+        default=None, exclude_if=lambda value: value is None)
     when_unavailable: Literal['wait', 'block'] = 'wait'
 
     @model_validator(mode='after')

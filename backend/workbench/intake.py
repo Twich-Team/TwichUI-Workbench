@@ -79,10 +79,8 @@ def submit(engine, body, *, owner_provenance=None):
                 receipt = everyday.planning_receipt(original, at)
                 from workbench import provider_routes
                 try:
-                    if body.local_planning in provider_routes.CODEX_CHOICES:
-                        receipt['codex_route'] = provider_routes.codex_choice(connection, body.local_planning)
-                    else:
-                        receipt['local_route'] = everyday.local_selection(connection).model_dump()
+                    key, binding = provider_routes.planning_binding(connection, body.local_planning)
+                    receipt[key] = binding
                 except ValueError as error:
                     raise HTTPException(409, str(error)) from None
                 planning['local_planning_receipt'] = receipt

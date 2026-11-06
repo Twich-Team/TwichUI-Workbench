@@ -11,7 +11,7 @@ import { Implementation } from './Implementation';
 import { TaskExecution } from './TaskExecution';
 import { TaskJourney, TaskOverview } from './TaskOverview';
 import { TaskExample } from './TaskExample';
-import { minutes } from './taskProgress';
+import { minutes, providerOutcome } from './taskProgress';
 import { ExactRunLimits, RunLimits } from './RunLimits';
 
 type Input = components['schemas']['IntakeInput'];
@@ -145,21 +145,26 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,supported_task:item?.id||null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Use my description</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Use a ready-made task with a fixed plan. Your comments stay with the request. The fixed scope sets what can run.</p></>}
   {kind==='issue' && <><label className="check-label"><input type="checkbox" checked={lua} onChange={e=>{setLua(e.target.checked);if(!e.target.checked)setBody({...body,lua_error:''});}}/>Add a Lua error <span>Optional</span></label>{lua && <><label htmlFor="lua-error">Lua error <span>Plain text · never executed</span></label><textarea className="code-input" id="lua-error" maxLength={6000} rows={6} value={body.lua_error || ''} onChange={e=>setBody({...body,lua_error:e.target.value})}/></>}</>}</details>
   <label htmlFor="request-interface">Does this request change the interface?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.</p>
-  {localWork.data?.enabled&&regression&&<>
-    <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning==='qwen-once'} disabled={body.visual_requirement!=='nonvisual'}
+  {localWork.data?.enabled&&regression&&<div role="group" aria-label="Planning provider">
+    <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('qwen-')||false} disabled={body.visual_requirement!=='nonvisual'}
       onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>Allow one local Qwen request to plan this task</span></label>
     {localWork.data.codex_configured ? <>
-      {!localWork.data.codex_available&&<p className="detail-copy">The Codex connector is unavailable. A request with fallback disabled will be held. Workbench can switch to Qwen only with your explicit approval and saved fallback policy.</p>}
+      {!localWork.data.codex_available&&<p className="detail-copy">The Codex connector is unavailable. If you choose Codex first, planning can proceed with Qwen only if you allow that switch.</p>}
+      {body.local_planning?.startsWith('qwen-')&&<>
+        <label className="check-label"><input type="checkbox" checked={body.local_planning==='qwen-with-codex-fallback'}
+          onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-with-codex-fallback':'qwen-once'})}/>Allow one switch to signed-in Codex if Qwen refuses its readiness connection</label>
+        {body.local_planning==='qwen-with-codex-fallback'&&<p className="detail-copy">If Qwen cannot start and Models allows the switch, this permits sending your request, clarification and relevant committed source excerpts to OpenAI after the account and included allowance are checked.</p>}
+      </>}
       <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('codex-')||false} disabled={body.visual_requirement!=='nonvisual'}
         onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-once':null})}/><span>Allow one signed-in Codex turn to plan this task</span></label>
       {body.local_planning?.startsWith('codex-')&&<>
         <p className="detail-copy">This sends the request, clarification and relevant committed source excerpts to OpenAI through the configured ChatGPT sign-in. Workbench will check the saved model and included allowance before sending task content.</p>
         <label className="check-label"><input type="checkbox" checked={body.local_planning==='codex-with-local-fallback'}
-          onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-with-local-fallback':'codex-once'})}/>Allow one switch to local Qwen if a condition configured in Models stops Codex before generation</label>
+          onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-with-local-fallback':'codex-once'})}/>Allow one switch to local Qwen if Codex is unavailable or reaches its included allowance reserve before generation</label>
       </>}
     </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
-    <p className="detail-copy">Choose “Does not change the interface” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. Permission expires after 30 minutes. Planning can take up to two minutes. You review the plan and approve any run separately.</p>
-  </>}
+    <p className="detail-copy">Choose “Does not change the interface” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. Permission expires after 30 minutes. Fallback applies only before generation starts. Failed, partial or uncertain generation stops for review. You review the plan and approve any run separately.</p>
+  </div>}
 </fieldset>
   <p className="detail-copy">{localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':'Your request will be saved. Model planning requires the test coverage option and your permission.'):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.title.trim() || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
 }
@@ -238,7 +243,7 @@ export function IntakeDetail() {
       <ul>{data.provider_activity?.map(attempt=><li key={attempt.id}>
         <strong>{attempt.purpose==='capability_validation'?'Cancellation check':attempt.purpose==='implementation'?'Implementation':'Planning'}</strong>
         {' · '}{attempt.backend==='local'?'Local Qwen':attempt.backend==='codex'?'Codex':attempt.backend}
-        {' · '}{attempt.outcome==='interrupted_unknown'?'Interrupted, outcome unknown':attempt.outcome}
+        {' · '}{providerOutcome(attempt.outcome)}
         <p>{attempt.routing_reason}</p>
         {(attempt.actual_model||attempt.requested_model)&&<p className="small-text">{attempt.actual_model?'Reported model':'Selected model'} {attempt.actual_model||attempt.requested_model}</p>}
       </li>)}</ul>

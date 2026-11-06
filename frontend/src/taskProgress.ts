@@ -87,3 +87,10 @@ export function executionProgress(data: Execution): Progress | undefined {
 }
 
 export const minutes = (seconds: number) => `${seconds / 60} min`;
+
+export function providerOutcome(value: string) {
+  if (value === 'interrupted_unknown') return 'Interrupted, outcome unknown';
+  if (value === 'incomplete_output') return 'Finished with partial output';
+  if (value === 'unavailable') return 'Unavailable before generation';
+  return value;
+}

@@ -100,7 +100,7 @@ def test_uncertain_turn_interrupts_without_replay(events, reason):
     with pytest.raises(codex.Hold) as caught:
         codex.turn(rpc, 'fixture-model', None, 'task source', {})
     assert caught.value.reason == reason and caught.value.started and rpc.started
-    assert len(rpc.interrupted) == 1
+    assert len(rpc.interrupted) == (0 if caught.value.terminal else 1)
     assert [method for method, _ in rpc.calls].count('turn/start') == 1
 
 
@@ -116,3 +116,18 @@ def test_lan_requires_exact_socket_peer_authority_tls_and_origin(store, monkeypa
         assert client.get('/api/session', headers={'X-Forwarded-For': '10.0.0.42'}).status_code == 403
     with TestClient(app, base_url='http://10.0.0.9:9487', client=('10.0.0.42', 1234)) as client:
         assert client.get('/api/session').status_code == 403
+
+@pytest.mark.parametrize('with_output,terminal', [(False, True), (True, True), (True, False)])
+def test_failed_turn_retains_known_usage_and_partial_output(with_output, terminal):
+    events = [completed()[1]]
+    if with_output:
+        events.append({'method': 'item/agentMessage/delta', 'params': {'delta': 'some output'}})
+    if terminal:
+        events.append({'method': 'turn/completed', 'params': {'turn': {'id': 'turn', 'status': 'failed'}}})
+    rpc = Transcript(events=events)
+    with pytest.raises(codex.Hold) as caught:
+        codex.turn(rpc, 'fixture-model', None, 'task source', {})
+    error = caught.value
+    assert error.started and error.terminal is terminal and error.partial is with_output
+    assert error.counted['total_tokens'] == 24
+    assert bool(rpc.interrupted) is not terminal

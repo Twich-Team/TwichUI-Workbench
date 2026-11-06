@@ -17,6 +17,7 @@ from uuid import UUID, uuid5, uuid4
 from fastapi import HTTPException
 from pydantic import ValidationError
 from sqlalchemy import select
+from sqlalchemy.exc import OperationalError
 
 from workbench import intake
 from workbench.db import intakes, planning_jobs, proposals, model_attempts, write_transaction
@@ -301,13 +302,14 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     model_selection = None
     claimed_generation = False
     loaded_selection = False
-    codex_route = fallback_reason = None
+    codex_route = route = fallback_reason = None
+    choice = original['payload'].get('local_planning')
     everyday_mode = everyday.enabled()
     generation = job['kind'] == 'planning' and scenario_response is None and (
         everyday_mode or bool(os.environ.get('WORKBENCH_PREPARATION_CONFIG')))
     if generation:
         from workbench import codex_provider, grounded_scenarios, model_policy, provider_routes, trusted_preparation, planning_worker
-        from workbench.planning_provider import LocalProvider, provider, PlanningUnavailable
+        from workbench.planning_provider import LocalBeforeGeneration, LocalProvider, provider, PlanningUnavailable
         raw = None
         try:
             if everyday_mode:
@@ -340,6 +342,17 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             if os.environ.get("WORKBENCH_DEMO_MANIFEST_SHA256"):
                 from browser_demo.stage import require_active_stage
                 require_active_stage()
+            def provider_stopped():
+                if stop_event is not None and stop_event.is_set():
+                    return True
+                try:
+                    with engine.connect() as active:
+                        return (intake.require(active, planning_jobs, job['id']) != job
+                                or intake.human_scope(active, original['id']) != scope
+                                or provider_routes.approved(active, original) != route)
+                except (ValueError, OSError, HTTPException, OperationalError):
+                    return True
+
             # Same job/lease and accounting owners; duplicate workers never call an
             # adapter for an already claimed job. No automatic inference retry.
             with write_transaction(engine) as c:
@@ -348,33 +361,21 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         or intake.human_scope(c, original['id']) != scope
                         or (stop_event is not None and stop_event.is_set())):
                     return True
-                selected = None
+                from workbench.schemas import ScenarioModelSelection
+
                 if everyday_mode:
                     everyday.check_planning(c, original)
-                    if original['payload'].get('local_planning') in provider_routes.CODEX_CHOICES:
-                        codex_route = provider_routes.approved(c, original)
-                    else:
-                        from workbench.schemas import ScenarioModelSelection
-                        selected = ScenarioModelSelection.model_validate(provider_routes.approved(c, original))
+                    route = provider_routes.approved(c, original)
+                    if choice in provider_routes.CODEX_CHOICES:
+                        codex_route = route
                 if codex_route:
-                    from workbench.schemas import ScenarioModelSelection
-                    model_selection = ScenarioModelSelection(policy_revision=codex_route['policy_revision'],
-                                                             model=codex_route['model'])
-                    def provider_stopped():
-                        if stop_event is not None and stop_event.is_set():
-                            return True
-                        try:
-                            with engine.connect() as active:
-                                return (intake.human_scope(active, original['id']) != scope
-                                        or provider_routes.approved(active, original) != codex_route)
-                        except (ValueError, OSError):
-                            return True
-
+                    model_selection = ScenarioModelSelection(policy_revision=route['policy_revision'], model=route['model'])
                     adapter_used = codex_provider.Planner(codex_route, provider_stopped)
                 else:
                     adapter_used = adapter or (LocalProvider(stop_event) if everyday_mode else provider(stop_event))
                     if isinstance(adapter_used, LocalProvider):
-                        model_selection = selected or model_policy.grounded_local_selection(c)
+                        model_selection = (ScenarioModelSelection(policy_revision=route['policy_revision'], model=route['model'])
+                                           if route else model_policy.grounded_local_selection(c))
                 lease = str(uuid4())
                 job['payload'].pop('diagnostics', None)
                 job['payload']['scenario_generation_claim'] = owner_identity()
@@ -389,41 +390,55 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     requested_model=model_selection.model if model_selection else None,
                     requested_effort=codex_route['effort'] if codex_route else None,
                     routing_reason=('Explicit task consent and saved Codex model.' if codex_route else
-                                    'Saved local planning model; fixed decoding, no fallback.' if model_selection else
+                                    ('Saved local planning model; Codex allowed only if Qwen cannot connect before generation.'
+                                     if choice == 'qwen-with-codex-fallback' else 'Saved local planning model; fixed decoding, no fallback.') if model_selection else
                                     'Controlled planning adapter; no saved model selection consumed.')))
                 c.execute(intakes.update().where(intakes.c.id == original['id']).values(status='investigating'))
                 original['status'] = 'investigating'
             claimed_generation = True
-            if codex_route:
-                try:
+            try:
+                if codex_route or not model_selection:
                     raw, model, basis = adapter_used.generate(wire, schema)
-                except codex_provider.Hold as error:
-                    if (error.started or provider_routes.SAFE_FALLBACK.get(error.reason) not in codex_route['fallback']
+                else:
+                    raw, model, basis = adapter_used.generate(wire, schema, expected_model=model_selection.model)
+            except PlanningUnavailable as error:
+                reason = provider_routes.fallback_reason(choice, route, error) if route else None
+                if not reason or provider_stopped():
+                    raise
+                if grounded_scenarios.context(original['payload'], feedback, prepare(original['payload'], feedback),
+                        trusted_preparation.configuration(engine)) != packet:
+                    raise ValueError('Committed source or preparation policy changed before fallback.')
+                from datetime import datetime, timedelta, timezone
+                with write_transaction(engine) as c:
+                    if (intake.require(c, planning_jobs, job['id']) != job
+                            or intake.require(c, intakes, original['id']) != original
+                            or intake.human_scope(c, original['id']) != scope
+                            or provider_routes.approved(c, original) != route
                             or (stop_event is not None and stop_event.is_set())):
-                        raise
-                    with write_transaction(engine) as c:
-                        if (intake.require(c, planning_jobs, job['id']) != job
-                                or intake.human_scope(c, original['id']) != scope
-                                or provider_routes.approved(c, original) != codex_route):
-                            raise ValueError('Approved task or provider policy changed before fallback.')
-                        from datetime import datetime, timedelta, timezone
-                        ends = datetime.fromisoformat(original['created_at']) + timedelta(minutes=everyday.PLANNING_MINUTES)
-                        if datetime.now(timezone.utc) + timedelta(seconds=120) >= ends:
-                            raise ValueError('The original planning approval cannot fit the local fallback.')
-                        fallback_reason = error.reason
-                        job['payload']['provider_switch'] = dict(from_provider='codex', to_provider='local',
-                            reason=error.reason, codex_generation_started=False)
-                        c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(payload=job['payload']))
-                        c.execute(model_attempts.update().where(model_attempts.c.id == job['lease']).values(
-                            backend='local', requested_model=everyday.MODEL, requested_effort=None,
-                            routing_reason=f'{error} The approved Qwen fallback started before any Codex generation.'))
-                    model_selection = model_selection.model_copy(update={'model': everyday.MODEL})
+                        raise ValueError('Approved task or provider policy changed before fallback.')
+                    receipt = everyday.planning_receipt(original['payload'], original['created_at'])
+                    ends = datetime.fromisoformat(receipt['expires_at'])
+                    if datetime.now(timezone.utc) + timedelta(seconds=125) >= ends:
+                        raise ValueError('The original planning approval cannot fit the fallback.')
+                    fallback_reason = reason
+                    before = 'codex' if codex_route else 'local'
+                    after = 'local' if codex_route else 'codex'
+                    codex_route = None if codex_route else {**route['codex'], 'policy_revision': route['policy_revision']}
+                    target = codex_route['model'] if codex_route else everyday.MODEL
+                    label = 'Codex' if codex_route else 'Qwen'
+                    job['payload']['provider_switch'] = dict(from_provider=before, to_provider=after,
+                        reason=reason, **{f'{before}_generation_started': False})
+                    c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(payload=job['payload']))
+                    c.execute(model_attempts.update().where(model_attempts.c.id == job['lease']).values(
+                        backend=after, requested_model=target, requested_effort=codex_route['effort'] if codex_route else None,
+                        routing_reason=f'{error} The approved {label} fallback took over the one planning request.'))
+                model_selection = model_selection.model_copy(update={'model': target})
+                if codex_route:
+                    adapter_used = codex_provider.Planner(codex_route, provider_stopped)
+                    raw, model, basis = adapter_used.generate(wire, schema)
+                else:
                     adapter_used = LocalProvider(stop_event)
-                    raw, model, basis = adapter_used.generate(wire, schema, expected_model=everyday.MODEL)
-            elif model_selection:
-                raw, model, basis = adapter_used.generate(wire, schema, expected_model=model_selection.model)
-            else:
-                raw, model, basis = adapter_used.generate(wire, schema)
+                    raw, model, basis = adapter_used.generate(wire, schema, expected_model=target)
             if len(json.dumps(raw, allow_nan=False).encode()) > 24000 or basis not in {'demo', 'local', 'codex'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
                 raise ValueError('Invalid bounded scenario provider response')
             parsed = grounded_scenarios.resolve_response(raw, schema, wire, packet)
@@ -449,7 +464,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
         except PlanningUnavailable as error:
             hold = getattr(stop_event, 'reason', None)
             failure = ('capacity_stop', hold) if hold else (
-                (error.reason, str(error)) if isinstance(error, codex_provider.Hold) else (error.reason, None))
+                (error.reason, str(error)) if isinstance(error, (codex_provider.Hold, LocalBeforeGeneration)) else (error.reason, None))
         except ValueError as error:
             failure = ('planning_validation', str(error))
         except OSError:
@@ -501,17 +516,27 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             diagnostics['category'] = category
             if loaded_selection and claimed_generation:
                 diagnostics['retained_failure'] = 1
+            state = diagnostics.get('generation_state')
+            if state == 'uncertain':
+                detail = ('The provider returned some output, but completion is uncertain. Workbench held the task without switching.'
+                          if diagnostics.get('partial_output') else
+                          'Provider completion is uncertain. Workbench held the task without switching.')
+            elif state == 'partial':
+                detail = 'The provider finished with partial output. Workbench held the task without switching.'
             c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
                 status='failed', finished_at=intake.now(), lease=None, lease_until=None,
                 payload={**job['payload'], 'diagnostics': diagnostics},
-                message=(f'{detail} Your original request and any example are saved.' if codex_route and not fallback_reason and detail
+                message=(f'{detail} Your original request and any example are saved.' if detail and (codex_route or state in {'uncertain', 'partial'})
                          else scenario_failure_message(category, detail[:600] if detail else None))))
             if not scope_changed:
                 c.execute(intakes.update().where(intakes.c.id == original['id']).values(status='failed'))
             if claimed_generation:
-                unknown = category in {'canceled', 'timeout'} or (codex_route and not fallback_reason
-                    and category in {'protocol', 'accounting'})
-                outcome = 'superseded' if scope_changed else 'interrupted_unknown' if unknown else 'failed'
+                outcome = ('superseded' if scope_changed else 'interrupted_unknown' if state == 'uncertain'
+                           or (state is None and category in {'canceled', 'timeout'})
+                           else 'incomplete_output' if state == 'partial'
+                           else 'canceled' if category == 'canceled'
+                           else 'unavailable' if category == 'local_unreachable' or (state == 'not_started'
+                               and category in provider_routes.SAFE_CODEX_FALLBACK) else 'failed')
                 planning_worker.finish_attempt(c, job, adapter_used, model, basis, outcome)
             if fail_before_commit:
                 raise RuntimeError('Simulated preparation crash before commit')

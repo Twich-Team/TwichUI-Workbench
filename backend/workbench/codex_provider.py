@@ -24,8 +24,11 @@ FEATURES_OFF = ('shell_tool', 'multi_agent', 'multi_agent_v2', 'hooks', 'plugins
 
 
 class Hold(PlanningUnavailable):
-    def __init__(self, reason, *, started=False):
+    def __init__(self, reason, *, started=False, terminal=False, partial=False, counted=None):
         self.started = started
+        self.terminal = terminal
+        self.partial = partial
+        self.counted = counted
         super().__init__({
             'authentication': 'Codex sign-in needs attention.',
             'capacity': 'The included Codex allowance has reached the Workbench reserve.',
@@ -35,6 +38,7 @@ class Hold(PlanningUnavailable):
             'canceled': 'The Codex operation was stopped.',
             'timeout': 'The Codex operation reached its time limit.',
             'protocol': 'Codex returned an unexpected or incomplete response.',
+            'failed': 'Codex finished without a usable result.',
         }[reason], reason)
 
 
@@ -211,6 +215,7 @@ def turn(rpc, model, effort, prompt, schema):
         'outputSchema': schema})
     turn_id = response['turn']['id']
     output = observed = None
+    terminal = partial = False
     try:
         while True:
             event = rpc.events.pop(0) if rpc.events else rpc.receive()
@@ -219,6 +224,8 @@ def turn(rpc, model, effort, prompt, schema):
                 raise Hold('protocol', started=True)
             if p.get('threadId', thread) != thread or p.get('turnId', turn_id) != turn_id:
                 raise Hold('protocol', started=True)
+            if method == 'item/agentMessage/delta' and isinstance(p.get('delta'), str) and p['delta']:
+                partial = True
             if method in {'item/started', 'item/completed'}:
                 item = p['item']
                 kind = item.get('type')
@@ -228,6 +235,7 @@ def turn(rpc, model, effort, prompt, schema):
                     if output is not None or len(item['text'].encode()) > MAX_PACKET:
                         raise Hold('protocol', started=True)
                     output = item['text']
+                    partial = partial or bool(output)
             if method == 'thread/tokenUsage/updated':
                 observed = usage(p['tokenUsage']['total'])
             if method == 'account/rateLimits/updated' and p.get('rateLimits', {}).get('rateLimitReachedType'):
@@ -236,25 +244,29 @@ def turn(rpc, model, effort, prompt, schema):
                 final = p['turn']
                 if final['id'] != turn_id:
                     raise Hold('protocol', started=True)
-                if final.get('status') == 'interrupted':
+                status = final.get('status')
+                terminal = status in {'completed', 'failed', 'interrupted'}
+                if status == 'interrupted':
                     raise Hold('canceled', started=True)
-                if final.get('status') != 'completed':
+                if status != 'completed':
                     info = (final.get('error') or {}).get('codexErrorInfo')
                     raise Hold({'usageLimitExceeded': 'capacity', 'unauthorized': 'authentication'}.get(
-                        info if isinstance(info, str) else '', 'protocol'), started=True)
+                        info if isinstance(info, str) else '', 'failed' if terminal else 'protocol'), started=True)
                 if observed is None:
                     raise Hold('accounting', started=True)
                 parsed = json.loads(output or '')
                 if not isinstance(parsed, dict):
                     raise Hold('protocol', started=True)
                 return {'output': parsed, 'usage': observed}
-    except (Hold, ValueError, TypeError, KeyError, OSError):
-        # Best effort protocol interruption. The owned process group is also killed.
-        try:
-            rpc.interrupt({'id': 999, 'method': 'turn/interrupt', 'params': {'threadId': thread, 'turnId': turn_id}})
-        except (Hold, OSError):
-            pass
-        raise
+    except (Hold, ValueError, TypeError, KeyError, OSError) as error:
+        if not terminal:
+            # Best effort protocol interruption. The owned process group is also killed.
+            try:
+                rpc.interrupt({'id': 999, 'method': 'turn/interrupt', 'params': {'threadId': thread, 'turnId': turn_id}})
+            except (Hold, OSError):
+                pass
+        raise Hold(error.reason if isinstance(error, Hold) else 'protocol', started=True,
+                   terminal=terminal, partial=partial, counted=observed) from None
 
 
 def connector_path():
@@ -304,7 +316,9 @@ def generate(model, effort, prompt, schema, stop=lambda: False):
         except OSError:
             raise Hold('protocol', started=True) from None
     if 'error' in result:
-        raise Hold(result['error'], started=result.get('started') is not False)
+        raise Hold(result['error'], started=result.get('started') is not False,
+                   terminal=result.get('terminal') is True, partial=result.get('partial') is True,
+                   counted=result.get('counted'))
     return result['output'], result['usage']
 
 
@@ -339,10 +353,22 @@ class Planner:
                              'fixture_bindings. Use the first return unless an explicitly supported '
                              'client field is requested. Return specific unresolved questions when uncertain.')
         model = self.selection['model']
-        result, counted = generate(model, self.selection['effort'],
-            instructions + '\nUntrusted task data:\n' + json.dumps(packet, ensure_ascii=True),
-            required_output(schema.model_json_schema()), self.stop)
-        from workbench.service import now
-        self.diagnostics = dict(actual_model=model, usage=dict(
-            source='Codex app-server reported turn tokens', units='tokens', observed_at=now(), values=counted))
+        try:
+            result, counted = generate(model, self.selection['effort'],
+                instructions + '\nUntrusted task data:\n' + json.dumps(packet, ensure_ascii=True),
+                required_output(schema.model_json_schema()), self.stop)
+        except Hold as error:
+            self.diagnostics = dict(generation_state=(
+                'not_started' if not error.started else 'uncertain' if not error.terminal else
+                'partial' if error.partial else 'finished'), partial_output=error.partial)
+            if error.counted is not None:
+                self.diagnostics['usage'] = usage_record(error.counted)
+            raise
+        self.diagnostics = dict(actual_model=model, generation_state='finished', usage=usage_record(counted))
         return result, model, 'codex'
+
+
+def usage_record(counted):
+    from workbench.service import now
+
+    return dict(source='Codex app-server reported turn tokens', units='tokens', observed_at=now(), values=counted)

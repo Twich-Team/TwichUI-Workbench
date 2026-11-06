@@ -57,7 +57,7 @@ def test_reproduces_retained_diagnostic_without_assuming_missing_response_fields
     ("wrong-arity", "explicit arguments"),
     ("different-outcome", "match the user's explicit example"),
     ("duplicate-key", "could not read"),
-    ("incomplete", "complete plan"),
+    ("incomplete", "partial output"),
     ("abstain", "could not match the supplied example"),
     ("stale", "bindings are stale"),
 ])
@@ -168,7 +168,8 @@ def test_loaded_client_transport_to_review(fault, explanation, store, client, he
     assert len(calls) == 1 and attempt["usage"]["values"]["total_tokens"] == 280
     assert not view["decisions"] and not view["tasks"] and not list(output.iterdir())
     if explanation:
-        assert attempt["outcome"] == view["status"] == "failed"
+        assert view["status"] == "failed"
+        assert attempt["outcome"] == ("incomplete_output" if fault == "incomplete" else "failed")
         job, = view["jobs"]
         assert explanation in job["message"] and "Your original request and any example are saved." in job["message"]
         assert job["diagnostics"]["retained_failure"] == 1
