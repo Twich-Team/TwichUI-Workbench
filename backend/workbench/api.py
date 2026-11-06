@@ -21,7 +21,7 @@ from workbench.service import get_task, submit, task_view
 from workbench.real_execution import RunPage, StopRequest
 from workbench.task_execution import TaskExecutionContext
 
-# Exact authorities only. The dedicated LAN service supplies TLS and requires a client certificate.
+# Exact authorities only. The dedicated HTTPS service admits the configured home subnet.
 AUTHORITIES = {"127.0.0.1:8787", "localhost:8787", "127.0.0.1:5180", "localhost:5180",
                "127.0.0.1:9187", "127.0.0.1:5280", "127.0.0.1:9287", "127.0.0.1:5380", "127.0.0.1:9387", "127.0.0.1:9487", "testserver"}
 
