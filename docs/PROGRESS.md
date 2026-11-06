@@ -1,3 +1,15 @@
+## November 6, 2026 — real-addon planning passed and implementation held
+
+The real Qwen proposal matched the map-fade task, Rich approved it in
+the browser, and all four independent preparation controls produced the
+expected results. The supervisor stopped before offering implementation
+approval because the staged capability retained the previous stage's
+template path. No second decision, lease, probe, implementation or
+patch occurred. Normal model access and isolated write-service cleanup
+were verified. The frozen stage and result are sealed. The next
+preflight must verify the active-capability criteria against the exact
+stage before consuming planning. Another live run needs fresh approval.
+
 ## November 6, 2026 — loaded-addon planning repaired and verified offline
 
 The sealed real-addon planning failure remains a failure. The exact

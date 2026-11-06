@@ -2,9 +2,9 @@
 
 Last updated November 6, 2026 (Mountain time).
 
-- **Running app.** Port 9487 runs build `fcf74ce`. The planning repair is staged in a separate local build.
+- **Running app.** Port 9487 runs build `fcf74ce`. The real-addon demonstration used an isolated build.
 - **Finished results.** One synthetic browser task finished with real Qwen and two owner approvals. Zero real-addon tasks have completed through the browser with a real model.
-- **Tests and demonstrations.** The first real-addon run stopped at planning. Offline tests of the repair showed a valid map-fade proposal and rejected invalid replies. The prior scripted addon rehearsal passed all 167 offline test groups.
-- **What is stopping progress.** The repaired planning path still needs a real-model browser run. The earlier failure is preserved and its write services are closed.
-- **Next complete outcome.** Take the map-fade request through real planning, both owner browser approvals, and independent checks to a sealed local patch.
-- **Decision needed.** Approve one fresh run. Installation, in-game verification, broader acceptance, and publication require separate decisions.
+- **Tests and demonstrations.** Real Qwen produced a valid map-fade proposal. Rich approved it, and all four independent preparation controls behaved as expected. The earlier scripted addon rehearsal passed all 167 offline test groups.
+- **What is stopping progress.** The staged runtime configuration pointed to the previous stage. The supervisor stopped before the implementation approval, so there is no patch. Normal model access and isolated write-service cleanup were verified.
+- **Next complete outcome.** Correct and verify the stage configuration, then take the map-fade task through both browser approvals to a sealed, independently checked patch.
+- **Decision needed.** Another live run needs fresh approval. Installation, in-game verification, broader acceptance, and publication remain separate.

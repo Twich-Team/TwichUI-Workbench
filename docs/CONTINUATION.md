@@ -1,3 +1,71 @@
+# Fresh real-addon planning passed, implementation held — November 6, 2026 Mountain time
+
+The owner approved one isolated local browser run of **Cover the map fade
+at a single threshold**. Build `8073673a0ca918530ba2626a058f72a55df96dfb`
+and manifest SHA-256
+`baafd5592ad5b68231fd8fb297a586c32ee7171d23e4c6c935fca0b6536865d7`
+were reverified on TwichUI base `1caf530212bbc6eaf37e41d668902a391aa936c1`.
+The run started at 6:17:42 a.m. MST, both browser decisions were due by
+6:50:42 a.m., and the outer deadline was 8:02:42 a.m. The old read-only
+preview's identity and seal were verified before clearing port 9187.
+The owner confirmed the new access page before the one planning call.
+
+The single authorized archive preserved 4 files and 3,091,792 bytes
+from `artifacts/runs/browser-lKucD8/report`. Contents, metadata,
+original-path lookups and a separate restoration matched before pruning.
+The archive verified again after pruning. Actual post-archive headroom
+was 79,485,150 bytes, with 28,989,333,504 bytes physically free. The
+pre-planning reserve passed.
+
+The one authenticated Qwen planning request succeeded with 3,443 input
+and 320 generated tokens. The proposal selected
+`TwichUI.MapViewMath.Fade(2,2,2)`, expected `1`, and rejected `0`.
+It bound `!!!TwichUI/map/ViewMath.lua` and the single writable
+`tests/test_map_viewmath_step.lua`. Rich approved that proposal in the
+browser at 6:20:41 a.m. MST. All four independent preparation controls
+produced the expected results. The known-good control passed the
+behavior check and the original, vacuous, and wrong-behavior controls
+failed it. The baseline suite passed for all four controls.
+
+The supervisor held at 6:36:57 a.m. MST before opening the second
+approval. I carried the previous stage's `templates_root` into this
+stage's frozen capability. The capability reader requires the path
+under the current stage and rejects the stale path. The API persisted a
+certified preparation offer with the correct base, scope and test. The
+staged runtime could not offer one-off activation. The live response
+body was not retained. The frozen path, capability rule, closed-store
+offer and saved supervisor reason establish the hold. I left the
+frozen configuration intact.
+
+The store has one applied proposal decision, one preparation offer,
+and zero implementation approvals, sessions, grants, requests, and
+publication records. The browser's 90-minute budget never started.
+No patch was produced. No lease, probe, implementation generation or
+temporary credential was used. Normal authenticated access was verified
+by planning and a recheck of the original process, configuration and
+credential. The write API, worker and delegated cgroup closed, the
+matching capability was withdrawn, and the clean control scratch clone
+was removed. The original listeners on 9487, 8765 and 8080 matched.
+Both pinned addon checkouts stayed clean and 570 protected historical
+hashes matched.
+
+The [generated proposal](../artifacts/runs/browser-addon-repaired.OdbU15/browser-proposal.json),
+[control results](../artifacts/runs/browser-addon-repaired.OdbU15/independent-controls.json),
+[offer diagnosis](../artifacts/runs/browser-addon-repaired.OdbU15/offer-hold-diagnostic.json),
+[terminal audit](../artifacts/runs/browser-addon-repaired.OdbU15/terminal-verification.json),
+and [sealed outcome](../artifacts/runs/browser-addon-repaired.OdbU15/SHA256.json)
+are durable. The immutable [read-only review](http://127.0.0.1:9187/intake/30eb3773-332b-48c5-84f8-40e73af2a3d6)
+is bounded by 8:02:42 a.m. MST. The closed offer view is also saved at
+[desktop](../artifacts/runs/browser-addon-repaired.OdbU15/browser/offer-held-1440.png)
+and [phone](../artifacts/runs/browser-addon-repaired.OdbU15/browser/offer-held-390.png)
+widths.
+
+This authorization is spent. The next milestone is to correct and
+preflight the stage-local capability with the same validator that
+admits execution, then seek fresh authorization for a new complete
+browser run. Installation, in-game verification, broader acceptance
+and publication remain separate.
+
 # Loaded-addon planning repaired offline — November 6, 2026 Mountain time
 
 The first live map-fade intake reached Qwen and was rejected before a
