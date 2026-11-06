@@ -1,3 +1,19 @@
+## November 6, 2026 — verified archive and acceptance held offline
+
+Verified and independently restored the 36 authorized folders. The 447
+original paths resolved before and after removal of matching originals.
+The prior real-addon seal still matches. The Chromium diagnostic exposed
+historical approval navigation and reached the evidence guard. The one
+test-only correction let the revoked approval and implementation checks
+pass in the final sharded run. That run reached 36 passes and one failed
+retry assertion before the guard interrupted it again. The final visual
+project remains pending. All diagnostics were retained.
+
+No live clock, services, model calls, leases or new addon patch resulted.
+The offline fixture services closed and the frozen trial stage passed
+dormant preflight again. The exact approval record was preserved. The
+handoff records the receipts and the scope that needs fresh authorization.
+
 ## November 6, 2026 — reviewed interface frozen for one proposed map-fade trial
 
 The owner accepted the usability direction. Reviewed UI assets match the

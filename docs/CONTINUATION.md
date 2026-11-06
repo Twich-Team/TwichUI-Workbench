@@ -1,3 +1,64 @@
+# Verified archive and offline acceptance hold — November 6, 2026 Mountain time
+
+The owner approved the exact `docs/WORKFLOW_ACCEPTANCE_REQUEST_20261106.md`
+record at checkpoint `d85bbee`. Its SHA-256
+`3cd6da8961d7ca9073b0dbc4a61c439a6857e03b5f732ccb95393ab29338ec2a`
+matched before and after work. The archive and offline window opened at
+9:58:31 a.m. MST with a 10:43:31 a.m. deadline. The offline phase closed
+at 10:13 a.m. The conditional live window did not start.
+
+The named archive and separate private restore matched the bound inventory
+for all 36 directories and 447 files. Original-path lookup passed for all
+files before and after removing the verified matching originals. The closure
+check combined same-user process references and lsof. The kernel restricted
+inspection of the existing systemd, PAM and SSH session managers. No archive
+references were found. Logical space recovered was 125,356,114 bytes before
+the new receipts. The archive [index](../artifacts/archive-index/workflow-owner-acceptance-20261106.json)
+and [verification receipt](../.local/runs/workflow-owner-acceptance-20261106-offline/archive-verification.json)
+remain local. All 222 sealed files from the earlier real-addon result still
+match at their original paths.
+
+The diagnostic Chromium pass had 20 passes and one revoked-approval failure.
+The evidence guard then interrupted the next test. The one test-only correction
+pass opened the existing historical-task disclosure where fixtures revoke
+approval, and skipped duplicate authored screenshot attachments under the
+line reporter while retaining the screenshots and normal failure capture.
+Checkpoint `3bf348f2218c732d26751ced3f23bf113722a1b9` records those test changes.
+The final pass used sequential shards with one worker and the normal failure
+capture settings. The revoked approval and revoked implementation tests passed.
+The sample PR fixture assertions were outside the completed shards.
+
+The final Chromium result was 36 passed, one failed, one interrupted and
+69 unrun out of 107. The failed mockup/decomposition retry check still expected
+**Waiting to start** after retry. The visible progress was **Plan approved**
+and said Workbench was preparing the agreed work. The stale approval scenario
+was interrupted before it could finish checking the browser warning and
+server rejection. These results grant no acceptance. The guard stopped the
+second pass while retaining trace and video output. After stop, new offline
+evidence was about 34.1 MiB of the 40 MiB allowance, with about 5.9 MiB left
+and 86.3 MiB of aggregate headroom before closeout receipts. The complete
+visual project and comparison never started. The original snapshots remain
+unchanged. See the [failed retry](../.local/runs/workflow-owner-acceptance-20261106-offline/chromiumFinal09.log),
+[interrupted shard](../.local/runs/workflow-owner-acceptance-20261106-offline/chromiumFinal10.log),
+and [closeout receipt](../.local/runs/workflow-owner-acceptance-20261106-offline/closeout.json).
+
+Ports 5380 and 9287 closed after testing. The approved trial stage at
+`.local/workflow-acceptance-20261106` passed dormant preflight again with
+manifest SHA-256 `507049cbc6f2a28c858fb2c3321f44d1a5593af32249548510d0506637f5b1ff`.
+Port 9187 stayed free. The local model PID and preserved listeners matched
+entry. The two addon checkouts stayed clean at the pinned base. There was no
+model call, lease, temporary credential, active execution capability, or
+new patch in this session, so no model restoration was needed.
+
+The next package needs fresh authority for the outstanding browser test
+alignment, a bounded full Chromium and visual pass, and enough verified
+evidence capacity to retain failures and protect the live reserve. Review
+the retry check against both the saved job state and visible progress, and
+finish the stale-browser decision case with its server rejection assertion
+in force. A real trial remains conditional on passing offline checks, the
+owner's availability and both genuine browser decisions. Everyday Workbench
+installation and applying any addon patch remain separate.
+
 # Owner usability direction accepted and map-fade trial prepared — November 6, 2026 Mountain time
 
 The owner reviewed the simpler interface and said it looks good for now.
