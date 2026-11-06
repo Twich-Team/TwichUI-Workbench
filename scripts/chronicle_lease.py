@@ -253,6 +253,9 @@ def attempt(root, private, instruction):
 
 
 def controller(root, instruction):
+    if os.environ.get("WORKBENCH_DEMO_MANIFEST_SHA256"):
+        from browser_demo.stage import require_active_stage
+        require_active_stage()
     linked = workflow(root, instruction)
     if linked:
         connected_deadline(linked)

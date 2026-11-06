@@ -441,6 +441,9 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
                 "cancelled",
                 "Stopped before model activation. Readiness evidence is retained.",
             )
+        if os.environ.get("WORKBENCH_DEMO_MANIFEST_SHA256"):
+            from browser_demo.stage import require_active_stage
+            require_active_stage()
         durable(
             claim,
             json.dumps(

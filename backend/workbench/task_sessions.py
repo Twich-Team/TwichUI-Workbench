@@ -29,45 +29,57 @@ ROOT = Path(__file__).resolve().parents[2]
 ACTIVE = {"pending", "active", "waiting_recovery"}
 
 
+def read_capability(engine, path):
+    """Validate the same capability bytes before publication and at admission."""
+    if (
+        path.resolve() != path or not path.is_file()
+        or path.stat().st_uid != os.getuid() or path.stat().st_mode & 0o077
+        or path.stat().st_size > 8192
+    ):
+        raise ValueError("Private owned one-off runtime configuration required")
+    value = json.loads(path.read_text())
+    db = Path(engine.url.database).absolute()
+    if (
+        value.get("mode") != "explicit-one-off-only"
+        or db.resolve() != db or value.get("database") != str(db)
+        or value.get("database_identity") != [db.stat().st_dev, db.stat().st_ino]
+        or value.get("repository") != "Twich-Team/TwichUI"
+        or value.get("base_branch") != "main"
+        or value.get("model") != "pilot-qwen38-27b"
+        or value.get("automatic_fallback") is not False
+        or not inspect(engine).has_table(sessions.name)
+    ):
+        raise ValueError("One-off runtime configuration does not match the application store")
+    templates = ROOT / ".local/supported-task-templates"
+    if value.get("templates_root") != str(templates):
+        raise ValueError("One-off runtime templates must belong to the current stage")
+    if "templates" in value:
+        from workbench.supported_tasks import read_template
+        expected = value["templates"]
+        if (not isinstance(expected, list) or templates.resolve() != templates
+                or not templates.is_dir() or templates.stat().st_uid != os.getuid()
+                or templates.stat().st_mode & 0o077
+                or sorted(p.name for p in templates.iterdir()) != sorted(expected)):
+            raise ValueError("Staged template inventory changed")
+        for name in expected:
+            if not read_template(templates, name.removesuffix(".json")):
+                raise ValueError("Staged template is missing")
+    proof = Path(value["total_limit_proof"])
+    if (
+        proof.resolve() != proof or not proof.is_file()
+        or proof.stat().st_uid != os.getuid() or proof.stat().st_size > 16384
+        or sha(proof.read_bytes()) != value["total_limit_proof_sha256"]
+    ):
+        raise ValueError("One-off runtime sampler proof changed")
+    return value
+
+
 def capability(engine):
     """Read-only fixed installation capability, never a model/HTTP activation check."""
     path = ROOT / ".local/task-runtime.json"
     try:
-        if (
-            path.is_symlink()
-            or path.parent.is_symlink()
-            or not path.is_file()
-            or path.stat().st_uid != os.getuid()
-            or path.stat().st_mode & 0o077
-            or path.stat().st_size > 8192
-        ):
-            return None
-        value = json.loads(path.read_text())
-        db = Path(engine.url.database).resolve()
-        if (
-            value.get("mode") != "explicit-one-off-only"
-            or value.get("database") != str(db)
-            or db.is_symlink()
-            or value.get("database_identity") != [db.stat().st_dev, db.stat().st_ino]
-            or value.get("templates_root") != str(ROOT / ".local/supported-task-templates")
-            or value.get("repository") != "Twich-Team/TwichUI"
-            or value.get("base_branch") != "main"
-            or value.get("model") != "pilot-qwen38-27b"
-            or value.get("automatic_fallback") is not False
-            or not inspect(engine).has_table(sessions.name)
-        ):
-            return None
-        proof = Path(value["total_limit_proof"])
-        if (
-            proof.is_symlink()
-            or not proof.is_file()
-            or proof.stat().st_uid != os.getuid()
-            or proof.stat().st_size > 16384
-            or sha(proof.read_bytes()) != value["total_limit_proof_sha256"]
-        ):
-            return None
-        return value
-    except OSError, ValueError, KeyError, TypeError:
+        return read_capability(engine, path)
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, HTTPException):
         return None
 
 
@@ -183,6 +195,9 @@ def _config(engine, row):
     config = capability(engine)
     if not config:
         raise ValueError("One-off runtime capability is unavailable; no activation")
+    expected = row["snapshot"].get("capability_sha256")
+    if expected and sha((ROOT / ".local/task-runtime.json").read_bytes()) != expected:
+        raise ValueError("One-off runtime configuration changed after the saved decision")
     ref = row["snapshot"]["task"]
     with engine.connect() as c:
         approval = (

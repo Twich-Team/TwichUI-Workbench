@@ -38,8 +38,11 @@ def load(identity, engine=None):
     root = template_root(engine)
     if not root:
         return None
-    folder = Path(root)
-    if folder.is_symlink() or not folder.is_dir() or folder.stat().st_uid != os.getuid():
+    return read_template(Path(root), identity)
+
+
+def read_template(folder, identity):
+    if folder.resolve() != folder or not folder.is_dir() or folder.stat().st_uid != os.getuid():
         raise ValueError("Owned task-template directory required")
     if (
         not isinstance(identity, str)

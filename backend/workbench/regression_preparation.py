@@ -320,6 +320,9 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             loaded_selection = schema is grounded_scenarios.LoadedClientResponse
             if len(json.dumps(wire).encode()) > 24000:
                 raise ValueError('Grounded scenario context exceeds the planning input budget; narrow the request.')
+            if os.environ.get("WORKBENCH_DEMO_MANIFEST_SHA256"):
+                from browser_demo.stage import require_active_stage
+                require_active_stage()
             # Same job/lease and accounting owners; duplicate workers never call an
             # adapter for an already claimed job. No automatic inference retry.
             with write_transaction(engine) as c:

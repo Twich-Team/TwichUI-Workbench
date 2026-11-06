@@ -85,6 +85,9 @@ class SingleDemo:
                 phase = self.phase()
                 raw = json.loads(chunks)
                 allowed = self.allow(method, path, raw, phase)
+                if allowed and phase["state"] not in {"active", "stopping"}:
+                    from browser_demo.stage import require_active_stage
+                    require_active_stage()
             except (OSError, ValueError, KeyError, TypeError):
                 allowed = False
             if not allowed:

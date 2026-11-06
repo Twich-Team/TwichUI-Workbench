@@ -17,6 +17,15 @@ from workbench.visual_scope import digest
 
 def configuration(engine):
     """Private installation input, bound to this store. Never request/model data."""
+    path = os.environ.get('WORKBENCH_PREPARATION_CONFIG')
+    if not path:
+        raise ValueError('Application preparation is not configured; an owned storage/identity policy is required.')
+    if not Path(path).is_absolute():
+        raise ValueError('Preparation configuration must use an absolute owned path')
+    return read_configuration(engine, Path(path))
+
+
+def read_configuration(engine, path):
     from pydantic import Field, StrictBool, StrictInt
     from typing import Literal
     from workbench.schemas import StrictModel
@@ -31,11 +40,6 @@ def configuration(engine):
         identity: dict[str, str]
         scenario_generation: StrictBool = False
 
-    path = os.environ.get('WORKBENCH_PREPARATION_CONFIG')
-    if not path:
-        raise ValueError('Application preparation is not configured; an owned storage/identity policy is required.')
-    if not Path(path).is_absolute():
-        raise ValueError('Preparation configuration must use an absolute owned path')
     file = owned(path)
     if not file.is_file() or file.stat().st_mode & 0o077 or file.stat().st_size > 8192:
         raise ValueError('Preparation configuration exceeds its bound')

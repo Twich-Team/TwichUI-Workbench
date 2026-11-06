@@ -13,7 +13,7 @@ from workbench.db import real_execution_grants, real_execution_requests, real_pu
 from workbench.real_workspace import durable
 
 
-def advance_local(engine, database, outcome, planner, *, example="  ALICE ", native=False):
+def advance_local(engine, database, outcome, planner, *, example="  ALICE ", native=False, staged=False):
     from test_regression_evidence import ControlledPreparer
     from test_real_transport import final_response, scripted_http, tool_response
     from test_verification_profiles import TEST
@@ -40,7 +40,7 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
 
     def launch(command):
         cycle = Path(command[command.index('--root') + 1])
-        assert cycle.is_relative_to(sandbox / 'controlled-session-owner' / 'artifacts/runs')
+        assert cycle.parent == task_session.ROOT / "artifacts/runs"
         ref = json.loads((cycle / 'workflow-link.json').read_text())['task']
         runtime = SimulatedRuntime(cycle / 'real-run')
         runtime.task_ref = ref
@@ -95,7 +95,8 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
         durable(cycle / 'lease-controller-result.json', b'{"restoration":{"restored":true},"simulated":true}')
 
     def advance(store, config, stop_event=None):
-        return original(store, config, stop_event=stop_event, prepare=prepare, launch=launch)
+        return original(store, config, stop_event=stop_event,
+                        prepare=task_session.provision if staged and native else prepare, launch=launch)
 
     def prepare(runtime, template):
         task_session.provision(SimulatedRuntime(runtime.root), template)
@@ -106,7 +107,9 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
         if not native:
             isolated.setattr(real_workspace.confine, 'root', lambda: str(sandbox / 'simulated-cgroup'))
         # Installed sampler, credential lease, and cgroup control remain out of this fixture.
-        with (patch('runpy.run_path', return_value={'checked_limit': lambda _root: None}),
+        from contextlib import nullcontext
+        proof = nullcontext() if staged else patch('runpy.run_path', return_value={'checked_limit': lambda _root: None})
+        with (proof,
               patch.object(task_session, 'process_one', advance)):
             assert worker.tick(engine, planning_adapter=planner)
             if outcome != 'interrupt':

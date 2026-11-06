@@ -18,9 +18,15 @@ from browser_demo.gate import MODEL, SingleDemo
 
 evidence = Path(os.environ["WB_REHEARSAL_CASE"])
 database = Path(os.environ["WORKBENCH_DB"])
-assert evidence.is_relative_to(database.parents[1]) and database.parent.name == "store"
+staged = os.environ.get("WB_STAGED_REHEARSAL") == "1"
 assert os.environ.get("WORKBENCH_LOCAL_KEY") == str(evidence / "inert-key")
-task_sessions.ROOT = task_session.ROOT = database.parent / "controlled-session-owner"
+if staged:
+    from browser_demo import stage as layout
+    assert database == layout.ROOT / layout.DATABASE
+    assert json.loads((layout.ROOT / layout.MANIFEST).read_text())["mode"] == "offline"
+else:
+    assert evidence.is_relative_to(database.parents[1]) and database.parent.name == "store"
+    task_sessions.ROOT = task_session.ROOT = database.parent / "controlled-session-owner"
 
 
 def create_app():
@@ -37,7 +43,7 @@ def run_worker():
     native = mode == "addon"
     # Only the supported rehearsal runs the native Lua suite, in its own
     # delegated worker group. Transport is scripted in either mode.
-    if native:
+    if native and not staged:
         group = Path("/sys/fs/cgroup" + Path("/proc/self/cgroup").read_text().strip().split("::", 1)[1])
         assert group.name == os.environ["WB_REHEARSAL_UNIT"] + ".service"
         assert group.stat().st_uid == os.getuid()
@@ -61,7 +67,8 @@ def run_worker():
             selected = {key: example[key] for key in ("acceptance_index", "args", "expected", "incorrect")}
             if mode == "addon-invalid":
                 selected["source_paths"] = ["TwichUI_Settings/map/ViewMath.lua"]
-            value["draft"]["scenarios"] = [dict(selected, id="fade-threshold", binding_id=binding["binding_id"])]
+            value["draft"]["scenarios"] = [dict(selected, id=expected.get("id", "fade-threshold"),
+                                               binding_id=binding["binding_id"])]
             return
         assert example["args"] == [" ALICE "]
         value["draft"]["scenarios"][0]["args"] = example["args"]
@@ -95,11 +102,12 @@ def run_worker():
             (evidence / "planning-started").touch()
             if os.environ["WB_REHEARSAL_OUTCOME"] == "crash":
                 os._exit(37)
-            end = time.monotonic() + 12
-            while time.monotonic() < end and not (evidence / "return-response").exists():
-                if self.stop.wait(.025):
-                    raise planning_provider.PlanningUnavailable("Controlled cancellation", "canceled")
-            assert (evidence / "return-response").exists()
+            if not staged:
+                end = time.monotonic() + 12
+                while time.monotonic() < end and not (evidence / "return-response").exists():
+                    if self.stop.wait(.025):
+                        raise planning_provider.PlanningUnavailable("Controlled cancellation", "canceled")
+                assert (evidence / "return-response").exists()
             response, _, _ = planner.generate(packet, None)
             usage = {} if mode == "accounting" else dict(prompt_tokens=90, completion_tokens=30, total_tokens=120)
             reason = "length" if mode == "incomplete" else "stop"
@@ -116,8 +124,8 @@ def run_worker():
         if (evidence / "ingress-budget.json").is_file():
             # The existing offline transport/candidate fixture consumes the real
             # browser decision through worker ticks and verifies real Lua.
-            advance_local(engine, database, "wait", None, example=" ALICE ", native=native)
-            advance_local(engine, database, "pass", None, example=" ALICE ", native=native)
+            advance_local(engine, database, "wait", None, example=" ALICE ", native=native, staged=staged)
+            advance_local(engine, database, "pass", None, example=" ALICE ", native=native, staged=staged)
             stopped.wait(20)
             return
         if not (evidence / "certified-offer.json").exists():

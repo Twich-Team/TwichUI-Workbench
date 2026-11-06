@@ -1,6 +1,6 @@
 """Activate a staged, approved browser demonstration on the isolated loopback port."""
 
-from contextlib import closing, contextmanager
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from hashlib import sha256
 from hmac import compare_digest
@@ -9,24 +9,15 @@ import os
 from pathlib import Path
 import shutil
 import signal
-import sqlite3
 import subprocess
-import sys
 import tempfile
 import time
 import runpy
 
 from browser_demo.launch import run_owned, utc_now
-from browser_demo.gate import SYNTHETIC_TASK
+from browser_demo import stage as layout
 from browser_demo.supervisor import RESERVE, RunHeld
 from project_env import ARTIFACT_LIMIT, artifact_bytes, require_ports
-
-EMPTY_TABLES = (
-    "intakes", "planning_jobs", "proposals", "proposal_decisions", "task_run_offers",
-    "task_sessions", "model_attempts", "real_execution_grants", "real_execution_requests",
-    "real_publications", "fake_publications", "pr_preparations", "execution_policies",
-)
-
 
 def require(condition, message):
     if not condition:
@@ -46,6 +37,8 @@ def verify_model_installation(stage, manifest, config):
         text=True, timeout=3).strip()
     require(pid.isdigit() and int(pid) > 0, "The existing local model process is unavailable.")
     proc = Path("/proc") / pid
+    require(Path(identity["config_path"]).stat().st_mode & 0o777 == identity["config_mode"],
+            "The installed model configuration permissions changed.")
     require(all(digest(path) == identity[key] for path, key in (
         (proc / "exe", "executable_sha256"), (proc / "cmdline", "argv_sha256"),
         (Path(identity["unit_path"]), "unit_sha256"),
@@ -73,15 +66,37 @@ def owned_scratch(evidence):
                 scratch.rmdir()
 
 
-def run(manifest_path, evidence):
-    manifest = json.loads(manifest_path.read_text())
-    task = manifest.get("task", SYNTHETIC_TASK)
-    require(task["base"] == manifest["fixture_base"], "The approved browser task has a different source base.")
-    stage = manifest_path.parent.resolve()
-    require(Path(__file__).resolve().parents[2] == stage, "Use the supervisor from the tested staged source.")
+def preflight(manifest_path, fingerprint):
+    stage = manifest_path.parent
+    require(manifest_path == stage / layout.MANIFEST and layout.ROOT == stage,
+            "Use the supervisor from the tested staged source.")
+    manifest, config = layout.preflight(stage, fingerprint)
+    fixture = Path(manifest["fixture"])
+    git = ["git", "--no-optional-locks", "-C", str(fixture)]
+    require(fixture.resolve() == fixture
+            and not subprocess.check_output(git + ["status", "--porcelain=v1", "--ignored"])
+            and subprocess.check_output(git + ["branch", "--show-current"]).strip() == b"main"
+            and subprocess.check_output(git + ["rev-parse", "HEAD"]).decode().strip() == manifest["fixture_base"],
+            "The fixture checkout, branch or base changed.")
+    if manifest["mode"] == "live":
+        verify_model_installation(stage, manifest, config)
+    else:
+        require(manifest["mode"] == "offline", "Unknown stage mode")
+        checked_limit = runpy.run_path(str(stage / "scripts/chronicle_lease.py"))["checked_limit"]
+        require(checked_limit((stage / layout.PROOF).parent) == config["total_limit_proof_sha256"],
+                "The installed generation limit proof no longer matches.")
+    return manifest
+
+
+def run(manifest_path, evidence, fingerprint, *, rehearsal=False):
+    manifest = preflight(manifest_path, fingerprint)
+    require(manifest["mode"] == ("offline" if rehearsal else "live"), "Stage mode does not match launcher")
+    task = manifest["task"]
+    stage = manifest_path.parent
     require(evidence.is_dir() and evidence.stat().st_uid == os.getuid() and evidence.stat().st_mode & 0o077 == 0,
             "Use a new private owned evidence directory.")
-    require_ports([9187])
+    port = 9387 if rehearsal else 9187
+    require_ports([port])
     window = json.loads((evidence / "window.json").read_text())
     start = datetime.fromisoformat(window["start"])
     minutes = manifest.get("window_minutes", 90)
@@ -91,25 +106,10 @@ def run(manifest_path, evidence):
     deadline = start + timedelta(minutes=minutes)
     require(start <= utc_now() < deadline - timedelta(minutes=reserve), "The authorized setup window is unavailable.")
     require(not (evidence / "ingress-phase.json").exists(), "This evidence directory already owns a run.")
-    for name, checksum in manifest["sha256"].items():
-        path = stage / name
-        require(path.resolve().is_relative_to(stage) and digest(path) == checksum,
-                "The tested source, assets, policy or preflight files changed.")
-    database = stage / "artifacts/runs/browser-demo-store/review.sqlite3"
-    with closing(sqlite3.connect(database.as_uri() + "?mode=ro", uri=True, timeout=1)) as connection:
-        require(connection.execute("PRAGMA quick_check").fetchone() == ("ok",), "The staged store is unhealthy.")
-        require(all(not connection.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone()
-                    for table in EMPTY_TABLES), "The staged store already contains work or authority.")
-    pending = stage / ".local/task-runtime.pending.json"
-    active = pending.with_name("task-runtime.json")
-    config = json.loads(pending.read_text())
-    require(config["database"] == str(database) and config["database_identity"] ==
-            [database.stat().st_dev, database.stat().st_ino] and config["automatic_fallback"] is False,
-            "The private runtime capability does not belong to the staged store.")
-    require(not active.exists() and not active.is_symlink(), "The capability is already active.")
-    verify_model_installation(stage, manifest, config)
-    require(not (evidence / "guarded-runtime-preflight.py").exists(), "Use fresh run evidence.")
-    shutil.copyfile(stage / ".local/guarded-runtime-preflight.py", evidence / "guarded-runtime-preflight.py")
+    database = stage / layout.DATABASE
+    pending = stage / layout.PENDING
+    active = stage / layout.ACTIVE
+    shutil.copyfile(stage / layout.PREFLIGHT, evidence / "guarded-runtime-preflight.py")
     stopped = False
 
     def stop_requested(*_):
@@ -139,15 +139,9 @@ def run(manifest_path, evidence):
                     "Evidence headroom, physical space or scratch exceeded the approved limit.")
             return dict(counted=counted, headroom=ARTIFACT_LIMIT-counted, scratch=scratch_bytes, physical_free=physical)
 
-        fixture = Path(manifest["fixture"])
-        require(not subprocess.check_output(["git", "-C", str(fixture), "status", "--porcelain=v1", "--ignored"]),
-                "The fixture checkout is not clean.")
-        require(subprocess.check_output(["git", "-C", str(fixture), "symbolic-ref", "--short", "HEAD"]).strip() == b"main"
-                and subprocess.check_output(["git", "-C", str(fixture), "rev-parse", "HEAD"]).decode().strip()
-                == manifest["fixture_base"], "The fixture branch or base changed.")
-
         def activate():
             room(RESERVE)
+            layout.sealed_inputs(stage, fingerprint, fresh=True)
             original = pending.read_bytes()
             with active.open("xb") as stream:
                 stream.write(original)
@@ -167,11 +161,15 @@ def run(manifest_path, evidence):
                "XDG_RUNTIME_DIR": f"/run/user/{os.getuid()}",
                "DBUS_SESSION_BUS_ADDRESS": f"unix:path=/run/user/{os.getuid()}/bus",
                "PYTHONPATH": f"{stage/'backend'}:{stage/'scripts'}", "PYTHONDONTWRITEBYTECODE": "1",
-               "TMPDIR": str(scratch), "WORKBENCH_DB": str(database), "WORKBENCH_PLANNER": "local",
-               "WORKBENCH_PLANNING_DEADLINE_S": "120", "WORKBENCH_RESEARCH_ROOT": str(fixture),
-               "WORKBENCH_PREPARATION_CONFIG": str(database.parent / "preparation-policy.json"),
-               "WORKBENCH_STATIC_ROOT": str(stage / "frontend/dist")}
-        worker_env = {**env, "WORKBENCH_LOCAL_KEY": manifest["local_key_path"]}
+               "TMPDIR": str(scratch), "WORKBENCH_PLANNER": "local",
+               "WORKBENCH_PLANNING_DEADLINE_S": "120", layout.FINGERPRINT_ENV: fingerprint,
+               **layout.inputs(stage, manifest)}
+        worker_env = {**env, "WORKBENCH_LOCAL_KEY": manifest.get("local_key_path", str(evidence / "inert-key"))}
+        if rehearsal:
+            worker_env.update(WB_REHEARSAL_CASE=str(evidence), WB_REHEARSAL_OUTCOME=(
+                "addon" if task["scenario"]["fixture"] == "loaded-client" else "pass"),
+                WB_STAGED_REHEARSAL="1")
+            worker_env["PYTHONPATH"] += f":{stage / 'backend/tests'}"
         unit = "workbench-browser-demo-" + evidence.name
         command = [
             "/usr/bin/systemd-run", "--expand-environment=no", "--user", "--wait", "--pipe",
@@ -181,7 +179,8 @@ def run(manifest_path, evidence):
             "--property=IPAddressDeny=any", "--property=IPAddressAllow=localhost",
             "--working-directory=" + str(stage), "/usr/bin/env", "-i",
             *(f"{key}={value}" for key, value in worker_env.items()), "/bin/bash",
-            str(stage / ".local/delegated-worker.sh"), unit, str(evidence),
+            str(stage / layout.WORKER), unit, str(evidence),
+            *(["offline"] if rehearsal else []),
         ]
 
         def stop_worker(proc):
@@ -190,12 +189,25 @@ def run(manifest_path, evidence):
                                env=env, check=True, timeout=25)
                 proc.wait(timeout=20)
 
-        run_owned(stage=stage, database=database, evidence=evidence, port=9187, env=env, deadline=deadline,
+        run_owned(stage=stage, database=database, evidence=evidence, port=port, env=env, deadline=deadline,
                   room=room, stopping=lambda: stopped, activate=activate, worker_command=command,
                   stop_worker=stop_worker, verify_worker=lambda _: (evidence / "worker-ready.txt").is_file(),
                   task=task, budget_reserve_minutes=reserve)
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("manifest", type=Path)
+    parser.add_argument("fingerprint")
+    parser.add_argument("evidence", type=Path, nargs="?")
+    parser.add_argument("--preflight", action="store_true")
+    args = parser.parse_args()
     os.umask(0o077)
-    run(Path(sys.argv[1]).resolve(), Path(sys.argv[2]).resolve())
+    if args.preflight and args.evidence is None:
+        verified = preflight(args.manifest.absolute(), args.fingerprint)
+        print(f"Verified {len(verified['sha256'])} frozen inputs and dormant runtime and preparation policies.")
+    elif not args.preflight and args.evidence:
+        run(args.manifest.absolute(), args.evidence.absolute(), args.fingerprint)
+    else:
+        parser.error("Supply evidence for a live run, or --preflight for read-only verification.")
