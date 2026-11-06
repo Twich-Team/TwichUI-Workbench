@@ -62,7 +62,7 @@ class CodexRuntime(Runtime):
                 (window['path'], window['start'], window['end']) for window in self.recipe['initial_reads']
                 if window['path'] == self.paths[0]):
             excerpt = tools.handle('read_file', dict(path=path, start=start, end=end))
-            source.append(json.loads(excerpt))
+            source.append(excerpt)
         if not source:
             raise ValueError('The reviewed test has no bounded source excerpt.')
         prompt = (instructions + '\nPropose one exact replacement in ' + self.paths[0] +

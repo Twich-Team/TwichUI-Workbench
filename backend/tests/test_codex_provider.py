@@ -20,7 +20,8 @@ class Transcript:
     def __init__(self, *, account='chatgpt', limit=None, events=()):
         self.started = False
         self.deadline = time.monotonic() + 30
-        self.events = list(events)
+        self.events = []
+        self.turn_events = list(events)
         self.interrupted = []
         self.calls = []
         self.responses = {
@@ -37,6 +38,8 @@ class Transcript:
 
     def call(self, method, params):
         self.calls.append((method, params))
+        if method == 'turn/start':
+            self.events.extend(self.turn_events)
         return self.responses[method]
 
     def stop(self):
