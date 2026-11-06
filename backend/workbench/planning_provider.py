@@ -192,8 +192,11 @@ class LocalProvider:
     def _request(self, schema, encoded, key_path, expected_model):
         with local_slot():
             secret = Path(key_path).read_text().strip()
-            with LocalHTTP(self.stop_event, ends_at=self.ends_at) as transport:
-                return self._infer(transport, secret, schema, encoded, expected_model=expected_model)
+            transport = LocalHTTP(self.stop_event)
+            if self.ends_at is not None:
+                transport.ends_at = min(transport.ends_at, self.ends_at)
+            with transport as active:
+                return self._infer(active, secret, schema, encoded, expected_model=expected_model)
 
     def _infer(self, transport, secret, schema, encoded, *, expected_model=None):
         from workbench.grounded_scenarios import LoadedClientResponse, unique_json_object

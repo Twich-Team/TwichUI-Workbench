@@ -59,7 +59,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 class LocalHTTP:
     """Closes the active socket on deadline or worker shutdown, including header wait."""
 
-    def __init__(self, stop_event=None, *, ends_at=None):
+    def __init__(self, stop_event=None):
         self.stop_event = stop_event or threading.Event()
         self.done = threading.Event()
         self.expired = threading.Event()
@@ -68,8 +68,6 @@ class LocalHTTP:
         self.lock = threading.Lock()
         self.seconds = deadline_seconds()
         self.ends_at = time.monotonic() + self.seconds
-        if ends_at is not None:
-            self.ends_at = min(self.ends_at, ends_at)
         owner = self
 
         class Connection(http.client.HTTPConnection):
