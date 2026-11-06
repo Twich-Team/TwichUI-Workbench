@@ -1,3 +1,70 @@
+# Offline acceptance completed for the reviewed workflow — November 6, 2026 Mountain time
+
+The fresh 30-minute offline window opened at 10:52:53 a.m. MST with an
+11:22:53 a.m. deadline and closed at 11:02:49 a.m. Both previously failed
+browser cases passed. The 23 previously unrun Chromium cases also
+passed. Reconciled against the exact 107-case inventory, the 82 applicable
+earlier passes and 25 fresh passes establish complete Chromium acceptance.
+There are no outstanding failed, interrupted or unrun Chromium cases.
+
+The exact-match selectors still check the actual expected `"alice"` and
+incorrect `"ALICE"` values before plan review. They are browser test
+repairs. The certified-offer fixture exposed two more test defects.
+The test toggled Publishing options closed after selecting a draft
+and then tried to select the hidden control. It also used an immediate
+visibility probe for the saved permission disclosure while the refreshed
+page was still loading. The repaired test checks the selected option
+and waits for the disclosure through the normal browser click. It still
+checks the one saved approval and absence of a new approval action when
+the offer goes stale. Both widths passed the recheck. The two earlier
+failed attempts and their diagnostics remain in the new window's receipts.
+
+All 10 visual cases passed, including desktop, phone and narrow layouts.
+All 12 new snapshot captures match the tracked references byte for byte.
+The existing reference PNGs are unchanged. Inspected fresh
+[desktop Work](../artifacts/runs/browser-cIdmav/screenshots/work-1440.png),
+[phone Work](../artifacts/runs/browser-j7r4A4/screenshots/work-390.png),
+[phone approval](../artifacts/runs/browser-L5Zezw/local-browser/approval-390.png),
+and [phone checked result](../artifacts/runs/browser-L5Zezw/local-browser/result-390.png).
+Enlarged text and recovery also passed browser assertions. The completed
+verification covers the reviewed interface and controlled task path.
+
+The product and guarded launcher source, dependencies, migrations and
+visual baselines match `17ad1ac4658b26dcb3eba3fa44891a53d8310c97`.
+The acceptance checkpoint is `78095d16cb0d6f0d4fe5b3daece3cf2cf19955d4`.
+Only the newly verified task-session test assertions changed in this
+window. The 82 prior passes used the same product, compact configuration
+and dependencies. The [closeout](../.local/runs/offline-acceptance-finish-20261106/closeout.json)
+maps all 25 fresh Chromium and 10 visual cases to their receipts and
+retains the comparison digests. Its SHA-256 is
+`97f2ce6cc778569a415bc970e1decd7a21a40b1ff169df2aa05496891c512be7`.
+
+The earlier 5.19 MiB visual estimate shortfall was relative to the prior
+window's 35 MiB operating stop. The aggregate cap still had capacity.
+This window began with 54.10 MiB aggregate headroom. Reserving all 24 MiB
+and a separate 5 MiB of aggregate margin left 25.10 MiB. The evidence
+sampled peak including temporary files was 14,114,108 bytes (13.46 MiB),
+5.54 MiB below the 19 MiB operating stop. Retained use before closeout
+was 11,927,349 bytes (11.37 MiB). After the receipt, aggregate headroom
+was 44,784,359 bytes (42.71 MiB). The physical floor held. No evidence
+was archived, pruned or redirected. The earlier retry trace retains
+its original hash.
+
+Ports 5380 and 9287 closed. The installed app, port 8765, local model
+listener and two previews kept their owners. The working and isolated
+addon checkouts stayed at the pinned base. The dormant trial package
+reverified 318 inputs without publishing a capability. No model request,
+probe, lease or live trial started. Installing Workbench and applying a
+patch remain separate decisions.
+
+A [fresh bounded trial request](VERIFIED_MAP_FADE_TRIAL_REQUEST_20261106.md)
+binds the verified candidate and lists 22 exact closed archive folders.
+The 46,009,747 logical bytes would leave 80.59 MiB projected headroom
+after the setup and receipt allowance. This would support the 72 MiB
+trial gate if remeasured. The request covers verified archival and one
+local-only real-model task, with the owner's separate browser submission
+and two decisions. It is awaiting approval.
+
 # Fresh retry passed and offline verification held for capacity — November 6, 2026 Mountain time
 
 The approved offline window started at 10:29:37 a.m. MST with an

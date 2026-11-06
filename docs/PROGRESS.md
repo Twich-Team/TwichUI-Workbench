@@ -1,3 +1,18 @@
+## November 6, 2026 — complete offline Chromium and visual acceptance
+
+Both repaired cases and all 23 previously unrun Chromium cases passed.
+Reconciled with the 82 prior applicable passes, the inventory is 107/107.
+The saved permission fixture now checks the selected option and waits
+for the disclosure after reload. Both viewports passed. No product change
+was needed. All 10 visual cases passed with 12 byte-identical captures
+and the existing baselines. Desktop and phone captures were inspected.
+
+Peak sampled new evidence was 13.46 MiB under the 24 MiB allowance and
+19 MiB operating stop. Test processes closed and the previous retry trace
+was preserved. No model request, service change, archival or installation
+occurred. The new proposed request binds one real-model trial to the
+verified candidate and exact archival targets for its higher reserve.
+
 ## November 6, 2026 — retry passed in Chromium, acceptance stopped at evidence reserve
 
 The fresh retry and connected stale-approval and response-loss checks
