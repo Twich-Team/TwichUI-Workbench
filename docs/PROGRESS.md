@@ -1,3 +1,17 @@
+## November 6, 2026 — retry expectation and evidence plan repaired
+
+The saved HTTP 200, subsequent reads and browser state confirm that retry
+preserved the applied approval and requeued the existing preparation job.
+The test expected the first-planning label. It now checks the right progress,
+exact job and approval, and one successful continuation. The saved trace
+and current projection match. The browser recheck awaits a fresh window.
+
+Compact evidence is opt-in. It keeps failure PNGs, DOM and network traces,
+key workflow screens and the visual comparisons while avoiding duplicate
+captures and video. The capacity record measures what accumulated and sets
+a bounded forecast with a focused measurement gate. Product and frozen
+stage code are unchanged. No offline browser run or live trial was started.
+
 ## November 6, 2026 — verified archive and acceptance held offline
 
 Verified and independently restored the 36 authorized folders. The 447

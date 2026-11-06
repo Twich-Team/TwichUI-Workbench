@@ -1,3 +1,53 @@
+# Retry failure diagnosed and compact offline verification prepared — November 6, 2026 Mountain time
+
+The previous offline window closed on the evidence hold. It recorded 36
+final Chromium passes, one failure and one interruption. The visual suite
+and live trial did not start. Both test ports are free. The everyday app,
+the existing preview owners and local model listener were checked without
+model-service contact.
+
+The [failed test](../.local/runs/workflow-owner-acceptance-20261106-offline/chromiumFinal09.log)
+expected **Waiting to start**, the label for a new planning request.
+Its retained network trace records an HTTP 200 that requeued the same
+decomposition job at the same attempt count, retained the applied approval,
+and created no tasks yet. The following polls repeated that state. The
+projection showed **Plan approved** and explained that Workbench was
+preparing the agreed work. This matches the saved approved request and
+decomposition retry rules. The failure was the test's expected state.
+
+Checkpoint `cf014efe2c4999d500c60a32a545c54246749e74` waits for the saved
+decision and the retry response, then checks the same job and applied
+approval, the visible approved progress, and eventual preparation of
+tasks by the same job with one additional attempt. The captured retry
+request, response and progress mapping passed an in-memory check. The
+changed test and compact Playwright settings passed static checks. The
+browser verification of the corrected case, stale-scope rejection and
+connected behavior still needs an authorized window.
+
+The previous archive and independent restore still match all 447 files.
+The earlier real-addon result's 222-file seal also matches. No new archive
+or removal was made. Interrupted runs retained about 34.1 MiB, chiefly
+authored PNGs, trace ZIPs, video and duplicate attachments. The guard
+also counted temporary output while tests ran. Current aggregate
+headroom is about 86.29 MiB. Physical free space exceeds the operating
+floor. The opt-in compact configuration keeps failure screenshots,
+DOM and network traces, key workflow screenshots and all visual
+assertions. It omits video, embedded frames and duplicate or optional
+captures. Standard output settings remain available.
+
+The [offline authorization request](OFFLINE_ACCEPTANCE_WINDOW_20261106.md)
+proposes 60 minutes and 40 MiB under the existing 512 MiB cap. It requires
+a measured focused batch before the full projects, serial bounded groups,
+and a monitored stop before the evidence ceiling. It requests no archive
+or increase. No browser or visual test ran during this preparation.
+
+The product and guarded trial source match `17ad1ac4658b26dcb3eba3fa44891a53d8310c97`.
+Its dormant stage passed the read-only preflight again with manifest
+SHA-256 `507049cbc6f2a28c858fb2c3321f44d1a5593af32249548510d0506637f5b1ff`.
+The reviewed product candidate remains the one to verify. Offline
+acceptance and a fresh owner decision are required before any real trial.
+No existing service, installed app or addon was changed.
+
 # Verified archive and offline acceptance hold — November 6, 2026 Mountain time
 
 The owner approved the exact `docs/WORKFLOW_ACCEPTANCE_REQUEST_20261106.md`
