@@ -70,9 +70,14 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
     <h3>{receipt.status==='pending'?'Task budget saved · Waiting to apply':receipt.status==='applied'?'Task budget applied':'Task budget held'}</h3>
     <p role="status">{receipt.status==='pending'?'Workbench saved your permission. It will check the offer again before applying it.':receipt.status==='applied'?'Your decision is recorded for this one attempt.':receipt.message}</p>
     <p>{receipt.payload.run_budget?.publication==='draft-pr'?'One draft PR was authorized for this run.':'Local implementation only. Publication requires separate approval.'}</p>
-    {(!receipt.payload.run_budget?.activate_once||!current.available)&&<p>{current.message}</p>}
+    {current.approval_hold && <p>{current.approval_hold}</p>}
+    {(!receipt.payload.run_budget?.activate_once||!current.available)&&!current.approval_hold&&<p>{current.message}</p>}
     <p>Reloading keeps this decision. This approval cannot create another attempt.</p>
     <details><summary>Technical approval record</summary><p>{receipt.message}</p><pre>{JSON.stringify(receipt,null,2)}</pre></details>
+  </section>;
+  if(current.local_only&&!current.available)return <section className="soft-callout" aria-label="Local run waiting">
+    <h3>Local run is waiting</h3><p role="status">{current.message}</p>
+    <p>The reviewed test and plan are saved. The run decision will be available when Workbench can start it safely.</p>
   </section>;
   if(!shown?.available||!shown.offer)return <section className="soft-callout" aria-label="Task preparation hold">
     <h3>{current.preparing?'Preparing the reviewed task':'Task preparation held'}</h3><p role="status">{current.preparing?'Workbench is checking that the test can catch the wrong result.':'Workbench could not confirm the current test and plan are ready to run.'}</p>
@@ -101,13 +106,13 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
       <Button variant="secondary" disabled={busy} onClick={reviewAgain}>Review current offer</Button></>:<>
       <p><strong>{draftPR?'One draft pull request allowed':'Result stays local.'}</strong>{draftPR?
         <> After checks pass, Workbench may push a branch and open one draft pull request at {offer.repository} / {offer.base_branch}. Delivery has up to {minutes(budget.publication_seconds)}. Merging, releasing and installing need separate decisions.</>:null}</p>
-      <details open={draftPR || undefined}>
+      {!current.local_only&&<details open={draftPR || undefined}>
         <summary>Publishing options</summary>
         <fieldset disabled={busy||Boolean(draft)} aria-label="Where the result may go">
           <label className="check-label"><input type="radio" name={key} checked={!draftPR} onChange={()=>choose('hold')}/>Keep the result local</label>
           <label className="check-label"><input type="radio" name={key} checked={draftPR} onChange={()=>choose('draft-pr')}/>Also allow one draft pull request</label>
         </fieldset>
-      </details>
+      </details>}
       <label className="check-label"><input type="checkbox" checked={accepted||Boolean(draft)} disabled={busy||Boolean(draft)} onChange={e=>setAccepted(e.target.checked)}/>
         {draftPR?'I reviewed the run and publishing permission.':'I reviewed what this run allows.'}
       </label>

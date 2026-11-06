@@ -23,7 +23,7 @@ MAX_OUTPUT = 24000
 
 def configured_mode():
     mode = os.environ.get('WORKBENCH_PLANNER', 'unavailable')
-    return mode if mode in {'demo', 'local'} else 'unavailable'
+    return mode if mode in {'demo', 'local', 'everyday'} else 'unavailable'
 
 
 def evidence_packet(original):
@@ -270,6 +270,8 @@ class LocalProvider:
 
 def provider(stop_event=None):
     mode = configured_mode()
+    if mode == 'everyday':
+        raise PlanningUnavailable('Only the test coverage option can use the local model in this installation.')
     if mode == 'demo':
         return DemoProvider()
     if mode == 'local':

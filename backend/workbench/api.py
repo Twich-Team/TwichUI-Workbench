@@ -84,6 +84,13 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     def session():
         return {"csrf_token": token}
 
+    from workbench.everyday import LocalWorkStatus
+
+    @app.get('/api/local-work', response_model=LocalWorkStatus)
+    def local_work():
+        from workbench.everyday import status
+        return status(app.state.engine)
+
     @app.get('/api/intake', response_model=IntakePage)
     def intake_list(page: int = Query(default=1, ge=1, le=1000)):
         return intake.listing(app.state.engine, page)

@@ -166,7 +166,20 @@ def main():
     stopped = threading.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, lambda *_: stopped.set())
+    from contextlib import nullcontext
+    from workbench import everyday
+
+    if everyday.enabled() and (args.session_config or args.test_crash or args.once):
+        parser.error('Everyday operation requires its dedicated persistent worker.')
     engine = engine_for()
+    owner = everyday.worker_owner(engine) if everyday.enabled() else nullcontext()
+    with owner as policy:
+        run(engine, args, stopped, policy)
+
+
+def run(engine, args, stopped, policy):
+    from workbench.everyday import watch_capacity
+
     while not stopped.is_set():
         try:
             if args.session_config:
@@ -175,6 +188,9 @@ def main():
                 worked = task_session.process_one(engine, args.session_config, stop_event=stopped)
                 if task_session.finished(args.session_config):
                     return
+            elif policy:
+                with watch_capacity(policy, stopped) as guard:
+                    worked = tick(engine, stop_event=guard)
             else:
                 worked = tick(engine, crash=args.test_crash, stop_event=stopped)
         except OperationalError as error:

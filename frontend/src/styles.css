@@ -394,6 +394,8 @@ th,td { text-align: left; padding: 10px; border-bottom: 1px solid #5e4a34; }
 .intake-page fieldset { padding:0; border:0; margin:0; min-width:0; }
 .intake-page .check-label { display:flex; align-items:center; flex-wrap:wrap; gap:10px; min-height:44px; }
 .intake-page .check-label input { width:20px; height:20px; }
+.intake-page .planning-consent { flex-wrap:nowrap; }
+.intake-page .planning-consent input { flex:none; }
 .code-input { font-family:monospace; }
 .intake-form .button { margin-top:20px; }
 .intake-card { display:flex; align-items:center; gap:16px; }

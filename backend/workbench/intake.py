@@ -40,6 +40,8 @@ def enqueue(connection, intake_id, kind, revision, payload=None):
 
 
 def submit(engine, body, *, owner_provenance=None):
+    from workbench import everyday
+
     original = body.model_dump(mode='json')
     if body.supported_task is None:
         original.pop('supported_task', None)
@@ -49,6 +51,8 @@ def submit(engine, body, *, owner_provenance=None):
         from workbench.supported_tasks import load
         if not load(body.supported_task):
             raise HTTPException(409, 'This supported task is unavailable.')
+    if body.local_planning and (not body.regression_tests or body.visual_requirement != 'nonvisual'):
+        raise HTTPException(422, 'Local planning is available for test coverage without in-game interface changes.')
     if body.kind == 'feature' and body.lua_error:
         raise HTTPException(422, 'Lua errors belong to issue reports.')
     identity = str(body.request_id)
@@ -63,12 +67,22 @@ def submit(engine, body, *, owner_provenance=None):
         else:
             if connection.scalar(select(func.count()).select_from(planning_jobs).where(planning_jobs.c.status.in_(['queued','running']))) >= 64:
                 raise HTTPException(503, 'Planning queue is full. Keep this request and retry after queued work completes.')
+            at = now()
+            planning = {'owner_provenance': owner_provenance} if owner_provenance is not None else {}
+            if body.local_planning:
+                if not everyday.enabled():
+                    raise HTTPException(409, 'Ordinary local planning is unavailable at this address.')
+                try:
+                    everyday.configuration(engine)
+                except (OSError, ValueError, RuntimeError):
+                    raise HTTPException(503, 'The Workbench installation needs attention before saving model approval.') from None
+                planning['local_planning_receipt'] = everyday.planning_receipt(original, at)
             connection.execute(intakes.insert().values(id=identity, payload=original, status='queued',
-                revision=0, created_at=now(), priority_override=None))
+                revision=0, created_at=at, priority_override=None))
             connection.execute(intake_scopes.insert().values(intake_id=identity, revision=1, command_id=identity,
                 visual_requirement=body.visual_requirement, stage='implementation', origin='human',
                 note='Recorded with the original request.', change_payload=original, created_at=now()))
-            enqueue(connection, identity, 'planning', 1, {'owner_provenance': owner_provenance} if owner_provenance is not None else None)
+            enqueue(connection, identity, 'planning', 1, planning)
     return view(engine, identity)
 
 
@@ -320,6 +334,8 @@ def retry(engine, identity, job_id):
             raise HTTPException(404, 'Job not found for this request.')
         if job['kind'] == 'behavioral_preparation':
             raise HTTPException(409, 'Preparation retains one durable claim. Inspect its outcome or recovery hold; retry cannot launch duplicate preparation.')
+        if row['payload'].get('local_planning') and job['kind'] == 'planning':
+            raise HTTPException(409, 'This approval covers one planning request. Review the saved outcome or start a new task.')
         if retained_source_failure(job):
             raise HTTPException(409, 'This addon planning result is retained. Retry cannot start another generation for this request.')
         if job['kind'] == 'decomposition':

@@ -444,3 +444,63 @@ test('expired local approval holds the task without starting a run', async ({pag
   await expect(page.getByRole('heading',{name:'Needs your attention'})).toBeVisible();
   await expect(page.locator('.task-lane').filter({has:page.getByRole('heading',{name:'Needs your attention'})}).locator(`a[href="${task}"]`)).toBeVisible();
 });
+
+test('everyday intake completes two different local tasks in one saved history',async({page})=>{
+  test.skip(process.env.WORKBENCH_E2E_EVERYDAY!=='1','Uses the dedicated disposable everyday fixture.');
+  test.setTimeout(60000);
+  fixture('reviewed-offer-automatic-setup');
+  const {artifactPath}=await import('./output');
+  const results:string[]=[];
+  for(const width of [1440,390]){
+    const module=width===1440;
+    const path=module?'tests/test_normalize.lua':'tests/test_client.lua';
+    await page.setViewportSize({width,height:1000});
+    await page.goto('/intake/new');
+    await expect(page.getByText('Available for local execution')).toBeVisible();
+    await page.getByLabel('Title Required').fill(module?'Cover lowercase normalization':'Cover the client’s stored name');
+    await page.getByLabel('Description Required').fill(
+      `In ${path} check how spaces are trimmed.\n${module?moduleExample:clientExample}`);
+    await page.getByLabel('Add a check for existing behavior').check();
+    await page.getByLabel('Expected test results').fill(module?'The normalized name is alice.':'The stored name is bob.');
+    await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+    await page.getByLabel('Allow one local Qwen request to plan this task').check();
+    await overflow(page);
+    await page.screenshot({path:artifactPath(`everyday/intake-${width}.png`),fullPage:true});
+    await page.getByRole('button',{name:'Submit request',exact:true}).dblclick();
+    await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
+    expect(JSON.parse(fixture('reviewed-offer-automatic-worker')).adapter_calls).toBe(1);
+    await page.reload();
+    const approve=page.getByRole('button',{name:'Approve plan',exact:true});
+    await expect(approve).toBeDisabled();
+    await page.getByLabel('The test examples match what I asked for.').check();
+    await approve.click();
+    await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
+    fixture('reviewed-offer-automatic-worker');
+    const offer=page.getByRole('region',{name:'Certified task run approval'});
+    const run=offer.getByRole('button',{name:'Approve local run',exact:true});
+    await expect(run).toBeDisabled();
+    await expect(offer.getByText('Publishing options')).toHaveCount(0);
+    await offer.screenshot({path:artifactPath(`everyday/approval-${width}.png`)});
+    await offer.getByRole('checkbox',{name:'I reviewed what this run allows.'}).check();
+    await run.dblclick();
+    await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+    fixture('reviewed-offer-automatic-tick');
+    fixture('reviewed-offer-automatic-tick');
+    await expect(page.getByRole('heading',{name:'Preparing approved task'})).toBeVisible();
+    fixture('reviewed-offer-automatic-local-pass');
+    await page.getByRole('link',{name:'Review changes and checks'}).click();
+    const result=page.getByRole('region',{name:'Run result and checks'});
+    await expect(result.getByRole('heading',{name:'Test changes checked'})).toBeVisible();
+    await overflow(page);
+    await result.screenshot({path:artifactPath(`everyday/result-${width}.png`)});
+    await page.reload();
+    await expect(result.getByRole('heading',{name:'Test changes checked'})).toBeVisible();
+    results.push(page.url());
+  }
+  await page.goto(results[0]);
+  await expect(page.getByRole('heading',{name:'Test changes checked'})).toBeVisible();
+  const history=await page.request.get('/api/real-executions').then(r=>r.json());
+  expect(history.total).toBe(2);
+});

@@ -246,6 +246,17 @@ def validate_selection(c, proposal_id, budget):
         or selected["fingerprint"] != budget.offer_fingerprint
     ):
         raise HTTPException(409, "The supported task or budget offer changed. Review it again.")
+    from workbench import everyday
+    if everyday.enabled():
+        review = selected['snapshot'].get('reviewed_task') or {}
+        if (budget.publication != 'hold' or not selected['snapshot'].get('certified_preparation')
+                or not review or not review.get('ref')):
+            raise HTTPException(409, 'This Workbench installation runs certified test coverage and keeps results local.')
+        from workbench import intake
+        from workbench.db import intakes
+        original = intake.require(c, intakes, review['ref']['intake_id'])
+        if original['payload'].get('local_planning') != 'qwen-once':
+            raise HTTPException(409, 'This offer belongs to an earlier workflow. Start an ordinary locally approved test task.')
     if budget.activate_once:
         from workbench.task_sessions import capability
 
@@ -333,12 +344,15 @@ def offer_view(c, proposal, selected):
     contract = spec["contract"]
     from workbench.task_sessions import capability
 
-    one_off = capability(c.engine) is not None
+    from workbench import everyday
+    readiness = everyday.status(c.engine) if everyday.enabled() else None
+    one_off = readiness.ready if readiness else capability(c.engine) is not None
     reviewed = selected["snapshot"].get("reviewed_task")
     return dict(
         runtime_ready=one_off,
-        available=True,
-        message=("The task is ready for your decision. The worker will check readiness again before it starts." if one_off else "Execution is unavailable here. Saving approval records your decision without starting a run."),
+        local_only=True if readiness else None,
+        available=one_off or not readiness,
+        message=("The task is ready for your decision. The worker will check readiness again before it starts." if one_off else readiness.message if readiness else "Execution is unavailable here. Saving approval records your decision without starting a run."),
         offer=dict(
             id=selected["id"],
             fingerprint=selected["fingerprint"],
@@ -442,6 +456,7 @@ def run_context(engine, intake_id, task_id):
         result = offer_view(c, proposal, selected)
     if budget_message:
         result['message'] = budget_message
+        result['approval_hold'] = budget_message
     return dict(**result, scope_approval_id=ref['approval_id'], binding=binding,
                 scope=linked['proposal_review'], receipt=receipt)
 
@@ -470,6 +485,11 @@ def approve_run(engine, intake_id, task_id, body):
         if parent['payload'].get('execution_continuation') or parent['payload'].get('run_budget'):
             raise HTTPException(409, 'A first scope-only approval is required; earlier budgets cannot be reset')
         selected = validate_selection(c, parent['proposal_id'], body.run_budget)
+        from workbench import everyday
+        if everyday.enabled():
+            readiness = everyday.status(engine)
+            if not body.run_budget.activate_once or not readiness.ready:
+                raise HTTPException(409, readiness.message if not readiness.ready else 'Refresh and review the available local run.')
         if (selected['snapshot'].get('reviewed_task', {}).get('ref') != ref or
                 body.binding != digest(dict(scope=linked, offer=selected['fingerprint']))):
             raise HTTPException(409, 'Scope, certification or offer changed. Review the current task again.')

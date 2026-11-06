@@ -262,6 +262,7 @@ class Lease:
                      executable_sha256=digest((p/'exe').read_bytes()), model_path=props['model_path'],
                      setup_deadline=time.time()+240, owner_pid=os.getpid(),
                      owner_start=Path('/proc/self/stat').read_text().split(') ',1)[1].split()[19],
+                     owner_boot=Path('/proc/sys/kernel/random/boot_id').read_text(),
                      applied=False, restart_begun=False, restored=False)
         for name, data in [('serve.env.original', original), ('serve.env.temporary', temporary),
                            ('original.key', old.encode()), ('temporary.key', self.secret.encode())]:
@@ -274,9 +275,28 @@ class Lease:
         atomic(self.private/'state.json', json.dumps(state).encode())
         # Watchdog is temporary; restores on owner loss/setup timeout/lease expiration.
         env = {'PATH': os.environ['PATH'], 'PYTHONPATH': str(Path(__file__).resolve().parents[1])}
-        self.watchdog = subprocess.Popen([sys.executable, '-m', 'workbench.real_lease', str(self.private)],
-                                        env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                                        stderr=subprocess.DEVNULL, start_new_session=True)
+        command = [sys.executable, '-m', 'workbench.real_lease', str(self.private)]
+        from workbench import everyday
+
+        if everyday.enabled():
+            # A Workbench worker restart or cgroup kill must leave this owned
+            # restoration watcher running in a distinct user service.
+            unit = 'workbench-restore-' + self.private.name
+            command = ['/usr/bin/systemd-run', '--user', '--wait', '--collect', '--expand-environment=no',
+                       '--unit=' + unit, '--property=RuntimeMaxSec=4100',
+                       '--property=IPAddressDeny=any', '--property=IPAddressAllow=localhost',
+                       '/usr/bin/env', '-i', *(f'{k}={v}' for k, v in env.items()), *command]
+            env = os.environ.copy()
+        self.watchdog = subprocess.Popen(command, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                         stderr=subprocess.DEVNULL, start_new_session=True)
+        if everyday.enabled():
+            end = time.monotonic() + 8
+            ready = self.private / 'watchdog-ready.json'
+            while not ready.is_file() and self.watchdog.poll() is None and time.monotonic() < end:
+                time.sleep(.05)
+            from workbench.real_execution import alive
+            if not ready.is_file() or not alive(json.loads(ready.read_text())):
+                raise RuntimeError('Independent restoration watcher did not start; no configuration changed')
         if epoch() != expected or ENV.read_bytes() != original:
             raise RuntimeError('Ownership/configuration changed before apply')
         slots = json.loads(request(old, 'GET', '/slots')[1])
@@ -358,13 +378,18 @@ class Lease:
 
 def watchdog(private):
     private = Path(private)
+    from workbench.real_execution import owner_identity
+
+    atomic(private/'watchdog-ready.json', json.dumps(owner_identity()).encode())
     while True:
         state = json.loads((private/'state.json').read_text())
         if state.get('restored'):
             return
         try:
             p = Path('/proc')/str(state['owner_pid'])
-            alive = (p/'stat').read_text().split(') ',1)[1].split()[19] == state['owner_start']
+            fields = (p/'stat').read_text().split(') ',1)[1].split()
+            boot = Path('/proc/sys/kernel/random/boot_id').read_text()
+            alive = fields[19] == state['owner_start'] and fields[0] != 'Z' and state.get('owner_boot', boot) == boot
         except FileNotFoundError:
             alive = False
         if not alive or time.time() >= state.get('watchdog_deadline', state.get('deadline', state['setup_deadline'])):

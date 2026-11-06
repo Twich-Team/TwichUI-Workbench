@@ -14,6 +14,7 @@ from workbench.real_workspace import durable
 
 
 def advance_local(engine, database, outcome, planner, *, example="  ALICE ", native=False, staged=False):
+    from workbench import everyday
     from test_regression_evidence import ControlledPreparer
     from test_real_transport import final_response, scripted_http, tool_response
     from test_verification_profiles import TEST
@@ -42,7 +43,10 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
 
     original = task_session.process_one
     sandbox = database.parent
-    scratch = Path(tempfile.gettempdir() if native else sandbox) / 'implementation-scratch'
+    with engine.connect() as c:
+        session_id = c.execute(select(task_sessions.c.id).where(task_sessions.c.status == 'pending')).scalar_one()
+    scratch = (Path(everyday.configuration(engine).scratch) if everyday.enabled()
+               else Path(tempfile.gettempdir() if native else sandbox) / 'implementation-scratch')
     scratch.mkdir(mode=0o700, exist_ok=True)
 
     class SimulatedRuntime(real_workspace.Runtime if native else ControlledPreparer):
@@ -69,7 +73,7 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
         def scripted_edit(body):
             rendered = json.loads(body['messages'][1]['content'].split('\n', 1)[1])
             scenario, = rendered['examples']
-            if native:
+            if native or example is None:
                 # This fixture sends a generated positive control through the
                 # implementation parser. It is never supplied to a live model.
                 from workbench.regression_evidence import compile_plan
@@ -133,9 +137,10 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
             if outcome != 'interrupt':
                 assert not worker.tick(engine, planning_adapter=planner)
     with engine.connect() as c:
-        session = c.execute(select(task_sessions)).mappings().one()
-        request = c.execute(select(real_execution_requests)).mappings().one()
-        grant = c.execute(select(real_execution_grants)).mappings().one()
+        session = c.execute(select(task_sessions).where(task_sessions.c.id == session_id)).mappings().one()
+        grant = c.execute(select(real_execution_grants).where(
+            real_execution_grants.c.snapshot['task_budget']['decision_id'].as_string() == session_id)).mappings().one()
+        request = c.execute(select(real_execution_requests).where(real_execution_requests.c.grant_id == grant['id'])).mappings().one()
         assert grant['snapshot']['task_budget']['budget']['publication'] == 'hold'
         assert not c.execute(select(real_publications)).first()
         expected_session, expected_request = {

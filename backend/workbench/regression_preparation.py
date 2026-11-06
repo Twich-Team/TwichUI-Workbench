@@ -258,6 +258,8 @@ def proposal_content(original, contract):
 
 
 def process_one(engine, *, fail_before_commit=False, scenario_response=None, adapter=None, stop_event=None):
+    from workbench import everyday
+
     # Git inspection happens outside the writer transaction. Revalidate everything
     # before atomic publication; concurrent processors may inspect but cannot duplicate.
     with write_transaction(engine) as c:
@@ -299,12 +301,26 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     model_selection = None
     claimed_generation = False
     loaded_selection = False
-    generation = job['kind'] == 'planning' and scenario_response is None and bool(os.environ.get('WORKBENCH_PREPARATION_CONFIG'))
+    everyday_mode = everyday.enabled()
+    generation = job['kind'] == 'planning' and scenario_response is None and (
+        everyday_mode or bool(os.environ.get('WORKBENCH_PREPARATION_CONFIG')))
     if generation:
         from workbench import grounded_scenarios, model_policy, trusted_preparation, planning_worker
         from workbench.planning_provider import LocalProvider, provider, PlanningUnavailable
         raw = None
         try:
+            if everyday_mode:
+                with engine.connect() as c:
+                    everyday.check_planning(c, original)
+                try:
+                    everyday.require_room(everyday.configuration(engine))
+                except everyday.CapacityHold as error:
+                    # Capacity may return without another model approval. The
+                    # original deadline and request still govern the claim.
+                    with write_transaction(engine) as c:
+                        if intake.require(c, planning_jobs, job['id']) == job and job['message'] != str(error):
+                            c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(message=str(error)))
+                    return False
             policy = trusted_preparation.configuration(engine)
             if not policy['scenario_generation']:
                 raise ValueError('Preparation policy denies scenario generation for this task class.')
@@ -331,9 +347,13 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         or intake.human_scope(c, original['id']) != scope
                         or (stop_event is not None and stop_event.is_set())):
                     return True
-                adapter_used = adapter or provider(stop_event)
+                if everyday_mode:
+                    everyday.check_planning(c, original)
+                adapter_used = adapter or (LocalProvider(stop_event) if everyday_mode else provider(stop_event))
                 if isinstance(adapter_used, LocalProvider):
                     model_selection = model_policy.grounded_local_selection(c)
+                    if everyday_mode and model_selection.model != everyday.MODEL:
+                        raise ValueError('Choose the installed Qwen model in Models before starting a new task.')
                 lease = str(uuid4())
                 job['payload'].pop('diagnostics', None)
                 job['payload']['scenario_generation_claim'] = owner_identity()
@@ -377,7 +397,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 location = '.'.join(map(str, issue['loc'])) or 'response'
                 failure = ('schema_validation', f'Planning returned an invalid example at {location}: {issue["msg"]}')
         except PlanningUnavailable as error:
-            failure = (error.reason, None)
+            hold = getattr(stop_event, 'reason', None)
+            failure = ('capacity_stop', hold) if hold else (error.reason, None)
         except ValueError as error:
             failure = ('planning_validation', str(error))
         except OSError:

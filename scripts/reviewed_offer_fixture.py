@@ -41,7 +41,35 @@ def setup(path):
     (local / 'task-runtime.json').chmod(0o600)
 
 
+
+def everyday_config(path):
+    from workbench import everyday
+    from workbench.real_execution import owner_identity
+
+    if os.environ.get('WORKBENCH_E2E_EVERYDAY') != '1':
+        return
+    root = path.parent / 'controlled-session-owner'
+    local = root / '.local'
+    local.mkdir(mode=0o700, parents=True, exist_ok=True)
+    scratch = root / 'scratch'
+    scratch.mkdir(mode=0o700, exist_ok=True)
+    policy = local / 'everyday-policy.json'
+    binding = dict(database=str(path), database_identity=[path.stat().st_dev, path.stat().st_ino])
+    if not policy.exists():
+        policy.write_text(json.dumps(dict(**binding, evidence_roots=[str(root)], scratch=str(scratch))))
+        policy.chmod(0o600)
+        # The offline API process represents readiness. Worker ticks use an
+        # offline fixture with no service controller or real transport.
+        receipt = local / 'everyday-worker.json'
+        receipt.write_text(json.dumps(dict(owner=owner_identity(), database_identity=binding['database_identity'])))
+        receipt.chmod(0o600)
+    os.environ.update(WORKBENCH_PLANNER='everyday', TMPDIR=str(scratch), WORKBENCH_EVERYDAY_CONFIG=str(policy))
+    everyday.ROOT = root
+    sys.path.insert(0, str(ROOT / 'scripts'))
+
+
 def advance(engine, path, action):
+    everyday_config(path)
     os.environ['WORKBENCH_RESEARCH_ROOT'] = str(path.parent / 'reviewed-research/source')
     task_sessions.ROOT = path.parent / 'controlled-session-owner'
     task_session.ROOT = task_sessions.ROOT
@@ -69,7 +97,8 @@ def advance(engine, path, action):
             if action.startswith('automatic-local-'):
                 from local_browser_fixture import advance_local
 
-                advance_local(engine, path, action.removeprefix('automatic-local-'), adapter)
+                advance_local(engine, path, action.removeprefix('automatic-local-'), adapter,
+                              example=None if os.environ.get('WORKBENCH_E2E_EVERYDAY') == '1' else '  ALICE ')
             else:
                 # Advance the normal worker without exposing an HTTP test-control route.
                 for _ in range(1 if action == 'automatic-tick' else 4):

@@ -3,7 +3,7 @@ import type {components} from './api.generated';
 type Intake = components['schemas']['IntakeView'];
 type Execution = components['schemas']['TaskExecutionContext'];
 export type RunApprovalContext = {
-  available: boolean; preparing?: boolean; message: string; binding?: string; scope_approval_id?: string;
+  local_only?: boolean; approval_hold?: string; available: boolean; preparing?: boolean; message: string; binding?: string; scope_approval_id?: string;
   scope?: components['schemas']['ProposalView']; receipt?: components['schemas']['ProposalReceipt'] | null;
   offer: null | {id: string; fingerprint: string; title: string; repository: string; base_branch: string;
     base: string; paths: string[]; checks: {argv: string[]; cwd: string; purpose?: string}[];
@@ -30,7 +30,7 @@ export function intakeProgress(item: Intake): Progress {
   const research = proposal?.research_only || proposal?.content.delivery === 'research';
   switch (item.status) {
     case 'queued':
-      return {step: 0, title: 'Waiting to start', next: 'Your request is saved. Planning is next.', group: 'current'};
+      return {step: 0, title: 'Waiting to start', next: item.jobs.find(job=>job.status==='queued'&&job.message.startsWith('Waiting for '))?.message||'Your request is saved. Planning is next.', group: 'current'};
     case 'investigating':
       return {step: 0, title: 'Looking into your request', next: 'Workbench will show its findings or bring you a plan.', group: 'current'};
     case 'waiting_for_information':

@@ -211,6 +211,9 @@ def _config(engine, row):
         task_execution.snapshot(c, **ref)
     if execution.digest(policy) != row["snapshot"]["budget_fingerprint"]:
         raise ValueError("The approved task budget changed")
+    from workbench import everyday
+    if everyday.enabled():
+        everyday.require_room(everyday.configuration(engine))
     package_root = ROOT / "artifacts/runs" / ("task-session-" + str(UUID(row["id"])))
     package_root.mkdir(mode=0o700, parents=True, exist_ok=True)
     if package_root.is_symlink() or package_root.stat().st_uid != os.getuid():
@@ -277,6 +280,9 @@ def _result(engine, row, status, message, state):
         actual = c.execute(select(sessions).where(sessions.c.id == row["id"])).mappings().one()
         if actual["state"].get("owner") != row["state"].get("owner"):
             return False
+        if (status == "waiting_recovery" and actual["status"] == status
+                and actual["message"] == message and actual["state"] == state):
+            return True
         c.execute(
             sessions.update()
             .where(sessions.c.id == row["id"])
@@ -302,8 +308,16 @@ def _result(engine, row, status, message, state):
 
 def reconcile_controller(root):
     report = root / "lease-controller-result.json"
-    if report.exists() or not (root / "session-claimed.json").exists():
+    from workbench import everyday
+
+    if not (root / "session-claimed.json").exists():
         return
+    if report.exists():
+        if not everyday.enabled() or json.loads(report.read_text()).get("restoration", {}).get("restored"):
+            return
+        report = root / 'lease-restoration-reconciled.json'
+        if report.exists():
+            return
     owner_path = root / "controller-owner.json"
     if owner_path.exists() and execution.alive(json.loads(owner_path.read_text())):
         return
@@ -343,7 +357,7 @@ def reconcile_controller(root):
                 sort_keys=True,
             ).encode(),
         )
-    elif (root / "controller-started.json").exists() and not (
+    elif ((root / "controller-started.json").exists() or (everyday.enabled() and owner_path.is_file())) and not (
         root / "lease-established.json"
     ).exists():
         # Lease persists state BEFORE modifying authentication; absence proves no lease effect.
@@ -389,15 +403,19 @@ def process_one(engine, stop_event=None, advance=None):
             raise ValueError("Saved task-session identity changed")
         state["owner"] = execution.owner_identity()
         row["state"] = state
-        c.execute(
-            sessions.update()
-            .where(sessions.c.id == row["id"])
-            .values(
-                status="active",
-                state=state,
-                message="Preparing an isolated workspace and running readiness checks.",
+        if row["status"] == "waiting_recovery":
+            if owner != state["owner"]:
+                c.execute(sessions.update().where(sessions.c.id == row["id"]).values(state=state))
+        else:
+            c.execute(
+                sessions.update()
+                .where(sessions.c.id == row["id"])
+                .values(
+                    status="active",
+                    state=state,
+                    message="Preparing an isolated workspace and running readiness checks.",
+                )
             )
-        )
     cancelled = threading.Event()
     done = threading.Event()
 
@@ -475,6 +493,8 @@ def process_one(engine, stop_event=None, advance=None):
                 )
         reconcile_controller(root)
         (advance or task_session.process_one)(engine, cfg, stop_event=cancelled)
+        if reason := getattr(stop_event, 'reason', None):
+            state['resource_hold'] = reason
         terminal = root / "session-finished.json"
         if terminal.exists():
             outcome = json.loads(terminal.read_text())
@@ -492,14 +512,19 @@ def process_one(engine, stop_event=None, advance=None):
                 else outcome["message"],
                 state,
             )
+        from workbench import everyday
+        if everyday.enabled():
+            error = ROOT / '.local' / ('chronicle-primary-lease-' + root.name) / 'restoration-error.json'
+            if error.is_file():
+                return _result(engine, row, 'waiting_recovery',
+                               'Model access needs attention. Workbench could not verify restoration. New local work is held.',
+                               state)
         return _result(
-            engine,
-            row,
-            "waiting_recovery",
-            "Waiting for saved result delivery and verified restoration. Implementation will not be replayed.",
-            state,
+            engine, row, "waiting_recovery",
+            "Waiting for saved result delivery and verified restoration. Implementation will not be replayed.", state,
         )
     except (ValueError, HTTPException, OSError, subprocess.SubprocessError) as error:
+        reason = getattr(stop_event, 'reason', None)
         state["error_type"] = type(error).__name__
         # Keep claimed work recoverable until original controller/restoration settles.
         uncertain = (
@@ -512,7 +537,7 @@ def process_one(engine, stop_event=None, advance=None):
             row,
             "waiting_recovery" if uncertain else "held",
             "Task preparation needs attention: "
-            + str(error)[:400]
+            + (reason or str(error))[:400]
             + ". Saved work is retained; no automatic replay.",
             state,
         )
@@ -539,7 +564,7 @@ def public_view(c, task_id):
     return dict(
         id=row["id"],
         status=row["status"],
-        message=row["message"],
+        message=' '.join(filter(None, [row["state"].get("resource_hold"), row["message"]])),
         cancel_requested=bool(row["state"].get("cancel_requested")),
         can_stop=row["status"] in ACTIVE and not row["state"].get("cancel_requested"),
     )

@@ -79,6 +79,7 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   const [regressionPaths,setRegressionPaths] = useState(body.regression_tests?.test_paths?.join('\n')||'');
   const regression=body.regression_tests;
   const example=regression?.text_example;
+  const localWork=useQuery({queryKey:['local-work'],queryFn:()=>request<components['schemas']['LocalWorkStatus']>('/api/local-work'),refetchInterval:5000});
   const supported=useQuery({queryKey:['supported-tasks'],queryFn:()=>request<{items:{id:string;title:string;purpose:string}[]}>('/api/supported-tasks')});
   async function submit(event:React.FormEvent) {
     event.preventDefault(); setError('');
@@ -99,20 +100,26 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   <label htmlFor="request-description">Description <span>Required</span></label>
   <textarea id="request-description" required maxLength={6000} rows={4} value={body.description} onChange={e=>setBody({...body,description:e.target.value})}/>
   <p className="small-text">Tell Workbench what you want to happen. For a bug, say what happens today and what you expected.</p>
-  <details className="request-options" open={!unified || kind==='issue' || Boolean(regression || body.supported_task) || undefined}>
+  {localWork.data?.enabled&&<div className="soft-callout">
+    <p><strong>Available for local execution</strong> Add coverage to an existing TwichUI Lua test for a concrete example. Workbench saves the checked result here.</p>
+    <p>Bug fixes, features, inspections, simulator work, Codex and publishing still need a separate workflow.</p>
+    <p role="status">{localWork.data.message}</p>
+    {localWork.data.headroom_bytes!=null&&<p className="small-text">{Math.max(0,Math.floor(localWork.data.headroom_bytes/1048576))} MiB available for saved evidence. Workbench needs {localWork.data.reserve_bytes/1048576} MiB free before starting.</p>}
+  </div>}
+  <details className="request-options" open={!unified || kind==='issue' || Boolean(localWork.data?.enabled || regression || body.supported_task) || undefined}>
   <summary>Task options</summary>
   {unified && <><label htmlFor="request-kind">What should Workbench do?</label>
   <select id="request-kind" value={kind} onChange={e=>chooseKind(e.target.value as 'feature'|'issue',body)}><option value="feature">Plan, inspect or test</option><option value="issue">Investigate a bug</option></select></>}
   {kind==='feature' && <>
     <label className="check-label"><input type="checkbox" checked={Boolean(regression)} onChange={e=>setBody({
-      ...body,supported_task:null,regression_tests:e.target.checked?{
+      ...body,supported_task:null,local_planning:null,regression_tests:e.target.checked?{
         acceptance:regressionAcceptance.split('\n').filter(s=>s.trim()),
         test_paths:regressionPaths.split(/[\s,]+/).filter(Boolean),
       }:null,
     })}/>Add a check for existing behavior</label>
     {regression&&<>
       <p className="small-text">Tell Workbench what should happen. This route can add checks to an existing TwichUI test. Workbench will ask for anything it needs to make the check specific.</p>
-      <label htmlFor="regression-acceptance">Expected test results <span>Required · One result per line, up to 8</span></label>
+      <label htmlFor="regression-acceptance">Expected test results <span>Required · One result per line, up to {localWork.data?.enabled?3:8}</span></label>
       <textarea id="regression-acceptance" required rows={3} maxLength={6000} value={regressionAcceptance} onChange={e=>{
         setRegressionAcceptance(e.target.value);
         setBody({...body,regression_tests:{...regression,acceptance:e.target.value.split('\n').filter(s=>s.trim())}});
@@ -137,9 +144,14 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   </>}
   {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,supported_task:item?.id||null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Use my description</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Use a ready-made task with a fixed plan. Your comments stay with the request. The fixed scope sets what can run.</p></>}
   {kind==='issue' && <><label className="check-label"><input type="checkbox" checked={lua} onChange={e=>{setLua(e.target.checked);if(!e.target.checked)setBody({...body,lua_error:''});}}/>Add a Lua error <span>Optional</span></label>{lua && <><label htmlFor="lua-error">Lua error <span>Plain text · never executed</span></label><textarea className="code-input" id="lua-error" maxLength={6000} rows={6} value={body.lua_error || ''} onChange={e=>setBody({...body,lua_error:e.target.value})}/></>}</>}</details>
-  <label htmlFor="request-interface">Does this request change the interface?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.</p>
+  <label htmlFor="request-interface">Does this request change the interface?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.</p>
+  {localWork.data?.enabled&&regression&&<>
+    <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning==='qwen-once'} disabled={body.visual_requirement!=='nonvisual'}
+      onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>Allow one local Qwen request to plan this task</span></label>
+    <p className="detail-copy">Choose “Does not change the interface” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. Permission expires after 30 minutes. Planning can take up to two minutes. You review the plan and approve any run separately.</p>
+  </>}
 </fieldset>
-  <p className="detail-copy">Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.title.trim() || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
+  <p className="detail-copy">{localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':'Your request will be saved. Local model planning requires the test coverage option and your permission.'):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.title.trim() || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
 }
 
 export function IntakeDetail() {
@@ -164,6 +176,7 @@ export function IntakeDetail() {
 
   const sample = data.original.title === 'Synthetic feature · Admission rehearsal';
   const asking = data.status==='waiting_for_information';
+  const waiting = data.jobs.find(job=>job.status==='queued'&&job.message.startsWith('Waiting for '));
   const activeJobs = data.jobs.filter(job => job.revision >= data.revision && job.status === 'failed');
   const clarification = data.result?.clarification;
   // These fixed phrases come from the deterministic regression precheck.
@@ -209,9 +222,10 @@ export function IntakeDetail() {
         <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/><Button disabled={blocked || !clarificationInput.trim()}>Send information</Button></form>
       </>}
     </section>}
+    {waiting&&<p role="status" className="soft-callout">{waiting.message}</p>}
     {activeJobs.length > 0 && <section className="panel"><h2>Why planning stopped</h2>
       {activeJobs.map(job=><div key={job.id}><p>{job.message}</p>
-        {job.kind!=='behavioral_preparation' && !job.diagnostics.retained_failure && job.attempts<3
+        {job.kind!=='behavioral_preparation' && !(data.original.local_planning&&job.kind==='planning') && !job.diagnostics.retained_failure && job.attempts<3
           ? <Button disabled={blocked} variant="secondary" onClick={()=>void act('retry',{job_id:job.id}).catch(()=>{})}>Retry planning</Button>
           : <p>Your request and any saved decisions are here. You can review the details below or start a new request with updated information.</p>}</div>)}
     </section>}

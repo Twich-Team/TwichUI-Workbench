@@ -122,7 +122,14 @@ class Runtime:
             raise ValueError('Pinned source HEAD/tree is not clean')
         if (self.root/'workspace-location.json').exists():
             raise ValueError('Never reuse an implementation workspace')
-        parent = Path(tempfile.mkdtemp(prefix='workbench-verify-' if self.recipe else 'wb-chronicle-work-'))
+        from workbench import everyday
+        scratch = everyday.configuration().scratch if everyday.enabled() and self.recipe else None
+        parent = Path(tempfile.mkdtemp(prefix='workbench-verify-' if self.recipe else 'wb-chronicle-work-', dir=scratch))
+        if scratch:
+            info = parent.stat()
+            owner = self.root/'everyday-scratch.json'
+            durable(owner, json.dumps(dict(path=str(parent), identity=[info.st_dev, info.st_ino])).encode())
+            owner.chmod(0o600)
         self.workspace = parent/'workspace'
         durable(self.root/'workspace-location.json', json.dumps({'path': str(self.workspace)}).encode())
         subprocess.run(['git', '-c', 'core.hooksPath=/dev/null', '-c', 'protocol.allow=never',
@@ -264,8 +271,16 @@ class Runtime:
         package = package_for(self.root.parent)
         if package:
             reservation = package.remaining_evidence_reservation()
-        gate('aggregate evidence reservation', ceiling == 512<<20 and total+reservation <= ceiling,
-             f'{total} bytes used; reserve remaining {reservation} bytes under authorized 512 MiB cap; owned retained package bytes count once')
+        from workbench import everyday
+        if everyday.enabled():
+            try:
+                remaining = everyday.require_room(everyday.configuration(), reservation + everyday.CLOSEOUT_RESERVE)
+                gate('aggregate evidence reservation', True, f'{remaining} bytes of aggregate headroom')
+            except (OSError, ValueError, RuntimeError):
+                gate('aggregate evidence reservation', False, 'Evidence, scratch or physical storage capacity needs attention.')
+        else:
+            gate('aggregate evidence reservation', ceiling == 512<<20 and total+reservation <= ceiling,
+                 f'{total} bytes used; reserve remaining {reservation} bytes under authorized 512 MiB cap; owned retained package bytes count once')
         self.gates = gates
         return gates
 

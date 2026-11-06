@@ -184,7 +184,7 @@ def journal_proof(pid, task, since, end):
                 interpretation='Normal stop paths print timings before release; CANCEL releases without timing. Raw logs not retained.')
 
 
-def attempt(root, private, instruction):
+def attempt(root, private, instruction, stop_event=None):
     linked = workflow(root, instruction)
     package = package_for(root)
     if package:
@@ -223,6 +223,8 @@ def attempt(root, private, instruction):
     if any(g['status'] != 'passed' for g in gates):
         save(root/'implementation-result.json', dict(grant_issued=False, inference_ran=False, gates=gates))
         return
+    if stop_event and stop_event.is_set():
+        return
     engine = store(root/'real-run')
     try:
         if state['deadline']-time.time() < 2400+300:
@@ -243,7 +245,7 @@ def attempt(root, private, instruction):
             receipt = {'id':request_id(grant['id'])}
         else:
             receipt = job.submit(engine, grant['id'], str(uuid4()))
-        job.process_one(engine, runtime)
+        job.process_one(engine, runtime, stop_event=stop_event)
         save(root/'implementation-result.json', job.review(engine, receipt['id']))
         if linked:
             save(root/'connected-delivery.json',dict(task=linked['task'],request_id=receipt['id'],
@@ -265,6 +267,14 @@ def controller_preflight(root, instruction):
     package = package_for(root)
     if package:
         package.require_time(3000)
+    from workbench import everyday
+    if everyday.enabled():
+        policy = everyday.configuration()
+        if (not package or not linked or linked['database'] != policy.database
+                or linked['database_identity'] != policy.database_identity):
+            raise ValueError('Everyday execution requires a linked, approved task package in its configured store.')
+        everyday.require_room(policy,
+                              package.remaining_evidence_reservation() + everyday.CLOSEOUT_RESERVE)
     prepared_runtime = Runtime(root/'real-run')
     if prepared_runtime.recipe and any(g['status']!='passed' for g in prepared_runtime.static_preflight()):
         save(root/'static-readiness-blocked.json',dict(grant_issued=False,inference_ran=False))
@@ -272,7 +282,9 @@ def controller_preflight(root, instruction):
     return store(root/'real-run'), package, linked
 
 
-def controller(root, instruction):
+def controller(root, instruction, stop_event=None):
+    if stop_event and stop_event.is_set():
+        return
     verified = controller_preflight(root, instruction)
     if verified is None:
         return
@@ -286,6 +298,8 @@ def controller(root, instruction):
             if package:
                 package.clamp_lease(lease)
             save(root/'lease-established.json', lease.metadata)
+            if stop_event and stop_event.is_set():
+                raise RuntimeError('Stopped before the owned cancellation probe')
             audit = audit_ready(lease.server_epoch[0])
             save(root/'new-epoch-audit-preflight.json', audit)
             if not audit['passed']:
@@ -314,7 +328,7 @@ def controller(root, instruction):
             result = dict(passed=False, input_tokens=counted, generated_tokens=None, generated_upper_bound=60,
                           purpose='capability_validation', implementation_attempts=0, epoch=lease.current_epoch())
             try:
-                client.request(body, lambda: True, started+30, probe=True)
+                client.request(body, lambda: not (stop_event and stop_event.is_set()), started+30, probe=True)
                 event = events[0]
                 log = journal_proof(lease.server_epoch[0], event['probe_decision']['witness']['task'],
                                     event['started_at'], started+30)
@@ -332,6 +346,8 @@ def controller(root, instruction):
                 with write_transaction(engine) as c:
                     c.execute(model_attempts.update().where(model_attempts.c.id == probe_id).values(
                         outcome='passed' if result['passed'] else 'failed', finished_at=now(), usage=result))
+            if stop_event and stop_event.is_set():
+                raise RuntimeError('Stopped before implementation')
             if not result['passed']:
                 raise RuntimeError('Single cancellation probe failed or inconclusive; implementation remains unspent')
             primary.atomic(private/'certification.json', json.dumps(dict(probe_sha256=sha((root/'probe-result.json').read_bytes()),
@@ -346,8 +362,27 @@ def controller(root, instruction):
                    str(ROOT/'.venv/bin/python'), str(Path(__file__).resolve()), 'attempt',
                    '--root', str(root), '--private', str(private), '--owner-instruction', str(instruction)])
             with (root/'implementation-controller.log').open('x') as log:
-                child = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, timeout=2500)
-            report['implementation_controller_exit'] = child.returncode
+                if stop_event is None:
+                    exit_code = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, timeout=2500).returncode
+                else:
+                    unit = 'workbench-real-chronicle-' + root.name + '.service'
+                    child = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT)
+                    notified = False
+                    end = time.monotonic() + 2500
+                    while child.poll() is None:
+                        if stop_event.is_set() and not notified:
+                            notified = subprocess.run(
+                                ['/usr/bin/systemctl', '--user', 'kill', '--kill-whom=main', '--signal=TERM', unit],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5,
+                            ).returncode == 0
+                        if time.monotonic() >= end:
+                            subprocess.run(['/usr/bin/systemctl', '--user', 'stop', unit],
+                                           check=True, timeout=25)
+                            child.wait(timeout=15)
+                            break
+                        time.sleep(.2)
+                    exit_code = child.returncode
+            report['implementation_controller_exit'] = exit_code
             if (root/'implementation-result.json').is_file():
                 outcome = json.loads((root/'implementation-result.json').read_text())
                 report['implementation_result'] = outcome
@@ -361,6 +396,9 @@ def controller(root, instruction):
             state = json.loads((private/'state.json').read_text())
             report['restoration'] = {k: state.get(k) for k in ['restored','restored_at','restored_epoch','original_config_verified',
                 'original_access_verified','temporary_access_rejected','established_at','deadline']}
+        elif stop_event is not None:
+            # The lease controller records its backup state before any change.
+            report['restoration'] = dict(restored=True, lease_not_established=True)
         save(root/'lease-controller-result.json', report)
     print(json.dumps(report, indent=2))
 
@@ -375,10 +413,20 @@ def main():
     root = args.root.resolve()
     if root.parent != ROOT/'artifacts/runs' or not root.name.startswith(('chronicle-lease-','task-lease-')) or root.is_symlink():
         p.error('Unique owned run root required')
+    from workbench import everyday
+
+    stop_event = None
+    if everyday.enabled():
+        import signal
+        from threading import Event
+
+        stop_event = Event()
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            signal.signal(sig, lambda *_: stop_event.set())
     if args.stage == 'controller':
-        controller(root, args.owner_instruction)
+        controller(root, args.owner_instruction, stop_event)
     else:
-        attempt(root, args.private, args.owner_instruction)
+        attempt(root, args.private, args.owner_instruction, stop_event)
 
 
 if __name__ == '__main__':

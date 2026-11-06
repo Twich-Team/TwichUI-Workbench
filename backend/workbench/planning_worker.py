@@ -157,6 +157,8 @@ def claim(engine):
     with write_transaction(engine) as connection:
         job = connection.execute(select(planning_jobs).where(planning_jobs.c.kind.in_(['planning', 'decomposition']), or_(planning_jobs.c.status == 'queued',
             and_(planning_jobs.c.status == 'running', planning_jobs.c.lease_until < now())))
+            .join(intakes, planning_jobs.c.intake_id == intakes.c.id)
+            .where(intakes.c.payload['regression_tests'].as_string().is_(None))
             .order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not job:
             return None
@@ -164,8 +166,6 @@ def claim(engine):
         approval = None
         try:
             row = intake.require(connection, intakes, job['intake_id'])
-            if row['payload'].get('regression_tests'):
-                raise HTTPException(409, 'Regression-test preparation cannot fall through to model planning. Review the saved preparation job.')
             if job['kind'] == 'decomposition':
                 approval = intake.require(connection, proposal_decisions, job['payload']['approval_id'])
             if job['payload'].get('scope_revision', 0) != intake.human_scope(connection, row['id'])['revision']:

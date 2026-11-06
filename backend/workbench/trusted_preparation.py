@@ -389,6 +389,8 @@ def process_one(engine, *, stop_event=None):
     Completed artifacts can reconcile after receipt loss. Uncertain interrupted
     work holds; neither a lease expiry nor an HTTP retry repeats preparation.
     """
+    from workbench import everyday
+
     recovering = False
     with write_transaction(engine) as c:
         row = c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'behavioral_preparation',
@@ -412,6 +414,17 @@ def process_one(engine, *, stop_event=None):
                 config = configuration(engine)
                 linked = task_execution.snapshot(c, **ref)
                 validate_reviewed_policy(engine, linked['proposal_review'].get('task_contract') or {})
+                if everyday.enabled():
+                    from workbench.db import intakes
+                    original = intake.require(c, intakes, ref['intake_id'])
+                    if original['payload'].get('local_planning') != 'qwen-once':
+                        raise ValueError('Only locally approved everyday requests can prepare checks.')
+                    try:
+                        everyday.require_room(everyday.configuration(engine))
+                    except everyday.CapacityHold as error:
+                        if job['message'] != str(error):
+                            c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(message=str(error)))
+                        return False
                 binding = linked['proposal_review']['binding']
                 root = Path(config['output_root']) / job['id']
                 if root.exists():
@@ -462,13 +475,21 @@ def _run_claim(engine, ref, claim, reconciling, *, recovery=None, stop_event=Non
             root.mkdir(mode=0o700)
             selected = prepare_regression(engine, ref, root, claim['identity'],
                                           validate_policy=validate_policy, recovery=recovery, stop_event=stop_event)
-        result = dict(status='prepared', message='Reviewed scenarios independently checked; a certified run offer is ready for its separate budget review.',
+        from workbench import everyday
+        cleaned = not everyday.enabled() or everyday.clean_workspace(root)
+        message = 'Reviewed scenarios independently checked; a certified run offer is ready for its separate budget review.'
+        if not cleaned:
+            message += ' An owned scratch copy needs attention.'
+        result = dict(status='prepared', message=message,
             offer_id=selected['id'], review_binding=claim['review_binding'], execution_authorized=False)
     except SubprocessError:
         result = dict(status='hold', message='A bounded preparation subprocess did not complete successfully. Inspect the retained preparation evidence; no checks will replay automatically.',
             review_binding=claim['review_binding'], execution_authorized=False)
     except (ValueError, OSError, HTTPException) as error:
         result = {**_hold(error), 'review_binding': claim['review_binding']}
+    if reason := getattr(stop_event, 'reason', None):
+        if result['status'] != 'prepared':
+            result['message'] = reason + ' Preparation stopped and its diagnostics were kept.'
     return result
 
 

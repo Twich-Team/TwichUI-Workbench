@@ -24,6 +24,10 @@ ROOT = Path(__file__).resolve().parents[2]
 def delegated_command(options, command):
     """Pass only the owned execution inputs into a fresh user service."""
     inputs = ("WORKBENCH_RESEARCH_ROOT", "WORKBENCH_PREPARATION_CONFIG", "TMPDIR")
+    from workbench import everyday
+    if everyday.enabled():
+        inputs += ("WORKBENCH_PLANNER", "WORKBENCH_EVERYDAY_CONFIG")
+        options = [*options, '--property=IPAddressDeny=any', '--property=IPAddressAllow=localhost']
     return [
         "/usr/bin/systemd-run", "--expand-environment=no", *options,
         "/usr/bin/env", "-i", "PATH=/usr/bin:/bin", "LANG=C.UTF-8", f"HOME={Path.home()}",
@@ -497,7 +501,8 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
                             import signal
 
                             signal.pidfd_send_signal(descriptor, signal.SIGTERM)
-                            child.wait(timeout=15)
+                            from workbench import everyday
+                            child.wait(timeout=225 if everyday.enabled() else 15)
                             break
                         time.sleep(0.1)
                 finally:
@@ -507,6 +512,10 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
     report_file = root / ("authored-controller-result.json" if config.get("authoring_mode")=="explicit-current-session" else "lease-controller-result.json")
     if not report_file.is_file():
         return False  # Never relaunch a claimed session.
+    from workbench import everyday
+    reconciled = root / 'lease-restoration-reconciled.json'
+    if everyday.enabled() and reconciled.is_file():
+        report_file = reconciled
     report = json.loads(report_file.read_text())
     if not report.get("restoration", {}).get("restored"):
         return False  # Restoration uncertainty always wins over result delivery.
@@ -542,9 +551,10 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
             )
         return False  # Existing sealed-outcome recovery still owns pending delivery.
     if config.get("allow_publication") is not True:
-        return finish(
-            engine, config, "verified", "Verified candidate retained; publication not activated."
-        )
+        message = "Verified candidate retained; publication not activated."
+        if everyday.enabled() and not everyday.clean_workspace(real):
+            message += " An owned scratch copy needs attention."
+        return finish(engine, config, "verified", message)
     with engine.connect() as c:
         publication = (
             c.execute(
