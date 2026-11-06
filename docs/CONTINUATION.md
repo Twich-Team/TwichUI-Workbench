@@ -169,6 +169,77 @@ the port was free at closeout. An unknown listener holds activation.
    bounded by the deadline. Publication remains held. Any later draft PR
    requires separate explicit permission.
 
+## Authorization details reverified before approval
+
+This is the same unspent real-addon package above. The staged manifest and
+all 302 entries matched, the bound store was empty and inactive, both local
+addon checkouts matched the pinned revision, and the installed model and
+sampler proof matched using local reads. Port 9187 was free. The last owned
+synthetic review, `workbench-browser-real-review-real.NYebPZ.service`, was
+absent and all 67 entries in its retained evidence and store manifest matched.
+If an owned obsolete preview is present at execution time, match the exact
+listener, unit, PID, command and immutable store to its saved receipt, confirm
+its write API and worker are stopped, and reverify the retained evidence before
+gracefully stopping only that preview. Hold for any unknown owner. Check
+browser reachability with Rich on a temporary owned read-only access page
+before launching the frozen supervisor, which proceeds directly to configure
+and submit. Stop the access page and recheck the port before launch.
+
+Use only archive `real-addon-browser-preflight-20261105` at
+`/home/rich/.local/share/TwichUI-Workbench/evidence-archives/real-addon-browser-preflight-20261105`.
+In the order listed above, the exact inventories are 22 files / 8,068,073
+bytes, 22 / 8,073,101, 22 / 8,073,101, and 4 / 3,087,206. The new count
+showed 53,778,534 bytes of headroom and 81,080,015 projected after pruning
+before the index and new receipts. Count logical regular-file bytes excluding
+symlinks under `artifacts`, `test-results`, `playwright-report` and
+`.local/runs` in the repository, live stage and each other counted manifest
+root. The external archive data and its external manifest are outside those
+roots and still occupy physical storage. The workspace index and any other
+receipts under counted roots count. Copy first, verify the archive and
+original-path lookup, verify a separate isolated restore including metadata,
+then prune only originals still matching the archive. Verify again and
+remeasure counted and physical capacity after receipts and backups. Keep the
+72 MiB reserve at each required gate.
+
+After explicit approval and port clearance, record actual start T in
+`window.json` before archival or setup. Waiting for this approval uses none
+of the window. Both browser review gates close at T+33 minutes, with the scope
+decision early enough to certify before that shared cutoff. Announce the actual
+Mountain-time cutoff at activation. The browser's 90 minutes starts at the
+server-recorded timestamp B of the local implementation approval, including
+waiting after that approval. Use the earlier of T+105 and B+90. Apply the
+50-minute lease, 45-minute attempt and five-minute restoration reserves,
+including the frozen supervisor's outer-clock early guards of 50:10 and 45:03.
+The fixed 40-minute checked-run clock is recorded after fresh preparation
+before the controller. The 20-minute implementation limit fits inside it.
+Keep the staged build, verifier, check definitions, supervisor and bound inputs
+frozen. On a repair requirement, stop safely, retain the outcome and obtain
+any new authorization required before changing the build or trying again.
+
+Additional frozen limits include 1,024 file descriptors per confined command,
+120 seconds per ordinary check and 600 per full suite, 250 lines per source
+read, 2 KiB source-read arguments, 128 KiB other tool arguments, 8 KiB tool
+replies and replacement strings, and a 16 KiB browser write body. The 45,000
+source-character cap charges repeated reads. Non-generating model access is
+only through the existing loopback controller. Planning uses one model
+identity GET at 3 seconds / 8 KiB. Allow up to 21 explicit input counts
+including the probe, with a 2-second / 128 KiB probe count and 3 seconds /
+4 KiB per implementation count. Lease metadata uses 2 seconds / 128 KiB per
+call, a 120-second drain with six idle samples, a 150-second authentication
+and readiness window, 111 rejection checks across 37 fixed POST routes and
+three credential cases, and a separate 150-second restoration readiness
+window with two final rejection checks. Attempt identity checks use the fixed
+3-second / 64 KiB-class preflight reads. Slot observations poll on the existing
+40 ms loop at 1 second / 64 KiB per call. The owned cancellation path allows
+one DELETE per affected stream and requires two stable cessation observations
+within five seconds, at 2 seconds / 64 KiB per call. Readiness and slot polls
+are bounded by these clocks and fences. No separate aggregate call-count cap
+is implemented for these polls. The probe's 30 seconds covers up to 23 seconds
+for the witness, five for cancellation and two for the final audit. Journal
+inspection uses two-second calls with a 128-entry readiness read and up to
+512 entries with a 1 MiB audit output gate. No provider fallback, additional
+generation or discretionary service calls are included.
+
 # Fresh browser task completed with real Qwen — November 5, 2026 Mountain time
 
 **Cover lowercase name normalization** went from one fresh browser request
