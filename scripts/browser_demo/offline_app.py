@@ -40,7 +40,7 @@ def run_worker():
 
     install_offline_guard()
     mode = os.environ["WB_REHEARSAL_OUTCOME"]
-    native = mode == "addon"
+    native = staged or mode == "addon"
     # Only the supported rehearsal runs the native Lua suite, in its own
     # delegated worker group. Transport is scripted in either mode.
     if native and not staged:

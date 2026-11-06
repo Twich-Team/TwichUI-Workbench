@@ -170,7 +170,7 @@ def run(manifest_path, evidence, fingerprint, *, rehearsal=False):
                 "addon" if task["scenario"]["fixture"] == "loaded-client" else "pass"),
                 WB_STAGED_REHEARSAL="1")
             worker_env["PYTHONPATH"] += f":{stage / 'backend/tests'}"
-        unit = "workbench-browser-demo-" + evidence.name
+        unit = ("workbench-real-rehearsal-" if rehearsal else "workbench-browser-demo-") + evidence.name
         command = [
             "/usr/bin/systemd-run", "--expand-environment=no", "--user", "--wait", "--pipe",
             "--collect", "--unit=" + unit, "--property=Delegate=yes", "--property=MemoryMax=6G",
