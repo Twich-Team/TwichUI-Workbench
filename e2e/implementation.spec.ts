@@ -146,9 +146,11 @@ test('historical successful sample and check remain distinct from current approv
   fixture('worker');
   await expect(box.getByRole('heading',{name:'Sample check passed',exact:true})).toBeVisible();
   const before = (await (await page.request.get(path)).json()).receipts[0].candidate;
-  await page.getByText('Review or change your scope',{exact:true}).click();
-  await page.getByLabel('Reason for this scope revision').fill('A new human scope revision must not inherit historical candidate authority.');
-  await page.getByRole('button',{name:'Save scope revision',exact:true}).click();
+  await page.getByText('Read the plan',{exact:true}).click();
+  await page.getByText('Change what this plan may cover',{exact:true}).click();
+  await page.getByLabel('Why are you changing the scope?').fill('A new human scope revision must not inherit historical candidate authority.');
+  await page.getByRole('button',{name:'Save and review the updated plan',exact:true}).click();
+  await page.getByText('Original request, planning history and evidence',{exact:true}).click();
   await expect(box.getByRole('heading',{name:'Earlier sample prepared',exact:true})).toBeVisible();
   await expect(box.getByRole('heading',{name:'Earlier sample check passed',exact:true})).toBeVisible();
   await expect(box.getByText('A current approval check is needed',{exact:true})).toBeVisible();

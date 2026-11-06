@@ -30,11 +30,11 @@ async function ready(file, timeout=25000) {
       await ready('owner-step-scope.json');
       const step = JSON.parse(fs.readFileSync(join(evidence,'owner-step-scope.json')));
       await page.goto(step.url);
-      await page.getByText('Expected result 1:',{exact:false}).click();
+      await page.getByText('Expected result 1',{exact:true}).waitFor();
       await page.screenshot({path:join(evidence,'proposal-1440.png')});
-      await page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.').check();
+      await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').check();
       const scopeSaved = page.waitForResponse(r=>r.url().endsWith('/decisions')&&r.request().method()==='POST');
-      await page.getByRole('button',{name:'Approve proposal',exact:true}).click();
+      await page.getByRole('button',{name:'Approve plan',exact:true}).click();
       assert.equal((await scopeSaved).status(),200);
       await ready('owner-step-budget.json', task.scenario.fixture === 'loaded-client' ? 30*60*1000 : 25000);
       await page.reload();
@@ -55,29 +55,29 @@ async function ready(file, timeout=25000) {
         assert.equal(view.original.description,task.intake.description);
         if (mode==='checked') {
           await page.getByRole('link',{name:'Review changes and checks'}).click();
-          await page.getByRole('heading',{name:'Real candidate checked'}).waitFor();
-          assert.equal(await page.getByText(/Check [1-4]: pass · exit 0/).count(),4);
+          await page.getByRole('heading',{name:'Test changes checked'}).waitFor();
+          assert.equal(await page.locator('.check-summary').getByText('Passed',{exact:true}).count(),4);
         } else if (mode==='failure') {
           await page.getByText(expected,{exact:true}).waitFor();
           await page.getByText('Your original request and any example are saved.',{exact:false}).waitFor();
           assert.equal(await page.getByText('Waiting for information',{exact:true}).count(),0);
           assert.equal(await page.getByRole('button',{name:'Send information'}).count(),0);
-          assert.equal(await page.getByRole('button',{name:'Approve proposal',exact:true}).count(),0);
+          assert.equal(await page.getByRole('button',{name:'Approve plan',exact:true}).count(),0);
           if (task.scenario.fixture === 'loaded-client') {
             await page.getByText(view.jobs[0].message,{exact:true}).waitFor();
             assert.match(view.jobs[0].message,/verified addon operation|one core addon source/);
             assert.equal(await page.getByRole('button',{name:'Retry planning'}).count(),0);
             assert.equal(await page.getByText('Example 1:',{exact:false}).isVisible(),true);
           } else {
-            assert.equal(await page.getByText('" ALICE "',{exact:true}).isVisible(),true);
+            await page.getByText('Original request, planning history and evidence',{exact:true}).click();
+            assert.equal(await page.getByRole('heading',{name:'Submitted text example'}).isVisible(),true);
           }
         } else {
-          await page.getByText('Ready to review',{exact:true}).waitFor();
+          await page.getByText('Ready for your review',{exact:true}).waitFor();
           if (mode === 'proposal') {
-            const expected = page.getByText('Expected result 1:',{exact:false});
-            await expected.click();
+            await page.getByText('Expected result 1',{exact:true}).waitFor();
             assert.equal(await page.getByText('TwichUI.MapViewMath.Fade',{exact:false}).first().isVisible(),true);
-            assert.equal(await page.getByRole('button',{name:'Approve proposal',exact:true}).isVisible(),true);
+            assert.equal(await page.getByRole('button',{name:'Approve plan',exact:true}).isVisible(),true);
             assert.equal(await page.getByRole('button',{name:'Approve local implementation',exact:true}).count(),0);
           }
         }

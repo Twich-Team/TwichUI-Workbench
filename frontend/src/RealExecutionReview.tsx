@@ -2,6 +2,9 @@ import {useQuery} from '@tanstack/react-query';
 import {Link,useParams} from 'react-router-dom';
 import {request} from './api';
 import {PublicationStatus} from './PublicationStatus';
+import {Button} from './components/ui/button';
+import {StateBadge} from './Catalog';
+import {runStage} from './taskProgress';
 import {DiffFile} from './CandidateReview';
 import type {components} from './api.generated';
 
@@ -16,48 +19,69 @@ type View={id:string;title:string;status:string;message:string;base:string;curre
     check_failure?:{name:string;diagnostic:string;context_hint?:{path:string;start:number;end:number}|null};
     files?:components['schemas']['FileComparison'][];
     gates?:{name:string;status:string;evidence:string}[];
-    checks?:{status:string;rc:number|null;out:string}[];error?:string}};
+    checks?:{status:string;rc:number|null;out:string;command?:string[]}[];error?:string}};
+
+function checkName(command: string[] | undefined, i: number) {
+  const [tool,...args] = command || [];
+  const target = args.at(-1);
+  if (tool?.startsWith('luac') && args.includes('-p')) return 'Lua syntax';
+  if (tool?.startsWith('lua') && target?.endsWith('/oracle.lua')) return 'Independent behavior check';
+  if (tool?.startsWith('lua') && /(?:^|\/)test_[^/]+\.lua$/.test(target || '')) return 'Focused regression test';
+  if (tool === 'bash' && target === 'tests/run.sh') return 'Existing test suite';
+  return `Check ${i+1}`;
+}
 
 export function RealExecutionReview(){
-  const {identity}=useParams();
+  const {identity=''}=useParams();
   const query=useQuery({queryKey:['real-execution',identity],
-    queryFn:()=>request<View>('/api/real-executions/'+encodeURIComponent(identity!)),refetchInterval:3000});
-  if(query.isPending)return <section className="panel" aria-busy="true">Loading real task evidence…</section>;
-  if(!query.data)return <section className="panel" role="alert">Real task evidence could not be loaded. Refresh to try again.</section>;
+    queryFn:()=>request<View>('/api/real-executions/'+encodeURIComponent(identity)),refetchInterval:3000});
+  if(query.isPending)return <section className="panel" aria-busy="true">Opening the run result…</section>;
+  if(!query.data)return <section className="panel" role="alert">The result could not be loaded. <Button variant="secondary" onClick={()=>void query.refetch()}>Try again</Button></section>;
   const row=query.data,result=row.result;
-  const stages:Record<string,string>={pending:'Waiting',cancel_requested:'Stopping · Waiting for cleanup',cancelled:'Stopped · History retained',running:'Implementing in isolation',checking:'Checking real changes',
-    checked:'Real candidate checked',failed:'Real attempt needs attention',blocked:'Needs attention · Permission or setup',interrupted:'Interrupted attempt retained'};
-  return <section className="panel candidate-review real-execution-review" aria-label="Real task and candidate review">
-    <Link to="/executions">All recorded runs</Link>
-    {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded evidence.</p>}
-    <h1>{row.title}</h1>
-    {row.workflow_task&&<p><Link to={'/intake/'+encodeURIComponent(row.workflow_task.intake_id)}>Back to the submitted task</Link></p>}
-    {row.current_task===false&&<p className="soft-callout">Earlier task inputs. This result remains in history; current task approval or scope has changed.</p>}
-    <h2>{row.recovery_pending?'Waiting for safe recovery':stages[row.status]||row.status}</h2><p>{row.status==='checked'&&row.publication_requested?'Changes completed and independently checked. PR delivery is recorded below; acceptance and merge remain separate.':row.message}</p>
-    {row.recovery_pending&&<p className="soft-callout">Saved evidence is retained. Implementation will not run again; other execution stays on hold until cleanup is confirmed.</p>}
-    <p className="soft-callout">{row.publication_requested?'Real task · Offline checks · Draft delivery follows this task’s explicit budget. No automatic merge or fallback.':'Real task · Offline checks only · Publication and fallback disabled.'}</p>
-    {!row.current_grant&&<p>Historical record. The execution grant is no longer current.</p>}
-    {result?.authorship?.kind==='explicit-current-session'&&<p>Completed by Codex in the explicitly authorized session, retaining the earlier failed patch’s contribution. This is not a Qwen success or an automatic fallback.</p>}
-    {result?.usage&&<p className="small-text">{result.usage.status==='complete'?`Recorded generated tokens: ${result.usage.values?.completion_tokens??'unavailable'}.`:'Token usage is unavailable or incomplete; it is not recorded as zero.'}</p>}
-    {result?.inference_ran===false&&!result.authorship&&<p>{['running','checking'].includes(row.status)&&!result.handler_returned?'Model activity has not yet been reported. The run is still in progress.':'No model implementation ran.'}</p>}
-    {result?.inference_ran===null&&<p>Inference completion is uncertain. The attempt remains consumed.</p>}
-    {result?.error&&<p role="alert">{result.error}</p>}
-    {result?.check_failure&&<section aria-label="Last failed check">
-      <h3>Last failed check</h3>
-      <p>{result.check_failure.name}{result.check_failure.context_hint&&
-        <> · {result.check_failure.context_hint.path}</>}</p>
-      <pre className="candidate-diff check-diagnostic" tabIndex={0}>{result.check_failure.diagnostic}</pre>
-    </section>}
-    {result?.gates&&<ul>{result.gates.map(g=><li key={g.name}>{g.name}: {g.status} — {g.evidence}</li>)}</ul>}
-    <h3>Review real changes</h3>
-    {result?.files?.length?result.files.map(file=><DiffFile key={file.path} file={file}/>):<p>No frozen real candidate is available.</p>}
-    <h3>Independent verification</h3>
-    <p>{result?.verification||'Not performed'}. No simulator or physical-client verification.</p>
-    {result?.checks?.map((c,i)=><details key={i}><summary>Check {i+1}: {c.status} · exit {c.rc??'unknown'}</summary><pre className="candidate-diff" tabIndex={0}>{c.out}</pre></details>)}
-    <PublicationStatus identity={row.id}/>
-    <details><summary>Task, grant and candidate provenance</summary>
-      <p>Exact base: {row.base}</p><p>Grant: {row.grant_id} · expires {row.expires_at}</p>
-      <p>Candidate: {result?.candidate_id||'Unavailable'}</p><p>Submitted task: {row.workflow_task?.task_id||'Standalone authorized task'}</p><p>Task snapshot: {row.workflow_task?.binding||'Standalone grant'}</p><p>{row.publication_requested?'PR delivery is recorded separately above. Checks grant no acceptance, merge or deployment permission.':'No PR was created. Checks grant no acceptance or publication permission.'}</p>
-    </details>
-  </section>;
+  const checked=row.status==='checked'&&result?.verification==='passed';
+  const active=['pending','running','checking','cancel_requested'].includes(row.status);
+  const testOnly=Boolean(result?.files?.length&&result.files.every(file=>file.path.startsWith('tests/')&&(!file.old_path||file.old_path.startsWith('tests/'))));
+  const workflow=row.workflow_task;
+  return <div className="intake-page result-page">
+    <Link className="back-link" to={workflow?'/intake/'+encodeURIComponent(workflow.intake_id):'/executions'}>{workflow?'Back to the task':'All run results'}</Link>
+    <div className="page-heading"><div><img className="heading-art" src="/art/workshop/history.png" alt=""/><p className="eyebrow">RUN RESULT</p><h1>{row.title}</h1></div></div>
+    <section className="panel candidate-review real-execution-review" aria-label="Run result and checks">
+      {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded result.</p>}
+      {row.current_task===false&&<p className="soft-callout">This result belongs to an earlier plan. The current task still needs its own review and checks.</p>}
+      <h2>{row.recovery_pending?'Waiting for safe recovery':checked?(testOnly?'Test changes checked':'Changes checked'):row.status==='checked'?'Run result saved':runStage[row.status]||'Recorded result'}</h2>
+      {checked?<><p>{testOnly?'Workbench changed only test files.':'Workbench completed and checked the changes in a separate copy.'} Review the checks and changes below.</p>
+        <p>{row.publication_requested?'This run included permission to attempt draft delivery. See its recorded status below.':'This result is saved locally. This run did not authorize publication.'}</p></>
+        :<p>{row.message}</p>}
+      {row.recovery_pending?<p>Workbench is waiting to confirm cleanup. It will keep the evidence and will not run the work again.</p>
+        :!checked&&!active&&<p>Review the saved reason and any check results below. Another attempt needs fresh permission.</p>}
+      {result?.inference_ran===false && !active && !result.authorship && <p>No model implementation ran.</p>}
+      {result?.inference_ran===null&&<p>Workbench could not confirm how the model call ended. This attempt has been used.</p>}
+      {result?.authorship?.kind==='explicit-current-session'&&<p>Codex finished the work in a separately approved session using contributions from the earlier attempt.</p>}
+      {result?.check_failure&&<section aria-label="Last failed check"><h3>Last failed check</h3>
+        <p>{result.check_failure.name}{result.check_failure.context_hint&&<> · {result.check_failure.context_hint.path}</>}</p>
+        <details><summary>See the failure output</summary><pre className="candidate-diff check-diagnostic" tabIndex={0}>{result.check_failure.diagnostic}</pre></details>
+      </section>}
+      <h3>What was checked</h3>
+      {result?.checks?.length?<ul className="check-summary">{result.checks.map((c,i)=><li key={i}>
+        <strong>{checkName(c.command,i)}</strong><StateBadge value={c.status==='pass'&&c.rc===0?'Passed':c.status==='fail'||(c.rc!==null&&c.rc!==0)?'Failed':'Outcome unavailable'}/>
+      </li>)}</ul>:<p>{active?'Checks are still pending or have yet to report.':'No completed checks are recorded for this run.'}</p>}
+      <p className="soft-callout">These are offline checks. Simulator and in-game behavior were not verified by this run.</p>
+      <h3>What changed</h3>
+      {result?.files?.length ? <><ul>{result.files.map(file=><li key={file.path}>{file.path}</li>)}</ul>
+        <details><summary>See the changes in code</summary>{result.files.map(file=><DiffFile key={file.path} file={file}/>)}</details></>
+        :<p>No changes were saved for review.</p>}
+      <PublicationStatus identity={row.id}/>
+      <details><summary>Technical results and run details</summary>
+        <p>Exact base {row.base}</p><p>Grant {row.grant_id} · expires {row.expires_at} · {row.current_grant?'Current':'Historical'}</p>
+        <p>Candidate {result?.candidate_id||'Unavailable'}</p><p>Task {workflow?.task_id||'Standalone authorized task'}</p><p>Task snapshot {workflow?.binding||'Standalone grant'}</p>
+        <p>Recorded verification {result?.verification||'Unavailable'}</p><p>{row.message}</p>
+        {result?.usage&&<details><summary>Model usage record</summary><pre>{JSON.stringify(result.usage,null,2)}</pre></details>}
+        {result?.inference_ran===false&&<p>Model execution was not reported for this result.</p>}
+        {result?.error&&<p>{result.error}</p>}
+        {result?.gates&&<ul>{result.gates.map(g=><li key={g.name}>{g.name} · {g.status} — {g.evidence}</li>)}</ul>}
+        {result?.checks?.map((c,i)=><details key={i}><summary>Check {i+1} · {c.status} · exit {c.rc??'unknown'}</summary>
+          {c.command&&<p><code>{c.command.join(' ')}</code></p>}<pre className="candidate-diff" tabIndex={0}>{c.out}</pre></details>)}
+      </details>
+    </section>
+  </div>;
 }

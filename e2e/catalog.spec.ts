@@ -172,7 +172,7 @@ test('selectable demos exercise real pagination, hierarchy, search and mode sepa
 
 
 test('decision summary opens the relevant real review', async ({page}) => {
-  await page.goto('/');
+  await page.goto('/?source=fixture');
   await page.getByRole('link',{name:'Open decision queue'}).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('radio')).toHaveCount(6);

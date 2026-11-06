@@ -5,7 +5,7 @@ import { appendFileSync, mkdirSync } from 'node:fs';
 
 export const fixture = (action: string) => execFileSync('.venv/bin/python', ['scripts/fixture_ctl.py', action], { env: { ...process.env, PYTHONPATH: 'backend' }, encoding: 'utf8' }).trim();
 export async function openReview(page: Page) {
-  await page.goto('/');
+  await page.goto('/?source=fixture');
   await page.getByRole('link', { name: /Keep your place in a guide/ }).click();
   await page.getByRole('link', { name: 'Open review', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();

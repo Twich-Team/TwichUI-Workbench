@@ -19,10 +19,10 @@ async function ready(page:Page) {
   mkdirSync(artifactPath('m5-plain-language/screenshots'),{recursive:true});
   await page.screenshot({path:artifactPath(`m5-plain-language/screenshots/plan-${page.viewportSize()!.width}.png`),fullPage:true});
   await approve.click();
-  await expect(page.locator('.outcome').getByText('Approval saved · Waiting to confirm',{exact:true})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Latest plan decision'}).getByText('Saved · Pending application',{exact:true})).toBeVisible();
   await expect(page.getByText('Plan approved',{exact:true})).toHaveCount(0);
   fixture('apply-planning');
-  await expect(page.getByText('Plan approved',{exact:true})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Latest plan decision'}).getByText('Plan approved',{exact:true})).toBeVisible();
   fixture('planning');
   const box = page.getByRole('region',{name:'Approval check'});
   await expect(box.getByText('This task has a current approved plan',{exact:true})).toBeVisible();
@@ -112,9 +112,11 @@ test('an admitted historical receipt does not represent current authority after 
   fixture('worker');
   await expect(box.getByRole('heading',{name:'Approval check passed'})).toBeVisible();
   const before = (await (await page.request.get(path)).json()).receipts[0];
-  await page.getByText('Review or change your scope',{exact:true}).click();
-  await page.getByLabel('Reason for this scope revision').fill('A new explicit human scope revision needs a new approval.');
-  await page.getByRole('button',{name:'Save scope revision',exact:true}).click();
+  await page.getByText('Read the plan',{exact:true}).click();
+  await page.getByText('Change what this plan may cover',{exact:true}).click();
+  await page.getByLabel('Why are you changing the scope?').fill('A new explicit human scope revision needs a new approval.');
+  await page.getByRole('button',{name:'Save and review the updated plan',exact:true}).click();
+  await page.getByText('Original request, planning history and evidence',{exact:true}).click();
   await expect(box.getByText('This task needs attention',{exact:true})).toBeVisible();
   await expect(box.getByRole('heading',{name:'Previous check passed'})).toBeVisible();
   await expect(box.getByText('This earlier check passed, but it does not confirm approval of the task as it is now.',{exact:true})).toBeVisible();
@@ -141,5 +143,6 @@ test('plain wording preserves an unfamiliar revised plan sentence',async({page})
     await route.fulfill({response,json:data});
   });
   await page.reload();
+  await page.getByText('Read the plan',{exact:true}).click();
   await expect(page.getByText('A revised plan sentence must remain visible exactly.',{exact:true})).toBeVisible();
 });

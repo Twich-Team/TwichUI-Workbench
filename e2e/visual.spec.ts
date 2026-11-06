@@ -5,7 +5,7 @@ test.beforeEach(() => fixture('reset'));
 for (const width of [1440, 1024, 768, 390, 320]) {
   test(`work, detail and long review fit ${width}px`, async ({ page }, info) => {
     await page.setViewportSize({ width, height: width < 500 ? 844 : 1000 });
-    await page.goto('/');
+    await page.goto('/?source=fixture');
     await expect(page.getByRole('link', { name: /Keep your place in a guide/ })).toBeVisible();
     await overflow(page);
     if ([1440, 390].includes(width)) { await capture(page, info, `work-${width}`); await expect(page).toHaveScreenshot(`work-${width}.png`, { fullPage: true }); }
@@ -30,7 +30,7 @@ test('loading, failed and empty states', async ({ page }, info) => {
   let release: () => void = () => {};
   const hold = new Promise<void>(resolve => { release = resolve; });
   await page.route('**/api/tasks', async route => { await hold; await route.continue(); });
-  await page.goto('/');
+  await page.goto('/?source=fixture');
   await expect(page.getByText('Opening your work…')).toBeVisible();
   await capture(page, info, 'loading');
   release();
@@ -67,7 +67,7 @@ test('pending application stays explicit on a phone', async ({ page }, info) => 
 test('missing descriptive metadata has honest fallbacks', async ({ page }, info) => {
   fixture('missing');
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('/?source=fixture');
   await expect(page.getByText('Area not recorded')).toBeVisible();
   await expect(page.getByText('No summary was recorded for this task.')).toBeVisible();
   await overflow(page);

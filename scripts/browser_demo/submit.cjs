@@ -47,8 +47,9 @@ const [step, output, origin] = process.argv.slice(2);
       await page.goto(origin+'/intake/new?kind='+intake.kind);
       await page.getByLabel('Title Required').fill(intake.title);
       await page.getByLabel('Description Required').fill(intake.description);
-      await page.getByLabel('Prepare a Lua regression-test task').check();
+      await page.getByLabel('Add a check for existing behavior').check();
       await page.getByLabel('Expected test results').fill(regression.acceptance.join('\n'));
+      await page.getByText('Optional test details',{exact:true}).click();
       await page.getByLabel('Existing test paths').fill(regression.test_paths.join('\n'));
       if (regression.text_example) {
         await page.getByLabel('Add a text example for the first expected result').check();

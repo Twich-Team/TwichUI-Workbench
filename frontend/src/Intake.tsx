@@ -9,22 +9,16 @@ import { StateBadge, formatTime } from './Catalog';
 import { Admission } from './Admission';
 import { Implementation } from './Implementation';
 import { TaskExecution } from './TaskExecution';
+import { TaskJourney, TaskOverview } from './TaskOverview';
+import { TaskExample } from './TaskExample';
+import { minutes } from './taskProgress';
+import { RunLimits } from './RunLimits';
 
 type Intake = components['schemas']['IntakeView'];
 type Page = components['schemas']['IntakePage'];
 type Proposal = components['schemas']['ProposalView'];
 type Decision = components['schemas']['ProposalDecisionInput'];
 type Artifact = components['schemas']['ArtifactInput'];
-const labels: Record<string,string> = {queued:'Queued',investigating:'Investigating',completed:'Ready to review',waiting_for_information:'Waiting for information',failed:'Planning failed',approved:'Approved · Preparing tasks',tasks_ready:'Tasks ready · See task progress',decomposition_failed:'Approved · Task planning failed',declined:'Declined',scope_review_required:'Scope review required · Execution held'};
-function intakeLabel(item: Intake) {
-  if (item.decisions.some(d=>d.status==='pending')) return 'Decision saved · Waiting to apply';
-  if (item.original.kind==='issue' && item.status==='completed') return 'Triage completed';
-  const planning = item.jobs.filter(job=>job.kind==='planning').at(-1);
-  if (item.status==='failed' && ['canceled','interrupted_unknown'].includes(String(planning?.diagnostics.category))) {
-    return 'Planning interrupted';
-  }
-  return labels[item.status] || item.status;
-}
 const scopeLabels: Record<string,string> = {visual:'Changes the in-game interface',nonvisual:'Does not change the interface',unclassified:'Not sure'};
 function ScopeOptions() { return <><option value="unclassified">Not sure</option><option value="visual">Changes the in-game interface</option><option value="nonvisual">Does not change the interface</option></>; }
 // Translate known sample sentences only; revised plan content stays visible verbatim.
@@ -41,31 +35,27 @@ const artifactRole = (role:string) => ({mockup:'Proposed mockup',game_context:'I
 const readStored = <T,>(key: string): T | null => { try { return JSON.parse(localStorage.getItem(key) || 'null') as T | null; } catch { return null; } };
 
 export function IntakeActions() {
-  return <div className="intake-actions"><Button asChild variant="secondary"><Link to="/intake/new?kind=issue">Report an issue</Link></Button><Button asChild variant="secondary"><Link to="/intake/new?kind=feature">Request a feature</Link></Button><Link className="back-link" to="/intake">Intake &amp; planning <ArrowRight size={15}/></Link></div>;
+  return <div className="intake-actions"><Button asChild><Link to="/intake/new">Create a task <ArrowRight size={16}/></Link></Button><Link className="back-link" to="/intake">Submitted tasks</Link><Link className="back-link" to="/executions">Run results</Link></div>;
 }
 
 export function IntakeList() {
   const [params,setParams] = useSearchParams();
-  const page = Math.max(1, Number(params.get('page')) || 1);
-  const query = useQuery({queryKey:['intake',page], queryFn:()=>request<Page>(`/api/intake?page=${page}`), refetchInterval:2000});
-  return <div className="intake-page"><Link className="back-link" to="/"><ArrowLeft size={15}/>Work</Link><div className="page-heading"><div><h1>Intake &amp; planning</h1><p>Keep the original request, review the proposal, then organize agreed work.</p></div></div><IntakeActions/>
-    {query.isPending ? <p role="status">Opening saved requests…</p> : query.isError ? <div role="alert" className="form-error">Requests couldn’t be loaded. <Button onClick={()=>void query.refetch()}>Try again</Button></div> : <><p className="soft-callout">{query.data.planner === 'demo' ? 'Demo planner · New jobs use simulated responses. Saved proposals retain their own source.' : query.data.planner === 'local' ? 'Local planner configured · Results identify the actual model and inspected evidence.' : 'Observed planning unavailable · Requests are still saved. No paid fallback.'}</p>{query.data.items.length ? query.data.items.map(item=><Link className="panel intake-card" key={item.id} to={`/intake/${item.id}`}><div><span className="eyebrow">{item.original.kind === 'issue' ? 'Issue report' : 'Feature request'}</span><h2>{item.original.title}</h2><p>{formatTime(item.created_at)}{item.proposals[0] && <> · {item.proposals[0].basis==='demo'?'Synthetic demo response':item.proposals[0].basis==='preparation'?'Prepared regression-test scope':item.proposals[0].basis==='template'?'Fixed supported-task plan · No planning model':'Observed local response · Unverified findings'}</>}</p></div><StateBadge value={intakeLabel(item)}/><ArrowRight size={18}/></Link>) : <section className="panel empty-panel"><h2>No requests yet.</h2><p>Report an issue or describe an improvement to get started.</p></section>}
-    {query.data.total > 12 && <div className="pagination"><Button disabled={page===1} onClick={()=>setParams({page:String(page-1)})}>Previous</Button><span>Page {page}</span><Button disabled={page*12>=query.data.total} onClick={()=>setParams({page:String(page+1)})}>Next</Button></div>}</>}
+  const page = Math.min(1000, Math.max(1, Math.floor(Number(params.get('page'))) || 1));
+  const query = useQuery({queryKey:['intake',page], queryFn:()=>request<Page>(`/api/intake?page=${page}`), refetchInterval:5000});
+  return <div className="intake-page"><Link className="back-link" to="/"><ArrowLeft size={15}/>Work</Link>
+    <div className="page-heading"><div><img className="heading-art" src="/art/workshop/backlog.png" alt=""/><h1>Submitted tasks</h1><p>See what needs a decision, what’s underway and what finished.</p></div></div>
+    <div className="intake-actions"><Button asChild><Link to="/intake/new">Create a task</Link></Button><Link className="back-link" to="/executions">Run results <ArrowRight size={15}/></Link></div>
+    <TaskOverview page={page}/>
+    {query.data && query.data.total > 12 && <nav className="pagination" aria-label="Submitted task pages"><Button disabled={page===1} onClick={()=>setParams({page:String(page-1)})}>Previous</Button><span>Page {page} of {Math.ceil(query.data.total/12)}</span><Button disabled={page*12>=query.data.total} onClick={()=>setParams({page:String(page+1)})}>Next</Button></nav>}
   </div>;
-}
-
-export function IntakeSummary() {
-  const query = useQuery({queryKey:['intake-work'],queryFn:()=>request<Page>('/api/intake'),refetchInterval:5000});
-  if(!query.data?.items.length) return null;
-  return <section className="panel intake-work"><div className="section-heading"><h2>Recent requests</h2><Link to="/intake">All intake &amp; planning</Link></div>{query.data.items.slice(0,4).map(item=><Link className="record-link" key={item.id} to={`/intake/${item.id}`}><span><strong>{item.original.title}</strong><small>{intakeLabel(item)}</small></span><ArrowRight size={16}/></Link>)}</section>;
 }
 
 export function IntakeForm() {
   const [params] = useSearchParams();
-  const kind = params.get('kind') === 'feature' ? 'feature' : 'issue';
-  return <IntakeFormBody key={kind} kind={kind}/>;
+  const [kind, setKind] = useState<'feature' | 'issue'>(params.get('kind') === 'issue' ? 'issue' : 'feature');
+  return <IntakeFormBody key={kind} kind={kind} chooseKind={setKind} unified={!params.has('kind')}/>;
 }
-function IntakeFormBody({kind}: {kind:'feature'|'issue'}) {
+function IntakeFormBody({kind, chooseKind, unified}: {kind:'feature'|'issue'; chooseKind:(kind:'feature'|'issue')=>void; unified:boolean}) {
   const navigate = useNavigate();
   const key = `intake-draft:${kind}`;
   type Input = components['schemas']['IntakeInput'];
@@ -91,23 +81,25 @@ function IntakeFormBody({kind}: {kind:'feature'|'issue'}) {
       localStorage.removeItem(key); void navigate(`/intake/${saved.id}?received=1`);
     } catch (e) {setError((e as Error).message);} finally {setBusy(false);}
   }
-  return <div className="intake-page"><Link to="/intake" className="back-link"><ArrowLeft size={15}/>Intake &amp; planning</Link><div className="page-heading"><div><img className="heading-art" src={`/art/workshop/${kind==='issue'?'issues':'feature-requests'}.png`} alt=""/><h1>{kind==='issue'?'Report an issue':'Request a feature'}</h1><p>{kind==='issue'?'Tell us what happened and what you expected. A report starts an investigation.':'Describe the experience you want. You’ll review a proposal before detailed work is planned.'}</p></div></div>
-  <form className="panel intake-form" onSubmit={event=>void submit(event)}><fieldset disabled={sent || busy}><label htmlFor="request-title">Title <span>Required</span></label><input id="request-title" required maxLength={160} value={body.title} onChange={e=>setBody({...body,title:e.target.value})}/><label htmlFor="request-description">Description <span>Required</span></label><textarea id="request-description" required maxLength={6000} rows={7} value={body.description} onChange={e=>setBody({...body,description:e.target.value})}/>
+  return <div className="intake-page"><Link to="/intake" className="back-link"><ArrowLeft size={15}/>Submitted tasks</Link><div className="page-heading"><div><img className="heading-art" src={`/art/workshop/${kind==='issue'?'issues':'feature-requests'}.png`} alt=""/><h1>{unified?'Create a task':kind==='issue'?'Report an issue':'Request a feature'}</h1><p>{kind==='issue'?'Tell us what happened and what you expected. A report starts an investigation.':'Describe what you want to improve, inspect or test. You’ll see a plan before any changes are approved.'}</p></div></div>
+  <form className="panel intake-form" onSubmit={event=>void submit(event)}><fieldset disabled={sent || busy}>{unified && <><label htmlFor="request-kind">What would you like to do?</label>
+  <select id="request-kind" value={kind} onChange={e=>chooseKind(e.target.value as 'feature'|'issue')}><option value="feature">Plan, inspect or test</option><option value="issue">Investigate a bug</option></select>
+  <p className="small-text">General requests can produce findings or a plan. Workbench can also run certain supported tasks after your approval.</p></>}<label htmlFor="request-title">Title <span>Required</span></label><input id="request-title" required maxLength={160} value={body.title} onChange={e=>setBody({...body,title:e.target.value})}/><label htmlFor="request-description">Description <span>Required</span></label><textarea id="request-description" required maxLength={6000} rows={7} value={body.description} onChange={e=>setBody({...body,description:e.target.value})}/>
   {kind==='feature' && <>
     <label className="check-label"><input type="checkbox" checked={Boolean(regression)} onChange={e=>setBody({
       ...body,supported_task:null,regression_tests:e.target.checked?{
         acceptance:regressionAcceptance.split('\n').filter(s=>s.trim()),
         test_paths:regressionPaths.split(/[\s,]+/).filter(Boolean),
       }:null,
-    })}/>Prepare a Lua regression-test task</label>
+    })}/>Add a check for existing behavior</label>
     {regression&&<>
-      <p className="small-text">Describe what an existing TwichUI test should check. You'll review the proposal before any implementation can be approved.</p>
-      <label htmlFor="regression-acceptance">Expected test results <span>Required · One observable result per line, up to 8</span></label>
+      <p className="small-text">Tell Workbench what should happen. This route can add checks to an existing TwichUI test. Workbench will ask for anything it needs to make the check specific.</p>
+      <label htmlFor="regression-acceptance">Expected test results <span>Required · One result per line, up to 8</span></label>
       <textarea id="regression-acceptance" required rows={3} maxLength={6000} value={regressionAcceptance} onChange={e=>{
         setRegressionAcceptance(e.target.value);
         setBody({...body,regression_tests:{...regression,acceptance:e.target.value.split('\n').filter(s=>s.trim())}});
       }}/>
-      <label htmlFor="regression-paths">Existing test paths <span>Optional · Up to 3. You can also name them in the description.</span></label>
+      <details><summary>Optional test details</summary><label htmlFor="regression-paths">Existing test paths <span>Optional · Up to 3. You can also name them in the description.</span></label>
       <textarea id="regression-paths" rows={2} maxLength={720} placeholder="tests/test_example.lua" value={regressionPaths} onChange={e=>{
         setRegressionPaths(e.target.value);
         setBody({...body,regression_tests:{...regression,test_paths:e.target.value.split(/[\s,]+/).filter(Boolean)}});
@@ -122,13 +114,13 @@ function IntakeFormBody({kind}: {kind:'feature'|'issue'}) {
         ] as const).map(([field,label])=><label key={field}>{label}<input type="text" maxLength={512} value={example[field]} onChange={e=>setBody({
           ...body,regression_tests:{...regression,text_example:{...example,[field]:e.target.value}},
         })}/></label>)}
-      </>}
+      </>}</details>
     </>}
   </>}
-  {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,supported_task:item?.id||null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Other request · Planning only</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Review the fixed plan and budget before execution. Additional comments do not expand its supported scope.</p></>}
+  {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,supported_task:item?.id||null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Use my description</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Use a ready-made task with a fixed plan. Your comments stay with the request. The fixed scope sets what can run.</p></>}
   <label htmlFor="request-interface">Does this request change the interface?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.</p>
   {kind==='issue' && <><label className="check-label"><input type="checkbox" checked={lua} onChange={e=>{setLua(e.target.checked);if(!e.target.checked)setBody({...body,lua_error:''});}}/>Add a Lua error <span>Optional</span></label>{lua && <><label htmlFor="lua-error">Lua error <span>Plain text · never executed</span></label><textarea className="code-input" id="lua-error" maxLength={6000} rows={6} value={body.lua_error || ''} onChange={e=>setBody({...body,lua_error:e.target.value})}/></>}</>}</fieldset>
-  <p className="detail-copy">Saved privately in this local app before planning starts. Remove player details and secrets before sharing anything outside it.</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.title.trim() || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
+  <p className="detail-copy">Workbench saves your request locally and starts planning. You’ll see what happens next on the task page.</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.title.trim() || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
 }
 
 export function IntakeDetail() {
@@ -138,8 +130,9 @@ export function IntakeDetail() {
   const query = useQuery({queryKey:['intake-detail',identity],queryFn:()=>request<Intake>(`/api/intake/${identity}`),refetchInterval:1200});
   const [error,setError] = useState('');
   const [busy,setBusy] = useState(false);
-  const [clarification,setClarification] = useState('');
+  const [clarificationInput,setClarification] = useState('');
   const [selected,setSelected] = useState('');
+  const [pickedFile, setPickedFile] = useState('');
   useEffect(()=>{if(!selected && query.data?.proposals[0]) setSelected(query.data.proposals[0].id);},[selected,query.data]);
   async function act(suffix:string, body:unknown, method='POST') {
     setError('');setBusy(true);
@@ -151,23 +144,99 @@ export function IntakeDetail() {
   const p = data.proposals.find(p=>p.id===selected) || data.proposals[0];
 
   const sample = data.original.title === 'Synthetic feature · Admission rehearsal';
-  const originalSection = (<><section className="panel"><h2>Original request</h2><p className="original-text">{data.original.description}</p>{data.original.regression_tests?.text_example&&<details open={data.status==='failed'}><summary>Submitted text example</summary><p>Input <code className="original-text">{JSON.stringify(data.original.regression_tests.text_example.input)}</code></p><p>Expected <code className="original-text">{JSON.stringify(data.original.regression_tests.text_example.expected)}</code></p><p>Reject <code className="original-text">{JSON.stringify(data.original.regression_tests.text_example.incorrect)}</code></p></details>}{data.clarifications.length>0 && <details open><summary>Additional information</summary>{data.clarifications.map((c,i)=><div key={i}><p className="original-text">{c.text}</p><p className="small-text">Saved {formatTime(c.created_at)} for revision {c.revision}</p></div>)}</details>}{data.original.lua_error && <details open><summary>Original Lua error · plain text</summary><pre>{data.original.lua_error}</pre></details>}<p className="small-text">Saved {formatTime(data.created_at)} · Local owner</p></section></>);
-  const progressSection = (<><section className="panel"><h2>Planning progress</h2>{data.jobs.map(job=><div className="planning-job" key={job.id}><div><strong>{job.kind==='planning'?'Investigation / proposal':job.kind==='behavioral_preparation'?'Behavioral scenario preparation':'Detailed task planning'} · Revision {job.revision}</strong><StateBadge value={job.status}/></div><p>{job.message}</p>{job.status==='failed' && job.kind!=='behavioral_preparation' && !job.diagnostics.retained_failure && <Button disabled={busy || job.attempts>=3} variant="secondary" onClick={()=>void act('retry',{job_id:job.id}).catch(()=>{})}>Retry planning</Button>}<details><summary>Job provenance</summary><p>{job.model || 'No validated model response'} · {job.attempts} bounded attempt(s)</p>{Object.entries(job.diagnostics).map(([key,value])=><p key={key}>{key}: {String(value)}</p>)}</details></div>)}</section></>);
-  const resultSection = (<>{data.result && <section className="panel"><h2>{data.original.kind==='issue'?'Investigation result':'Planning summary'}</h2>{data.original.kind==='feature' && <p className="soft-callout">{data.original.regression_tests?'Committed repository evidence defines the scope. Behavioral examples need independent review; check results are recorded separately.':'Model interpretation of supplied excerpts only. Findings and feasibility require review.'}</p>}<p>{data.result.summary}</p>{data.original.kind==='issue' && <p className="soft-callout">Unverified investigation. The report is evidence to investigate; root cause and duplicate status are not established.</p>}{data.result.related_ids.length>0 && <div><h3>Possibly related work · not confirmed duplicates</h3>{data.result.related_ids.map(id=><Link className="back-link" key={id} to={`/records/fixture/${id}`}>{id}</Link>)}</div>}{data.status==='waiting_for_information' && data.result.clarification && <div className="soft-callout"><strong>More information needed</strong><p>{data.result.clarification}</p><form onSubmit={e=>{e.preventDefault();void act('clarification',{command_id:crypto.randomUUID(),revision:data.revision,text:clarification}).then(()=>setClarification('')).catch(()=>{});}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarification} onChange={e=>setClarification(e.target.value)}/><Button disabled={busy || !clarification.trim()}>Send information</Button></form></div>}
-    <details><summary>Supplied context and evidence limits</summary><p>Product documents establish requirements. Addon code, root cause, duplicates and in-game behavior remain unverified unless specifically evidenced.</p>{data.evidence.map(e=><div key={e.id}><h3>{e.label}</h3><pre>{e.excerpt}</pre><p className="small-text">{e.id} · SHA-256 {e.sha256} · Source revision: {e.source_revision || 'Not recorded (product context or fixture)'}</p></div>)}</details></section>}</>);
-  return <div className="intake-page"><Link className="back-link" to="/intake"><ArrowLeft size={15}/>Intake &amp; planning</Link>{params.has('received') && <p className="soft-callout" role="status">Request received and saved. Planning runs separately; you can leave this page.</p>}<div className="page-heading detail-heading"><div><p className="eyebrow">{data.original.kind==='issue'?'Issue report':'Feature request'}</p><h1>{sample?'Sample plan: tidy a label':data.original.title}</h1><StateBadge value={sample?(data.decisions.some(d=>d.status==='pending')?'Approval saved · Waiting to confirm':data.status==='tasks_ready'?'Task ready for approval check':data.status==='approved'?'Plan approved · Preparing task':data.status==='scope_review_required'?'Review the plan again':intakeLabel(data)):intakeLabel(data)}/></div><Button variant="ghost" onClick={()=>void query.refetch()}><RefreshCw size={15}/>Refresh</Button></div>
-    {query.isError && <p role="alert" className="form-error">Refresh failed. Showing the last saved observation.</p>}{error && <p className="form-error" role="alert">{error}</p>}
-    <div className="intake-layout"><div>
-    {p && data.status==='waiting_for_information' && resultSection}
-    {p && <>{p.id!==data.proposals[0]?.id && <div className="stale-callout" role="status"><p>A newer proposal or human scope revision is ready.</p><Button onClick={()=>setSelected(data.proposals[0].id)}>Open current proposal</Button></div>}<label className="revision-picker">{sample?'Plan version':'Proposal revision'}<select aria-label={sample?'Plan version':'Proposal revision'} value={p.id} onChange={e=>setSelected(e.target.value)}>{data.proposals.map(p=><option key={p.id} value={p.id}>{sample?'Version':'Revision'} {p.revision} · {sample?'Sample':p.basis==='preparation'?'Prepared regression scope':p.basis==='owner'?'Owner-provided':p.basis==='demo'?'Demo':'Local planning'}</option>)}</select></label><ScopeControl key={`scope-${p.id}-${data.human_scope.revision}`} data={data} proposal={p} act={act} busy={busy}/><ProposalReview key={p.id} proposal={p} data={data} act={act} busy={busy}/></>}
-    {!p && <>{data.original.kind==='issue' && resultSection}{originalSection}{progressSection}{data.original.kind==='feature' && resultSection}</>}
-    {p && data.jobs.some(j=>['queued','running'].includes(j.status)) && <section className="panel" role="status"><h2>Planning progress</h2>{data.jobs.filter(j=>['queued','running'].includes(j.status)).map(j=><div key={j.id}><StateBadge value={j.status}/><p>{j.kind==='behavioral_preparation'?'Preparing reviewed scenarios and independently checking behavioral controls.':j.kind==='decomposition'?'Preparing tasks within approved scope.':'Preparing the next proposal revision.'}</p></div>)}</section>}
-    {p && data.jobs.some(j=>j.status==='failed') && <section className="panel"><h2>Planning needs attention</h2>{data.jobs.filter(j=>j.status==='failed').map(j=><div key={j.id}><p>{j.message}</p>{j.kind!=='behavioral_preparation' && !j.diagnostics.retained_failure && <Button disabled={busy || j.attempts>=3} variant="secondary" onClick={()=>void act('retry',{job_id:j.id}).catch(()=>{})}>Retry planning</Button>}</div>)}</section>}
-
-    {data.decisions.length>0 && <section className="panel"><h2>Saved decisions</h2>{data.decisions.map(d=><div className={`outcome outcome-${d.status}`} key={d.id} role="status"><div><strong>{d.status==='pending'?(sample?'Approval saved · Waiting to confirm':'Saved · Pending application'):d.status==='applied'?(sample?(d.payload.action==='approve'?'Plan approved':d.payload.action==='decline'?'Plan declined':'Changes requested'):'Applied'):d.status==='stale'?(sample?'Plan changed · Review again':'Stale · Not applied'):d.status}</strong><p>{d.payload.action==='approve'?(sample?'Approve this plan':'Approve proposal'):d.payload.action==='changes'?'Request changes':'Decline'} · {sample?(d.status==='pending'?'Your choice is saved; approval is not confirmed yet.':d.status==='applied'?'Your choice was confirmed. No addon work is permitted.':'Review the current plan before deciding again.'):d.message}</p>{d.scope_review_required && <p className="soft-callout">{sample?'The plan needs another review. Your previous choice is saved, but does not approve the current plan.':'Scope review required. Historical decision retained; implementation and publication remain held.'}</p>}{d.payload.note && <p>{d.payload.note}</p>}<details><summary>Decision binding</summary>{sample && <p>{d.status} · {d.message}</p>}<p>Proposal {d.proposal_id}</p><p>{d.binding}</p></details></div></div>)}</section>}
-    {data.tasks.length>0 && <section className="panel"><h2>Resulting work</h2><p>{sample?'These sample tasks come from your plan. Check the current task’s approval below.':'Follow each task from its approved plan to its recorded result. Dependencies remain prerequisites; execution permission is separate.'}</p>{data.tasks.map(t=><div className="planned-task" key={t.id}><Link className="record-link" to={`/records/fixture/${t.id}`}><span><span className="record-type">{t.kind}</span><strong>{t.title}</strong></span><ArrowRight size={16}/></Link>{t.scope_review_required && <p className="soft-callout">{sample?'Review the latest plan before checking this task.':'Scope review required · Execution held'}</p>}<details><summary>Purpose and acceptance</summary><p>{t.purpose}</p><ul>{t.acceptance.map((a,i)=><li key={i}>{a}</li>)}</ul><p>Dependencies: {t.dependencies.join(', ') || 'None'}</p><p>Planning model: {t.model}</p></details>{t.kind==='task' && <>{sample?<><Admission intakeId={data.id} taskId={t.id}/><Implementation intakeId={data.id} taskId={t.id}/></>:<TaskExecution intakeId={data.id} taskId={t.id}/>} </>}</div>)}<Button asChild variant="secondary"><Link to={`/backlog?source=fixture&focus=intake-${data.id}`}>Open in Backlog<ArrowRight size={16}/></Link></Button></section>}
-    {p && <details className="planning-context"><summary>Original request, planning history and evidence</summary>{originalSection}{progressSection}{data.status!=='waiting_for_information' && resultSection}</details>}
-    </div><aside><section className="panel"><h2>Priority recommendation</h2><p>Severity: {data.priority.severity}</p><p>Priority {data.priority.priority} of 5 · {data.priority.manual?'Manual':'Recommended'}</p><p>{data.priority.reason}</p><label htmlFor="priority">Manual priority</label><select id="priority" value={data.priority.manual?String(data.priority.priority):''} disabled={busy} onChange={e=>void act('priority',{priority:e.target.value?Number(e.target.value):null},'PUT').catch(()=>{})}><option value="">Use recommendation</option>{[1,2,3,4,5].map(n=><option key={n} value={n}>{n}{n===1?' · Highest':''}</option>)}</select>{!sample && <p className="soft-callout">Priority helps order work. It does not grant execution or publication permission.</p>}</section>{p && <section className="panel"><h2>What approval means</h2><p>{sample?'Approval confirms this version of the plan. The task is prepared next so you can check its approval.':'Approves this proposal and exact artifact set. If you include a task budget, the same decision also permits that bounded run and draft delivery.'}</p></section>}</aside></div>
+  const activeJobs = data.jobs.filter(job => job.revision >= data.revision && job.status === 'failed');
+  const clarification = data.result?.clarification;
+  // These fixed phrases come from the deterministic regression precheck.
+  const exampleNumber = data.original.regression_tests && clarification?.match(/^For expected result ([1-8])(?: \(|, no committed callable matches)/)?.[1];
+  const suggestedFiles = clarification?.startsWith('Name an existing tests/test_*.lua file')
+    ? data.proposals[0]?.task_contract?.path_candidates || [] : [];
+  const blocked = busy || query.isError;
+  function sendAnswer(answer: string) {
+    void act('clarification',{command_id:crypto.randomUUID(),revision:data.revision,text:answer}).then(()=>setClarification('')).catch(()=>{});
+  }
+  const receipt = data.decisions.find(d => d.proposal_id===data.proposals[0]?.id && !d.payload.execution_continuation);
+  const currentTasks = data.tasks.filter(t => t.kind==='task' && (t.proposal_id===data.proposals[0]?.id || (!t.proposal_id && !p)) && !t.scope_review_required);
+  return <div className="intake-page task-detail">
+    <Link className="back-link" to="/intake"><ArrowLeft size={15}/>Submitted tasks</Link>
+    {params.has('received') && <p className="soft-callout" role="status">Request received and saved. You can leave this page and come back for the next step.</p>}
+    <div className="page-heading detail-heading"><div><p className="eyebrow">{sample?'Sample task':data.original.kind==='issue'?'Bug investigation':data.original.regression_tests?'Test coverage':'Task request'}</p>
+      <h1>{sample?'Sample plan: tidy a label':data.original.title}</h1><p className="original-text task-request-copy">{data.original.description}</p></div>
+      <Button variant="ghost" onClick={()=>void query.refetch()}><RefreshCw size={15}/>Refresh</Button>
+    </div>
+    <TaskJourney item={data}/>
+    {query.isError && <p role="alert" className="form-error">Refresh failed. Showing the last saved record. Refresh before making a decision.</p>}
+    {error && <p className="form-error" role="alert">{error}</p>}
+    {data.status==='waiting_for_information' && clarification && <section className="panel" aria-labelledby="task-question">
+      <h2 id="task-question">Workbench needs your help</h2>
+      {exampleNumber ? <>
+        <TaskExample key={data.revision} index={Number(exampleNumber)}
+          expectation={data.original.regression_tests?.acceptance[Number(exampleNumber)-1] || 'Add the missing example'}
+          busy={blocked} send={sendAnswer}/>
+        <details><summary>Advanced example format</summary><p>{clarification}</p>
+          <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/><Button disabled={blocked || !clarificationInput.trim()}>Send information</Button></form>
+        </details>
+      </> : <>
+        <p>{suggestedFiles.length?'Workbench needs to know which existing test covers the behavior you described. Choose a file only if it fits your request.':clarification}</p>
+        {suggestedFiles.length>0 && <form onSubmit={e=>{e.preventDefault();if(suggestedFiles.includes(pickedFile))sendAnswer(`Use ${pickedFile}.`);}}>
+          <label htmlFor="suggested-test">Possible existing test</label>
+          <select id="suggested-test" value={suggestedFiles.includes(pickedFile)?pickedFile:''} onChange={e=>setPickedFile(e.target.value)}>
+            <option value="">Choose a test</option>{suggestedFiles.map(file=><option key={file}>{file}</option>)}
+          </select>
+          <Button disabled={blocked || !suggestedFiles.includes(pickedFile)}>Use this test</Button>
+        </form>}
+        <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/><Button disabled={blocked || !clarificationInput.trim()}>Send information</Button></form>
+      </>}
+    </section>}
+    {activeJobs.length > 0 && <section className="panel"><h2>Why planning stopped</h2>
+      {activeJobs.map(job=><div key={job.id}><p>{job.message}</p>
+        {job.kind!=='behavioral_preparation' && !job.diagnostics.retained_failure && job.attempts<3
+          ? <Button disabled={blocked} variant="secondary" onClick={()=>void act('retry',{job_id:job.id}).catch(()=>{})}>Retry planning</Button>
+          : <p>Your request and any saved decisions are here. You can review the details below or start a new request with updated information.</p>}</div>)}
+    </section>}
+    {data.status==='completed' && !p && data.result && <section className="panel"><h2>Investigation findings</h2>
+      <p>{data.result.summary}</p><p className="soft-callout">These are preliminary findings. A fix, a confirmed cause and in-game behavior still need their own evidence.</p>
+      {data.result.related_ids.length>0 && <details><summary>Possibly related records</summary>{data.result.related_ids.map(id=><p key={id}><Link to={`/records/fixture/${id}`}>{id}</Link></p>)}</details>}
+    </section>}
+    {receipt && <section className="panel saved-plan-decision" aria-label="Latest plan decision">
+      <h2>{receipt.status==='pending'?'Saved · Pending application':receipt.scope_review_required||receipt.status==='stale'?'Review the current plan again':receipt.status==='applied'?({approve:'Plan approved',decline:'Plan declined',changes:'Changes requested'}[receipt.payload.action]):'Plan decision could not be applied'}</h2>
+      <p>{receipt.status==='pending'?'Workbench saved your choice and will check it before applying it.':receipt.scope_review_required||receipt.status==='stale'?'The earlier decision is saved. A changed plan needs a new review.':receipt.status==='applied'?({approve:sample?'Your choice was confirmed. No addon work is permitted.':receipt.payload.run_budget?'The plan and the separately selected run permission were recorded.':'Workbench confirmed the plan. Any run needs its own permission.',decline:'Workbench closed this plan without approving the work.',changes:'Workbench saved your feedback for a revised plan.'}[receipt.payload.action]):receipt.message}</p>
+      {receipt.payload.note && <p>{receipt.payload.note}</p>}
+    </section>}
+    {currentTasks.map(t=>
+      <section className="panel planned-task" key={t.id}><h2>{t.title===data.original.title?'Work and result':t.title}</h2>
+        {sample ? <><Admission intakeId={data.id} taskId={t.id}/><Implementation intakeId={data.id} taskId={t.id}/></> :
+          <>
+            {!data.original.regression_tests && !data.original.supported_task && <><p>{t.purpose}</p><Link className="back-link" to={`/records/fixture/${t.id}`}>Open {t.title} <ArrowRight size={15}/></Link><ul>{t.acceptance.map((a,i)=><li key={i}>{a}</li>)}</ul></>}
+            <TaskExecution intakeId={data.id} taskId={t.id} separateApproval={Boolean(data.original.regression_tests)} showWaiting={Boolean(data.original.supported_task)}/>
+          </>}
+      </section>)}
+    {data.tasks.length>0 && <Link className="back-link" to={`/backlog?source=fixture&focus=intake-${data.id}`}>Open in Backlog <ArrowRight size={15}/></Link>}
+    {p && <>
+      {p.id!==data.proposals[0]?.id && <div className="stale-callout" role="status"><p>A newer plan is ready.</p><Button onClick={()=>setSelected(data.proposals[0].id)}>Open current proposal</Button></div>}
+      {['completed','waiting_for_information'].includes(data.status)
+        ? <ProposalReview key={p.id} proposal={p} data={data} act={act} busy={blocked}/>
+        : <details className="panel"><summary>Read the plan</summary><ProposalReview key={p.id} proposal={p} data={data} act={act} busy={blocked}/></details>}
+    </>}
+    <details className="panel planning-context">
+      <summary>Original request, planning history and evidence</summary>
+      <p>Saved {formatTime(data.created_at)}</p>
+      {data.original.lua_error && <><h3>Submitted error message</h3><pre>{data.original.lua_error}</pre></>}
+      {data.original.regression_tests?.text_example && <><h3>Submitted text example</h3><pre>{JSON.stringify(data.original.regression_tests.text_example,null,2)}</pre></>}
+      {data.clarifications.map((c,i)=><div key={i}><p>Reply for revision {c.revision} · {formatTime(c.created_at)}</p><p className="original-text">{c.text}</p></div>)}
+      {p && <label className="revision-picker">{sample?'Plan version':'Proposal revision'}<select value={p.id} onChange={e=>setSelected(e.target.value)}>{data.proposals.map(plan=><option key={plan.id} value={plan.id}>{sample?'Version':'Revision'} {plan.revision}</option>)}</select></label>}
+      <h3>Planning history</h3>
+      {data.jobs.map(job=><div className="planning-job" key={job.id}><strong>{job.kind==='planning'?'Investigation / proposal':job.kind==='behavioral_preparation'?'Behavioral scenario preparation':'Detailed task planning'} · Revision {job.revision}</strong><StateBadge value={job.status}/><p>{job.message}</p>
+        <details><summary>Job provenance</summary><p>{job.model || 'No validated model response'} · {job.attempts} bounded attempt(s)</p><pre>{JSON.stringify(job.diagnostics,null,2)}</pre></details></div>)}
+      {data.decisions.length>0 && <><h3>Decision history</h3>{data.decisions.map(d=><details key={d.id}><summary>{d.payload.action} · {d.status}</summary><p>{d.message}</p><pre>{JSON.stringify(d,null,2)}</pre></details>)}</>}
+      {data.evidence.map(e=><details key={e.id}><summary>{e.label}</summary><pre>{e.excerpt}</pre><p>{e.id} · SHA-256 {e.sha256} · Source revision {e.source_revision || 'Unavailable'}</p></details>)}
+      <label htmlFor="priority">Priority</label><p>{data.priority.reason} Priority orders work and grants no run permission.</p>
+      <select id="priority" value={data.priority.manual?String(data.priority.priority):''} disabled={blocked} onChange={e=>void act('priority',{priority:e.target.value?Number(e.target.value):null},'PUT').catch(()=>{})}><option value="">Use recommendation ({data.priority.priority})</option>{[1,2,3,4,5].map(n=><option key={n} value={n}>{n}{n===1?' · Highest':''}</option>)}</select>
+      {data.tasks.filter(t=>t.kind==='task' && !currentTasks.includes(t)).map(t=><section key={t.id}>
+        <h3>{t.title}</h3><Link to={`/records/fixture/${t.id}`}>Open historical task record</Link>
+        {sample ? <><Admission intakeId={data.id} taskId={t.id}/><Implementation intakeId={data.id} taskId={t.id}/></> :
+          <TaskExecution intakeId={data.id} taskId={t.id} separateApproval={false}/>}
+      </section>)}
+    </details>
   </div>;
 }
 
@@ -180,8 +249,8 @@ function ScopeControl({data,proposal,act,busy}: {data:Intake;proposal:Proposal;a
   const [note,setNote] = useState('');
   const [command] = useState(crypto.randomUUID());
   const current = proposal.revision===data.revision;
-  return <section className="panel human-scope"><h2>{sample?'What this plan covers':'Your interface scope'}</h2><p><strong>{scopeLabels[scope.visual_requirement]}</strong>{!sample && <> · Scope revision {scope.revision}</>}</p><p className="small-text">{scope.origin==='legacy'?'This existing request has no recorded human scope. Confirm it before approval.':sample?'Your chosen scope is kept with this plan.':'Recorded by you. Planner classifications cannot remove your visual requirements.'}</p><p>{scope.stage==='research'?'Research only · All implementation excluded. Future implementation still needs its own review.':sample?'This sample plan describes one task.':'Implementation planning · Run and delivery permissions are recorded with each task.'}</p>
-    <details open={scope.origin==='legacy'}><summary>Review or change your scope</summary><form className="scope-form" onSubmit={e=>{e.preventDefault();void act('scope',{command_id:command,proposal_id:proposal.id,binding:proposal.binding,visual_requirement:visual,stage,note}).catch(()=>{});}}><label htmlFor="review-interface">Does this request change the interface?</label><select id="review-interface" disabled={!current || busy} value={visual} onChange={e=>setVisual(e.target.value as ScopeInput['visual_requirement'])}><ScopeOptions/></select><label htmlFor="review-stage">Review stage</label><select id="review-stage" disabled={!current || busy} value={stage} onChange={e=>setStage(e.target.value as ScopeInput['stage'])}><option value="implementation">Implementation planning</option><option value="research">Research only · Excludes implementation</option></select><label htmlFor="scope-note">Reason for this scope revision</label><textarea id="scope-note" required maxLength={1600} rows={2} disabled={!current || busy} value={note} onChange={e=>setNote(e.target.value)}/><p className="small-text">Creates a new proposal for review. Previous decisions and attachments stay in history; attach references to the new revision before approval.</p><Button disabled={!current || busy || !note.trim()}>Save scope revision</Button></form></details>
+  return <section className="panel human-scope"><h3>{sample?'Your scope':'In-game changes'}</h3><p><strong>{scopeLabels[scope.visual_requirement]}</strong></p><p className="small-text">{scope.origin==='legacy'?'This existing request has no recorded human scope. Confirm it before approval.':sample?'Your choice is saved with this plan.':'Your choice sets the minimum review needed for in-game changes.'}</p><p>{scope.stage==='research'?'Research only · All implementation excluded. Future implementation still needs its own review.':sample?'This sample plan describes one task.':'This plan may describe changes. Running them takes separate permission.'}</p>
+    <details open={scope.origin==='legacy'}><summary>Change what this plan may cover</summary><form className="scope-form" onSubmit={e=>{e.preventDefault();void act('scope',{command_id:command,proposal_id:proposal.id,binding:proposal.binding,visual_requirement:visual,stage,note}).catch(()=>{});}}><label htmlFor="review-interface">Does this request change the interface?</label><select id="review-interface" disabled={!current || busy} value={visual} onChange={e=>setVisual(e.target.value as ScopeInput['visual_requirement'])}><ScopeOptions/></select><label htmlFor="review-stage">What may Workbench plan?</label><select id="review-stage" disabled={!current || busy} value={stage} onChange={e=>setStage(e.target.value as ScopeInput['stage'])}><option value="implementation">Plan possible changes</option><option value="research">Research only</option></select><label htmlFor="scope-note">Why are you changing the scope?</label><textarea id="scope-note" required maxLength={1600} rows={2} disabled={!current || busy} value={note} onChange={e=>setNote(e.target.value)}/><p className="small-text">Creates a new proposal for review. Previous decisions and attachments stay in history; attach references to the new revision before approval.</p><Button disabled={!current || busy || !note.trim()}>Save and review the updated plan</Button></form></details>
     <details><summary>Human scope history</summary>{data.scope_history.map(s=><p key={s.revision}>Revision {s.revision}: {scopeLabels[s.visual_requirement]} · {s.stage} · {s.note}</p>)}</details></section>;
 }
 
@@ -193,7 +262,7 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
   const [expectationChecked,setExpectationChecked]=useState(false);
   const examples=review.task_contract?.behavioral_evidence;
   const needsExpectationReview=examples?.status==='review_required';
-  const runOffer=useQuery({queryKey:['task-run-offer',data.id,proposal.id,proposal.binding],queryFn:()=>request<{available:boolean;message:string;offer:null|{title:string;repository:string;base_branch:string;base:string;paths:string[];budget:NonNullable<Decision['run_budget']>}}>(`/api/intake/${encodeURIComponent(data.id)}/proposals/${encodeURIComponent(proposal.id)}/run-offer`)});
+  const runOffer=useQuery({enabled:Boolean(data.original.supported_task && data.status==='completed'),refetchInterval:3000,queryKey:['task-run-offer',data.id,proposal.id,proposal.binding],queryFn:()=>request<{available:boolean;message:string;offer:null|{title:string;repository:string;base_branch:string;base:string;paths:string[];budget:NonNullable<Decision['run_budget']>}}>(`/api/intake/${encodeURIComponent(data.id)}/proposals/${encodeURIComponent(proposal.id)}/run-offer`)});
   const key = `proposal-decision:${data.id}:${review.id}`;
   const [draft,setDraft] = useState<Decision|null>(()=>readStored<Decision>(key));
   const [uploadError,setUploadError] = useState('');
@@ -204,6 +273,10 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
   const saved = data.decisions.some(d=>d.proposal_id===review.id && d.binding===review.binding);
   const locked = busy || stale || saved || data.status !== 'completed';
   async function decide(action:Decision['action']) {
+    const offer=runOffer.data?.offer;
+    if (locked || (action==='approve' && offerChanged) || (action==='approve' && (review.approval_blockers.length>0 ||
+      (needsExpectationReview && !expectationChecked && !draft?.expectation_review) ||
+      ((includeRun || draft?.run_budget) && (!offer || !runOffer.data?.available || runOffer.isError))))) return;
     const body = draft || {command_id:crypto.randomUUID(),proposal_id:review.id,binding:review.binding,scope_revision:review.scope_revision,action,note,...(action==='approve'&&needsExpectationReview&&expectationChecked?{expectation_review:examples.review_digest}:{}),...(action==='approve'&&includeRun&&runOffer.data?.offer?{run_budget:runOffer.data.offer.budget}:{})};
     try {localStorage.setItem(key,JSON.stringify(body));setDraft(body);await act('decisions',body);} catch { /* Canonical error shown above; preserve exact retry. */ }
   }
@@ -219,36 +292,90 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
   }
   const c = review.content;
   const sample = data.original.title === 'Synthetic feature · Admission rehearsal';
-  return <section className="panel proposal-panel"><div className="section-heading"><h2>{data.original.title==='Synthetic feature · Admission rehearsal'?'Plan':'Proposal'} · {sample?'Version':'Revision'} {review.revision}</h2><StateBadge value={sample?'Uses sample data only':review.basis==='preparation'?'Prepared regression-test scope':review.basis==='owner'?'Owner-provided plan':review.basis==='template'?'Fixed supported-task plan':review.basis==='demo'?'Demo response':'Local planning'}/></div>{c.summary.length>180?<><h3>{c.delivery==='research'?'Proposed research outcome':'Proposed outcome'}</h3><p>{c.summary}</p></>:<h3>{sample?sampleWording(c.summary):c.summary}</h3>}<p>{sample?sampleWording(c.value):c.value}</p><p className="soft-callout">{sample?'This sample flow does not build or run anything, test the addon, or publish changes.':review.basis==='preparation'?'Scope prepared from your request and committed repository evidence · Behavioral examples remain proposed data. No execution permission.':review.basis==='owner'?'Recorded from your explicit authorization · No planning model was invoked.':review.basis==='demo'?'Simulated proposal · No model research was performed.':review.basis==='template'?'Fixed supported-task scope · No planning model was invoked.':'Local model interpretation of the displayed evidence. Unsupported addon behavior remains uncertain.'} {sample?'':review.research_only?'Research scope only.':c.delivery==='research'?'Planner suggests research; confirm the human review stage.':'Implementation scope · Follow the resulting task for run and delivery permission.'}</p>
-  {review.task_contract && <RegressionContract contract={review.task_contract}/>}
-  <h3>Proposed experience</h3><ul>{c.behavior.map((v,i)=><li key={i}>{sample?sampleWording(v):v}</li>)}</ul><h3>Agreed scope</h3><ul>{c.scope.map((v,i)=><li key={i}>{sample?sampleWording(v):v}</li>)}</ul><h3>Out of scope</h3><ul>{c.exclusions.map((v,i)=><li key={i}>{sample?sampleWording(v):v}</li>)}</ul><h3>{sample?'What the planned task would do':'Acceptance criteria'}</h3><ul>{c.acceptance.map((v,i)=><li key={i}>{sample?sampleWording(v):v}</li>)}</ul>
-
-  <div className="proposal-artifacts"><h3>{sample?'Pictures and supporting information':'Mockups and references'}</h3><p>{review.research_only?'Research-only approval excludes all implementation. The human interface requirement is preserved for a future implementation review.':review.required_artifacts.length?'Human scope and proposal impact require a proposed mockup and in-game-context reference for implementation approval.':sample?'This sample plan changes no screens, so no pictures are needed.':'Explicit human nonvisual scope and nonvisual proposal · No implementation mockup required.'}</p>{review.scope_conflicts.map(message=><p className="scope-conflict" role="note" key={message}>{message}</p>)}{review.artifacts.map(a=><figure key={a.id}>{a.media_type==='image/png' && <img src={`/api/planning-artifacts/${a.id}`} alt={`${artifactRole(a.role)}: ${a.label}`}/>}<figcaption><a href={`/api/planning-artifacts/${a.id}`}>{a.label}</a> · {artifactRole(a.role)} · Manually attached reference, not proof of implementation</figcaption></figure>)}
-  {!locked && !draft && <details><summary>Attach a mockup or evidence</summary><form className="artifact-form" onSubmit={e=>void upload(e)}><label>Artifact role<select value={role} onChange={e=>setRole(e.target.value as Artifact['role'])}><option value="mockup">Proposed mockup</option><option value="game_context">In-game-context reference</option><option value="evidence">Supporting evidence</option></select></label><label>Artifact label<input required maxLength={160} value={label} onChange={e=>setLabel(e.target.value)}/></label><label>Private attachment · PNG or text, up to 1 MiB<input type="file" accept="image/png,text/plain" required onChange={e=>setFile(e.target.files?.[0] || null)}/></label>{uploadError && <p className="form-error" role="alert">{uploadError}</p>}<Button type="submit">Attach to revision {review.revision}</Button></form></details>}</div>
-  <div className="proposal-uncertainty"><h3>{sample?'About this example':'Material uncertainty'}</h3><p className="soft-callout">{sample?'This is an example plan, not proof of an addon change.':review.basis==='preparation'?'The contract identifies unrun commands and independent checks still required. Repository inspection does not establish behavioral correctness.':review.basis==='owner'?'This is the bounded scope supplied and approved by you. Model implementation and independent checks are still separate.':review.basis==='demo'?'Synthetic example: addon feasibility and in-game behavior are unverified.':data.evidence.some(e=>e.kind==='addon')?'Assessment uses only the selected supplied excerpts. Uninspected code and behavior remain uncertain.':'Preliminary assessment: no relevant addon source was supplied. Inspect the addon code before confirming feasibility.'}</p><ul>{c.uncertainty.map((v,i)=><li key={i}>{sample?sampleWording(v):v}</li>)}</ul></div>
-  {stale && <div className="stale-callout" role="alert"><strong>This review is out of date.</strong><p>Read the current revision and artifact set before deciding.</p>{review.revision===data.revision && <Button onClick={()=>{setReview(proposal);setDraft(null);setExpectationChecked(false);localStorage.removeItem(key);}}>Open refreshed review</Button>}</div>}
-  {!saved && data.status==='completed' && <div className="proposal-decisions"><h3>Your decision</h3>{review.approval_blockers.length>0 && <div id="approval-prerequisites" className="approval-prerequisites" role="note"><strong>Before implementation approval</strong><ul>{review.approval_blockers.map(b=><li key={b}>{b}</li>)}</ul></div>}{runOffer.data?.available&&runOffer.data.offer&&<section className="soft-callout" aria-label="One task and PR budget"><h4>Complete this supported task</h4><p>{runOffer.data.offer.title}</p><p>One local Qwen attempt · Up to 20 turns and 24,000 generated tokens · 90 minutes overall, including waiting and delivery. No paid fallback.</p><p>Includes one draft PR to {runOffer.data.offer.repository} / {runOffer.data.offer.base_branch}. No automatic merge or deployment.</p><label className="check-label"><input type="checkbox" disabled={locked||Boolean(draft)} checked={Boolean(draft?.run_budget)||includeRun} onChange={e=>setIncludeRun(e.target.checked)}/>Approve this scope and one task-to-PR budget together</label><p className="small-text">{runOffer.data.offer.budget.activate_once?'Your saved approval starts this one run when the installed runtime is ready. It temporarily reserves the local model, tests cancellation, then restores access.':'Execution is disabled here. This saves the budget; it does not start the model.'} Ordinary check failures can be repaired within this attempt; expiry or exhausted limits stop work.</p><details><summary>Exact scope and limits</summary><p>Base: {runOffer.data.offer.base}</p><ul>{runOffer.data.offer.paths.map(path=><li key={path}>{path}</li>)}</ul><p>Maximum 2,500 generated tokens per response; 20 minutes implementation, 40 minutes through verification, 15 minutes publication within the overall limit.</p></details></section>}
-  {needsExpectationReview && <label className="check-label"><input type="checkbox" disabled={locked||Boolean(draft)} checked={Boolean(draft?.expectation_review)||expectationChecked} onChange={e=>setExpectationChecked(e.target.checked)}/>I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.</label>}
-  <label htmlFor="decision-note">Review note <span>Required for changes, optional for approval or decline</span></label><textarea id="decision-note" rows={3} maxLength={1600} disabled={locked || Boolean(draft)} value={draft?.note ?? note} onChange={e=>setNote(e.target.value)}/>{draft ? <Button disabled={locked} onClick={()=>void decide(draft.action)}>Retry same decision</Button> : <div className="intake-actions"><Button aria-describedby={review.approval_blockers.length>0?'approval-prerequisites':undefined} disabled={locked || review.approval_blockers.length>0 || (needsExpectationReview&&!expectationChecked)} onClick={()=>void decide('approve')}>{data.original.title==='Synthetic feature · Admission rehearsal'?'Approve this plan':includeRun&&runOffer.data?.offer?'Approve scope and one task-to-PR run':'Approve proposal'}</Button><Button variant="secondary" disabled={locked || !note.trim()} onClick={()=>void decide('changes')}>Request changes</Button><Button variant="ghost" disabled={locked} onClick={()=>void decide('decline')}>Decline</Button></div>}<p className="small-text">{data.original.title==='Synthetic feature · Admission rehearsal'?'Your choice is saved first, then confirmed. It approves this version of the plan only; it does not permit addon work or publication.':<>Saved first, applied separately. Your choice binds to proposal revision {review.revision}, human scope revision {review.scope_revision}, and its exact required artifact set.</>}</p></div>}
+  const offer = runOffer.data?.offer;
+  const runSelected = includeRun || Boolean(draft?.run_budget);
+  const runChanged = Boolean(runSelected && (!runOffer.data?.available || runOffer.isError || (draft?.run_budget &&
+    (draft.run_budget.offer_fingerprint!==offer?.budget.offer_fingerprint ||
+     draft.run_budget.offer_id!==offer?.budget.offer_id ||
+     Boolean(draft.run_budget.activate_once)!==Boolean(offer?.budget.activate_once)))));
+  const [reviewedOffer, setReviewedOffer] = useState<typeof offer>(null);
+  const offerChanged = runChanged || Boolean(includeRun && (reviewedOffer?.budget.offer_fingerprint!==offer?.budget.offer_fingerprint ||
+    reviewedOffer?.budget.offer_id!==offer?.budget.offer_id ||
+    reviewedOffer?.budget.activate_once!==offer?.budget.activate_once));
+  return <section className="panel proposal-panel">
+    <div className="section-heading"><h2>{sample?`Plan · Version ${review.revision}`:'The plan'}</h2><StateBadge value={sample?'Uses sample data only':review.basis==='preparation'?'Test coverage plan':review.basis==='owner'?'Owner-provided plan':review.basis==='template'?'Ready-made task':review.basis==='demo'?'Sample response':'Local planning'}/></div>
+    <h3>{sample?sampleWording(c.summary):c.summary}</h3><p>{sample?sampleWording(c.value):c.value}</p>
+    <p className="soft-callout">{sample?'This example shows how plan review works.':review.basis==='demo'?'This plan uses a simulated response. Addon behavior and feasibility are unverified.':review.research_only?'The plan is for research only. Changes require a later plan and decision.':review.task_contract?'Review the proposed test and what it should catch. Workbench will check it before asking to run anything.':'Review the proposed work and its limits. Approving the plan prepares the agreed work.'}</p>
+    {review.task_contract && <RegressionContract contract={review.task_contract} asking={Boolean(data.status==='waiting_for_information' && data.result?.clarification)}/>}
+    <h3>What this plan covers</h3><ul>{c.scope.map((v,i)=><li key={i}>{sample?sampleWording(v):v}</li>)}</ul>
+    <h3>What stays outside the plan</h3><ul>{c.exclusions.map((v,i)=><li key={i}>{sample?sampleWording(v):v}</li>)}</ul>
+    {!review.task_contract && <><h3>What a good result looks like</h3><ul>{c.acceptance.map((v,i)=><li key={i}>{sample?sampleWording(v):v}</li>)}</ul></>}
+    <ScopeControl key={`scope-${review.id}-${data.human_scope.revision}`} data={data} proposal={review} act={act} busy={busy}/>
+  <div className="proposal-artifacts"><h3>{sample?'Pictures and supporting information':'Pictures and references'}</h3><p>{review.research_only?'Research-only approval excludes all implementation. The human interface requirement is preserved for a future implementation review.':review.required_artifacts.length?'Add a picture of the proposed change and a picture of the current in-game screen before approving this plan.':sample?'This sample plan changes no screens, so no pictures are needed.':'This plan leaves the in-game interface as it is.'}</p>{review.scope_conflicts.map(message=><p className="scope-conflict" role="note" key={message}>{message}</p>)}{review.artifacts.map(a=><figure key={a.id}>{a.media_type==='image/png' && <img src={`/api/planning-artifacts/${a.id}`} alt={`${artifactRole(a.role)}: ${a.label}`}/>}<figcaption><a href={`/api/planning-artifacts/${a.id}`}>{a.label}</a> · {artifactRole(a.role)} · Manually attached reference, not proof of implementation</figcaption></figure>)}
+  {!locked && !draft && <details><summary>Attach a picture or supporting note</summary><form className="artifact-form" onSubmit={e=>void upload(e)}><label>Artifact role<select value={role} onChange={e=>setRole(e.target.value as Artifact['role'])}><option value="mockup">Proposed mockup</option><option value="game_context">In-game-context reference</option><option value="evidence">Supporting evidence</option></select></label><label>Artifact label<input required maxLength={160} value={label} onChange={e=>setLabel(e.target.value)}/></label><label>Private attachment · PNG or text, up to 1 MiB<input type="file" accept="image/png,text/plain" required onChange={e=>setFile(e.target.files?.[0] || null)}/></label>{uploadError && <p className="form-error" role="alert">{uploadError}</p>}<Button type="submit">Attach to this plan</Button></form></details>}</div>
+  <div className="proposal-uncertainty"><h3>{sample?'About this example':'What still needs checking'}</h3><p className="soft-callout">{sample?'This is an example plan, not proof of an addon change.':review.basis==='preparation'?'Workbench still needs to check that the test passes for the intended behavior and fails for the wrong behavior.':review.basis==='owner'?'This is the bounded scope supplied and approved by you. Model implementation and independent checks are still separate.':review.basis==='demo'?'Synthetic example: addon feasibility and in-game behavior are unverified.':data.evidence.some(e=>e.kind==='addon')?'Assessment uses only the selected supplied excerpts. Uninspected code and behavior remain uncertain.':'Preliminary assessment: no relevant addon source was supplied. Inspect the addon code before confirming feasibility.'}</p><ul>{c.uncertainty.map((v,i)=><li key={i}>{sample?sampleWording(v):v}</li>)}</ul></div>
+  {stale && <div className="stale-callout" role="alert"><strong>This review is out of date.</strong><p>Open the updated plan and attachments before deciding.</p>{review.revision===data.revision && <Button onClick={()=>{setReview(proposal);setDraft(null);setExpectationChecked(false);localStorage.removeItem(key);}}>Open refreshed review</Button>}</div>}
+  {!saved && data.status==='completed' && <div className="proposal-decisions">
+    <h3>Your decision</h3>
+    <p>{sample?'Approving confirms this sample plan.':review.research_only?'Approving agrees to the research described here. Any later changes need their own review.':'Approving confirms this plan and its attachments so Workbench can prepare the agreed work. Running code changes or publishing requires explicit permission.'}</p>
+    {review.approval_blockers.length>0 && <div id="approval-prerequisites" className="approval-prerequisites" role="note"><strong>What’s needed before approval</strong><ul>{review.approval_blockers.map(b=><li key={b}>{b}</li>)}</ul></div>}
+    {runOffer.data?.available && offer && <p>This ready-made task can run only if you choose its extra permission below before you approve the plan.</p>}
+    {runOffer.data?.available && offer && <details className="soft-callout" open={runSelected || undefined}>
+      <summary>Optional permission for this ready-made task to run and open a draft pull request</summary>
+      <h4>{offer.title}</h4><RunLimits budget={offer.budget}/>
+      <p>Workbench may change only the files below. If the checks pass, this also permits a branch push and one draft pull request to {offer.repository} / {offer.base_branch}, with up to {minutes(offer.budget.publication_seconds)} for delivery. Merging, releasing and installing require separate decisions.</p>
+      <ul>{offer.paths.map(path=><li key={path}>{path}</li>)}</ul>
+      <label className="check-label"><input type="checkbox" disabled={locked||Boolean(draft)} checked={runSelected} onChange={e=>{setIncludeRun(e.target.checked);setReviewedOffer(offer);}}/>Also allow this task to run and open one draft pull request</label>
+      <details><summary>Technical run details</summary><p>Base {offer.base}</p><p>{offer.budget.response_tokens.toLocaleString()} tokens per response.</p><pre>{JSON.stringify(offer.budget,null,2)}</pre></details>
+    </details>}
+    {offerChanged && <p role="alert">The run offer changed or could not be refreshed. Review the current permission before deciding.</p>}
+    {offerChanged && <Button variant="secondary" onClick={()=>{setIncludeRun(false);setReviewedOffer(null);setDraft(null);setExpectationChecked(false);localStorage.removeItem(key);}}>Clear the earlier choice</Button>}
+    {needsExpectationReview && <label className="check-label"><input type="checkbox" disabled={locked||Boolean(draft)} checked={Boolean(draft?.expectation_review)||expectationChecked} onChange={e=>setExpectationChecked(e.target.checked)}/>I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.</label>}
+    <label htmlFor="decision-note">Note <span>Required for changes. Optional otherwise.</span></label>
+    <textarea id="decision-note" rows={2} maxLength={1600} disabled={locked || Boolean(draft)} value={draft?.note ?? note} onChange={e=>setNote(e.target.value)}/>
+    {draft ? <Button disabled={locked || offerChanged} onClick={()=>void decide(draft.action)}>Retry same decision</Button> :
+      <div className="intake-actions"><Button aria-describedby={review.approval_blockers.length>0?'approval-prerequisites':undefined}
+        disabled={locked || offerChanged || review.approval_blockers.length>0 || (needsExpectationReview&&!expectationChecked)}
+        onClick={()=>void decide('approve')}>{sample?'Approve this plan':includeRun&&offer?'Approve plan and allow this run':'Approve plan'}</Button>
+        <Button variant="secondary" disabled={locked || !note.trim()} onClick={()=>void decide('changes')}>Request changes</Button>
+        <Button variant="ghost" disabled={locked} onClick={()=>void decide('decline')}>Decline</Button>
+      </div>}
+    <p className="small-text">Workbench saves your choice and checks that this plan is still current before applying it.</p>
+  </div>}
   {!locked && !draft && c.delivery==='implementation' && review.approval_blockers.length>0 && <details><summary>Revise to a research stage</summary><p>Create a new proposal revision limited to research. It will need its own review; implementation remains excluded.</p><form onSubmit={e=>{e.preventDefault();void act('research-revision',{binding:review.binding,explanation:research}).catch(()=>{});}}><label htmlFor="research-scope">Research scope explanation</label><textarea id="research-scope" required maxLength={1600} value={research} onChange={e=>setResearch(e.target.value)}/><Button disabled={!research.trim()}>Create research revision</Button></form></details>}
   {sample && <details><summary>Original plan wording</summary><pre>{JSON.stringify(c,null,2)}</pre></details>}
-  <details><summary>Feasibility, evidence and delivery details</summary><p>{c.feasibility}</p><h3>Dependencies and risks</h3><ul>{[...c.dependencies,...c.risks].map((v,i)=><li key={i}>{v}</li>)}</ul><h3>Broad delivery stages</h3><ol>{c.stages.map((v,i)=><li key={i}>{v}</li>)}</ol><p>Evidence references: {c.evidence_ids.join(', ') || 'None cited'}</p><p>Visual impact: {c.visual}. Model: {review.model}</p></details>
+  <details><summary>Technical plan details</summary><p>{c.feasibility}</p><p>Plan revision {review.revision} · Scope revision {review.scope_revision} · Binding {review.binding}</p><h3>Proposed behavior</h3><ul>{c.behavior.map((v,i)=><li key={i}>{v}</li>)}</ul><h3>Dependencies and risks</h3><ul>{[...c.dependencies,...c.risks].map((v,i)=><li key={i}>{v}</li>)}</ul><h3>Broad delivery stages</h3><ol>{c.stages.map((v,i)=><li key={i}>{v}</li>)}</ol><p>Evidence references: {c.evidence_ids.join(', ') || 'None cited'}</p><p>Visual impact: {c.visual}. Model: {review.model}</p></details>
   </section>;
 }
 
 
-function RegressionContract({contract:c}: {contract:NonNullable<Proposal['task_contract']>}) {
-  return <section className="soft-callout" aria-label="Proposed regression-test contract"><h3>Proposed task contract</h3>
-    <p>{c.repository} · Base {c.resolved_base||'Unresolved'} ({c.base_ref} at preparation)</p>
-    <p>Draft PR destination: {c.pr_repository} / {c.pr_base_branch}. Execution and publication are held.</p>
-    <h4>Proposed writable paths</h4>{c.writable_paths.length?<ul>{c.writable_paths.map(p=><li key={p}>{p}</li>)}</ul>:<p>No paths selected.</p>}
-    <p>{c.category==='lua-regression-tests'?'Additions to existing test files only. Shared harness, runner and production code are excluded.':'Bounded changes to the reviewed existing Lua files. Shared framework and unrelated behavior are excluded.'}</p>
-    {c.behavioral_evidence && <div><h4>Behavioral examples · {c.behavioral_evidence.status==='hold'?'Expectation missing':'Independent review required'}</h4><p>Generated examples are proposed checks. Confirm their inputs and expected outcomes against your intended behavior; generated Lua and passing tests cannot establish that intent.</p>{c.behavioral_evidence.holds.length>0 && <ul>{c.behavioral_evidence.holds.map((hold,i)=><li key={i}>{hold}</li>)}</ul>}{c.behavioral_evidence.scenarios.map(s=><details key={s.id}><summary>Expected result {s.acceptance_index+1}: {c.acceptance[s.acceptance_index]}</summary><p>{s.fixture==='module'?'Module':s.fixture==='loaded-client'?'Addon file loaded by the test harness':'Harness client'} · {s.source_paths.join(', ')}</p>{s.fixture!=='module'&&<p>Client {JSON.stringify(s.name)} with addons {s.addons.join(', ')}.</p>}<p>{s.method?'Call as a method':'Call'} {s.target.join('.')||'the exported function'} with <span className="original-text">{JSON.stringify(s.args)}</span>.</p><p>Expected {s.observe.path.length?s.observe.path.join('.'):'first return value'}: <span className="original-text">{JSON.stringify(s.observe.expected)}</span>.</p><p>Incorrect outcome this test must reject: <span className="original-text">{JSON.stringify(s.incorrect)}</span>.</p>{s.setup.length>0 && <><p>Setup before the call:</p><pre>{JSON.stringify(s.setup,null,2)}</pre></>}<p>Existing test: {s.test_path}</p></details>)}<p className="small-text">Draft origin: {c.behavioral_evidence.origin}. No behavioral certification or run permission is supplied by this draft.</p></div>}
-    {c.review_feedback && <><h4>Recorded owner feedback</h4><p className="original-text">{c.review_feedback}</p></>}
-    {c.scope_missing.length>0&&<><h4>Missing scope requirements</h4><ul>{c.scope_missing.map((m,i)=><li key={i}>{m}</li>)}</ul>{c.path_candidates.length>0&&<p>Possible existing files (not selected): {c.path_candidates.join(', ')}</p>}</>}
-    <h4>Proposed verification · Not run</h4><ul>{c.verification_commands.map((check,i)=><li key={i}>{check.purpose}: <code>{check.argv.join(' ')}</code> (from {check.cwd})</li>)}</ul>
-    <h4>Independent checks still required</h4><ul>{c.independent_checks.map((check,i)=><li key={i}>{check}</li>)}</ul>
-    <p>Proposed limits: one attempt, {c.resource_limits.turns} turns, {c.resource_limits.total_tokens.toLocaleString()} generated tokens, {c.resource_limits.implementation_s/60} minutes implementation, {c.resource_limits.overall_seconds/60} minutes overall including waiting and delivery. No fallback.</p>
-    <details><summary>Evidence and remaining execution requirements</summary><ul>{c.evidence.map(e=><li key={e.path}>{e.path} · SHA-256 {e.sha256}</li>)}</ul><ul>{c.execution_blockers.map((b,i)=><li key={i}>{b}</li>)}</ul><pre>{JSON.stringify(c.resource_limits,null,2)}</pre></details>
+function RegressionContract({contract:c, asking}: {contract:NonNullable<Proposal['task_contract']>; asking:boolean}) {
+  return <section className="soft-callout" aria-label="Proposed test">
+    <h3>What the test would check</h3>
+    <ul>{c.acceptance.map((result,i)=><li key={i}>{result}</li>)}</ul>
+    {c.writable_paths.length ? <><p>{c.category==='lua-regression-tests'?'Workbench may add checks only to these existing test files. Addon code and the shared test tools stay outside the scope.':'Workbench may change only these reviewed files. The shared framework and unrelated behavior stay outside the scope.'}</p><ul>{c.writable_paths.map(p=><li key={p}>{p}</li>)}</ul></> : <p>No paths selected.</p>}
+    {c.behavioral_evidence && c.behavioral_evidence.scenarios.length>0 && <div className="test-examples">
+      <h4>Examples to review</h4><p>Check that each example describes what should happen and what the test should catch. Workbench checks whether the test can tell them apart after you approve the plan.</p>
+      {c.behavioral_evidence.scenarios.map(s=><div className="test-example" key={s.id}>
+        <strong>Expected result {s.acceptance_index+1}</strong>
+        <p>{s.method?'Call the method':'Use'} <code>{s.target.join('.')||'the function loaded by the test'}</code> {s.args.length?'with':'without inputs'} {s.args.map((arg,i)=><code key={i} className="example-chip">{JSON.stringify(arg)}</code>)}.</p>
+        <p>Expected {s.observe.path.length?s.observe.path.join('.'):'first return value'} <strong><code>{JSON.stringify(s.observe.expected)}</code></strong></p><p>Wrong result to catch <strong><code>{JSON.stringify(s.incorrect)}</code></strong></p>
+        <p>Runs in {s.test_path} using {s.source_paths.join(', ')}.</p>
+        {s.fixture!=='module'&&<p>Uses a test player named {JSON.stringify(s.name)} with {s.addons.join(', ') || 'no addons'}.</p>}
+        {s.setup.length>0 && <div><p>Before the test</p><ol>{s.setup.map((step,i)=><li key={i}>{step.op==='set'
+          ? <>Set {step.path.join('.')} to <code>{JSON.stringify(step.value)}</code>.</>
+          : <>Call {step.path.join('.')} {step.method?'as a method ':''}with <code>{JSON.stringify(step.args)}</code>.</>}</li>)}</ol></div>}
+      </div>)}</div>}
+    {c.scope_missing.length>0 && !asking && <><h4>Information still needed</h4><ul>{c.scope_missing.map((m,i)=><li key={i}>{m}</li>)}</ul></>}
+    <details><summary>Technical test plan and checks</summary>
+      {c.review_feedback && <><h4>Recorded planning feedback</h4><p className="original-text">{c.review_feedback}</p></>}
+      <p>{c.repository} · Base {c.resolved_base||'Unresolved'} ({c.base_ref})</p>
+      <p>Proposed destination for separately authorized delivery {c.pr_repository} / {c.pr_base_branch}.</p>
+      {c.path_candidates.length>0&&<p>Possible files {c.path_candidates.join(', ')}</p>}
+      <h4>Proposed verification · Not run</h4><ul>{c.verification_commands.map((check,i)=><li key={i}>{check.purpose} · <code>{check.argv.join(' ')}</code> (from {check.cwd})</li>)}</ul>
+      <ul>{c.independent_checks.map((check,i)=><li key={i}>{check}</li>)}</ul>
+      <ul>{c.evidence.map(e=><li key={e.path}>{e.path} · SHA-256 {e.sha256}</li>)}</ul>
+      <ul>{c.execution_blockers.map((b,i)=><li key={i}>{b}</li>)}</ul>
+      <pre>{JSON.stringify(c.resource_limits,null,2)}</pre></details>
   </section>;
 }

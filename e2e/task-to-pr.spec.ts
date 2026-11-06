@@ -10,16 +10,17 @@ for(const {width,hold} of [{width:1440,hold:false},{width:390,hold:false},{width
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('task-pr-step');await page.reload();
-  const option=page.getByLabel('Approve this scope and one task-to-PR budget together');
+  await page.getByText('Optional permission for this ready-made task to run and open a draft pull request',{exact:true}).click();
+  const option=page.getByLabel('Also allow this task to run and open one draft pull request');
   await expect(option).toBeVisible();await option.focus();await page.keyboard.press('Space');
   await expect(option).toBeChecked();
   await page.screenshot({path:artifactPath(`task-to-pr/budget-${width}.png`),fullPage:false});
-  await page.getByRole('button',{name:'Approve scope and one task-to-PR run',exact:true}).click();
+  await page.getByRole('button',{name:'Approve plan and allow this run',exact:true}).click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('task-pr-step');fixture('task-pr-step');await page.reload();
   fixture('task-pr-step');fixture('task-pr-step');await page.reload();
   await page.getByRole('link',{name:'Review changes and checks',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Real candidate checked',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Changes checked',exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Preparing draft PR delivery'})).toBeVisible();
   await page.screenshot({path:artifactPath(`task-to-pr/waiting-${width}.png`),fullPage:false});
   if(hold){fixture('task-pr-hold');await page.reload();await expect(page.getByRole('heading',{name:'PR delivery needs attention'})).toBeVisible();await expect(page.getByText('The target base moved.',{exact:false})).toBeVisible();await page.screenshot({path:artifactPath('task-to-pr/held-desktop.png')});return;}

@@ -7,19 +7,21 @@ test('ordinary regression request prepares a bound contract without a registered
   await page.goto('/intake/new?kind=feature');
   await page.getByLabel('Title Required').fill('Regression coverage for invalid profile names');
   await page.getByLabel('Description Required').fill('In tests/test_profiles.lua cover rejecting invalid names while preserving the selected profile.');
-  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Invalid names are rejected.\nThe selected profile stays unchanged.');
   await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('regression-planning');
-  const contract=page.getByRole('region',{name:'Proposed regression-test contract'});
-  await expect(contract.getByRole('heading',{name:'Proposed task contract'})).toBeVisible();
+  const contract=page.getByRole('region',{name:'Proposed test'});
+  await expect(contract.getByRole('heading',{name:'What the test would check'})).toBeVisible();
   await expect(contract.getByText('tests/test_profiles.lua',{exact:true})).toBeVisible();
+  await expect(contract.getByText('Proposed verification · Not run')).not.toBeVisible();
+  await contract.getByText('Technical test plan and checks',{exact:true}).click();
   await expect(contract.getByText('Proposed verification · Not run')).toBeVisible();
   await expect(contract.getByText(/Before execution, independently certify/).first()).toBeVisible();
-  await expect(page.getByRole('checkbox',{name:'Approve this scope and one task-to-PR budget together'})).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'Approve proposal',exact:true})).toBeEnabled();
+  await expect(page.getByRole('checkbox',{name:'Also allow this task to run and open one draft pull request'})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toBeEnabled();
   const identity=page.url().split('/intake/')[1].split('?')[0];
   const saved=await page.request.get('/api/intake/'+identity).then(r=>r.json());
   expect(saved.proposals[0].basis).toBe('preparation');
@@ -35,7 +37,7 @@ test('ordinary regression request prepares a bound contract without a registered
   await page.evaluate(()=>document.documentElement.style.fontSize='');
   await page.setViewportSize({width:320,height:740});await overflow(page);
   await page.reload();
-  await expect(contract.getByRole('heading',{name:'Proposed task contract'})).toBeVisible();
+  await expect(contract.getByRole('heading',{name:'What the test would check'})).toBeVisible();
   const again=await page.request.get('/api/intake/'+identity).then(r=>r.json());
   expect(again.proposals[0]).toEqual(saved.proposals[0]);
 });
@@ -45,22 +47,22 @@ test('missing target is explained and clarified without granting permissions',as
   await page.goto('/intake/new?kind=feature');
   await page.getByLabel('Title Required').fill('Regression coverage for truncated sharing payloads');
   await page.getByLabel('Description Required').fill('Exercise rejection of a truncated settings payload.');
-  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('A truncated payload does not apply any settings.');
   await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('regression-planning');
-  await expect(page.getByRole('heading',{name:'Missing scope requirements'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Workbench needs your help'})).toBeVisible();
   await expect(page.getByText('No paths selected.')).toBeVisible();
-  await expect(page.getByRole('button',{name:'Approve proposal',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toHaveCount(0);
   await overflow(page);await capture(page,info,'regression-missing-phone');
-  await page.getByLabel('Your answer').fill('Use tests/test_share.lua.');
-  await page.getByRole('button',{name:'Send information'}).click();
+  await page.getByLabel('Possible existing test').selectOption('tests/test_share.lua');
+  await page.getByRole('button',{name:'Use this test'}).click();
   fixture('regression-planning');
   await page.getByRole('button',{name:'Open current proposal'}).click();
-  await expect(page.getByRole('region',{name:'Proposed regression-test contract'}).getByText('tests/test_share.lua',{exact:true})).toBeVisible();
-  await expect(page.getByRole('heading',{name:'Missing scope requirements'})).toHaveCount(0);
+  await expect(page.getByRole('region',{name:'Proposed test'}).getByText('tests/test_share.lua',{exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Workbench needs your help'})).toHaveCount(0);
   await overflow(page);
 });
 
@@ -69,28 +71,27 @@ for(const width of [1440,390])test(`generated behavioral examples need independe
   await page.goto('/intake/new?kind=feature');
   await page.getByLabel('Title Required').fill('CONTROLLED regression request with generated behavioral checks');
   await page.getByLabel('Description Required').fill('In tests/test_normalize.lua cover trimming surrounding spaces and lowercasing names.');
-  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Names with surrounding spaces and capitals normalize to lowercase.');
   await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('reviewed-offer-scenario-plan');await page.reload();
-  const contract=page.getByRole('region',{name:'Proposed regression-test contract'});
-  await expect(contract.getByText('Behavioral examples · Independent review required')).toBeVisible();
-  const approve=page.getByRole('button',{name:'Approve proposal',exact:true});
+  const contract=page.getByRole('region',{name:'Proposed test'});
+  await expect(contract.getByText('Examples to review')).toBeVisible();
+  const approve=page.getByRole('button',{name:'Approve plan',exact:true});
   await expect(approve).toBeDisabled();
-  await contract.getByText('Expected result 1:',{exact:false}).click();
-  await expect(contract.getByText('Expected first return value: "alice".',{exact:true})).toBeVisible();
+  await expect(contract.getByText('Expected first return value "alice"',{exact:true})).toBeVisible();
   if(width===390)await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   await overflow(page);
-  await contract.getByText('Behavioral examples · Independent review required').scrollIntoViewIfNeeded();
+  await contract.getByText('Examples to review').scrollIntoViewIfNeeded();
   await page.screenshot({path:(await import('./output')).artifactPath(`generated-expectations/expectations-viewport-${width}.png`)});
-  await contract.getByText('Expected first return value: \"alice\".',{exact:true}).scrollIntoViewIfNeeded();
+  await contract.getByText('Expected first return value "alice"',{exact:true}).scrollIntoViewIfNeeded();
   await page.screenshot({path:(await import('./output')).artifactPath(`generated-expectations/observation-viewport-${width}.png`)});
-  await page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.').scrollIntoViewIfNeeded();
+  await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').scrollIntoViewIfNeeded();
   await page.screenshot({path:(await import('./output')).artifactPath(`generated-expectations/confirmation-viewport-${width}.png`)});
   if(width===390)await page.evaluate(()=>document.documentElement.style.fontSize='');
-  await page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.').check();
+  await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').check();
   await expect(approve).toBeEnabled();
   const submission=page.waitForResponse(r=>r.url().endsWith('/decisions')&&r.request().method()==='POST');
   await approve.click();expect((await submission).status()).toBe(200);
@@ -118,15 +119,15 @@ test('generated expectation mismatch stays a specific browser hold after review'
   await page.goto('/intake/new?kind=feature');
   await page.getByLabel('Title Required').fill('CONTROLLED wrong expectation must hold');
   await page.getByLabel('Description Required').fill('In tests/test_normalize.lua cover trimming spaces and lowercasing names.');
-  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Names become lowercase.');
   await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('reviewed-offer-scenario-wrong-plan');await page.reload();
   // Even an incorrect human confirmation cannot turn mismatching evidence into certification.
-  await page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.').check();
-  await page.getByRole('button',{name:'Approve proposal',exact:true}).click();
+  await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').check();
+  await page.getByRole('button',{name:'Approve plan',exact:true}).click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('reviewed-offer-scope');
   const result=JSON.parse(fixture('reviewed-offer-scenario-certify-hold'));
@@ -151,27 +152,26 @@ for(const width of [1440,390])test(`application worker prepares grounded ordinar
   await page.getByLabel('Description Required').fill(client
     ? `In tests/test_client.lua cover trimming spaces before storing the last name.\n${clientExample}`
     : `In tests/test_normalize.lua cover trimming spaces and lowercasing names.\n${moduleExample}`);
-  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill(client?'The last name stores bob after a spaced input.':'Spaces and capital letters normalize to alice.');
   await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   const planned=JSON.parse(fixture('reviewed-offer-automatic-worker'));
   expect(planned.adapter_calls).toBe(1);await page.reload();
-  const contract=page.getByRole('region',{name:'Proposed regression-test contract'});
-  await expect(contract.getByText('Behavioral examples · Independent review required')).toBeVisible();
-  await contract.getByText('Expected result 1:',{exact:false}).click();
-  await expect(contract.getByText(client?'Expected last: "bob".':'Expected first return value: "alice".',{exact:true})).toBeVisible();
-  const approve=page.getByRole('button',{name:'Approve proposal',exact:true});
+  const contract=page.getByRole('region',{name:'Proposed test'});
+  await expect(contract.getByText('Examples to review')).toBeVisible();
+  await expect(contract.getByText(client?'Expected last "bob"':'Expected first return value "alice"',{exact:true})).toBeVisible();
+  const approve=page.getByRole('button',{name:'Approve plan',exact:true});
   await expect(approve).toBeDisabled();
   if(client)await page.evaluate(()=>document.documentElement.style.fontSize='200%');
-  await contract.getByText('Expected result 1:',{exact:false}).scrollIntoViewIfNeeded();
+  await contract.getByText('Expected result 1',{exact:false}).scrollIntoViewIfNeeded();
   await overflow(page);
   const {artifactPath}=await import('./output');
   await page.screenshot({path:artifactPath(`automatic-scenarios/review-${width}.png`)});
-  await contract.getByText(client?'Expected last: \"bob\".':'Expected first return value: \"alice\".',{exact:true}).scrollIntoViewIfNeeded();
+  await contract.getByText(client?'Expected last "bob"':'Expected first return value "alice"',{exact:true}).scrollIntoViewIfNeeded();
   await page.screenshot({path:artifactPath(`automatic-scenarios/observation-${width}.png`)});
-  const confirmation=page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.');
+  const confirmation=page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.');
   await confirmation.check();await approve.click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   if(client)await page.evaluate(()=>document.documentElement.style.fontSize='');
@@ -196,10 +196,11 @@ for(const width of [1440,390])test(`application worker prepares grounded ordinar
 
 test('grounded intake asks for exact example values before opening approval',async({page})=>{
   fixture('reviewed-offer-automatic-setup');
-  await page.goto('/intake/new?kind=feature');
+  await page.goto('/');
+  await page.getByRole('link',{name:'Create a task',exact:true}).click();
   await page.getByLabel('Title Required').fill('Cover lowercase name normalization');
   await page.getByLabel('Description Required').fill('Synthetic fixture only. In tests/test_normalize.lua cover trimming spaces and lowercasing names.');
-  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Spaces and capital letters normalize to alice.');
   await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
@@ -208,10 +209,13 @@ test('grounded intake asks for exact example values before opening approval',asy
   expect(held).toMatchObject({adapter_calls:0,model_attempts:[],grants:0,requests:0,publications:0});
   await page.reload();
   await expect(page.getByText('Waiting for information',{exact:true})).toBeVisible();
-  await expect(page.getByRole('button',{name:'Approve proposal',exact:true})).toHaveCount(0);
-  await expect(page.getByText('Expected result 1:',{exact:false})).toHaveCount(0);
-  const question=page.getByText(/For expected result 1.*what exact arguments/).first();
-  await expect(question).toContainText('Example 1:');
+  await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toHaveCount(0);
+  await expect(page.getByText('Expected result 1',{exact:true})).toHaveCount(0);
+  const question=page.getByRole('heading',{name:'Workbench needs your help'});
+  await expect(page.getByText(/what exact arguments/).first()).not.toBeVisible();
+  await page.getByRole('textbox',{name:'Input 1',exact:true}).fill('  ALICE ');
+  await page.getByRole('textbox',{name:'Expected result',exact:true}).fill('alice');
+  await page.getByRole('textbox',{name:'Wrong result to catch',exact:true}).fill('ALICE');
   for(const width of [1440,390]){
     await page.setViewportSize({width,height:1000});
     await question.scrollIntoViewIfNeeded();
@@ -219,14 +223,15 @@ test('grounded intake asks for exact example values before opening approval',asy
     await page.screenshot({path:(await import('./output')).artifactPath(`screenshots/grounded-clarification-${width}.png`)});
   }
   const answered=page.waitForResponse(r=>r.url().endsWith('/clarification')&&r.request().method()==='POST');
-  await page.getByLabel('Your answer').fill(moduleExample);
-  await page.getByRole('button',{name:'Send information'}).click();
-  expect((await answered).status()).toBe(200);
+  await page.getByRole('button',{name:'Send example'}).click();
+  const answer=await answered;
+  expect(answer.status()).toBe(200);
+  expect(JSON.parse(answer.request().postDataJSON().text.split('Example 1: ')[1])).toMatchObject({args:['  ALICE '],expected:'alice',incorrect:'ALICE'});
   const planned=JSON.parse(fixture('reviewed-offer-automatic-worker'));
   expect(planned.adapter_calls).toBe(1);
   await page.reload();
-  await expect(page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.')).toBeVisible();
-  await expect(page.getByRole('button',{name:'Approve proposal',exact:true})).toBeDisabled();
+  await expect(page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.')).toBeVisible();
+  await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toBeDisabled();
 });
 
 test('application preparation policy denial is a specific hold without a duplicate retry button',async({page})=>{
@@ -234,14 +239,14 @@ test('application preparation policy denial is a specific hold without a duplica
   await page.goto('/intake/new?kind=feature');
   await page.getByLabel('Title Required').fill('Cover lowercase normalization with reviewed policy');
   await page.getByLabel('Description Required').fill(`In tests/test_normalize.lua cover trimming spaces and lowercasing names.\n${moduleExample}`);
-  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Spaces and capital letters normalize to alice.');
   await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('reviewed-offer-automatic-worker');await page.reload();
-  await page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.').check();
-  await page.getByRole('button',{name:'Approve proposal',exact:true}).click();
+  await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').check();
+  await page.getByRole('button',{name:'Approve plan',exact:true}).click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   const result=JSON.parse(fixture('reviewed-offer-automatic-denied-worker'));
   expect(result.jobs.find((j:{kind:string})=>j.kind==='behavioral_preparation').status).toBe('failed');
@@ -258,11 +263,13 @@ test('application preparation policy denial is a specific hold without a duplica
 
 async function openLocalOffer(page: import('@playwright/test').Page) {
   fixture('reviewed-offer-automatic-setup');
-  await page.goto('/intake/new?kind=feature');
+  await page.goto('/');
+  await page.getByRole('link',{name:'Create a task',exact:true}).click();
   await page.getByLabel('Title Required').fill('Cover lowercase name normalization');
   await page.getByLabel('Description Required').fill('Cover trimming spaces and lowercasing names.');
-  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Spaces and capital letters normalize to alice.');
+  await page.getByText('Optional test details',{exact:true}).click();
   await page.getByLabel('Existing test paths').fill('tests/test_normalize.lua');
   await page.getByLabel('Add a text example for the first expected result').check();
   await page.getByLabel('Example input',{exact:true}).fill('  ALICE ');
@@ -273,13 +280,12 @@ async function openLocalOffer(page: import('@playwright/test').Page) {
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   const planned=JSON.parse(fixture('reviewed-offer-automatic-worker'));
   expect(planned.adapter_calls).toBe(1);
-  const proposal=page.getByRole('region',{name:'Proposed regression-test contract'});
-  await proposal.getByText('Expected result 1:',{exact:false}).click();
-  await expect(proposal.getByText('Expected first return value: "alice".')).toBeVisible();
-  await expect(proposal.getByText('Incorrect outcome this test must reject: "ALICE".')).toBeVisible();
-  const approve=page.getByRole('button',{name:'Approve proposal',exact:true});
+  const proposal=page.getByRole('region',{name:'Proposed test'});
+  await expect(proposal.getByText('Expected first return value "alice"')).toBeVisible();
+  await expect(proposal.getByText('Wrong result to catch "ALICE"')).toBeVisible();
+  const approve=page.getByRole('button',{name:'Approve plan',exact:true});
   await expect(approve).toBeDisabled();
-  await page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.').check();
+  await page.getByLabel('I checked the test examples above. The operation, inputs, expected results and wrong results match the behavior I asked for.').check();
   await approve.click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('reviewed-offer-automatic-tick');
@@ -292,7 +298,7 @@ async function openLocalOffer(page: import('@playwright/test').Page) {
   expect(prepared).toMatchObject({adapter_calls:0,grants:0,requests:0,publications:0});
   const offer=page.getByRole('region',{name:'Certified task run approval'});
   await expect(offer.getByRole('radio',{name:'Local implementation only'})).toBeChecked();
-  await expect(offer.getByText(/Remote pushes, draft PRs, merges and releases remain unauthorized/)).toBeVisible();
+  await expect(offer.getByText(/Publishing, merging, releasing and installing each require separate permission/)).toBeVisible();
   await expect(offer.getByRole('button',{name:'Approve local implementation',exact:true})).toBeDisabled();
   await expect(offer.getByText('tests/test_normalize.lua',{exact:true})).toBeVisible();
   return offer;
@@ -340,6 +346,7 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
 
   fixture('reviewed-offer-automatic-local-wait');
   await expect(page.getByRole('heading',{name:'Preparing approved task'})).toBeVisible();
+  await page.getByText('Permission for this run',{exact:true}).click();
   await expect(page.getByRole('heading',{name:'Task budget applied'})).toBeVisible();
   await expect(page.getByText('Local implementation only. Publication requires separate approval.')).toBeVisible();
   const result=JSON.parse(fixture('reviewed-offer-automatic-local-'+outcome));
@@ -351,7 +358,7 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
   }
   const progress=page.getByRole('region',{name:'Task implementation progress'});
   await progress.getByRole('link',{name:outcome==='pass'?'Review changes and checks':'View run details'}).click();
-  const review=page.getByRole('region',{name:'Real task and candidate review'});
+  const review=page.getByRole('region',{name:'Run result and checks'});
   await expect(review).toBeVisible();
   const executionPath='/api/real-executions/'+new URL(page.url()).pathname.split('/').at(-1);
   const execution=await page.request.get(executionPath).then(r=>r.json());
@@ -359,24 +366,39 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
   expect(execution.publication_requested).toBe(false);
   expect(await page.request.get(executionPath+'/delivery').then(r=>r.json())).toBeNull();
   if(outcome==='pass'){
-    await expect(review.getByRole('heading',{name:'Real candidate checked'})).toBeVisible();
+    await expect(review.getByRole('heading',{name:'Test changes checked'})).toBeVisible();
+    await review.getByText('See the changes in code',{exact:true}).click();
     await expect(review.getByLabel('Unified diff for tests/test_normalize.lua')).toContainText('assert(normalize("  ALICE ") == "alice")');
-    await expect(review.getByText(/Check [1-4]: pass · exit 0/)).toHaveCount(4);
-    await review.getByText('Check 4: pass · exit 0').click();
+    await expect(review.locator('.check-summary').getByText('Passed',{exact:true})).toHaveCount(4);
+    await expect(review.getByText('Technical results and run details',{exact:true})).toBeVisible();
+    await review.getByText('Technical results and run details',{exact:true}).click();
+    await review.getByText('Check 4 · pass · exit 0',{exact:true}).click();
     await expect(review.getByText(/5 passed, 0 failed/)).toBeVisible();
+    await review.getByText('Technical results and run details',{exact:true}).click();
+    await review.getByText('See the changes in code',{exact:true}).click();
     const {artifactPath}=await import('./output');
     for(const width of [1440,390]){
       await page.setViewportSize({width,height:1000});
       await overflow(page);
       await review.screenshot({path:artifactPath(`local-browser/result-${width}.png`)});
     }
+    await page.goto('/');
+    const recent=page.locator('.task-lane').filter({has:page.getByRole('heading',{name:'Recent outcomes'})});
+    await expect(recent.getByRole('link',{name:/Cover lowercase name normalization.*Checks passed/})).toBeVisible();
+    for(const width of [1440,390]){
+      await page.setViewportSize({width,height:1000});
+      await overflow(page);
+      await page.screenshot({path:artifactPath(`local-browser/work-${width}.png`),fullPage:true});
+    }
   }else if(outcome==='fail'){
-    await expect(review.getByRole('heading',{name:'Real attempt needs attention'})).toBeVisible();
-    await expect(review.getByRole('region',{name:'Last failed check'}).getByText(/assertion failed/)).toBeVisible();
-    await expect(review.getByText('No frozen real candidate is available.')).toBeVisible();
+    await expect(review.getByRole('heading',{name:'Work could not finish'})).toBeVisible();
+    const failure=review.getByRole('region',{name:'Last failed check'});
+    await failure.getByText('See the failure output',{exact:true}).click();
+    await expect(failure.getByText(/assertion failed/)).toBeVisible();
+    await expect(review.getByText('No changes were saved for review.')).toBeVisible();
   }else{
-    await expect(review.getByRole('heading',{name:'Interrupted attempt retained'})).toBeVisible();
-    await expect(review.getByText('Inference completion is uncertain. The attempt remains consumed.')).toBeVisible();
+    await expect(review.getByRole('heading',{name:'Interrupted · Evidence retained'})).toBeVisible();
+    await expect(review.getByText('Workbench could not confirm how the model call ended. This attempt has been used.')).toBeVisible();
   }
 });
 
@@ -396,4 +418,21 @@ test('browser approval refuses changed certified evidence before saving a run',a
   await expect(page.getByRole('heading',{name:'Task preparation held'})).toBeVisible();
   expect(await page.request.get('/api'+new URL(page.url()).pathname).then(r=>r.json()).then(r=>r.decisions)).toHaveLength(1);
   expect(await page.request.get('/api/real-executions').then(r=>r.json()).then(r=>r.total)).toBe(0);
+});
+
+test('expired local approval holds the task without starting a run', async ({page})=>{
+  test.setTimeout(45000);
+  const offer=await openLocalOffer(page);
+  const task=new URL(page.url()).pathname;
+  await offer.getByRole('checkbox',{name:/I approve this exact task.*for local implementation/}).check();
+  await offer.getByRole('button',{name:'Approve local implementation',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  const expired=JSON.parse(fixture('reviewed-offer-automatic-local-expire'));
+  expect(expired).toMatchObject({grants:0,requests:0,publications:0});
+  await page.reload();
+  await expect(page.getByRole('region',{name:'Task implementation progress'}).getByRole('heading',{name:'Run approval expired',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Approve local implementation',exact:true})).toHaveCount(0);
+  await page.goto('/');
+  await expect(page.getByRole('heading',{name:'Needs your attention'})).toBeVisible();
+  await expect(page.locator('.task-lane').filter({has:page.getByRole('heading',{name:'Needs your attention'})}).locator(`a[href="${task}"]`)).toBeVisible();
 });

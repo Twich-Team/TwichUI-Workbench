@@ -9,7 +9,7 @@ from sqlalchemy import select
 from acceptance_transport_guard import install_offline_guard
 
 from workbench import real_execution, real_workspace, task_session, worker
-from workbench.db import real_execution_grants, real_execution_requests, real_publications, task_sessions
+from workbench.db import real_execution_grants, real_execution_requests, real_publications, task_sessions, proposal_decisions
 from workbench.real_workspace import durable
 
 
@@ -19,6 +19,18 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
     from test_verification_profiles import TEST
 
     install_offline_guard()
+    if outcome == 'expire':
+        assert worker.tick(engine, planning_adapter=planner)
+        with engine.begin() as c:
+            for row in c.execute(select(proposal_decisions)).mappings():
+                stamp = "2000-01-01T00:00:00+00:00" if row["payload"].get("run_budget") else "1999-01-01T00:00:00+00:00"
+                c.execute(proposal_decisions.update().where(proposal_decisions.c.id == row["id"]).values(created_at=stamp))
+        assert worker.tick(engine, planning_adapter=planner)
+        with engine.connect() as c:
+            assert c.execute(select(task_sessions.c.status)).scalar_one() == 'held'
+            assert not c.execute(select(real_execution_requests)).first()
+        return
+
     if outcome == 'wait':
         # Apply the browser decision and queue the session. The worker has not claimed it.
         assert worker.tick(engine, planning_adapter=planner)

@@ -67,7 +67,7 @@ def main():
             "reviewed-offer-automatic-setup", "reviewed-offer-automatic-worker", "reviewed-offer-automatic-denied-worker",
             "reviewed-offer-automatic-tick", "reviewed-offer-automatic-local-wait",
             "reviewed-offer-automatic-local-pass", "reviewed-offer-automatic-local-fail",
-            "reviewed-offer-automatic-local-interrupt", "reviewed-offer-automatic-local-recover",
+            "reviewed-offer-automatic-local-interrupt", "reviewed-offer-automatic-local-recover", "reviewed-offer-automatic-local-expire",
             "reviewed-offer-scenario-plan", "reviewed-offer-scenario-certify",
             "reviewed-offer-scenario-wrong-plan", "reviewed-offer-scenario-certify-hold",
             "task-pr-setup",

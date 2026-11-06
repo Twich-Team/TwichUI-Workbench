@@ -8,7 +8,8 @@ import { ApiError, loadTask, readDraft, request, saveDecision, taskKey, type Tas
 import { Button } from './components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from './components/ui/dialog';
 
-import { IntakeActions, IntakeSummary, IntakeList, IntakeForm, IntakeDetail } from './Intake';
+import { IntakeActions, IntakeList, IntakeForm, IntakeDetail } from './Intake';
+import { TaskOverview } from './TaskOverview';
 import { Monitoring } from './Monitoring';
 import { Settings } from './Settings';
 import { Models } from './Models';
@@ -28,20 +29,21 @@ export function App() {
   const location = useLocation();
   const source = useSource();
   const taskWorkflow = location.pathname.startsWith('/intake') || location.pathname.startsWith('/executions');
-  const destination = location.pathname.startsWith('/executions') ? 'Task runs' : location.pathname.startsWith('/intake') ? 'Intake & planning' : (location.pathname.startsWith('/backlog') || location.pathname.startsWith('/records/')) ? 'Backlog' : location.pathname.startsWith('/history') ? 'History' : location.pathname.startsWith('/models') ? 'Models' : location.pathname.startsWith('/settings') ? 'Settings' : location.pathname.startsWith('/monitoring') ? 'Monitoring' : 'Work';
+  const everyday = taskWorkflow || location.pathname === '/';
+  const destination = location.pathname.startsWith('/executions') ? 'Run results' : location.pathname.startsWith('/intake') ? 'Tasks' : (location.pathname.startsWith('/backlog') || location.pathname.startsWith('/records/')) ? 'Backlog' : location.pathname.startsWith('/history') ? 'History' : location.pathname.startsWith('/models') ? 'Models' : location.pathname.startsWith('/settings') ? 'Settings' : location.pathname.startsWith('/monitoring') ? 'Monitoring' : 'Work';
   return <div className="app-shell">
     <a className="skip-link" href="#main">Skip to content</a>
     <aside className="sidebar">
       <Link to="/" className="brand" aria-label="TwichUI Workbench home"><img className="brand-logo" src="/art/branding/twichui-launcher-transparent-edited.png" alt="" /><span>TwichUI<small>WORKBENCH</small></span></Link>
       <div className="workspace-label">YOUR WORKSPACE</div>
-      <nav className="primary-nav" aria-label="Main navigation">{['Work','Backlog','History','Monitoring','Models','Settings'].map((name,index) => <NavLink className={({isActive}) => 'nav-item'+(isActive || (name === 'Models' && location.pathname.startsWith('/models/')) || (name === 'Backlog' && location.pathname.startsWith('/records/')) ? ' active' : '')} key={name} to={`${index === 0 ? '/' : '/'+name.toLowerCase()}?source=${source}`} end>{index === 0 ? <Activity size={18} /> : index === 1 ? <FolderTree size={18} /> : index === 2 ? <HistoryIcon size={18} /> : index === 3 ? <Monitor size={18} /> : index === 4 ? <Cpu size={18} /> : <SettingsIcon size={18} />}{name}<ChevronRight size={15} /></NavLink>)}</nav>
-      <div className="sidebar-note"><ShieldCheck size={20} /><p>Review workspace<br /><span>Decisions and recorded outcomes</span></p></div>
+      <nav className="primary-nav" aria-label="Main navigation">{['Work','Backlog','History','Monitoring','Models','Settings'].map((name,index) => <NavLink className={({isActive}) => 'nav-item'+(isActive || (name === 'Work' && taskWorkflow) || (name === 'Models' && location.pathname.startsWith('/models/')) || (name === 'Backlog' && location.pathname.startsWith('/records/')) ? ' active' : '')} key={name} to={index === 0 && source !== 'pilot' ? '/' : `${index === 0 ? '/' : '/'+name.toLowerCase()}?source=${source}`} end>{index === 0 ? <Activity size={18} /> : index === 1 ? <FolderTree size={18} /> : index === 2 ? <HistoryIcon size={18} /> : index === 3 ? <Monitor size={18} /> : index === 4 ? <Cpu size={18} /> : <SettingsIcon size={18} />}{name}<ChevronRight size={15} /></NavLink>)}</nav>
+      <div className="sidebar-note"><ShieldCheck size={20} /><p>{everyday?'Your workshop':'Review workspace'}<br /><span>{everyday?'Tasks, decisions and results':'Decisions and recorded outcomes'}</span></p></div>
       <div className="fixture-mark"><span /> LOCAL WORKBENCH</div>
     </aside>
     <div className="workspace">
-      <header className="topbar"><span>Workbench <ChevronRight size={13} /> <strong>{destination}</strong></span><span className="topbar-mode">{taskWorkflow?'Local Workbench · Task-specific permissions':'Local Workbench · No live actions'}</span></header>
+      <header className="topbar"><span>Workbench <ChevronRight size={13} /> <strong>{destination}</strong></span><span className="topbar-mode">{everyday?'Local Workbench · Task-specific permissions':'Local Workbench · No live actions'}</span></header>
       <main id="main"><Routes><Route path="/executions" element={<ExecutionRuns />} /><Route path="/executions/:identity" element={<RealExecutionReview />} /><Route path="/" element={<TaskList />} /><Route path="/intake" element={<IntakeList />} /><Route path="/intake/new" element={<IntakeForm />} /><Route path="/intake/:identity" element={<IntakeDetail />} /><Route path="/backlog" element={<Backlog />} /><Route path="/history" element={<History />} /><Route path="/monitoring" element={<Monitoring />} /><Route path="/settings" element={<Settings />} /><Route path="/models/*" element={<Models />} /><Route path="/records/:source/:recordId" element={<RecordDetail />} /><Route path="/tasks/:taskId/*" element={<TaskPage />} /><Route path="*" element={<Notice title="That page has wandered off." text="Return to your work to find the current review." />} /></Routes></main>
-      <footer><span>TwichUI Workbench</span><span>{taskWorkflow?'Task runs and draft PRs require an explicit budget · Human review and merge remain':'Local examples or read-only observations · Nothing is published here'}</span></footer>
+      <footer><span>TwichUI Workbench</span><span>{everyday?'Runs and publishing require your permission':'Local examples or read-only observations · Nothing is published here'}</span></footer>
     </div>
   </div>;
 }
@@ -52,20 +54,30 @@ function Notice({ title, text, retry }: { title: string; text: string; retry?: (
 function Loading() { return <section className="loading" role="status"><span className="loading-dot" /><p>Opening your work…</p><div className="skeleton" /><div className="skeleton short" /></section>; }
 function TaskList() {
   const source = useSource();
+  const location = useLocation();
+  return <>
+    <div className="page-heading"><div><img className="heading-art" src="/art/workshop/overview.png" alt="" /><h1>Work</h1><p>Describe a task, make decisions and review what finished.</p></div></div>
+    <IntakeActions /><TaskOverview preview />
+    <details className="panel workspace-examples" open={source==='pilot' || new URLSearchParams(location.search).has('source') || undefined}>
+      <summary>Workspace records and examples</summary><WorkspaceExamples/>
+    </details>
+  </>;
+}
+
+function WorkspaceExamples() {
+  const source = useSource();
   const query = useQuery({ queryKey: ['tasks'], queryFn: () => request<Task[]>('/api/tasks'), refetchInterval: 1500, enabled: source === 'fixture' });
   const fixtureTasks = query.data || [];
   if (source === 'fixture' && query.isPending) return <Loading />;
   if (source === 'fixture' && !query.data) return <Notice title="Your work couldn’t be loaded." text="The review store may be taking a moment. Your saved decisions remain recorded." retry={() => void query.refetch()} />;
   return <>
     {query.isError && <p className="form-error" role="alert">Refresh is unavailable. Showing the last loaded work.</p>}
-    <div className="page-heading"><div><img className="heading-art" src="/art/workshop/overview.png" alt="" /><h1>Work</h1><p>Decisions, current work and recorded outcomes.</p></div></div>
-    <IntakeActions /><ExecutionRuns preview /><SourcePicker /><WorkSummary reviewTaskId={fixtureTasks.find(task => task.review_available)?.id} />
+    <SourcePicker /><WorkSummary reviewTaskId={fixtureTasks.find(task => task.review_available)?.id} />
     {source === 'fixture' && <section className="work-section" id="reviews"><div className="section-heading"><h2>Review queue</h2><span>Contract review</span></div>
       {fixtureTasks.length === 0 ? <Notice title="All clear for now." text="There are no fixture tasks waiting here. New work will appear when it’s available." /> : fixtureTasks.filter(task => task.review_available || task.latest_command).map(task => <div className="task-card" key={task.id}>
         <div className="task-icon"><BookOpen size={26} strokeWidth={1.3} /></div><div className="task-card-content"><span className="subsystem">{task.subsystem || 'Area not recorded'}</span><h2><Link to={`/tasks/${task.id}`}>{task.title}</Link></h2><p>{task.summary || 'No summary was recorded for this task.'}</p><div className="task-meta"><span className={`badge tone-${tone(taskDisplayState(task))}`}><CircleDot size={12} />{taskDisplayState(task)}</span><span><CheckCheck size={15} /> Checks passed</span><span>Not published</span></div></div><Link to={`/tasks/${task.id}/review`} className="review-card-action">{task.review_available ? 'Open review' : 'View saved review'}<ArrowRight size={16}/></Link>
       </div>)}
     </section>}
-    {source === 'fixture' && <IntakeSummary />}
     <details className="diagnostics"><summary>Workspace limits and evidence</summary><p>{source === 'fixture' ? 'Demo records are simulated. Reviews use the local database and separate worker; saved and applied are separate outcomes.' : 'Maintenance observations are read only. Live review actions are unavailable.'} Nothing here publishes changes or starts implementation.</p></details>
   </>;
 }
@@ -83,7 +95,7 @@ function TaskPage() {
   if (location.pathname.endsWith('/verification')) return <Verification task={task}/>;
   return <>
     {query.isError && <p className="form-error" role="alert">Refresh is unavailable. Showing the last loaded task. Your choices are kept.</p>}
-    <Link className="back-link" to="/"><ArrowLeft size={15} />All work</Link>
+    <Link className="back-link" to="/?source=fixture"><ArrowLeft size={15} />All work</Link>
     <div className="page-heading detail-heading"><div><p className="eyebrow">{task.subsystem || 'Area not recorded'}</p><h1>{task.title}</h1><p>{task.summary || 'No summary was recorded for this task.'}</p></div></div>
     <div className="detail-grid"><div className="main-column">
       <section className="panel review-intro"><div className="section-heading"><span className={`badge tone-${tone(taskDisplayState(task))}`}><CircleDot size={12} />{taskDisplayState(task)}</span><span className="revision-label">Review {task.revision}</span></div>
