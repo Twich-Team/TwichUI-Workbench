@@ -1,3 +1,54 @@
+# Usability pass available for local review — November 6, 2026 Mountain time
+
+Open [127.0.0.1:9189](http://127.0.0.1:9189/) on the Workbench host or through
+the owner's SSH loopback forwarding. `workbench-usability-preview-9189.service`
+started at 9:33:27 a.m. MST and expires about 11:33:27 a.m. MST on November 6.
+It can be closed sooner with `systemctl --user stop workbench-usability-preview-9189.service`.
+Practice input is in memory. The original preview at 9188 keeps its earlier build
+and its own deadline. Port 9487 still serves the earlier installed app, and
+port 8765 kept its owner.
+
+The owner feedback now guides what appears first. Create a task starts with title
+and description. Specialized choices are under **Task options**. The run
+decision shows the test scope, time and model availability, and where the
+result goes. The explicit acknowledgement and separate publishing choice
+still lead to the existing exact bound decision. Technical limits are
+available on demand. **Needs attention** puts the question and answer before
+a collapsed supporting plan. **Progress** shows the recorded update beneath
+the stage strip. **Checked result** gives the behavior covered by frozen
+verification, the extent and location of the change, and offline limitations.
+Check details, code and records are optional. The existing preview controls
+keep sample approvals inactive. No real run or deployment occurred.
+
+Candidate `cd46482c4a9f031b3bc777cbe4763b5db30660aa` builds
+`index-4ozvO3nT.js` and `index-BPx3MuYY.css`. Build, type, lint and migration
+checks passed. Twenty-five frontend tests and 105 focused backend tests
+passed. The final backend projection also passed a focused recheck and was
+exercised against the immutable retained map-fade store. The new read view
+showed only the behavior tied to that stored verification. It granted no
+authority. Local versus draft approval, replay, changed and expired offers
+and declined plans were covered by offline checks.
+
+Chromium exercised the simulated Work overview, intake, plan, run permission,
+checking, clarification and result at 1440 and 390 pixels and at 320 pixels
+with 200% text. Verified retained description when switching task options,
+visible keyboard focus, default collapsed disclosures, sample labels, and
+rejection of approval and execution writes by the preview. Inspected
+[phone approval](../artifacts/runs/usability-review.skS9Gn/approval-phone.jpg)
+and [desktop result](../artifacts/runs/usability-review.skS9Gn/result-desktop.jpg).
+Only those two small captures were retained, totaling 55,399 bytes.
+No recordings or browser reports were produced. Remaining counted headroom
+is 1,601,898 bytes of the existing 512 MiB cap. Full browser and final
+visual comparisons remain pending within a larger evidence allowance.
+Physical device and in-game behavior remain unverified.
+
+The [combined request](WORKFLOW_ACCEPTANCE_REQUEST_20261106.md) now binds this
+candidate. The prior proposed archive targets still match their fingerprint.
+The new request is unapproved and covers the exact verified archive, remaining
+offline checks and one subsequent bounded map-fade trial with restoration.
+The earlier real-model evidence remains historical. No archive, model call,
+installation or publication took place in this usability pass.
+
 # Owner review preview open — November 6, 2026 Mountain time
 
 Review the simpler task screens at [127.0.0.1:9188](http://127.0.0.1:9188/).

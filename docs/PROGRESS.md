@@ -1,3 +1,18 @@
+## November 6, 2026 — practical task decisions and readable results
+
+Owner feedback is recorded as guidance about what to show first. The updated
+candidate leads with the description, the current question or approval, the
+latest recorded activity, and the behavior covered by checks. It keeps local
+work as the default and retains the distinct draft permission, exact scope
+binding and all backend enforcement.
+
+Build and focused offline checks passed. The new 9189 preview uses simulated
+records, and the earlier 9188 preview and installed app kept their owners.
+Desktop, phone and enlarged text were exercised in Chromium. Two inspected
+captures total 55,399 bytes. Full browser and final visual comparisons remain
+pending. CONTINUATION links the new candidate and the updated combined
+authorization request. No model use, archival or installation occurred.
+
 ## November 6, 2026 — owner review preview and combined verification request
 
 The existing 9187 result review shows an earlier build. A separate 9188

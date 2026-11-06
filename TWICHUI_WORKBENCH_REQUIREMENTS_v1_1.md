@@ -1,7 +1,7 @@
 # TwichUI Workbench — Product Requirements and Roadmap
 
 Version: 1.1 — owner requirements, revised November 6, 2026
-Revision: Owner-facing task workflow and approval explanations
+Revision: Owner-facing task workflow, approval explanations, and readability
 Date: November 6, 2026
 Owner: Rich
 
@@ -38,6 +38,8 @@ This example does not limit the product to bug reports. Retain the full intended
 - Use plain English in the app and in user-facing development reports.
 - Make the ordinary path usable without engineering knowledge. Start with what the owner asked for, show what is happening and what comes next, and lead with the decision or result that matters now.
 - Explain each approval using the actual reviewed task, permitted action, limits, consequences and remaining uncertainty. Keep required decisions separate where the workflow requires separate authority. A new or expired offer needs its own valid decision. The summary and its optional technical details must reflect the same authoritative data.
+- Lead with the description at intake and with the question and answer when clarification is needed. Put the current decision, its practical consequences, and the outcome ahead of supporting plans or records. Provide optional details for exact limits, examples, code and check records while keeping material restrictions, time, cost, local service availability and delivery choices readable at the decision.
+- Treat basic readability at desktop and phone sizes as part of the working task flow. Use legible supporting text, visible focus and usable enlarged text. Present the latest recorded activity and distinguish offline checks from installed or in-game behavior.
 - Keep technical detail in advanced views and supporting reports. Deterministic explanations are the baseline. Model-assisted explanations are optional, require their own authorization where applicable, and confer no authority.
 - Let outcomes fit the request. Show findings, test results, proposed changes or completed checked work. State what was checked and what still needs evidence, and explain why held work stopped and what the owner can do.
 - Treat workflow examples and controls as illustrations of the desired simplicity. The layout and interaction can evolve as long as they satisfy these principles.
