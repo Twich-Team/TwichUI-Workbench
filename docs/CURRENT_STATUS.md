@@ -15,8 +15,9 @@ November 6, 2026 Mountain time.
   Workbench holds on missing or available credit signals.
 - The verified home LAN is `10.0.0.0/24` on `enp4s0`, with host
   `10.0.0.9` and gateway `10.0.0.1`. The staged HTTPS proposal accepts
-  any certified computer on that subnet. Cutover still requires one
-  explicit approval, private TLS provisioning and firewall preflight.
+  any certified computer on that subnet. The subnet matches the owner's
+  intent. The operator access choice, private TLS provisioning, firewall
+  preflight and cutover approval remain pending.
 - The proposed app covers supported regression tests with checked local
   diffs. General bug fixes, features, inspections, simulator work, draft
   PR delivery, queue-wide pause and routine evidence retention remain open.

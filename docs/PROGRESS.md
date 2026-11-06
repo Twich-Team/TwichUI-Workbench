@@ -1,3 +1,15 @@
+## November 6, 2026 — LAN operator access decision
+
+- Confirmed the sealed candidate still requires a client certificate before
+  any Workbench route. In-process testing showed that the app's CSRF token
+  can be obtained by either admitted LAN peer and provides no owner identity.
+- Documented server trust separately from client enrollment and the tradeoff
+  of trusting all reachable LAN devices with the existing approval flow.
+  A shared access gate or subnet-only mode requires a revised seal.
+- Kept both owner account observations pending and the connector held.
+  The [combined decision](EVERYDAY_INSTALL_APPROVAL_20261106.md) retains
+  the exact existing candidate, history copy, rollback and acceptance limits.
+
 ## November 6, 2026 — Home LAN and included allowance
 
 - Verified the actual interface, prefix, connected route and gateway.

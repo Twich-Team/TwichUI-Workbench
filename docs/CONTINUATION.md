@@ -1,20 +1,23 @@
 # Home LAN and Codex billing boundary — November 6, 2026 Mountain time
 
-The owner clarified that any home-LAN computer should be able to connect.
-The server's DHCP address is `10.0.0.9/24` on `enp4s0`, with connected
-`10.0.0.0/24` and gateway `10.0.0.1`. Candidate `133b485` seals that subnet
-for the dedicated HTTPS listener, systemd allowlist and conditional UFW
-proposal. Client certificates authorize browsers without an IP pin. The
-loopback app still serves the earlier build.
+The owner confirmed `10.0.0.0/24` as the intended home LAN. The server
+remains `10.0.0.9/24` on `enp4s0`, with gateway `10.0.0.1`. No firewall
+approval was granted. Candidate `133b485` and its seal are unchanged.
+Its dedicated HTTPS unit requires a trusted client certificate. This
+was added as an operator access safeguard, not a dashboard login or
+product requirement. The combined request explains per-device setup,
+the LAN-only trust tradeoff, and the option of a shared access gate.
+Only the client-certificate option is sealed. Await the owner's choice
+before treating any other access design as part of the package.
 
-The owner wants only the existing Codex subscription allowance. The pinned
-App Server exposes allowance and credit snapshots with no per-turn billing
-selector. The candidate holds on absent or available credit signals and
-rechecks before sending source. The exact owner checks are Automatic reload
-and the additional usage-credit balance. Keep live Codex acceptance held
-until the account prerequisites and explicit approval are recorded. See the
-[combined installation request](EVERYDAY_INSTALL_APPROVAL_20261106.md) for
-the sealed record, exact account paths, evidence, limits, and rollback.
+The Codex policy remains existing signed-in allowance only, with no
+API key, additional credits, purchases or automatic reload. The owner
+will check the additional usage-credit balance and Automatic reload.
+Both results are pending. Keep Codex held on unclear account status or
+ineligible live signals. The App Server checks are snapshots with no
+per-turn billing selector. The [combined installation request](EVERYDAY_INSTALL_APPROVAL_20261106.md)
+binds the decision, verified history, rollback, bounded acceptance
+and cleanup. The loopback app still serves the earlier build.
 
 The prior stages, checked history backup and rollback remain intact. No
 live provider call, source transmission, account change, installation,
