@@ -97,10 +97,11 @@ for(const width of [1440,390])test(`generated behavioral examples need independe
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('reviewed-offer-scope');fixture('reviewed-offer-scenario-certify');await page.reload();
   const offer=page.getByRole('region',{name:'Certified task run approval'});
-  await expect(offer.getByRole('heading',{name:'Review one task and draft-PR budget'})).toBeVisible();
+  await expect(offer.getByRole('heading',{name:'Review and approve implementation'})).toBeVisible();
   await offer.screenshot({path:(await import('./output')).artifactPath(`generated-expectations/offer-${width}.png`)});
-  await offer.getByRole('checkbox',{name:'I approve this exact scope, aggregate budget, and one draft PR to the destination above.'}).check();
-  await offer.getByRole('button',{name:'Approve scope, budget and one draft-PR run',exact:true}).click();
+  await offer.getByRole('radio',{name:'Also authorize one draft PR'}).check();
+  await offer.getByRole('checkbox',{name:'I approve this exact task, expected behavior, scope, limits, and one draft PR.'}).check();
+  await offer.getByRole('button',{name:'Approve implementation and one draft PR',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
   const result=JSON.parse(fixture('reviewed-offer-controller'));
   expect(result.controller_calls).toBe(1);expect(result.preparations[0].certified).toBe(true);
@@ -134,7 +135,7 @@ test('generated expectation mismatch stays a specific browser hold after review'
   const hold=page.getByRole('region',{name:'Task preparation hold'});
   await expect(hold.getByText(/capital-name: the expected observation or fixture setup/)).toBeVisible();
   await expect(page.getByRole('region',{name:'Certified task run approval'})).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'Approve scope, budget and one draft-PR run',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Approve implementation and one draft PR',exact:true})).toHaveCount(0);
   await overflow(page);await hold.screenshot({path:(await import('./output')).artifactPath('generated-expectations/specific-expectation-hold-phone.png')});
 });
 
@@ -181,7 +182,7 @@ for(const width of [1440,390])test(`application worker prepares grounded ordinar
   expect(prepared.model_attempts).toEqual([{source:'demo',outcome:'completed',model:'controlled-scenario-adapter'}]);
   await page.reload();
   const offer=page.getByRole('region',{name:'Certified task run approval'});
-  await expect(offer.getByRole('heading',{name:'Review one task and draft-PR budget'})).toBeVisible();
+  await expect(offer.getByRole('heading',{name:'Review and approve implementation'})).toBeVisible();
   await offer.screenshot({path:artifactPath(`automatic-scenarios/offer-${width}.png`)});
   await page.getByText('Original request, planning history and evidence',{exact:true}).click();
   await page.getByText('Behavioral scenario preparation · Revision 1',{exact:true}).scrollIntoViewIfNeeded();
@@ -253,4 +254,146 @@ test('application preparation policy denial is a specific hold without a duplica
   await overflow(page);
   const {artifactPath}=await import('./output');
   await hold.screenshot({path:artifactPath('automatic-scenarios/policy-hold-390.png')});
+});
+
+async function openLocalOffer(page: import('@playwright/test').Page) {
+  fixture('reviewed-offer-automatic-setup');
+  await page.goto('/intake/new?kind=feature');
+  await page.getByLabel('Title Required').fill('Cover lowercase name normalization');
+  await page.getByLabel('Description Required').fill('Cover trimming spaces and lowercasing names.');
+  await page.getByLabel('Prepare a Lua regression-test task').check();
+  await page.getByLabel('Expected test results').fill('Spaces and capital letters normalize to alice.');
+  await page.getByLabel('Existing test paths').fill('tests/test_normalize.lua');
+  await page.getByLabel('Add a text example for the first expected result').check();
+  await page.getByLabel('Example input',{exact:true}).fill('  ALICE ');
+  await page.getByLabel('Expected example result',{exact:true}).fill('alice');
+  await page.getByLabel('Incorrect example result to reject',{exact:true}).fill('ALICE');
+  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByRole('button',{name:'Submit request',exact:true}).click();
+  await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
+  const planned=JSON.parse(fixture('reviewed-offer-automatic-worker'));
+  expect(planned.adapter_calls).toBe(1);
+  const proposal=page.getByRole('region',{name:'Proposed regression-test contract'});
+  await proposal.getByText('Expected result 1:',{exact:false}).click();
+  await expect(proposal.getByText('Expected first return value: "alice".')).toBeVisible();
+  await expect(proposal.getByText('Incorrect outcome this test must reject: "ALICE".')).toBeVisible();
+  const approve=page.getByRole('button',{name:'Approve proposal',exact:true});
+  await expect(approve).toBeDisabled();
+  await page.getByLabel('I independently confirm the fixture, operation, inputs, expected outcomes and incorrect outcomes to reject match my request.').check();
+  await approve.click();
+  await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
+  fixture('reviewed-offer-automatic-tick');
+  fixture('reviewed-offer-automatic-tick');
+  await expect(page.getByRole('heading',{name:'Preparing the reviewed task'})).toBeVisible();
+  const submitted=await page.request.get('/api'+new URL(page.url()).pathname).then(r=>r.json());
+  expect(submitted.original.description).toBe('Cover trimming spaces and lowercasing names.');
+  expect(submitted.original.regression_tests.text_example).toEqual({input:'  ALICE ',expected:'alice',incorrect:'ALICE'});
+  const prepared=JSON.parse(fixture('reviewed-offer-automatic-worker'));
+  expect(prepared).toMatchObject({adapter_calls:0,grants:0,requests:0,publications:0});
+  const offer=page.getByRole('region',{name:'Certified task run approval'});
+  await expect(offer.getByRole('radio',{name:'Local implementation only'})).toBeChecked();
+  await expect(offer.getByText(/Remote pushes, draft PRs, merges and releases remain unauthorized/)).toBeVisible();
+  await expect(offer.getByRole('button',{name:'Approve local implementation',exact:true})).toBeDisabled();
+  await expect(offer.getByText('tests/test_normalize.lua',{exact:true})).toBeVisible();
+  return offer;
+}
+
+for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-only approval reaches the worker and retains ${outcome}`,async({page})=>{
+  test.setTimeout(45000);
+  const offer=await openLocalOffer(page);
+  const button=offer.getByRole('button',{name:'Approve local implementation',exact:true});
+  const confirm=offer.getByRole('checkbox',{name:/I approve this exact task.*for local implementation/});
+  await confirm.check();
+  await offer.getByRole('radio',{name:'Also authorize one draft PR'}).check();
+  await expect(offer.getByRole('button',{name:'Approve implementation and one draft PR'})).toBeDisabled();
+  await offer.getByRole('radio',{name:'Local implementation only'}).check();
+  await expect(button).toBeDisabled();
+  await confirm.check();
+  if(outcome==='pass'){
+    const {artifactPath}=await import('./output');
+    for(const width of [1440,390]){
+      await page.setViewportSize({width,height:1000});
+      await overflow(page);
+      await offer.screenshot({path:artifactPath(`local-browser/approval-${width}.png`)});
+    }
+  }
+  const sent=page.waitForResponse(r=>r.url().endsWith('/run-approval')&&r.request().method()==='POST');
+  await button.dblclick();
+  const first=await sent;
+  expect(first.status()).toBe(200);
+  const body=first.request().postDataJSON();
+  expect(body.run_budget).toMatchObject({publication:'hold',activate_once:true,fallback:false});
+  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+
+  // Exercise server-side replay and attempted publication escalation after the browser decision.
+  const csrf=await page.request.get('/api/session').then(r=>r.json());
+  const headers={'Origin':new URL(page.url()).origin,'X-CSRF-Token':csrf.csrf_token};
+  const same=await page.request.post(first.url(),{headers,data:body});
+  expect(same.status()).toBe(200);
+  expect((await same.json()).id).toBe(body.command_id);
+  const duplicate=await page.request.post(first.url(),{headers,data:{...body,
+    command_id:crypto.randomUUID(),run_budget:{...body.run_budget,publication:'draft-pr'}}});
+  expect(duplicate.status()).toBe(409);
+  expect(JSON.stringify(await duplicate.json())).toContain('already saved');
+
+  fixture('reviewed-offer-automatic-local-wait');
+  await expect(page.getByRole('heading',{name:'Preparing approved task'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Task budget applied'})).toBeVisible();
+  await expect(page.getByText('Local implementation only. Publication requires separate approval.')).toBeVisible();
+  const result=JSON.parse(fixture('reviewed-offer-automatic-local-'+outcome));
+  expect(result).toMatchObject({adapter_calls:0,grants:1,requests:1,publications:0});
+  if(outcome==='interrupt'){
+    await expect(page.getByRole('heading',{name:'Waiting for safe recovery'})).toBeVisible();
+    fixture('reviewed-offer-automatic-local-recover');
+    await expect(page.getByRole('heading',{name:'Interrupted · Evidence retained'})).toBeVisible();
+  }
+  const progress=page.getByRole('region',{name:'Task implementation progress'});
+  await progress.getByRole('link',{name:outcome==='pass'?'Review changes and checks':'View run details'}).click();
+  const review=page.getByRole('region',{name:'Real task and candidate review'});
+  await expect(review).toBeVisible();
+  const executionPath='/api/real-executions/'+new URL(page.url()).pathname.split('/').at(-1);
+  const execution=await page.request.get(executionPath).then(r=>r.json());
+  expect(execution.status).toBe({pass:'checked',fail:'failed',interrupt:'interrupted'}[outcome]);
+  expect(execution.publication_requested).toBe(false);
+  expect(await page.request.get(executionPath+'/delivery').then(r=>r.json())).toBeNull();
+  if(outcome==='pass'){
+    await expect(review.getByRole('heading',{name:'Real candidate checked'})).toBeVisible();
+    await expect(review.getByLabel('Unified diff for tests/test_normalize.lua')).toContainText('assert(normalize("  ALICE ") == "alice")');
+    await expect(review.getByText(/Check [1-4]: pass · exit 0/)).toHaveCount(4);
+    await review.getByText('Check 4: pass · exit 0').click();
+    await expect(review.getByText(/5 passed, 0 failed/)).toBeVisible();
+    const {artifactPath}=await import('./output');
+    for(const width of [1440,390]){
+      await page.setViewportSize({width,height:1000});
+      await overflow(page);
+      await review.screenshot({path:artifactPath(`local-browser/result-${width}.png`)});
+    }
+  }else if(outcome==='fail'){
+    await expect(review.getByRole('heading',{name:'Real attempt needs attention'})).toBeVisible();
+    await expect(review.getByRole('region',{name:'Last failed check'}).getByText(/assertion failed/)).toBeVisible();
+    await expect(review.getByText('No frozen real candidate is available.')).toBeVisible();
+  }else{
+    await expect(review.getByRole('heading',{name:'Interrupted attempt retained'})).toBeVisible();
+    await expect(review.getByText('Inference completion is uncertain. The attempt remains consumed.')).toBeVisible();
+  }
+});
+
+test('browser approval refuses changed certified evidence before saving a run',async({page})=>{
+  test.setTimeout(45000);
+  const offer=await openLocalOffer(page);
+  await offer.getByRole('checkbox',{name:/I approve this exact task.*for local implementation/}).check();
+  await page.route('**/run-approval',async route=>{
+    if(route.request().method()==='POST')fixture('reviewed-offer-stale');
+    await route.continue();
+  });
+  const sent=page.waitForResponse(r=>r.url().endsWith('/run-approval')&&r.request().method()==='POST');
+  await offer.getByRole('button',{name:'Approve local implementation',exact:true}).click();
+  expect((await sent).status()).toBe(409);
+  await expect(offer.getByRole('alert').filter({hasText:'offer changed'}).first()).toBeVisible();
+  await offer.getByRole('button',{name:'Review current offer'}).click();
+  await expect(page.getByRole('heading',{name:'Task preparation held'})).toBeVisible();
+  expect(await page.request.get('/api'+new URL(page.url()).pathname).then(r=>r.json()).then(r=>r.decisions)).toHaveLength(1);
+  expect(await page.request.get('/api/real-executions').then(r=>r.json()).then(r=>r.total)).toBe(0);
 });

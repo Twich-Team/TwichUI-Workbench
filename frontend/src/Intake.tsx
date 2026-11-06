@@ -68,9 +68,15 @@ function IntakeFormBody({kind}: {kind:'feature'|'issue'}) {
   const [lua,setLua] = useState(Boolean(body.lua_error));
   const [regressionAcceptance,setRegressionAcceptance] = useState(body.regression_tests?.acceptance.join('\n')||'');
   const [regressionPaths,setRegressionPaths] = useState(body.regression_tests?.test_paths?.join('\n')||'');
+  const regression=body.regression_tests;
+  const example=regression?.text_example;
   const supported=useQuery({queryKey:['supported-tasks'],queryFn:()=>request<{items:{id:string;title:string;purpose:string}[]}>('/api/supported-tasks')});
   async function submit(event:React.FormEvent) {
     event.preventDefault(); setError('');
+    if(example&&example.expected===example.incorrect){
+      setError('The expected result and incorrect result must differ.');
+      return;
+    }
     try {
       localStorage.setItem(key, JSON.stringify(body)); setSent(true); setBusy(true);
       const saved = await mutate<Intake>('/api/intake',body);
@@ -79,7 +85,38 @@ function IntakeFormBody({kind}: {kind:'feature'|'issue'}) {
   }
   return <div className="intake-page"><Link to="/intake" className="back-link"><ArrowLeft size={15}/>Intake &amp; planning</Link><div className="page-heading"><div><img className="heading-art" src={`/art/workshop/${kind==='issue'?'issues':'feature-requests'}.png`} alt=""/><h1>{kind==='issue'?'Report an issue':'Request a feature'}</h1><p>{kind==='issue'?'Tell us what happened and what you expected. A report starts an investigation.':'Describe the experience you want. You’ll review a proposal before detailed work is planned.'}</p></div></div>
   <form className="panel intake-form" onSubmit={event=>void submit(event)}><fieldset disabled={sent || busy}><label htmlFor="request-title">Title <span>Required</span></label><input id="request-title" required maxLength={160} value={body.title} onChange={e=>setBody({...body,title:e.target.value})}/><label htmlFor="request-description">Description <span>Required</span></label><textarea id="request-description" required maxLength={6000} rows={7} value={body.description} onChange={e=>setBody({...body,description:e.target.value})}/>
-  {kind==='feature' && <><label className="check-label"><input type="checkbox" checked={Boolean(body.regression_tests)} onChange={e=>setBody({...body,supported_task:null,regression_tests:e.target.checked?{acceptance:regressionAcceptance.split('\n').filter(s=>s.trim()),test_paths:regressionPaths.split(/[\s,]+/).filter(Boolean)}:null})}/>Prepare a Lua regression-test task</label>{body.regression_tests && <><p className="small-text">Propose additions to existing TwichUI tests. Describe the behavior and expected results; no registered task template or planning model is needed. A proposal grants no run permission.</p><label htmlFor="regression-acceptance">Expected test results <span>Required · One observable result per line, up to 8</span></label><textarea id="regression-acceptance" required rows={3} maxLength={6000} value={regressionAcceptance} onChange={e=>{setRegressionAcceptance(e.target.value);setBody({...body,regression_tests:{...body.regression_tests!,acceptance:e.target.value.split('\n').filter(s=>s.trim())}});}}/><label htmlFor="regression-paths">Existing test paths <span>Optional · Up to 3; can also be named in the description</span></label><textarea id="regression-paths" rows={2} maxLength={720} placeholder="tests/test_example.lua" value={regressionPaths} onChange={e=>{setRegressionPaths(e.target.value);setBody({...body,regression_tests:{...body.regression_tests!,test_paths:e.target.value.split(/[\s,]+/).filter(Boolean)}});}}/></>}</>}
+  {kind==='feature' && <>
+    <label className="check-label"><input type="checkbox" checked={Boolean(regression)} onChange={e=>setBody({
+      ...body,supported_task:null,regression_tests:e.target.checked?{
+        acceptance:regressionAcceptance.split('\n').filter(s=>s.trim()),
+        test_paths:regressionPaths.split(/[\s,]+/).filter(Boolean),
+      }:null,
+    })}/>Prepare a Lua regression-test task</label>
+    {regression&&<>
+      <p className="small-text">Describe what an existing TwichUI test should check. You'll review the proposal before any implementation can be approved.</p>
+      <label htmlFor="regression-acceptance">Expected test results <span>Required · One observable result per line, up to 8</span></label>
+      <textarea id="regression-acceptance" required rows={3} maxLength={6000} value={regressionAcceptance} onChange={e=>{
+        setRegressionAcceptance(e.target.value);
+        setBody({...body,regression_tests:{...regression,acceptance:e.target.value.split('\n').filter(s=>s.trim())}});
+      }}/>
+      <label htmlFor="regression-paths">Existing test paths <span>Optional · Up to 3. You can also name them in the description.</span></label>
+      <textarea id="regression-paths" rows={2} maxLength={720} placeholder="tests/test_example.lua" value={regressionPaths} onChange={e=>{
+        setRegressionPaths(e.target.value);
+        setBody({...body,regression_tests:{...regression,test_paths:e.target.value.split(/[\s,]+/).filter(Boolean)}});
+      }}/>
+      <label className="check-label"><input type="checkbox" checked={Boolean(example)} onChange={e=>setBody({
+        ...body,regression_tests:{...regression,text_example:e.target.checked?{input:'',expected:'',incorrect:''}:null},
+      })}/>Add a text example for the first expected result</label>
+      {example&&<>
+        <p className="small-text">Use these fields for one text input and a text result. Spaces count. A blank field means empty text.</p>
+        {([
+          ['input','Example input'],['expected','Expected example result'],['incorrect','Incorrect example result to reject'],
+        ] as const).map(([field,label])=><label key={field}>{label}<input type="text" maxLength={512} value={example[field]} onChange={e=>setBody({
+          ...body,regression_tests:{...regression,text_example:{...example,[field]:e.target.value}},
+        })}/></label>)}
+      </>}
+    </>}
+  </>}
   {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,supported_task:item?.id||null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Other request · Planning only</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Review the fixed plan and budget before execution. Additional comments do not expand its supported scope.</p></>}
   <label htmlFor="request-interface">Does this request change the interface?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.</p>
   {kind==='issue' && <><label className="check-label"><input type="checkbox" checked={lua} onChange={e=>{setLua(e.target.checked);if(!e.target.checked)setBody({...body,lua_error:''});}}/>Add a Lua error <span>Optional</span></label>{lua && <><label htmlFor="lua-error">Lua error <span>Plain text · never executed</span></label><textarea className="code-input" id="lua-error" maxLength={6000} rows={6} value={body.lua_error || ''} onChange={e=>setBody({...body,lua_error:e.target.value})}/></>}</>}</fieldset>
@@ -106,7 +143,7 @@ export function IntakeDetail() {
   const p = data.proposals.find(p=>p.id===selected) || data.proposals[0];
 
   const sample = data.original.title === 'Synthetic feature · Admission rehearsal';
-  const originalSection = (<><section className="panel"><h2>Original request</h2><p className="original-text">{data.original.description}</p>{data.clarifications.length>0 && <details open><summary>Additional information</summary>{data.clarifications.map((c,i)=><div key={i}><p className="original-text">{c.text}</p><p className="small-text">Saved {formatTime(c.created_at)} for revision {c.revision}</p></div>)}</details>}{data.original.lua_error && <details open><summary>Original Lua error · plain text</summary><pre>{data.original.lua_error}</pre></details>}<p className="small-text">Saved {formatTime(data.created_at)} · Local owner</p></section></>);
+  const originalSection = (<><section className="panel"><h2>Original request</h2><p className="original-text">{data.original.description}</p>{data.original.regression_tests?.text_example&&<details><summary>Submitted text example</summary><p>Input <code className="original-text">{JSON.stringify(data.original.regression_tests.text_example.input)}</code></p><p>Expected <code className="original-text">{JSON.stringify(data.original.regression_tests.text_example.expected)}</code></p><p>Reject <code className="original-text">{JSON.stringify(data.original.regression_tests.text_example.incorrect)}</code></p></details>}{data.clarifications.length>0 && <details open><summary>Additional information</summary>{data.clarifications.map((c,i)=><div key={i}><p className="original-text">{c.text}</p><p className="small-text">Saved {formatTime(c.created_at)} for revision {c.revision}</p></div>)}</details>}{data.original.lua_error && <details open><summary>Original Lua error · plain text</summary><pre>{data.original.lua_error}</pre></details>}<p className="small-text">Saved {formatTime(data.created_at)} · Local owner</p></section></>);
   const progressSection = (<><section className="panel"><h2>Planning progress</h2>{data.jobs.map(job=><div className="planning-job" key={job.id}><div><strong>{job.kind==='planning'?'Investigation / proposal':job.kind==='behavioral_preparation'?'Behavioral scenario preparation':'Detailed task planning'} · Revision {job.revision}</strong><StateBadge value={job.status}/></div><p>{job.message}</p>{job.status==='failed' && job.kind!=='behavioral_preparation' && <Button disabled={busy || job.attempts>=3} variant="secondary" onClick={()=>void act('retry',{job_id:job.id}).catch(()=>{})}>Retry planning</Button>}<details><summary>Job provenance</summary><p>{job.model || 'No validated model response'} · {job.attempts} bounded attempt(s)</p>{Object.entries(job.diagnostics).map(([key,value])=><p key={key}>{key}: {String(value)}</p>)}</details></div>)}</section></>);
   const resultSection = (<>{data.result && <section className="panel"><h2>{data.original.kind==='issue'?'Investigation result':'Planning summary'}</h2>{data.original.kind==='feature' && <p className="soft-callout">{data.original.regression_tests?'Committed repository evidence defines the scope. Behavioral examples need independent review; check results are recorded separately.':'Model interpretation of supplied excerpts only. Findings and feasibility require review.'}</p>}<p>{data.result.summary}</p>{data.original.kind==='issue' && <p className="soft-callout">Unverified investigation. The report is evidence to investigate; root cause and duplicate status are not established.</p>}{data.result.related_ids.length>0 && <div><h3>Possibly related work · not confirmed duplicates</h3>{data.result.related_ids.map(id=><Link className="back-link" key={id} to={`/records/fixture/${id}`}>{id}</Link>)}</div>}{data.result.clarification && <div className="soft-callout"><strong>More information needed</strong><p>{data.result.clarification}</p>{data.status==='waiting_for_information' && <form onSubmit={e=>{e.preventDefault();void act('clarification',{command_id:crypto.randomUUID(),revision:data.revision,text:clarification}).then(()=>setClarification('')).catch(()=>{});}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarification} onChange={e=>setClarification(e.target.value)}/><Button disabled={busy || !clarification.trim()}>Send information</Button></form>}</div>}
     <details><summary>Supplied context and evidence limits</summary><p>Product documents establish requirements. Addon code, root cause, duplicates and in-game behavior remain unverified unless specifically evidenced.</p>{data.evidence.map(e=><div key={e.id}><h3>{e.label}</h3><pre>{e.excerpt}</pre><p className="small-text">{e.id} · SHA-256 {e.sha256} · Source revision: {e.source_revision || 'Not recorded (product context or fixture)'}</p></div>)}</details></section>}</>);

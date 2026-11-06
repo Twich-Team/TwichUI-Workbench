@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from workbench.regression_evidence import BehavioralPreparation
 
 Choice = Literal["confirm", "change"]
@@ -246,9 +246,22 @@ class ScopeRevisionInput(StrictModel):
     note: Annotated[str, Field(min_length=1, max_length=1600)]
 
 
+class RegressionTextExample(StrictModel):
+    input: Annotated[str, Field(max_length=512)]
+    expected: Annotated[str, Field(max_length=512)]
+    incorrect: Annotated[str, Field(max_length=512)]
+
+    @model_validator(mode='after')
+    def distinct_results(self):
+        if self.expected == self.incorrect:
+            raise ValueError('The expected and incorrect results must differ')
+        return self
+
+
 class RegressionTestRequest(StrictModel):
     test_paths: Annotated[list[Annotated[str, Field(max_length=240, pattern=r'^tests/test_[A-Za-z0-9_-]+\.lua$')]], Field(max_length=3)] = []
     acceptance: Annotated[list[ShortText], Field(min_length=1, max_length=8)]
+    text_example: RegressionTextExample | None = Field(default=None, exclude_if=lambda value: value is None)
 
     @field_validator('acceptance')
     @classmethod

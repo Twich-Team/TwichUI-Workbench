@@ -327,20 +327,18 @@ def offer_view(c, proposal, selected):
     """Display only the selected owner's snapshot; never combine two read revisions."""
     from workbench import intake
     if not selected:
-        return dict(
-            available=False,
-            message=preparation_hold(c, proposal),
-            offer=None,
-        )
+        message, preparing = preparation_status(c, proposal)
+        return dict(available=False, message=message, preparing=preparing, offer=None)
     spec = selected["snapshot"]["specification"]
     contract = spec["contract"]
     from workbench.task_sessions import capability
 
     one_off = capability(c.engine) is not None
+    reviewed = selected["snapshot"].get("reviewed_task")
     return dict(
         runtime_ready=one_off,
         available=True,
-        message=("One-off runtime is configured; the worker must still pass current preparation and operational gates." if one_off else "Execution unavailable on this installation. Approval can save the exact budget, but no run starts."),
+        message=("The task is ready for your decision. The worker will check readiness again before it starts." if one_off else "Execution is unavailable here. Saving approval records your decision without starting a run."),
         offer=dict(
             id=selected["id"],
             fingerprint=selected["fingerprint"],
@@ -349,20 +347,20 @@ def offer_view(c, proposal, selected):
             base_branch=spec["base_branch"],
             base=contract["base"],
             paths=contract["paths"],
-            checks=(selected['snapshot'].get('reviewed_task') and
+            checks=(reviewed and
                     intake.proposal_view(c, proposal)['task_contract']['verification_commands']) or [],
             limits=contract["limits"],
             budget=TaskBudget(
                 offer_id=selected["id"],
                 offer_fingerprint=selected["fingerprint"],
-                publication="draft-pr",
+                publication="hold" if reviewed else "draft-pr",
                 activate_once=one_off,
             ).model_dump(mode="json"),
         ),
     )
 
 
-def preparation_hold(c, proposal):
+def preparation_status(c, proposal):
     from workbench.regression_preparation import contract_for
     from workbench.db import planning_jobs
     from workbench.intake import proposal_view
@@ -373,11 +371,11 @@ def preparation_hold(c, proposal):
         try:
             validate_reviewed_policy(c.engine, contract)
             if repository()[1] != contract['resolved_base']:
-                return 'Preparation held: committed source changed from the reviewed scenario base. Request a fresh grounded proposal.'
+                return 'Preparation held: committed source changed from the reviewed scenario base. Request a fresh grounded proposal.', False
         except (ValueError, OSError) as error:
-            return 'Preparation held: ' + str(error)
+            return 'Preparation held: ' + str(error), False
     if contract and contract['scope_missing']:
-        return 'Preparation held: ' + ' '.join(contract['scope_missing'])
+        return 'Preparation held: ' + ' '.join(contract['scope_missing']), False
     prepared = (contract or {}).get('behavioral_evidence')
     if prepared:
         payload = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == proposal['intake_id'],
@@ -395,19 +393,19 @@ def preparation_hold(c, proposal):
             proposal_decisions.c.status == 'applied')).mappings().first()
         recovery = preparation['payload'].get('recovery') if preparation else None
         if recovery and recovery['authorization']['review_binding'] == binding:
-            return recovery['message']
+            return recovery['message'], False
         if outcome.get('status') == 'hold' and outcome.get('review_binding') == binding:
-            return 'Last behavioral preparation held: ' + outcome['message']
+            return 'Last behavioral preparation held: ' + outcome['message'], False
         if preparation:
             if preparation['status'] == 'failed':
-                return 'Behavioral preparation held: ' + preparation['message']
+                return 'Behavioral preparation held: ' + preparation['message'], False
             if preparation['status'] in {'queued', 'running'}:
-                return ('Reviewed scenarios are queued for the application worker. No further preparation command is required.'
-                        if preparation['status'] == 'queued' else 'The application worker is preparing reviewed behavioral controls. Certification is not complete.')
+                return ('Waiting for the worker to prepare the reviewed examples.'
+                        if preparation['status'] == 'queued' else 'The worker is checking that the reviewed examples can detect the wrong behavior.'), True
         if prepared['holds']:
-            return 'Behavioral preparation held: ' + ' '.join(prepared['holds'])
-        return 'Behavioral examples require independent expectation review and fresh positive, vacuous and wrong-behavior control checks at the reviewed base. No certified offer exists yet.'
-    return 'Preparation held: independently certified evidence is missing, stale, or no longer matches the current reviewed scope/base. A trusted operator must prepare and certify it.'
+            return 'Behavioral preparation held: ' + ' '.join(prepared['holds']), False
+        return 'Behavioral examples require independent expectation review and fresh positive, vacuous and wrong-behavior control checks at the reviewed base. No certified offer exists yet.', False
+    return 'Preparation held: independently certified evidence is missing, stale, or no longer matches the current reviewed scope/base. A trusted operator must prepare and certify it.', False
 
 
 def run_context(engine, intake_id, task_id):
@@ -427,7 +425,7 @@ def run_context(engine, intake_id, task_id):
         receipt = intake.receipt_view(saved) if saved else None
         if not selected or 'reviewed_task' not in selected['snapshot']:
             proposal = intake.require(c, intake.proposals, task['proposal_id'])
-            return dict(available=False, message=preparation_hold(c, proposal), offer=None, receipt=receipt)
+            return dict(**offer_view(c, proposal, None), receipt=receipt)
         ref = selected['snapshot']['reviewed_task']['ref']
         if ref['intake_id'] != intake_id or ref['task_id'] != task_id:
             raise HTTPException(409, 'Offer is bound to another task')
@@ -493,7 +491,10 @@ def approve_run(engine, intake_id, task_id, body):
                                 binding=binding, scope_revision=review['human_scope']['revision'],
                                 action='approve', note=body.note, run_budget=budget,
                                 execution_continuation=continuation), snapshot=review,
-                   status='pending', message='Exact scope and one task/draft-PR budget saved · Waiting for application.',
+                   status='pending', message=(
+                       'Local implementation approval saved. Publication held. Waiting to apply.'
+                       if body.run_budget.publication == 'hold' else
+                       'Implementation and one draft PR approved. Waiting to apply.'),
                    created_at=execution.now(), finished_at=None)
         c.execute(proposal_decisions.insert().values(**row))
         return intake.receipt_view(row)

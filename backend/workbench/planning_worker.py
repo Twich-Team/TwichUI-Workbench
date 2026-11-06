@@ -32,18 +32,25 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
                 if continuation.get('owner_provenance', {}).get('purpose') != 'browser-reviewed-offer-v1':
                     raise ValueError('Unsupported pending continuation')
                 request = continuation['browser_request']
+                budget = receipt['payload']['run_budget']
+                if (request['run_budget'] != budget or receipt['binding'] !=
+                        task_budget.digest(dict(execution_continuation=continuation, run_budget=budget))):
+                    raise ValueError('Saved browser decision differs from the approved budget')
                 ref = dict(intake_id=receipt['intake_id'], task_id=request['task_id'],
                            approval_id=continuation['scope_approval_id'])
                 linked = task_execution.snapshot(connection, **ref)
                 from workbench.schemas import TaskBudget
                 selected = task_budget.validate_selection(connection, receipt['proposal_id'],
-                    TaskBudget.model_validate(receipt['payload']['run_budget']))
+                    TaskBudget.model_validate(budget))
                 if (request['binding'] != task_budget.digest(dict(scope=linked, offer=selected['fingerprint']))
                         or selected['snapshot'].get('reviewed_task', {}).get('ref') != ref):
                     raise ValueError('Scope or certified offer changed before application')
                 # Original timestamp owns expiry, including time spent pending.
                 task_budget.permission(connection, {**receipt, 'status': 'applied', 'finished_at': now()})
-                status, message = 'applied', 'Exact scope and one task/draft-PR budget applied. Waiting for certified execution.'
+                status = 'applied'
+                message = ('Local implementation approval applied. Publication held.'
+                           if budget['publication'] == 'hold' else
+                           'Implementation and one draft PR approved. Approval applied.')
             except (HTTPException, ValueError, KeyError, TypeError):
                 status, message = 'stale', 'Scope, certification, runtime or budget changed/expired. This saved decision cannot start execution.'
             connection.execute(proposal_decisions.update().where(proposal_decisions.c.id == receipt['id']).values(

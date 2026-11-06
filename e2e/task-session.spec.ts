@@ -46,18 +46,21 @@ for(const width of [1440,390])test(`reviewed certified offer browser approval re
   await page.getByRole('region',{name:'Task preparation hold'}).screenshot({path:artifactPath(`reviewed-offers/missing-certification-${width}.png`)});
   fixture('reviewed-offer-certify');await page.reload();
   const offer=page.getByRole('region',{name:'Certified task run approval'});
-  await expect(offer.getByRole('heading',{name:'Review one task and draft-PR budget'})).toBeVisible();
-  await expect(offer.getByText('Draft PR destination: Twich-Team/TwichUI / main. No automatic merge or deployment.',{exact:true})).toBeVisible();
-  await offer.getByText('Bound base, checks, acceptance and limits',{exact:true}).click();
+  await expect(offer.getByRole('heading',{name:'Review and approve implementation'})).toBeVisible();
+  await expect(offer.getByRole('radio',{name:'Local implementation only'})).toBeChecked();
+  await offer.getByRole('radio',{name:'Also authorize one draft PR'}).check();
+  await expect(offer.getByText(/Draft PR destination: Twich-Team\/TwichUI \/ main/)).toBeVisible();
+  await offer.getByText('Base, checks, exclusions and limits',{exact:true}).click();
   await expect(offer.getByText('tests/test_normalize.lua',{exact:true})).toBeVisible();
-  await offer.getByText('Bound base, checks, acceptance and limits',{exact:true}).click();
+  await offer.getByText('Base, checks, exclusions and limits',{exact:true}).click();
   if(width===390){await offer.screenshot({path:artifactPath('reviewed-offers/offer-phone-normal.png')});await page.evaluate(()=>document.documentElement.style.fontSize='200%');}
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();
   await offer.screenshot({path:artifactPath(`reviewed-offers/offer-${width}.png`)});
   await page.screenshot({path:artifactPath(`reviewed-offers/viewport-${width}.png`)});
-  await offer.getByRole('checkbox',{name:'I approve this exact scope, aggregate budget, and one draft PR to the destination above.'}).check();
+  await offer.getByRole('radio',{name:'Also authorize one draft PR'}).check();
+  await offer.getByRole('checkbox',{name:'I approve this exact task, expected behavior, scope, limits, and one draft PR.'}).check();
   const send=page.waitForResponse(r=>r.url().endsWith('/run-approval')&&r.request().method()==='POST');
-  await offer.getByRole('button',{name:'Approve scope, budget and one draft-PR run',exact:true}).click();
+  await offer.getByRole('button',{name:'Approve implementation and one draft PR',exact:true}).click();
   expect((await send).status()).toBe(200);
   await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
   await page.reload();
@@ -76,5 +79,5 @@ for(const width of [1440,390])test(`reviewed certified offer browser approval re
   await page.getByRole('region',{name:'Saved task run approval'}).screenshot({path:artifactPath(`reviewed-offers/applied-${width}.png`)});
   fixture('reviewed-offer-stale');await page.reload();
   await expect(page.getByRole('heading',{name:'Task budget applied'})).toBeVisible();
-  await expect(page.getByRole('button',{name:'Approve scope, budget and one draft-PR run',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Approve implementation and one draft PR',exact:true})).toHaveCount(0);
 });

@@ -330,8 +330,10 @@ class TaskExecutionContext(BaseModel):
 
 def context(engine, intake_id, task_id):
     from workbench import real_execution as execution
+    from workbench.task_sessions import public_view, capability
 
     configured = bool(os.environ.get("WORKBENCH_REAL_EXECUTION_ROOT"))
+    one_off = capability(engine) is not None
     with engine.connect() as c:
         c.exec_driver_sql("BEGIN")
         task = intake.require(c, backlog_items, task_id)
@@ -450,7 +452,7 @@ def context(engine, intake_id, task_id):
             ):
                 reason = prerequisite_reason(c, linked) or (
                     "Waiting for the worker to pick up this task."
-                    if configured
+                    if configured or one_off
                     else "Execution is disabled here. The task is saved; no model will be invoked."
                 )
         if runs:
@@ -477,7 +479,7 @@ def context(engine, intake_id, task_id):
                     reason = (
                         "Task inputs changed. The saved request cannot use the earlier permission."
                     )
-                elif not configured:
+                elif not (configured or one_off):
                     reason = "Execution is disabled here. The saved request is waiting; no model will start."
         if not available:
             reason = (
@@ -498,22 +500,29 @@ def context(engine, intake_id, task_id):
                 )
                 if stage == "waiting":
                     reason = (
-                        "Approved task budget is waiting for a certified runtime. Execution is disabled here."
+                        ("Approval applied. Waiting for the worker to prepare the approved task."
+                         if configured or one_off else
+                         "Approved task budget is saved. Execution is disabled here.")
                         if budget_status["current"]
                         else "The approved task budget expired. Saved work remains; no execution or publication will start."
                     )
             except ValueError, HTTPException:
                 if stage == "waiting":
                     reason = "The saved task budget or supported recipe changed. Review is required; no execution starts."
-        from workbench.task_sessions import public_view, capability
-
         operation = public_view(c, task_id)
-        if operation and operation["status"] in {
+        if operation and operation["status"] == "waiting_recovery":
+            stage, reason = "recovering", operation["message"]
+        elif operation and operation["status"] == "active" and any(
+            r["current_task"] and r["status"] == "checked" for r in runs
+        ):
+            stage, reason = "settling", "Checks passed. Waiting for the worker to finish cleanup."
+        elif operation and operation["status"] in {
             "pending",
             "active",
-            "waiting_recovery",
             "held",
             "cancelled",
+            "expired",
+            "ended-before-result",
         }:
             if not any(
                 r["current_task"]
@@ -523,8 +532,7 @@ def context(engine, intake_id, task_id):
                 stage = (
                     "preparing"
                     if operation["status"] in {"pending", "active"}
-                    else "recovering"
-                    if operation["status"] == "waiting_recovery"
+                    else "held" if operation["status"] in {"expired", "ended-before-result"}
                     else operation["status"]
                 )
                 reason = operation["message"]
@@ -536,7 +544,7 @@ def context(engine, intake_id, task_id):
             stage=stage,
             message=reason,
             current_approval=linked is not None,
-            execution_configured=configured or capability(engine) is not None,
+            execution_configured=configured or one_off,
             runs=runs,
             publication_allowed=False,
             accepted=False,

@@ -5,7 +5,7 @@ import {formatTime} from './Catalog';
 import type {components} from './api.generated';
 
 type Page=components['schemas']['RunPage'];
-export const runStage:Record<string,string>={preparing:'Preparing approved task',held:'Needs attention',completed:'Completed',pending:'Waiting',recovering:'Waiting for safe recovery',cancel_requested:'Stopping · Waiting for cleanup',cancelled:'Stopped · History retained',running:'Working in isolation',checking:'Checking changes',checked:'Completed · Checks passed',failed:'Needs attention',blocked:'Needs attention · Permission or setup',interrupted:'Interrupted · Evidence retained'};
+export const runStage:Record<string,string>={preparing:'Preparing approved task',settling:'Checks passed · Finishing cleanup',held:'Needs attention',completed:'Completed',pending:'Waiting',recovering:'Waiting for safe recovery',cancel_requested:'Stopping · Waiting for cleanup',cancelled:'Stopped · History retained',running:'Working in isolation',checking:'Checking changes',checked:'Completed · Checks passed',failed:'Needs attention',blocked:'Needs attention · Permission or setup',interrupted:'Interrupted · Evidence retained'};
 export function ExecutionRuns({preview=false}:{preview?:boolean}){
   const [search,setSearch]=useSearchParams();
   const group=preview?'all':(['all','active','attention','checked'].includes(search.get('group')||'')?search.get('group')||'all':'all');

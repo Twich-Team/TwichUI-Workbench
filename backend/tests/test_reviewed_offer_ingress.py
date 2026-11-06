@@ -32,8 +32,9 @@ def approval(data):
                 binding=data['binding'], run_budget=data['offer']['budget'], note='Controlled browser approval')
 
 
+@pytest.mark.parametrize('publication', ['hold', 'draft-pr'])
 def test_supported_local_preparation_and_browser_budget_reach_existing_session(
-    store, client, headers, tmp_path, monkeypatch, installed
+    store, client, headers, tmp_path, monkeypatch, installed, publication
 ):
     ref, runtime, _ = prepared(store, client, headers, tmp_path, monkeypatch)
     before = authority_counts(store)
@@ -45,6 +46,8 @@ def test_supported_local_preparation_and_browser_budget_reach_existing_session(
     assert data['scope']['task_contract']['writable_paths'] == runtime.recipe['contract']['paths']
     assert data['offer']['checks'] == data['scope']['task_contract']['verification_commands']
     body = approval(data)
+    assert body['run_budget']['publication'] == 'hold'
+    body['run_budget']['publication'] = publication
     response = client.post(path, headers=headers, json=body)
     assert response.status_code == 200, response.text
     receipt = response.json()
@@ -63,7 +66,7 @@ def test_supported_local_preparation_and_browser_budget_reach_existing_session(
         value = json.loads(cfg.read_text())
         calls.append(value)
         assert value['task'] == {**ref, 'approval_id': body['command_id']}
-        assert value['allow_publication'] is True
+        assert value['allow_publication'] is (publication == 'draft-pr')
         with engine.connect() as c:
             decision = intake.require(c, proposal_decisions, body['command_id'])
             policy = task_budget.permission(c, decision)
@@ -83,7 +86,7 @@ def test_supported_local_preparation_and_browser_budget_reach_existing_session(
     assert after == {**before, 'task_sessions': 1}
 
 
-@pytest.mark.parametrize('change', ['review', 'base', 'certificate', 'expiry', 'runtime'])
+@pytest.mark.parametrize('change', ['review', 'base', 'certificate', 'expiry', 'runtime', 'publication'])
 def test_pending_budget_revalidates_before_application(store, client, headers, tmp_path, monkeypatch, installed, change):
     ref, runtime, source = prepared(store, client, headers, tmp_path, monkeypatch)
     trusted_preparation.register(store, ref, runtime.root)
@@ -99,6 +102,11 @@ def test_pending_budget_revalidates_before_application(store, client, headers, t
         (runtime.root / 'profile-evidence.json').write_text('{}')
     elif change == 'runtime':
         (installed / '.local/task-runtime.json').chmod(0o644)
+    elif change == 'publication':
+        with store.begin() as c:
+            decision = intake.require(c, proposal_decisions, body['command_id'])
+            payload = {**decision['payload'], 'run_budget': {**body['run_budget'], 'publication': 'draft-pr'}}
+            c.execute(proposal_decisions.update().where(proposal_decisions.c.id == body['command_id']).values(payload=payload))
     else:
         with store.begin() as c:
             c.execute(proposal_decisions.update().where(proposal_decisions.c.id == body['command_id']).values(created_at='2000-01-01T00:00:00+00:00'))

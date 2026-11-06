@@ -65,8 +65,7 @@ def response(body, chunked=False):
     return result
 
 
-@pytest.fixture
-def http_tape(tmp_path, monkeypatch):
+def scripted_http(tmp_path, monkeypatch):
     import workbench.real_stream as stream
 
     t = SimpleNamespace(
@@ -139,6 +138,11 @@ def http_tape(tmp_path, monkeypatch):
         "SCRIPTED-PRIVATE", tmp_path / "session", lambda: [1, 2], lambda: True, t.reports.append
     )
     return t
+
+
+@pytest.fixture
+def http_tape(tmp_path, monkeypatch):
+    return scripted_http(tmp_path, monkeypatch)
 
 
 def tool_response(calls, reasoning=""):

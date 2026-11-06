@@ -56,8 +56,8 @@ def advance(engine, path, action):
             research.mkdir(mode=0o700, exist_ok=True)
             controlled_source(research)
             policy_file(engine, parent)
+            setup(path)
             return
-        assert action in {'automatic-worker', 'automatic-denied-worker'}
         if action == 'automatic-denied-worker':
             policy = json.loads((parent / 'preparation.json').read_text())
             policy['allowed_classes'] = []
@@ -66,10 +66,15 @@ def advance(engine, path, action):
         os.environ['WORKBENCH_PREPARATION_CONFIG'] = str(parent / 'preparation.json')
         adapter = ControlledPlanner()
         with patch.object(trusted_preparation, 'Runtime', ControlledPreparer):
-            # Tick the actual generic worker, never call a per-task preparer.
-            for _ in range(4):
-                if not worker.tick(engine, planning_adapter=adapter):
-                    break
+            if action.startswith('automatic-local-'):
+                from local_browser_fixture import advance_local
+
+                advance_local(engine, path, action.removeprefix('automatic-local-'), adapter)
+            else:
+                # Advance the normal worker without exposing an HTTP test-control route.
+                for _ in range(1 if action == 'automatic-tick' else 4):
+                    if not worker.tick(engine, planning_adapter=adapter):
+                        break
         with engine.connect() as c:
             from workbench.db import planning_jobs, model_attempts, real_execution_grants, real_execution_requests, real_publications
             report = dict(jobs=[dict(id=j['id'],kind=j['kind'],status=j['status'],message=j['message'])

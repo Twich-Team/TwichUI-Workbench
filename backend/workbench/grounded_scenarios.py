@@ -156,10 +156,13 @@ def unique_json_object(pairs):
 
 
 def concrete_examples(original, feedback):
-    # The existing text fields can carry exact values without a schema migration.
-    # A later explicitly numbered clarification replaces that example only.
+    # Keep numbered examples from older requests and allow later clarification.
     examples = {}
-    for text in (original["description"], feedback):
+    for is_clarification, text in ((False, original["description"]), (True, feedback)):
+        if is_clarification and (example := original["regression_tests"].get("text_example")):
+            examples[0] = ConcreteExample(
+                args=[example["input"]], expected=example["expected"], incorrect=example["incorrect"]
+            )
         for line in text.split("\n"):
             match = re.fullmatch(r"\s*Example ([1-8]):\s*(.*)", line)
             if match:
