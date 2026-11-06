@@ -151,7 +151,7 @@ Rich's example is using a roughly $20 Codex offering's included allowance on wor
 
 Before implementation, verify the actual subscription/access arrangement and supported integration. Do not assume subscription allowances equal API credits, that they reset daily, or that unsupported automation is permitted.
 
-Owner decision, November 6, 2026. Use the existing signed-in Codex subscription on the Workbench host through a supported local interface. The connection must use included subscription allowance. Workbench must not buy or automatically replenish credits, use API-key billing or intentionally consume purchased credits. Hold if the available billing and allowance controls cannot establish eligibility. An authorized Qwen fallback can take over on a proven pre-generation allowance stop.
+Owner decision, November 6, 2026. Use the existing signed-in Codex subscription on the Workbench host through a supported local interface. The connection must use included subscription allowance. Workbench must not use API-key billing, use extra credits, purchase or automatically replenish credits, or upgrade the subscription. Hold if the available billing and allowance controls cannot establish eligibility. An authorized Qwen fallback can take over on a proven pre-generation allowance stop.
 
 Owner clarification, November 6, 2026. The user chooses Qwen alone, Codex alone, Qwen first with explicitly enabled bounded Codex fallback, or Codex first with explicitly enabled bounded Qwen fallback. The app must distinguish unavailability before generation, a finished failure, partial output and uncertain or active work. It must preserve cancellation, accounting, independent checks, binding and duplicate protection when switching. Uncertain work holds for review.
 

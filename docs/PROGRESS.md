@@ -1,3 +1,14 @@
+## November 6, 2026 — Owner account report and Qwen-only approval
+
+- Recorded the owner-reported zero additional usage-credit balance and
+  Automatic reload Off. The owner did not accept snapshot billing risk.
+  Kept Codex held because the App Server lacks a per-turn included lock.
+- Rechecked the seal, symlinks, staged unit definitions, archive inventory
+  and network bindings. Preserved the unchanged trusted-subnet candidate.
+- Narrowed the [combined request](EVERYDAY_INSTALL_APPROVAL_20261106.md)
+  to an explicitly approved Qwen-only cutover with one bounded trial,
+  verified history, named archive, cleanup and rollback.
+
 ## November 6, 2026 — Trusted home subnet candidate
 
 - Recorded the owner's decision that every device able to reach Workbench

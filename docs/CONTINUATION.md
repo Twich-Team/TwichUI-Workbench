@@ -1,4 +1,24 @@
-# Trusted home subnet candidate — November 6, 2026 Mountain time
+# Qwen-only installation decision — November 6, 2026 Mountain time
+
+The owner reports a zero additional usage-credit balance and Automatic
+reload Off. These are owner-reported settings, with no independent
+verification or permanent lock. The existing sign-in policy permits
+included allowance only and excludes API billing, extra credits,
+purchases, automatic reload and upgrades. The pinned App Server has no
+verified per-turn included-allowance lock. Keep live Codex held and
+the connector staged only. The report grants no operational authority.
+
+The seal for candidate `2613172` matched all 4,302 files and the symlink
+inventory. The [combined request](EVERYDAY_INSTALL_APPROVAL_20261106.md)
+now proposes an explicit Qwen-only cutover and one bounded Qwen trial.
+The trusted `10.0.0.0/24` LAN and loopback design are unchanged, with
+server-verified HTTPS and no client certificate or dashboard passphrase.
+The earlier full-provider acceptance design remains in checkpoint
+`855201c`. Approve the limited release explicitly or leave the current
+deployment in place. A failed LAN or Qwen acceptance triggers the bound
+rollback once any owned lease is settled. No live change occurred.
+
+# Historical trusted home subnet package preparation — November 6, 2026 Mountain time
 
 The owner chose whole-subnet operator access on `10.0.0.0/24` and accepted
 that any reachable device can exercise Workbench operator controls.
