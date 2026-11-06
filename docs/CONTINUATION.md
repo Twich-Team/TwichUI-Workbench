@@ -1,3 +1,99 @@
+# Plain-English task workflow ready for offline review — November 6, 2026 Mountain time
+
+Development checkpoint `a943707905ed67344e4276a82527a3dbb4066247` builds
+`index-CcF64LiB.js` and `index-v1R3EEkW.css`. A disposable loopback preview
+served the candidate. The everyday app on port 9487 still serves
+`fcf74ce`. Its listener, installed asset names and demo planner setting
+match the installation receipt. Port 8765 and the historical read-only
+preview on 9187 were preserved. The 9487 process works from the shared
+checkout but serves an explicitly separate installed static directory.
+The files changed here leave the running backend source and static
+directory untouched.
+
+## What the owner sees
+
+Work leads with one Create a task button, decisions, open work and recent
+outcomes. Each request shows its original description, current stage and
+next action. General requests can lead to findings or a plan. For a supported
+regression test, the owner can choose a suggested existing test and answer
+follow-up questions in normal fields. The browser sends the exact typed
+values through the existing clarification command. It shows the proposed
+example and the wrong result it should catch before the owner confirms
+the plan.
+
+The later run decision shows the allowed files, behavior, one-attempt
+limit, clock, model use, and consequences. Local work is the default and
+draft delivery takes an explicit choice. A finished result leads with
+checks, changes and limits. The code diff, command output, approval
+records, provenance and model accounting are available on demand.
+The existing ready-made task route still requires explicit consent for
+its bound run and draft delivery. The earlier sample review is available
+under Workspace records and examples.
+
+## What was verified
+
+- Entry was `51fcc6a` with existing edits to AGENTS, CONTINUATION and
+  PROGRESS. Those edits were preserved. The requested
+  `CODEX_MODEL_REFERENCE.md` was absent from the checkout, local history
+  and supplied attachments. This work used the actual repo and receipts
+  for model attribution and required no model selection.
+- The real-addon stage used frozen build `1a2dbd9`. Its manifest matches
+  the reported digest. All 222 retained evidence files matched their seal.
+  The closed store records an applied expectation approval and a separate
+  applied one-off local-only approval. The audit records four passing
+  candidate checks, all 167 original suite groups, a sealed test-only
+  patch, no publication and verified restoration of normal access. Git
+  shows only documentation changes between the frozen build and
+  `51fcc6a`. The proven execution code was already in development.
+  The stage's store, credentials, capability, pinned addon checkout
+  and authorization belong to that closed run. See the historical entry
+  below for its [patch](../artifacts/runs/browser-addon-staged.PPqj6w/checked-map-fade.patch),
+  [checks](../artifacts/runs/browser-addon-staged.PPqj6w/check-summary.json),
+  and [restoration receipt](../artifacts/runs/browser-addon-staged.PPqj6w/closeout-safeguards.json).
+- Build, type, lint, migration, backend and frontend checks passed.
+  Focused Chromium exercised the real API and worker on disposable stores
+  with scripted model responses. It covered request creation, bug findings,
+  clarification, approving or declining a plan, changed scope, pending and
+  applied decisions, the separate run decision, duplicate replay,
+  certification changes, expiry, preparation, failure, interruption and
+  recovery, and a checked test patch. The successful fixture ran actual
+  offline Lua checks. Its approval was local only, and the fixture verified
+  that publication escalation was rejected. The expired and changed
+  offers produced no execution request.
+- Inspected rendered desktop and phone
+  [built intake](../artifacts/runs/task-workflow-built.h8oy9g5c/create-1440.png),
+  [final phone intake](../artifacts/runs/task-workflow-final.bd_0mji4/create-390.png),
+  [plan examples](../artifacts/runs/browser-9DbWWS/generated-expectations/observation-viewport-1440.png),
+  [phone run decision](../artifacts/runs/browser-zk0JAp/local-browser/approval-390.png),
+  [desktop result](../artifacts/runs/browser-zk0JAp/local-browser/result-1440.png)
+  and [phone result](../artifacts/runs/browser-zk0JAp/local-browser/result-390.png).
+  The Work screenshot comparisons found the intentional layout change.
+  The two Work references were updated from the inspected actual images.
+  A complete Chromium run and a fresh visual comparison after the reference
+  update are pending. The retained evidence left less than 2 MiB of the
+  512 MiB allowance, and no evidence was pruned. Physical device and
+  in-game acceptance remain pending.
+
+No new real-model task ran through this design. The earlier Qwen result
+continues to be evidence for the previous isolated interface. The new
+design was exercised offline, and its built screens were served only from
+disposable loopback previews. The API write guards, exact approval
+validation, preparation, isolation, usage, and restoration code are the
+existing workflow owners. Model-assisted explanation remains deferred.
+
+## Next complete outcome
+
+Demonstrate one supported real-addon task through the new interface in a
+fresh isolated stage, then review a rollback-ready installation of the
+passing candidate. That package needs fresh owner authorization and
+verified storage headroom. Before starting, record the exact task and
+addon base, request and token caps, time and retry limits, local model
+reservation and restoration, and both browser decisions. Authorize a
+specific preservation action if needed to make room. Installing
+Workbench is a separate explicit action against the installed app and
+its store. The demonstration can be local only. Addon installation and
+external publication each require their own authorization.
+
 # First independently checked real-addon browser patch — November 6, 2026 Mountain time
 
 The fresh isolated browser run of **Cover the map fade at a single

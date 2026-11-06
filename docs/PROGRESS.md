@@ -1,3 +1,24 @@
+## November 6, 2026 — owner-facing task workflow ready for offline review
+
+The development build connects Work and the task page to the saved
+request, plan, run approval, progress and result. The tested regression
+path uses guided example replies, separate decisions and local-only
+execution by default. The test result leads with checks and uncertainty.
+Technical records stay in disclosures. The task overview groups the
+current page of recent requests, and completed checked entries link
+directly to their results. Older sample reviews remain available
+separately. The existing stage browser drivers use the new controls.
+
+The full backend and frontend suites passed. Focused offline browser
+runs verified both decisions, actual Lua checks with scripted responses,
+findings, decline, changed and expired permission, and failure or
+interruption. Desktop and phone renderings were inspected. Current
+assets, prior real-addon proof and browser evidence are listed in
+CONTINUATION. The installed build is still `fcf74ce`. Remaining evidence
+headroom is under 2 MiB. Full browser and post-update screenshot
+comparison runs are pending. This assignment made no call to the model
+service and grants no new live acceptance or installation authority.
+
 ## November 6, 2026 — first real-addon browser patch independently checked
 
 The approved frozen stage completed the map-fade task through real

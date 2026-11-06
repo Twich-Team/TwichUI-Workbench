@@ -1,8 +1,8 @@
 # TwichUI Workbench — Product Requirements and Roadmap
 
-Version: 1.1 — owner requirements, revised November 5, 2026
-Revision: Frameless visual baseline, candidate asset inventory, and standing local-model priority decision
-Date: November 5, 2026
+Version: 1.1 — owner requirements, revised November 6, 2026
+Revision: Owner-facing task workflow and approval explanations
+Date: November 6, 2026
 Owner: Rich
 
 ## Purpose and authority
@@ -11,7 +11,7 @@ Build a self-driven but user-operable application for continued development of T
 
 Follow PROJECT_WORKING_PHILOSOPHY.md for assignments, communication, autonomy, and safeguards. Rich is the product owner, not the coordinator of every repair.
 
-This document describes required behavior and future plans, not implementation completion. Use docs/CONTINUATION.md and the latest verified reports for current status. The repository handoff was referenced in owner-provided reports but was not directly read during this document revision. Do not infer later execution or successful restoration from a proposed authorization.
+This document describes required behavior and future plans, not implementation completion. Use docs/CONTINUATION.md and the latest verified reports for current status. A proposed authorization does not establish execution or restoration.
 
 Labels:
 - Initial product: required for the first usable release, with any proposed acceptance details identified explicitly.
@@ -36,7 +36,11 @@ Example: while playing, Rich notices a problem, opens Workbench, describes it, a
 This example does not limit the product to bug reports. Retain the full intended capability set.
 
 - Use plain English in the app and in user-facing development reports.
-- Keep technical detail in advanced views and supporting reports.
+- Make the ordinary path usable without engineering knowledge. Start with what the owner asked for, show what is happening and what comes next, and lead with the decision or result that matters now.
+- Explain each approval using the actual reviewed task, permitted action, limits, consequences and remaining uncertainty. Keep required decisions separate where the workflow requires separate authority. A new or expired offer needs its own valid decision. The summary and its optional technical details must reflect the same authoritative data.
+- Keep technical detail in advanced views and supporting reports. Deterministic explanations are the baseline. Model-assisted explanations are optional, require their own authorization where applicable, and confer no authority.
+- Let outcomes fit the request. Show findings, test results, proposed changes or completed checked work. State what was checked and what still needs evidence, and explain why held work stopped and what the owner can do.
+- Treat workflow examples and controls as illustrations of the desired simplicity. The layout and interaction can evolve as long as they satisfy these principles.
 - Preserve the addon's general colors, artwork, and theme. Use the current frameless WoW-inspired visual baseline for the dashboard phase.
 - Automate routine investigation, preparation, debugging, testing, recovery, and housekeeping.
 - Ask Rich only for genuine decisions, unavailable access, changed scope, or consequential permission.
@@ -428,3 +432,5 @@ Do not let redesign or future expansion postpone proving the initial working pro
 # 10. Revision record
 
 November 5, 2026: recorded the owner's frameless WoW-inspired visual preference and uploaded candidate textures; aligned authority with the updated visual guide; recorded standing control of the existing local model without expanding task budgets or publication rights. Retained initial-product priority, the broader roadmap, open decisions, and safeguards. Filename remains TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md to preserve existing project references. No current implementation milestone is newly certified by this revision.
+
+November 6, 2026. Recorded the owner’s simplicity principle for the task workflow, with plain explanations of bound decisions and results suited to the work. The existing release priorities and approval boundaries still apply.

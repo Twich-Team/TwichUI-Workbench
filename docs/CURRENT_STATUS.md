@@ -2,9 +2,9 @@
 
 Last updated November 6, 2026 (Mountain time).
 
-- **Running app.** Port 9487 runs build `fcf74ce`. The real-addon task ran in a separate frozen stage.
-- **Finished results.** One synthetic task and one real-addon task went from fresh browser request to an independently checked local result with real Qwen and both owner approvals.
-- **Tests and demonstrations.** The map-fade patch adds a regression assertion to one existing test. All 167 offline suite groups passed. Normal model access and isolated-service cleanup were verified.
-- **What is stopping progress.** The local patch is ready for review. Installation, in-game verification, broader product acceptance, and publication remain separate.
-- **Next complete outcome.** Review the sealed map-fade patch and its checks, then decide whether to proceed with installation or a separately authorized acceptance milestone.
-- **Decision needed.** Any installation, publication, or additional live run needs fresh approval.
+- **Running app.** The everyday app still serves the earlier build. The simpler task screens are in a local development build.
+- **Finished results.** One real addon task and one synthetic task previously went from browser request to checked local result with Qwen. The real addon result added a map-fade test.
+- **Offline demonstration.** The simpler screens took a test request through plan review, two approvals and a checked result using scripted model responses. Desktop and phone layouts were inspected.
+- **What remains.** Zero real-model tasks have completed through the simpler screens. The evidence allowance is nearly full, and the complete browser check is pending.
+- **Next outcome.** Demonstrate one real addon task through the simpler screens in isolation, then review a rollback-ready installation.
+- **Decision needed.** Local review can proceed now. A fresh real-model run, any evidence move needed to make room, and installation each need the owner’s authorization.
