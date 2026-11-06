@@ -252,7 +252,7 @@ def attempt(root, private, instruction):
         engine.dispose()
 
 
-def controller(root, instruction):
+def controller_preflight(root, instruction):
     if os.environ.get("WORKBENCH_DEMO_MANIFEST_SHA256"):
         from browser_demo.stage import require_active_stage
         require_active_stage()
@@ -269,8 +269,15 @@ def controller(root, instruction):
     if prepared_runtime.recipe and any(g['status']!='passed' for g in prepared_runtime.static_preflight()):
         save(root/'static-readiness-blocked.json',dict(grant_issued=False,inference_ran=False))
         return
+    return store(root/'real-run'), package, linked
+
+
+def controller(root, instruction):
+    verified = controller_preflight(root, instruction)
+    if verified is None:
+        return
+    engine, package, linked = verified
     private = ROOT/'.local'/('chronicle-primary-lease-'+root.name)
-    engine = store(root/'real-run')
     report = dict(inference_ran=False, implementation_attempt_consumed=False,
                   probe_generation_requests=0, accepted=False, private_recovery_directory=str(private))
     lease = primary.Lease(private)

@@ -12,7 +12,7 @@ printf '%s\n' "$$" > "$cg/main/cgroup.procs"
 printf '%s\n' '+memory +pids +cpu' > "$cg/cgroup.subtree_control"
 export WORKBENCH_CG_ROOT="$cg"
 mkdir "$out/worker-preflight"
-PYTHONPATH="$PWD/backend:$PWD/scripts" .venv/bin/python "$out/guarded-runtime-preflight.py" "$out/worker-preflight"
+PYTHONPATH="$PWD/backend:$PWD/scripts" .venv/bin/python scripts/browser_demo/guarded_runtime_preflight.py "$out/worker-preflight"
 printf '%s\n' "$cg" > "$out/worker-ready.txt"
 if [ "${3:-}" = "preflight-only" ]; then
     exit 0

@@ -46,7 +46,13 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
         runtime.task_ref = ref
         tape = scripted_http(cycle, isolated)
         runtime.primary = tape.adapter
-        durable(cycle / 'controller-started.json', b'{"simulated": true}')
+        if staged and native:
+            from chronicle_lease import controller_preflight
+            verified = controller_preflight(cycle, Path(command[command.index('--owner-instruction') + 1]))
+            assert verified is not None
+            verified[0].dispose()
+        else:
+            durable(cycle / 'controller-started.json', b'{"simulated": true}')
 
         def scripted_edit(body):
             rendered = json.loads(body['messages'][1]['content'].split('\n', 1)[1])

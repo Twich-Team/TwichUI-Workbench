@@ -101,22 +101,34 @@ def preflight(stage, fingerprint):
         require(connection.execute("PRAGMA quick_check").fetchone() == ("ok",), "Staged store is unhealthy")
         require(all(not connection.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone()
                     for table in EMPTY_TABLES), "Staged store already contains work or authority")
+    config = validate_policies(stage, stage / PENDING)
+    return manifest, config
+
+
+
+def validate_policies(stage, capability_path):
+    db = stage / DATABASE
+    uri = db.as_uri() + "?mode=ro"
     engine = create_engine(f"sqlite:///{db}", creator=lambda: sqlite3.connect(uri, uri=True))
     try:
-        config = task_sessions.read_capability(engine, stage / PENDING)
+        config = task_sessions.read_capability(engine, capability_path)
         policy = trusted_preparation.read_configuration(engine, stage / POLICY)
         require(config["total_limit_proof"] == str(stage / PROOF)
                 and "templates" in config and policy["output_root"] == str(stage / PREPARATIONS)
                 and policy["scenario_generation"], "Runtime policy or proof belongs to a different stage")
+        return config
     finally:
         engine.dispose()
-    return manifest, config
 
 
 def require_active_stage():
     """Recheck immutable inputs immediately before a staged browser write or controller."""
     fingerprint = os.environ.get(FINGERPRINT_ENV)
     if fingerprint:
-        sealed_inputs(ROOT, fingerprint)
+        manifest = sealed_inputs(ROOT, fingerprint)
+        require("WORKBENCH_TASK_TEMPLATES_ROOT" not in os.environ
+                and all(os.environ.get(key) == value for key, value in inputs(ROOT, manifest).items()),
+                "Launcher environment does not match the tested stage")
+        validate_policies(ROOT, ROOT / ACTIVE)
         require(digest(ROOT / ACTIVE) == digest(ROOT / PENDING),
                 "Active runtime configuration differs from the tested stage")

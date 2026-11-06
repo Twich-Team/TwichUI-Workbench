@@ -109,7 +109,7 @@ def run(manifest_path, evidence, fingerprint, *, rehearsal=False):
     database = stage / layout.DATABASE
     pending = stage / layout.PENDING
     active = stage / layout.ACTIVE
-    shutil.copyfile(stage / layout.PREFLIGHT, evidence / "guarded-runtime-preflight.py")
+    require(not (evidence / "worker-ready.txt").exists(), "Use fresh worker evidence.")
     stopped = False
 
     def stop_requested(*_):
