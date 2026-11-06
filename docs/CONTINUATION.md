@@ -1,3 +1,63 @@
+# Fresh browser task completed with real Qwen — November 5, 2026 Mountain time
+
+**Cover lowercase name normalization** went from one fresh browser request
+through real Qwen planning, two actual owner browser approvals, one local
+implementation, independent checks, and a saved browser review. It ran on
+isolated Workbench checkpoint `d98cd1b3d6228ba02c6c08839419ad18971d43ba`,
+on synthetic fixture `main` at `ebb16fff02f755bf523f3a7c30787ebdc0c8e894`.
+The model added one assertion to `tests/test_normalize.lua`. The first
+return for `" ALICE "` is tested against `"alice"`. The frozen independent
+behavior check rejected the unchanged, vacuous and wrong-behavior controls.
+Lua syntax, the focused regression, the independent behavior check, and
+all five groups in the full suite passed. The result and completion seal
+matched. Publication remains held.
+
+The owner approved the immediately preceding combined request and required
+confirmation of browser access before submission. The exact obsolete
+read-only 9187 unit and store matched, its write API and worker were
+stopped, and all 71 sealed files matched. Only that obsolete unit was
+gracefully stopped. The original 90-minute clock started at **7:55:43 p.m.
+MST**, with a latest safe implementation approval of **8:30:43 p.m. MST**
+and an outer deadline of **9:25:43 p.m. MST**. The owner confirmed the
+isolated read-only intake page before the tested supervisor submitted the
+request in Chromium. The approved archive preserved 33 files and 12,240,769
+bytes from the four named results trees. A separate restore and every
+original-path lookup matched before pruning only the matching originals.
+Measured headroom after backups and archival was 77,595,189 bytes. The
+rechecks before planning and implementation both cleared 72 MiB.
+
+Qwen's one planning response accounted for 1,675 input and 364 generated
+tokens. The owner approved the actual proposal at **8:00:20 p.m. MST**,
+then independently reviewed and approved the certified local-only offer
+at **8:00:37 p.m. MST**. The sole cancellation probe passed. The probe
+generated between 1 and 60 tokens and its exact final count is unavailable.
+The one implementation attempt used four requests, 5,781 input and
+259 generated tokens, with zero tool-input corrections. The checked
+candidate was sealed at **8:01:25 p.m. MST**. The supervisor recorded no
+observation outage during this run.
+
+The controller restored and verified the original model settings, normal
+authentication and rejection of the temporary credential after 42.64
+seconds of exclusive use. A separate authenticated metadata read passed
+against the restored service. The write API and worker stopped, the
+capability was removed, and the one-off grant closed. All 451 prior
+protected files matched. Port 9487 still runs build `fcf74ce` with its
+existing store, and port 8765 kept its listener.
+
+The [read-only browser result](http://127.0.0.1:9187/executions/53ef4511-4883-5713-ac8c-7293f0298a96)
+expires by **9:25:43 p.m. MST**. The
+[local patch](../artifacts/runs/browser-fresh-real.NYebPZ/checked-normalization.patch),
+[desktop capture](../artifacts/runs/browser-fresh-real.NYebPZ/browser/execution-result-1440.png),
+[phone capture](../artifacts/runs/browser-fresh-real.NYebPZ/browser/execution-result-390.png),
+[verification and restoration receipt](../artifacts/runs/browser-fresh-real.NYebPZ/terminal-verification.json),
+and [closeout safeguards](../artifacts/runs/browser-fresh-real.NYebPZ/closeout-safeguards.json)
+remain available locally. The approval is closed.
+
+Real-addon acceptance still requires a clean eligible real-addon base,
+supported loading for its test patterns, and a separately authorized
+real-addon task with independently verified results. The synthetic
+demonstration establishes the fresh browser path through local review.
+
 # Browser planning readiness repaired offline — November 5, 2026 Mountain time
 
 The checkout started at `cf83907`. Later working edits in AGENTS, this

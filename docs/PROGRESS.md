@@ -1,5 +1,25 @@
 # Current progress and operator handoff
 
+### 2026-11-05 MST — First fresh browser task checked with real model responses
+
+The owner confirmed access to the isolated browser, reviewed the actual
+Qwen proposal and independently approved the certified local-only offer.
+On `d98cd1b`, one planning call, one cancellation probe and one four-call
+implementation attempt produced a sealed one-line assertion in the
+synthetic fixture. Lua syntax, focused regression, frozen independent
+behavior and the exact five-group suite passed. The read-only browser
+result was inspected at desktop and phone widths, and the local patch
+was preserved. The controller restored and verified normal model access
+and temporary credential rejection. The write API and worker stopped,
+the capability and grant closed, and publication stayed held.
+
+The approved four-tree archive was verified against a separate restore
+before pruning. Measured headroom after backups and archival cleared the
+72 MiB reserve, as did both preflight rechecks. All 451 prior evidence
+files and the 9487 and 8765 listeners matched. The authorization is closed.
+Real-addon test loading and a checked task on an eligible real-addon
+base remain separate. [Handoff and evidence](CONTINUATION.md).
+
 ### 2026-11-05 MST — Repaired browser supervision and honest planning outcomes
 
 Started at `cf83907` and preserved the unrelated working edits. The sealed
