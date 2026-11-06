@@ -1,3 +1,48 @@
+# Missed approval reviewed and a coordinated trial prepared — November 6, 2026 Mountain time
+
+The [approval investigation](MAP_FADE_APPROVAL_REVIEW_20261106.md) reconciles
+the closed database, ingress receipts, API access log, preparation records
+and chat dispatch timestamps from the last trial. Qwen's proposal was ready
+at 11:15:36 a.m. MST. The owner's plan approval applied at 11:21:44 a.m.
+and preparation took 16 minutes 14 seconds. The certified offer opened at
+11:37:59 a.m. with 7 minutes 46 seconds before the cutoff. The ready message
+was dispatched at 11:38:15 a.m. The server recorded browser reads during
+preparation, followed by the supervisor's final offer check. It recorded
+no later owner-browser offer read and no implementation approval POST.
+There is no evidence of when the owner saw the notice, what the browser
+displayed, or whether a click was attempted. The specific client-side
+cause remains unknown.
+
+The previous link led to the generic task page and the cutoff was only in
+chat. Candidate `fb1830e` adds an isolated, read-only status page with the
+actual Mountain-time cutoff and a direct link that focuses the existing
+Workbench local-run offer. The authority stays with the existing form and
+write gate. The supervisor holds if certification is too late to give the
+owner the full minimum review period. The cutoff is checked again before
+dispatching an admitted write.
+
+`wb check`, 45 focused backend tests, the final 17-test stage recheck, and
+both connected Chromium cases passed. Inspected the desktop and phone
+approval captures. The staged, scripted rehearsal used the proposed
+timing and direct review link, recorded the two distinct browser decisions,
+and completed one checked simulated run. The API and worker closed and
+the temporary capability was withdrawn. The earlier offline acceptance
+still covers unchanged paths and baselines. The full suites were not
+rerun for this focused change.
+
+The [fresh authorization request](COORDINATED_MAP_FADE_TRIAL_REQUEST_20261106.md)
+binds one 120-minute trial, a minute-48 browser cutoff, a minute-33 latest
+offer, and unchanged execution and restoration reserves. The exact
+request SHA-256 is
+`1d27739593f3ede1fac2af6a4f60465d509d6569c90c43616e306f3216952495`.
+It requests no archive. The dormant stage passed 320 input checks,
+both historical seals verified 264 files, the original retry trace
+matched, and the guard measured 82.51 MiB of aggregate headroom across
+all four counted roots. See the
+[preparation verification](../.local/runs/workflow-map-fade-review-preparation-20261106/preparation-verification.json).
+The trial has not started and needs fresh approval. No model request,
+probe, lease, evidence removal or installation occurred.
+
 # Real Qwen map-fade trial held before the local run — November 6, 2026 Mountain time
 
 The owner approved the exact [verified trial request](VERIFIED_MAP_FADE_TRIAL_REQUEST_20261106.md)

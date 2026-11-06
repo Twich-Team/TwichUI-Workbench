@@ -1,3 +1,18 @@
+## November 6, 2026 — missed implementation approval investigated
+
+The certified offer opened with 7 minutes 46 seconds left. The server
+has no recorded owner-browser read of the ready offer or second approval
+write. The exact cause on the owner side is unknown. The generic task
+link and short review window were improved without changing the approval
+binding or separate decisions.
+
+Candidate `fb1830e` adds the direct review link, exact cutoff, explicit
+status and a minimum review interval. Focused backend and desktop and
+phone browser checks passed. The staged scripted rehearsal reached one
+checked result and closed. A fresh 120-minute request is ready with
+82.51 MiB of measured headroom and no additional archival. The live
+package remains dormant and requires separate approval.
+
 ## November 6, 2026 — real Qwen plan and checked offer, trial closed at the cutoff
 
 Verified and independently restored the 22 approved archive folders.
