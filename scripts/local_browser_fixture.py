@@ -44,7 +44,8 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
     original = task_session.process_one
     sandbox = database.parent
     with engine.connect() as c:
-        session_id = c.execute(select(task_sessions.c.id).where(task_sessions.c.status == 'pending')).scalar_one()
+        expected = 'waiting_recovery' if outcome == 'recover' else 'pending'
+        session_id = c.execute(select(task_sessions.c.id).where(task_sessions.c.status == expected)).scalar_one()
     scratch = (Path(everyday.configuration(engine).scratch) if everyday.enabled()
                else Path(tempfile.gettempdir() if native else sandbox) / 'implementation-scratch')
     scratch.mkdir(mode=0o700, exist_ok=True)
