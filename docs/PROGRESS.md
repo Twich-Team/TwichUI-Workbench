@@ -1,3 +1,19 @@
+## November 6, 2026 — A8 signed-in candidate
+
+- Owner held the Qwen-only interim install and chose existing ChatGPT CLI
+  authentication. Kept API billing and automated purchases outside the path.
+- Used the pinned App Server stdio protocol to verify the model and allowance
+  before a bounded tool-free turn. Restricted implementation source to excerpts
+  from the one approved test. The worker retains local verification and scope.
+- Kept fallback opt-in and limited to a confirmed no-generation planning hold.
+  Both phases keep a single claim and the same task ID. Uncertain attempts
+  remain visible and are fenced from replay.
+- Prepared a second, exact HTTPS LAN listener with client certificate and
+  owner-client address. Privileged firewall inspection remains due at cutover.
+- Preserved the interim stage, backup and rollback. The replacement request
+  binds the new source, four named everyday services and all acceptance limits.
+  See [current status](CURRENT_STATUS.md) and [combined request](EVERYDAY_INSTALL_APPROVAL_20261106.md).
+
 ## Release reconciliation and rollback readiness — November 6, 2026
 
 The A8 review is complete within offline scope. The release recommendation

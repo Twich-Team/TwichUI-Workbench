@@ -151,6 +151,8 @@ Rich's example is using a roughly $20 Codex offering's included allowance on wor
 
 Before implementation, verify the actual subscription/access arrangement and supported integration. Do not assume subscription allowances equal API credits, that they reset daily, or that unsupported automation is permitted.
 
+Owner decision, November 6, 2026. Use the existing signed-in Codex subscription on the Workbench host through a supported local interface. The connection must use included subscription allowance. An API key, separately billed fallback, paid overages and changes to the owner's login require separate authority.
+
 Basic deliberate Codex use belongs in Phase A. Automatic allowance monitoring and percentage-based allocation belong in Phase C unless separately promoted.
 
 ## A9. Recovery and continuity
@@ -170,6 +172,8 @@ Establish what storage is counted, why, and how long evidence is retained. The c
 Protect credentials, user data, unrelated work, and important evidence. Use checked installation and rollback procedures.
 
 Dashboard login is not required for initial local/private-network use. This does not remove model-service authentication, approval requirements, limits, or isolation, and does not authorize public exposure.
+
+Owner decision, November 6, 2026. The everyday app must also be usable through the host's private-network IP without an SSH tunnel. Restrict access to the authorized owner device and keep model services and credentials private. Maintain a stable installed release separate from development, with deliberate updates that account for active work, stored data, backup and rollback.
 
 ## A11. Standing local-model priority and control
 

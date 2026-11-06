@@ -1,7 +1,31 @@
-# Reconciled release decision after A8 — November 6, 2026 Mountain time
+# Signed-in Codex candidate staged — November 6, 2026 Mountain time
 
-Recommend holding installation for A8. The [reconciled package](EVERYDAY_INSTALL_APPROVAL_20261106.md)
-preserves an explicit Qwen-only interim option and lists the initial-product
+The owner held the Qwen-only interim package and selected the existing
+ChatGPT CLI sign-in for A8. Application checkpoint `8167291` and the sealed
+separate release are recorded in the [combined request](EVERYDAY_INSTALL_APPROVAL_20261106.md).
+Use that record for the candidate, exact source scope and limits, private
+LAN access, backup, rollback and one acceptance window. Earlier entries
+below retain historical evidence and authorizations.
+
+The Codex and Qwen routes now run through one eligible test workflow.
+The one optional switch goes to Qwen before Codex generation. Simulated
+provider outcomes and independent verification passed. The app on 9487
+still serves the earlier demo. The prior isolated Qwen result retains its
+own evidence. No Workbench Codex model call, installation, store migration,
+service or firewall change, or evidence archive occurred in this assignment.
+The signed-in app-server's actual entitlement and allowance, the installed
+browser workflow and LAN transport still need approved acceptance.
+
+The stage is separate from the development worktree. The existing backup
+and all interim stages were preserved. Next, bind the exact owner client IP
+and certificate provisioning and confirm included-only account settings
+with the installation decision. After successful acceptance, continue with
+the simpler screens for styling and the owner's full requirements audit.
+
+# Historical interim release decision — November 6, 2026 Mountain time
+
+The superseded interim record in local checkpoint `dfbcdcb`
+preserved a Qwen-only interim option and lists the initial-product
 requirements still open, including deliberate Codex use, bounded fallback
 and authorized draft PR acceptance. The exact everyday task breadth remains
 an owner decision. No current message approved cutover or a live run.
