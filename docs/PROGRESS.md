@@ -1,3 +1,15 @@
+## November 6, 2026 — first real-addon browser patch independently checked
+
+The approved frozen stage completed the map-fade task through real
+Qwen planning, two owner browser approvals, both independent control
+rounds, one local implementation attempt, and a sealed result. The
+six-line patch touches only the existing test. All four candidate
+checks and all 167 suite groups passed. Normal model access was
+restored and verified, the temporary credential was rejected, and
+isolated execution services and authority were closed. The patch,
+checks, read-only review, and audit are in CONTINUATION. Installation,
+in-game verification, broader acceptance, and publication remain held.
+
 ## November 6, 2026 — staged execution preflight verified offline
 
 The stage builder now derives the store, policies, template root,

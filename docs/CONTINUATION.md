@@ -1,3 +1,73 @@
+# First independently checked real-addon browser patch — November 6, 2026 Mountain time
+
+The fresh isolated browser run of **Cover the map fade at a single
+threshold** produced a sealed Qwen patch on TwichUI base
+`1caf530212bbc6eaf37e41d668902a391aa936c1`. It used Workbench build
+`1a2dbd9f8889c538be4d5ee4f900e528a3195988`, manifest SHA-256
+`aa174f49950c08e5c112943dd87db42317b05eedb3e4072050febba2c7e307f3`.
+The stage and both dormant policies passed preflight. The run started at
+7:47:04 a.m. MST, the browser cutoff was 8:20:04 a.m., and the outer
+deadline was 9:32:04 a.m. The old preview's ownership and sealed evidence
+were verified before port clearance. Rich confirmed the new access page
+before planning.
+
+The approved `staging-reliability-preflight-20261106` archive preserved
+110 files and 16,175,759 bytes from the seven named directories. File
+contents, metadata, original-path lookups, and a separate restoration
+matched before pruning. Verification after pruning and at closeout
+passed. Actual headroom after the archive and receipts was 78,916,983
+bytes. The pre-implementation gate measured 77,028,925 bytes. Both
+exceeded the 72 MiB reserve, and the physical-free-space floor passed.
+
+The one planning request used 3,436 input and 310 generated tokens.
+Rich approved the actual proposal at 7:58:25 a.m. MST and approved
+the certified offer with **Local implementation only** at 8:18:01 a.m.
+Both were actual browser decisions. The outer deadline governed.
+The known-good control passed the behavior check. The original,
+vacuous, and wrong-behavior controls failed it as expected, and all four
+passed the existing suite. This was verified before the offer and again
+in the fresh implementation workspace.
+
+The one lease passed 111 authentication rejection checks. The sole
+cancellation probe passed in about 0.77 seconds with 64 counted input
+tokens and an upper bound of 60 generated tokens. Qwen made four
+implementation requests, using 15,178 input and 440 generated tokens
+with zero corrections. It added six lines only in
+`tests/test_map_viewmath_step.lua`, including an assertion that
+`VM.Fade(2, 2, 2) == 1`. No other file changed. Lua syntax, focused
+regression, independent behavior, and all 167 original suite groups
+passed. The result was sealed at 8:40:12 a.m. MST. The independent
+terminal verifier matched the patch, candidate, completion seal,
+accounting, and approval bindings. Patch SHA-256 is
+`f5396cf0b510101e140e4fbb7aeac31ccf69e4e269fceb6da109443cee09bbc3`.
+
+The lease lasted 355.42 seconds. The controller restored the original
+configuration and permissions, verified normal authenticated access,
+and verified rejection of the temporary credential. The worker, write
+API, and delegated cgroups closed, the execution grant was revoked,
+the matching capability was withdrawn, and owned scratch was removed.
+Ports 9487 and 8765 matched their starting listeners. The working addon
+checkout and pinned isolated source stayed clean. The installed addon
+and main app were untouched. The audit checked 680 historical entries,
+831 staging entries at their original paths, and the initial run store
+against its matching backup. Publication records and PR preparations
+are zero. This authorization is spent.
+
+The [sealed patch](../artifacts/runs/browser-addon-staged.PPqj6w/checked-map-fade.patch),
+[checks and controls](../artifacts/runs/browser-addon-staged.PPqj6w/check-summary.json),
+[terminal audit](../artifacts/runs/browser-addon-staged.PPqj6w/terminal-verification.json),
+[cleanup receipt](../artifacts/runs/browser-addon-staged.PPqj6w/closeout-safeguards.json),
+and [222-file seal](../artifacts/runs/browser-addon-staged.PPqj6w/SHA256.json)
+are retained. The [read-only browser review](http://127.0.0.1:9187/executions/336d62bb-798c-5d77-a58e-f9a50d54a5b0)
+is bounded by 9:32:04 a.m. MST. The checked result is saved at
+[desktop](../artifacts/runs/browser-addon-staged.PPqj6w/browser/execution-result-1440.png)
+and [phone](../artifacts/runs/browser-addon-staged.PPqj6w/browser/execution-result-390.png)
+widths.
+
+This is one completed local browser workflow on the real addon. Rich
+can review the patch and checks. Any installation, in-game verification,
+broader acceptance, or publication requires its own decision.
+
 # Staging reliability repaired and verified offline — November 6, 2026 Mountain time
 
 Checkpoint `2912fb7` recorded a successful real-Qwen proposal, the
