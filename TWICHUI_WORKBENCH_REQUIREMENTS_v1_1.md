@@ -151,7 +151,7 @@ Rich's example is using a roughly $20 Codex offering's included allowance on wor
 
 Before implementation, verify the actual subscription/access arrangement and supported integration. Do not assume subscription allowances equal API credits, that they reset daily, or that unsupported automation is permitted.
 
-Owner decision, November 6, 2026. Use the existing signed-in Codex subscription on the Workbench host through a supported local interface. The connection must use included subscription allowance. An API key, separately billed fallback, paid overages and changes to the owner's login require separate authority.
+Owner decision, November 6, 2026. Use the existing signed-in Codex subscription on the Workbench host through a supported local interface. The connection must use included subscription allowance. Workbench must not buy or automatically replenish credits, use API-key billing or intentionally consume purchased credits. Hold if the available billing and allowance controls cannot establish eligibility. An authorized Qwen fallback can take over on a proven pre-generation allowance stop.
 
 Owner clarification, November 6, 2026. The user chooses Qwen alone, Codex alone, Qwen first with explicitly enabled bounded Codex fallback, or Codex first with explicitly enabled bounded Qwen fallback. The app must distinguish unavailability before generation, a finished failure, partial output and uncertain or active work. It must preserve cancellation, accounting, independent checks, binding and duplicate protection when switching. Uncertain work holds for review.
 
@@ -175,7 +175,7 @@ Protect credentials, user data, unrelated work, and important evidence. Use chec
 
 Dashboard login is not required for initial local/private-network use. This does not remove model-service authentication, approval requirements, limits, or isolation, and does not authorize public exposure.
 
-Owner decision, November 6, 2026. The everyday app must also be usable through the host's private-network IP without an SSH tunnel. Restrict access to the authorized owner device and keep model services and credentials private. Maintain a stable installed release separate from development, with deliberate updates that account for active work, stored data, backup and rollback.
+Owner decision, November 6, 2026. The everyday app must also be usable through the host's private-network IP without an SSH tunnel. Permit the home LAN identified by gateway 10.0.0.1, using the subnet verified from the server interface and routes. Access is not pinned to one device address. Keep model services and credentials private and exclude public ingress and router port forwarding. Maintain a stable installed release separate from development, with deliberate updates that account for active work, stored data, backup and rollback.
 
 ## A11. Standing local-model priority and control
 

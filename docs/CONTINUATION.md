@@ -1,4 +1,26 @@
-# Bidirectional fallback candidate staged — November 6, 2026 Mountain time
+# Home LAN and Codex billing boundary — November 6, 2026 Mountain time
+
+The owner clarified that any home-LAN computer should be able to connect.
+The server's DHCP address is `10.0.0.9/24` on `enp4s0`, with connected
+`10.0.0.0/24` and gateway `10.0.0.1`. Candidate `133b485` seals that subnet
+for the dedicated HTTPS listener, systemd allowlist and conditional UFW
+proposal. Client certificates authorize browsers without an IP pin. The
+loopback app still serves the earlier build.
+
+The owner wants only the existing Codex subscription allowance. The pinned
+App Server exposes allowance and credit snapshots with no per-turn billing
+selector. The candidate holds on absent or available credit signals and
+rechecks before sending source. The exact owner checks are Automatic reload
+and the additional usage-credit balance. Keep live Codex acceptance held
+until the account prerequisites and explicit approval are recorded. See the
+[combined installation request](EVERYDAY_INSTALL_APPROVAL_20261106.md) for
+the sealed record, exact account paths, evidence, limits, and rollback.
+
+The prior stages, checked history backup and rollback remain intact. No
+live provider call, source transmission, account change, installation,
+service or firewall change, or archive occurred.
+
+# Historical bidirectional fallback candidate staged — November 6, 2026 Mountain time
 
 The owner clarified the four A8 choices. Application checkpoint `3404a29`
 supersedes `8167291` as the proposed installation. All four choices work

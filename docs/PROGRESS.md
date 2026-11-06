@@ -1,3 +1,18 @@
+## November 6, 2026 — Home LAN and included allowance
+
+- Verified the actual interface, prefix, connected route and gateway.
+  Replaced the single-client address with the sealed home-LAN subnet.
+  Retained HTTPS client authentication for any certified computer.
+- Verified the pinned App Server schema and official account guidance.
+  Restricted turns to standard speed and added explicit credit checks
+  immediately before task content. A disqualifying update attempts
+  interruption and holds without replay.
+- Kept the connector gated on an approved review of Automatic reload and
+  the additional usage-credit balance. The provider offers no atomic
+  included-usage reservation or per-turn billing selector.
+- Sealed a separate candidate, rehearsed the subnet and history setup,
+  and updated the [combined request](EVERYDAY_INSTALL_APPROVAL_20261106.md).
+
 ## November 6, 2026 — Bidirectional fallback
 
 - Bound both optional directions to the saved per-task selection and original
