@@ -76,7 +76,7 @@ def main():
     parser.add_argument('--binary-sha256', required=True)
     parser.add_argument('--sign-in-file', required=True, type=Path)
     parser.add_argument('--included-only-confirmed', action='store_true',
-                        help='Start only after the owner confirms paid usage and automatic purchases are disabled.')
+                        help='Start only after owner review of Automatic reload and the additional usage-credit balance.')
     args = parser.parse_args()
     if not args.included_only_confirmed:
         parser.error('Explicit included-only account confirmation is required.')
