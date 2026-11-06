@@ -106,12 +106,45 @@ test('F · missing mockups block approval; synthetic attachments bind the revisi
   }
   await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toBeEnabled();
   await overflow(page);await capture(page,info,'m3-mockups-desktop');
-  await page.getByRole('button',{name:'Approve plan',exact:true}).click();fixture('apply-planning');
+  await page.getByRole('button',{name:'Approve plan',exact:true}).click();
+  await expect(page.getByRole('region',{name:'Latest plan decision'}).getByText('Saved · Pending application',{exact:true})).toBeVisible();
+  fixture('apply-planning');
   fixture('fail-planning');await expect(page.getByText('Approved work could not be prepared',{exact:true})).toBeVisible();
-  expect((await snapshot(page)).decisions[0].status).toBe('applied');
-  await capture(page,info,'m3-decomposition-failed-desktop');
-  await page.getByRole('button',{name:'Retry planning'}).click();await expect(page.getByText('Waiting to start',{exact:true}).first()).toBeVisible();fixture('planning');
-  await expect(page.getByText('Plan ready',{exact:true})).toBeVisible();
+  const failed = await snapshot(page);
+  expect(failed.status).toBe('decomposition_failed');
+  expect(failed.decisions).toHaveLength(1);
+  expect(failed.decisions[0].status).toBe('applied');
+  expect(failed.tasks).toHaveLength(0);
+  const decomposition = failed.jobs.filter(job => job.kind === 'decomposition');
+  expect(decomposition).toHaveLength(1);
+  expect(decomposition[0].status).toBe('failed');
+  await capture(page,info,'m3-decomposition-failed-desktop',{keepInCompact:true});
+
+  const retryResponse = page.waitForResponse(response =>
+    response.url().endsWith(`/api/intake/${failed.id}/retry`) && response.request().method() === 'POST');
+  await page.getByRole('button',{name:'Retry planning'}).click();
+  const response = await retryResponse;
+  expect(response.status()).toBe(200);
+  const queued: Intake = await response.json();
+  expect(queued.status).toBe('approved');
+  expect(queued.decisions).toEqual(failed.decisions);
+  expect(queued.tasks).toHaveLength(0);
+  expect(queued.jobs.filter(job => job.kind === 'decomposition')).toEqual([
+    expect.objectContaining({id: decomposition[0].id, status: 'queued', attempts: decomposition[0].attempts}),
+  ]);
+  const progress = page.getByRole('region',{name:'Task progress'});
+  await expect(progress.getByText('Plan approved',{exact:true})).toBeVisible();
+  await expect(progress.getByText('Workbench is preparing the agreed work.',{exact:true})).toBeVisible();
+
+  fixture('planning');
+  await expect(progress.getByText('Plan ready',{exact:true})).toBeVisible();
+  const finished = await snapshot(page);
+  expect(finished.status).toBe('tasks_ready');
+  expect(finished.decisions).toEqual(failed.decisions);
+  expect(finished.jobs.filter(job => job.kind === 'decomposition')).toEqual([
+    expect.objectContaining({id: decomposition[0].id, status: 'completed', attempts: decomposition[0].attempts + 1}),
+  ]);
+  expect(finished.tasks.length).toBeGreaterThan(0);
 });
 
 test('unavailable planning, response-loss intake retry, empty/loading/error states and enlarged phone text',async({page},info)=>{
@@ -144,7 +177,7 @@ test('required forms, optional Lua input and enlarged text fit desktop and phone
     await page.getByLabel('Lua error Plain text').fill('Interface/Guide.lua:42: literal synthetic error\n'+ 'UnbrokenEvidence'.repeat(30));
     await expect(page.getByRole('button',{name:'Submit request',exact:true})).toBeEnabled();
     if(width===390) await page.evaluate(()=>{document.documentElement.style.fontSize='24px';});
-    await overflow(page);await capture(page,info,`m3-form-${width}`);
+    await overflow(page);await capture(page,info,`m3-form-${width}`,{keepInCompact:true});
   }
 });
 
@@ -219,7 +252,7 @@ for(const width of [1440,390]) {
     await expect(page.getByRole('heading',{name:'The plan',exact:true})).toBeVisible();
     await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toBeDisabled();
     expect((await page.request.post(`/api/intake/${old.id}/decisions`,{headers,data:body})).status()).toBe(409);
-    await overflow(page);await capture(page,info,`wb16-stale-scope-${width}`);
+    await overflow(page);await capture(page,info,`wb16-stale-scope-${width}`,{keepInCompact:true});
     await page.getByRole('button',{name:'Open current proposal'}).click();
     await expect(page.getByRole('heading',{name:'The plan',exact:true})).toBeVisible();
     await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toBeDisabled();

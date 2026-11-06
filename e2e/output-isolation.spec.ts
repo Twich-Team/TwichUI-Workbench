@@ -20,7 +20,7 @@ test('ordinary browser output preserves prior evidence and allocates separate ru
     expect(relative(process.cwd(),run)).toMatch(/^artifacts\/runs\/browser-/);
     expect(info.project.outputDir).toContain('/artifacts/runs/browser-');
     await page.goto('/');
-    await capture(page,info,'output-isolation-control');
+    await capture(page,info,'output-isolation-control',{keepInCompact:true});
     expect(readFileSync(artifactPath('screenshots/output-isolation-control.png')).subarray(0,8)).toEqual(Buffer.from([137,80,78,71,13,10,26,10]));
   } finally {rmSync(fixture,{recursive:true,force:true});}
 });

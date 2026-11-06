@@ -25,11 +25,13 @@ export async function overflow(page: Page) {
   appendFileSync(artifactPath('overflow.jsonl'), JSON.stringify({ at: new Date().toISOString(), url: page.url(), ...result }) + '\n');
   expect(result, JSON.stringify(result)).toMatchObject({ scroll: result.width });
 }
-export async function capture(page: Page, info: TestInfo, name: string) {
+export async function capture(page: Page, info: TestInfo, name: string, { keepInCompact = false } = {}) {
+  const compact = process.env.WORKBENCH_E2E_COMPACT === '1';
+  if (compact && info.project.name === 'chromium' && !keepInCompact) return;
   mkdirSync(artifactPath('screenshots'), { recursive: true });
   const path = artifactPath(`screenshots/${name}.png`);
   if (!(await page.getByRole('dialog').isVisible())) await page.evaluate(() => window.scrollTo(0,0));
   await page.screenshot({ path, fullPage: !(await page.getByRole('dialog').isVisible()) });
-  if (process.env.WORKBENCH_E2E_LINE_ONLY !== '1')
+  if (!compact && process.env.WORKBENCH_E2E_LINE_ONLY !== '1')
     await info.attach(name, { path, contentType: 'image/png' });
 }

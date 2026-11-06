@@ -29,11 +29,11 @@ test('ordinary regression request prepares a bound contract without a registered
   expect(saved.proposals[0].task_contract.resolved_base).toMatch(/^[a-f0-9]{40}$/);
   expect(saved.decisions).toEqual([]);
   expect(saved.tasks).toEqual([]);
-  await overflow(page);await capture(page,info,'regression-contract-desktop');
+  await overflow(page);await capture(page,info,'regression-contract-desktop',{keepInCompact:true});
   await page.setViewportSize({width:390,height:844});
-  await overflow(page);await capture(page,info,'regression-contract-phone');
+  await overflow(page);await capture(page,info,'regression-contract-phone',{keepInCompact:true});
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
-  await overflow(page);await capture(page,info,'regression-contract-phone-enlarged');
+  await overflow(page);await capture(page,info,'regression-contract-phone-enlarged',{keepInCompact:true});
   await page.evaluate(()=>document.documentElement.style.fontSize='');
   await page.setViewportSize({width:320,height:740});await overflow(page);
   await page.reload();
