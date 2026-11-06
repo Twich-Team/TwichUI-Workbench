@@ -1540,3 +1540,24 @@ offer writer fences recovery by claim, evidence root and exact binding. The
 existing scope, preparation, certification and separate run-budget owners
 retain their authority. Recovery creates zero execution or publication
 permission.
+
+## Local-only browser approval — November 6, 2026
+
+The ordinary regression intake may supply a text example for its first
+expected result. The optional fields preserve the exact text and enter the
+same grounded scenario validation and request binding. Existing numbered
+examples still work, and later explicit clarification can replace an example.
+
+Reviewed task offers default to a held-publication budget. The browser
+requires confirmation of the task, expected behavior, scope and limits.
+Selecting the explicit draft-PR option resets confirmation and changes the
+saved budget. The existing command journal owns exact replay and rejects a
+second budget for the same proposal. Its worker verifies that the saved
+budget matches the browser request and original decision binding before
+application. A held run produces no publication authority. The earlier
+explicit draft route retains its existing delivery owner and guards.
+
+Progress reads the existing preparation jobs, session, execution and result
+records. The task shows ongoing cleanup before declaring the run settled.
+No new queue, schema migration, public activation endpoint or publication
+authority is introduced.

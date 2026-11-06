@@ -1,5 +1,23 @@
 # Current progress and operator handoff
 
+### 2026-11-06 — Local-only browser approval and checked result verified
+
+The ordinary browser form accepts an exact text example. The worker prepares
+the reviewed request and the certified offer defaults to local implementation.
+Draft delivery is an explicit separate choice. The existing journal and worker
+protect against stale offers, duplicate decisions and repeated execution.
+
+The staged build passed build and schema checks, 983 backend tests with one
+skip, 24 frontend tests and ten focused Chromium cases. Fresh browser requests
+used simulated planning and implementation responses, real disposable Lua
+checks and the production result path. Waiting, passing, failed, interrupted,
+recovered, stale and duplicate outcomes were exercised. Desktop and phone
+captures were inspected. The exact staged build and live confinement preflight
+passed without model use. The previous checked Qwen run and failed-run
+evidence were reverified. Port 9487 was preserved. The complete isolated
+real-model request and exact archive scope are recorded in
+[the handoff](CONTINUATION.md). Real-addon test loading remains separate.
+
 ### 2026-11-06 — Repaired synthetic normalization checked with real Qwen
 
 The exact approved synthetic proposal passed independent preparation and

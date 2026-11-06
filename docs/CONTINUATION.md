@@ -1,4 +1,161 @@
-# Repaired normalization passed with local Qwen — November 6, 2026
+# Local-only browser workflow verified with simulated responses — November 6, 2026
+
+The browser now accepts a plain-text example for the first expected result
+without changing the user's description. It shows the resulting proposal and
+asks the user to confirm the expected and incorrect outcomes. Workbench's
+worker prepares the independent checks. The certified offer defaults to
+**Local implementation only** and requires confirmation of the exact task,
+expected behavior, files and limits. Draft delivery is a distinct opt-in
+with its own confirmation. A held-publication decision cannot be upgraded
+by reusing or repeating that approval.
+
+The existing approval journal binds both permission choices to the exact
+scope, reviewed offer and budget. The existing worker owns preparation,
+execution, checking, safe recovery and frozen result delivery. The UI
+distinguishes queued preparation, saved but unapplied approval, waiting,
+implementation, checks, cleanup, failure and interruption. A rejected
+attempt retains its last failing check. No migration or publication-owner
+change was needed.
+
+The backend suite passed 983 tests with one skip. All 24 frontend tests
+and ten focused Chromium cases passed. The browser submitted fresh requests
+through the ordinary form and used the real scope and local approval buttons.
+Scripted planning and streaming responses entered the production worker,
+parser, tools and frozen-result path. The Lua checks ran on disposable
+fixtures. The tests covered waiting, a checked candidate, a failed check,
+interruption and recovery, a changed offer, repeated clicks and command
+replay, and explicit draft approval with no real publication. Inspected
+both desktop and phone captures. The separate native delegated preflight
+also verified actual network and filesystem isolation without model use.
+
+[Desktop checked result](../artifacts/runs/browser-bOhZoS/local-browser/result-1440.png),
+[phone approval](../artifacts/runs/browser-bOhZoS/local-browser/approval-390.png),
+[browser checks](../artifacts/runs/browser-local-readiness-l4Aw3o/browser-test-summary.txt),
+[staged build and request](../artifacts/runs/browser-local-readiness-l4Aw3o/staged-readiness.json),
+and [delegated isolation](../artifacts/runs/browser-local-readiness-l4Aw3o/delegated-preflight.log).
+
+Port 9487 still runs build `fcf74ce`. The new build is staged privately and
+has not opened a listener. Its disposable store has a matching backup,
+zero requests, approvals, jobs, attempts, or publication records, and an
+inactive one-off capability. The previous Qwen result and all 170 sealed
+files, plus all 210 earlier failure-evidence files, still match. The
+existing 8080 configuration and service identity were verified without a
+model call. The synthetic workflow has not yet run from a fresh browser
+submission through a finished result with real model responses. The real
+addon's test-loading patterns remain a separate acceptance gap.
+
+## One combined authorization proposed for the real browser demonstration
+
+1. **Activate an isolated copy.** Use app and worker checkpoint
+   `188f19adb6de9d2be2421bd99af2fbfa03bee648`, the staged
+   `index-DJDbGV7p.js` and `index-CzQfAJRs.css` assets, and the empty
+   inode-bound SQLite store and backup in the readiness receipt. Verify
+   the exact build, store, policy, fixture, installed model proof and
+   native delegated launcher again. Start the normal API and worker on
+   the isolated installation, with the write API bound only to
+   `127.0.0.1:9187`. Wait for any existing preview to expire on its own.
+   Keep 9487, 8765, and their stores out of the activation. Use a private
+   single demonstration browser session, the existing API host/origin and
+   anti-forgery protection, and the supported private runtime capability.
+2. **Submit one exact synthetic request.** Use the browser feature form
+   titled **Cover lowercase name normalization**. Description
+   “In the synthetic fixture, cover trimming surrounding spaces and
+   lowercasing names.” Select Lua regression-test work and a nonvisual
+   request. Expected result “The first result for a spaced uppercase
+   name is the trimmed lowercase name.” Allow additions only to
+   `tests/test_normalize.lua` on fixture main
+   `ebb16fff02f755bf523f3a7c30787ebdc0c8e894`. In the text example
+   enter `" ALICE "` with one space on each side, expect `"alice"`,
+   and reject `"ALICE"` for the same call. The model may also read
+   `!!!TwichUI/normalize.lua`, which stays unchanged. Preserve existing
+   tests, runner, harness and file modes. The real addon is outside scope.
+3. **Use the browser for the decisions.** In the isolated app's Models
+   settings, save only the enabled preferred local `pilot-qwen38-27b`
+   with fixed decoding and blocking on unavailability. Submit the fresh
+   request through the form. The owner reviews the actual generated
+   proposal and confirms the typed example with **Approve proposal**.
+   Workbench then certifies its checks automatically. The owner verifies
+   the certified scope and limits and clicks **Approve local
+   implementation** with **Local implementation only** selected. The
+   outer authorization starts the isolated demonstration and permits
+   the bounded planning call. The browser task decision alone permits
+   implementation. No replayed proposal or operator API approval.
+4. **One real plan and one implementation.** Use existing Qwen on
+   `127.0.0.1:8080`. Planning uses the normal authenticated route and
+   existing locks, with one generation request, a 120-second deadline,
+   2,600 generated tokens requested, reasoning disabled and 24,000-byte
+   request and response bounds. Verify the planning identity and complete
+   usage before approving scope. Implementation uses one existing
+   controller lease up to 60 minutes with five minutes reserved for
+   restoration, one cancellation probe up to 30 seconds with at most
+   128 input and 60 generated tokens, then one implementation attempt.
+   At most 20 implementation requests, 120 seconds each, 2,500
+   generated tokens per response with a 2,496 wire ceiling, 24,000
+   implementation generated tokens total, and the existing 32,768-token
+   context gate. Aggregate at most 22 generating requests and 26,660
+   generated tokens, plus up to 21 input-count calls and the supported
+   non-generating metadata, readiness, cancellation and restoration
+   exchanges. Deterministic decomposition uses no generation.
+5. **Keep the existing run envelope.** Start one 90-minute clock once
+   the port is free and authorized work begins. Include archive,
+   readiness, planning, browser decisions, implementation, checks,
+   restoration and closeout. Allow 20 minutes for implementation and
+   40 minutes through verification, with at least 55 minutes before
+   submitting the implementation approval, 50 minutes before lease
+   start and 45 before the attempt. Never reserve the model while waiting
+   for the previous preview. Keep 6 GiB runtime RAM, zero swap, two
+   cores, 64 tasks and 16 MiB per file for model-side checks, 128 tasks
+   and 128 MiB per file for trusted checks. Keep 45,000 characters of
+   source reads, 150 added lines, 65,536 patch bytes, 8 MiB log limit,
+   2 MiB stream, 64 KiB line and 256 KiB assembled response limits,
+   and 1 GiB scratch. Two shared safe tool-input corrections and
+   check-driven edits may use the same implementation attempt and its
+   original budgets. No extra planning, replacement attempt, extra
+   probe, lease extension, paid fallback, or automatic retry.
+6. **Make room first.** Authorize the single lossless archive
+   `browser-local-demo-preflight-20261106` of these closed generated
+   trees under `artifacts/runs/` only:
+   `browser-ttUFQv/report`, `browser-SBNBUp/results`,
+   `browser-GWo9Si/results`, `browser-iV9yl6/results`,
+   `browser-Fl9Yry/report`, `browser-TiyPEB/report`,
+   `browser-BIOBHF/report`, `browser-xoOZab/report`,
+   `browser-HxICpK/report`, and `browser-UnoM5x/report`.
+   Recheck their ownership, closed status and inventory. Copy with the
+   repository archive tool, verify all files, metadata and original
+   path lookup, restore into a separate directory and compare before
+   pruning only matching originals. Reverify afterward. Preserve
+   earlier real-run results, failures, stores and recovery records.
+   Under the aggregate 512 MiB ceiling require at least 72 MiB
+   counted headroom after backups before any model generation and
+   recheck before implementation. Require 4 GiB physically free.
+   The checked inventory contains 44,975,443 bytes and is projected
+   to clear the reserve. Remeasure. Stop if it does not.
+7. **Verify and close safely.** Require positive and negative controls
+   (unchanged, vacuous and wrong behavior), Lua syntax and focused
+   regression, the independent frozen behavior check, exact five-group
+   suite, complete usage, matching sealed patch and durable result,
+   and zero publication records. Stop on scope or evidence drift,
+   unexpected work, unavailable review or limits, denial, unclear
+   planning output, failed cancellation, unverified checks or unknown
+   completion. Never patch the model's output manually or start a
+   replacement. The controller takes exclusive access for the probe
+   and implementation, keeps authentication enabled, and restores
+   the original configuration and credential on every exit, with
+   the guarded watchdog/recovery path available. Verify normal access,
+   original config and temporary credential rejection. Leave a
+   restoration uncertainty held, with recovery evidence.
+8. **Review and rollback.** Present the browser result, diff and
+   checks with desktop and phone captures and a durable local patch
+   for a passing result. Retain the actual outcome and evidence on a
+   hold. Stop only the owned write API and worker and remove the
+   isolated capability after settling any owned model work. A
+   read-only loopback preview may serve the exact result until the
+   earlier of the recorded outer and saved deadline, then expire.
+   Retain the store and local evidence. No external access, pushes,
+   PRs, merges or releases are authorized. There is no installation
+   change to roll back on the running 9487 app.
+
+## Earlier implementation-only Qwen result — November 6, 2026
 
 The owner-approved synthetic proposal `f9f53de6-7906-5e59-84b3-1df79f75e240`,
 revision 1, finished on isolated app and worker checkpoint
