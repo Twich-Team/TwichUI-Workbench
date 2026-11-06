@@ -1,5 +1,21 @@
 # Current progress and operator handoff
 
+### 2026-11-05 MST — Real browser planning held and closed
+
+The owner authorized graceful early stop of the verified preceding read-only
+preview. Its worker and write API were already stopped and all 170 sealed
+files matched. The approved 60-file archive was verified and restored
+before pruning. The original window began after port 9187 was free.
+
+One fresh browser intake started the allowed Qwen planning request. The
+operator supervisor's publication check queried a nonexistent column and
+cancelled the worker. The server released the planning slot. The request
+and hold were preserved with desktop and phone captures. The supervisor
+query was corrected and tested offline against the exact store. No probe,
+implementation, service restart or publication occurred. Normal
+authenticated access was verified and the isolated write processes stopped.
+[Detailed handoff and evidence](CONTINUATION.md).
+
 ### 2026-11-06 — Local-only browser approval and checked result verified
 
 The ordinary browser form accepts an exact text example. The worker prepares

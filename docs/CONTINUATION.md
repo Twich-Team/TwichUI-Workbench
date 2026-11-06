@@ -1,4 +1,66 @@
-# Local-only browser workflow verified with simulated responses — November 6, 2026
+# Fresh browser demonstration held during planning — November 5, 2026 Mountain time
+
+The owner approved the isolated demonstration at app and worker checkpoint
+`188f19adb6de9d2be2421bd99af2fbfa03bee648` and then amended only the wait for
+port 9187. The amendment authorized graceful early stop of the preceding
+owned read-only preview after checking its worker, write API and evidence.
+The owner's browser reached that preview. I identified its exact transient
+unit, process and immutable store, confirmed that its write API and worker
+were stopped, read its checked status and four passing checks, and verified
+all 170 sealed evidence files. I stopped only that preview. Its store,
+patch, checks and captures are retained.
+
+After the port was free, the 90-minute clock started at **7:22:42 p.m.
+MST**. The latest implementation approval would have been **7:57:42 p.m.**
+The outer deadline was **8:52:42 p.m.** I verified and restored a separate
+copy of the approved ten-directory archive before pruning only the matching
+originals. All 60 files (44,975,443 bytes) were preserved under archive
+`browser-local-demo-preflight-20261106`. Counted headroom before planning
+was 76,462,584 bytes, above the 72 MiB reserve. I also verified the prior
+210 failure files. The first browser setup stopped at a settings-control
+selector. I corrected the selector and resumed setup in the same window
+after confirming that no intake or model request had been created.
+
+The isolated build saved the local model settings through the browser and
+submitted one fresh synthetic normalization request with the approved text
+example. The worker started the sole authorized planning request. My
+operator supervisor then selected a nonexistent `id` column while checking
+the sample-publication table. Its cleanup stopped the worker and cancelled
+planning before a usable response or token receipt was saved. The server
+journal confirmed that one model slot began, saw cancellation, and released
+the task. The browser preserved a planning hold. There was no owner scope
+approval, budget approval, probe, exclusive lease, implementation, or
+publication. The run was not repeated.
+
+I corrected the supervisor query to check for row existence and added the
+same health check before future intake submission. The correction passed a
+read-only test against the exact store schema. The application build stayed
+unchanged. The prior 8080 process and normal authenticated access were
+verified with an authenticated metadata read. There was no temporary
+credential or model-service restart. Ports 9487 and 8765 kept their
+previous listener identities. The demonstration's write API and worker
+stopped and its one-off capability was removed.
+
+The [saved browser request](http://127.0.0.1:9187/intake/c4330338-dc89-40d6-b6da-c13de920f0bf)
+is available read-only through **8:52 p.m. MST**. The
+[desktop capture](../artifacts/runs/browser-real-demonstration-Ldasz8/browser/intake-result-1440.png),
+[phone capture](../artifacts/runs/browser-real-demonstration-Ldasz8/browser/intake-result-390.png),
+[interruption audit](../artifacts/runs/browser-real-demonstration-Ldasz8/planning-interruption-audit.json),
+and [restoration and authority audit](../artifacts/runs/browser-real-demonstration-Ldasz8/terminal-verification.json)
+remain available. The hold screen labels this “Waiting for information,”
+but the original request included the approved example. The actual
+blocker was the cancelled planning response.
+
+A fresh one-shot browser demonstration still needs explicit authorization.
+The same session can continue from this handoff. Recheck capacity and
+use a fresh store and request with the corrected supervisor. The prior
+approved budget remains spent. The earlier successful implementation-only
+Qwen run remains separate. Real-addon acceptance still needs a clean
+current base and an eligible test, or a separately reviewed change for
+the addon's test-loading patterns, then independent verification of a
+real-addon task.
+
+## Earlier local-only browser verification
 
 The browser now accepts a plain-text example for the first expected result
 without changing the user's description. It shows the resulting proposal and
