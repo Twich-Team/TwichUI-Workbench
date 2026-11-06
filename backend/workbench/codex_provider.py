@@ -20,17 +20,22 @@ MAX_LINE = 256 << 10
 SECONDS = 120
 # This is a hold after observation, not a provider output-token limit.
 MAX_OBSERVED = 32_768
+BACKEND_HOST = 'chatgpt.com'
+RPC_PHASES = ('resolve', 'initialize', 'account/read', 'account/rateLimits/read', 'model/list', 'thread/start', 'turn/start')
 PERSONAL_SUBSCRIPTIONS = {'go', 'plus', 'pro', 'prolite', 'promax'}
 FEATURES_OFF = ('shell_tool', 'multi_agent', 'multi_agent_v2', 'hooks', 'plugins',
                 'code_mode_host', 'unified_exec', 'standalone_web_search')
 
 
 class Hold(PlanningUnavailable):
-    def __init__(self, reason, *, started=False, terminal=False, partial=False, counted=None):
+    def __init__(self, reason, *, started=False, terminal=False, partial=False, counted=None, phase=None, rpc_code=None):
         self.started = started
         self.terminal = terminal
         self.partial = partial
         self.counted = counted
+        diagnostics = {'phase': phase} if phase in RPC_PHASES else {}
+        if type(rpc_code) is int and -32768 <= rpc_code <= 32767:
+            diagnostics['rpc_code'] = rpc_code
         super().__init__({
             'authentication': 'Codex sign-in needs attention.',
             'capacity': 'The included Codex allowance has reached the Workbench reserve.',
@@ -42,11 +47,11 @@ class Hold(PlanningUnavailable):
             'timeout': 'The Codex operation reached its time limit.',
             'protocol': 'Codex returned an unexpected or incomplete response.',
             'failed': 'Codex finished without a usable result.',
-        }[reason], reason)
+        }[reason], reason, diagnostics)
 
 
-def command(binary, credential, *, network=False):
-    """Expose only the pinned executable, normal system trust/DNS and a read-only auth file."""
+def command(binary, credential, *, hosts=None):
+    """Share the network only with a fixed, per-operation hostname mapping."""
     argv = ['/usr/bin/bwrap', '--unshare-all', '--die-with-parent', '--cap-drop', 'ALL',
             '--clearenv', '--ro-bind', str(binary), '/codex-cli', '--tmpfs', '/codex',
             '--ro-bind', str(credential), '/codex/auth.json', '--tmpfs', '/work',
@@ -56,11 +61,12 @@ def command(binary, credential, *, network=False):
             # Pinned CLI honors these endpoint overrides. Never let this process rotate the owner's login.
             '--setenv', 'CODEX_REFRESH_TOKEN_URL_OVERRIDE', 'http://127.0.0.1:0',
             '--setenv', 'CODEX_REVOKE_TOKEN_URL_OVERRIDE', 'http://127.0.0.1:0']
-    if network:
-        argv += ['--share-net', '--ro-bind', '/etc/resolv.conf', '/etc/resolv.conf',
+    if hosts is not None:
+        argv += ['--share-net', '--ro-bind', str(hosts), '/etc/hosts',
                  '--ro-bind', '/etc/ssl/certs', '/etc/ssl/certs']
     return argv + ['/codex-cli', '--no-daemon', 'app-server', '--listen', 'stdio://',
                    '--strict-config', '-c', 'forced_login_method="chatgpt"',
+                   '-c', f'chatgpt_base_url="https://{BACKEND_HOST}/backend-api/"',
                    '-c', 'cli_auth_credentials_store="file"', '-c', 'web_search="disabled"',
                    '-c', 'analytics.enabled=false',
                    *[arg for feature in FEATURES_OFF for arg in ('--disable', feature)]]
@@ -104,16 +110,25 @@ class Channel:
 
     def call(self, method, params):
         self.seq += 1
-        self.send(dict(id=self.seq, method=method, params=params))
-        while True:
-            event = self.receive()
-            if event.get('id') == self.seq and 'method' not in event:
-                if not isinstance(event.get('result'), dict):
+        try:
+            self.send(dict(id=self.seq, method=method, params=params))
+            while True:
+                event = self.receive()
+                if event.get('id') == self.seq and 'method' not in event:
+                    if not isinstance(event.get('result'), dict):
+                        error = event.get('error')
+                        code = error.get('code') if isinstance(error, dict) else None
+                        raise Hold('protocol', started=self.started, rpc_code=code)
+                    return event['result']
+                if 'id' in event or len(self.events) >= 100:
                     raise Hold('protocol', started=self.started)
-                return event['result']
-            if 'id' in event or len(self.events) >= 100:
-                raise Hold('protocol', started=self.started)
-            self.events.append(event)
+                self.events.append(event)
+        except OSError:
+            raise Hold('protocol', started=self.started, phase=method) from None
+        except Hold as error:
+            if method in RPC_PHASES:
+                error.metadata['phase'] = method
+            raise
 
     def close(self):
         self.selector.close()
@@ -346,7 +361,7 @@ def generate(model, effort, prompt, schema, stop=lambda: False):
     if 'error' in result:
         raise Hold(result['error'], started=result.get('started') is not False,
                    terminal=result.get('terminal') is True, partial=result.get('partial') is True,
-                   counted=result.get('counted'))
+                   counted=result.get('counted'), phase=result.get('phase'), rpc_code=result.get('rpc_code'))
     return result['output'], result['usage']
 
 
@@ -388,7 +403,7 @@ class Planner:
         except Hold as error:
             self.diagnostics = dict(generation_state=(
                 'not_started' if not error.started else 'uncertain' if not error.terminal else
-                'partial' if error.partial else 'finished'), partial_output=error.partial)
+                'partial' if error.partial else 'finished'), partial_output=error.partial, **error.metadata)
             if error.counted is not None:
                 self.diagnostics['usage'] = usage_record(error.counted)
             raise

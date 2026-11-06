@@ -1,5 +1,8 @@
 """Offline protocol and request-boundary tests. These never start the real CLI."""
 import json
+import os
+import socket
+from threading import Thread
 import time
 
 import pytest
@@ -7,6 +10,77 @@ from fastapi.testclient import TestClient
 
 from workbench import codex_provider as codex
 from workbench.api import create_app
+import codex_connector as connector
+
+
+def test_connector_queries_only_the_fixed_hostname_over_unix_socket(tmp_path, monkeypatch):
+    path = str(tmp_path / 'resolve.sock')
+    monkeypatch.setattr(connector, 'RESOLVER', path)
+    requests = []
+    with socket.socket(socket.AF_UNIX) as server:
+        server.bind(path)
+        server.listen()
+        server.settimeout(2)
+
+        def reply():
+            client, _ = server.accept()
+            with client:
+                raw = b''
+                while not raw.endswith(b'\0'):
+                    chunk = client.recv(4096)
+                    if not chunk:
+                        return
+                    raw += chunk
+                requests.append(json.loads(raw[:-1]))
+                client.sendall(b'{"parameters":{"addresses":[{"family":2,"address":[1,1,1,1]}]}}\0')
+
+        thread = Thread(target=reply, daemon=True)
+        thread.start()
+        mapping = connector.resolve_backend(lambda: False, time.monotonic() + 2)
+        thread.join(timeout=2)
+    assert requests == [{'method': 'io.systemd.Resolve.ResolveHostname',
+                         'parameters': {'name': 'chatgpt.com', 'family': socket.AF_INET, 'flags': 1}}]
+    assert mapping == '1.1.1.1 chatgpt.com\n'
+    hosts = tmp_path / 'hosts'
+    hosts.write_text(mapping)
+    argv = codex.command('/fixture/cli', '/fixture/auth.json', hosts=hosts)
+    assert argv[argv.index(str(hosts)) - 1:argv.index(str(hosts)) + 2] == ['--ro-bind', str(hosts), '/etc/hosts']
+    assert '--share-net' in argv and '/etc/resolv.conf' not in argv
+    assert 'chatgpt_base_url="https://chatgpt.com/backend-api/"' in argv
+    assert '--share-net' not in codex.command('/fixture/cli', '/fixture/auth.json')
+
+
+@pytest.mark.parametrize('address', [[127, 0, 0, 53], [10, 0, 0, 9], [224, 0, 0, 1],
+                                     [True, 1, 1, 1], [1, 1, 1], ['1', 1, 1, 1]])
+def test_connector_refuses_nonpublic_or_malformed_dns_answer(address):
+    with pytest.raises(ValueError):
+        connector.host_mapping({'parameters': {'addresses': [{'family': socket.AF_INET, 'address': address}]}})
+
+
+def test_missing_resolver_fails_before_the_cli_can_start(tmp_path, monkeypatch):
+    monkeypatch.setattr(connector, 'RESOLVER', str(tmp_path / 'absent'))
+    with pytest.raises(codex.Hold) as caught:
+        connector.resolve_backend(lambda: False, time.monotonic() + 2)
+    assert caught.value.reason == 'unavailable' and not caught.value.started
+    assert caught.value.metadata == {'phase': 'resolve'}
+
+
+def test_rpc_phase_receipt_omits_server_error_text_and_parameters():
+    read_fd, write_fd = os.pipe()
+    try:
+        os.write(write_fd, b'{"id":1,"error":{"code":-32603,"message":"fixture private error","data":"secret"}}\n')
+        channel = codex.Channel(read_fd, lambda _: None, lambda: False, time.monotonic() + 2)
+        try:
+            with pytest.raises(codex.Hold) as caught:
+                channel.call('account/read', {'refreshToken': False})
+        finally:
+            channel.close()
+    finally:
+        os.close(read_fd)
+        os.close(write_fd)
+    assert not caught.value.started
+    assert caught.value.metadata == {'phase': 'account/read', 'rpc_code': -32603}
+    assert 'secret' not in str(caught.value) and 'fixture private error' not in str(caught.value)
 
 
 def allowance(used=10):

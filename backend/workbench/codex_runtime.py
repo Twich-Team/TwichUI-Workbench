@@ -108,5 +108,6 @@ class CodexRuntime(Runtime):
                     inference_ran=False if failure and not failure.started else True if counted else None,
                     provider_terminal=failure.terminal if failure else False,
                     provider_partial_output=failure.partial if failure else False,
+                    provider_diagnostics=failure.metadata if failure else {},
                     provider_message=str(failure) if failure else
                     'Codex completion or usage is uncertain. The attempt will not restart automatically.')

@@ -1,6 +1,7 @@
 """Rich's private connector. Start only under an explicitly approved account review."""
 import argparse
 from hashlib import sha256
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -9,9 +10,63 @@ import select
 import socket
 import stat
 import struct
+import tempfile
 import time
 
 from workbench import codex_provider as codex
+
+RESOLVER = '/run/systemd/resolve/io.systemd.Resolve'
+
+
+def host_mapping(response):
+    """Accept only bounded public IPv4 answers for the fixed backend hostname."""
+    if not isinstance(response, dict) or 'error' in response:
+        raise ValueError('Resolver refused lookup')
+    records = response['parameters']['addresses']
+    if not isinstance(records, list) or not 1 <= len(records) <= 16:
+        raise ValueError('Unexpected resolver answer count')
+    addresses = []
+    for record in records:
+        raw = record['address']
+        if (record['family'] != socket.AF_INET or not isinstance(raw, list) or len(raw) != 4
+                or any(type(value) is not int or not 0 <= value <= 255 for value in raw)):
+            raise ValueError('Unexpected resolver address')
+        address = ipaddress.IPv4Address(bytes(raw))
+        if not address.is_global or address.is_multicast or address.is_reserved:
+            raise ValueError('Non-public resolver answer')
+        addresses.append(address)
+    return ''.join(f'{address} {codex.BACKEND_HOST}\n' for address in dict.fromkeys(addresses))
+
+
+def resolve_backend(stop, deadline):
+    # The connector's cgroup denies explicit IP binds. Let the host resolver
+    # do DNS over its Unix socket rather than enabling a bind in the sandbox.
+    end = min(deadline, time.monotonic() + 3)
+    request = {'method': 'io.systemd.Resolve.ResolveHostname',
+               'parameters': {'name': codex.BACKEND_HOST, 'family': socket.AF_INET, 'flags': 1}}
+    try:
+        with socket.socket(socket.AF_UNIX) as client:
+            client.settimeout(.1)
+            if stop():
+                raise codex.Hold('canceled', phase='resolve')
+            client.connect(RESOLVER)
+            client.sendall(json.dumps(request).encode() + b'\0')
+            response = bytearray()
+            while time.monotonic() < end:
+                if stop():
+                    raise codex.Hold('canceled', phase='resolve')
+                try:
+                    chunk = client.recv(4097 - len(response))
+                except TimeoutError:
+                    continue
+                response.extend(chunk)
+                if not chunk or len(response) > 4096:
+                    break
+                if response.endswith(b'\0'):
+                    return host_mapping(json.loads(response[:-1]))
+    except (OSError, ValueError, TypeError, KeyError):
+        pass
+    raise codex.Hold('unavailable', phase='resolve')
 
 
 def private_inputs(socket_path, binary, binary_hash, credential):
@@ -50,7 +105,7 @@ def allowed_cgroup(group, uid):
     return bool(child and re.fullmatch(r'workbench-real-codex-task-lease-[A-Za-z0-9-]+\.service', child[0]))
 
 
-def handle(connection, argv):
+def handle(connection, binary, credential, runtime):
     connection.settimeout(3)
     pid, uid, _ = struct.unpack('3i', connection.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
     if uid != os.getuid():
@@ -77,14 +132,20 @@ def handle(connection, argv):
         def stop():
             return bool(select.select([connection], [], [], 0)[0])
 
-        with codex.app_server(argv, stop, time.monotonic() + codex.SECONDS) as rpc:
-            try:
-                result = codex.turn(rpc, **request)
-            finally:
-                started = rpc.started
+        deadline = time.monotonic() + codex.SECONDS
+        mapping = resolve_backend(stop, deadline)
+        with tempfile.TemporaryDirectory(prefix='codex-hosts-', dir=runtime) as directory:
+            hosts = Path(directory) / 'hosts'
+            hosts.write_text(mapping, encoding='ascii')
+            argv = codex.command(binary, credential, hosts=hosts)
+            with codex.app_server(argv, stop, deadline) as rpc:
+                try:
+                    result = codex.turn(rpc, **request)
+                finally:
+                    started = rpc.started
     except codex.Hold as error:
         result = dict(error=error.reason, started=started or error.started, terminal=error.terminal,
-                      partial=error.partial, counted=error.counted)
+                      partial=error.partial, counted=error.counted, **error.metadata)
     except (KeyError, TypeError, ValueError, OSError):
         result = {'error': 'protocol', 'started': started}
     try:
@@ -104,7 +165,6 @@ def main():
     os.umask(0o077)
     check_account_review(args.account_review)
     private_inputs(args.socket, args.binary, args.binary_sha256, args.sign_in_file)
-    argv = codex.command(args.binary, args.sign_in_file, network=True)
     with socket.socket(socket.AF_UNIX) as listener:
         listener.bind(str(args.socket))
         listener.listen(1)
@@ -112,7 +172,7 @@ def main():
             connection, _ = listener.accept()
             with connection:
                 check_account_review(args.account_review)
-                handle(connection, argv)
+                handle(connection, args.binary, args.sign_in_file, args.socket.parent)
 
 
 if __name__ == '__main__':
