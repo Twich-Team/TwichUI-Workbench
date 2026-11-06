@@ -4,8 +4,9 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+from secrets import token_urlsafe
 
-from starlette.responses import JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse
 from workbench.model_policy import ExecutionPolicy
 from workbench.schemas import IntakeInput, ProposalDecisionInput, TaskRunApprovalInput
 
@@ -50,8 +51,9 @@ class SingleDemo:
                             for name in ("codex", "claude")))
         if state == "submit" and method == "POST" and path == "/api/intake":
             body = IntakeInput.model_validate(raw).model_dump(mode="json")
-            body.pop("request_id")
-            return body == phase["intake_payload"]
+            identity = body.pop("request_id")
+            return (body == phase["intake_payload"]
+                    and (not phase.get("intake_request_id") or identity == phase["intake_request_id"]))
         root = "/api/intake/" + phase.get("intake", "")
         if state == "scope" and method == "POST" and path == root + "/decisions":
             body = ProposalDecisionInput.model_validate(raw)
@@ -65,8 +67,40 @@ class SingleDemo:
                     and body.run_budget.model_dump(mode="json") == phase["budget"] and not body.note)
         return False
 
+    def owner_intake_form(self, scope):
+        hosts = [value for key, value in scope["headers"] if key == b"host"]
+        if hosts not in ([b"127.0.0.1:9187"], [b"127.0.0.1:9387"]):
+            return JSONResponse({"detail": "Open the isolated trial on its loopback address."}, status_code=400)
+        try:
+            phase = self.phase()
+            if (phase["state"] != "submit" or not phase.get("intake_request_id")
+                    or datetime.now(timezone.utc) >= datetime.fromisoformat(phase["cutoff"])
+                    or (self.evidence / "ingress-submit.json").exists()):
+                raise ValueError("Intake is closed")
+            from browser_demo.stage import require_active_stage
+            require_active_stage()
+            body = IntakeInput.model_validate(dict(phase["intake_payload"], request_id=phase["intake_request_id"]))
+        except (KeyError, OSError, ValueError):
+            return JSONResponse({"detail": "The trial request is not available for submission."}, status_code=409)
+        # Populate only a browser draft. The real form owns the explicit submit
+        # action, and the gate requires the same request and identity.
+        nonce = token_urlsafe(18)
+        draft = body.model_dump_json().replace("<", r"\u003c")
+        key = json.dumps(f"intake-draft:{body.kind}")
+        url = json.dumps(f"/intake/new?kind={body.kind}")
+        return HTMLResponse(
+            '<!doctype html><html lang="en"><meta charset="utf-8"><title>Open the trial request</title>'
+            '<p>Opening the prepared task. Review it and select Submit request when ready.</p>'
+            f'<script nonce="{nonce}">localStorage.setItem({key},JSON.stringify({draft}));'
+            f'location.replace({url});</script></html>',
+            headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
+                     "Content-Security-Policy": f"default-src 'none'; script-src 'nonce-{nonce}'; frame-ancestors 'none'"},
+        )
+
     async def __call__(self, scope, receive, send):
         method = scope.get("method")
+        if scope["type"] == "http" and method == "GET" and scope["path"] == "/demo/request":
+            return await self.owner_intake_form(scope)(scope, receive, send)
         if scope["type"] != "http" or method in ("GET", "HEAD"):
             return await self.app(scope, receive, send)
         path = scope["path"]
@@ -106,12 +140,14 @@ class SingleDemo:
 
             async def capture(message):
                 if message["type"] == "http.response.start" and 200 <= message["status"] < 300 and not receipt.exists():
-                    with receipt.open("x") as record:
+                    pending = receipt.with_suffix(".pending")
+                    with pending.open("w") as record:
                         json.dump({"at":datetime.now(timezone.utc).isoformat(),
                                    "method":method,"path":path,"body":raw}, record)
                         record.write("\n")
                         record.flush()
                         os.fsync(record.fileno())
+                    pending.replace(receipt)
                 await send(message)
 
             await self.app(scope, replay, capture)

@@ -76,6 +76,8 @@ def prepare(args):
         preserve_checkout=str(args.preserve_checkout.resolve()) if args.preserve_checkout else None,
         mode="live" if args.installation else "offline",
         sha256={name: layout.digest(stage / name) for name in sorted(names)})
+    if args.owner_submits:
+        manifest["owner_submits"] = True
     if args.installation:
         installed = json.loads(args.installation.read_text())
         manifest.update(model_identity=installed["model_identity"], local_key_path=installed["local_key_path"])
@@ -97,6 +99,7 @@ def main():
     parser.add_argument("--author", default="TwichUI Workbench")
     parser.add_argument("--email", default="workbench@local.invalid")
     parser.add_argument("--template", type=Path, action="append", default=[])
+    parser.add_argument("--owner-submits", action="store_true", help="Wait for the owner to submit the prepared browser draft")
     parser.add_argument("--counted-root", type=Path, action="append", default=[])
     parser.add_argument("--history", type=Path, action="append", default=[])
     parser.add_argument("--preserve-checkout", type=Path)

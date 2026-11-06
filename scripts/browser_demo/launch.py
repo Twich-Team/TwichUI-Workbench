@@ -36,7 +36,8 @@ def api_client(origin):
 
 def run_owned(*, stage, database, evidence, port, env, deadline, room, stopping, activate,
               worker_command, stop_worker, verify_worker, api_app="browser_demo.gate:app", now=None,
-              request_wrapper=None, runtime_root=None, task=SYNTHETIC_TASK, budget_reserve_minutes=55):
+              request_wrapper=None, runtime_root=None, task=SYNTHETIC_TASK, budget_reserve_minutes=55,
+              owner_submits=False):
     require_ports([port])
     origin = f"http://127.0.0.1:{port}"
     request = api_client(origin)
@@ -88,7 +89,8 @@ def run_owned(*, stage, database, evidence, port, env, deadline, room, stopping,
         Supervisor(database, evidence, origin, request, room,
                    lambda: api.poll() is None and worker is not None and worker.poll() is None,
                    stopping, deadline, runtime_root=runtime_root or stage, now=now,
-                   task=task, budget_reserve_minutes=budget_reserve_minutes).run(browser, start_worker, owned.close)
+                   task=task, budget_reserve_minutes=budget_reserve_minutes,
+                   owner_submits=owner_submits).run(browser, start_worker, owned.close)
 
 
 def utc_now():

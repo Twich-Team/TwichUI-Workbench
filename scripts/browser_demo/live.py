@@ -192,7 +192,7 @@ def run(manifest_path, evidence, fingerprint, *, rehearsal=False):
         run_owned(stage=stage, database=database, evidence=evidence, port=port, env=env, deadline=deadline,
                   room=room, stopping=lambda: stopped, activate=activate, worker_command=command,
                   stop_worker=stop_worker, verify_worker=lambda _: (evidence / "worker-ready.txt").is_file(),
-                  task=task, budget_reserve_minutes=reserve)
+                  task=task, budget_reserve_minutes=reserve, owner_submits=manifest.get("owner_submits", False))
 
 
 if __name__ == "__main__":

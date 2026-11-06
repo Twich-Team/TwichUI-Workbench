@@ -62,7 +62,7 @@ const [step, output, origin] = process.argv.slice(2);
       await page.getByRole('button',{name:'Submit request',exact:true}).click();
       const result=await response;assert.equal(result.status(),200,await result.text());
       const saved=await result.json();
-      await page.getByText('Request received and saved.',{exact:false}).waitFor();
+      await page.waitForURL(url=>url.pathname==='/intake/'+saved.id);
       assert.equal(new URL(page.url()).pathname,'/intake/'+saved.id);
       fs.writeFileSync(path.join(output,'browser-intake.json'),JSON.stringify({id:saved.id,url:origin+'/intake/'+saved.id},null,2)+'\n',{flag:'wx',mode:0o600});
       await page.screenshot({path:path.join(output,'browser-submitted.png')});

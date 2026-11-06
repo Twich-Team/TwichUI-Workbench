@@ -1,14 +1,20 @@
 """Stage input rejection uses the runtime's real capability and policy readers."""
 
+from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
+import runpy
 import shutil
 import sqlite3
+from uuid import uuid4
 
+from fastapi.testclient import TestClient
 import pytest
 
 from browser_demo import stage
+from browser_demo.gate import INTAKE, SingleDemo
 from workbench import task_sessions
+from workbench.schemas import IntakeInput
 
 
 @pytest.fixture
@@ -151,3 +157,55 @@ def test_preflight_never_activates_and_later_gate_rechecks_package(package, monk
     (root / stage.PREFLIGHT).write_text("changed")
     with pytest.raises(ValueError, match="Frozen stage input changed"):
         stage.require_active_stage()
+    controller_preflight = runpy.run_path(
+        str(Path(__file__).resolve().parents[2] / "scripts/chronicle_lease.py")
+    )["controller_preflight"]
+    with pytest.raises(ValueError, match="Frozen stage input changed"):
+        controller_preflight(root, None)
+    assert not (root / "controller-started.json").exists()
+
+
+def test_owner_draft_waits_for_authenticated_exact_submission(client, tmp_path, monkeypatch):
+    origin = "http://127.0.0.1:9187"
+    browser = TestClient(SingleDemo(client.app, tmp_path), base_url=origin)
+    identity = str(uuid4())
+    payload = IntakeInput.model_validate(
+        dict(INTAKE, request_id=identity, title="Fixture </script> text")
+    ).model_dump(mode="json")
+    phase = {"state": "submit", "intake_request_id": identity,
+             "intake_payload": {key: value for key, value in payload.items() if key != "request_id"},
+             "cutoff": (datetime.now(timezone.utc) + timedelta(minutes=1)).isoformat()}
+    phase_file = tmp_path / "ingress-phase.json"
+    phase_file.write_text(json.dumps(phase))
+    receipt = tmp_path / "ingress-submit.json"
+    headers = {"origin": origin, "x-csrf-token": browser.get("/api/session").json()["csrf_token"]}
+
+    draft = browser.get("/demo/request")
+    assert draft.status_code == 200
+    assert draft.headers["cache-control"] == "no-store"
+    assert r"Fixture \u003c/script> text" in draft.text
+    assert "localStorage.setItem" in draft.text
+    assert browser.get(f"/api/intake/{identity}").status_code == 404
+    assert not receipt.exists()
+    assert browser.post("/api/intake", json=payload).status_code == 403
+    for change in ({"request_id": str(uuid4())}, {"title": "Changed task"}):
+        assert browser.post("/api/intake", headers=headers, json=payload | change).status_code == 409
+
+    with monkeypatch.context() as patch:
+        def invalid_stage():
+            raise ValueError("Frozen stage input changed")
+        patch.setattr(stage, "require_active_stage", invalid_stage)
+        assert browser.get("/demo/request").status_code == 409
+        assert browser.post("/api/intake", headers=headers, json=payload).status_code == 409
+    assert not receipt.exists()
+
+    saved = browser.post("/api/intake", headers=headers, json=payload)
+    assert saved.status_code == 200
+    assert saved.json()["id"] == identity
+    assert saved.json()["status"] == "queued"
+    assert json.loads(receipt.read_text())["body"] == payload
+    assert browser.get("/demo/request").status_code == 409
+
+    phase["cutoff"] = datetime.now(timezone.utc).isoformat()
+    phase_file.write_text(json.dumps(phase))
+    assert browser.post("/api/intake", headers=headers, json=payload).status_code == 409

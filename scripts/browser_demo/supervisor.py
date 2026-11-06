@@ -23,7 +23,7 @@ class RunHeld(RuntimeError):
 class Supervisor:
     def __init__(self, database, evidence, origin, request, room, owners_running, stopping,
                  deadline, *, runtime_root, now=None, pause=None, task=SYNTHETIC_TASK,
-                 budget_reserve_minutes=55):
+                 budget_reserve_minutes=55, owner_submits=False):
         self.database = database
         self.evidence = evidence
         self.origin = origin
@@ -38,6 +38,7 @@ class Supervisor:
         self.pause = pause or time.sleep
         self.unavailable = set()
         self.task = task
+        self.owner_submits = owner_submits
 
     def read(self, name):
         return json.loads((self.evidence / name).read_text())
@@ -182,10 +183,13 @@ class Supervisor:
             start_worker()
             self.check(RESERVE, until=self.cutoff)
             self.write("pre-planning-capacity.json", self.room(RESERVE))
-            self.phase("submit", intake_payload=self.task["intake"])
-            browser("submit")
+            if self.owner_submits:
+                identity = self.wait_owner_intake()
+            else:
+                self.phase("submit", intake_payload=self.task["intake"])
+                browser("submit")
+                identity = self.read("browser-intake.json")["id"]
             self.phase("read-only")
-            identity = self.read("browser-intake.json")["id"]
             proposal = self.wait_plan(identity)
             self.check(RESERVE, until=self.cutoff)
             self.phase("scope", intake=identity, proposal_id=proposal["id"], binding=proposal["binding"],
@@ -224,6 +228,22 @@ class Supervisor:
                     self.phase("read-only")
                 finally:
                     finish()
+
+    def wait_owner_intake(self):
+        identity = str(uuid4())
+        self.phase("submit", intake_payload=self.task["intake"], intake_request_id=identity)
+        url = self.origin + "/demo/request"
+        self.write("owner-step-intake.json", {"url": url, "cutoff": self.cutoff.isoformat()})
+        print("Ready for owner task submission", url, flush=True)
+        while self.now() < self.cutoff:
+            self.check(RESERVE, until=self.cutoff)
+            if (self.evidence / "ingress-submit.json").is_file():
+                if self.read("ingress-submit.json")["body"]["request_id"] != identity:
+                    raise RunHeld("The saved browser request did not match the prepared task.")
+                self.write("browser-intake.json", {"id": identity, "url": self.origin + "/intake/" + identity})
+                return identity
+            self.pause(.35)
+        raise RunHeld("The owner did not submit the prepared request before the cutoff.")
 
     def wait_scope(self):
         while self.now() < self.cutoff:

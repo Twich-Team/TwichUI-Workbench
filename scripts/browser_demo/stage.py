@@ -91,6 +91,7 @@ def preflight(stage, fingerprint):
     manifest = sealed_inputs(stage, fingerprint, fresh=True)
     require(not (stage / ACTIVE).exists() and not (stage / ACTIVE).is_symlink(),
             "The capability is already active")
+    require(type(manifest.get("owner_submits", False)) is bool, "Invalid browser submission mode")
     require(manifest["task"]["base"] == manifest["fixture_base"], "Approved task base differs")
     db = stage / DATABASE
     require(digest(db) == digest(stage / BACKUP), "Initial store and backup differ")
