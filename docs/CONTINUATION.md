@@ -1,3 +1,13 @@
+# Bounded administrator mechanism prepared — November 6, 2026 Mountain time
+
+The [administrator approval](WORKBENCH_ADMIN_APPROVAL.md) binds the tested
+helper and one interactive bootstrap. The proposed grant lasts up to
+seven days in the current root-owned Codex login cgroup and boot. It
+renders trusted Workbench units running as Rich, controls only the named
+services and LAN rule, and retains a root-owned audit and owner recovery
+path. The helper and sudoers rule have not been installed. Live provider
+budgets and separate task decisions remain independent of this grant.
+
 # System-manager acceptance rolled back — November 6, 2026 Mountain time
 
 The owner approved exact checkpoint `d13c2e6` for sealed `92094bc` and

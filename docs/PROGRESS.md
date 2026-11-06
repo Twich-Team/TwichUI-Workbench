@@ -1,3 +1,12 @@
+## November 6, 2026 — Workbench administrator mechanism prepared
+
+- Prepared one bounded grant for the repair and acceptance effort. The
+  helper renders fixed service definitions as Rich and validates the
+  login scope, release paths, drop-in, owned firewall rule and recovery.
+- Passed 48 offline tests and validated the exact sudoers syntax with the
+  host's `visudo-rs`. The helper and policy are staged for one owner
+  approval. See the [approval and recovery record](WORKBENCH_ADMIN_APPROVAL.md).
+
 ## November 6, 2026 — System acceptance rolled back after first Codex gate
 
 - Passed the privileged address filtering and isolated sandbox proofs.

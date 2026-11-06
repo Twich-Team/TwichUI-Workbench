@@ -2,6 +2,10 @@
 
 November 6, 2026 Mountain time.
 
+- The [bounded administrator mechanism](WORKBENCH_ADMIN_APPROVAL.md) is
+  prepared and tested offline. Installation and live authorization smoke
+  checks await approval of the exact design. The grant adds no live model
+  authority.
 - The earlier app is restored at `http://127.0.0.1:9487/` under the two
   sealed rollback services. Its 79 history rows match the original
   fingerprint, and the original Qwen and dashboard processes kept running.
