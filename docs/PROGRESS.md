@@ -1,3 +1,18 @@
+## November 6, 2026 — Administrator grant verified and connector repaired offline
+
+- Installed the exact owner-approved `a0edd32` grant after interactive
+  sudo. Checked root ownership, exact helper hash, allowed-session status,
+  all required denials and root-owned audit evidence.
+- Reproduced the pre-generation Codex DNS failure under bind denial.
+  Repair `cba1a7b` keeps the existing network filters and uses the host
+  Unix resolver for the fixed TLS hostname. Failure receipts can keep an
+  allowlisted RPC phase and numeric code without retaining provider text.
+- Verified the pinned CLI against a network-isolated account and allowance
+  fixture and verified the changed sandbox mount. The old loopback app and
+  original Qwen process are still active. A newly sealed release approval
+  is required for the installed proof and bounded live trials.
+  [Repair record](CODEX_CONNECTOR_REPAIR_20261106.md)
+
 ## November 6, 2026 — Workbench administrator mechanism prepared
 
 - Prepared one bounded grant for the repair and acceptance effort. The

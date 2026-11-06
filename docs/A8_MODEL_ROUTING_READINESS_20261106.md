@@ -1,5 +1,16 @@
 # A8 signed-in Codex and model routing
 
+## Connector repair after rollback
+
+Repair `cba1a7b` keeps the connector's IP and bind restrictions and supplies
+only a validated mapping for `chatgpt.com` from the host's Unix resolver.
+The pinned CLI reached the synthetic account and allowance checks under
+injected bind denial. A separate sandbox check verified initialization
+with the new read-only mount. Future failed RPC receipts can retain a known
+phase and numeric code. Live signed-in eligibility and the four installed
+provider journeys remain open. The previous cutover authorization closed
+with rollback. [Repair and acceptance record](CODEX_CONNECTOR_REPAIR_20261106.md)
+
 ## Live acceptance outcome
 
 On November 6, 2026 Mountain time, the owner-approved system installation

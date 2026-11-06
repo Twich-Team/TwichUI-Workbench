@@ -2,10 +2,11 @@
 
 November 6, 2026 Mountain time.
 
-- The [bounded administrator mechanism](WORKBENCH_ADMIN_APPROVAL.md) is
-  prepared and tested offline. Installation and live authorization smoke
-  checks await approval of the exact design. The grant adds no live model
-  authority.
+- The bounded administrator mechanism at `a0edd32` is installed and passed
+  its scope, denial and audit checks. The current-session grant expires no
+  later than November 13 at 4:29 p.m. Mountain time and covers administrative
+  operations separately from release and model approvals.
+  [Grant and recovery record](WORKBENCH_ADMIN_APPROVAL.md)
 - The earlier app is restored at `http://127.0.0.1:9487/` under the two
   sealed rollback services. Its 79 history rows match the original
   fingerprint, and the original Qwen and dashboard processes kept running.
@@ -16,6 +17,11 @@ November 6, 2026 Mountain time.
   response before generation. It produced no plan or run offer. The other
   three trials never started. The failed intake, candidate seal, original
   approval record, and both independently restored archives are retained.
+- Repair `cba1a7b` resolves the fixed Codex backend hostname through the
+  host Unix resolver. Offline checks reproduced the DNS bind blocker and
+  verified account and allowance responses with synthetic credentials
+  while binds were denied. The repaired build needs a newly sealed cutover
+  and live acceptance approval. [Repair record](CODEX_CONNECTOR_REPAIR_20261106.md)
 - The owner-reported zero extra credits, Automatic reload Off, and accepted
   snapshot uncertainty remain recorded. Live signed-in eligibility and A8
   acceptance remain open. API-key billing, extra credits, purchases, auto

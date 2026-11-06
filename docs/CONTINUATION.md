@@ -1,12 +1,20 @@
-# Bounded administrator mechanism prepared — November 6, 2026 Mountain time
+# Administrator grant verified and Codex transport repaired offline — November 6, 2026 Mountain time
 
-The [administrator approval](WORKBENCH_ADMIN_APPROVAL.md) binds the tested
-helper and one interactive bootstrap. The proposed grant lasts up to
-seven days in the current root-owned Codex login cgroup and boot. It
-renders trusted Workbench units running as Rich, controls only the named
-services and LAN rule, and retains a root-owned audit and owner recovery
-path. The helper and sudoers rule have not been installed. Live provider
-budgets and separate task decisions remain independent of this grant.
+The owner approved the exact [administrator mechanism](WORKBENCH_ADMIN_APPROVAL.md)
+at `a0edd32` and ran the reviewed bootstrap. Hash, ownership, allowed-scope,
+denial and audit checks passed. The grant is bound to Rich's login session
+`78` and the current boot, with a maximum expiry of November 13 at 4:29 p.m.
+Mountain time. [Smoke receipt](/home/rich/.local/share/TwichUI-Workbench/admin-smoke.fMEuaMEk/result.txt)
+
+The pinned Codex CLI reproduced the pre-generation protocol error offline
+when its DNS socket bind was denied. Repair `cba1a7b` uses the host's Unix
+resolver to supply one fixed backend hostname to the sandbox while keeping
+the bind and IP restrictions. A pinned-CLI fixture reached the signed-in
+account and allowance gates under simulated bind denial. The old live
+receipt does not identify its exact failing RPC. The repaired transport
+needs installed kernel-filter and live signed-in checks under a fresh,
+sealed approval. The restored loopback app remains the everyday deployment.
+[Repair and acceptance record](CODEX_CONNECTOR_REPAIR_20261106.md)
 
 # System-manager acceptance rolled back — November 6, 2026 Mountain time
 
