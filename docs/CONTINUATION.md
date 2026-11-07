@@ -1,3 +1,42 @@
+# Verified9736533 installed; fresh17 active — November7,21:50 UTC
+
+Installed9736533344b167e2a0666691f1bfc5a1cd2d9a18, tree
+98699e4037496951acf566a37d3a42a2e36d2a2a, stage
+/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-9736533 (S),
+seal252e030f484365ebceaadb753b4aef50444c5a6efbcdeb59d2f1bcad2067deb6.
+R=C/outcome-9736533,5196files/16links/560419500bytes/379tracked files.
+Final1338 backend/25 frontend/build/40focused and actual native LARGE-context
+semantic-review API/worker/normal browser two-fixture/restart33.10sec pass. Full
+dispatcher now shares BUG_INPUT65536 for bug tasks, nonbugMAX_INPUT24000 untouched;
+serialized64KiB hard guard still tested not_started/no usage. Precise decoder7/
+negative receipt8/count-only actual source11425/11016 tokens and unchanged browser/
+routing/readiness/admin reuse in R/offline-verification.json, no omitted applicable
+check. ALL19 installed history list/detail HTTP200, original79/latest147 checked
+copies exact; strict both addresses/TLS/LAN/browser/filter/five isolation/foreign
+connector peer gates pass. Helper/model/key/auth metadata unchanged.4roles active/
+disabled pending final accepted outcome. Explicit source-grounded-v1 config/pinned
+Forever642file cache retained/sealed. No schema/journal/source/write expansion.
+
+Fresh17 dispatched21:49:16, intake84baabae-eec1-4fb1-97ba-bdf2d68a5f5d,
+driver93648; inspect actual model claim below/current DB, private response journals,
+R/bug-flight-paths-driver.txt and stage acceptance/bug-flight-paths.jsonl. Prior16
+settled tasks46 Qwen requests33516 generated/234189 prompt; task16 had ZERO model
+claim/request before obsolete early size guard, no uncertainty/repair. Task15
+independently rejected schema-valid plan never approved/replayed. CURRENT DB changes,
+never replace with historical147. Still NO real bug/provider-case complete.
+
+When awaiting-independent-plan-review, judge actual app-generated plan against
+report/source: initial route eligibility, actual first flight-master visit learning,
+later visit refresh. Never developer-write addon patch/reproducer, assign expected
+fixture state or force booleans to satisfy checker. Positive private review needs
+explicit decision=approve,approved=true and all exact binding/three observation
+criteria/index/reason rows. Self-review is not independent approval. Then normal
+delegated plan/run/original FAIL/candidate PASS/full addon suite/saved patch, four
+provider cases and durable restart/next supported bug. Same standing authority,
+no old campaign caps/owner engineering renewal. Broader product/live Codex bug repair/
+in-game/PRs unfinished. Continue; older active16/preinstallation statements below
+are historical, task16 settlement147-row and safe operational details preserved.
+
 # Task16 settled BEFORE generation; dispatcher correction — November7,21:43 UTC
 
 No real bug/provider case complete. Installed2cb6482 remains protected/idle and all
