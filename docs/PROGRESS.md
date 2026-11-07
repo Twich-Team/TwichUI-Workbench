@@ -1,3 +1,37 @@
+# Verified source-memory build installed; task13 active — November7,19:41 UTC
+
+Installed b7624e20b24229046d8f1bc3b92e1fe15847bdf8, tree
+ e7e27c663c8febfb18c3aef5149617feb3a35070, stage
+/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-b7624e2,
+seal e0526403ea74892791a73e5e389ac9e69fd41f3b799ed611257f4504ecaedcb4.
+R=C/outcome-b7624e2. Full1293 backend/25 frontend,90 focused/build and actual
+native separate-process/browser/restart/concurrent rehearsal33.85sec pass. First
+native launch omitted WORKBENCH_CG_ROOT, failed before app activity; corrected
+bounded delegated user unit passes/removed. Existing34 parser/108 Chromium/10 visual/
+2 browser opt-ins/4 routing/readiness/48 admin evidence precisely reused because
+unchanged. R/offline-verification.json binds all checks and scope; no applicable
+check omitted. Actual authenticated count-only context proof retains22829 source
+chars,10335 tokens in32768 context, no generation/source transmission externally.
+
+All installed gates pass: original79/latest130 checked copies, same schema0012,
+both listeners/TLS/LAN/browser/filter/five isolation probes/foreign connector peer,
+normal authenticated model/key/helper/CA/nonsecret auth-config metadata unchanged.
+Roles active/disabled pending acceptance. Ledger updater initially used wrong key
+revisions; corrected to verified_revisions. Pre-activation seal/check/history record
+existed before service activation. Private correction diagnostic retained.
+
+Fresh task13 dispatched19:40:25 via normal app; intake
+9fa60357-7184-44cf-b6de-bbda712f6bf8, driver98136. Read current stage
+artifacts/acceptance/bug-flight-paths.jsonl and R/bug-flight-paths-driver.txt.
+No real repair/provider case complete. Previous12 tasks30 Qwen requests14026 generated/
+107837 prompt are settled; no implementation/Codex/uncertainty. CURRENT live DB
+changes with task13: do not copy historical130 over it. Review any app-generated
+plan independently before delegated plan/run decisions as described below; never
+supply addon solution/reproducer. Continue real journey and four provider cases,
+durable result/restart/normal next supported bug. Standing autonomy continues.
+
+Earlier task12/source-verification-underway statements below are historical.
+
 # Source context repair — November7,2026,19:30 UTC
 
 Task12 definitively settled19:18:40: four valid read-only inspections, no plan,

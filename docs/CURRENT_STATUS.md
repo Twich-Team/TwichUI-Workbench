@@ -1,19 +1,19 @@
-# Workbench status — November7,2026,19:30 UTC
+# Workbench status — November7,2026,19:41 UTC
 
-No real flight-path repair or required real-provider case complete. Installed9da8bce
-is active/protected; latest task12 settled with four valid inspections but no plan,
-no approvals/repair/uncertainty. Latest history130 rows preserved. All12 tasks30 real
-Qwen requests14026 generated/107837 prompt; zero implementation/Codex turns.
+No real flight-path repair or supporting real-provider case complete yet. Fresh
+flight-path13 is investigating through installed b7624e2 after verified cutover.
+Original79/latest130 history copied/checked; normal model, both addresses, TLS,
+browser and network/isolation protections pass. Current live DB changes: preserve it.
 
-Local source-memory and remaining-budget visibility repair built;90 focused tests
-and build pass. Actual non-generating local context count confirms up to22829 source
-chars/10335 prompt tokens fit32768 context; full suites/native process underway.
-Not installed or real-model demonstrated yet. Repeated source requests now have a
-concrete changed approach, rather than another unchanged retry.
+Exact source memory/remaining operation budget and context-counted local64KiB input
+are installed. Full1293 backend/25 frontend/90 focused/build/actual native-process
+browser/restart tests pass; applicable unchanged opt-ins precisely reused. Actual
+count-only proof retains22829 source chars/10335 tokens inside32768 context, no
+inference. This is verified implementation/installation, not a completed real fix.
 
-Exact root owner documents remain authoritative/byte-identical; former campaign
-caps superseded. No new owner decision/access needed. Continue frozen-code checks,
-verified history-preserving cutover, fresh app investigation, reviewed plan/separate
-delegated run, actual original/candidate behavior and full addon suite, four provider
-checks, durable restart/result and normal next supported bug. Broader capabilities,
-in-game/live Codex bug repair/PRs unfinished; styling/audit not begun. See handoff.
+Prior12 settled tasks30 Qwen requests14026 generated/107837 prompt; no prior repair/
+Codex/uncertainty. Current task uses fresh bindings and no prior approvals. Continue
+independent review/separate delegated decisions/checked patch, provider cases and
+restart. No owner decision/access needed. Standing owner docs byte-identical and
+old caps superseded. Broader product/in-game/live Codex bug repair/PRs unfinished;
+styling/audit not started. Exact private evidence/next steps: CONTINUATION.md.
