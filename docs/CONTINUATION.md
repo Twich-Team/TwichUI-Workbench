@@ -1,3 +1,40 @@
+# Campaign live work held; original app restored — November 7, 2026 UTC
+
+Following PROJECT_WORKING_PHILOSOPHY.md, attempt 1 finished Qwen generation
+but failed schema validation before creating a plan. It consumed one
+planning request and 608 generated tokens. Full diagnostics identify
+finished generation and actual model, but the worker discarded the
+response and exact validation issue. Source/database inspection cannot
+establish the particular invalid field or a demonstrated correction.
+Do not admit this model-attempt ID for renewal using counters alone.
+
+LAN ingress was closed and prescribed restoration verified: original
+loopback app, original 79-row history and checked backup, firewall baseline,
+absent candidate services/socket/drop-in and normal authenticated Qwen.
+Codex authentication/configuration metadata is unchanged. No campaign
+Codex turn, plan approval, implementation or publication occurred. The
+failed 84-row store and every diagnostic/archive/restore remain preserved.
+
+The single clock remains `2026-11-07T04:35:45.612Z`; do not reset it.
+The private campaign ledger records one settled but renewal-ineligible
+attempt. Seven slots and three revisions remain conditional on policy,
+resources and time. No case is complete. The approved initial package
+document is unchanged.
+
+Development checkpoint `ab25071` retains bounded safe validation locations,
+error types and schema identity. It passed check, 1,146 default backend
+tests, 25 frontend tests and seven focused tests. Three backend opt-ins,
+browser/visual/native revision checks and a new stage/seal remain to be
+completed before any diagnostic revision activation. It is not a verified
+correction to the rejected model plan and has not been installed.
+
+The [specific hold record](DELIVERY_CAMPAIGN_SCHEMA_HOLD_20261107.md)
+explains the exact evidence gap and proposed one-attempt eligibility
+exception. It requests no extra budgets or clock and remains unapproved.
+Live work stays held pending that genuine policy decision. Do not rerun
+the old driver, overwrite receipts or generate a developer flight-path
+solution. Preserve the functional gate and broader unfinished scope.
+
 # Delivery campaign running — November 7, 2026 UTC
 
 Following PROJECT_WORKING_PHILOSOPHY.md, the owner confirmed availability.

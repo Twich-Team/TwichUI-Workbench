@@ -2,6 +2,17 @@
 
 November 6, 2026 Mountain time.
 
+- November 7 UTC, latest: live campaign work is held after the first Qwen
+  investigation finished but failed schema validation. One request and
+  608 generated tokens; no plan, repair or Codex turn. Original loopback
+  app, history, firewall and authenticated Qwen are restored and verified.
+  The response and exact validation error were not retained, preventing
+  a demonstrated correction before renewal. Offline diagnostic source
+  `ab25071` passed check, 1,146 backend and 25 frontend tests; it is not
+  installed or sealed for activation. The [hold and specific decision](DELIVERY_CAMPAIGN_SCHEMA_HOLD_20261107.md)
+  preserve the original campaign clock and all limits. Earlier entries
+  below describe prior states.
+
 - November 7 UTC: the approved campaign is running from 04:35:45 UTC,
   with new admissions ending at 18:35:45 and restoration ending at
   20:35:45. The exact archive and independent restore passed; original

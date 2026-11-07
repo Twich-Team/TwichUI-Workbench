@@ -1,3 +1,22 @@
+## November 7, 2026 UTC — First planning result held and restoration verified
+
+Qwen completed the first flight-path investigation; Workbench rejected it
+at schema validation. Usage is fully recorded: one request, 608 generated
+tokens. No proposal, approval, implementation or Codex turn followed.
+The original app, 79-row history, firewall, model and credential metadata
+were restored/verified. Candidate history retains 84 rows. Full persisted
+diagnostic and source review cannot recover the discarded response or
+particular validation issue. The campaign's demonstrated-correction
+prerequisite is not met, so no automatic renewal is eligible.
+
+Offline checkpoint `ab25071` adds bounded safe validation diagnostics with
+redaction/no-replay coverage. Check passed, 1,146 default backend tests
+passed (three separately enabled checks not repeated yet), all 25 frontend
+tests passed and seven focused tests passed. No diagnostic revision is
+sealed, installed or live-proven. The [specific hold record](DELIVERY_CAMPAIGN_SCHEMA_HOLD_20261107.md)
+defines one proposed eligibility exception without enlarging any budget.
+The original campaign clock remains fixed and live work remains held.
+
 ## November 7, 2026 UTC — Campaign opened and initial installation verified
 
 The owner confirmed availability. The fixed campaign clock opened at
