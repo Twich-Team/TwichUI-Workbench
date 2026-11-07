@@ -1,4 +1,4 @@
-# Workbench current status — November 7, 2026, 15:13 UTC
+# Workbench current status — November 7, 2026, 15:17 UTC
 
 Exact owner reference documents are installed at the operating repository root;
 active guidance and executable defaults use standing autonomous-delivery authority.
@@ -11,8 +11,11 @@ https://10.0.0.9:9487/ passed fresh installed checks with the existing CA and
 
 Complete final verification passed: 1,204 backend, 25 frontend, 108 browser,
 10 visual, 48 admin and all applicable opt-ins. These are offline evidence.
-The real flight-path task is investigating in the normal app as fresh attempt 4;
-no checked real repair or supporting real-provider case is complete yet.
+Real attempt 4 finished with a source limitation, no repair or uncertainty.
+Latest retained history is 98 rows. Conflicting planning instructions are corrected
+in development; 60 focused checks passed and final verification follows. Four
+requests total 1,290 generated / 17,094 prompt tokens. No checked real repair or
+supporting real-provider case is complete yet.
 
 Delivery continues through independent plan review, authorized repair and checks,
 provider acceptance, durable result/restart and leaving the verified app usable.

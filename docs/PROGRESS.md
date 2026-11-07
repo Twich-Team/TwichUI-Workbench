@@ -6177,3 +6177,14 @@ hold is marked superseded without changing historical campaign facts. Older
 README/ownership/product/design guidance now explicitly defers to root owner
 references; actual physical controls and verified retention replace old caps.
 Continue live journey and ordinary engineering under standing authority.
+
+## November 7, 15:17 UTC — settled limitation and connected prompt repair
+
+Real attempt 4 finished with a valid missing-source limitation, 119 generated /
+3,691 prompt tokens. No implementation or uncertainty; authenticated normal model
+verified. Latest installed history98 rows retained. Found conflicting no-tools/
+three-outcome instructions despite app-owned inspection. Corrected system prompt
+and actual-wire assertions, preserving no shell/edit/approval/publication power.
+Private diagnostics include inspection outcome. Focused60 passed; historical model
+choice's exact cause is not proven. Continue full verification, history-forward
+revision and fresh bounded attempt under unchanged standing authority.

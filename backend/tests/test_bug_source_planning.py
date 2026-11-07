@@ -33,6 +33,12 @@ def scripted(monkeypatch, answers):
 
             def read(self, request, limit):
                 assert len(request.data) <= 24000
+                system = json.loads(request.data)['messages'][0]['content']
+                assert 'You may request app-owned read-only committed-source search or line inspection' in system
+                assert 'You have no tools' not in system
+                assert 'a read-only inspection request, a plan, a useful question, or a limitation' in system
+                assert 'Missing code is not a real-world question or a limitation' in system
+                assert 'no shell, editing, approval, external-tool or publication authority' in system
                 return json.dumps(dict(id='chatcmpl-controlled-inspection', model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
                     choices=[dict(finish_reason='stop', message=dict(content=json.dumps(value)))])).encode()

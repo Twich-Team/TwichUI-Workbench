@@ -10,7 +10,7 @@ limits this work. Checkpoints are not stop points. Own ordinary repairs and
 continue through the actual functional outcome. No further owner decision is
 currently needed for engineering/live acceptance/deployment inside standing scope.
 
-## Live continuation — 15:13 UTC
+## Live continuation — 15:17 UTC
 
 Installed candidate `6b48d87629e0595d34152a1bd0783eb935612f5f`, tree
 `5814db14a4cdf43eb0ebb1ab783a0c258046147e`, stage
@@ -36,13 +36,37 @@ inspected. Original failure logs retained. No real task completion yet.
 Fresh attempt 4 dispatched through normal browser at 15:13:06 UTC, intake
 `88923854-b90f-4560-8966-1bac1eb791e5`; driver execution session 22306 in this chat.
 Watch stage `artifacts/acceptance/bug-flight-paths.jsonl`, private driver log and
-actual database before any replay. At this checkpoint it is investigating.
+actual database before any replay. It definitively finished at 15:13:27 with a valid missing-source limitation; no repair/approval occurred. See the settled disposition below; do not replay this receipt.
 Independent plan review is still required; create the bound private
 `artifacts/acceptance/bug-plan-review.json` only after reviewing the generated
 three action-driven observations. Never hand-write the addon repair/reproducer.
 `outcome-ledger.json` reserves attempt 4 and preserves all prior usage; no global
 clock/count/revision cap. Continue settled failure investigation/repair autonomously.
 Source HEAD may advance for documentation only; that does not alter installed seal.
+
+## Current settled correction
+
+Attempt 4 model id `936fb1d4-4550-40d1-89e9-6bd62b997285` used 119 generated /
+3,691 prompt tokens, one finished request. All four real requests total 1,290
+generated / 17,094 prompt. No Codex turn or implementation; no uncertainty.
+Current latest settled store is the installed 6b48d87 store, 98 rows/schema 0012,
+logical SHA `793d338da68448aa4c92483195358922dd05ddba88179f1e5afa8ac2ad5b4d54`.
+Private `outcome-6b48d87/attempt-4-accounting.json` preserves exact disposition.
+Authenticated normal model/key checked after settlement; installation remains
+safe/active while engineering continues. Do not copy the older 93-row store over it.
+
+Found contradictory bug system instructions: generic no-tools denial and three
+terminal alternatives preceded the read-only fourth alternative. Corrected bug
+prompt explicitly permits only app-owned committed-source inspection, directs
+missing code to inspection rather than terminal limitation, preserves no shell/
+edit/approval/publication authority, and distinguishes offline API stubs from game
+verification. Its contribution to the historical model choice is not proven.
+Private outcome-shape diagnostics now include inspection. Actual-wire assertions
+and 60 focused tests passed. Next: full checks/native/browser verification, seal a
+new candidate, settle/stop existing four candidate roles for checked history-forward
+revision, then fresh attempt 5. Reuse existing original 79-row recovery evidence;
+keep installed 98-row store and copy it forward. Current source fixes are not yet
+installed. Standing authority covers this routine repair and renewal.
 
 ## Verified pre-activation baseline (historical, superseded by installation above)
 

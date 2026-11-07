@@ -315,7 +315,7 @@ class Evidence:
                     normalization=list(changes), generation_state=diagnostics.get('generation_state'),
                     usage=diagnostics.get('usage'), structure=structure,
                     outcome_shapes={key: self.summary(value[key]) if key in value else {'type': 'missing'}
-                                    for key in ('plan', 'question', 'limitation')} if isinstance(value, dict) else {})
+                                    for key in ('plan', 'question', 'limitation', 'inspection')} if isinstance(value, dict) else {})
 
     def rejected(self, error, value=None, *, phase='validation'):
         errors = []
