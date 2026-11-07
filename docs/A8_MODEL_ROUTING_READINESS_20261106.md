@@ -1,5 +1,13 @@
 # A8 signed-in Codex and model routing
 
+The owner-approved `8d17534` cutover passed separate-device HTTPS, history
+and installed filters. The first delegated Codex-only planning submission
+held on accounting before generation. The receipt does not identify the
+account or quota signal that failed. The three remaining cases stayed
+unstarted. The scoped rule and candidate services were removed, and the
+original loopback deployment and history were verified. Live provider
+journeys and A8 remain open. [Closeout receipt](/home/rich/.local/share/TwichUI-Workbench/everyday-delegated-live-1fdee91/closeout.json)
+
 Candidate `8d17534` seals the connector repair and the owner-delegated
 browser decisions for the four exact acceptance cases. The rehearsals
 passed with controlled responses. The restored loopback app remains live

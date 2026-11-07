@@ -1,3 +1,25 @@
+# Delegated installation rolled back — November 6, 2026 Mountain time
+
+The owner approved checkpoint `1fdee91` for sealed candidate `8d17534`
+and confirmed the separate-device HTTPS page loaded without a certificate
+warning. The window ran from 5:27:42 p.m. to 5:37:12 p.m. MST. The installed
+candidate passed kernel filtering, scoped TLS and origin checks, and the
+79-row history copy. The 12-file conditional archive passed independent
+restore and lookup before pruning. The two earlier archives verified again.
+
+The delegated browser submitted the one authorized Codex-only planning
+request. It held at pre-generation accounting, with no model turn, task
+source transmission, partial output, plan or run approval. The receipt
+does not distinguish the exact account or quota signal. The other three
+cases stayed unstarted, and this approval closed with verified rollback.
+The candidate and failed intake are retained for offline diagnosis.
+
+The original app serves `http://127.0.0.1:9487/` again. Its history matches
+all 79 rows and the original fingerprint. The original Qwen PID and
+authentication checks matched, the LAN rule and candidate units were
+removed, and the scoped administrator grant remains available within its
+original limits. A8 and broader addon capabilities remain open. [Closeout receipt](/home/rich/.local/share/TwichUI-Workbench/everyday-delegated-live-1fdee91/closeout.json)
+
 # Sealed delegated acceptance package — November 6, 2026 Mountain time
 
 Candidate `8d17534` is staged and verified. It contains the repaired

@@ -1,3 +1,22 @@
+## November 6, 2026 — Delegated live cutover restored after accounting hold
+
+- Approved checkpoint `1fdee91` installed `8d17534` for the bounded trial.
+  The kernel filters, scoped TLS, separate-device load and history copy
+  passed. The conditional archive copied and independently restored all
+  12 files before pruning the matching closed originals.
+- Verified the worker in its expected delegated `main` child cgroup
+  using `/proc` and `cgroup.procs`. Created the exact private empty
+  template directory required by the generated runtime policy and
+  reverified the sealed file and link inventory.
+- The delegated browser submitted `codex-once`. The provider gate held
+  on accounting before generation or source transmission. There was no
+  plan or run decision and no subsequent case. The receipt does not
+  identify the specific account or quota signal.
+- Removed the candidate LAN rule and services. Restored and verified
+  original loopback assets, the 79-row history fingerprint, Qwen process
+  and authenticated access. Preserved the failed candidate and all three
+  verified archives. [Closeout receipt](/home/rich/.local/share/TwichUI-Workbench/everyday-delegated-live-1fdee91/closeout.json)
+
 ## November 6, 2026 — Delegated browser acceptance package sealed
 
 - Bound the already delegated case list, expected provider and fallback

@@ -2,20 +2,21 @@
 
 November 6, 2026 Mountain time.
 
-- Candidate `8d17534` is sealed for one combined cutover and acceptance
-  decision. All four browser journeys passed with controlled providers.
-  The owner has delegated only those four cases' plan and run decisions.
-  The owner needs to load the HTTPS page once from a home-LAN device during
-  cutover. Live model calls and installation remain pending exact approval.
-  [Combined package](EVERYDAY_DELEGATED_INSTALL_APPROVAL_20261106.md)
+- The owner-approved installation of `8d17534` passed the scoped TLS,
+  remote home-LAN access, history copy and installed filter checks. The
+  delegated Codex-only submission held on pre-generation accounting. It
+  created no plan, model turn or task source transmission. The remaining
+  three cases stayed unstarted. The window closed with verified rollback.
+  [Combined package](EVERYDAY_DELEGATED_INSTALL_APPROVAL_20261106.md) · [Closeout receipt](/home/rich/.local/share/TwichUI-Workbench/everyday-delegated-live-1fdee91/closeout.json)
 - The bounded administrator mechanism at `a0edd32` is installed and passed
   its scope, denial and audit checks. The current-session grant expires no
   later than November 13 at 4:29 p.m. Mountain time and covers administrative
   operations separately from release and model approvals.
   [Grant and recovery record](WORKBENCH_ADMIN_APPROVAL.md)
 - The earlier app is restored at `http://127.0.0.1:9487/` under the two
-  sealed rollback services. Its 79 history rows match the original
-  fingerprint, and the original Qwen and dashboard processes kept running.
+  verified rollback services. Its 79 history rows match the original
+  fingerprint. The original Qwen process and authenticated access were
+  verified. All three evidence archives passed verification after rollback.
 - The exact `d13c2e6` cutover for `92094bc` passed system-level filtering,
   sandbox, history, and LAN HTTPS checks. The scoped firewall rule was
   removed during rollback. Current access is loopback.
