@@ -1,3 +1,51 @@
+# Installed staged investigation; real task19 active — November7,23:34 UTC
+
+Installed d4f4812fbbeac9e10f874a1e245f432a3a612c40, tree
+0d06c932a3a21953d63e5fc4637157e87c328b00, S=/home/rich/TwichUI-Workbench/.local/
+m5-review/everyday-outcome-d4f4812, R=C/outcome-d4f4812,
+seal d86d72373dd5a17621595d945751b3dc0063980a18f25c8080b60ec7e79dfe77.
+5205files/16links/560515997logicalbytes/388 tracked source verified. Exact1388backend/
+25frontend/build/139focused/native33.26sec620.3MiB pass;11actual C++ diagnosis grammar
+cases no model loaded. Precise reused108Chromium/10visual/2browser opt-ins/regression
+routing/readiness/admin and current actual151-row history-copy proof bound in
+R/offline-verification.json. Current source clean apart original dependency links.
+
+Verified original79/current151 history copies before scoped cutover. All strict
+both listeners/sealed assets/TLS/LAN/browser/filter/5isolation/foreign connector peer
+and model/key/auth/helper gates passed. Four everyday roles active/disabled pending
+final acceptance. Remote-LAN proof legitimately reused after unchanged effective
+network/certificate gates. No new authority or broader exposure. Model normal.
+
+INSTALLED canonical stopped-local CLI succeeded for f63026e9/task40232: only existing
+job payload receipt/message changed. Original model outcome interrupted_unknown,
+missing final response/usage, diagnostics, request and intake unchanged. Actual
+admission passes; all20 installed history list/detail reads HTTP200. Settled151rows/
+schema0012/28tables hash819d9dcda74c81e91414cc584760483c04f4017b994b2bd314bfc578e95b0b43
+at that point. R/local-reconciliation-verified.json and installed-history-read-proof.
+This is not recovered final usage or approval. Fresh task now changes live store;
+never overwrite with this151-row checkpoint or prior copies.
+
+Task19 dispatched23:33:22, intake6b297250-ccc9-47f7-8515-5f936fd7059b,
+modelda557189-7c53-41fd-943d-bec88516c596, driver24781. Fresh v5 consent, protected
+prep mode source-grounded-v2. Actual private journal records seven source windows
+revalidated/reused from settled17, then new lightweight source diagnosis request1.
+Authenticated metadata shows owned Qwen task42595 actively processing11475prompt
+tokens. No receipt yet when this note saved. Model active, not hung/uncertain.
+53Qwen requests started/51complete historical receipts plus current1in progress and
+old cancelled1missing finalreceipt. Known40022generated/301269prompt unchanged until
+new complete receipt. Zero implementation/Codex turns;0/4real provider cases passed.
+
+NO real flight-path repair yet. Monitor current S/artifacts/acceptance/bug-flight-
+paths.jsonl, R/bug-flight-paths-driver.txt and private response journals in release/
+artifacts/runs. Do not launch another request while current task active. Normal
+independent app-generated plan review and separate delegated browser run remain.
+Follow source-grounded criteria before signing exact review receipt; never supply
+addon answer/reproducer or force outcome. Then original FAIL/candidate PASS/full
+addon suite/saved reviewable patch, four provider cases, durable installed restart/
+next ordinary bug. No owner decision required. Standing owner authority continues;
+checkpoints do not stop work. Billing/disclosure/admin/network/recovery/publication
+protections unchanged. Styling/audit not begun; broader product unfinished.
+
 # Staged investigation under final verification — November 7, 23:28 UTC
 
 No real flight-path repair or supporting real-provider case has completed.
