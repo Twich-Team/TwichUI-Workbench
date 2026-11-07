@@ -1,3 +1,46 @@
+# Settled task19; exact citation schema and preparse retention — November7,23:39 UTC
+
+No real flight-path repair/provider case complete. Installed d4f4812 remains healthy
+and model idle. Task19/driver24781 settled held after2 completed local requests:
+2477generated/27402prompt. NO diagnosis accepted, plan approved, implementation or
+Codex. Reused source worked:7old windows plus one new range (two rereads redundant).
+Second response rejected at draft.diagnosis.evidence_paths. Three distinct string
+hashes match NONE of supplied source/API paths; actual citation text was not saved,
+so do not assert its precise spelling or line suffix. Retained exact failure/usage
+in C/outcome-d4f4812/attempt-19-accounting.json. Authenticated final model idle proof
+there. Source grammar had unconstrained citation strings despite semantic path
+membership; this is a concrete schema/application mismatch now being corrected.
+
+Known cumulative54Qwen requests started/53complete receipts,42499generated/328671prompt
+plus old17cancelled finalreceipt still unavailable/max2600completion kept separately.
+Zero implementation/Codex. Latest SETTLED live155rows/schema0012/28tables hash
+ da2f25e019b8fdfe8df007961f0b45b2608bac7ef9ec71ebd649432c47854291.
+Original79/history/current155/recovery evidence preserved. Original17modeloutcome
+and usage remain unchanged; installed canonical stopped receipt remains valid.
+
+New source (not installed): actual diagnosis wire schema enumerates inspected
+committed paths; prompt explicitly requires exact names. Existing semantic/source
+checks retained. New Evidence.capture_content saves up to8KiB private model content
+BEFORE payload parsing/semantic rejection, including completed malformed, length/
+unknown finish, tool denial and accounting/identity failure where envelope permits.
+Only message.content, NEVER reasoning; known provider credential and its JSON form
+redacted in diagnostic copy. Actual parsing gets untouched original content. Fixed
+create-only provider-content.json0600/owned0700, hash-only public metadata, combined
+existing64KiB journal/snapshot cap unchanged. Truncated prefix flagged, full-content
+hash retained. Invalid envelope still only bounded redacted framing.14actual installed
+C++ cases pass (exact path enum/invalid abbreviations/suffix/outsidefile),128focused
+app/retention/reader tests pass. Full final suites/native required before deployment.
+
+Next source revision21, next controller20 (task19 is18th actualapp task;16 had no
+model,18 no intake). Previous d4,155-row forward/original79, prior modelID append
+ da557189-7c53-41fd-943d-bec88516c596 to16previousIDs, evidence roots71. Current protected
+config alreadyv2: next stage must preservev2, not assertoldv1. Existing stopped17receipt
+copies forward and MUST NOT run a new reconciliation or overwrite modelrow. Source
+cache will prefer settled19 sourcefacts (8unique windows), no rejected hypothesis/
+plan/approval reused. Fresh normal consent/browserbindings and real task remain.
+No repeated unchanged live request, no owner engineering renewal. Continue complete
+real journey/provider checks/durable restart/nextbug. Broader product unfinished.
+
 # Installed staged investigation; real task19 active — November7,23:34 UTC
 
 Installed d4f4812fbbeac9e10f874a1e245f432a3a612c40, tree

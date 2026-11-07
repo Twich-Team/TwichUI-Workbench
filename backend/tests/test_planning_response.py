@@ -153,6 +153,10 @@ def test_wire_is_durable_before_parse_and_classification_is_conservative(
         )
         assert (result, model, basis) == (value, MODEL, "local")
     assert len(calls) == 1 and provider.diagnostics["generation_state"] == state
+    if fault in {'good', 'payload', 'duplicate', 'truncated', 'unknown-finish', 'tools', 'usage', 'negative', 'identity'}:
+        retained=json.loads((evidence.directory/'provider-content.json').read_text())
+        assert retained['text']==envelope['choices'][0]['message']['content']
+        assert retained['truncated'] is False
     assert evidence.file.stat().st_mode & 0o777 == 0o600
     assert evidence.directory.stat().st_mode & 0o777 == 0o700
     assert evidence.file.stat().st_size <= MAX_EVIDENCE
@@ -614,3 +618,38 @@ def test_bug_transport_timeout_is_explicit_and_shared_deadline_still_wins(monkey
     shared=time.monotonic()+30
     LocalProvider(ends_at=shared)._request(schema,'{}',key,'fixture')
     assert seen[-1][0]==seconds and seen[-1][1]==shared
+
+
+@pytest.mark.parametrize('text', ['{"draft":', 'x'*30000, '\U0001f60a'*12000])
+def test_preparse_private_content_is_bounded_and_retains_original_identity(tmp_path, text):
+    import hashlib
+    from uuid import uuid4
+    from workbench.bug_investigation_stage import InvestigationResponse
+    from workbench.planning_response import Evidence
+    journal=Evidence(tmp_path,str(uuid4()),InvestigationResponse)
+    try:
+        journal.capture_content(text,'fixture-credential')
+        raw=(journal.directory/'provider-content.json').read_bytes()
+        value=json.loads(raw)
+        assert len(raw)<=8193 and value['original_sha256']==hashlib.sha256(text.encode()).hexdigest()
+        assert text.startswith(value['text']) and value['truncated']==(value['text']!=text)
+        assert (journal.directory/'provider-content.json').stat().st_mode & 0o077 == 0
+        assert '"text"' not in journal.file.read_text()
+    finally:
+        journal.close()
+
+
+def test_preparse_content_redacts_known_provider_credential_without_changing_parser_input(tmp_path):
+    from uuid import uuid4
+    from workbench.bug_investigation_stage import InvestigationResponse
+    from workbench.planning_response import Evidence
+    secret='fixture-private-provider-token'
+    text='{"draft":{"question":"'+secret+'"}}'
+    journal=Evidence(tmp_path,str(uuid4()),InvestigationResponse)
+    try:
+        journal.capture_content(text,secret)
+        snapshot=(journal.directory/'provider-content.json').read_text()
+        assert secret not in snapshot and secret not in journal.file.read_text()
+        assert json.loads(snapshot)['credential_redacted'] and secret in text
+    finally:
+        journal.close()

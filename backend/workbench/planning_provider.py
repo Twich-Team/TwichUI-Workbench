@@ -392,6 +392,10 @@ class LocalProvider:
             self.diagnostics['model_matches'] = int(model == actual)
             if self.response_evidence:
                 self.response_evidence.envelope(result, self.diagnostics)
+            diagnostic_message = choice.get('message')
+            if (self.response_evidence and isinstance(diagnostic_message, dict)
+                    and schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse)):
+                self.response_evidence.capture_content(diagnostic_message.get('content'), secret)
             if reason != 'stop':
                 raise PlanningUnavailable('Generation stopped before a complete proposal.', 'incomplete_output')
             if model != actual:

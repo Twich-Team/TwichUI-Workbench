@@ -98,6 +98,13 @@ def normalize_bug(value, changes=()):
 
 def wire_schema(model, coverage=None, files=None):
     result = model.model_json_schema()
+    if model.__name__ == 'InvestigationResponse':
+        selected = [item['path'] for item in (files or [])
+                    if isinstance(item, dict) and isinstance(item.get('path'), str)]
+        if selected:
+            result['$defs']['Diagnosis']['properties']['evidence_paths']['items'] = {
+                'type':'string', 'enum':list(dict.fromkeys(selected))}
+        return result
     if model.__name__ != 'BugPlanningResponse':
         return result
     # Express the null comparison rule in the supported alternative/object
@@ -321,7 +328,7 @@ class Evidence:
 
     def snapshot(self, name, value):
         """Retain bounded proposed data privately; never approval or execution."""
-        if name not in {'proposed-plan', 'model-plan-review', 'investigation-diagnosis'}:
+        if name not in {'proposed-plan', 'model-plan-review', 'investigation-diagnosis', 'provider-content'}:
             raise OSError('Unknown private planning snapshot')
         from workbench.trusted_preparation import owned
         owned(self.directory)
@@ -339,6 +346,31 @@ class Evidence:
         self.snapshot_bytes += len(raw)
         self.record('private-proposed-data', name=name, sha256=sha(raw), bytes=len(raw),
                     approved=False, executed=False, public=False)
+
+    def capture_content(self, text, secret):
+        """Private bounded content BEFORE payload parsing; never retain reasoning.
+
+        The actual parser still receives the untouched response. Known provider
+        credentials are redacted from this diagnostic copy, never transmitted.
+        """
+        if not isinstance(text, str):
+            return
+        original = sha(text.encode('utf-8', 'surrogatepass'))
+        redacted = text
+        if isinstance(secret, str) and len(secret) >= 4:
+            for value in {secret, json.dumps(secret)[1:-1]}:
+                redacted = redacted.replace(value, '<redacted-provider-credential>')
+        def value(end):
+            return dict(text=redacted[:end], truncated=end < len(redacted),
+                        original_sha256=original, credential_redacted=redacted != text)
+        low, high = 0, min(len(redacted), 8192)
+        while low < high:
+            middle = (low+high+1)//2
+            if len(json.dumps(value(middle)).encode()) <= 8192:
+                low = middle
+            else:
+                high = middle-1
+        self.snapshot('provider-content', value(low))
 
     def location(self, path):
         # Known schema fields are exact; untrusted keys use a stable identity.

@@ -169,3 +169,28 @@ def test_stage_diagnostics_identify_actual_schema_and_known_union_paths():
         raise AssertionError('Invalid diagnosis accepted')
     assert facts['validation_schema_sha256'] == digest(InvestigationResponse.model_json_schema())
     assert 'draft.Diagnosed.diagnosis.evidence_paths' in facts['validation_locations']
+
+
+def test_diagnosis_decoder_uses_exact_selected_file_enum():
+    schema = wire_schema(InvestigationResponse, files=[{'path':PRODUCTION}, {'path':'tests/test_example.lua'}])
+    assert schema['$defs']['Diagnosis']['properties']['evidence_paths']['items'] == {
+        'type':'string', 'enum':[PRODUCTION, 'tests/test_example.lua']}
+
+
+@pytest.mark.usefixtures('installed')
+def test_invalid_citation_text_retained_privately_before_semantic_rejection(
+    client, headers, store, monkeypatch, tmp_path,
+):
+    enable(monkeypatch)
+    value = diagnosis()
+    bad_path = PRODUCTION+':1-7'
+    value['draft']['diagnosis']['evidence_paths'] = [bad_path]
+    scripted(monkeypatch, [value])
+    item, attempt = run(client, headers, store)
+    assert item['status'] == 'failed' and not item['proposals']
+    assert attempt['usage']['requests_observed'] == 1
+    root = tmp_path/'artifacts/runs'/('planning-evidence-'+attempt['id'])
+    content=json.loads((root/'provider-content.json').read_text())
+    assert json.loads(content['text']) == value and not content['truncated']
+    assert bad_path not in (root/'events.jsonl').read_text()
+    assert 'provider-content' in (root/'events.jsonl').read_text()
