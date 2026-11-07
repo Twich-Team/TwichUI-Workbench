@@ -14,7 +14,7 @@ RUNTIME_FILES = {
     'ops/codex-account-review.json', 'ops/tls/server.crt', 'ops/tls/server.key',
     'release/.local/task-runtime.json', 'release/.local/everyday-worker.json', 'release/.local/everyday-worker.lock',
 }
-RUNTIME_DIRS = {'artifacts', 'scratch', 'release/artifacts'}
+RUNTIME_DIRS = {'artifacts', 'scratch', 'release/artifacts/runs'}
 
 
 def inventory(stage, active):
