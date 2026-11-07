@@ -1,3 +1,15 @@
+# Task9 settled; null-result schema/diagnostics revision — November7,17:50 UTC
+
+Task9 finished4 accounted Qwen requests,1454 generated/13397 prompt; identical
+null/null observation rejected twice, no approval/repair/uncertainty. Latest118-row
+history/model/auth key checked. Full cumulative accounting retained:18 requests,
+6228 generated/67189 prompt. New wire expresses the existing null-result inequality
+without inventing results; new private <=6000-byte fixture facts preserve operations/
+known source identifiers and scalar types, redact all scalar strings/prose/literals.
+103 focused/native19 parser cases pass; full backend/frontend underway. No new
+live call or revised cutover yet; standing authority continues. Earlier entries
+are historical where superseded; use current handoff for actual state.
+
 # Verified9889377 installed; fresh task9 — November7,2026,17:43 UTC
 
 Installed gates all pass, including original79/latest114 history copies, TLS/LAN,

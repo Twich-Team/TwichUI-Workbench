@@ -8,11 +8,16 @@ LAN HTTPS addresses, browser boundaries, service isolation and normal authentica
 Qwen pass.1240 backend/25 frontend/108 Chromium/10 visual plus all opt-ins passed;
 precise reuse/failures/installed grammar and source proofs in bound private record.
 
-Fresh real flight-path task9 is investigating in the normal app. No real fix or
-supporting provider case complete yet. Prior8 settled tasks used14 Qwen requests,
-4774 generated/53792 prompt tokens, no implementation/Codex/uncertainty. Current
-store may change; preserve it. Independent plan review, separate delegated plan/run
-approvals and checked patch remain ahead. Continue without engineering renewal.
+Task9 definitively settled without an approved plan or repair. Two generated
+proposals had identical null results; exact field/rule diagnostics worked.9 tasks
+18 Qwen requests6228 generated/67189 prompt, no implementation/Codex/uncertainty.
+Latest settled118-row store preserved; model/key checked.
+
+New supported wire constraint excludes null/null and private bounded fixture
+diagnostics retain operations/known identifiers/types without source/prose/secrets.
+103 focused/native/parser checks pass; backend/frontend underway. No new deployment
+or live request yet. Continue delivery without engineering renewal; no real case
+complete. Current candidate/lineage/accounting are in the handoff.
 
 Broader product, in-game verification, live Codex bug repair and PRs unfinished.
 Styling/audit not begun. See [handoff](CONTINUATION.md).

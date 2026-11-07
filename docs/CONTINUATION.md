@@ -18,10 +18,16 @@ R=C/outcome-9889377. Original79/latest114 checked copies, both listeners/LAN/TLS
 browser/filters/five probes/foreign-peer rejection pass; same authenticated model,
 CA and root helper. All roles active/disabled pending success.
 
-Fresh task9 intake8fcf02d6-2075-4b0a-8253-fb964ccbf28e dispatched17:43:04 UTC,
-chat driver1685. At checkpoint investigating, no repair/provider case complete.
-Watch current stage artifacts/acceptance/bug-flight-paths.jsonl and R/driver output.
-The working store changes during this task; do not overwrite it with114-row copy.
+Task9 intake8fcf02d6-2075-4b0a-8253-fb964ccbf28e dispatched17:43:04 UTC and
+definitively settled held17:44:27. Model attempt1b90c9c3-dbd6-4667-8f52-93a5d4fe21a0;
+driver1685 exited2. Four complete requests: inspection, rejected plan with identical
+null expected/incorrect observation0, corrected plan with the same null/null error,
+then source inspection. No approval, repair or uncertainty.1454 generated/13397
+prompt; cumulative9 tasks18 requests6228 generated/67189 prompt, no implementation
+or Codex. R/attempt-9-accounting.json and journals preserved. Normal model/key checked.
+Latest settled CURRENT store118 rows/schema0012 SHA
+cb905d88f5aa20906d7a6f0a6a87ff6f3252e92eb2ada76b945cee1d07732319.
+Copy this forward, never the older114/110-row stores.
 Independent review before plan/run approvals still required. Never replay uncertain
 activity. Outcome ledger retains all prior usage, no former campaign gate.
 
@@ -33,6 +39,25 @@ R/offline-verification.json binds reuse and every log/failure disposition; two
 unactivated stages preserved. Full application bytes exercised, final-only operator
 wait/fixture contention corrections separately checked. Desktop/phone screenshots
 inspected. No live real result established by these offline proofs.
+
+## Null comparison and diagnostic revision —17:50 UTC
+
+The next modern schema expresses the already-required null-versus-nonnull result
+constraint through two supported object alternatives. It chooses no result and
+still rejects equal nonnull values locally. New bounded private fixture diagnostic
+records operation/index/known source identifiers, inspected file selections and
+scalar types/null/bools/small numbers; arbitrary strings/unknown identifiers are
+redacted/hashed. Lua comments/string literals and prose are never retained. Missing
+values are distinguished from explicit null; output is explicitly non-executable,
+not approved, <=6000 bytes. Hostile/malformed/list bounds/privacy tests cover it.
+
+103 focused checks, native process/browser rehearsal and installed parser19 cases
+pass. Actual simulated packet23846/23469 bytes with4395/5170 source chars, no provider.
+Full backend/frontend underway in C/non-null-default-tests.log; check rerun fixed
+one test-only inline-if lint error. No new deployment/live request yet. Reuse only
+uninvalidated Chromium/visual/routing/readiness/admin evidence with exact lineage;
+new schema/diagnostics have fresh focused/parser/native checks. Continue to candidate,
+checked118-row history cutover and renewed task10 under standing authority.
 
 Earlier00d78ab/verification-underway statements below are historical and superseded.
 

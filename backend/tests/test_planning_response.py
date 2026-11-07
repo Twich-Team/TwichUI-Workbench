@@ -418,3 +418,45 @@ def test_real_http_receipt_precedes_limit_and_cancellation_checks(tmp_path, mode
         server.shutdown()
         thread.join(2)
         server.server_close()
+
+
+def test_fixture_diagnostics_preserve_operation_and_null_pair_without_source_or_secrets(tmp_path):
+    from test_bug_wire import wire_response
+    value = wire_response(True)
+    step = value['plan']['reproducer']['steps'][-1]
+    step.update(path=['Visible','SENSITIVE_TOKEN_VALUE'], args=['SENSITIVE_TOKEN_VALUE'])
+    observation = value['plan']['reproducer']['observations'][0]
+    observation.update(expected=None, incorrect=None)
+    files = [dict(path='!!!TwichUI/alerts.lua', excerpts=[dict(text='function Visible() end -- HIDDEN_COMMENT\nlocal x="HIDDEN_LITERAL"')])]
+    evidence = Evidence(tmp_path, str(uuid4()), BugPlanningResponse, files=files)
+    evidence.parsed(value, {})
+    rows = [json.loads(line) for line in evidence.file.read_text().splitlines()]
+    fact = next(r for r in rows if r['phase']=='fixture-diagnostics')
+    assert fact['steps'][-1]['path'][0]=='Visible'
+    assert fact['observations'][0]['expected']==dict(type='NoneType',value=None)
+    assert fact['observations'][0]['incorrect']==dict(type='NoneType',value=None)
+    assert fact['observations'][0]['expected_present']
+    assert fact['executable'] is False and fact['approved'] is False
+    text=evidence.file.read_text()
+    assert not any(s in text for s in ['SENSITIVE_TOKEN_VALUE','HIDDEN_COMMENT','HIDDEN_LITERAL','function Visible'])
+    assert len(text.encode())<=65536
+    evidence.close()
+
+
+@pytest.mark.parametrize('value', [None, [], {'plan':None}, {'plan':{'reproducer':[]}},
+    {'plan':{'reproducer':{'setup':{'kind':[]},'steps':[{'op':[]}],
+       'observations':[{'source':{},'after_step':[], 'path':[{}]}]}}}])
+def test_fixture_diagnostics_do_not_discard_malformed_response(value):
+    from workbench.planning_fixture_diagnostics import fixture_snapshot
+    snapshot=fixture_snapshot(value,[],lambda v:dict(type=type(v).__name__))
+    if snapshot:
+        assert snapshot['executable'] is False
+
+
+def test_fixture_diagnostics_bound_hostile_lists_and_keep_observation_presence():
+    from workbench.planning_fixture_diagnostics import fixture_snapshot
+    fixture=dict(steps=[dict(op='call',path=['secret']*8,args=['secret']*8)]*1000,
+                 observations=[dict(after_step=2,source='return',path=[1],incorrect=None)])
+    snapshot=fixture_snapshot(dict(plan=dict(reproducer=fixture)),[],lambda v:dict(type=type(v).__name__,sha256='x'*64))
+    assert len(json.dumps(snapshot).encode())<=6000 and snapshot['truncated']
+    assert snapshot['observations'][0]['expected_present'] is False

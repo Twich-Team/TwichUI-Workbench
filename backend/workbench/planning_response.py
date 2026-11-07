@@ -94,6 +94,18 @@ def wire_schema(model, coverage=None, files=None):
     result = model.model_json_schema()
     if model.__name__ != 'BugPlanningResponse':
         return result
+    # Express the null comparison rule in the supported alternative/object
+    # subset. Both values remain model choices; equal non-null scalars are
+    # still rejected by the authoritative local validator.
+    observation = result['$defs']['Observation']
+    scalar = observation['properties']['expected']
+    nonnull = {'anyOf': [v for v in scalar['anyOf'] if v.get('type') != 'null']}
+    branches = []
+    for expected, incorrect in ((nonnull, scalar), ({'type': 'null', 'const': None}, nonnull)):
+        branch = json.loads(json.dumps(observation))
+        branch['properties'].update(expected=expected, incorrect=incorrect)
+        branches.append(branch)
+    result['$defs']['Observation'] = {'anyOf': branches}
     # The provider grammar cannot execute Python validators. Express Step's
     # shape rules in its supported object/array/alternative schema subset too.
     original = result['$defs']['Step']
@@ -207,6 +219,7 @@ class Evidence:
         from workbench.trusted_preparation import owned
 
         self.schema = wire_schema(model, coverage, files)
+        self.fixture_files = files
         self.schema_hash = sha(json.dumps(self.schema, sort_keys=True).encode())
         self.keys = {'choices', 'message', 'content', 'model', 'usage', 'id', 'tool_calls',
                      'finish_reason', 'prompt_tokens', 'completion_tokens', 'total_tokens'}
@@ -319,6 +332,10 @@ class Evidence:
                     model_matches=diagnostics.get('model_matches'))
 
     def parsed(self, value, diagnostics, changes=()):
+        from workbench.planning_fixture_diagnostics import fixture_snapshot
+        snapshot = fixture_snapshot(value, self.fixture_files, self.summary)
+        if snapshot:
+            self.record('fixture-diagnostics', **snapshot)
         structure = []
         structure_bytes = 0
         def visit(node, path=()):
