@@ -1,3 +1,15 @@
+# Working addon bug-fix outcome — November 6, 2026 Mountain time
+
+The owner authorized local implementation and preparation for the complete
+ordinary bug journey. The acceptance task is the owner's report that navigation
+assumes every flight path is available. The app must investigate the pinned
+addon, propose a scoped repair, reproduce the reported behavior, perform the
+approved repair in isolation, check the patch, and preserve the result after
+restart. Qwen, signed-in Codex and both pre-generation switches need distinct
+real acceptance. The four existing coverage trials support provider acceptance.
+Installation and live work await the new exact combined package. Preserve the
+existing 512 MiB evidence cap and the approved private-network policy.
+
 # Execution-path audit and local model binding — November 5, 2026
 
 Continue clean `b59b907` for 60 minutes. Trace the existing execution and delivery

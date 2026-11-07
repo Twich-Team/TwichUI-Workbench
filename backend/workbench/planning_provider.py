@@ -15,6 +15,7 @@ from workbench.planning_transport import LocalHTTP, NoRedirect as NoRedirect, Pl
 
 from workbench.schemas import DecompositionOutput
 from workbench.regression_evidence import ScenarioResponse
+from workbench.bug_evidence import BugPlanningResponse
 
 ROOT = Path(__file__).resolve().parents[2]
 MAX_INPUT = 24000
@@ -163,7 +164,7 @@ class LocalProvider:
 
     def generate(self, packet, schema, *, expected_model=None):
         self.diagnostics = {'generation_state': 'not_started'}
-        if issubclass(schema, ScenarioResponse) and expected_model is None:
+        if (issubclass(schema, ScenarioResponse) or schema is BugPlanningResponse) and expected_model is None:
             raise PlanningUnavailable('Grounded local planning requires a saved model selection.', 'model_policy')
         encoded = json.dumps(packet, ensure_ascii=True)
         if len(encoded.encode()) > MAX_INPUT:
@@ -249,13 +250,16 @@ class LocalProvider:
         )
         instructions = loaded_client if schema is LoadedClientResponse else (
             scenario if issubclass(schema, ScenarioResponse) else planning)
+        if schema is BugPlanningResponse:
+            from workbench.bug_investigation import INSTRUCTIONS
+            instructions = INSTRUCTIONS
         body = dict(model=expected_model or actual, temperature=0, max_tokens=2600, reasoning_budget_tokens=0,
             tools=[], response_format=dict(type='json_schema', json_schema=dict(
                 name='planning', strict=True, schema=schema.model_json_schema())),
             messages=[dict(role='system', content=general + instructions),
                 dict(role='user', content=encoded)])
         encoded_body = json.dumps(body).encode()
-        if issubclass(schema, ScenarioResponse) and len(encoded_body) > MAX_INPUT:
+        if (issubclass(schema, ScenarioResponse) or schema is BugPlanningResponse) and len(encoded_body) > MAX_INPUT:
             raise PlanningUnavailable('Serialized grounded request exceeds the input budget; narrow the request.')
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
             encoded_body, {'Authorization': 'Bearer '+secret, 'Content-Type': 'application/json'})

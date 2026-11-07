@@ -28,6 +28,7 @@ class LocalWorkStatus(StrictModel):
     reserve_bytes: int = START_RESERVE
     codex_configured: bool = False
     codex_available: bool = False
+    bug_investigation: bool = False
 
 
 class Installation(StrictModel):
@@ -110,7 +111,8 @@ def status(engine):
         return LocalWorkStatus(enabled=False, ready=False, message='Ordinary local execution is unavailable.')
     try:
         policy = configuration(engine)
-        if not capability(engine) or not preparation_config(engine)['scenario_generation']:
+        prepared = preparation_config(engine)
+        if not capability(engine) or not prepared['scenario_generation']:
             raise ValueError('Workbench setup or its installed model proof needs attention.')
         marker = owned(ROOT / '.local/everyday-worker.json')
         if not marker.is_file() or marker.stat().st_size > 1024:
@@ -129,6 +131,7 @@ def status(engine):
         return LocalWorkStatus(enabled=True, ready=False, message='Workbench could not measure storage capacity.')
     from workbench.codex_provider import connector_path
     return LocalWorkStatus(enabled=True, ready=True, headroom_bytes=remaining,
+                           bug_investigation='lua-offline-bugfix' in prepared['allowed_classes'],
                            codex_configured=bool(os.environ.get('WORKBENCH_CODEX_SOCKET')),
                            codex_available=connector_path() is not None,
                            message='The worker is available. It checks model access before any approved work starts.')
@@ -220,7 +223,7 @@ def planning_receipt(original, created_at):
         datetime.fromisoformat(created_at) + timedelta(minutes=PLANNING_MINUTES)).isoformat())
 
 
-def check_planning(c, original):
+def check_planning(c, original, job=None):
     from workbench.db import planning_jobs
     jobs = c.execute(select(planning_jobs.c.payload).where(
         planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')).scalars().all()
@@ -229,7 +232,21 @@ def check_planning(c, original):
     if (original['payload'].get('local_planning') not in CHOICES
             or not any(all(job.get('local_planning_receipt', {}).get(k) == v for k, v in expected.items()) for job in jobs)):
         raise ValueError('A saved one-request planning approval is required. Open a new task to give that permission.')
-    if any(job.get('scenario_generation_claim') for job in jobs):
+    claimed = sum(bool(payload.get('scenario_generation_claim')) for payload in jobs)
+    followup = job['payload'].get('bug_followup') if job else None
+    if followup:
+        from workbench.intake import digest
+        from workbench.provider_routes import approved
+
+        data = job['payload']
+        binding = digest(dict(original=original['payload'], revision=original['revision'],
+                              feedback=data['feedback'], clarification_id=data['clarification_id']))
+        if (original['revision'] != 1 or job['revision'] != 2 or claimed > 1
+                or followup['binding'] != binding or followup['route'] != approved(c, original)
+                or data.get('scenario_generation_claim')):
+            raise ValueError('The follow-up no longer matches the approved investigation.')
+        expected = followup
+    elif claimed:
         raise ValueError('The one approved planning request has already been claimed. Start a new task with updated details.')
     if datetime.now(timezone.utc) + timedelta(seconds=120) >= datetime.fromisoformat(expected['expires_at']):
         raise ValueError('The planning approval expired before the worker could start. Start a new task to approve planning again.')

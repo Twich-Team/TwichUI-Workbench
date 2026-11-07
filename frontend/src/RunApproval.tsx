@@ -78,7 +78,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
   </section>;
   if(current.local_only&&!current.available)return <section className="soft-callout" aria-label="Run waiting">
     <h3>Run is waiting</h3><p role="status">{current.message}</p>
-    <p>The reviewed test and plan are saved. The run decision will be available when Workbench can start it safely.</p>
+    <p>The reviewed behavior and plan are saved. The run decision will be available when Workbench can start it safely.</p>
   </section>;
   if(!shown?.available||!shown.offer)return <section className="soft-callout" aria-label="Task preparation hold">
     <h3>{current.preparing?'Preparing the reviewed task':'Task preparation held'}</h3><p role="status">{current.preparing?'Workbench is checking that the test can catch the wrong result.':'Workbench could not confirm the current test and plan are ready to run.'}</p>

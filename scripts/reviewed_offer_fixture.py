@@ -73,6 +73,35 @@ def advance(engine, path, action):
     os.environ['WORKBENCH_RESEARCH_ROOT'] = str(path.parent / 'reviewed-research/source')
     task_sessions.ROOT = path.parent / 'controlled-session-owner'
     task_session.ROOT = task_sessions.ROOT
+    if action.startswith('bug-'):
+        from unittest.mock import patch
+        from test_bug_workflow import BugPlanner, enable_bugs, response
+        from test_grounded_workflow import controlled_source, policy_file, ControlledPreparer
+        from test_verification_profiles import BUGGY, CORRECT, PRODUCTION
+        from pytest import MonkeyPatch
+        from workbench import worker, trusted_preparation
+
+        parent = path.parent / 'automatic-workflow'
+        parent.mkdir(mode=0o700, exist_ok=True)
+        research = path.parent / 'reviewed-research'
+        research.mkdir(mode=0o700, exist_ok=True)
+        if action == 'bug-setup':
+            controlled_source(research)
+            policy_file(engine, parent)
+            setup(path)
+        os.environ.update(WORKBENCH_RESEARCH_ROOT=str(research / 'source'),
+                          WORKBENCH_PREPARATION_CONFIG=str(parent / 'preparation.json'))
+        adapter = BugPlanner(response())
+        if action == 'bug-setup':
+            with MonkeyPatch.context() as isolated:
+                enable_bugs(isolated)
+        elif action == 'bug-tick':
+            with patch.object(trusted_preparation, 'Runtime', ControlledPreparer):
+                assert worker.tick(engine, planning_adapter=adapter)
+        elif action == 'bug-run':
+            from local_browser_fixture import advance_local
+            advance_local(engine, path, 'pass', adapter, bug_edit=dict(path=PRODUCTION, old=BUGGY, new=CORRECT))
+        return
     if action.startswith('automatic-'):
         from unittest.mock import patch
         from test_grounded_workflow import controlled_source, policy_file, ControlledPlanner, ControlledPreparer

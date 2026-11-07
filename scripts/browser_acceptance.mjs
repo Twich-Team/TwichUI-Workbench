@@ -17,7 +17,7 @@ function originalRequest(value, expected) {
   check(uuid(value.request_id), 'intake identity missing');
   const submitted = without(value, 'request_id');
   // Response schemas materialize optional nulls. No non-null extra request data is allowed.
-  for (const key of ['local_planning', 'supported_task']) if (submitted[key] === null) delete submitted[key];
+  for (const key of ['local_planning', 'supported_task', 'regression_tests']) if (submitted[key] === null) delete submitted[key];
   if (submitted.regression_tests?.text_example === null)
     submitted.regression_tests = without(submitted.regression_tests, 'text_example');
   exact(submitted, expected, 'intake request changed');
@@ -39,17 +39,26 @@ export function reviewPlan(item, candidate, identity, revision, now) {
   for (const key of ['required_artifacts', 'scope_conflicts', 'artifacts', 'approval_blockers'])
     exact(plan[key], [], 'plan prerequisites or attachments changed');
   exact(plan.human_scope, item.human_scope, 'plan scope revision changed');
-  exact(plan.content, candidate.content, 'plan wording or proposed operations changed');
+  const bug = candidate.request.kind === 'issue';
   const {behavioral_evidence: behavior, scenario_grounding: ground, ...contract} = plan.task_contract;
-  exact(contract, without(candidate.contract, 'behavioral_evidence'), 'test paths, evidence, commands or limits changed');
-  const [scenario] = behavior.scenarios;
-  check(behavior.scenarios.length === 1 && /^[a-z][a-z0-9-]{0,47}$/.test(scenario.id) &&
-    hex(behavior.input_sha256) && hex(behavior.review_digest), 'example identity changed');
-  exact(without(behavior, 'input_sha256', 'review_digest', 'scenarios'),
-    without(candidate.contract.behavioral_evidence, 'input_sha256', 'review_digest', 'scenarios'),
-    'example provenance changed');
-  exact(without(scenario, 'id'), without(candidate.contract.behavioral_evidence.scenarios[0], 'id'),
-    'example operation, setup, file or expected result changed');
+  if (bug) {
+    check(contract.category === 'lua-offline-bugfix' && !contract.scope_missing.length &&
+      !contract.execution_authorized && !contract.publication_authorized &&
+      hex(contract.bug_evidence?.review_digest) && contract.bug_evidence.plan.reproducer.observations.length >= 3 &&
+      contract.writable_paths.every(path => candidate.writablePaths.includes(path)),
+    'repair scope, behavior checks or publication boundary changed');
+  } else {
+    exact(plan.content, candidate.content, 'plan wording or proposed operations changed');
+    exact(contract, without(candidate.contract, 'behavioral_evidence'), 'test paths, evidence, commands or limits changed');
+    const [scenario] = behavior.scenarios;
+    check(behavior.scenarios.length === 1 && /^[a-z][a-z0-9-]{0,47}$/.test(scenario.id) &&
+      hex(behavior.input_sha256) && hex(behavior.review_digest), 'example identity changed');
+    exact(without(behavior, 'input_sha256', 'review_digest', 'scenarios'),
+      without(candidate.contract.behavioral_evidence, 'input_sha256', 'review_digest', 'scenarios'),
+      'example provenance changed');
+    exact(without(scenario, 'id'), without(candidate.contract.behavioral_evidence.scenarios[0], 'id'),
+      'example operation, setup, file or expected result changed');
+  }
   check(hex(ground.policy_sha256), 'preparation policy binding missing');
   exact(ground, {evidence_sha256: candidate.evidenceSha, policy_sha256: ground.policy_sha256,
     basis: candidate.provider, ...(candidate.reason ? {fallback_reason: candidate.reason} : {}),
@@ -74,7 +83,7 @@ export function reviewRun(view, task, plan, approval, candidate, policy) {
   check(uuid(offer.id) && hex(offer.fingerprint), 'certified offer identity missing');
   exact(offer, {id: offer.id, fingerprint: offer.fingerprint, title: candidate.request.title,
     repository: 'Twich-Team/TwichUI', base_branch: 'main', base: policy.base,
-    paths: candidate.request.regression_tests.test_paths, checks: candidate.contract.verification_commands,
+    paths: plan.task_contract.writable_paths, checks: plan.task_contract.verification_commands,
     limits: policy.limits, budget: {...policy.budget, offer_id: offer.id, offer_fingerprint: offer.fingerprint}},
   'implementation files, commands, publication or budget changed');
 }
@@ -179,7 +188,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
       }
     }
     await page.getByText('Routing preferences', {exact:true}).click();
-    if (previous.test_fallback !== direction) await page.getByLabel('Fallback for eligible tests').selectOption(direction);
+    if (previous.test_fallback !== direction) await page.getByLabel(/Fallback for eligible (tests|work)/).selectOption(direction);
     expected.test_fallback = direction;
     if (direction === 'both') {
       if (previous.substitution !== 'configured_fallback_only')
@@ -206,15 +215,18 @@ export async function runJourney(context, origin, policy, candidate, options) {
     const desired = candidate.reason ? 'both' : 'off';
     const saved = await settings(desired, true);
     await controlsReady('planning');
-    await page.goto(origin + '/intake/new?kind=feature');
+    const bug = candidate.request.kind === 'issue';
+    await page.goto(origin + '/intake/new?kind=' + candidate.request.kind);
     await page.getByLabel('Title', {exact:false}).fill(candidate.request.title);
     await page.getByLabel('Description', {exact:false}).fill(candidate.request.description);
-    await page.getByRole('checkbox', {name:'Add a check for existing behavior'}).check();
-    await page.getByLabel('Expected test results').fill(candidate.request.regression_tests.acceptance[0]);
-    await page.getByText('Optional test details', {exact:true}).click();
-    await page.getByLabel('Existing test paths').fill(candidate.request.regression_tests.test_paths[0]);
+    if (!bug) {
+      await page.getByRole('checkbox', {name:'Add a check for existing behavior'}).check();
+      await page.getByLabel('Expected test results').fill(candidate.request.regression_tests.acceptance[0]);
+      await page.getByText('Optional test details', {exact:true}).click();
+      await page.getByLabel('Existing test paths').fill(candidate.request.regression_tests.test_paths[0]);
+    }
     await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
-    const local = candidate.choice.startsWith('qwen-');
+    const local = candidate.request.local_planning.startsWith('qwen-');
     await page.getByRole('checkbox', {name:local ? /Allow one local Qwen request/ : /Allow one signed-in Codex turn/}).check();
     if (candidate.reason) await page.getByRole('checkbox', {name:local ?
       /Allow one switch to signed-in Codex/ : /Allow one switch to local Qwen/}).check();
@@ -228,8 +240,8 @@ export async function runJourney(context, origin, policy, candidate, options) {
     const opened = await act('submit', 'POST', '/api/intake', button('Submit request'), async body => {
       originalRequest(body, candidate.request);
       const work = await capacity();
-      check(work.codex_available === (candidate.choice !== 'codex-with-local-fallback'), 'unexpected connector readiness');
-      check(blockDeadline - now() >= (options.minimumRunMs ?? 60*60000) + (options.preparationMs ?? 10*60000) + (options.planningReserveMs ?? 150000),
+      check((!bug || work.bug_investigation) && work.codex_available === (candidate.choice !== 'codex-with-local-fallback'), 'unexpected connector readiness');
+      check(blockDeadline - now() >= (options.minimumRunMs ?? 60*60000) + (options.preparationMs ?? 10*60000) + (options.planningReserveMs ?? 150000) + (bug ? options.reviewMs ?? 0 : 0),
         'planning and run no longer fit the case budget');
       await beforeAction('submit', {request: body});
       requestId = body.request_id;
@@ -246,17 +258,25 @@ export async function runJourney(context, origin, policy, candidate, options) {
     const plan = reviewPlan(complete, candidate, identity, saved.revision, now());
     check(!complete.decisions.length && !complete.tasks.length && complete.original.request_id === requestId,
       'unexpected prior plan approval or task');
+    if (bug) {
+      check(typeof options.reviewBug === 'function', 'independent bug plan review is unavailable');
+      await options.reviewBug({intake:identity, plan});
+      ensure();
+      exact(await readItem(), complete, 'plan changed during independent bug review');
+    }
     await controlsReady('implementation'); // Restore any controlled outage before approving work.
     if (candidate.reason) await page.reload();
     await page.getByText('Add a note or request changes', {exact:true}).click();
     await page.getByLabel('Note', {exact:false}).fill(policy.note);
-    await page.getByRole('checkbox', {name:'The test examples match what I asked for.'}).check();
+    const review = bug ? plan.task_contract.bug_evidence : plan.task_contract.behavioral_evidence;
+    await page.getByRole('checkbox', {name:bug ?
+      'The reproduction and expected behavior match my report.' : 'The test examples match what I asked for.'}).check();
     const scope = await act('plan', 'POST', url + '/decisions', button('Approve plan'), async body => {
       await capacity();
       const fresh = await readItem();
       exact(fresh, complete, 'plan changed after review');
       exact(without(body, 'command_id'), {proposal_id: plan.id, binding: plan.binding, scope_revision: plan.scope_revision,
-        action: 'approve', note: policy.note, expectation_review: plan.task_contract.behavioral_evidence.review_digest},
+        action: 'approve', note: policy.note, expectation_review: review.review_digest},
       'plan command differs from reviewed scope');
       check(uuid(body.command_id), 'plan command identity missing');
       await beforeAction('plan', {intake:identity, proposal:plan});

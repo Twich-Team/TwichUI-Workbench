@@ -35,7 +35,7 @@ def read_configuration(engine, path):
         database: str
         database_identity: list[StrictInt] = Field(min_length=2, max_length=2)
         repository: Literal['Twich-Team/TwichUI']
-        allowed_classes: list[Literal['lua-regression-tests']] = Field(max_length=1)
+        allowed_classes: list[Literal['lua-regression-tests', 'lua-offline-bugfix']] = Field(max_length=2)
         output_root: str
         identity: dict[str, str]
         scenario_generation: StrictBool = False
@@ -53,16 +53,20 @@ def read_configuration(engine, path):
     identity = config['identity']
     if (set(identity) != {'name', 'email'} or any(not 1 <= len(v) <= 160 or any(ord(c) < 32 for c in v) for v in identity.values())):
         raise ValueError('Configure a bounded local publication identity')
-    if 'lua-regression-tests' not in config['allowed_classes']:
+    if not config['allowed_classes']:
         raise ValueError('Preparation policy denies this task class')
+    if len(set(config['allowed_classes'])) != len(config['allowed_classes']):
+        raise ValueError('Preparation task classes must be unique')
     return config
 
 
 def validate_reviewed_policy(engine, reviewed):
     from workbench.visual_scope import digest
     grounding = reviewed.get('scenario_grounding')
-    if grounding and digest(configuration(engine)) != grounding['policy_sha256']:
-        raise ValueError('Preparation policy differs from the reviewed scenario policy; request a fresh proposal before preparing or approving a run.')
+    if grounding:
+        policy = configuration(engine)
+        if digest(policy) != grounding['policy_sha256'] or reviewed['category'] not in policy['allowed_classes']:
+            raise ValueError('Preparation policy differs from the reviewed source policy; request a fresh proposal before preparing or approving a run.')
 
 
 def owned(path):
@@ -96,8 +100,8 @@ def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=
     The existing application worker supplies reviewed scenario data and private
     configured storage/identity. No model or operational activation is called here.
     """
-    from workbench import real_recipes, task_session, regression_preparation
-    from workbench.regression_evidence import compile_plan, validate_expectation_review
+    from workbench import bug_evidence, real_recipes, task_session, regression_preparation
+    from workbench.regression_evidence import compile_plan
     from workbench.real_workspace import durable
 
     owned(engine.url.database)
@@ -108,13 +112,17 @@ def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=
         linked = task_execution.snapshot(c, **ref)
         reviewed = linked['proposal_review'].get('task_contract') or {}
         validate_reviewed_policy(engine, reviewed)
-        if reviewed.get('category') != 'lua-regression-tests':
-            raise ValueError('Reusable preparation is limited to regression-test additions')
-        prepared = reviewed.get('behavioral_evidence')
-        if not prepared:
-            raise ValueError('Specify concrete inputs and expected observations for the reviewed acceptance criteria')
-        validate_expectation_review(linked['proposal_review'], linked['approval']['payload'])
-        compiled = compile_plan(prepared)
+        bug = reviewed.get('category') == 'lua-offline-bugfix'
+        if bug and reviewed.get('bug_evidence'):
+            compiled = bug_evidence.compile_plan(reviewed['bug_evidence'])
+            template = dict(control_patches={})
+        elif reviewed.get('category') == 'lua-regression-tests' and reviewed.get('behavioral_evidence'):
+            prepared = reviewed['behavioral_evidence']
+            compiled = compile_plan(prepared)
+            template = dict(scenario_preparation=prepared)
+        else:
+            raise ValueError('A reviewed offline reproducer or regression example is required.')
+        bug_evidence.validate_expectation_review(linked['proposal_review'], linked['approval']['payload'])
         spec = real_recipes.from_review(c, ref, oracle=compiled['oracle'], behavior_id=compiled['behavior_id'],
             read_paths=compiled['read_paths'], focused_test=compiled['focused_test'], identity=identity)
         if recovery:
@@ -125,7 +133,7 @@ def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=
         if validate_policy:
             validate_policy()
         runtime = Runtime(root, stop_event=stop_event)
-        task_session.provision(runtime, dict(scenario_preparation=prepared))
+        task_session.provision(runtime, template)
         if validate_policy:
             validate_policy()
         # Reconstruct canonical Runtime and independently re-evaluate, exactly as
@@ -136,7 +144,7 @@ def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=
         durable(root / 'behavioral-preparation-outcome.json', json.dumps(outcome, sort_keys=True).encode())
         regression_preparation.record_behavioral_outcome(engine, ref, linked['proposal_review']['binding'], outcome)
         raise
-    outcome = dict(status='prepared', message='Generated behavioral controls passed independent certification; no execution authority.',
+    outcome = dict(status='prepared', message='The reviewed behavior passed independent baseline checks. Implementation requires separate approval.',
                    root=str(root), execution_authorized=False)
     durable(root / 'behavioral-preparation-outcome.json', json.dumps(outcome, sort_keys=True).encode())
     regression_preparation.record_behavioral_outcome(engine, ref, linked['proposal_review']['binding'], outcome)

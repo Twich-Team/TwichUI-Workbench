@@ -80,6 +80,7 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   const regression=body.regression_tests;
   const example=regression?.text_example;
   const localWork=useQuery({queryKey:['local-work'],queryFn:()=>request<components['schemas']['LocalWorkStatus']>('/api/local-work'),refetchInterval:5000});
+  const bugWork=kind==='issue'&&Boolean(localWork.data?.bug_investigation)&&!body.supported_task;
   const supported=useQuery({queryKey:['supported-tasks'],queryFn:()=>request<{items:{id:string;title:string;purpose:string}[]}>('/api/supported-tasks')});
   async function submit(event:React.FormEvent) {
     event.preventDefault(); setError('');
@@ -102,7 +103,10 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   <p className="small-text">Tell Workbench what you want to happen. For a bug, say what happens today and what you expected.</p>
   {localWork.data?.enabled&&<div className="soft-callout">
     <p><strong>Available for local execution</strong> Add coverage to an existing TwichUI Lua test for a concrete example. Workbench saves the checked result here.</p>
-    <p>Bug fixes, features, inspections, simulator work and publishing still need a separate workflow.</p>
+    {localWork.data.bug_investigation
+      ? <p>Workbench can also investigate an addon bug and prepare a local repair when it can reproduce the problem offline. Describe what happened and what you expected.</p>
+      : <p>Bug fixes need a separate workflow.</p>}
+    <p>Features, inspections, simulator work and publishing are outside this workflow.</p>
     <p role="status">{localWork.data.message}</p>
     {localWork.data.headroom_bytes!=null&&<p className="small-text">{Math.max(0,Math.floor(localWork.data.headroom_bytes/1048576))} MiB available for saved evidence. Workbench needs {localWork.data.reserve_bytes/1048576} MiB free before starting.</p>}
   </div>}
@@ -142,31 +146,32 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
       </>}</details>
     </>}
   </>}
-  {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,supported_task:item?.id||null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Use my description</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Use a ready-made task with a fixed plan. Your comments stay with the request. The fixed scope sets what can run.</p></>}
+  {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,supported_task:item?.id||null,local_planning:null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Use my description</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Use a ready-made task with a fixed plan. Your comments stay with the request. The fixed scope sets what can run.</p></>}
   {kind==='issue' && <><label className="check-label"><input type="checkbox" checked={lua} onChange={e=>{setLua(e.target.checked);if(!e.target.checked)setBody({...body,lua_error:''});}}/>Add a Lua error <span>Optional</span></label>{lua && <><label htmlFor="lua-error">Lua error <span>Plain text · never executed</span></label><textarea className="code-input" id="lua-error" maxLength={6000} rows={6} value={body.lua_error || ''} onChange={e=>setBody({...body,lua_error:e.target.value})}/></>}</>}</details>
   <label htmlFor="request-interface">Does this request change the interface?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.</p>
-  {localWork.data?.enabled&&regression&&<div role="group" aria-label="Planning provider">
+  {localWork.data?.enabled&&(regression||bugWork)&&<div role="group" aria-label="Planning provider">
     <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('qwen-')||false} disabled={body.visual_requirement!=='nonvisual'}
-      onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>Allow one local Qwen request to plan this task</span></label>
+      onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>Allow one local Qwen request to {bugWork?'investigate this report':'plan this task'}</span></label>
     {localWork.data.codex_configured ? <>
       {!localWork.data.codex_available&&<p className="detail-copy">The Codex connector is unavailable. If you choose Codex first, planning can proceed with Qwen only if you allow that switch.</p>}
       {body.local_planning?.startsWith('qwen-')&&<>
         <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning==='qwen-with-codex-fallback'}
           onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-with-codex-fallback':'qwen-once'})}/><span>Allow one switch to signed-in Codex if Qwen cannot connect before generation</span></label>
-        {body.local_planning==='qwen-with-codex-fallback'&&<p className="detail-copy">If Qwen cannot start and Models allows the switch, this permits sending your request, clarification and relevant committed source excerpts to OpenAI after the account and included allowance are checked.</p>}
+        {body.local_planning==='qwen-with-codex-fallback'&&<p className="detail-copy">If Qwen cannot start and Models allows the switch, this permits sending your request, clarification and {bugWork?'relevant committed addon code and test excerpts':'relevant committed source excerpts'} to OpenAI after the account and included allowance are checked.</p>}
       </>}
       <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('codex-')||false} disabled={body.visual_requirement!=='nonvisual'}
-        onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-once':null})}/><span>Allow one signed-in Codex turn to plan this task</span></label>
+        onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-once':null})}/><span>Allow one signed-in Codex turn to {bugWork?'investigate this report':'plan this task'}</span></label>
       {body.local_planning?.startsWith('codex-')&&<>
-        <p className="detail-copy">This sends the request, clarification and relevant committed source excerpts to OpenAI through the configured ChatGPT sign-in. Workbench will check the saved model and included allowance before sending task content.</p>
+        <p className="detail-copy">This sends the request, clarification and {bugWork?'relevant committed addon code and test excerpts':'relevant committed source excerpts'} to OpenAI through the configured ChatGPT sign-in. Workbench will check the saved model and included allowance before sending task content.</p>
         <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning==='codex-with-local-fallback'}
           onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-with-local-fallback':'codex-once'})}/><span>Allow one switch to local Qwen if Codex is unavailable or reaches its included allowance reserve before generation</span></label>
       </>}
     </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
+    {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. It cannot edit files or publish. If a detail is missing, Workbench may ask for one reply and separate permission for a follow-up with the same provider.</p>}
     <p className="detail-copy">Choose “Does not change the interface” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. Permission expires after 30 minutes. Fallback applies only to planning before generation starts. Failed, partial or uncertain generation stops for review. Review the plan and approve the run separately. The run keeps the provider that made the plan.</p>
   </div>}
 </fieldset>
-  <p className="detail-copy">{localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':'Your request will be saved. Model planning requires the test coverage option and your permission.'):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.title.trim() || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
+  <p className="detail-copy">{localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':(bugWork?'Your report will be saved. Model investigation needs your permission.':'Your request will be saved. Model planning requires the test coverage option and your permission.')):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.title.trim() || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
 }
 
 export function IntakeDetail() {
@@ -199,8 +204,9 @@ export function IntakeDetail() {
   const suggestedFiles = clarification?.startsWith('Name an existing tests/test_*.lua file')
     ? data.proposals[0]?.task_contract?.path_candidates || [] : [];
   const blocked = busy || query.isError;
+  const bugInvestigation=data.original.kind==='issue'&&Boolean(data.original.local_planning)&&!data.original.supported_task;
   function sendAnswer(answer: string) {
-    void act('clarification',{command_id:crypto.randomUUID(),revision:data.revision,text:answer}).then(()=>setClarification('')).catch(()=>{});
+    void act('clarification',{command_id:crypto.randomUUID(),revision:data.revision,text:answer,...(bugInvestigation?{continue_investigation:true}:{})}).then(()=>setClarification('')).catch(()=>{});
   }
   const receipt = data.decisions.find(d => d.proposal_id===data.proposals[0]?.id && !d.payload.execution_continuation);
   const currentTasks = data.tasks.filter(t => t.kind==='task' && (t.proposal_id===data.proposals[0]?.id || (!t.proposal_id && !p)) && !t.scope_review_required);
@@ -223,7 +229,7 @@ export function IntakeDetail() {
           expectation={data.original.regression_tests?.acceptance[Number(exampleNumber)-1] || 'Add the missing example'}
           busy={blocked} send={sendAnswer}/>
         <details><summary>Advanced example format</summary><p>{clarification}</p>
-          <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/><Button disabled={blocked || !clarificationInput.trim()}>Send information</Button></form>
+          <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/>{bugInvestigation&&<p>Sending this reply allows one more read-only investigation with the same provider. Any reply and relevant source excerpts may be sent to that provider. A repair still requires approval.</p>}<Button disabled={blocked || !clarificationInput.trim()}>{bugInvestigation?'Send reply and allow follow-up':'Send information'}</Button></form>
         </details>
       </> : <>
         <p className="question-text">{suggestedFiles.length?'Workbench needs to know which existing test covers the behavior you described. Choose a file only if it fits your request.':clarification}</p>
@@ -234,7 +240,7 @@ export function IntakeDetail() {
           </select>
           <Button disabled={blocked || !suggestedFiles.includes(pickedFile)}>Use this test</Button>
         </form>}
-        <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/><Button disabled={blocked || !clarificationInput.trim()}>Send information</Button></form>
+        <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/>{bugInvestigation&&<p>Sending this reply allows one more read-only investigation with the same provider. Any reply and relevant source excerpts may be sent to that provider. A repair still requires approval.</p>}<Button disabled={blocked || !clarificationInput.trim()}>{bugInvestigation?'Send reply and allow follow-up':'Send information'}</Button></form>
       </>}
     </section>}
     {waiting&&<p role="status" className="soft-callout">{waiting.message}</p>}
@@ -254,6 +260,9 @@ export function IntakeDetail() {
           ? <Button disabled={blocked} variant="secondary" onClick={()=>void act('retry',{job_id:job.id}).catch(()=>{})}>Retry planning</Button>
           : <p>Your request and any saved decisions are here. You can review the details below or start a new request with updated information.</p>}</div>)}
     </section>}
+    {bugInvestigation&&data.status==='failed'&&p?.task_contract?.scope_missing[0]&&
+      <section className="panel"><h2>Investigation finding</h2><p>{p.content.value}</p>
+        <p>{p.task_contract.scope_missing[0]}</p><p>There is no repair or verified fix for this report.</p></section>}
     {data.status==='completed' && !p && data.result && <section className="panel"><h2>Investigation findings</h2>
       <p>{data.result.summary}</p><p className="soft-callout">These are preliminary findings. A fix, a confirmed cause and in-game behavior still need their own evidence.</p>
       {data.result.related_ids.length>0 && <details><summary>Possibly related records</summary>{data.result.related_ids.map(id=><p key={id}><Link to={`/records/fixture/${id}`}>{id}</Link></p>)}</details>}
@@ -267,8 +276,8 @@ export function IntakeDetail() {
       <section className="panel planned-task" key={t.id}>{(sample || currentTasks.length>1 || t.title!==data.original.title) && <h2>{t.title}</h2>}
         {sample ? <><Admission intakeId={data.id} taskId={t.id}/><Implementation intakeId={data.id} taskId={t.id}/></> :
           <>
-            {!data.original.regression_tests && !data.original.supported_task && <><p>{t.purpose}</p><Link className="back-link" to={`/records/fixture/${t.id}`}>Open {t.title} <ArrowRight size={15}/></Link><ul>{t.acceptance.map((a,i)=><li key={i}>{a}</li>)}</ul></>}
-            <TaskExecution intakeId={data.id} taskId={t.id} separateApproval={Boolean(data.original.regression_tests)} showWaiting={Boolean(data.original.supported_task)}/>
+            {!data.original.regression_tests && !data.original.supported_task && !bugInvestigation && <><p>{t.purpose}</p><Link className="back-link" to={`/records/fixture/${t.id}`}>Open {t.title} <ArrowRight size={15}/></Link><ul>{t.acceptance.map((a,i)=><li key={i}>{a}</li>)}</ul></>}
+            <TaskExecution intakeId={data.id} taskId={t.id} separateApproval={Boolean(data.original.regression_tests)||bugInvestigation} showWaiting={Boolean(data.original.supported_task)}/>
           </>}
       </section>)}
     {data.tasks.length>0 && <Link className="back-link" to={`/backlog?source=fixture&focus=intake-${data.id}`}>Open in Backlog <ArrowRight size={15}/></Link>}
@@ -324,7 +333,9 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
   const [includeRun,setIncludeRun]=useState(false);
   const [expectationChecked,setExpectationChecked]=useState(false);
   const examples=review.task_contract?.behavioral_evidence;
-  const needsExpectationReview=examples?.status==='review_required';
+  const bug=review.task_contract?.bug_evidence;
+  const expectationDigest=bug?.review_digest||(examples?.status==='review_required'?examples.review_digest:undefined);
+  const needsExpectationReview=Boolean(expectationDigest);
   const runOffer=useQuery({enabled:Boolean(data.original.supported_task && data.status==='completed'),refetchInterval:3000,queryKey:['task-run-offer',data.id,proposal.id,proposal.binding],queryFn:()=>request<{available:boolean;message:string;offer:null|{title:string;repository:string;base_branch:string;base:string;paths:string[];budget:NonNullable<Decision['run_budget']>}}>(`/api/intake/${encodeURIComponent(data.id)}/proposals/${encodeURIComponent(proposal.id)}/run-offer`)});
   const key = `proposal-decision:${data.id}:${review.id}`;
   const [draft,setDraft] = useState<Decision|null>(()=>readStored<Decision>(key));
@@ -340,7 +351,7 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
     if (locked || (action==='approve' && offerChanged) || (action==='approve' && (review.approval_blockers.length>0 ||
       (needsExpectationReview && !expectationChecked && !draft?.expectation_review) ||
       ((includeRun || draft?.run_budget) && (!offer || !runOffer.data?.available || runOffer.isError))))) return;
-    const body = draft || {command_id:crypto.randomUUID(),proposal_id:review.id,binding:review.binding,scope_revision:review.scope_revision,action,note,...(action==='approve'&&needsExpectationReview&&expectationChecked?{expectation_review:examples.review_digest}:{}),...(action==='approve'&&includeRun&&runOffer.data?.offer?{run_budget:runOffer.data.offer.budget}:{})};
+    const body = draft || {command_id:crypto.randomUUID(),proposal_id:review.id,binding:review.binding,scope_revision:review.scope_revision,action,note,...(action==='approve'&&needsExpectationReview&&expectationChecked?{expectation_review:expectationDigest}:{}),...(action==='approve'&&includeRun&&runOffer.data?.offer?{run_budget:runOffer.data.offer.budget}:{})};
     try {localStorage.setItem(key,JSON.stringify(body));setDraft(body);await act('decisions',body);} catch { /* Canonical error shown above; preserve exact retry. */ }
   }
   async function upload(e:React.FormEvent) {
@@ -366,9 +377,9 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
     reviewedOffer?.budget.offer_id!==offer?.budget.offer_id ||
     reviewedOffer?.budget.activate_once!==offer?.budget.activate_once));
   return <section className="panel proposal-panel">
-    <div className="section-heading"><h2>{sample?`Plan · Version ${review.revision}`:'The plan'}</h2><StateBadge value={sample?'Uses sample data only':review.basis==='preparation'?'Test coverage plan':review.basis==='owner'?'Owner-provided plan':review.basis==='template'?'Ready-made task':review.basis==='demo'?'Sample response':'Local planning'}/></div>
+    <div className="section-heading"><h2>{sample?`Plan · Version ${review.revision}`:'The plan'}</h2><StateBadge value={sample?'Uses sample data only':review.basis==='preparation'?(review.task_contract?.category==='lua-offline-bugfix'?'Bug repair plan':'Test coverage plan'):review.basis==='owner'?'Owner-provided plan':review.basis==='template'?'Ready-made task':review.basis==='demo'?'Sample response':'Local planning'}/></div>
     <h3 className="plan-outcome">{sample?sampleWording(c.summary):c.summary}</h3>
-    {!review.task_contract && <p>{sample?sampleWording(c.value):c.value}</p>}
+    {(!review.task_contract || review.task_contract.category==='lua-offline-bugfix') && <p>{sample?sampleWording(c.value):c.value}</p>}
     {review.task_contract?.category==='lua-regression-tests' ? <p>Only the selected tests may change. Addon code and shared test tools stay as they are.</p> :
       <div className="plan-scope">
         <div><h4>Included</h4><ul>{c.scope.map((v,i)=><li key={i}>{sample?sampleWording(v):v}</li>)}</ul></div>
@@ -395,7 +406,7 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
     </details>}
     {offerChanged && <p role="alert">The run offer changed or could not be refreshed. Review the current permission before deciding.</p>}
     {offerChanged && <Button variant="secondary" onClick={()=>{setIncludeRun(false);setReviewedOffer(null);setDraft(null);setExpectationChecked(false);localStorage.removeItem(key);}}>Clear the earlier choice</Button>}
-    {needsExpectationReview && <label className="check-label"><input type="checkbox" disabled={locked||Boolean(draft)} checked={Boolean(draft?.expectation_review)||expectationChecked} onChange={e=>setExpectationChecked(e.target.checked)}/>The test examples match what I asked for.</label>}
+    {needsExpectationReview && <label className="check-label"><input type="checkbox" disabled={locked||Boolean(draft)} checked={Boolean(draft?.expectation_review)||expectationChecked} onChange={e=>setExpectationChecked(e.target.checked)}/>{bug?'The reproduction and expected behavior match my report.':'The test examples match what I asked for.'}</label>}
     <details open={Boolean(draft?.note) || undefined}><summary>Add a note or request changes</summary>
     <label htmlFor="decision-note">Note <span>Required when requesting changes</span></label>
     <textarea id="decision-note" rows={2} maxLength={1600} disabled={locked || Boolean(draft)} value={draft?.note ?? note} onChange={e=>setNote(e.target.value)}/>
@@ -422,12 +433,18 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
 
 
 function RegressionContract({contract:c, asking}: {contract:NonNullable<Proposal['task_contract']>; asking:boolean}) {
-  return <section className="soft-callout" aria-label="Proposed test">
-    <h3>What the test would check</h3>
+  const bug=c.category==='lua-offline-bugfix';
+  const reproducer=c.bug_evidence?.plan.reproducer;
+  return <section className="soft-callout" aria-label={bug?'Proposed repair check':'Proposed test'}>
+    <h3>{bug?'How Workbench would check the repair':'What the test would check'}</h3>
+    {reproducer&&reproducer.observations.map((o,i)=><dl className="example-values" key={i}>
+      <div><dt>Expected result</dt><dd>{JSON.stringify(o.expected)}</dd></div>
+      <div><dt>Incorrect result to catch</dt><dd>{JSON.stringify(o.incorrect)}</dd></div>
+    </dl>)}
     <ul>{c.acceptance.map((result,i)=><li key={i}>{result}</li>)}</ul>
     {c.writable_paths.length
-      ? <p className="permission-files"><strong>Tests in scope</strong> {c.writable_paths.map((path,i)=><span key={path}>{i>0?', ':''}<code>{path}</code></span>)}</p>
-      : <p>No test file selected.</p>}
+      ? <p className="permission-files"><strong>{bug?'Files in scope':'Tests in scope'}</strong> {c.writable_paths.map((path,i)=><span key={path}>{i>0?', ':''}<code>{path}</code></span>)}</p>
+      : <p>{bug?'No files selected for repair.':'No test file selected.'}</p>}
     {c.behavioral_evidence && c.behavioral_evidence.scenarios.length>0 && <div className="test-examples">
       <h4>Examples to review</h4>
       {c.behavioral_evidence.scenarios.map(s=><div className="test-example" key={s.id}>
@@ -448,7 +465,8 @@ function RegressionContract({contract:c, asking}: {contract:NonNullable<Proposal
         </details>
       </div>)}</div>}
     {c.scope_missing.length>0 && !asking && <><h4>Information still needed</h4><ul>{c.scope_missing.map((m,i)=><li key={i}>{m}</li>)}</ul></>}
-    <details><summary>Technical test plan and checks</summary>
+    <details><summary>{bug?'Technical plan and checks':'Technical test plan and checks'}</summary>
+      {reproducer&&<pre>{JSON.stringify(reproducer,null,2)}</pre>}
       {c.review_feedback && <><h4>Recorded planning feedback</h4><p className="original-text">{c.review_feedback}</p></>}
       <p>{c.repository} · Base {c.resolved_base||'Unresolved'} ({c.base_ref})</p>
       <p>Proposed destination for separately authorized delivery {c.pr_repository} / {c.pr_base_branch}.</p>

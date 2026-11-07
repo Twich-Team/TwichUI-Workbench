@@ -590,10 +590,14 @@ def review(engine, identity):
     binding = digest(linked) if linked else None
     # Only the frozen verification profile ties these examples to the checks.
     behavior_checked = []
+    behavior_reproduced = False
     if (linked and row['status'] == 'checked' and result.get('verification') == 'passed'
             and manifest.get('profile_certificate_sha256')
             and manifest.get('workflow_task_binding') == binding):
         expected = contract.get('acceptance') or []
+        if contract.get('bug_evidence') and len(expected) == 1:
+            behavior_checked.extend(expected)
+            behavior_reproduced = True
         for scenario in (contract.get('behavioral_evidence') or {}).get('scenarios', []):
             index = scenario.get('acceptance_index')
             if type(index) is int and 0 <= index < len(expected) and expected[index] not in behavior_checked:
@@ -602,7 +606,7 @@ def review(engine, identity):
                 message=notice or row['message'], base=grant['snapshot']['contract']['base'], current_grant=valid(grant),
                 workflow_task=dict(intake_id=linked['intake_id'],task_id=linked['task']['id'],
                                    binding=binding) if linked else None,
-                current_task=task_current, behavior_checked=behavior_checked,
+                current_task=task_current, behavior_checked=behavior_checked, behavior_reproduced=behavior_reproduced,
                 grant_id=grant['id'], expires_at=grant['expires_at'],
                 recovery_pending=recovering,
                 publication_allowed=False, publication_requested=grant['snapshot'].get('task_budget',{}).get('budget',{}).get('publication')=='draft-pr', source='real', result=row['result'])

@@ -34,7 +34,7 @@ const read = path => JSON.parse(readFileSync(path));
 const boot = readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim();
 
 process.umask(0o077);
-need(process.argv.length === 4 && /^(?:codex-once|qwen-once|codex-with-local-fallback|qwen-with-codex-fallback)$/.test(process.argv[2]),
+need(process.argv.length === 4 && /^(?:codex-once|qwen-once|codex-with-local-fallback|qwen-with-codex-fallback|bug-flight-paths)$/.test(process.argv[2]),
   'Expected one sealed case and the exact approved package reference');
 const [, , choice, approvalReference] = process.argv;
 const windowPath = join(evidence, 'window.json');
@@ -45,13 +45,14 @@ const window = read(windowPath);
 const meta = read(join(ops,'release.json'));
 const seal = sha(join(ops, 'bundle.sha256'));
 const opened = Date.parse(window.opened_at);
-const cutoff = opened + 450*minute; // Final 30 minutes are reserved for closeout.
+const policy = read(join(ops, 'browser-policy.json'));
+const duration = policy.windowMinutes === 600 ? 600 : 480;
+const cutoff = opened + (duration - 30)*minute; // Final 30 minutes are reserved for closeout.
 need(window.approval_reference === approvalReference && /^[a-f0-9]{40}$/.test(approvalReference) &&
   window.commit === meta.commit && window.seal === seal && window.boot === boot &&
   now() >= opened && now() < cutoff, 'Fresh exact installation and live approval is required');
 need(['kernel_filters', 'history_preserved', 'lan_tls', 'remote_lan_access'].every(key => window.preflight?.[key] === true),
   'Installed preflight is incomplete');
-const policy = read(join(ops, 'browser-policy.json'));
 const index = policy.cases.findIndex(c => c.choice === choice);
 need(index >= 0, 'Unknown case');
 need(index !== 0 || now() < opened + 30*minute, 'Installation preflight window expired');
@@ -66,8 +67,9 @@ for (const earlier of policy.cases.slice(0, index)) {
 }
 need(sha(helper) === helperSha, 'Administrator helper changed');
 const grant = JSON.parse(admin({op:'status'}));
-need(grant.expires * 1000 > opened + 480*minute, 'Administrator grant does not cover rollback window');
-const blockDeadline = Math.min(cutoff, now() + 105*minute);
+need(grant.expires * 1000 > opened + duration*minute, 'Administrator grant does not cover rollback window');
+const bug = candidate.request.kind === 'issue';
+const blockDeadline = Math.min(cutoff, now() + (bug ? 120 : 105)*minute);
 const receipt = join(evidence, choice + '.jsonl');
 const fd = openSync(receipt, 'wx', 0o600); // An uncertain dispatch consumes this case.
 let count = 0;
@@ -149,23 +151,59 @@ try {
       record('service-control', {phase, isolated:inducing && isolated, connectorOff:inducing && !isolated});
     }
   };
+  const reviewPath = join(evidence, 'bug-plan-review.json');
+  function readBugReview(intake, plan) {
+    const info = lstatSync(reviewPath);
+    need(realpathSync(reviewPath) === reviewPath && info.isFile() && info.uid === process.getuid() &&
+      !(info.mode & 0o077) && info.size <= 4096, 'Bug plan review is not private');
+    const receipt = read(reviewPath);
+    need(receipt.approval_reference === approvalReference && receipt.seal === seal &&
+      receipt.intake === intake && receipt.plan_binding === plan.binding &&
+      receipt.expectation_digest === plan.task_contract.bug_evidence.review_digest &&
+      Array.isArray(receipt.observations) && receipt.observations.length === candidate.criteria.length &&
+      receipt.observations.every((row, i) => row.criterion === candidate.criteria[i] &&
+        Number.isSafeInteger(row.index) && row.index >= 0 && row.index < plan.task_contract.bug_evidence.plan.reproducer.observations.length &&
+        typeof row.reason === 'string' && row.reason.trim().length >= 12 && row.reason.length <= 500) &&
+      new Set(receipt.observations.map(row => row.index)).size === candidate.criteria.length,
+      'Independent review does not bind the three acceptance observations');
+    return sha(reviewPath);
+  }
+  let reviewedSha;
   const callPolicy = (verb, action, value) => {
     const result = host(join(release, '.venv/bin/python'), [join(release, 'scripts/acceptance_policy.py'), verb,
       '--policy', join(ops,'browser-policy.json'), '--database', join(stage,'artifacts/workbench.sqlite3'),
       '--preparation', join(ops,'preparation.json')],
-    JSON.stringify({...value, action, choice, opened:window.opened_at, prior}), 4500);
+    JSON.stringify({...value, action, choice, opened:window.opened_at, prior}), 15000);
     return JSON.parse(result);
   };
   browser = await chromium.launch({executablePath:join(stage,'browser/chrome-headless-shell-linux64/chrome-headless-shell'),
     args:['--disable-dev-shm-usage','--disable-background-networking','--no-proxy-server']});
   const context = await browser.newContext({serviceWorkers:'block'});
   await runJourney(context, origin, policy, candidate, {
-    blockDeadline, now, preparationMs:38*minute, record, controlsReady:control,
+    blockDeadline, now, preparationMs:38*minute, reviewMs:10*minute, record, controlsReady:control,
+    async reviewBug({intake, plan}) {
+      callPolicy('admit', 'plan', {intake, proposal:plan});
+      record('awaiting-independent-plan-review', {intake, proposal:plan.id, binding:plan.binding});
+      const end = Math.min(blockDeadline - 98*minute, now() + 10*minute);
+      for (;;) {
+        try {
+          reviewedSha = readBugReview(intake, plan);
+          record('independent-plan-review', {intake, proposal:plan.id, binding:plan.binding, reviewSha:reviewedSha});
+          break;
+        } catch (error) {
+          if (error.code !== 'ENOENT') throw error;
+        }
+        need(now() < end, 'Independent bug plan review did not settle within the approved window');
+        await wait(500);
+      }
+    },
     async beforeAction(action, data) {
       need(now() < blockDeadline && sha(join(ops,'bundle.sha256')) === seal, 'Case window or seal changed');
       for (const role of ['api','lan','worker','codex']) installed(role,
         action === 'submit' && role === 'codex' && candidate.reason === 'unavailable' ? 'inactive' : 'active');
       // The approved controller checks effective cgroups and LAN TLS separately.
+      if (bug && action !== 'submit')
+        need(reviewedSha === readBugReview(data.intake, data.proposal), 'Independent bug plan review changed');
       callPolicy('admit', action, data);
     },
     async finish(data) {

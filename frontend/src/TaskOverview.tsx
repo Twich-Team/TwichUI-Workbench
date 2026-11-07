@@ -21,7 +21,7 @@ export const approvalQuery = (intakeId: string, taskId: string) => ({
 });
 
 function singleCurrentTask(item: Intake) {
-  if (item.status !== 'tasks_ready' || (!item.original.supported_task && !item.original.regression_tests)) return;
+  if (item.status !== 'tasks_ready' || (!item.original.supported_task && !item.original.regression_tests && !item.original.local_planning)) return;
   const tasks = item.tasks.filter(t => t.kind === 'task' && !t.scope_review_required && t.proposal_id === item.proposals[0]?.id);
   return tasks.length === 1 ? tasks[0] : undefined;
 }
@@ -44,7 +44,7 @@ function summary(item: Intake, execution?: Execution, approval?: RunApprovalCont
   if (approval && !approval.receipt) {
     if (approval.available) return {step:2, title:'Ready for your run decision', next:'Review what Workbench can do and the limits for this run.', group:'attention' as const};
     if (!approval.preparing) return {step:2, title:'Preparation is on hold', next:'Open the task for the reason and next step.', group:'attention' as const};
-    return {step:2, title:'Preparing the approved work', next:'Workbench is checking that the proposed test can catch the problem.', group:'current' as const};
+    return {step:2, title:'Preparing the approved work', next:'Workbench is running the approved check on the original code.', group:'current' as const};
   }
   return intakeProgress(item);
 }
@@ -53,7 +53,7 @@ export function TaskJourney({item}: {item: Intake}) {
   const task = singleCurrentTask(item);
   const execution = useQuery({...executionQuery(item.id, task?.id || ''), enabled: Boolean(task), refetchInterval: 3000});
   const approval = useQuery({...approvalQuery(item.id, task?.id || ''),
-    enabled: Boolean(task && item.original.regression_tests && execution.data?.stage === 'waiting' && !execution.data.run_budget),
+    enabled: Boolean(task && (item.original.regression_tests || item.original.local_planning) && execution.data?.stage === 'waiting' && !execution.data.run_budget),
     refetchInterval: 3000});
   const progress = summary(item, execution.isError ? undefined : execution.data, approval.isError ? undefined : approval.data);
   return <section className="panel task-journey" aria-label="Task progress">
@@ -74,7 +74,7 @@ export function TaskOverview({preview = false, page = 1}: {preview?: boolean; pa
   }))});
   const approvals = useQueries({queries: targets.map(({item, task}, i) => ({
     ...approvalQuery(item.id, task?.id || ''), refetchInterval: 12000,
-    enabled: Boolean(task && item.original.regression_tests && executions[i].data?.stage === 'waiting' && !executions[i].data?.run_budget &&
+    enabled: Boolean(task && (item.original.regression_tests || item.original.local_planning) && executions[i].data?.stage === 'waiting' && !executions[i].data?.run_budget &&
       !item.decisions.some(d => d.status === 'pending')),
   }))});
   if (!query.data) return query.isPending ? <p role="status">Opening your tasks…</p> :

@@ -66,7 +66,7 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
             if action == 'approve':
                 intake.validate_review(connection, proposal, intake.proposal_view(connection, proposal),
                                        receipt['scope_revision'], receipt['required_artifacts'])
-                from workbench.regression_evidence import validate_expectation_review
+                from workbench.bug_evidence import validate_expectation_review
                 validate_expectation_review(intake.proposal_view(connection, proposal), receipt['payload'])
                 if receipt['scope_review_required'] or receipt['required_artifacts'] is None:
                     raise HTTPException(409, 'Scope review required')
@@ -159,6 +159,9 @@ def claim(engine):
             and_(planning_jobs.c.status == 'running', planning_jobs.c.lease_until < now())))
             .join(intakes, planning_jobs.c.intake_id == intakes.c.id)
             .where(intakes.c.payload['regression_tests'].as_string().is_(None))
+            .where(~((intakes.c.payload['kind'].as_string() == 'issue')
+                & intakes.c.payload['local_planning'].as_string().is_not(None)
+                & intakes.c.payload['supported_task'].as_string().is_(None)))
             .order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not job:
             return None

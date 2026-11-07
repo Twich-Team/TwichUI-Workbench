@@ -73,10 +73,24 @@ def fallback_reason(choice, selected, error):
     return None
 
 
+def bug_followup_codex(route, followup):
+    """The read-only reply keeps the settled producer and never enables fallback."""
+    if followup['provider'] == 'local':
+        return None
+    if followup['provider'] == 'codex' or followup['provider'] is None:
+        if 'codex' in route:
+            if followup['provider'] == 'codex':
+                return {**route['codex'], 'policy_revision': route['policy_revision']}
+        elif 'effort' in route:
+            return route
+        return None
+    raise ValueError('The follow-up has no eligible provider route.')
+
+
 def run_selection(c, linked):
     choice = linked['original'].get('local_planning')
     if choice not in CHOICES:
-        raise ValueError('Start an ordinary test request with an explicit provider choice.')
+        raise ValueError('Start an eligible task with an explicit provider choice.')
     from workbench import intake
     from workbench.db import intakes
 

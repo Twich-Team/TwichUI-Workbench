@@ -43,7 +43,7 @@ export function intakeProgress(item: Intake): Progress {
     case 'approved':
       return {step: 2, title: 'Plan approved', next: 'Workbench is preparing the agreed work.', group: 'current'};
     case 'tasks_ready':
-      return research || (!item.original.supported_task && !item.original.regression_tests)
+      return research || (!item.original.supported_task && !item.original.regression_tests && !item.original.local_planning)
         ? {step: 4, title: 'Plan ready', next: 'Review the agreed work. This request has reached the end of planning.', group: 'results'}
         : {step: 2, title: 'Approved work', next: 'See the current decision, progress or result below.', group: 'current'};
     case 'failed': {

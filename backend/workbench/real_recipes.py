@@ -159,6 +159,13 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         if (oracle != compiled['oracle'] or behavior_id != compiled['behavior_id']
                 or read_paths != compiled['read_paths'] or focused_test != compiled['focused_test']):
             raise ValueError('Scenario oracle/read selection differs from the independently reviewed examples')
+    if bug := reviewed.get('bug_evidence'):
+        from workbench import bug_evidence
+        bug_evidence.validate_expectation_review(linked['proposal_review'], linked['approval']['payload'])
+        compiled = bug_evidence.compile_plan(bug)
+        if (oracle != compiled['oracle'] or behavior_id != compiled['behavior_id']
+                or read_paths != compiled['read_paths'] or focused_test != compiled['focused_test']):
+            raise ValueError('Reproducer differs from the independently reviewed bug plan')
     contract = real_execution.contract()
     contract.update(task_id=linked['task']['id'], title=linked['task']['title'],
                     repository=reviewed['repository'], source=str(root), base=base,
@@ -175,6 +182,15 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
                 initial_reads=[dict(path=read_paths[i % len(read_paths)], start=1, end=120) for i in range(4)] if read_paths else [],
                 base_branch=reviewed['pr_base_branch'], draft=reviewed['pr_draft'], identity=identity,
                 category='Tests' if reviewed['category'] == 'lua-regression-tests' else 'Bug fix')
+    if bug:
+        spec['instruction'] = json.dumps(dict(
+            task=linked['task']['title'], report=linked['original']['description'],
+            owner_reply=reviewed['review_feedback'], scope=bug['plan']['scope'],
+            finding=linked['proposal_review']['content']['value'], behavior=bug['plan']['reproducer']['description'],
+            exclusions=linked['proposal_review']['content']['exclusions']), ensure_ascii=True)
+        # Pin the reviewed excerpts so both providers start with the relevant
+        # sections instead of assuming that the target is at the top of a file.
+        spec['initial_reads'] = bug['windows']
     validate(spec)
     # Every command advertised to the reviewer must be consumed by this runtime.
     checks = [dict(argv=['luac5.1', '-p', p], cwd='.') for p in contract['paths']]

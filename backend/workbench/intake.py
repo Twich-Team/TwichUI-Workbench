@@ -40,7 +40,7 @@ def enqueue(connection, intake_id, kind, revision, payload=None):
 
 
 def submit(engine, body, *, owner_provenance=None):
-    from workbench import everyday
+    from workbench import bug_investigation, everyday
 
     original = body.model_dump(mode='json')
     if body.supported_task is None:
@@ -51,8 +51,9 @@ def submit(engine, body, *, owner_provenance=None):
         from workbench.supported_tasks import load
         if not load(body.supported_task):
             raise HTTPException(409, 'This supported task is unavailable.')
-    if body.local_planning and (not body.regression_tests or body.visual_requirement != 'nonvisual'):
-        raise HTTPException(422, 'Local planning is available for test coverage without in-game interface changes.')
+    bug = bug_investigation.requested(original)
+    if body.local_planning and ((not body.regression_tests and not bug) or body.visual_requirement != 'nonvisual'):
+        raise HTTPException(422, 'Model investigation is available for eligible offline bug fixes and test coverage.')
     if body.kind == 'feature' and body.lua_error:
         raise HTTPException(422, 'Lua errors belong to issue reports.')
     identity = str(body.request_id)
@@ -74,6 +75,10 @@ def submit(engine, body, *, owner_provenance=None):
                     raise HTTPException(409, 'Ordinary local planning is unavailable at this address.')
                 try:
                     everyday.configuration(engine)
+                    if bug:
+                        from workbench.trusted_preparation import configuration as preparation_config
+                        if bug_investigation.CATEGORY not in preparation_config(engine)['allowed_classes']:
+                            raise ValueError('Bug investigation is not configured')
                 except (OSError, ValueError, RuntimeError):
                     raise HTTPException(503, 'The Workbench installation needs attention before saving model approval.') from None
                 receipt = everyday.planning_receipt(original, at)
@@ -255,7 +260,7 @@ def decide(engine, identity, body):
             validate_selection(connection, proposal['id'], body.run_budget)
         if body.action == 'approve':
             validate_review(connection, proposal, review, body.scope_revision)
-            from workbench.regression_evidence import validate_expectation_review
+            from workbench.bug_evidence import validate_expectation_review
             validate_expectation_review(review, payload)
         receipt = dict(id=str(body.command_id), intake_id=identity, proposal_id=proposal['id'], binding=body.binding,
             scope_revision=body.scope_revision, required_artifacts=review['required_artifacts'], scope_review_required=0,
@@ -368,6 +373,8 @@ def retry(engine, identity, job_id):
 
 
 def clarify(engine, identity, body):
+    from workbench import bug_investigation, everyday, provider_routes
+
     if not body.text.strip():
         raise HTTPException(422, 'Add the requested information.')
     with write_transaction(engine) as connection:
@@ -375,14 +382,34 @@ def clarify(engine, identity, body):
         jobs = list(connection.execute(select(planning_jobs).where(planning_jobs.c.intake_id == identity)).mappings())
         for job in jobs:
             if job['payload'].get('clarification_id') == str(body.command_id):
-                if job['payload'].get('feedback') != body.text:
+                if (job['payload'].get('feedback') != body.text
+                        or bool(job['payload'].get('bug_followup')) != body.continue_investigation):
                     raise HTTPException(409, 'Clarification ID already used.')
                 return
         if (row['status'] != 'waiting_for_information' or row['revision'] != body.revision
                 or retained_planning_failure(row, jobs)):
             raise HTTPException(409, 'The request changed. Refresh before answering.')
-        enqueue(connection, identity, 'planning', row['revision']+1,
-                {'feedback': body.text, 'clarification_id': str(body.command_id)})
+        next_input = {'feedback': body.text, 'clarification_id': str(body.command_id)}
+        if bug_investigation.requested(row['payload']):
+            if not body.continue_investigation:
+                raise HTTPException(422, 'Confirm the follow-up investigation before sending your answer.')
+            initial = next((job for job in jobs if job['kind'] == 'planning' and job['revision'] == 1
+                            and job['status'] == 'completed'), None)
+            if row['revision'] != 1 or not initial:
+                raise HTTPException(409, 'The investigation already used its one follow-up.')
+            grounding = initial['payload'].get('task_contract', {}).get('scenario_grounding', {})
+            try:
+                route = provider_routes.approved(connection, row)
+                next_input['bug_followup'] = dict(
+                    binding=digest(dict(original=row['payload'], revision=row['revision'], **next_input)),
+                    expires_at=everyday.planning_receipt(row['payload'], now())['expires_at'],
+                    route=route, provider=grounding.get('basis'),
+                    fallback_reason=grounding.get('fallback_reason'))
+            except ValueError as error:
+                raise HTTPException(409, str(error)) from None
+        elif body.continue_investigation:
+            raise HTTPException(422, 'This request has no bug investigation to continue.')
+        enqueue(connection, identity, 'planning', row['revision']+1, next_input)
         connection.execute(intakes.update().where(intakes.c.id == identity).values(status='queued'))
 
 
@@ -407,7 +434,7 @@ def validate_approval(connection, receipt):
             or receipt['scope_review_required'] or receipt['required_artifacts'] is None):
         raise HTTPException(409, 'The approval requires human scope review. No tasks may be created.')
     validate_review(connection, proposal, review, receipt['scope_revision'], receipt['required_artifacts'])
-    from workbench.regression_evidence import validate_expectation_review
+    from workbench.bug_evidence import validate_expectation_review
     if not continuation:
         validate_expectation_review(review, receipt['payload'])
     return proposal

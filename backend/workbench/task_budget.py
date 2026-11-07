@@ -410,7 +410,7 @@ def preparation_status(c, proposal):
             return 'Preparation held: ' + str(error), False
     if contract and contract['scope_missing']:
         return 'Preparation held: ' + ' '.join(contract['scope_missing']), False
-    prepared = (contract or {}).get('behavioral_evidence')
+    prepared = (contract or {}).get('behavioral_evidence') or (contract or {}).get('bug_evidence')
     if prepared:
         payload = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == proposal['intake_id'],
             planning_jobs.c.revision == proposal['revision'], planning_jobs.c.kind == 'planning',
@@ -436,7 +436,7 @@ def preparation_status(c, proposal):
             if preparation['status'] in {'queued', 'running'}:
                 return ('Waiting for the worker to prepare the reviewed examples.'
                         if preparation['status'] == 'queued' else 'The worker is checking that the reviewed examples can detect the wrong behavior.'), True
-        if prepared['holds']:
+        if prepared.get('holds'):
             return 'Behavioral preparation held: ' + ' '.join(prepared['holds']), False
         return 'Behavioral examples require independent expectation review and fresh positive, vacuous and wrong-behavior control checks at the reviewed base. No certified offer exists yet.', False
     return 'Preparation held: independently certified evidence is missing, stale, or no longer matches the current reviewed scope/base. A trusted operator must prepare and certify it.', False

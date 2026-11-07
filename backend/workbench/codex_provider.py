@@ -501,6 +501,10 @@ class Planner:
             instructions += ('Use the test path, fixture, source paths, target and method from '
                              'fixture_bindings. Use the first return unless an explicitly supported '
                              'client field is requested. Return specific unresolved questions when uncertain.')
+        from workbench.bug_evidence import BugPlanningResponse
+        if schema is BugPlanningResponse:
+            from workbench.bug_investigation import INSTRUCTIONS
+            instructions = INSTRUCTIONS
         model = self.selection['model']
         try:
             result, counted = generate(model, self.selection['effort'],

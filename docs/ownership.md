@@ -1591,3 +1591,29 @@ retains its receipt and cannot certify an offer or start a model. The demo
 launcher restricts ingress to the approved manifest, and the review server
 opens only the closed inode-bound SQLite store in immutable mode. Both
 reuse the existing application owners for decisions, checks and results.
+
+
+## Ordinary offline addon bug workflow — November 6, 2026 Mountain time
+
+Ordinary issue intake with explicit planning consent can use the same durable
+planning and attempt owners as regression preparation. The installation policy
+separately enables the bug class. Workbench searches a bounded inventory of
+regular committed core and settings Lua files and existing tests in its clean
+research checkout. Neither this search nor model planning can modify the
+checkout. The app pins its selected excerpts and provider decision. One
+explicitly consented clarification can use the settled producer, with no
+fallback on the follow-up. Partial, failed generated or uncertain attempts
+cannot start another provider.
+
+A typed plan proposes existing writable files, read context, a focused test,
+and bounded data for a Lua module or test-client reproducer. The existing
+review binding pins this material, with separate confirmation of the expected
+behavior. After review the existing preparation job compiles a fixed data
+interpreter and runs the unchanged checks plus the original reproduction.
+An original pass, unexpected scalar or failed fixture does not create a
+certified offer. The same behavior and complete existing suite are checked
+on the frozen candidate. Tests in scope may gain assertions without losing
+existing lines. Codex may propose up to six exact replacements in the
+reviewed files in one turn. Both provider paths still use the local scope
+and independent verification owners. Neither proposal nor verification
+creates publication authority.

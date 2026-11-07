@@ -12,6 +12,7 @@ type View={id:string;title:string;status:string;message:string;base:string;curre
   recovery_pending?:boolean;publication_requested?:boolean;
   grant_id:string;expires_at:string;publication_allowed:false;source:'real';
   behavior_checked?:string[];
+  behavior_reproduced?:boolean;
   workflow_task?:{intake_id:string;task_id:string;binding:string}|null;current_task?:boolean|null;
   result:null|{inference_ran?:boolean|null;verification?:string;candidate_id?:string;
     handler_returned?:boolean;
@@ -51,6 +52,7 @@ export function RealExecutionReview(){
       {row.current_task===false&&<p className="soft-callout">This result belongs to an earlier plan. The current task still needs its own review and checks.</p>}
       <h2>{row.recovery_pending?'Waiting for safe recovery':checked?(testOnly?'Test changes checked':'Changes checked'):row.status==='checked'?'Run result saved':runStage[row.status]||'Recorded result'}</h2>
       {checked?<><p className="result-lead">{testOnly?'Only test files changed.':'The changes passed checks in a separate copy.'}</p>
+        {row.behavior_reproduced&&<p>The reviewed check reproduced the bug in the original code and passed with this patch.</p>}
         {Boolean(row.behavior_checked?.length) && <><h3>Behavior checked</h3><ul>{row.behavior_checked?.map((behavior,i)=><li key={i}>{behavior}</li>)}</ul></>}
         <p>{row.publication_requested?'The checked copy is saved locally. See the separate draft delivery status below.':'Saved locally. This run did not install or publish the result.'}</p></>
         :<p>{row.message}</p>}

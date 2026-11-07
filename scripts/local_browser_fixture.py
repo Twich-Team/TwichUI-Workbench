@@ -13,7 +13,7 @@ from workbench.db import real_execution_grants, real_execution_requests, real_pu
 from workbench.real_workspace import durable
 
 
-def advance_local(engine, database, outcome, planner, *, example="  ALICE ", native=False, staged=False):
+def advance_local(engine, database, outcome, planner, *, example="  ALICE ", native=False, staged=False, bug_edit=None, codex_route=None):
     from workbench import everyday
     from test_regression_evidence import ControlledPreparer
     from test_real_transport import final_response, scripted_http, tool_response
@@ -56,9 +56,22 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
             return self.static_preflight()
 
     def launch(command):
-        cycle = Path(command[command.index('--root') + 1])
+        cycle = Path(command[-1] if codex_route else command[command.index('--root') + 1])
         assert cycle.parent == task_session.ROOT / "artifacts/runs"
         ref = json.loads((cycle / 'workflow-link.json').read_text())['task']
+        if codex_route:
+            from workbench.codex_runtime import CodexRuntime
+
+            class SimulatedCodex(CodexRuntime, ControlledPreparer):
+                def preflight(self):
+                    return self.static_preflight()
+
+            runtime = SimulatedCodex(cycle / 'real-run', codex_route)
+            runtime.task_ref = ref
+            durable(cycle / 'controller-started.json', b'{"simulated": true}')
+            assert real_execution.process_one(engine, runtime)
+            durable(cycle / 'lease-controller-result.json', b'{"restoration":{"restored":true,"no_lease":true}}')
+            return
         runtime = SimulatedRuntime(cycle / 'real-run')
         runtime.task_ref = ref
         tape = scripted_http(cycle, isolated)
@@ -93,9 +106,13 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
 
         test, sources = runtime.recipe['focused_test'], [
             path for path in runtime.recipe['read_paths'] if path != runtime.recipe['focused_test']]
-        read = tool_response([('read_file', dict(path=path)) for path in (test, *sources)])
+        reads = ([('read_file', dict(path=window['path'], start=window['start'], end=window['end']))
+                  for window in runtime.recipe['initial_reads']] if bug_edit else
+                 [('read_file', dict(path=path)) for path in (test, *sources)])
+        read = tool_response(reads)
         check = tool_response([('run_check', dict(name='candidate'))])
-        tape.steps = [read, scripted_edit, check, final_response()]
+        edit = tool_response([('replace_text', bug_edit)]) if bug_edit else scripted_edit
+        tape.steps = [read, edit, check, final_response()]
         if outcome == 'fail':
             # Repeating a failed check requires a real edit. Finishing here
             # exercises the refusal to continue on an unchanged rejected patch.

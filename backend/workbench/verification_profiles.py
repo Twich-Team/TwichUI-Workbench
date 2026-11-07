@@ -137,8 +137,12 @@ def evaluate_snapshot(runtime, record, expected):
             missing = re.findall(r'^WB_EXPECTATION ([a-z][a-z0-9-]{0,47}) MISMATCH$', checks[-2].get('out', ''), re.MULTILINE)
             if missing:
                 return 'hold', f'Example {missing[0]}: the expected observation or fixture setup does not match the committed behavior. Clarify that expectation; generated examples are not correctness evidence.'
+            if runtime.recipe['behavior']['id'] == 'bug-reproducer':
+                return 'hold', 'The offline fixture did not produce either reviewed result. Workbench could not verify this report with the available evidence.'
             return 'hold', 'Missing or ambiguous behavioral verdict'
         if outcome != expected:
+            if runtime.recipe['behavior']['id'] == 'bug-reproducer' and expected == 'fail':
+                return 'hold', 'The original code already passed the reviewed behavior check. Workbench could not reproduce the bug and will not offer a repair.'
             if runtime.recipe['behavior']['id'] == 'regression-scenarios':
                 if expected == 'fail' and outcome == 'pass':
                     return 'rejected', 'Existing or negative-control tests already distinguish the supplied example. Identify an uncovered expected behavior before proposing new coverage.'

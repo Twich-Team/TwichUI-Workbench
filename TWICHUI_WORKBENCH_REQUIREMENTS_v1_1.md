@@ -50,6 +50,12 @@ This example does not limit the product to bug reports. Retain the full intended
 - Never equate an internal repair or passing tests with a completed product.
 - Not all tasks produce code or a PR. Findings and test reports are valid results.
 - Do not make Rich provide developer-style test packages or coordinate a chain of repair prompts.
+For supported offline Lua fixes, a read-only investigation can use a bounded
+selection of committed addon and test files. A follow-up that sends a reply to
+the producing provider needs explicit consent. Approve the proposed behavior
+and scope before checking the original, then separately approve implementation.
+A missing or inconclusive offline reproduction is a finding or hold and
+cannot satisfy the successful-fix requirement.
 
 # 2. Release structure
 
@@ -62,6 +68,15 @@ Codex must be available in this initial product as both an intentional developme
 Proposed acceptance task: demonstrate at least one real TwichUI code-change task from browser intake through checks and an explicitly authorized draft PR. Synthetic fixtures alone do not establish real-addon readiness.
 
 Owner decision, November 6, 2026. Functional acceptance must include an ordinary browser report of a real addon bug. Workbench investigates, presents its findings and proposed fix for the required approvals, implements the approved change, verifies the reported behavior and relevant regressions, and presents the checked fix and evidence for review. The workflow must work without developer hand-preparation for that bug. The four regression-test provider journeys prove a narrower workflow and cannot satisfy this outcome. Publication requires its own authority.
+
+Owner report for functional acceptance, November 6, 2026 Mountain time.
+Navigation assumes all flight paths are available. It should use the paths
+the current character has learned and refresh that knowledge on successive
+flight-master visits. The ordinary browser report is the input. Acceptance
+must show relevant original behavior, a reviewed repair, and independent
+checks of initial eligibility and successive visits. Offline fixture evidence
+and actual in-game evidence must be identified separately. The report does
+not grant provider, deployment, addon installation or publication authority.
 
 Exact breadth beyond this required bug-fix journey remains to be agreed. Retain the broader capability vision.
 

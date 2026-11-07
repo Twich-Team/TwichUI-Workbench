@@ -1,0 +1,16 @@
+{
+  "id": "bug-flight-paths",
+  "request": {
+    "kind": "issue",
+    "title": "Navigation assumes all flight paths are unlocked",
+    "description": "The navigation feature built into the addon assumes that the character has all flight paths available. It needs to learn what flight paths the player has learned when visiting a flight master. It should re-learn each time in case new ones are discovered.",
+    "lua_error": "",
+    "visual_requirement": "nonvisual",
+    "local_planning": "qwen-once"
+  },
+  "criteria": [
+    "A character's navigation must avoid offering undiscovered flight paths as usable.",
+    "A flight-master visit must teach navigation about the paths this character has learned.",
+    "A subsequent visit with a newly learned path must refresh what navigation considers available."
+  ]
+}
