@@ -1,3 +1,40 @@
+# Verified5442405 installed; task14 active — November7,20:15 UTC
+
+Installed5442405ebf7431a1b2a967411446cf59b39272d9, tree
+210b67597cd35a76b30857e49499695e23c42708,
+stage /home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-5442405,
+seal97eb0e2f367aa2610420413c0b4d5c7b50be7234f96556c27716d98bc2caec46.
+C/outcome-5442405 binds4545 files/16links/556557986 logical bytes,370 tracked
+release files/root owner docs exact, pinnedCLI/auth-config metadata unchanged.
+Full1303 backend/25 frontend,100 final focused/earlier190, native actual separate
+API/worker/browser/restart/concurrency34.14sec,108 Chromium/10 visual and BOTH final
+browser opt-ins22.9/37.3sec pass. Precise routing/readiness/parser34/bootstrap/event/
+admin48 reuse bound in R/offline-verification.json; no applicable check omitted.
+
+Normal installed history fixed: ALL16 intake list/detail HTTP200, original134-row
+fingerprint and raw nested diagnostic preserved. Both loopback/LAN/TLS/browser/filter/
+five isolation probes/foreign connector peer pass; model/key/helper/CA unchanged.
+Roles active/disabled pending full real acceptance. Original79/latest134 checked
+copies preserved. Oldb7624e2 history500 is HISTORICAL, ac76 never activated. Baseline
+known-error preflight explicitly bound old readablepage2/security to corrected all16
+copy proof; strict NEW normal page1/detail gates all passed before any dispatch.
+No data/schema migration, restored normalhistory through readonly projection only.
+
+Fresh task14 dispatched20:14:38, intake4dd5212e-31d8-47d5-8680-279031d43c34,
+driver52866, new8-call/600sec normal delegated consent. Read current stage
+artifacts/acceptance/bug-flight-paths.jsonl and R/bug-flight-paths-driver.txt/journals.
+No real bug/provider case complete. Previous13 tasks34 requests18807 generated/
+133035 prompt settled, no prior repair/Codex/uncertainty. CURRENT live DB changes:
+do not overwrite with historical134. Follow independent plan review instructions
+below when driver emits awaiting-independent-plan-review. Do not developer-write
+addon patch/reproducer. Continue real bug, four provider cases, durable restart and
+normal next eligible bug under standing authority, no old campaign cutoff/renewal.
+
+Earlier installedb7624e2/verification-running/known500-current statements below are
+historical and superseded by this section. Active private ledger has14th revision/
+fresh reserved14th task and preserved every actual priorID/accounting. Candidate
+ac76 remains unactivated and accounted among evidence roots57 (not a numericalcap).
+
 # History display defect diagnosed and repaired locally — November7,20:09 UTC
 
 Nested new context count broke scalar public job diagnostics after task13. Writer

@@ -1,20 +1,18 @@
-# Workbench status — November7,2026,20:09 UTC
+# Workbench status — November7,2026,20:15 UTC
 
-No real flight-path repair/provider case complete.13 settled tasks34 Qwen requests,
-18807 generated/133035 prompt, no implementation/Codex/uncertainty. Installedb7624e2
-protected/idle with134-row history; its history list/detail currently500 on a nested
-new diagnostic. Current final repair preserves raw history, flattens known public
-counts and keeps unsupported structures private/unavailable. ALL16 saved intakes
-pass history/detail HTTP on verified copy, exact134-row fingerprint unchanged.
+No real flight-path repair/provider case complete. Fresh task14 investigating via
+installed5442405 with safe cached paging/visible continuation and fresh8-request/
+10-minute consent. Current DB changes; preserve it. Prior13 tasks34 Qwen requests
+18807 generated/133035 prompt settled, no implementation/Codex/uncertainty.
 
-Cached-source paging/continuations and fresh v4 consent8 calls/10min built and tested,
-unactivated.100 final focused/build/native-process checks pass; final full backend/
-frontend progressing. New108 Chromium/10 visual pass, final opt-ins running. ac76aea
-prepared stage lacks final display fix and must not activate. See concise handoff
-for evidence, preflight baseline-error handling and next verified candidate/cutover.
+History display restored: ALL16 installed list/detail endpoints200 with original
+134-row content/rawdiagnostics unchanged. Original79/latest134 checked copies and
+all network/TLS/browser/isolation/model/credential protections pass. Full1303 backend/
+25 frontend,100 final focused/native process/108 Chromium/10 visual/2 browser opt-ins
+pass with precisely reused unchanged checks. Exact candidate/seal/evidence in handoff.
 
-Continue real app investigation/reviewed plan/delegated run/original-candidate checks/
-reviewable patch, four provider cases and durable restart/normal next eligible bug.
-No owner decision/access needed. Standing authority/unchanged root documents active,
-old campaign caps superseded. Broader capabilities/live Codex bug repair/in-game/PRs
-unfinished; styling/audit not started.
+Continue real app investigation, independent plan review/separate delegated run,
+original/candidate behavior/full addon suite/reviewable patch, four provider cases,
+durable restart/normal next supported bug. No owner decision/access needed. Exact
+owner docs and standing autonomous authority active; old campaign caps superseded.
+Broader product/live Codex bug repair/in-game/PRs unfinished; styling/audit not begun.
