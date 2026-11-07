@@ -35,7 +35,7 @@ class LocalWorkStatus(StrictModel):
 class Installation(StrictModel):
     database: str
     database_identity: list[int] = Field(min_length=2, max_length=2)
-    evidence_roots: list[str] = Field(min_length=1, max_length=32)
+    evidence_roots: list[str] = Field(min_length=1, max_length=40)
     scratch: str
     evidence_limit_bytes: Literal[536870912, 1073741824] = 536870912
 

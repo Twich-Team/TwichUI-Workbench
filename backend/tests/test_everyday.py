@@ -185,6 +185,21 @@ def test_evidence_allowance_is_private_store_bound_and_bounded(store, installed)
         everyday.configuration(store)
 
 
+def test_accounting_keeps_all_prior_release_roots_across_three_revisions(store, installed):
+    path = everyday.ROOT / '.local/policy.json'
+    original = json.loads(path.read_text())
+    roots = [str(everyday.ROOT)]
+    for index in range(32):
+        folder = everyday.ROOT / ('retained-' + str(index))
+        folder.mkdir()
+        roots.append(str(folder))
+    write_policy(path, {**original, 'evidence_roots': roots})
+    assert len(everyday.configuration(store).evidence_roots) == 33
+    write_policy(path, {**original, 'evidence_roots': roots + [str(everyday.ROOT)]*8})
+    with pytest.raises(ValueError):
+        everyday.configuration(store)
+
+
 def test_explicit_qwen_is_independent_of_the_default_provider(
     store, client, headers, installed,
 ):
