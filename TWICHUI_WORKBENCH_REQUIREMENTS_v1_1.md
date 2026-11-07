@@ -215,6 +215,14 @@ restore is preserved. Development uses the existing 512 MiB ceiling.
 This is a proposed resource decision. Activation and pruning await the
 bound campaign approval.
 
+Owner approval, November 7, 2026 UTC. The campaign at checkpoint `7b5963a`
+authorizes its store-bound 1 GiB aggregate installation evidence allowance,
+retention after success and exactly the named two-directory archive with
+independent restore before pruning. The archive procedure passed. This
+does not change the 512 MiB development ceiling, grant further archive
+pruning or establish working-app acceptance. The original app is restored
+after the first planning hold; the functional outcome and A8 remain open.
+
 Protect credentials, user data, unrelated work, and important evidence. Use checked installation and rollback procedures.
 
 Dashboard login is not required for initial local/private-network use. This does not remove model-service authentication, approval requirements, limits, or isolation, and does not authorize public exposure.

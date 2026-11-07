@@ -2,6 +2,14 @@
 
 November 6, 2026 Mountain time.
 
+- November 7 UTC, final offline preparation: diagnostic source `ab25071`
+  passed complete default suites and all separately enabled checks. The
+  dormant stage, exact seals, checked 84-row history-copy rehearsal and
+  fresh restoration checks are bound in the [revision record](DELIVERY_CAMPAIGN_DIAGNOSTIC_REVISION_20261107.md).
+  The original loopback app remains installed. Live work is held for the
+  one-attempt policy decision at `95cefb9`; no flight-path fix or provider
+  case is complete. The original campaign clock and all limits remain.
+
 - November 7 UTC, latest: live campaign work is held after the first Qwen
   investigation finished but failed schema validation. One request and
   608 generated tokens; no plan, repair or Codex turn. Original loopback

@@ -1,5 +1,20 @@
 # Campaign live work held; original app restored — November 7, 2026 UTC
 
+Latest continuation: diagnostic source `ab25071` now has complete offline
+verification and a dormant sealed stage; see the exact
+[diagnostic revision record](DELIVERY_CAMPAIGN_DIAGNOSTIC_REVISION_20261107.md).
+Final file seal is `0948470eeeca195ce0ead2c26ff8d7053f47bd8f61cac2a195f8960a39a94586`.
+All three backend opt-ins, both browser opt-ins, 108 default Chromium
+checks, ten visual checks, 48 administrator checks and a checked-copy
+installation rehearsal passed. The combined browser fixture invocation
+and operator interpreter mistakes are preserved and explained separately.
+All owned test listeners/units are gone. Initial candidate and diagnostic
+stage seals both passed again. Fresh restoration/model/history checks
+passed. Private `closeout-held.json` binds the evidence and current
+capacity. The exact policy exception at `95cefb9` is still unapproved;
+no revision activation or new live attempt occurred. The detailed
+pre-verification status below is historical where superseded here.
+
 Following PROJECT_WORKING_PHILOSOPHY.md, attempt 1 finished Qwen generation
 but failed schema validation before creating a plan. It consumed one
 planning request and 608 generated tokens. Full diagnostics identify

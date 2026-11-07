@@ -1,3 +1,20 @@
+## November 7, 2026 UTC — Diagnostic revision verified without live renewal
+
+Complete checks now cover `ab25071`: 1,146 backend, 25 frontend, 108 default
+Chromium, ten visual, 48 administrator, all three backend opt-ins and both
+browser opt-ins. The regression browser opt-in needed its dedicated fresh
+fixture after the combined bug/regression invocation correctly held on
+the bug-mutated original. No assertion or source change was made for that
+invocation correction. Real confined Lua checks passed in two process-based
+fixture bugs and the corrective-readiness rehearsal. Desktop/phone result
+screens were inspected. Staged source and file/link/helper validation passed;
+the final seal is `0948470eeeca195ce0ead2c26ff8d7053f47bd8f61cac2a195f8960a39a94586`.
+Checked 84-row installation rehearsal passed; live migration did not occur.
+Original app/history/firewall/model restoration and all owned offline cleanup
+were checked again. The [revision record](DELIVERY_CAMPAIGN_DIAGNOSTIC_REVISION_20261107.md)
+binds details and preserved invocation diagnostics. Exact policy exception
+`95cefb9` remains pending. No new generation, activation or clock reset.
+
 ## November 7, 2026 UTC — First planning result held and restoration verified
 
 Qwen completed the first flight-path investigation; Workbench rejected it
