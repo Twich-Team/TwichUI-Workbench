@@ -9,6 +9,40 @@ active from historical copies. Former campaign clocks/counts/revisions/cumulativ
 local-testing limits and renewal gates are superseded. Checkpoints are not stops.
 Own ordinary repairs through the demonstrated outcome; no engineering renewal needed.
 
+## Current installed operation —17:19 UTC
+
+Installed `00d78abdfa7f1d429a9a799505790b2ad141d76e`, tree
+`ea67ecaff6649cf1a7f0d0c46dd153b1f7dcacd0`, stage
+`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-00d78ab`, seal
+`da83632748181d8251ac5ccc05b3c5d2a4a47ddeaf20e52739da174f4b23d079`.
+Current private R is `C/outcome-00d78ab`; C root defined below. Fresh checks passed
+original79/latest110-row history copies, both listeners/TLS/LAN, browser boundaries,
+filters, five confinement probes and foreign connector-peer rejection. Roles remain
+disabled pending completed acceptance. Same model, CA, helper/session grant; no
+credential contents read.360 tracked release files and exact owner docs verified.
+
+Final verification1229 backend/25 frontend,108 full Chromium/10 visual, all backend
+and browser opt-ins passed. Native process uses modern explicit setup after a
+controlled rejected proposal, then approved/checked fixture repairs across restart
+with concurrent reads. Final00d differs from f46 only in schema property ordering;
+85 focused tests, installed parser and native rerun verify exact final order;
+R/offline-verification.json and verification-lineage.json bind precise reuse.
+Current native helper/ops retain48 checks. No applicable check omitted.
+
+Fresh task8 intake `d9b9348c-1072-4ccb-8b4e-d07aa3e789a6` dispatched17:19:03 UTC,
+chat driver27567. Watch CURRENT stage artifacts/acceptance/bug-flight-paths.jsonl
+and R/bug-flight-paths-driver.txt before any replay. At checkpoint investigating;
+no real repair or supporting provider case complete. Prior settled store110 rows
+is preserved, but current working DB changes during this attempt. Independent
+plan review still required, bound to current stage/seal/intake/proposal/digest;
+normal delegated browser plan/run decisions remain separate. Never hand-write
+its addon patch/reproducer. Standing authority continues, no numerical gate.
+
+Older installed183/investigating7 statements below are historical, superseded by
+this section and prior settlement7. Current protocol requires explicit setup and
+exposes exact namespace preludes/compile-return facts; no behavior or expected
+answer is inserted by the developer session or compiler.
+
 ## Latest settled state and next revision —17:04 UTC
 
 Attempt7 definitively finished four requests: inspection→rejected plan→inspection→

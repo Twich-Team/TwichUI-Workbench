@@ -6267,3 +6267,13 @@ retained.85 focused+14 final targeted passed; installed parser verified explicit
 setup/phase/client restrictions offline. Real packet sizes23742/23380 bytes with
 4981/5780 source chars, fake transport/no provider calls. Native fixture now uses
 modern wire setup. Continue full tests, seal/history-forward revision and fresh8.
+
+## November7,17:19 UTC — explicit setup revision installed, fresh task8
+
+00d78ab installed with original79/latest110-row checked copies and fresh scoped
+TLS/LAN/browser/isolation gates.1229/25 backend/frontend,108 browser,10 visual,
+all opt-ins passed; schema ordering-only final delta rechecked with installed
+parser,85 focused and native modern-wire rehearsal.360 tracked files/exact owner
+refs verified; helper/grant/model/CA unchanged. Fresh intake d9b9348c-1072-4ccb-
+8b4e-d07aa3e789a6 investigating, no real repair/provider-case completion claimed.
+Continue independent plan review and real repair under standing authority.
