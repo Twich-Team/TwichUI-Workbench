@@ -1,5 +1,6 @@
 """Bounded data for a reviewed, independently executed Lua bug reproducer."""
 import hashlib
+import re
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -54,9 +55,15 @@ class Observation(Data):
     incorrect: Scalar
 
 
+class ClientBootstrap(Data):
+    through_line: int = Field(ge=1, le=200)
+    client: Annotated[str, Field(pattern=r'^[A-Za-z_][A-Za-z0-9_]{0,39}$')]
+
+
 class Reproducer(Data):
     description: Short
     fixture: Literal['module', 'client']
+    bootstrap: ClientBootstrap | None = None
     steps: Annotated[list[Step], Field(min_length=2, max_length=24)]
     observations: Annotated[list[Observation], Field(min_length=1, max_length=4)]
 
@@ -67,9 +74,10 @@ class Reproducer(Data):
         if any(isinstance(k, str) and (k in FORBIDDEN or k.startswith('__')) for p in paths for k in p):
             raise ValueError('Unsafe fixture access path')
         loads = [s.source for s in self.steps if s.op == 'load']
-        if (not loads or len(loads) != len(set(loads)) or len(loads) > 4
+        if ((not loads and not self.bootstrap) or len(loads) != len(set(loads)) or len(loads) > 6
+                or self.bootstrap and self.fixture != 'client'
                 or any('..' in Path(path).parts for path in loads)):
-            raise ValueError('Select one to four distinct existing Lua sources')
+            raise ValueError('Select one to six distinct existing Lua sources')
         if (not any(s.op == 'call' for s in self.steps)
                 or self.fixture == 'module' and (len(loads) != 1 or self.steps[0].op != 'load')
                 or len(self.model_dump_json().encode()) > 8200):
@@ -111,13 +119,33 @@ class ReadWindow(Data):
 
 
 class BugEvidence(Data):
+    bootstrap_source: Annotated[str, Field(max_length=16032)] = ''
     windows: Annotated[list[ReadWindow], Field(min_length=4, max_length=4)]
     plan: BugPlan
     review_digest: str
 
 
-def review_digest(plan):
-    return digest(dict(kind='offline-lua-reproducer-v1', plan=plan))
+def review_digest(plan, bootstrap_source):
+    return digest(dict(kind='offline-lua-reproducer-v1', plan=plan, bootstrap_source=bootstrap_source))
+
+
+def committed_bootstrap(root, base, plan):
+    """Freeze a bounded prefix of the existing focused test."""
+    spec = plan['reproducer'].get('bootstrap')
+    if not spec:
+        return ''
+    from workbench import regression_preparation as source
+
+    path = plan['focused_test']
+    lines = source.git(root, 'show', f'{base}:{path}').decode().splitlines(keepends=True)
+    if spec['through_line'] > len(lines):
+        raise ValueError('The reviewed client setup exceeds the committed test.')
+    prefix = ''.join(lines[:spec['through_line']])
+    client = spec['client']
+    if (len(prefix.encode()) > 16000 or not re.search(
+            rf'^local\s+{re.escape(client)}\s*=\s*MakeClient\s*\(', prefix, re.MULTILINE)):
+        raise ValueError('Select a bounded committed test setup with an existing client variable.')
+    return prefix + '\nreturn ' + client + '\n'
 
 
 def validate_expectation_review(review, payload):
@@ -127,7 +155,7 @@ def validate_expectation_review(review, payload):
     if not evidence:
         return validate_regression(review, payload)
     checked = BugEvidence.model_validate(evidence)
-    actual = review_digest(checked.plan.model_dump(mode='json'))
+    actual = review_digest(checked.plan.model_dump(mode='json'), checked.bootstrap_source)
     if checked.review_digest != actual or payload.get('expectation_review') != actual:
         raise HTTPException(422, 'Confirm that the reproduction and expected behavior match your report before approving this plan.')
 
@@ -135,10 +163,11 @@ def validate_expectation_review(review, payload):
 def compile_plan(evidence):
     checked = BugEvidence.model_validate(evidence)
     plan = checked.plan.model_dump(mode='json')
-    if checked.review_digest != review_digest(plan):
+    if checked.review_digest != review_digest(plan, checked.bootstrap_source):
         raise ValueError('The reviewed reproducer changed')
     body = Path(__file__).with_name('real_checks').joinpath('bug_reproducer.lua').read_text()
     data = plan['reproducer']
+    data['bootstrap_source'] = checked.bootstrap_source
     for step in data['steps']:
         step['args_n'] = len(step['args'])
     source = lua(data)

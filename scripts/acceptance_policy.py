@@ -88,7 +88,8 @@ def build_bug_case(bug_input):
         allowed_classes=[bug_investigation.CATEGORY], scenario_generation=True))
     require(packet['base'] == BASE, 'bug case source base changed')
     paths = [file['path'] for file in packet['files']]
-    writable = [path for path in paths if path.startswith(('!!!TwichUI/nav/', 'tests/test_nav'))]
+    writable = [f['path'] for f in packet['files'] if not f.get('support_only')
+                and f['path'].startswith(('!!!TwichUI/nav/', 'tests/test_nav'))]
     require(any(p.startswith('!!!TwichUI/nav/') for p in writable)
             and any(p.startswith('tests/test_nav') for p in writable), 'bug source envelope is insufficient')
     return dict(choice=bug_input['id'], provider='local', model=MODELS['local'], reason=None,

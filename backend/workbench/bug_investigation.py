@@ -5,7 +5,7 @@ from collections import Counter
 from math import log2
 
 from workbench import regression_preparation as source
-from workbench.bug_evidence import BugPlanningResponse, compile_plan, review_digest
+from workbench.bug_evidence import BugPlanningResponse, committed_bootstrap, compile_plan, review_digest
 from workbench.real_execution import LIMITS
 from workbench.real_workspace import PRELUDE
 from workbench.schemas import ProposalContent, RegressionTaskContract
@@ -25,7 +25,11 @@ INSTRUCTIONS = (
     'For a plan, use existing selected files, at least one writable addon source and a focused existing test. '
     'Describe the symptom, expected outcome and bounded repair. Build one data-only reproducer from the observed code. '
     'For fixture=module, first load a source that returns a function/table. For fixture=client, use the repository '
-    'MakeClient harness and ordered loads sharing an addon namespace. Steps can create tables, set scalar fields, '
+    'MakeClient harness and ordered loads sharing an addon namespace. Use the committed load_order and '
+    'support_only sources if the selected modules depend on them. Support-only files cannot be edited. '
+    'Prefer a supplied client_bootstrap from a focused test when it already loads the relevant modules. '
+    'Use its through_line and client in reproducer.bootstrap. This setup runs before the first step. '
+    'Steps can create tables, set scalar fields, '
     'stub an API or capture one call, or call an existing function (use method=true for colon calls). '
     'A stub/capture returns args as positional values or one table from fields. Paths are arrays of field names or '
     '1-based indexes. A call with empty path invokes the returned module function. For return/captured observation, '
@@ -78,6 +82,7 @@ def context(original, feedback, policy):
     if not terms:
         return dict(base=base, files=[], policy_sha256=digest(policy))
     candidates = []
+    inspected = {}
     document_frequency = Counter()
     scanned = 0
     for path, oid in inventory.items():
@@ -89,6 +94,7 @@ def context(original, feedback, policy):
         if scanned > 16 << 20:
             raise ValueError('The committed Lua search exceeded its local byte limit.')
         lines = raw.decode().splitlines()
+        inspected[path] = (oid, raw, lines)
         name = words('/'.join(path.split('/')[1:])) - {'lua', 'test', 'page', 'module'}
         name_hits = {term for term in terms if any(
             term == key or (min(len(term), len(key)) >= 3 and (term.startswith(key) or key.startswith(term)))
@@ -118,14 +124,66 @@ def context(original, feedback, policy):
         for block in selected or [0]:
             start = max(0, block * 16 - 2)
             excerpts.append(dict(line=start + 1, text='\n'.join(lines[start:start + 18])[:625]))
-        rankings.append((score, path, dict(path=path, git_blob=oid,
+        rankings.append((score, path, sum(weight(term) for term in name_hits), dict(path=path, git_blob=oid,
             sha256=hashlib.sha256(raw).hexdigest(), excerpts=excerpts)))
     order = sorted(rankings, key=lambda entry: (-entry[0], entry[1]))
-    core = [item for _, path, item in order if path.startswith('!!!TwichUI/')]
-    settings = [item for _, path, item in order if path.startswith('TwichUI_Settings/')]
-    files = core[:SOURCE_FILES - bool(settings)] + settings[:1]
-    files += [item for _, path, item in order if path.startswith('tests/')][:TEST_FILES]
+    core = [item for _, path, _, item in order if path.startswith('!!!TwichUI/')]
+    settings = [item for _, path, _, item in order if path.startswith('TwichUI_Settings/')]
+    tests = sorted([row for row in order if row[1].startswith('tests/')],
+                   key=lambda row: (not row[2], -row[0], row[1]))
+    primary = core[:3]
+    companions, load_order = client_context(root, base, primary, inspected)
+    files = [*primary, *companions]
+    selected = {item['path'] for item in files}
+    files += [item for item in [*settings[:1], *core] if item['path'] not in selected][:SOURCE_FILES-len(files)]
+    for item in files:
+        if item['path'] in load_order:
+            item['load_order'] = load_order[item['path']]
+    for _, path, _, item in tests[:TEST_FILES]:
+        setup = client_bootstrap(inspected[path][2])
+        if setup:
+            item['client_bootstrap'] = setup
+        files.append(item)
     return dict(base=base, files=files, policy_sha256=digest(policy))
+
+
+def client_bootstrap(lines):
+    prefix = lines[:160]
+    client = next((m[1] for line in prefix if (m := re.match(
+        r'^local\s+([A-Za-z_]\w*)\s*=\s*MakeClient\s*\(', line))), None)
+    loads = [i for i, line in enumerate(prefix) if 'loadfile(' in line]
+    if not client or not loads:
+        return None
+    # The chosen prefix must compile and run unchanged in isolation.
+    through = next((i for i in range(loads[-1]+1, min(len(prefix), loads[-1]+16))
+                    if not prefix[i].strip()), None)
+    return dict(client=client, through_line=through) if through else None
+
+
+def client_context(root, base, primary, inspected):
+    """Use the committed addon load order for neighboring client prerequisites."""
+    directory_counts = Counter(item['path'].rsplit('/', 1)[0] for item in primary)
+    if not directory_counts:
+        return [], {}
+    directory, count = directory_counts.most_common(1)[0]
+    try:
+        manifest = source.git(root, 'show', base + ':!!!TwichUI/!!!TwichUI.toc').decode('utf-8-sig')
+    except (source.RepositoryUnavailable, UnicodeError):
+        return [], {}
+    paths = ['!!!TwichUI/' + line.strip().replace('\\', '/') for line in manifest.splitlines()
+             if not line.lstrip().startswith('#') and line.strip().endswith('.lua')]
+    order = {path: index for index, path in enumerate(paths) if path in inspected}
+    selected = {item['path'] for item in primary}
+    anchors = [order[p] for p in selected if p in order and p.rsplit('/', 1)[0] == directory]
+    if count < 2 or len(anchors) < 2:
+        return [], order
+    earlier = [p for p, index in order.items() if index < min(anchors) and p.rsplit('/', 1)[0] == directory]
+    result = []
+    for path in earlier[-3:]:
+        oid, raw, lines = inspected[path]
+        result.append(dict(path=path, git_blob=oid, sha256=hashlib.sha256(raw).hexdigest(),
+                           excerpts=[dict(line=1, text='\n'.join(lines[:16])[:625])], support_only=True))
+    return result, order
 
 
 def planning_request(packet, original, feedback):
@@ -146,8 +204,9 @@ def resolve(raw, packet, original, feedback):
                 or len(set(plan.writable_paths)) != len(plan.writable_paths)
                 or not set(plan.read_paths) <= by_path.keys()
                 or not (loads | set(plan.writable_paths) | {plan.focused_test}) <= set(plan.read_paths)
+                or any(by_path[path].get('support_only') for path in plan.writable_paths)
                 or not any(SOURCE_PATH.fullmatch(path) for path in plan.writable_paths)
-                or not loads.intersection(plan.writable_paths)):
+                or not plan.reproducer.bootstrap and not loads.intersection(plan.writable_paths)):
             raise ValueError('The proposed repair or reproducer goes beyond the inspected files.')
         paths = plan.writable_paths
         root, base, inventory = source.repository()
@@ -166,6 +225,12 @@ def resolve(raw, packet, original, feedback):
                    dict(argv=['bash', 'tests/run.sh'], cwd='.', purpose='Complete existing suite')]
         acceptance = [plan.reproducer.description]
         proposed = plan.model_dump(mode='json')
+        bootstrap_source = committed_bootstrap(root, base, proposed)
+        if plan.reproducer.bootstrap:
+            if (plan.reproducer.bootstrap.model_dump() != by_path[plan.focused_test].get('client_bootstrap')
+                    or not any(path.removeprefix('!!!TwichUI/') in bootstrap_source
+                               for path in paths if SOURCE_PATH.fullmatch(path))):
+                raise ValueError('The proposed existing client setup is outside the discovered fixture.')
         ordered = list(dict.fromkeys([*paths, *plan.read_paths]))
         windows = []
         for i in range(4):
@@ -173,7 +238,8 @@ def resolve(raw, packet, original, feedback):
             chunks = by_path[path]['excerpts']
             start = chunks[(i // len(ordered)) % len(chunks)]['line']
             windows.append(dict(path=path, start=start, end=start+35))
-        bug = dict(plan=proposed, windows=windows, review_digest=review_digest(proposed))
+        bug = dict(plan=proposed, windows=windows, bootstrap_source=bootstrap_source,
+                   review_digest=review_digest(proposed, bootstrap_source))
         compile_plan(bug)
     missing = [draft.question or draft.limitation] if not bug else []
     blockers = (missing or ['Workbench must reproduce the reported behavior on the original before offering a run.',

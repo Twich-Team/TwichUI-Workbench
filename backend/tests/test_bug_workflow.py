@@ -36,9 +36,17 @@ function MakeClient()
 end
 ''')
     (root / 'tests/test_client.lua').write_text('assert(1+1==2)\n')
-    (root / CLIENT_TEST).write_text('assert(type("message")=="string")\n')
+    (root / CLIENT_TEST).write_text('''dofile(TESTS .. "harness.lua")
+local c = MakeClient()
+local chunk = assert(loadfile(ROOT .. "alerts.lua"))
+setfenv(chunk, c)
+chunk()
+
+assert(type("message")=="string")
+''')
     runner = root / 'tests/run.sh'
-    runner.write_text(runner.read_text().replace('5 passed', '6 passed'))
+    runner.write_text(runner.read_text().replace('5 passed', '6 passed')
+                      .replace('TESTS="./";', 'TESTS="./";ROOT="../!!!TwichUI/";'))
     git(root, 'add', '.')
     git(root, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid',
         'commit', '-qm', 'Disposable controlled behavior cases')
@@ -53,13 +61,15 @@ def report(client_case=False):
                 kind='issue', visual_requirement='nonvisual', local_planning='qwen-once')
 
 
-def response(client_case=False, *, already_works=False):
+def response(client_case=False, *, already_works=False, bootstrap=False):
     path, focused = (CLIENT_SOURCE, CLIENT_TEST) if client_case else (PRODUCTION, TEST)
     setup = [dict(op='capture', path=['Notify'])] if client_case else []
     call = dict(op='call', path=['Deliver'], args=['Sam']) if client_case else dict(op='call', args=['  ALICE '])
     steps = [*setup, dict(op='load', source=path), call]
     if client_case:
         steps += [*setup, dict(op='call', path=['Deliver'], args=['Lee'])]
+    if bootstrap:
+        steps = [step for step in steps if step['op'] != 'load']
     expected, incorrect = ('Sam', 'Unknown') if client_case else ('alice', 'ALICE')
     return dict(finding='The relevant committed Lua code and tests can be checked with an offline fixture.',
         question=None, limitation=None,
@@ -67,12 +77,12 @@ def response(client_case=False, *, already_works=False):
             read_paths=[path, focused], writable_paths=[path, focused], focused_test=focused,
             reproducer=dict(description='The operation should produce the requested name.',
                 fixture='client' if client_case else 'module',
-                steps=steps,
-                observations=[dict(after_step=3 if client_case else 2,
+                steps=steps, bootstrap=dict(client='c', through_line=5) if bootstrap else None,
+                observations=[dict(after_step=2 if bootstrap or not client_case else 3,
                     source='captured' if client_case else 'return', path=[2] if client_case else [1],
                     expected=incorrect if already_works else expected,
                     incorrect=expected if already_works else incorrect),
-                    *([dict(after_step=5, source='captured', path=[2], expected='Lee',
+                    *([dict(after_step=4 if bootstrap else 5, source='captured', path=[2], expected='Lee',
                             incorrect='Unknown')] if client_case else [])])))
 
 
@@ -130,7 +140,7 @@ def test_ordinary_report_reproduces_and_returns_checked_patch(
             provider_calls.append(prompt)
             usage = dict(total_tokens=120, input_tokens=100, output_tokens=20, cached_input_tokens=0, reasoning_output_tokens=0)
             if 'Untrusted task data:' in prompt:
-                return response(client_case), usage
+                return response(client_case, bootstrap=True), usage
             assert schema['properties']['edits']['items']['properties']['path']['enum'] == [CLIENT_SOURCE, CLIENT_TEST]
             assert CLIENT_SOURCE in prompt and CLIENT_TEST in prompt
             return dict(edits=[dict(path=CLIENT_SOURCE, old=BAD_ALERT, new=GOOD_ALERT),
@@ -148,6 +158,7 @@ def test_ordinary_report_reproduces_and_returns_checked_patch(
     production, focused = plan['writable_paths']
     if via_codex:
         assert production in provider_calls[0] and focused in provider_calls[0]
+        assert plan['bug_evidence']['bootstrap_source'].endswith('return c\n')
     else:
         assert {production, focused} <= {f['path'] for f in planner.calls[0]['files']}
     assert item['evidence'][0]['source_revision'] == plan['resolved_base']

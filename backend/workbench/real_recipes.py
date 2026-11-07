@@ -162,6 +162,8 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
     if bug := reviewed.get('bug_evidence'):
         from workbench import bug_evidence
         bug_evidence.validate_expectation_review(linked['proposal_review'], linked['approval']['payload'])
+        if bug['bootstrap_source'] != bug_evidence.committed_bootstrap(root, base, bug['plan']):
+            raise ValueError('The frozen client setup differs from the committed focused test')
         compiled = bug_evidence.compile_plan(bug)
         if (oracle != compiled['oracle'] or behavior_id != compiled['behavior_id']
                 or read_paths != compiled['read_paths'] or focused_test != compiled['focused_test']):

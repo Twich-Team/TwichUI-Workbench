@@ -3,7 +3,7 @@
 local assert, error, type, pairs, ipairs = assert, error, type, pairs, ipairs
 local rawget, rawset, pcall, select, unpack = rawget, rawset, pcall, select, unpack
 local getmetatable, match = getmetatable, string.match
-local setfenv, loadfile = setfenv, loadfile
+local setfenv, loadfile, loadstring = setfenv, loadfile, loadstring
 local print, exit = print, os.exit
 local function copy(t)
   local result = {}
@@ -69,12 +69,15 @@ local function exercise()
   end
   local loaded = {}
   env.loadfile = function(path)
-    assert(type(path) == 'string' and match(path, '^%.%./!!!TwichUI/[A-Za-z0-9_./-]+%.lua$')
-      and not match(path:sub(#ROOT+1), '%.%.'), 'unsupported harness load')
+    assert(type(path) == 'string' and (
+      match(path, '^%.%./!!!TwichUI/[A-Za-z0-9_./-]+%.lua$') and not match(path:sub(#ROOT+1), '%.%.')
+      or match(path, '^%./[A-Za-z0-9_./-]+%.lua$') and not match(path:sub(3), '%.%.')),
+      'unsupported harness load')
     local chunk = load(path, env)
     loaded[chunk] = true
     return chunk
   end
+  env.dofile = function(path) return env.loadfile(path)() end
   env.setfenv = function(chunk, scope)
     assert(type(chunk) == 'function' and loaded[chunk] and type(scope) == 'table',
       'only isolated harness chunks can receive a fixture environment')
@@ -93,8 +96,13 @@ local function exercise()
   end
   local root, returned, captured, captures = nil, nil, nil, 0
   if scenario.fixture == 'client' then
-    load(TESTS .. 'harness.lua', env)()
-    root = env.MakeClient('Workbench', {'!!!TwichUI', 'TwichUI_Settings'})
+    if scenario.bootstrap_source and scenario.bootstrap_source ~= '' then
+      root = setfenv(assert(loadstring(scenario.bootstrap_source, '@committed-client-setup')), env)()
+      assert(type(root) == 'table', 'expected a client from the committed setup')
+    else
+      load(TESTS .. 'harness.lua', env)()
+      root = env.MakeClient('Workbench', {'!!!TwichUI', 'TwichUI_Settings'})
+    end
   end
   local function observe(item)
     if item.source == 'field' then return get(root, item.path) end
