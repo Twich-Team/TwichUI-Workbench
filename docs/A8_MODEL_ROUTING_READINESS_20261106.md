@@ -1,5 +1,12 @@
 # A8 signed-in Codex and model routing
 
+Candidate `8d17534` seals the connector repair and the owner-delegated
+browser decisions for the four exact acceptance cases. The rehearsals
+passed with controlled responses. The restored loopback app remains live
+and the signed-in account, live provider paths and both installed switches
+still need acceptance under the new package.
+[Combined package](EVERYDAY_DELEGATED_INSTALL_APPROVAL_20261106.md)
+
 ## Connector repair after rollback
 
 Repair `cba1a7b` keeps the connector's IP and bind restrictions and supplies

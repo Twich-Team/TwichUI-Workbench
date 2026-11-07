@@ -1,3 +1,23 @@
+# Sealed delegated acceptance package — November 6, 2026 Mountain time
+
+Candidate `8d17534` is staged and verified. It contains the repaired
+Codex connector and a browser driver for the four explicitly delegated
+cases. The driver uses the ordinary UI and separate plan and run gates,
+checks the committed source, full plan, certified offer, provider route
+and budgets, and keeps a private audit of the delegated decisions.
+Controlled provider journeys and the offline containment checks passed.
+The isolated pinned addon baseline passed all 167 groups. The prior
+live receipt did not identify its exact failing RPC.
+
+The restored loopback app is still live. The original history fingerprint,
+rollback seal and two verified archives are preserved. The administrator
+grant was rechecked in session 78. No live provider operation, cutover or
+archive occurred during preparation. The combined approval covers one
+cutover, the exact conditional archive, and the four bounded trials. It
+needs one initial remote LAN page load from the owner, with the task
+decisions already delegated. A8 and broader product capabilities stay
+open pending installed evidence. [Exact combined package](EVERYDAY_DELEGATED_INSTALL_APPROVAL_20261106.md)
+
 # Administrator grant verified and Codex transport repaired offline — November 6, 2026 Mountain time
 
 The owner approved the exact [administrator mechanism](WORKBENCH_ADMIN_APPROVAL.md)

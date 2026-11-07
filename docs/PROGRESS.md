@@ -1,3 +1,17 @@
+## November 6, 2026 — Delegated browser acceptance package sealed
+
+- Bound the already delegated case list, expected provider and fallback
+  route, committed source, exact plan and certified run scope to a browser
+  driver. Ordinary browser approvals carry an explicit delegation note.
+- Verified four controlled browser journeys with read-only admission and
+  closeout checks. Verified the pinned baseline separately, both named
+  sandbox probes, configured history copy, TLS/browser boundaries and
+  fixed rollback. Kept independent checks and the Qwen watchdog unchanged.
+- Sealed `8d17534`. The one approval reserves up to eight hours with one
+  initial remote LAN load, a conditional named archive, existing grant,
+  four bounded live journeys and restoration. No live acceptance started.
+  [Combined package](EVERYDAY_DELEGATED_INSTALL_APPROVAL_20261106.md)
+
 ## November 6, 2026 — Administrator grant verified and connector repaired offline
 
 - Installed the exact owner-approved `a0edd32` grant after interactive

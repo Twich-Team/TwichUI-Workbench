@@ -2,6 +2,12 @@
 
 November 6, 2026 Mountain time.
 
+- Candidate `8d17534` is sealed for one combined cutover and acceptance
+  decision. All four browser journeys passed with controlled providers.
+  The owner has delegated only those four cases' plan and run decisions.
+  The owner needs to load the HTTPS page once from a home-LAN device during
+  cutover. Live model calls and installation remain pending exact approval.
+  [Combined package](EVERYDAY_DELEGATED_INSTALL_APPROVAL_20261106.md)
 - The bounded administrator mechanism at `a0edd32` is installed and passed
   its scope, denial and audit checks. The current-session grant expires no
   later than November 13 at 4:29 p.m. Mountain time and covers administrative
@@ -20,8 +26,8 @@ November 6, 2026 Mountain time.
 - Repair `cba1a7b` resolves the fixed Codex backend hostname through the
   host Unix resolver. Offline checks reproduced the DNS bind blocker and
   verified account and allowance responses with synthetic credentials
-  while binds were denied. The repaired build needs a newly sealed cutover
-  and live acceptance approval. [Repair record](CODEX_CONNECTOR_REPAIR_20261106.md)
+  while binds were denied. The actual historical failing RPC remains
+  unknown. Candidate `8d17534` includes the repair. [Repair record](CODEX_CONNECTOR_REPAIR_20261106.md)
 - The owner-reported zero extra credits, Automatic reload Off, and accepted
   snapshot uncertainty remain recorded. Live signed-in eligibility and A8
   acceptance remain open. API-key billing, extra credits, purchases, auto
