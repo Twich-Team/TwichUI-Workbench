@@ -7,12 +7,14 @@ from pathlib import Path
 import socket
 import subprocess
 import time
+import traceback
 import urllib.request
 from uuid import uuid4
 
 import pytest
 import uvicorn
 from sqlalchemy import select
+from sqlalchemy.exc import OperationalError
 
 from workbench import codex_provider, intake, real_execution, task_session, task_sessions, trusted_preparation, worker
 from workbench.api import create_app
@@ -196,9 +198,16 @@ def test_delegated_journeys(store, installed, tmp_path, monkeypatch):  # noqa: F
                             patch.setattr(confine, 'root', lambda: str(installed / 'simulated-cgroup'))
                             assert task_sessions.process_one(store, advance=advance)
                 else:
-                    worker.tick(store)
-        except Exception as error:
-            errors.put(repr(error))
+                    # Match the normal durable worker loop: a rolled-back
+                    # busy transaction remains pending, not a dead worker.
+                    # Do not replay the custom fixture implementation above.
+                    try:
+                        worker.tick(store)
+                    except OperationalError as error:
+                        if getattr(error.orig, 'sqlite_errorcode', 0) & 0xFF not in {5, 6}:
+                            raise
+        except Exception:
+            errors.put(traceback.format_exc())
 
     with serve(create_app(store)) as origin:
         install_offline_guard()

@@ -48,10 +48,16 @@ readonly support files, legacy strictness and independently reviewed execution.
 96 focused tests and check/build pass. Installed C++ converter/character parser
 passed8 planning/4 inspection/3 non-returning-client cases, without model loading.
 Simulated actual-packet measurement23922/23560 bytes,4981/5780 source chars;
-no provider call. Full suites/native/browser opt-ins are underway; inspect C/derived-reads-*.log.
+no provider call. Native API/worker/browser rehearsal passed both fixture repairs across restart with
+concurrent reads. Full suites/remaining opt-ins underway; inspect C/derived-reads-*.log.
 First native launch lacked WORKBENCH_CG_ROOT and failed before worker activity;
 rerun uses supported user delegated transient service. Never claim that failure
-as application proof. Source changes not installed and no new live request yet.
+as application proof. Routing rehearsal exposed a temporary SQLite lock killing its
+test worker; normal production worker already retries only busy/locked rolled-back
+transactions. Test now mirrors that tick behavior, preserves nonbusy exceptions and
+never replays its custom implementation. Full failure trace retained. Revised
+source remains uninstalled; no new live request yet. Dormant a9ab5a5 stage/seal is
+retained, superseded before activation by this test-driver-only correction.
 
 ## Operating protections and continuation
 
