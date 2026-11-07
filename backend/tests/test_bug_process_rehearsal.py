@@ -63,6 +63,8 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     cases = []
     for index, client_case in enumerate([False, True]):
         request = report(client_case)
+        if client_case:
+            request['description'] += ' It should refresh each time.'
         request.pop("request_id")
         request["lua_error"] = ""
         policy = json.loads(Path(os.environ["WORKBENCH_PREPARATION_CONFIG"]).read_text())
@@ -85,21 +87,25 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
 
     def scripted(self, packet, schema, expected_model):
         assert schema is bug_investigation.BugPlanningResponse
-        fault = packet['report']['title'].endswith(' · controlled malformed response')
+        conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
+        fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
         case = cases[0] if fault else next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
         answer = three_observations(case['client_case'])
-        if fault:
+        if conflict:
+            answer['question'] = 'A controlled extra question conflicts with the plan.'
+        elif fault:
             answer['finding'] = 'PRIVATE_REJECTED_CONTENT' * 30
         class Transport:
             seconds = 120
             def models(self, _): return expected_model
             def read(self, request, limit):
                 assert len(request.data) < 24000 and limit == 24000
+                outcome = dict(finding=answer['finding'], draft={key:answer[key] for key in ('plan', 'question', 'limitation')})
                 return json.dumps(dict(id='controlled-response', model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
-                    choices=[dict(finish_reason='stop', message=dict(content=json.dumps(answer)))])).encode()
+                    choices=[dict(finish_reason='stop', message=dict(content=json.dumps(outcome)))])).encode()
         value = self._infer(Transport(), 'fixture-no-credential', schema, json.dumps(packet), expected_model=expected_model)
-        calls.put(('fixture-fault' if fault else case["choice"], "planning"))
+        calls.put(('fixture-conflict' if conflict else 'fixture-fault' if fault else case["choice"], "planning"))
         return value
 
     monkeypatch.setattr(LocalProvider, "generate", scripted)
@@ -150,9 +156,10 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
             actors.append(child.pid)
             try:
                 if index == 0:
-                    fault = subprocess.run(["node", "e2e/bug_process_rehearsal.mjs", origin, str(path), "fault"],
-                                           cwd=ROOT, env=environment(), capture_output=True, text=True, timeout=40)
-                    assert fault.returncode == 0, fault.stdout + fault.stderr
+                    for failure in ('fault', 'conflict'):
+                        fault = subprocess.run(["node", "e2e/bug_process_rehearsal.mjs", origin, str(path), failure],
+                                               cwd=ROOT, env=environment(), capture_output=True, text=True, timeout=40)
+                        assert fault.returncode == 0, fault.stdout + fault.stderr
                 run = subprocess.run(["node", "e2e/bug_process_rehearsal.mjs", origin, str(path), str(index)],
                                      cwd=ROOT, env=environment(), capture_output=True, text=True, timeout=150)
                 assert run.returncode == 0, run.stdout + run.stderr
@@ -174,10 +181,12 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
             assert len(connection.execute(select(model_attempts).where(
                 model_attempts.c.purpose == "implementation")).all()) == index+1
     assert actors[0] != actors[1] != os.getpid()
-    assert [calls.get(timeout=2) for _ in range(5)] == [('fixture-fault', 'planning'), *[
+    assert [calls.get(timeout=2) for _ in range(6)] == [('fixture-fault', 'planning'), ('fixture-conflict', 'planning'), *[
         (case["choice"], phase) for case in cases for phase in ("planning", "implementation")]]
     with store.connect() as c:
-        failed = c.execute(select(intakes.c.id).where(intakes.c.status == 'failed')).scalar_one()
+        failures = c.execute(select(intakes.c.id, intakes.c.payload).where(intakes.c.status == 'failed')).all()
+        assert len(failures) == 2
+        failed = next(row.id for row in failures if row.payload['title'].endswith(' · controlled malformed response'))
         attempt = c.execute(select(model_attempts).where(model_attempts.c.task_id == failed)).mappings().one()
         assert attempt['outcome'] == 'failed' and attempt['finished_at']
         assert attempt['usage']['values']['completion_tokens'] == 10

@@ -40,6 +40,7 @@ INSTRUCTIONS = (
     'Drive the existing code: do not directly assign the expected result or the state the event is supposed to compute. '
     'Use null for unused plan/question/limitation alternatives. Stub/capture fields and args are mutually exclusive. '
     'Omit unused optional step fields and keep the plan concise enough for the bounded response. '
+    'Declaration and test-call indexes are source context, not proof of a fixture export. Choose a matching committed bootstrap. '
     'For each observation give the expected and a distinct behavior-relevant incorrect scalar; no invented game evidence.'
 )
 
@@ -149,7 +150,48 @@ def context(original, feedback, policy):
         if setup:
             item['client_bootstrap'] = setup
         files.append(item)
-    return dict(base=base, files=files, policy_sha256=digest(policy))
+    return dict(base=base, files=files, declarations=declaration_index(files, inspected, terms), policy_sha256=digest(policy))
+
+
+def declaration_index(files, inspected, terms):
+    """Bounded literal context from selected files only; never execute or infer exports."""
+    from workbench.grounded_scenarios import LITERALS
+    declarations, calls = [], []
+    for item in files:
+        path = item['path']
+        text = '\n'.join(inspected[path][2])
+        masked = LITERALS.sub(lambda match: re.sub(r'[^\n]', ' ', match[0]), text)
+        for match in re.finditer(r'^[ \t]*(local[ \t]+)?function[ \t]+([A-Za-z_]\w*(?:[.:][A-Za-z_]\w*)*)[ \t]*\(([^)]*)\)', masked, re.M):
+            args = ' '.join(match[3].split())
+            if not re.fullmatch(r'[A-Za-z0-9_,. ]*', args):
+                continue
+            header = ('local ' if match[1] else '') + 'function ' + match[2] + '(' + args + ')'
+            if len(header) <= 140:
+                declarations.append((len(words(match[2]) & terms), dict(path=path, line=masked.count('\n', 0, match.start())+1,
+                    kind='literal declaration; export unverified', header=header)))
+        setup = item.get('client_bootstrap')
+        if setup:
+            client = re.escape(setup['client'])
+            seen = set()
+            for match in re.finditer(r'\b'+client+r'([:.])([A-Za-z_]\w*)\s*\(', masked):
+                header = setup['client']+match[1]+match[2]+'(...)'
+                if header not in seen:
+                    calls.append((len(words(match[2]) & terms), dict(path=path, line=masked.count('\n', 0, match.start())+1,
+                        kind='literal test client call', header=header)))
+                    seen.add(header)
+    declarations.sort(key=lambda row: (-row[0], row[1]['path'], row[1]['line']))
+    calls.sort(key=lambda row: (-row[0], row[1]['path'], row[1]['line']))
+    result = []
+    for _, item in [*declarations[:2], *calls[:2], *declarations[2:]]:
+        proposed = [*result, item]
+        if len(proposed) <= 12 and len(json_bytes(proposed)) <= 1200:
+            result = proposed
+    return result
+
+
+def json_bytes(value):
+    import json
+    return json.dumps(value, ensure_ascii=True, separators=(',', ':')).encode()
 
 
 def client_bootstrap(lines):
@@ -191,11 +233,20 @@ def client_context(root, base, primary, inspected):
     return result, order
 
 
+def report_coverage(original):
+    text = original['title'] + '\n' + original['description']
+    repeatable = bool(re.search(r'\b(?:each time|every time|re-?learn|refresh\w*|subsequent|again|repeat\w*)\b', text, re.I))
+    return dict(minimum_observations=3 if repeatable else 1,
+                basis='The report requests repeatable state or refresh.' if repeatable else 'A focused original/candidate observation.',
+                call_driven=repeatable)
+
+
 def planning_request(packet, original, feedback):
     return BugPlanningResponse, dict(
         purpose='investigate-addon-bug', base=packet['base'], files=packet['files'],
         report=dict(title=original['title'], description=original['description'],
-                    lua_error=original.get('lua_error', '')), owner_reply=feedback)
+                    lua_error=original.get('lua_error', '')), owner_reply=feedback,
+        coverage=report_coverage(original), declarations=packet.get('declarations', []))
 
 
 def resolve(raw, packet, original, feedback):
@@ -203,6 +254,18 @@ def resolve(raw, packet, original, feedback):
     paths, acceptance, checks, evidence, bug = [], [], [], [], None
     if draft.plan:
         plan = draft.plan
+        coverage = report_coverage(original)
+        if coverage['minimum_observations'] == 3:
+            observations = plan.reproducer.observations
+            steps = plan.reproducer.steps
+            if (len(observations) < 3 or len({o.after_step for o in observations}) < 3
+                    or any(steps[o.after_step-1].op != 'call' for o in observations)):
+                raise ResponseValidationError('The report needs initial and successive action-driven observations.',
+                    ['plan', 'reproducer', 'observations'], 'three distinct observations after relevant calls', observations)
+            actions = [tuple(step.path) for step in steps if step.op == 'call']
+            if len(actions) == len(set(actions)):
+                raise ResponseValidationError('The report needs a repeated action to check refreshing.',
+                    ['plan', 'reproducer', 'steps'], 'repeat a relevant existing action', steps)
         by_path = {item['path']: item for item in packet['files']}
         loads = {step.source for step in plan.reproducer.steps if step.op == 'load'}
         requirements = [

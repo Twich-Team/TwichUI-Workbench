@@ -1,3 +1,44 @@
+## Revision 3 correction and settled second attempt — November 7, 2026 UTC
+
+Following PROJECT_WORKING_PHILOSOPHY.md, continue the independently amended
+campaign without another ordinary-repair approval. The original clock is
+still 04:35:45.612Z; admissions end 18:35:45.612Z and restoration ends
+20:35:45.612Z. The exact original approval remains unchanged at `7b5963a`.
+Read [the response correction record](DELIVERY_CAMPAIGN_RESPONSE_CORRECTION_20261107.md)
+and private canonical campaign ledger before any admission.
+
+Revision 2 (`23981b8`) passed its complete offline and installed gates, then
+Qwen attempt 2 definitively finished with a plan AND a nonempty question.
+The private pre-validation journal identifies the exact `one_outcome`
+validation conflict. Usage: one request, 440 generated / 4,428 prompt tokens;
+no plan approval, implementation, switch or Codex turn. This does not identify
+the discarded historical cause of attempt 1, which remains unknown.
+Original loopback app, 79-row history, firewall baseline, normal authenticated
+Qwen and absent candidate services/socket/drop-in were restored and verified.
+Latest settled campaign history is 88 rows, fingerprint `c73e45351fe7d752277e3be177228be85019045d9000e7ad7256d01d69e84bff`;
+copy that store forward, preserving both prior stages and all backups.
+
+Two campaign planning requests consumed 1,048 generated tokens. Six attempt
+slots, ONE bug allocation, three local allocations and four Codex allocations
+(eight turns) remain under intersecting original limits. Verified unused
+`ab25071` counts as revision 1 and restored `23981b8` as revision 2: only
+revision 3 remains. No case is complete. Do not reset time or accounting.
+
+The connected correction gives the provider a mutually exclusive outcome
+schema, deterministic unwrapping, selected-path constraints, compact steps,
+a bounded literal declaration index from already selected files, and generic
+initial/repeated-action observation requirements for refresh reports. It
+preserves independent scope/bootstrap/behavior validation, all accounting,
+approval bindings, source permissions and post-generation hold policy.
+Private diagnostics now preserve framing with every quoted value/key redacted;
+Lua original/candidate checks report each observation separately. No addon
+solution or acceptance reproducer is hand-prepared. Final full suites and
+opt-ins are underway; source, stage seal and deployment lineage must be
+recorded before activation and fresh delegated browser decisions.
+
+The real flight-path fix remains first and unfinished. No new provider call
+has started for revision 3. Keep all broader product gaps explicit.
+
 ## November 7, 2026 UTC — Owner amendment and connected response handling
 
 Recorded the independent owner amendment, unchanged original clock and

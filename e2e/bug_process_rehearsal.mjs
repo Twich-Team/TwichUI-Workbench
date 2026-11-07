@@ -5,9 +5,10 @@ import {runJourney, checkedProgress} from '../scripts/browser_acceptance.mjs';
 
 const [, , origin, path, index] = process.argv;
 const policy = JSON.parse(readFileSync(path));
-const fault = index === 'fault';
+const conflict = index === 'conflict';
+const fault = conflict || index === 'fault';
 const candidate = fault ? {...policy.cases[0],request:{...policy.cases[0].request,
-  title:policy.cases[0].request.title+' · controlled malformed response'}} : policy.cases[Number(index)];
+  title:policy.cases[0].request.title+(conflict?' · controlled conflicting outcomes':' · controlled malformed response')}} : policy.cases[Number(index)];
 const browser = await chromium.launch({args:['--disable-dev-shm-usage','--disable-background-networking']});
 const context = await browser.newContext({serviceWorkers:'block'});
 const observer = await browser.newContext({serviceWorkers:'block'});
@@ -69,7 +70,7 @@ try {
     assert.equal(result.tasks.length,0);
     assert.equal(result.decisions.length,0);
     assert.equal(result.jobs[0].diagnostics.generation_state,'finished');
-    assert.equal(result.jobs[0].diagnostics.validation_locations,'finding:string_too_long');
+    assert.equal(result.jobs[0].diagnostics.validation_locations,conflict?'response:value_error':'finding:string_too_long');
     assert.ok(result.jobs[0].diagnostics.evidence_id);
     assert.equal(result.provider_activity[0].outcome,'failed');
     assert.equal(JSON.stringify(result).includes('PRIVATE_REJECTED_CONTENT'),false);

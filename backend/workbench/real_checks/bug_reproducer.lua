@@ -145,12 +145,18 @@ local function exercise()
         returned = values(fn(unpack(step.args, 1, step.args_n)))
       end
     end
-    for _, item in ipairs(scenario.observations) do
+    for observation, item in ipairs(scenario.observations) do
       if item.after_step == index then
         local result = observe(item)
         if result ~= item.expected then
-          if result ~= item.incorrect then return 'ambiguous' end
+          if result ~= item.incorrect then
+            print('WB_OBSERVATION bug-reproducer ' .. observation .. ' outside-reviewed-results')
+            return 'ambiguous'
+          end
+          print('WB_OBSERVATION bug-reproducer ' .. observation .. ' incorrect')
           reproduced = true
+        else
+          print('WB_OBSERVATION bug-reproducer ' .. observation .. ' expected')
         end
       end
     end

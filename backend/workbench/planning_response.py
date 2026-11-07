@@ -68,6 +68,18 @@ def payload(raw, *, bug=False):
     if not isinstance(value, dict):
         raise ResponseValidationError('Expected one JSON object', [], 'JSON object', value)
     if bug:
+        return normalize_bug(value, changes)
+    return value, changes
+
+
+def normalize_bug(value, changes=()):
+    changes = list(changes)
+    if isinstance(value, dict) and set(value) == {'finding', 'draft'}:
+        draft = value['draft']
+        if isinstance(draft, dict) and set(draft) == {'plan', 'question', 'limitation'}:
+            value = dict(finding=value['finding'], **draft)
+            changes.append('unwrap-outcome-draft')
+    if isinstance(value, dict):
         # Empty *present* optional alternatives carry no meaning. Missing fields,
         # missing plan content, numeric strings and conflicting outcomes still fail.
         for field in ('question', 'limitation'):
@@ -77,7 +89,7 @@ def payload(raw, *, bug=False):
     return value, changes
 
 
-def wire_schema(model):
+def wire_schema(model, coverage=None, files=None):
     result = model.model_json_schema()
     if model.__name__ != 'BugPlanningResponse':
         return result
@@ -106,8 +118,49 @@ def wire_schema(model):
             props['value'] = {'const': None, 'type': 'null'}
         if op not in ('capture', 'call'):
             props['method'] = {'const': False, 'type': 'boolean'}
-        alternatives.append(variant)
+        allowed = {'op'} | {
+            'load': {'source'}, 'table': {'path'}, 'set': {'path', 'value'},
+            'stub': {'path', 'args', 'fields'}, 'capture': {'path', 'args', 'fields', 'method'},
+            'call': {'path', 'args', 'method'},
+        }[op]
+        variant['properties'] = {key: value for key, value in props.items() if key in allowed}
+        if op == 'set':
+            variant['required'] = ['op', 'path', 'value']
+        if op in ('stub', 'capture'):
+            for excluded in ('args', 'fields'):
+                branch = json.loads(json.dumps(variant))
+                branch['properties'].pop(excluded)
+                alternatives.append(branch)
+        else:
+            alternatives.append(variant)
     result['$defs']['Step'] = {'anyOf': alternatives}
+    props = result['properties']
+    outcomes = []
+    for selected in ('plan', 'question', 'limitation'):
+        choice = {}
+        for field in ('plan', 'question', 'limitation'):
+            choice[field] = (next(v for v in props[field]['anyOf'] if v.get('type') != 'null')
+                             if field == selected else {'type': 'null', 'const': None})
+        outcomes.append(dict(type='object', properties=choice,
+                             required=['plan', 'question', 'limitation'], additionalProperties=False))
+    result['$defs']['BugOutcome'] = {'anyOf': outcomes}
+    if isinstance(coverage, dict) and type(coverage.get('minimum_observations')) is int and coverage['minimum_observations'] == 3:
+        result['$defs']['Reproducer']['properties']['observations']['minItems'] = 3
+    if isinstance(files, list):
+        selected = [item['path'] for item in files if isinstance(item, dict) and isinstance(item.get('path'), str)]
+        writable = [item['path'] for item in files if isinstance(item, dict) and isinstance(item.get('path'), str) and not item.get('support_only')]
+        sources = [path for path in selected if path.startswith(('!!!TwichUI/', 'TwichUI_Settings/'))]
+        tests = [path for path in selected if path.startswith('tests/')]
+        if selected and writable and sources and tests:
+            plan = result['$defs']['BugPlan']['properties']
+            plan['read_paths']['items'] = {'type': 'string', 'enum': selected}
+            plan['writable_paths']['items'] = {'type': 'string', 'enum': writable}
+            plan['focused_test'] = {'type': 'string', 'enum': tests}
+            for variant in alternatives:
+                if variant['properties']['op']['const'] == 'load':
+                    variant['properties']['source'] = {'type': 'string', 'enum': sources}
+    result['properties'] = {'finding': props['finding'], 'draft': {'$ref': '#/$defs/BugOutcome'}}
+    result['required'] = ['finding', 'draft']
     def compact(node):
         if isinstance(node, dict):
             return {key: ({name: compact(child) for name, child in value.items()}
@@ -121,10 +174,10 @@ def wire_schema(model):
 
 class Evidence:
     """Structure-only private journal. No prompts, source text, tokens or keys."""
-    def __init__(self, root, attempt, model):
+    def __init__(self, root, attempt, model, coverage=None, files=None):
         from workbench.trusted_preparation import owned
 
-        self.schema = wire_schema(model)
+        self.schema = wire_schema(model, coverage, files)
         self.schema_hash = sha(json.dumps(self.schema, sort_keys=True).encode())
         self.keys = {'choices', 'message', 'content', 'model', 'usage', 'id', 'tool_calls',
                      'finish_reason', 'prompt_tokens', 'completion_tokens', 'total_tokens'}
@@ -201,7 +254,29 @@ class Evidence:
         return result
 
     def received(self, raw, *, complete=True):
-        self.record('wire-received', bytes=len(raw), sha256=sha(raw), bounded_prefix=not complete)
+        # Preserve JSON framing without retaining any quoted source or token text,
+        # including an unterminated string in a malformed response.
+        out, quoted, escaped = [], False, False
+        for char in raw[:8192].decode('utf-8', 'replace'):
+            if quoted:
+                if escaped:
+                    escaped = False
+                elif char == '\\':
+                    escaped = True
+                elif char == '"':
+                    out.append('"')
+                    quoted = False
+            elif char == '"':
+                out.append('"<redacted>')
+                quoted = True
+            elif char in '{}[]:, \n\r\t':
+                out.append(char)
+            elif not out or out[-1] != '.':
+                out.append('.')
+            if sum(map(len, out)) > 512:
+                break
+        self.record('wire-received', bytes=len(raw), sha256=sha(raw), bounded_prefix=not complete,
+                    format_excerpt=''.join(out)[:512], excerpt_contains_values=False)
 
     def envelope(self, result, diagnostics):
         identity = result.get('id')
@@ -235,7 +310,9 @@ class Evidence:
         self.record('payload-decoded', shape=self.summary(value),
                     sha256=sha(json.dumps(value, sort_keys=True, allow_nan=False).encode()),
                     normalization=list(changes), generation_state=diagnostics.get('generation_state'),
-                    usage=diagnostics.get('usage'), structure=structure)
+                    usage=diagnostics.get('usage'), structure=structure,
+                    outcome_shapes={key: self.summary(value[key]) if key in value else {'type': 'missing'}
+                                    for key in ('plan', 'question', 'limitation')} if isinstance(value, dict) else {})
 
     def rejected(self, error, value=None, *, phase='validation'):
         errors = []
@@ -277,8 +354,8 @@ class Evidence:
         self.record(phase + '-rejected', **facts)
 
 
-def create_evidence(attempt, schema):
+def create_evidence(attempt, schema, coverage=None, files=None):
     from workbench import everyday
     if not everyday.enabled():
         return None
-    return Evidence(everyday.ROOT, attempt, schema)
+    return Evidence(everyday.ROOT, attempt, schema, coverage, files)

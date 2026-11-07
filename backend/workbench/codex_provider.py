@@ -510,7 +510,8 @@ class Planner:
             from workbench.planning_response import wire_schema
             result, counted = generate(model, self.selection['effort'],
                 instructions + '\nUntrusted task data:\n' + json.dumps(packet, ensure_ascii=True),
-                required_output(wire_schema(schema)), self.stop)
+                required_output(wire_schema(schema, packet.get('coverage') if schema is BugPlanningResponse else None,
+                                            packet.get('files') if schema is BugPlanningResponse else None)), self.stop)
         except Hold as error:
             self.diagnostics = dict(generation_state=(
                 'not_started' if not error.started else 'uncertain' if not error.terminal else

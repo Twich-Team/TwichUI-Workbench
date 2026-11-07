@@ -167,7 +167,7 @@ class LocalProvider:
         self.diagnostics = {'generation_state': 'not_started'}
         if (issubclass(schema, ScenarioResponse) or schema is BugPlanningResponse) and expected_model is None:
             raise PlanningUnavailable('Grounded local planning requires a saved model selection.', 'model_policy')
-        encoded = json.dumps(packet, ensure_ascii=True)
+        encoded = json.dumps(packet, ensure_ascii=True, separators=(',', ':'))
         if len(encoded.encode()) > MAX_INPUT:
             raise PlanningUnavailable('Planning context exceeds the input budget.')
         # Reuse pilot coordination protocol without importing pilot code or creating files.
@@ -258,12 +258,14 @@ class LocalProvider:
         if schema is BugPlanningResponse:
             from workbench.bug_investigation import INSTRUCTIONS
             instructions = INSTRUCTIONS
+        context = json.loads(encoded) if schema is BugPlanningResponse else {}
         body = dict(model=expected_model or actual, temperature=0, max_tokens=2600, reasoning_budget_tokens=0,
             tools=[], response_format=dict(type='json_schema', json_schema=dict(
-                name='planning', strict=True, schema=planning_response.wire_schema(schema))),
+                name='planning', strict=True, schema=planning_response.wire_schema(schema,
+                    context.get('coverage'), context.get('files')))),
             messages=[dict(role='system', content=general + instructions),
                 dict(role='user', content=encoded)])
-        encoded_body = json.dumps(body).encode()
+        encoded_body = json.dumps(body, separators=(',', ':')).encode()
         if (issubclass(schema, ScenarioResponse) or schema is BugPlanningResponse) and len(encoded_body) > MAX_INPUT:
             raise PlanningUnavailable('Serialized grounded request exceeds the input budget; narrow the request.')
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',

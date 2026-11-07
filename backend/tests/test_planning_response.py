@@ -197,12 +197,153 @@ def test_wire_schema_enforces_load_and_call_shapes_without_changing_local_author
     by_op = {v["properties"]["op"]["const"]: v for v in variants}
     assert by_op["load"]["required"] == ["op", "source"]
     assert by_op["load"]["properties"]["source"]["type"] == "string"
-    assert by_op["call"]["properties"]["source"]["const"] is None
-    assert by_op["table"]["properties"]["args"]["maxItems"] == 0
+    assert "source" not in by_op["call"]["properties"]
+    assert "args" not in by_op["table"]["properties"]
     bad = response()
     bad["plan"]["reproducer"]["steps"][1]["source"] = "!!!TwichUI/other.lua"
     with pytest.raises(ValidationError):
         BugPlanningResponse.model_validate(bad)
+
+
+def test_wire_outcomes_are_mutually_exclusive_and_unwrap_without_choosing():
+    from workbench.planning_response import normalize_bug
+
+    schema = wire_schema(BugPlanningResponse)
+    assert set(schema["properties"]) == {"finding", "draft"}
+    for selected, variant in zip(
+        ("plan", "question", "limitation"), schema["$defs"]["BugOutcome"]["anyOf"], strict=True
+    ):
+        assert variant["required"] == ["plan", "question", "limitation"]
+        assert variant["properties"][selected].get("type") != "null"
+        assert all(
+            v.get("const") is None and v.get("type") == "null"
+            for key, v in variant["properties"].items()
+            if key != selected
+        )
+    value = response()
+    wrapped = dict(
+        finding=value["finding"],
+        draft={key: value[key] for key in ("plan", "question", "limitation")},
+    )
+    decoded, changes = normalize_bug(wrapped)
+    assert decoded == value and changes == ["unwrap-outcome-draft"]
+    wrapped["draft"]["question"] = "A genuine question is not discarded."
+    decoded, _ = normalize_bug(wrapped)
+    with pytest.raises(ValidationError, match="exactly one"):
+        BugPlanningResponse.model_validate(decoded)
+
+
+def test_repeat_coverage_is_generic_and_does_not_invent_observations():
+    from workbench.bug_investigation import report_coverage
+
+    basic = dict(
+        title="Name conversion", description="Entering ALICE returns uppercase. Expect lowercase."
+    )
+    repeat = dict(
+        title="Refresh cached settings",
+        description="Relearn the settings each time the panel opens.",
+    )
+    assert report_coverage(basic)["minimum_observations"] == 1
+    coverage = report_coverage(repeat)
+    assert coverage["minimum_observations"] == 3
+    schema = wire_schema(BugPlanningResponse, coverage)
+    assert schema["$defs"]["Reproducer"]["properties"]["observations"]["minItems"] == 3
+    assert (
+        BugPlanningResponse.model_json_schema()["$defs"]["Reproducer"]["properties"][
+            "observations"
+        ]["minItems"]
+        == 1
+    )
+    ordinary = response()
+    assert len(BugPlanningResponse.model_validate(ordinary).plan.reproducer.observations) == 1
+    from workbench.bug_investigation import resolve
+
+    with pytest.raises(ResponseValidationError) as error:
+        resolve(ordinary, dict(files=[]), repeat, "")
+    assert error.value.path == ["plan", "reproducer", "observations"]
+    assert len(ordinary["plan"]["reproducer"]["observations"]) == 1
+
+
+def test_wire_format_excerpt_contains_neither_values_nor_untrusted_keys(tmp_path):
+    evidence = Evidence(tmp_path, str(uuid4()), BugPlanningResponse)
+    evidence.received(
+        b'{"PRIVATE_SECRET_KEY":"SENSITIVE_TOKEN_VALUE", "finding":"unterminated secret'
+    )
+    row = json.loads(evidence.file.read_text().splitlines()[-1])
+    assert "<redacted>" in row["format_excerpt"]
+    assert "PRIVATE_SECRET_KEY" not in evidence.file.read_text()
+    assert "SENSITIVE_TOKEN_VALUE" not in evidence.file.read_text()
+    assert "unterminated secret" not in evidence.file.read_text()
+    assert len(row["format_excerpt"]) <= 512
+    evidence.close()
+
+
+def test_declaration_context_is_literal_selected_bounded_and_not_an_export_claim():
+    from workbench.bug_investigation import declaration_index, json_bytes
+
+    selected = "!!!TwichUI/cache.lua"
+    hidden = "!!!TwichUI/unselected.lua"
+    lines = ['-- function Fake() end', 'local s="function Secret()"', '',
+             'function Cache:Refresh(value)', 'end']
+    lines += [f'function Cache:Other{index}() end' for index in range(100)]
+    inspected = {selected: (None, None, lines), hidden: (None, None, ['function Hidden() end'])}
+    result = declaration_index([dict(path=selected)], inspected, {'refresh'})
+    assert result[0]['header'] == 'function Cache:Refresh(value)'
+    assert result[0]['line'] == 4
+    assert result[0]['kind'] == 'literal declaration; export unverified'
+    assert len(result) <= 12 and len(json_bytes(result)) <= 1200
+    assert all(item['path'] == selected for item in result)
+    assert not any(word in json_bytes(result).decode() for word in ['Fake', 'Secret', 'Hidden'])
+
+
+def test_wire_paths_cannot_offer_support_only_or_undiscovered_writes():
+    files = [dict(path='!!!TwichUI/a.lua'), dict(path='!!!TwichUI/helper.lua', support_only=True),
+             dict(path='tests/a_test.lua')]
+    schema = wire_schema(BugPlanningResponse, files=files)
+    properties = schema['$defs']['BugPlan']['properties']
+    assert properties['writable_paths']['items']['enum'] == ['!!!TwichUI/a.lua', 'tests/a_test.lua']
+    assert properties['read_paths']['items']['enum'] == [item['path'] for item in files]
+    assert properties['focused_test']['enum'] == ['tests/a_test.lua']
+
+
+def test_oracle_reports_every_original_and_candidate_observation(tmp_path):
+    import subprocess
+    from test_bug_process_rehearsal import three_observations
+    from test_verification_profiles import BUGGY, CORRECT, PRODUCTION
+    from workbench.bug_evidence import compile_plan, review_digest
+
+    plan = BugPlanningResponse.model_validate(three_observations(False)).plan.model_dump(mode='json')
+    spec = dict(
+        plan=plan,
+        bootstrap_source="",
+        windows=[dict(path=PRODUCTION, start=1, end=1)] * 4,
+        review_digest=review_digest(plan, ""),
+    )
+    oracle = tmp_path / "oracle.lua"
+    oracle.write_text(compile_plan(spec)["oracle"])
+    test_dir = tmp_path / "tests"
+    test_dir.mkdir()
+    source = tmp_path / PRODUCTION
+    source.parent.mkdir()
+    for contents, expected_code, marker in [(BUGGY, 1, "incorrect"), (CORRECT, 0, "expected")]:
+        source.write_text(contents)
+        result = subprocess.run(
+            [
+                "lua5.1",
+                "-e",
+                "package.preload.bit=function()return{}end;ROOT='../!!!TwichUI/';TESTS='./';REPO='../'",
+                str(oracle),
+            ],
+            cwd=test_dir,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        assert result.returncode == expected_code, result.stdout + result.stderr
+        assert all(
+            f"WB_OBSERVATION bug-reproducer {index} {marker}" in result.stdout
+            for index in [1, 2, 3]
+        )
 
 
 @pytest.mark.parametrize(

@@ -430,7 +430,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 original['status'] = 'investigating'
             claimed_generation = True
             from workbench.planning_response import create_evidence
-            response_evidence = create_evidence(lease, schema)
+            response_evidence = create_evidence(lease, schema, wire.get('coverage') if bug else None,
+                                                wire.get('files') if bug else None)
             if response_evidence:
                 adapter_used.response_evidence = response_evidence
             try:
@@ -484,8 +485,12 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 raise PlanningUnavailable('The shared planning deadline expired.', 'timeout')
             if len(json.dumps(raw, allow_nan=False).encode()) > 24000 or basis not in {'demo', 'local', 'codex'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
                 raise ValueError('Invalid bounded scenario provider response')
+            normalization = []
+            if bug:
+                from workbench.planning_response import normalize_bug
+                raw, normalization = normalize_bug(raw)
             if response_evidence:
-                response_evidence.parsed(raw, getattr(adapter_used, 'diagnostics', {}))
+                response_evidence.parsed(raw, getattr(adapter_used, 'diagnostics', {}), normalization)
                 if isinstance(getattr(adapter_used, 'diagnostics', None), dict):
                     adapter_used.diagnostics['evidence_id'] = response_evidence.identifier
             # Re-read committed evidence and private policy after the response.

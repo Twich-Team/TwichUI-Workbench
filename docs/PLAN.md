@@ -1,3 +1,13 @@
+# Current connected correction — November 7, 2026 UTC
+
+Finish final revision-3 response/behavior verification, seal fresh source,
+preserve and copy the settled 88-row history, pass all original installation
+gates, then renew the real flight-path report for its last bug allocation.
+Retain successful evidence and finish the four provider cases if the bug
+succeeds. Use only the original campaign clock and remaining allocations.
+If a genuine boundary is reached, settle/restore and prepare one consolidated
+extension request. Do not ask for routine repair prompts or waive the outcome.
+
 # Delivery campaign amendment — November 7, 2026 UTC
 
 Continue the same approved working-application outcome under the
