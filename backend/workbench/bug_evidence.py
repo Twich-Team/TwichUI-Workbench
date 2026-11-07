@@ -109,8 +109,8 @@ class InvestigationRead(ReadWindow):
     path: Annotated[str, Field(pattern=r'^(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/[A-Za-z0-9_./-]+)\.lua$', max_length=240)]
     @model_validator(mode='after')
     def bounded(self):
-        if not self.start <= self.end < self.start+80:
-            raise ValueError('Request one to eighty committed lines per source window')
+        if self.start > self.end:
+            raise ValueError('Source range start must not exceed its end')
         return self
 
 

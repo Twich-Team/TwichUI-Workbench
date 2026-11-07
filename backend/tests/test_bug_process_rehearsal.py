@@ -54,6 +54,11 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     from project_env import environment
 
     source = enable_bugs(monkeypatch)
+    alert_source = BAD_ALERT + '-- bounded source paging fixture\n'*120
+    (source / CLIENT_SOURCE).write_text(alert_source)
+    git(source, 'add', '.')
+    git(source, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid',
+        'commit', '-qm', 'Controlled long source read')
     native = os.environ.get("WB_PROCESS_NATIVE") == "1"
     if native:
         from workbench.real_workspace import Runtime
@@ -98,7 +103,7 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
         elif 'inspection_result' not in packet:
             answer = dict(finding='Inspect the exact committed implementation before proposing its check.',
                 plan=None, question=None, limitation=None,
-                inspection=[dict(path=CLIENT_SOURCE, start=1, end=1) if case['client_case']
+                inspection=[dict(path=CLIENT_SOURCE, start=1, end=9999) if case['client_case']
                             else dict(query='return')])
         elif not packet.get('validation_feedback'):
             # Exercise the actual cross-process correction path: a completed
@@ -212,6 +217,12 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     assert issue['path'] == ['finding'] and issue['expected']['max_length'] == 450
     assert issue['observed']['type'] == 'str'
     assert 'PRIVATE_REJECTED_CONTENT' not in evidence.read_text()
+    with store.connect() as c:
+        payload = c.execute(select(planning_jobs.c.payload).join(intakes).where(
+            intakes.c.payload['title'].as_string() == cases[1]['request']['title'])).scalar_one()
+    [page] = payload['bug_inspection_packet']['inspection_windows']
+    assert page['through_line'] == 80 and page['next_line'] == 81
+    assert page['requested_through_line'] == 9999 and page['coverage'] == 'partial requested committed lines'
     assert not git(source, "status", "--porcelain").strip()
     assert (source / PRODUCTION).read_text() == BUGGY
-    assert (source / CLIENT_SOURCE).read_text() == BAD_ALERT
+    assert (source / CLIENT_SOURCE).read_text() == alert_source

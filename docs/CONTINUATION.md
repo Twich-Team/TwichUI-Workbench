@@ -9,6 +9,40 @@ active from historical copies. Former campaign clocks/counts/revisions/cumulativ
 local-testing limits and renewal gates are superseded. Checkpoints are not stops.
 Own ordinary repairs through the demonstrated outcome; no engineering renewal needed.
 
+## Latest settled state and connected work —16:08 UTC
+
+Attempt6 finished185 generated/3,895 prompt and was rejected in the third source
+read's cross-field range validator. Exact endpoints were not retained, so overlong
+versus reversed is UNKNOWN; do not invent them. It did request inspection, not a
+plan. No repair/approval, no uncertainty. Six finished requests total2,021 generated/
+24,781 prompt. Exact private `outcome-edc912c/attempt-6-accounting.json` and journals
+preserved. Current installed edc912c store106 rows/schema0012, logical SHA
+`1965df75f1a8d49e60e1bd14376a19154167ad621843eb613ea81bb826373479`.
+Normal authenticated model/key checked after settlement. Driver19343 exited held.
+Keep this106-row store forward, not prior102/98/93 copies.
+
+Development now returns exact bounded pages for valid long source reads: maximum
+80 lines/window and6,500 total chars, honest actual/requested endpoints, EOF and
+continuation. Reversed/unsafe/out-of-project reads remain rejected. The private
+journal retains safe numeric protocol endpoints and exact schema union-branch
+names; arbitrary private keys/values remain redacted. Model-input shortening
+preserves requested-page priority and updates continuation to actual visible lines.
+Native process fixture now requests a long real committed file and checks the
+80-line page before corrected proposals and checked repairs.
+
+Shared investigation operational timeout is now five minutes, still four requests
+and a separate120-second timeout per request; source/token/accounting/scope guards
+remain. Normal browser disclosure and version3 receipt bind this setting. Version1
+and former version2/two-minute consent cannot silently authorize it. Root helper,
+unit environment/per-request120-second transport and system permissions unchanged.
+99 focused checks passed; installed converter/parser passed both updated schema
+phases without model loading. Run final complete/process/browser checks, seal and
+history-forward revision under standing authority, then fresh task7. No live call
+has been made for these development changes. No owner renewal is needed.
+
+The sections below retain the pre-attempt6 installation snapshot; their statement
+that6 was investigating is superseded by this settled state.
+
 ## Installed build and current live operation
 
 Candidate `edc912c0c89fbd9037e17ff2724109f0c77cd6a8`, tree

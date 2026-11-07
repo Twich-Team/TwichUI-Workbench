@@ -145,6 +145,15 @@ def verify_packet(initial, supplied):
         if (not 1 <= start <= end < start+80 or end > len(lines)
                 or window['sha256'] != item['sha256'] or window['text'] != '\n'.join(lines[start-1:end])):
             raise ValueError('The inspected source evidence changed.')
+        if 'requested_through_line' in window:
+            wanted = window['requested_through_line']
+            if type(wanted) is not int or wanted < end:
+                raise ValueError('The source continuation metadata changed.')
+            more = end < min(wanted, len(lines))
+            if (window.get('file_lines') != len(lines)
+                    or window.get('next_line') != (end+1 if more else None)
+                    or window['coverage'] != ('partial requested committed lines' if end < wanted else 'requested committed lines')):
+                raise ValueError('The source continuation metadata changed.')
     return supplied
 
 
@@ -154,8 +163,13 @@ def inspect(packet, requests):
     for index, request in enumerate(requests):
         if hasattr(request, 'query'):
             found = search(packet['base'], request.query)
-            matches += found
-            total += sum(len(item['text']) for item in found)
+            allowance = (6500-total)//max(1, len(requests)-index)
+            for match in found:
+                if len(match['text']) > allowance:
+                    break
+                matches.append(match)
+                allowance -= len(match['text'])
+                total += len(match['text'])
             continue
         try:
             raw, item = committed(request.path, packet['base'])
@@ -163,16 +177,30 @@ def inspect(packet, requests):
             raise ResponseValidationError('The requested committed source is unavailable or disallowed.',
                 ['inspection', index, 'path'], 'an allowed regular committed Lua/test file', request.path) from error
         lines = raw.decode().splitlines()
-        if not 1 <= request.start <= request.end <= len(lines):
+        if not 1 <= request.start <= request.end or request.start > len(lines):
             raise ResponseValidationError('The requested source lines are outside the committed file.',
                 ['inspection', index, 'end'], f'committed line range 1..{len(lines)}', request.end)
-        text = '\n'.join(lines[request.start-1:request.end])
+        end = min(request.end, request.start+79, len(lines))
+        allowance = (6500-total)//max(1, len(requests)-index)
+        selected_lines = []
+        for line in lines[request.start-1:end]:
+            candidate = '\n'.join([*selected_lines, line])
+            if len(candidate) > allowance:
+                # A single whole line can use remaining room; never fabricate
+                # a complete line by silently cutting its contents.
+                if not selected_lines and len(candidate) <= 6500-total:
+                    selected_lines.append(line)
+                break
+            selected_lines.append(line)
+        if not selected_lines:
+            continue
+        text = '\n'.join(selected_lines)
+        end = request.start+len(selected_lines)-1
         total += len(text)
-        if total > 6500:
-            raise ResponseValidationError('The requested source windows exceed their bounded response size.',
-                ['inspection'], 'at most 6500 source characters per inspection', total)
-        window = dict(line=request.start, through_line=request.end, text=text,
-                      coverage='requested committed lines')
+        window = dict(line=request.start, through_line=end, text=text,
+                      requested_through_line=request.end, file_lines=len(lines),
+                      next_line=end+1 if end < min(request.end, len(lines)) else None,
+                      coverage='partial requested committed lines' if end < request.end else 'requested committed lines')
         selected = next((f for f in packet['files'] if f['path'] == request.path), None)
         if selected is None:
             if len(packet['files']) >= MAX_FILES:
@@ -213,7 +241,8 @@ def next_wire(packet, original, feedback, windows, finding, matches=None):
                 remaining -= len(text)
         item['excerpts'] = excerpts
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
-        note='Requested committed source is supplied. No addon change or behavioral result has been produced.')
+        note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
+             'omitted ranges do not establish absence. No addon change or behavioral result has been produced.')
     if matches is not None:
         wire['inspection_result']['search_matches'] = matches
         wire['inspection_result']['search_limit'] = 'At most twelve literal matches; not an exhaustive absence proof.'
@@ -229,7 +258,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
     parent = adapter.response_evidence
     journals, receipts = [], []
     read_chars = sum(len(e['text']) for f in initial['files'] for e in f['excerpts'])
-    adapter.ends_at = adapter.ends_at or time.monotonic()+120
+    adapter.ends_at = adapter.ends_at or time.monotonic()+bug.INVESTIGATION_SECONDS
     evidence = parent
     diagnostics = {}
     response_added = True
@@ -321,6 +350,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
             if read_chars > READ_CHARS:
                 raise PlanningUnavailable('The investigation reached its source-read bound.', 'inspection_limit')
             wire = next_wire(packet, original, feedback, windows, draft.finding, matches)
+            wire['inspection_result']['requested'] = [r.model_dump(mode='json') for r in draft.inspection]
             if wire['coverage'].get('call_driven') and not packet.get('inspection_windows'):
                 wire['coverage']['require_inspection'] = True
     finally:

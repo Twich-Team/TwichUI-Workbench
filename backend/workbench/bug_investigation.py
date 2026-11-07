@@ -16,6 +16,7 @@ from workbench.planning_response import ResponseValidationError
 CATEGORY = 'lua-offline-bugfix'
 SOURCE_FILES = 6
 TEST_FILES = 3
+INVESTIGATION_SECONDS = 300
 SOURCE_PATH = re.compile(r'(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_!./-]+\.lua')
 STOP = frozenset('the and for with when after from that this has was should does not instead shows about expected bug lua addon feature player character each time case needs able'.split())
 INSTRUCTIONS = (
@@ -46,11 +47,13 @@ INSTRUCTIONS = (
     'Omit unused optional step fields and keep the plan concise enough for the bounded response. '
     'Declaration and test-call indexes are source context, not proof of a fixture export. Choose a matching committed bootstrap. '
     'If source context is incomplete, request inspection instead of inventing details or asking the owner to find code. '
-    'An inspection requests 1-3 committed path/start/end windows, each at most 80 lines and 6500 total characters. '
+    'An inspection requests 1-3 committed path/start/end windows. The app returns at most 80 lines per window '
+    'and 6500 total characters, with explicit partial coverage and continuation pointers for larger requests. '
     'Alternatively an inspection entry {"query":"literal symbol or text"} searches committed project Lua, including test helpers. '
     'Search returns bounded pointers; inspect the relevant body before proposing a repair. '
     'Use visible line numbers, partial-function ranges or literal dependency paths. Source inspection is read-only. '
-    'At most four local requests share the investigation deadline; produce a plan when sufficient evidence is available. '
+    'At most four local requests share a five-minute investigation deadline; each request remains separately bounded. '
+    'Produce a plan when sufficient evidence is available. '
     'Use null for every unused alternative, including inspection. '
     'When coverage.require_inspection is true, this is a read-only source discovery turn: return inspection only. '
     'A validation_feedback entry means a completed proposal was rejected locally, never approved or executed. '

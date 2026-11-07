@@ -395,7 +395,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 if everyday_mode:
                     everyday.check_planning(c, original, job if bug else None)
                     route = provider_routes.approved(c, original)
-                    planning_end = time.monotonic() + deadline_seconds()
+                    planning_end = time.monotonic() + (bug_investigation.INVESTIGATION_SECONDS if bug else deadline_seconds())
                     if bug and job['payload'].get('bug_followup'):
                         codex_route = provider_routes.bug_followup_codex(route, job['payload']['bug_followup'])
                         fallback_reason = job['payload']['bug_followup']['fallback_reason']
@@ -465,7 +465,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         raise ValueError('Approved task or provider policy changed before fallback.')
                     receipt = everyday.planning_receipt(original['payload'], original['created_at'])
                     ends = datetime.fromisoformat(receipt['expires_at'])
-                    if datetime.now(timezone.utc) + timedelta(seconds=125) >= ends:
+                    if datetime.now(timezone.utc) + timedelta(seconds=max(0, planning_end-time.monotonic())+5) >= ends:
                         raise ValueError('The original planning approval cannot fit the fallback.')
                     fallback_reason = reason
                     before = 'codex' if codex_route else 'local'

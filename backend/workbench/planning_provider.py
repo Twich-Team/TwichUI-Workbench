@@ -284,7 +284,8 @@ class LocalProvider:
                 if not options:
                     break
                 item, part = max(options, key=lambda pair:(
-                    pair[1].get('coverage') != 'requested committed lines', len(pair[1].get('text', ''))))
+                    pair[1].get('coverage') not in {'requested committed lines', 'partial requested committed lines'},
+                    len(pair[1].get('text', ''))))
                 lines = part['text'].splitlines()
                 if len(lines) < 2:
                     item['excerpts'].remove(part)
@@ -293,6 +294,8 @@ class LocalProvider:
                     lines = lines[:max(1,len(lines)//2)]
                     part.update(text='\n'.join(lines), through_line=part['line']+len(lines)-1,
                                 coverage='partial model-input window')
+                    if 'next_line' in part:
+                        part['next_line'] = part['through_line']+1
                 body['messages'][1]['content'] = json.dumps(context, ensure_ascii=True, separators=(',', ':'))
                 encoded_body = json.dumps(body, separators=(',', ':')).encode()
                 if len(encoded_body) <= MAX_INPUT:

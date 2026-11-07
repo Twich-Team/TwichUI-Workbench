@@ -189,6 +189,7 @@ class Evidence:
         def collect(node):
             if isinstance(node, dict):
                 self.keys.update(node.get('properties', {}))
+                self.keys.update(node.get('$defs', {}))
                 self.enums.update(v for v in node.get('enum', []) if isinstance(v, str))
                 if isinstance(node.get('const'), str):
                     self.enums.add(node['const'])
@@ -299,6 +300,10 @@ class Evidence:
             if len(structure) >= 80 or len(path) > 8:
                 return
             row = dict(path=self.location(path), **self.summary(node))
+            if (type(node) is int and 0 <= node <= 2**31-1 and path
+                    and path[-1] in {'start', 'end', 'after_step', 'through_line'}
+                    and all(type(part) is int or part in self.keys for part in path)):
+                row['value'] = node
             size = len(json.dumps(row).encode())
             if structure_bytes + size > 7000:
                 return

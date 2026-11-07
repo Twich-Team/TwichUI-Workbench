@@ -231,11 +231,11 @@ def local_selection(connection):
 def planning_receipt(original, created_at):
     from workbench.intake import digest
 
-    from workbench.bug_investigation import requested
+    from workbench.bug_investigation import INVESTIGATION_SECONDS, requested
     return dict(binding=digest(original), expires_at=(
         datetime.fromisoformat(created_at) + timedelta(minutes=PLANNING_MINUTES)).isoformat(),
-        **(dict(investigation_version=2, max_local_requests=4, max_codex_requests=1,
-                planning_deadline_seconds=120) if requested(original) else {}))
+        **(dict(investigation_version=3, max_local_requests=4, max_codex_requests=1,
+                planning_deadline_seconds=INVESTIGATION_SECONDS) if requested(original) else {}))
 
 
 def check_planning(c, original, job=None):
@@ -244,6 +244,7 @@ def check_planning(c, original, job=None):
         planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')).scalars().all()
     from workbench.provider_routes import CHOICES
     expected = planning_receipt(original['payload'], original['created_at'])
+    operation_seconds = expected.get('planning_deadline_seconds', 120)
     if (original['payload'].get('local_planning') not in CHOICES
             or not any(all(job.get('local_planning_receipt', {}).get(k) == v for k, v in expected.items()) for job in jobs)):
         raise ValueError('A current saved planning approval is required. Open a new task to give that permission.')
@@ -263,5 +264,5 @@ def check_planning(c, original, job=None):
         expected = followup
     elif claimed:
         raise ValueError('The approved planning operation has already been claimed. Start a new task with updated details.')
-    if datetime.now(timezone.utc) + timedelta(seconds=120) >= datetime.fromisoformat(expected['expires_at']):
+    if datetime.now(timezone.utc) + timedelta(seconds=operation_seconds) >= datetime.fromisoformat(expected['expires_at']):
         raise ValueError('The planning approval expired before the worker could start. Start a new task to approve planning again.')

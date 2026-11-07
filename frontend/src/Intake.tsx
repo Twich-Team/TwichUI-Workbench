@@ -167,7 +167,7 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
           onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-with-local-fallback':'codex-once'})}/><span>Allow one switch to local Qwen if Codex is unavailable or reaches its included allowance reserve before generation</span></label>
       </>}
     </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
-    {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. Local Qwen can use up to four requests within two minutes to inspect source, propose a plan and correct a rejected proposal. It cannot edit files or publish. If a real-world detail is missing, Workbench may ask for one reply and separate permission for a follow-up with the same provider.</p>}
+    {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. Local Qwen can use up to four requests within five minutes to inspect source, propose a plan and correct a rejected proposal. Each request has its own two-minute timeout. It cannot edit files or publish. If a real-world detail is missing, Workbench may ask for one reply and separate permission for a follow-up with the same provider.</p>}
     <p className="detail-copy">Choose “Does not change the interface” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. Permission expires after 30 minutes. Fallback applies only to planning before generation starts. Failed, partial or uncertain generation stops for review. Review the plan and approve the run separately. The run keeps the provider that made the plan.</p>
   </div>}
 </fieldset>

@@ -6224,3 +6224,18 @@ failed; edc corrected assertion checks new request-schema hash and native rerun
 passed. No product assertion weakened. Fresh flight-path attempt6 dispatched via
 normal delegated browser, intake0c93920a-4fd1-41b4-a76c-8fd6eb29dc93. Investigating;
 no real repair/provider-case completion claimed. Continue under standing authority.
+
+## November7,16:08 UTC — settled source-range rejection and bounded paging
+
+Attempt6 finished185gen/3895prompt. Third inspection failed cross-field range
+validation; endpoints were not retained, so overlong versus reversed remains
+unknown. Six requests total2021gen/24781prompt; no repair/Codex/uncertainty. Latest
+installed history106 rows, normal authenticated model verified. Implemented valid
+long-read pagination80lines/window,6500chars/response, exact continuation/EOF,
+kept reversed/unsafe restrictions and private protocol numeric/union diagnostics.
+Shared operation timeout chosen300s for multi-round source/validation work, four
+requests unchanged; each transport remains120s, no helper/environment/privilege
+change. Normal disclosure/v3 consent updated; oldv2 cannot be reused.99 focused
+checks and installed converter/parser phases passed. Native fixture now covers
+long committed-source pages before correction and checked repairs. Continue full
+checks/seal/history-forward revision and task7 under standing authority.

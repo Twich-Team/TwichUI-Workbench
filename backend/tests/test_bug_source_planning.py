@@ -158,6 +158,76 @@ def test_corrective_requests_share_the_four_request_operation_bound(
 
 
 @pytest.mark.usefixtures('installed')
+def test_long_source_request_returns_exact_bounded_pages_and_verified_continuation(monkeypatch):
+    from workbench.bug_evidence import InvestigationRead
+    from workbench.bug_source_planning import inspect, verify_packet
+
+    root = enable_bugs(monkeypatch)
+    path = '!!!TwichUI/long_source.lua'
+    lines = [f'local value_{i} = {i}' for i in range(120)]
+    (root/path).write_text('\n'.join(lines)+'\n')
+    git(root, 'add', '.')
+    git(root, '-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Long committed fixture')
+    initial = dict(base=git(root,'rev-parse','HEAD').strip(), files=[], policy_sha256='controlled')
+    packet = copy.deepcopy(initial)
+    windows, _, count = inspect(packet, [InvestigationRead(path=path,start=1,end=9999)])
+    [first] = windows
+    assert first['text'] == '\n'.join(lines[:80]) and first['through_line'] == 80
+    assert first['next_line'] == 81 and first['requested_through_line'] == 9999
+    assert first['coverage'] == 'partial requested committed lines' and count <= 6500
+    windows, _, _ = inspect(packet, [InvestigationRead(path=path,start=81,end=9999)])
+    assert windows[0]['text'] == '\n'.join(lines[80:])
+    assert windows[0]['through_line'] == 120 and windows[0]['next_line'] is None
+    assert verify_packet(initial,packet) == packet
+    forged = copy.deepcopy(packet)
+    forged['inspection_windows'][0]['next_line'] = 99
+    with pytest.raises(ValueError,match='continuation'):
+        verify_packet(initial,forged)
+    with pytest.raises(ValueError,match='start must not exceed'):
+        InvestigationRead(path=path,start=81,end=1)
+
+
+@pytest.mark.usefixtures('installed')
+def test_three_large_read_windows_share_output_bound_without_cutting_source_lines(monkeypatch):
+    from workbench.bug_evidence import InvestigationRead
+    from workbench.bug_source_planning import inspect, verify_packet
+
+    root = enable_bugs(monkeypatch)
+    paths = [f'!!!TwichUI/window_{i}.lua' for i in range(3)]
+    for path in paths:
+        (root/path).write_text(('local value = "'+'x'*140+'"\n')*120)
+    git(root,'add','.')
+    git(root,'-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Large bounded source fixture')
+    initial = dict(base=git(root,'rev-parse','HEAD').strip(),files=[],policy_sha256='controlled')
+    packet = copy.deepcopy(initial)
+    windows,_,count = inspect(packet,[InvestigationRead(path=p,start=1,end=120) for p in paths])
+    assert len(windows) == 3 and count == sum(len(w['text']) for w in windows) <= 6500
+    assert all(w['through_line'] < 80 and w['next_line'] == w['through_line']+1 for w in windows)
+    assert all(w['text'].endswith('"') for w in windows)
+    assert verify_packet(initial,packet) == packet
+
+
+def test_read_endpoint_diagnostics_preserve_safe_values_and_schema_branch_names(tmp_path):
+    from workbench.bug_evidence import BugPlanningResponse
+    from workbench.planning_response import Evidence
+    from uuid import uuid4
+
+    evidence = Evidence(tmp_path,str(uuid4()),BugPlanningResponse)
+    value = dict(finding='A read-only inspection is needed.',plan=None,question=None,limitation=None,
+                 inspection=[dict(path='tests/harness.lua',start=7,end=902)],
+                 PRIVATE_KEY=dict(end=777777))
+    evidence.parsed(value,{})
+    evidence.close()
+    rows = [json.loads(row) for row in evidence.file.read_text().splitlines()]
+    structure = rows[-1]['structure']
+    assert next(r for r in structure if r['path'] == ['inspection',0,'start'])['value'] == 7
+    assert next(r for r in structure if r['path'] == ['inspection',0,'end'])['value'] == 902
+    hidden = [r for r in structure if any(str(p).startswith('redacted-key-sha256:') for p in r['path'])]
+    assert hidden and all('value' not in r for r in hidden)
+    assert evidence.location(['inspection',0,'InvestigationRead','end']) == ['inspection',0,'InvestigationRead','end']
+
+
+@pytest.mark.usefixtures('installed')
 def test_source_followup_has_one_claim_two_accounted_requests_and_private_receipts(
     client, headers, store, monkeypatch,
 ):
@@ -226,17 +296,21 @@ def test_literal_search_and_committed_harness_read_can_precede_the_plan(
     assert usage['requests_observed'] == 3 and usage['values']['completion_tokens'] == 30
 
 
+@pytest.mark.parametrize('old_version', [1, 2])
 @pytest.mark.usefixtures('installed')
 def test_old_one_request_consent_cannot_silently_authorize_source_followups(
-    client, headers, store, monkeypatch,
+    client, headers, store, monkeypatch, old_version,
 ):
     enable_bugs(monkeypatch)
     identity = client.post('/api/intake', headers=headers, json=report()).json()['id']
     with store.begin() as connection:
         job = connection.execute(select(planning_jobs).where(planning_jobs.c.intake_id == identity)).mappings().one()
         payload = copy.deepcopy(job['payload'])
-        for key in ('investigation_version', 'max_local_requests', 'max_codex_requests', 'planning_deadline_seconds'):
-            payload['local_planning_receipt'].pop(key)
+        if old_version == 1:
+            for key in ('investigation_version', 'max_local_requests', 'max_codex_requests', 'planning_deadline_seconds'):
+                payload['local_planning_receipt'].pop(key)
+        else:
+            payload['local_planning_receipt'].update(investigation_version=2, planning_deadline_seconds=120)
         connection.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(payload=payload))
     monkeypatch.setattr(LocalProvider, 'generate', lambda *a, **kw:pytest.fail('Used stale one-request consent'))
     assert worker.tick(store)
