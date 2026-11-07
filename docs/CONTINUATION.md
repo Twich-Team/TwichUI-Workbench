@@ -1,3 +1,37 @@
+# Verified2cb6482 installed; task16 active — November7,21:38 UTC
+
+Installed2cb6482133b97f71102810a6e1eece54c2778a9c, tree
+5a94d12d0bca460ef270b578768209e8008754b0,
+stage /home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-2cb6482 (S),
+seal76f1f40ad5ad39546ff04df55a9e9ceabc46ba8eb6c2d0bdf9971e1daf273020.
+R=C/outcome-2cb6482.5196 files/16links/560410676 logicalbytes/379tracked files.
+Final1336 backend/25 frontend/build/47focused/native semantic-mode33.74sec/7new
+installed review-decoder cases/8exact sealed negative-review-reader cases all pass.
+Count-only real source+API requests11425/11016 prompt tokens inside32768, no
+inference. ALL18 installed history list/detail HTTP200, original79/latest144 checked
+copies exact. Strict normal both listeners/TLS/LAN/browser/filter/five isolation/
+foreign connector peer gates pass; helper/model/key/credential metadata unchanged.
+All precise reuse/skipped-opt-in consequences bound in R/offline-verification.json.
+All4roles active/disabled pending final accepted outcome. Source-grounded review
+explicitly enabled in new private preparation config; pinned Forever cache642files
+copied/hash-checked/sealed, no reference checkout changes. No new schema/journal.
+
+Fresh task16 dispatched21:37:37, intake3caf9ef6-1ef9-48ad-a28e-773b013e5352,
+driver8581. Check current acceptance JSONL, R/bug-flight-paths-driver.txt and actual
+model_attempts/private response journals. Prior15 tasks46 real requests33516
+generated/234189 prompt settled and preserved; no prior approval/implementation/
+Codex/uncertainty. CURRENT DB now changes; never replace it with historical144.
+When awaiting-independent-plan-review, inspect actual provider plan. Positive
+receipt MUST explicitly decision=approve,approved=true plus all exact bindings and
+three valid criterion/index/reason rows, only if initial route eligibility/actual
+first and later flight-master actions truly exercise reported behavior. No developer
+addon patch/reproducer or expected fixture state. Self-review is NOT independent
+approval. Continue real patch/full addon checks then four provider cases/restart/
+next supported bug under standing authority, no routine permission renewal.
+
+This header supersedes older installedbda/uncommitted/verification-underway statements
+below; their task15 settlement and preserved operational/continuation details remain.
+
 # Autonomous delivery — November 7, 2026, 21:30 UTC
 
 Read the authoritative root philosophy, requirements and standing owner direction,
