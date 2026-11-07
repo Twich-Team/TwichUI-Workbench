@@ -45,7 +45,9 @@ def retain(wire, packet, current, budget=24000):
     available = sum(len(text)+1 for text in lines.values())
     wire['source_memory'] = dict(source_base=packet['base'],available_characters=available,
         retained_characters=used,omitted_characters=available-used,
-        read_windows=[{key:window[key] for key in ('path','line','through_line')}
+        read_windows=[{key:window[key] for key in ('path','line','through_line',
+                          'requested_start_line','requested_through_line','file_lines',
+                          'next_line','cached_prefix_through_line','coverage') if key in window}
                       for window in packet.get('inspection_windows',[])],
         note='Previously inspected exact lines remain in file excerpts. Read windows are provenance, '
              'not a claim that every line is visible. Excerpt endpoints identify actual visible coverage. '

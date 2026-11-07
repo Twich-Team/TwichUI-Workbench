@@ -505,3 +505,41 @@ def test_material_model_policy_change_stops_before_another_inspection_request(
     assert worker.tick(store)
     item = client.get('/api/intake/'+identity).json()
     assert item['status'] == 'failed' and not item['tasks'] and len(calls) == 1
+
+
+@pytest.mark.usefixtures('installed')
+def test_repeated_read_advances_only_over_verified_contiguous_returned_prefix(monkeypatch):
+    from workbench.bug_evidence import InvestigationRead
+    from workbench.bug_source_planning import inspect,verify_packet,unread_start
+
+    root=enable_bugs(monkeypatch)
+    path='!!!TwichUI/paged.lua'
+    lines=[f'local value_{i} = {i}' for i in range(180)]
+    (root/path).write_text('\n'.join(lines)+'\n')
+    git(root,'add','.')
+    git(root,'-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Paging source')
+    initial=dict(base=git(root,'rev-parse','HEAD').strip(),files=[],policy_sha256='controlled')
+    packet=copy.deepcopy(initial)
+    request=InvestigationRead(path=path,start=1,end=9999)
+    pages=[]
+    for _ in range(3):
+        windows,_,_=inspect(packet,[request])
+        pages+=windows
+    assert [(p['line'],p['through_line']) for p in pages]==[(1,80),(81,160),(161,180)]
+    assert [p['cached_prefix_through_line'] for p in pages]==[None,80,160]
+    assert all(p['requested_start_line']==1 and p['requested_through_line']==9999 for p in pages)
+    assert '\n'.join(p['text'] for p in pages)=='\n'.join(lines)
+    assert verify_packet(initial,packet)==packet
+    forged=copy.deepcopy(packet)
+    forged['inspection_windows'][1]['cached_prefix_through_line']=79
+    with pytest.raises(ValueError,match='cached source prefix'):
+        verify_packet(initial,forged)
+    forged=copy.deepcopy(packet)
+    forged['inspection_windows'][0]['requested_start_line']=True
+    with pytest.raises(ValueError,match='cached source prefix'):
+        verify_packet(initial,forged)
+    # Exact rereads remain possible; holes and other files cannot be skipped.
+    windows,_,_=inspect(packet,[InvestigationRead(path=path,start=1,end=20)])
+    assert windows[0]['line']==1 and windows[0]['text']=='\n'.join(lines[:20])
+    assert unread_start([dict(path=path,line=5,through_line=80)],path,1,90)==1
+    assert unread_start([dict(path='other.lua',line=1,through_line=80)],path,1,90)==1

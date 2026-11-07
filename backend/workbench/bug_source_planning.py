@@ -128,6 +128,20 @@ def search(base, query):
     return result
 
 
+def unread_start(windows, path, start, end):
+    """Advance a repeated range past its exact previously returned prefix.
+
+    An entirely cached/narrow reread remains a reread. Only a contiguous prefix
+    is skipped; a hole or an uninspected dependency is never inferred away.
+    """
+    covered = {number for window in windows if window['path'] == path
+               for number in range(window['line'], window['through_line']+1)}
+    first = start
+    while first in covered and first <= end:
+        first += 1
+    return first if first <= end else start
+
+
 def verify_packet(initial, supplied):
     if (set(supplied) - set(initial) - {'inspection_windows'}
             or supplied.get('base') != initial['base'] or supplied.get('policy_sha256') != initial['policy_sha256']
@@ -149,7 +163,7 @@ def verify_packet(initial, supplied):
     windows = supplied.get('inspection_windows', [])
     if len(windows) > 12 or sum(len(w['text']) for w in windows) > READ_CHARS:
         raise ValueError('The committed inspection evidence exceeds its operation bound.')
-    for window in windows:
+    for index, window in enumerate(windows):
         raw, item = committed(window['path'], initial['base'])
         lines = raw.decode().splitlines()
         start, end = window['line'], window['through_line']
@@ -160,6 +174,13 @@ def verify_packet(initial, supplied):
             wanted = window['requested_through_line']
             if type(wanted) is not int or wanted < end:
                 raise ValueError('The source continuation metadata changed.')
+            if 'requested_start_line' in window:
+                requested = window['requested_start_line']
+                if (type(requested) is not int or not 1 <= requested <= start
+                        or start != unread_start(windows[:index], window['path'], requested,
+                                                 min(wanted, len(lines)))
+                        or window.get('cached_prefix_through_line') != (start-1 if start > requested else None)):
+                    raise ValueError('The cached source prefix changed.')
             more = end < min(wanted, len(lines))
             if (window.get('file_lines') != len(lines)
                     or window.get('next_line') != (end+1 if more else None)
@@ -191,10 +212,12 @@ def inspect(packet, requests):
         if not 1 <= request.start <= request.end or request.start > len(lines):
             raise ResponseValidationError('The requested source lines are outside the committed file.',
                 ['inspection', index, 'end'], f'committed line range 1..{len(lines)}', request.end)
-        end = min(request.end, request.start+79, len(lines))
+        first = unread_start([*packet.get('inspection_windows', []), *windows], request.path,
+                             request.start, min(request.end, len(lines)))
+        end = min(request.end, first+79, len(lines))
         allowance = (6500-total)//max(1, len(requests)-index)
         selected_lines = []
-        for line in lines[request.start-1:end]:
+        for line in lines[first-1:end]:
             candidate = '\n'.join([*selected_lines, line])
             if len(candidate) > allowance:
                 # A single whole line can use remaining room; never fabricate
@@ -206,9 +229,11 @@ def inspect(packet, requests):
         if not selected_lines:
             continue
         text = '\n'.join(selected_lines)
-        end = request.start+len(selected_lines)-1
+        end = first+len(selected_lines)-1
         total += len(text)
-        window = dict(line=request.start, through_line=end, text=text,
+        window = dict(line=first, through_line=end, text=text,
+                      requested_start_line=request.start,
+                      cached_prefix_through_line=first-1 if first > request.start else None,
                       requested_through_line=request.end, file_lines=len(lines),
                       next_line=end+1 if end < min(request.end, len(lines)) else None,
                       coverage='partial requested committed lines' if end < request.end else 'requested committed lines')
@@ -232,6 +257,8 @@ def next_wire(packet, original, feedback, windows, finding, matches=None):
     retain(wire, packet, windows, WIRE_TEXT-sum(len(m['text']) for m in (matches or [])))
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
+             'a repeated range advances past a contiguous previously returned prefix when unread lines remain. '
+             'requested_start_line preserves the request and cached_prefix_through_line identifies that exact prior prefix. '
              'omitted ranges do not establish absence. No addon change or behavioral result has been produced.')
     if matches is not None:
         wire['inspection_result']['search_matches'] = matches

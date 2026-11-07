@@ -73,6 +73,8 @@ INSTRUCTIONS = (
     'If source context is incomplete, request inspection instead of inventing details or asking the owner to find code. '
     'An inspection requests 1-3 committed path/start/end windows. The app returns at most 80 lines per window '
     'and 6500 total characters, with explicit partial coverage and continuation pointers for larger requests. '
+    'Exact earlier lines remain cached. Repeating a range advances past its already returned contiguous prefix '
+    'when unread lines remain; actual line/through_line and cached_prefix_through_line explain the returned page. '
     'Alternatively an inspection entry {"query":"literal symbol or text"} searches committed project Lua, including test helpers. '
     'Search returns bounded pointers; inspect the relevant body before proposing a repair. '
     'Use visible line numbers, partial-function ranges or literal dependency paths. Source inspection is read-only. '

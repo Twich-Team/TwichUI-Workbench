@@ -136,6 +136,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
 
     def scripted(self, packet, schema, expected_model):
         assert schema is bug_investigation.BugPlanningResponse
+        self.diagnostics = dict(generation_state='not_started')
         conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
         fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
         case = cases[0] if fault else next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
@@ -149,6 +150,10 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 plan=None, question=None, limitation=None,
                 inspection=[dict(path=CLIENT_SOURCE, start=1, end=9999) if case['client_case']
                             else dict(query='return')])
+        elif case['client_case'] and len(packet.get('source_memory', {}).get('read_windows', [])) == 1:
+            answer = dict(finding='Read the remaining committed source in the same bounded range.',
+                plan=None,question=None,limitation=None,
+                inspection=[dict(path=CLIENT_SOURCE,start=1,end=9999)])
         elif not packet.get('validation_feedback'):
             # Exercise the actual cross-process correction path: a completed
             # single-plan candidate omitted its load and cannot be approved.
@@ -161,8 +166,10 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         class Transport:
             seconds = 120
             def models(self, _): return expected_model
+            def context_budget(self, _, body):
+                return dict(prompt_tokens=8000, context_tokens=32768)  # Controlled, not a model call.
             def read(self, request, limit):
-                assert len(request.data) < 24000 and limit == 24000
+                assert len(request.data) <= 65536 and limit == 24000
                 outcome = dict(finding=answer['finding'], draft={key:answer[key]
                     for key in ('plan', 'question', 'limitation', 'inspection') if answer.get(key) is not None})
                 return json.dumps(dict(id='controlled-response', model=expected_model,
@@ -246,8 +253,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             assert len(connection.execute(select(model_attempts).where(
                 model_attempts.c.purpose == "implementation")).all()) == index+1
     assert actors[0] != actors[1] != os.getpid()
-    assert [calls.get(timeout=2) for _ in range(10)] == [('fixture-fault', 'planning'), ('fixture-conflict', 'planning'), *[
-        (case["choice"], phase) for case in cases for phase in ("planning", "planning", "planning", "implementation")]]
+    expected = [('fixture-fault', 'planning'), ('fixture-conflict', 'planning')]
+    for case in cases:
+        expected += [(case['choice'], 'planning')]*(4 if case['client_case'] else 3)
+        expected.append((case['choice'], 'implementation'))
+    assert [calls.get(timeout=2) for _ in expected] == expected
     with store.connect() as c:
         failures = c.execute(select(intakes.c.id, intakes.c.payload).where(intakes.c.status == 'failed')).all()
         assert len(failures) == 2
@@ -271,9 +281,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         payload = c.execute(select(planning_jobs.c.payload).join(intakes).where(
             intakes.c.payload['title'].as_string() == cases[1]['request']['title'],
             planning_jobs.c.kind == 'planning')).scalar_one()
-    [page] = payload['bug_inspection_packet']['inspection_windows']
+    [page, next_page] = payload['bug_inspection_packet']['inspection_windows']
     assert page['through_line'] == 80 and page['next_line'] == 81
     assert page['requested_through_line'] == 9999 and page['coverage'] == 'partial requested committed lines'
+    assert next_page['line'] == 81 and next_page['cached_prefix_through_line'] == 80
+    assert next_page['requested_start_line'] == 1 and next_page['next_line'] is None
     assert not git(source, "status", "--porcelain").strip()
     assert (source / PRODUCTION).read_text() == BUGGY
     assert (source / CLIENT_SOURCE).read_text() == alert_source

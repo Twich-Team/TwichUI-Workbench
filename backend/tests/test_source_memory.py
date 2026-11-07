@@ -46,6 +46,18 @@ def test_memory_evicts_whole_lines_with_current_reads_first_and_honest_omissions
     assert 'not a claim' in wire['source_memory']['note']
 
 
+def test_memory_keeps_pagination_metadata_visible_alongside_merged_exact_lines():
+    page=dict(path='tests/example.lua',line=81,through_line=82,text='line81\nline82',
+              requested_start_line=1,requested_through_line=200,next_line=83,file_lines=200,
+              cached_prefix_through_line=80,coverage='partial requested committed lines')
+    packet=dict(base='committed',files=[dict(path=page['path'],excerpts=[])],inspection_windows=[page])
+    wire=dict(files=copy.deepcopy(packet['files']))
+    retain(wire,packet,[page])
+    [provenance]=wire['source_memory']['read_windows']
+    assert provenance=={key:value for key,value in page.items() if key!='text'}
+    assert wire['files'][0]['excerpts'][0]['text']==page['text']
+
+
 @pytest.mark.parametrize('fault',['none','missing','bool','bad-count','overlong','transport','cancelled'])
 def test_exact_template_count_never_observes_source_or_starts_generation(fault):
     transport = LocalHTTP()

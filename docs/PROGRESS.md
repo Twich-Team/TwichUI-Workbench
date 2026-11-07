@@ -1,3 +1,38 @@
+# Task13 settled; verified cached paging repair — November7,19:51 UTC
+
+No real bug/provider case complete. Task13 intake9fa60357-7184-44cf-b6de-bbda712f6bf8,
+model48fc6927-fd12-465e-8efe-394734539fb8 definitively finished19:44:12 with4 valid
+inspections, no proposal/approval/repair/uncertainty.4781 generated/25198 prompt.
+Total13 tasks34 requests18807 generated/133035 prompt; zero implementation/Codex.
+Installedb7624e2 remains protected/active. Latest settled134 rows/schema0012/28tables
+SHA bfee6f4d2ee1ff7d7e790ff42d028c87f1f1549e5aab566ea61544d907e631c2.
+Normal model authenticated/key matches after settlement. Copy134 forward, never130.
+C/outcome-b7624e2/attempt-13-accounting.json and outcome-ledger.json preserve facts.
+
+Source context count worked in real Qwen requests (latest7560 prompt inside32768),
+but it repeated long read prefixes. App's fixed-size reader restarted at requested
+start; source-memory merging also omitted next-line/requested-range metadata.
+New generic paging skips only an exact contiguous previously returned prefix when
+unread requested lines remain; holes/different files are never inferred. Entirely
+cached/narrow rereads remain possible. Provenance is validated against earlier
+committed windows and retained visibly beside exact merged source. No addon result,
+plan content, write/scope/approval or source-disclosure authority is invented.
+
+150 focused/build and corrected actual native API/worker/normal browser/restart/
+concurrency checks pass33.11sec, now deliberately repeat a read, advance its page,
+correct a rejected proposal, and complete two checked FIXTURE bugs within4 requests.
+First native fixture lacked larger-input controlled count; real guard correctly held,
+fixture updated to match production reset/count/bounds. First suite run interrupted
+before final metadata correction; final frozen-code complete suites now progressing.
+Private generic context proof first incorrectly expected80 lines despite character
+budget, corrected to actual advancing whole-line bounds. Original failures retained.
+No new activation/live request. Continue final suites/seal, checked134-row cutover,
+fresh flight-path task, independent plan review, separate delegated decisions and
+real checked patch; then four provider cases/durable restart/normal next bug.
+Standing owner authority continues without renewal or old campaign ceilings.
+
+Earlier task13-in-progress/130-row/source-memory-complete statements are historical.
+
 # Verified source-memory build installed; task13 active — November7,19:41 UTC
 
 Installed b7624e20b24229046d8f1bc3b92e1fe15847bdf8, tree
