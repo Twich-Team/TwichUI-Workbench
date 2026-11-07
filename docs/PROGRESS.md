@@ -1,3 +1,29 @@
+## November 6, 2026 — Campaign preparation and concurrent-process checks
+
+The owner continued the delivery outcome after the restored `23825bd`
+checkpoint. Live generation and revised cutover await one campaign approval.
+The historical lock holder remains unknown. A read-only measurement on
+the preserved store found the run-approval read transaction lasting about
+150 ms, which meets the old busy timeout. A deterministic separate-process
+test identifies its actual status reader in the kernel lock table and
+exercises the real dispatch write. The repair retries only COMMIT of the
+same still-active SQLite transaction and bounds controller-side local
+contention handling. It retains DELETE journaling, FULL synchronization
+and the 150 ms connection busy timeout. New slow-transaction and lock-owner
+diagnostics exclude SQL and task content. Delegated children suppress
+bytecode so runtime imports cannot alter the sealed tree.
+
+The four controlled provider journeys passed with separate API and worker
+processes using DELETE mode. A second rehearsal passed two distinct
+ordinary bug reports with two browser clients and complete API/worker
+restarts between them, using real fixture Lua and scripted providers.
+These fixtures demonstrate reusable behavior and are separate from the
+unstarted real flight-path repair. The additional contention/interruption
+checks pass. Full final suites, kernel-bound opt-ins, candidate staging and
+the bounded campaign record remain in progress.
+Private evidence is under
+`/home/rich/.local/share/TwichUI-Workbench/campaign-rehearsal.AoPlSkKQ`.
+
 ## November 6, 2026 — Flight-path package restored after SQLite commit contention
 
 Owner approval bound `f507278`, checkpoint `8dcb17c` and the expanded

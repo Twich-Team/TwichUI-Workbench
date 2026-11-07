@@ -1,12 +1,13 @@
 """Opt-in rehearsal of the delegated browser driver on the four pinned cases."""
 from contextlib import contextmanager
 import json
+import multiprocessing
 import os
 from pathlib import Path
 import socket
 import subprocess
-from threading import Event, Thread
 import time
+import urllib.request
 from uuid import uuid4
 
 import pytest
@@ -36,18 +37,27 @@ def serve(app):
         from workbench.api import AUTHORITIES
         authority = f"127.0.0.1:{listener.getsockname()[1]}"
         AUTHORITIES.add(authority)
-        thread = Thread(target=server.run, kwargs={'sockets': [listener]}, daemon=True)
-        thread.start()
+        app.state.engine.dispose()
+        process = multiprocessing.get_context("fork").Process(
+            target=server.run, kwargs={'sockets': [listener]}, daemon=True)
+        process.start()
         try:
             end = time.monotonic() + 5
-            while not server.started and time.monotonic() < end:
-                time.sleep(.02)
-            assert server.started
+            opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+            while time.monotonic() < end:
+                try:
+                    with opener.open(f'http://{authority}/api/session', timeout=.2) as response:
+                        assert response.status == 200
+                    break
+                except OSError:
+                    time.sleep(.02)
+            else:
+                raise AssertionError("Disposable API process did not start")
             yield f'http://127.0.0.1:{listener.getsockname()[1]}'
         finally:
-            server.should_exit = True
-            thread.join(5)
-            assert not thread.is_alive()
+            process.terminate()
+            process.join(5)
+            assert not process.is_alive()
             AUTHORITIES.remove(authority)
 
 
@@ -64,15 +74,16 @@ def test_delegated_journeys(store, installed, tmp_path, monkeypatch):  # noqa: F
     database = Path(store.url.database)
     database.chmod(0o600)
     with store.connect() as connection:
-        connection.exec_driver_sql('PRAGMA journal_mode=WAL')  # Disposable fixture only.
+        assert connection.exec_driver_sql('PRAGMA journal_mode').scalar_one() == 'delete'
     policy = acceptance_policy.build_policy(json.loads((ROOT / 'ops/acceptance-input.json').read_text()))
     path = tmp_path / 'policy-browser.json'
     path.write_text(json.dumps(policy))
     phase = tmp_path / 'fixture-phase'
     phase.write_text('')
-    calls = []
-    stopped = Event()
-    errors = []
+    processes = multiprocessing.get_context("fork")
+    calls = processes.Queue()
+    stopped = processes.Event()
+    errors = processes.Queue()
     counted = dict(prompt_tokens=40, completion_tokens=10, reasoning_tokens=0, total_tokens=50)
     by_choice = {case['choice']: case for case in policy['cases']}
 
@@ -82,7 +93,7 @@ def test_delegated_journeys(store, installed, tmp_path, monkeypatch):  # noqa: F
         value = {**case['fixtureResponse'], **{k: packet[k] for k in
                  ('input_sha256', 'evidence_sha256', 'policy_sha256')}}
         assert packet['evidence_sha256'] == case['evidenceSha']
-        calls.append((choice, 'planning', case['provider']))
+        calls.put((choice, 'planning', case['provider']))
         return value
 
     def local(self, packet, schema, expected_model):
@@ -102,7 +113,7 @@ def test_delegated_journeys(store, installed, tmp_path, monkeypatch):  # noqa: F
                 raise codex_provider.Hold('unavailable')
             return controlled(packet), counted
         choice, edit = current_edit
-        calls.append((choice, 'implementation', 'codex'))
+        calls.put((choice, 'implementation', 'codex'))
         return edit, counted
 
     monkeypatch.setattr(codex_provider, 'connector_path', lambda: None if phase.read_text() == 'codex-off'
@@ -178,7 +189,7 @@ def test_delegated_journeys(store, installed, tmp_path, monkeypatch):  # noqa: F
                                 started_at=at, finished_at=at, outcome='passed',
                                 usage=dict(passed=True, wire_started=True, generated_upper_bound=60)))
                         local_browser_fixture.advance_local(store, Path(store.url.database), 'pass', None, example=None)
-                        calls.append((case['choice'], 'implementation', 'local'))
+                        calls.put((case['choice'], 'implementation', 'local'))
                     else:
                         with pytest.MonkeyPatch.context() as patch:
                             patch.setattr('runpy.run_path', lambda _path: {'checked_limit': lambda _root: None})
@@ -187,23 +198,28 @@ def test_delegated_journeys(store, installed, tmp_path, monkeypatch):  # noqa: F
                 else:
                     worker.tick(store)
         except Exception as error:
-            errors.append(error)
+            errors.put(repr(error))
 
     with serve(create_app(store)) as origin:
         install_offline_guard()
-        thread = Thread(target=advance_worker, daemon=True)
-        thread.start()
+        store.dispose()
+        process = processes.Process(target=advance_worker, daemon=True)
+        process.start()
         try:
             run = subprocess.run(['node', 'e2e/delegated_acceptance.mjs', origin, str(path), str(phase),
                                   str(database), os.environ['WORKBENCH_PREPARATION_CONFIG']],
                                  env=environment(), cwd=ROOT, capture_output=True, text=True, timeout=850)
-            if errors:
-                raise errors[0]
             assert run.returncode == 0, run.stdout + run.stderr
-            assert calls == [(case['choice'], action, case['provider'])
-                             for case in policy['cases'] for action in ('planning', 'implementation')]
+            expected = [(case['choice'], action, case['provider'])
+                        for case in policy['cases'] for action in ('planning', 'implementation')]
+            assert [calls.get(timeout=2) for _ in expected] == expected
             with store.connect() as connection:
                 assert len(connection.execute(select(model_attempts).where(model_attempts.c.purpose == 'planning')).all()) == 4
         finally:
             stopped.set()
-            thread.join(60)
+            process.join(60)
+            if process.is_alive():
+                process.terminate()
+                process.join(5)
+            assert errors.empty(), errors.get_nowait() if not errors.empty() else ""
+            assert process.exitcode == 0

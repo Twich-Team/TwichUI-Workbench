@@ -1,3 +1,21 @@
+# Delivery campaign preparation — November 6, 2026 Mountain time
+
+The owner continued the working-application assignment after checkpoint
+`23825bd`. Following PROJECT_WORKING_PHILOSOPHY.md, diagnose the retained
+failure, repair connected persistence and dispatch defects, rehearse
+separate API and worker processes with controlled providers and the
+installed database settings, run applicable full checks, then prepare
+one bounded repair-and-acceptance campaign. New live generation, source
+disclosure, revised cutover and additional pruning await that campaign.
+The running app and all retained history and recovery evidence stay intact.
+
+The real flight-path report remains required. The app must investigate,
+propose the original-code reproducer and repair, and deliver an independently
+checked implementation through normal decisions. Provider-routing regression
+cases are supporting evidence. Candidate revisions need an explicitly
+approved change envelope, their own seal and verification, and bounded
+task-wide attempts. No permission carries over from the closed live window.
+
 # Working addon bug-fix outcome — November 6, 2026 Mountain time
 
 The owner authorized local implementation and preparation for the complete

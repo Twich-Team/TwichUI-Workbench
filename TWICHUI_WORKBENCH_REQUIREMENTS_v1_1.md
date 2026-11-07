@@ -80,6 +80,17 @@ not grant provider, deployment, addon installation or publication authority.
 
 Exact breadth beyond this required bug-fix journey remains to be agreed. Retain the broader capability vision.
 
+Owner delivery instruction, November 6, 2026 Mountain time. Continue the
+same working-application outcome through connected reliability repairs,
+production-like controlled-provider rehearsal, and one proposed bounded
+repair-and-acceptance campaign. Its explicit revision envelope must retain
+task scope, disclosure, network, provider and administration limits. Each
+revision needs its own commit, inventory, seal, verification and deployment
+receipt. Durable local dispatch and uncertain external execution are distinct
+recovery boundaries. A successful planning turn, SQLite repair, regression
+routing exercise or another installation alone cannot complete acceptance.
+Live generation and a changed cutover require approval of that campaign.
+
 ## Phase B — Gamer-friendly dashboard
 
 Redesign the interface around clear current work, attention needed, backlog, and results. Preserve addon branding and the selected frameless WoW-inspired character. Basic clarity and honest progress are required in Phase A; the broader visual redesign follows the initial working product. Selecting artwork and preparing assets does not change this ordering.

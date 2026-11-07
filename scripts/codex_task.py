@@ -7,6 +7,7 @@ import signal
 import sys
 from threading import Event
 import time
+from sqlalchemy.exc import OperationalError
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'backend'))
@@ -15,6 +16,24 @@ from workbench.codex_runtime import CodexRuntime  # noqa: E402
 from workbench.db import engine_for, proposal_decisions  # noqa: E402
 from workbench.real_package import package_for  # noqa: E402
 from workbench.real_workspace import durable  # noqa: E402
+
+
+def process_with_contention(engine, runtime, stopped, *, busy_seconds=10):
+    """Reconcile the same durable request after a bounded local SQLite refusal.
+
+    process_one recovers first and claims a pending request durably before
+    execute. A committed execution fence can never become pending here.
+    """
+    end = min(runtime.deadline, time.monotonic() + busy_seconds)
+    while not stopped.is_set():
+        try:
+            return real_execution.process_one(engine, runtime, stop_event=stopped)
+        except OperationalError as error:
+            if (getattr(error.orig, "sqlite_errorcode", 0) & 0xFF not in {5, 6}
+                    or time.monotonic() >= end):
+                raise
+            stopped.wait(min(.1, max(0, end-time.monotonic())))
+    return False
 
 
 def main():
@@ -56,7 +75,7 @@ def main():
     runtime.package = dict(package=str(package.root), baseline_sha256=package.hash)
     runtime.grant_deadline = datetime.fromtimestamp(link['run_deadline'], timezone.utc)
     runtime.deadline = min(runtime.deadline, time.monotonic() + link['run_deadline'] - time.time())
-    real_execution.process_one(engine, runtime, stop_event=stopped)
+    process_with_contention(engine, runtime, stopped)
     durable(root / 'lease-controller-result.json', json.dumps({
         'restoration': {'restored': True, 'no_lease': True},
     }).encode())

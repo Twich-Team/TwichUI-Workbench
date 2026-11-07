@@ -31,6 +31,7 @@ def delegated_command(options, command):
     return [
         "/usr/bin/systemd-run", "--expand-environment=no", *options,
         "/usr/bin/env", "-i", "PATH=/usr/bin:/bin", "LANG=C.UTF-8", f"HOME={Path.home()}",
+        "PYTHONDONTWRITEBYTECODE=1",
         *(f"{name}={os.environ[name]}" for name in inputs if name in os.environ),
         *command,
     ]

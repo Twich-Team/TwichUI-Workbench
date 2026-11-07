@@ -42,6 +42,25 @@ try {
   }
   for (const candidate of policy.cases) {
     const context = await browser.newContext({serviceWorkers:'block'});
+    const observer = await browser.newContext({serviceWorkers:'block'});
+    const otherPage = await observer.newPage();
+    const decisions = new Map();
+    context.on('request', request => {
+      if (request.method() === 'POST' && /\/(?:decisions|run-approval)$/.test(request.url()))
+        decisions.set(request.url().endsWith('/decisions') ? 'plan' : 'run',
+          {url:request.url(), body:request.postDataJSON()});
+    });
+    const duplicate = async action => {
+      const request = decisions.get(action);
+      assert.ok(request);
+      const token = await observer.request.get(origin + '/api/session').then(r => r.json());
+      const headers = {Origin:origin, 'X-CSRF-Token':token.csrf_token};
+      const repeated = await observer.request.post(request.url, {headers, data:request.body});
+      assert.equal(repeated.status(), 200, await repeated.text());
+      const stale = await observer.request.post(request.url, {headers,
+        data:{...request.body, command_id:crypto.randomUUID(), binding:'0'.repeat(64)}});
+      assert.equal(stale.status(), 409);
+    };
     const events = [];
     try {
       await runJourney(context, origin, policy, candidate, {
@@ -55,6 +74,7 @@ try {
         async beforeAction(action, data) {
           verify('admit', candidate, action, data);
           if (action === 'plan') {
+            await otherPage.goto(origin + '/intake/' + data.intake);
             const item = await context.request.get(origin + '/api/intake/' + data.intake).then(r => r.json());
             const revision = item.proposals[0].task_contract.scenario_grounding.model_selection.policy_revision;
             for (const change of [
@@ -73,6 +93,7 @@ try {
             }
           }
           if (action === 'run') {
+            await duplicate('plan');
             const item = await context.request.get(origin + '/api/intake/' + data.intake).then(r => r.json());
             const task = item.tasks.find(row => row.kind === 'task');
             reviewRun(data.offer, task, data.proposal, item.decisions[0], candidate, policy);
@@ -91,6 +112,7 @@ try {
           }
         },
         async finish(data) {
+          await duplicate('run');
           const row = await context.request.get(origin + '/api/intake/' + data.intake + '/tasks/' + data.task + '/execution').then(r => r.json());
           assert.equal(checkedProgress(row), true);
           assert.equal(checkedProgress({...row, stage:'settling'}), false);
@@ -105,6 +127,7 @@ try {
       assert.equal(events.filter(event => event === 'reviewed').length, 2);
       assert.equal(events.at(-1), 'checked');
     } finally {
+      await observer.close();
       await context.close();
     }
   }

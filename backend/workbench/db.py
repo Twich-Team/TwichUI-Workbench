@@ -1,6 +1,8 @@
 from contextlib import contextmanager
 import os
+import logging
 import time
+import traceback
 from sqlalchemy.exc import OperationalError
 from pathlib import Path
 
@@ -8,6 +10,23 @@ from sqlalchemy import (Column, ForeignKey, Index, Integer, JSON, LargeBinary, M
                         UniqueConstraint, create_engine, event)
 
 metadata = MetaData()
+log = logging.getLogger("workbench.sqlite")
+
+
+def busy_owners(connection, phase):
+    """Record only lock owners for this database, without SQL or task content."""
+    try:
+        path = Path(connection.engine.url.database)
+        info = path.stat()
+        identity = f"{os.major(info.st_dev):02x}:{os.minor(info.st_dev):02x}:{info.st_ino}"
+        rows = Path("/proc/locks").read_text().splitlines()
+        owners = sorted({int(parts[4]) for row in rows
+                         if len(parts := row.split()) >= 6 and parts[5] == identity
+                         and parts[4].isdecimal()})[:16]
+    except OSError:
+        owners = []
+    log.warning("SQLite busy phase=%s pid=%s connection=%s lock_pids=%s",
+                phase, os.getpid(), id(connection.connection.driver_connection), owners)
 tasks = Table(
     "tasks", metadata,
     Column("id", String, primary_key=True),
@@ -61,13 +80,28 @@ def engine_for(path=None):
         connection.execute("PRAGMA busy_timeout=150")
         connection.execute("PRAGMA synchronous=FULL")
 
+    @event.listens_for(engine, "begin")
+    def started(connection):
+        connection.info["transaction_started"] = time.monotonic()
+
+    @event.listens_for(engine, "rollback")
+    @event.listens_for(engine, "commit")
+    def finished(connection):
+        started_at = connection.info.pop("transaction_started", None)
+        if started_at is not None and (elapsed := time.monotonic()-started_at) >= .1:
+            sites = [(Path(frame.filename).name, frame.name, frame.lineno)
+                     for frame in traceback.extract_stack()
+                     if "/workbench/" in frame.filename and frame.filename != __file__]
+            log.warning("SQLite transaction closed pid=%s connection=%s seconds=%.3f site=%s",
+                        os.getpid(), id(connection.connection.driver_connection), elapsed, sites[-1:])
+
     return engine
 
 
 @contextmanager
 def write_transaction(engine):
     # All writers acquire the lock before reading the revision or queue.
-    # Retry ONLY lock acquisition, before reading or applying any operation.
+    # Lock acquisition may wait before reading or applying any operation.
     # Never replay a transaction body, commit or external effect.
     with engine.connect() as connection:
         deadline = time.monotonic() + 1.0
@@ -79,9 +113,27 @@ def write_transaction(engine):
                 connection.rollback()
                 if getattr(error.orig, "sqlite_errorcode", 0) & 0xFF not in {5, 6} or time.monotonic() >= deadline:
                     raise
+                busy_owners(connection, "begin")
                 time.sleep(min(0.02, max(0, deadline-time.monotonic())))
         try:
             yield connection
+            # A reader can block COMMIT after BEGIN IMMEDIATE and all writes
+            # succeeded. SQLite keeps that same transaction active on BUSY.
+            # Retry COMMIT itself, never the body or an external operation.
+            # SQLAlchemy's commit() ends its transaction on an error, so issue
+            # the SQLite statement first and then close SQLAlchemy's bookkeeping.
+            deadline = time.monotonic() + 1.0
+            while True:
+                try:
+                    connection.exec_driver_sql("COMMIT")
+                    break
+                except OperationalError as error:
+                    if (getattr(error.orig, "sqlite_errorcode", 0) & 0xFF != 5
+                            or not connection.connection.driver_connection.in_transaction
+                            or time.monotonic() >= deadline):
+                        raise
+                    busy_owners(connection, "commit")
+                    time.sleep(min(0.02, max(0, deadline-time.monotonic())))
             connection.commit()
         except BaseException:
             connection.rollback()
