@@ -128,7 +128,8 @@ def test_stateful_report_requires_real_committed_line_inspection_before_plan(
 
     enable_bugs(monkeypatch)
     calls = scripted(monkeypatch, [inspection(), three_observations(False)])
-    request = report();request['description'] += ' Refresh it each time.'
+    request = report()
+    request['description'] += ' Refresh it each time.'
     identity = client.post('/api/intake', headers=headers, json=request).json()['id']
     assert worker.tick(store)
     item = client.get('/api/intake/'+identity).json()
