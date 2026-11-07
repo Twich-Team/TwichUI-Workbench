@@ -8,7 +8,36 @@ Preserve billing, source, network, task approvals, system access and recovery.
 Root files match owner attachments; REFERENCE_DOCUMENTS.md distinguishes historical
 copies. No document or offline result establishes a completed real task.
 
-## Current installed operation —17:56 UTC
+## Current installed operation —18:30 UTC
+
+Installeda2714806b0bb2874976e04743d579e0a986dac7a, tree
+20f1e8b4ef4ee99a67dafa06d30b4f6830b15d67; stage
+`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-a271480`, seal
+89842e5de13fb6db64bfb1f02c9b4c45b6799425158e92c918878b79414e5145.
+R=C/outcome-a271480. All installed gates pass: original79/latest122 checked copies,
+both listeners/TLS/LAN/browser/filters/five probes/foreign-peer rejection; same
+normal authenticated model/key, CA/helper/session grant. Four roles active/disabled
+pending success. Original stores/recovery/history/archives preserved.
+
+Fresh task11 intake708fc58e-2b10-4486-8bed-7b1839e6fd97 dispatched18:30:07 UTC;
+chat driver13509. At checkpoint investigating, no approved plan/repair or real case
+complete. Watch CURRENT stage artifacts/acceptance/bug-flight-paths.jsonl and
+R/bug-flight-paths-driver.txt/journals. Current DB may change; never overwrite it
+with prior122-row copy. All prior10 tasks settled:22 Qwen requests7558 generated/
+80223 prompt, no implementation/Codex turn/uncertainty before11.
+
+Final1268 backend/25 frontend,124 focused/29 installed decoder cases and actual
+native API/worker/browser two-bug restart/concurrency with refs pass. Independent
+Lua original FAIL/candidate PASS covers table/callback/false/nil/method receiver.
+Browser opt-ins23.2/37.2sec pass for checkpoint workflow. Exact unchanged UI108/
+visual10, routing4/readiness/admin48 evidence reused with bound lineage. All363
+tracked files/root owner docs/nonsecret metadata verified. R/offline-verification.json
+binds every log and reuse. No actual addon source/expected fix supplied by developer;
+no native schema0012 migration or expanded source/write/billing/network permission.
+
+Earlier9b/verification-underway states below are historical and superseded.
+
+## Prior installed operation —17:56 UTC
 
 Installed9b0658cf87c8175d5bfc573cc02c82fd91402015, tree
  a487065b7c36afd3fd35d22b6c99e4f72a798184; stage
