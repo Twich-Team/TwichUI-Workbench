@@ -1,321 +1,145 @@
-# Fresh investigation bounds reconciled — November7,19:56 UTC
+# Continue autonomous delivery — November7,2026,20:09 UTC
 
-Standing owner authority permits choosing practical individual operation settings.
-Actual page measurement: repeated Journey requests advance59–110,111–157,158–213;
-three character-bounded pages do not cover requested252-line endpoint. Fresh bug
-consent v4 therefore permits8 local requests/shared600sec (each120sec/2600 total
-completion including1024 reasoning), driver planning wait/reserve11min. Model
-usage is observed/summed across all8; no campaign reset. Old v1–v3 consent cannot
-authorize the new operation. Read45000chars/12files,24-step reproducer, source/write/
-disclosure/task-plan/run/independent checks and billing limits are unchanged.
-Verified inspection-window bound24 follows8x3 requests, not an evidence waiver.
+Read authoritative root PROJECT_WORKING_PHILOSOPHY.md, requirements and standing
+owner direction; EXECUTION/PLAN/PROGRESS and DELIVERY_OUTCOME_AUTHORITY_20261107.md.
+Exact owner attachments are installed byte-identically; REFERENCE_DOCUMENTS.md
+identifies authority. No campaign clocks/counts/revision/testing ceilings or routine
+renewal. Checkpoints/session interruption are not stops. All preserved billing,
+source, approval, network, real admin permissions and recovery protections remain.
 
-190 focused/build and actual native normal-browser process/restart/concurrency
-checks pass. Final complete backend/frontend, Chromium/visual and both browser
-opt-ins running on frozen code. No new activation/live call yet; installedb7624e2
-idle/protected and latest134-row settled history preserved. No real bug/provider
-case complete;13 tasks34 Qwen requests18807 generated/133035 prompt, no prior
-repair/Codex/uncertainty. Generic paging and source-context-only proof retain22844
-source chars/10751 counted prompt tokens inside32768; generation simulated and
-only local authenticated count metadata contacted. Initial incorrect80-line
-measurement expectation corrected to actual whole-line character-bound pages.
+## Actual outcome and operation
 
-Continue final checks/identity/seal/checked134-row cutover/fresh flight-path journey
-under standing authority, then provider cases/durable result/restart/normal next
-eligible bug. New candidate identity will be recorded before activation. Earlier
-four-request/five-minute values describe previous versions, not fresh operation.
-
-# Task13 settled; verified cached paging repair — November7,19:51 UTC
-
-No real bug/provider case complete. Task13 intake9fa60357-7184-44cf-b6de-bbda712f6bf8,
-model48fc6927-fd12-465e-8efe-394734539fb8 definitively finished19:44:12 with4 valid
-inspections, no proposal/approval/repair/uncertainty.4781 generated/25198 prompt.
-Total13 tasks34 requests18807 generated/133035 prompt; zero implementation/Codex.
-Installedb7624e2 remains protected/active. Latest settled134 rows/schema0012/28tables
-SHA bfee6f4d2ee1ff7d7e790ff42d028c87f1f1549e5aab566ea61544d907e631c2.
-Normal model authenticated/key matches after settlement. Copy134 forward, never130.
-C/outcome-b7624e2/attempt-13-accounting.json and outcome-ledger.json preserve facts.
-
-Source context count worked in real Qwen requests (latest7560 prompt inside32768),
-but it repeated long read prefixes. App's fixed-size reader restarted at requested
-start; source-memory merging also omitted next-line/requested-range metadata.
-New generic paging skips only an exact contiguous previously returned prefix when
-unread requested lines remain; holes/different files are never inferred. Entirely
-cached/narrow rereads remain possible. Provenance is validated against earlier
-committed windows and retained visibly beside exact merged source. No addon result,
-plan content, write/scope/approval or source-disclosure authority is invented.
-
-150 focused/build and corrected actual native API/worker/normal browser/restart/
-concurrency checks pass33.11sec, now deliberately repeat a read, advance its page,
-correct a rejected proposal, and complete two checked FIXTURE bugs within4 requests.
-First native fixture lacked larger-input controlled count; real guard correctly held,
-fixture updated to match production reset/count/bounds. First suite run interrupted
-before final metadata correction; final frozen-code complete suites now progressing.
-Private generic context proof first incorrectly expected80 lines despite character
-budget, corrected to actual advancing whole-line bounds. Original failures retained.
-No new activation/live request. Continue final suites/seal, checked134-row cutover,
-fresh flight-path task, independent plan review, separate delegated decisions and
-real checked patch; then four provider cases/durable restart/normal next bug.
-Standing owner authority continues without renewal or old campaign ceilings.
-
-Earlier task13-in-progress/130-row/source-memory-complete statements are historical.
-
-# Verified source-memory build installed; task13 active — November7,19:41 UTC
-
-Installed b7624e20b24229046d8f1bc3b92e1fe15847bdf8, tree
- e7e27c663c8febfb18c3aef5149617feb3a35070, stage
-/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-b7624e2,
+NO real flight-path repair or supporting real-provider case complete. Installed
+b7624e20b24229046d8f1bc3b92e1fe15847bdf8, tree e7e27c663c8febfb18c3aef5149617feb3a35070,
+stage /home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-b7624e2,
 seal e0526403ea74892791a73e5e389ac9e69fd41f3b799ed611257f4504ecaedcb4.
-R=C/outcome-b7624e2. Full1293 backend/25 frontend,90 focused/build and actual
-native separate-process/browser/restart/concurrent rehearsal33.85sec pass. First
-native launch omitted WORKBENCH_CG_ROOT, failed before app activity; corrected
-bounded delegated user unit passes/removed. Existing34 parser/108 Chromium/10 visual/
-2 browser opt-ins/4 routing/readiness/48 admin evidence precisely reused because
-unchanged. R/offline-verification.json binds all checks and scope; no applicable
-check omitted. Actual authenticated count-only context proof retains22829 source
-chars,10335 tokens in32768 context, no generation/source transmission externally.
+All4 roles active/disabled pending accepted success. Original review roles stopped.
+No provider/job/repair active or uncertain. Current history API list/detail has a
+known500 on task13 diagnostic shape; state/network/model protections remain intact.
 
-All installed gates pass: original79/latest130 checked copies, same schema0012,
-both listeners/TLS/LAN/browser/filter/five isolation probes/foreign connector peer,
-normal authenticated model/key/helper/CA/nonsecret auth-config metadata unchanged.
-Roles active/disabled pending acceptance. Ledger updater initially used wrong key
-revisions; corrected to verified_revisions. Pre-activation seal/check/history record
-existed before service activation. Private correction diagnostic retained.
+Task13 intake9fa60357-7184-44cf-b6de-bbda712f6bf8/model48fc6927-fd12-465e-8efe-394734539fb8
+settled19:44:12,4 valid inspections4781 generated/25198 prompt, no proposal/approval/
+repair. Repeated long range still restarted partial prefix; source-memory merging
+omitted continuation fields. All13 tasks34 Qwen requests18807 generated/133035 prompt,
+zero implementation/Codex. Task1 invalid historical field UNKNOWN, task6 exact
+endpoints UNKNOWN; do not invent either. Original requests, failures and usage kept.
 
-Fresh task13 dispatched19:40:25 via normal app; intake
-9fa60357-7184-44cf-b6de-bbda712f6bf8, driver98136. Read current stage
-artifacts/acceptance/bug-flight-paths.jsonl and R/bug-flight-paths-driver.txt.
-No real repair/provider case complete. Previous12 tasks30 Qwen requests14026 generated/
-107837 prompt are settled; no implementation/Codex/uncertainty. CURRENT live DB
-changes with task13: do not copy historical130 over it. Review any app-generated
-plan independently before delegated plan/run decisions as described below; never
-supply addon solution/reproducer. Continue real journey and four provider cases,
-durable result/restart/normal next supported bug. Standing autonomy continues.
+Current settled store S/artifacts/workbench.sqlite3:134 rows/schema0012/28tables,
+SHA bfee6f4d2ee1ff7d7e790ff42d028c87f1f1549e5aab566ea61544d907e631c2.
+Original review.sqlite3:79rows/schema0012,
+SHA4b889a9e8ea11f8683b5750934b73ab12a6293e58ccd72433a8c490a06202204.
+Copy latest134 forward, never130 or earlier. Model/key normal authenticated200/
+unauth401 after settlement. Every original store, recovery copy/archive preserved.
 
-Earlier task12/source-verification-underway statements below are historical.
+C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a.
+Active outcome-ledger.json preserves34 requests and13 attempts/verified revisions;
+original campaign ledger/clock immutable historical. Standing reference
+A=7f10158b0d3eb1ae5314eae423a73562b5ddd331, not exact-candidate permission.
+Prepared ac76aea stage is UNACTIVATED: /home/rich/TwichUI-Workbench/.local/m5-review/
+everyday-outcome-ac76aea, sealcc1a94c1016f77155d5ddc6e4cfbfa66ab6302b742f96bd7fe7a1e1ad2cbaf99.
+Its preflight found500; it lacks final diagnostic repair and must not activate.
 
-# Source context repair — November7,2026,19:30 UTC
+## Current final repair and verification
 
-Task12 definitively settled19:18:40: four valid read-only inspections, no plan,
-approval, repair or uncertain activity.4832 generated/13658 prompt; cumulative12
-settled tasks30 real Qwen requests14026 generated/107837 prompt, zero Codex turns.
-All four task12 responses had a separate reasoning channel; private reasoning
-text was neither parsed nor retained. No real flight-path/provider case complete.
-Current installed9da8bce remains protected/active; latest settled store130 rows,
-schema0012/28tables SHA f8a22bf41345c001f95c640568c7fe21fb3afb7aa497b620108b85ecb828888f.
-Copy this forward, never prior126. Original79/recovery copies remain unchanged.
+Source-memory exact committed lines retained/deduplicated/bounded24000; conflict
+rejects. Repeated inspection advances over only previously verified contiguous
+prefix, with requested start/end, actual window/next/cached-prefix metadata visible.
+Narrow or entirely cached rereads remain possible; holes/other paths not skipped.
+Readonly source authority, write authority and approved expected behavior separate.
+Actual count-only source proof C/pagination-context-proof.json: Journey pages59–110,
+111–157,158–213; source22844 chars/count10751 tokens inside32768, no generation.
 
-Concrete defect: stateless follow-ups discarded or shortened earlier exact source,
-causing repeated overlapping Travel/Journey reads. New source_memory.py retains
-bounded exact committed lines, deduplicates overlap, rejects conflicting provenance,
-prioritizes current reads and reports omissions honestly without changing source or
-write/approval authority. Requests expose remaining calls/time/read budget. Bug-only
-local input64KiB preserves source beside schema; responses stay24KiB, generation2600
-including reasoning1024,4 requests/shared300sec, reads45000chars/12files unchanged.
-Larger requests use installed authenticated non-generating input_tokens endpoint
-and current props context before generation: strict count <=22000 and reserved
-output/context room; unavailable/malformed/over-budget holds before generation.
-Other providers/planning retain24KiB. No new external source disclosure.
+Fresh bug receipt v4 discloses8 requests/shared600sec, each120sec/2600 completion
+including1024 reasoning; browser wait/reserve11min. Previous3 read turns insufficient
+for those whole-line/6500char pages. v1–v3 consent rejected; fresh normal delegated
+consent required. Source45000chars/12files,24 windows/24-step reproducer, native
+scope/write/behavior checks unchanged. No campaign budget reset or new disclosure.
+Local bug request64KiB only; >24KiB uses exact supported authenticated local
+/v1/chat/completions/input_tokens plusprops; missing/malformed/overbudget holds
+before generation. Output stays24KiB; all other provider envelopes24KiB.
 
-90 focused tests/build pass. Real local COUNT-ONLY proof (no generation) retains
-11436/16349/22829 source chars in35387/40965/48669-byte follow-ups, counted6602/
-8136/10335 prompt tokens against32768 context. Full suites and native separate-
-process/browser rehearsal running; do not call them complete until logs confirm.
-C/source-memory-{focused-final,check,default-tests,native-process}.log and
-source-memory-context-proof.json bind evidence. Current source changes unactivated.
-Standing autonomous delivery continues, no owner engineering renewal needed.
+Known500 cause: nested context_budget diagnostic incompatible with existing scalar
+public diagnostics. Final writer now records context_prompt_tokens/capacity_tokens.
+Read-only history projection flattens only known historical count shape; unsupported
+structures explicitly unavailable/private. Raw stored history/authority is unchanged.
+No migration or schema change. C/outcome-ac76aea/diagnostic-history-copy-proof.json
+proves ALL16 saved intake list/detail HTTP reads pass on verified134-row copy, exact
+before/after/original fingerprint matches, original nested evidence still present,
+no model/provider/source transmission. Original500 journal/private failed preflight
+retained. Normal new installed page1 must pass; no security gate weakened.
+Previous network/browser/TLS/filter checks may use readable page2 only with exact
+known-baseline-error-preflight.json and corrected complete-history copy proof.
+This documents diagnosed old app failure; it is not permission to accept500 in new app.
 
-This section supersedes older task12-in-progress and126-row statements below.
+Final100 focused/history tests, build, new native separate API/worker/browser two
+checked FIXTURE bugs/restart/concurrency pass34.14sec. Current complete1303 expected
+backend/25 frontend suite progressing; inspect C/diagnostic-history-default-tests.log,
+not assume complete. Prior ac76 source1296/25 and190 focused pass; new source needs
+final full run. New108 Chromium/10 visual pass for identical frontend; old backend
+scalar-fixture behavior unchanged by projection, final actual native/copy/opt-ins
+cover repaired read path. Browser bug opt-in first omitted required EVERYDAY fixture
+flag (empty model catalog), no provider; corrected both flags running. Exact scripts/
+logs named diagnostic-history-*.log. Two default backend opt-ins (routing/readiness)
+retain unchanged precise C/derived-reads-* proof; new native covers changed planner.
+Parser34 cases/bootstrap/event/oracle/admin48 unchanged and retained. No applicable
+check may be omitted. Raw failed and interrupted local verification retained.
 
-# Continue autonomous delivery — November7,2026,19:04 UTC
+## Next connected steps
 
-Read exact root PROJECT_WORKING_PHILOSOPHY.md, requirements and standing owner
-direction, then EXECUTION/PLAN/PROGRESS and DELIVERY_OUTCOME_AUTHORITY_20261107.md.
-Owner autonomous delivery continues: no campaign clocks/counts/revision/testing
-ceilings or routine engineering renewal. Checkpoints are not stops. Preserve all
-billing/source/network/task-approval/system-access/recovery protections. Root
-references match owner attachments exactly; REFERENCE_DOCUMENTS.md defines authority.
+Freeze final source, complete suites/opt-ins, save candidate/identity/inventory/seal
+and verification before activation. Use b7624e2 R templates, actual previous stage
+b7624e2, latest134 history, attempt/revision14 and all prior IDs including48fc6927.
+Include unactivatedac76 evidence roots in new accounting (old53+ac76two+newtwo=57).
+New frontend JS index-_zdTECLP.js/CSS index-CBKHT43W.css; bind network checks to sealed
+assets. Original79 and latest134 checked backups/config inode bindings; grant/helper,
+model/key, source/credential metadata and physical4GiB recovery reserve beforecutover.
+Do not repeat historical conditional archives. Record known previous500 handling,
+require strict NORMAL new API history/both listeners/TLS/browser/filter/five isolation
+probes/foreign-peer rejection after new activation. No live dispatch before all gates.
 
-## Current installed operation —19:15 UTC
+Then fresh real flight-path first via normal app, independent plan review BEFORE
+separate delegated plan/run. Driver waits awaiting-independent-plan-review; inspect
+actual provider-generated reproducer and committed source. Must verify initial route
+eligibility, learning first flight-master visit, refresh later visit through actual
+addon behavior, never directly assigned expected/derived state. Write private stage
+artifacts/acceptance/bug-plan-review.json<=4096 with A/seal/intake/plan.binding/
+review_digest and3 exact criteria/index/reason rows only if valid. No developer addon
+solution/reproducer. Original FAIL/candidate PASS/full addon suite/reviewable saved
+patch required. Acceptance checker currently demands both expected true/false; do not
+force meaningless booleans. Repair a demonstrated defective check without weakening
+criteria if a valid app plan shows a different scalar behavior.
 
-Installed9da8bce1da132fb86b5f2891c2f6d0b428f7f14b, tree
-ddbddf43ac9b6555d031c15f5e88096db4152418,
-stage `/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-9da8bce`, seal
-6ff72ccb227dfaac3cb5f22fb6baa856b22c43e8faa008ed7857584d1672e888.
-R=C/outcome-9da8bce. All installed gates pass original79/latest126 checked copies,
-both listeners/TLS/LAN/browser/filter/five probes/foreign-peer rejection, same
-normal authenticated model/key/CA/helper. Roles active/disabled pending acceptance.
+After real bug: codex-once,qwen-once,codex-with-local-fallback,qwen-with-codex-fallback
+in sealed order; NONE complete yet. Only permitted pre-generation switches; all known
+usage and task scope shared. Never replay partial/uncertain/successful actions.
+Success: durable result/history/restart/next supported bug without registration,
+normal model/key, fallbackOff via normalUI, no temp units/drop-ins, bothaddresses,
+enable4 verified roles and leave separate stable app installed. Unsafe cutover/network/
+data/uncertainty: safely settle, close ingress, supported rollback preserves newest
+store/evidence and restores original79/build/firewall/model. Ordinary settled failure
+is an engineering problem, not an owner renewal gate.
 
-Fresh task12 driver51293 dispatched19:15 UTC; inspect current stage acceptance/
-bug-flight-paths.jsonl for intake ID and R/bug-flight-paths-driver.txt/journals.
-No real repair/provider case complete. Prior11 tasks settled26 requests9194 generated/
-94179 prompt, no implementation/Codex/uncertainty. Current DB may change: never
-copy prior126-row snapshot over it. Real reasoning channel behavior remains to be
-verified in this new live turn; private text must not be retained or exposed.
+## Preserved operating facts
 
-Final1280 backend/25 frontend/136 focused/34 decoder cases, actual eventful native
-API/worker/browser/restart/concurrency and committed-bootstrap isolated readiness
-pass. R/offline-verification.json binds final source/fixtures/failures/exact reuse.
-366 tracked release files/root owner documents and nonsecret metadata verified.
-Prior0b unactivated stage preserved. No model turn for final candidate before this
-fresh dispatch. Continue under standing authority, no old campaign cutoff.
-
-Earlier installeda271480/verification-underway statements below are historical
-and superseded by this section.
-
-## Prior state
-
-No real flight-path fix or supporting real-provider case complete. Installed app:
-commit a2714806b0bb2874976e04743d579e0a986dac7a, tree
-20f1e8b4ef4ee99a67dafa06d30b4f6830b15d67, stage
-`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-a271480`, seal
-89842e5de13fb6db64bfb1f02c9b4c45b6799425158e92c918878b79414e5145.
-All four roles active/disabled pending acceptance; both addresses and all last
-installed history/TLS/browser/filter/isolation/foreign-peer gates passed.
-Original review roles stopped; original store and every recovery copy preserved.
-
-Private C=`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a`.
-R=C/outcome-a271480. Active outcome-ledger.json imports historical campaign accounting;
-original campaign ledger/clock immutable historical, no active numerical ceiling.
-
-Task11 intake708fc58e-2b10-4486-8bed-7b1839e6fd97/model attempt
-0056a7fd-e182-4e92-ab89-66692da636ed definitively finished18:31:38 UTC. Driver13509
-exited held2. Four requests: inspection, rejected positional/capture target plan,
-inspection, rejected target plan. Positional paths used strings such as return/1;
-first plan selected captured output without installing capture (retained setup
-ops were table,set,table,set; first call had no preparation). No approval/repair/
-uncertainty.1636 generated/13956 prompt. R/attempt-11-accounting.json and journals.
-All11 tasks26 real Qwen requests9194 generated/94179 prompt; no implementation or
-Codex turn. Task1 historical invalid field UNKNOWN; task6 exact endpoints UNKNOWN.
-Do not pretend later diagnostics recovered those original facts.
-
-Latest settled CURRENT store artifacts/workbench.sqlite3:126 rows/schema0012,
-logical SHA4c5e7f8a1cb0557ccf677095087e265420f9d419be646846362408c7294be588.
-Copy this forward, never prior122/118/etc stores. Original review.sqlite3 remains
-79 rows/schema0012 SHA4b889a9e8ea11f8683b5750934b73ab12a6293e58ccd72433a8c490a06202204.
-Normal authenticated model/key checked after settlement. No live request remains.
-
-## Connected revision now being verified
-
-Typed result targets separate explicit return_value/client_field/captured_argument
-from numeric position and nested path; results retain provider expected/incorrect
-scalars. Compiler computes only indices/read union, never behavior/results/write
-scope/permission. Strict numeric positions, missing/mixed/unsafe/extra fields reject;
-complete legacy data remains compatible. Single-key draft is an explicit tagged
-union; only absent alternatives become null, never missing plan content. All native
-independent validators,24-step/write/source/approval bounds remain.
-
-Bug-only Qwen reasoning now requests1024 tokens inside the UNCHANGED2600 total,
-with supported enable_thinking/deepseek separation. Current Qwen3.8 template/server
-metadata and installed parser support controls; R/reasoning-support-preflight.json
-records metadata-only proof. Real reasoning behavior NOT YET VERIFIED. Reasoning
-text never parsed as plan or retained; only presence/budget metadata and aggregate
-usage. Non-bug decoding unchanged. Per-task4 requests/shared300sec/each120sec remain
-explicit operational consent, not delivery caps. Browser planning wait330sec.
-
-Actual test_nav.lua replaces CreateFrame; old FireEvent tracked only original
-frames. New generic bug_frame_events.lua records actual event registrations and
-handlers on replacement table frames, preserves original frames/avoids delegated
-factory double delivery, honors unregister/hooks/nil handlers. Committed startup
-is preserved; supplementation starts after selected setup for explicit task events.
-No handler/event/flight knowledge/expected result is invented. Independent oracle
-hash includes helper. Current known fixture limitation: virtualized factory rawget
-semantics are not general game compatibility; no in-game claim. No SQLite/schema0012
-or journal migration. Native24-step/data/write/disclosure bounds unchanged.
-
-136 focused checks pass; check/build pass. Separate API/worker/normal browser native
-rehearsal passed32.88sec with overridden-frame actual events, refs, two checked
-fixture bugs across restart/concurrent activity.29 earlier reference decoder cases
-and final34 typed/tagged cases pass with installed C++ converter/parser, no model.
-Source packet proof C/typed-events-namespace-budget.json:20710/23101 bytes,
-6823/3415 source chars; initial schema1035, planning10433 bytes. Simulated only.
-Full final backend/frontend passed1280/25 in C/typed-events-default-tests.log.
-Final eventful native rehearsal31.46sec uses actual compact one-key outcomes and
-a separate controlled reasoning channel, verifies no thought text retention, two
-checked fixture bugs/restart/concurrency/events/refs. First final rehearsal failed
-only its stale expected error string for two-key ambiguous tagged input; app
-correctly rejected it with no proposal/task/decision. Updated exact-shape assertion
-passed; original failure retained. Production bytes unchanged from0b7b96e; only
-native fixture/controller and this handoff differ. No revised live task12 yet.
-
-Generic ACTUAL committed navigation bootstrap readiness passed in isolation,
-C/nav-bootstrap-readiness-v2.json/log: original project archive, exact129-line prefix,
-no addon patch/provider/flight-path behavior. First wrapper omitted mandatory usage
-log and reported error despite rc0; corrected owned log/cgroup run passes, original
-failure retained. Never count this as real task acceptance. Frame unit covers
-original/replaced/delegated factories, registration/unregister/hooks/errors and args.
-
-## Next actions
-
-Current suites complete; inspect existing logs without redundant reruns. Save final
-candidate/inventory/seal and precise verification lineage before activation. Reuse
-uninvalidated108 Chromium/10 visual/routing4/readiness/admin48; new native eventful
-process and focused/parser/Lua checks cover changed compiler/harness. Last two
-browser opt-ins passed23.2/37.2sec on unchanged frontend/HTTP flow. Retain every failure.
-
-Use R/stage.py/common.sh/preflight.sh/install.sh/network.sh/source-proof.py/
-verify-final.py/driver-case.sh/rollback.sh templates. New previous stage a271480,
-new evidence_roots51, attempt/revision12, append0056a7fd-e182-4e92-ab89-66692da636ed
-prior ID. New private R/release name binds exact commit/tree/seal; copy original79
-and latest126 with checked backups. Root files exact owner attachments. Verify
-normal key/model, helper/grant, source and credential metadata, seals, physical
-recovery room; do not rerun historical conditional archives.
-
-Fresh flight-path case first after installed gates, with current outcome authority
-7f10158b0d3eb1ae5314eae423a73562b5ddd331 (standing reference, not exact-candidate
-approval), all actual prior IDs and positive sequence. No former campaign cutoff.
-Never replay uncertain/partial/successful work. Investigate ordinary settled failures
-and renew fresh bindings after meaningful correction, no engineering renewal.
-
-When awaiting-independent-plan-review appears, inspect app-generated program and
-committed sources. Must establish initial route eligibility, learning at first
-flight-master visit, refresh at later visit through actual addon behavior; no direct
-assigned expected state. Then only if valid write current stage artifacts/acceptance/
-bug-plan-review.json <=4096/private binding authority/seal/intake/plan.binding/
-review_digest and exact3 criteria/index/reason rows. Driver uses separate delegated
-browser plan/run decisions. Never developer-write addon patch/reproducer. App must
-prove original failure/candidate behavior/full addon suite and saved reviewable patch.
-Acceptance helper currently expects both true/false expected values; actual PlanNow
-has walkOnly, but do not force a meaningless Boolean or relax criteria to get a pass.
-After real bug, four actual supporting cases codex-once,qwen-once,
-codex-with-local-fallback,qwen-with-codex-fallback; none complete yet. Only pre-generation
-switching, shared accounting/scopes, no replay after any generation.
-
-Success: verify restart/durable history/result and next supported bug discovery
-without registration (controlled two-bug proof is supporting, not second real bug),
-normal model/key restoration, temporary drop-ins/units gone, fallback Off via normal
-UI, both addresses/filters and enable verified roles. Leave separate stable stage
-installed; development checkout stays independent. Unsafe installation/network/data/
-uncertainty: safely settle, close ingress and use R/rollback.sh original app/history/
-firewall/model, retaining newest store/unique diagnostics. Ordinary engineering
-failure does not itself require owner approval or terminate assignment.
-
-## Preserved boundaries
-
-Loopback http://127.0.0.1:9487/; LAN https://10.0.0.9:9487/, enp4s0/10.0.0.0/24,
-gateway10.0.0.1. No client cert/passphrase, full subnet operator trust; HTTPS CA same.
-CA crt at /home/rich/.local/share/TwichUI-Workbench/everyday-install-20261106-tls/
-workbench-home-lan-ca.crt, SHA06:E8:DE:82:AF:EA:0A:86:57:65:70:D1:02:4B:0D:DC:89:D3:8E:9C:9B:03:1F:95:F0:EE:CC:9D:32:E7:71:BD.
-Owner remote page-load00:35:07 UTC reused only after unchanged fresh topology/CA/
-TLS/filter checks. No public/router-forward/model/connector LAN exposure. Preserve8765.
-Normal QwenPID3300469/authenticated loopback8080. Unix connector /run/twichui-workbench-codex/
-connector.sock mode0700, exact worker-cgroup peer; foreign sameUID peer rejected before bytes.
-
+http://127.0.0.1:9487/ and https://10.0.0.9:9487/, enp4s0/10.0.0.0/24/gateway10.0.0.1,
+forwardingOff. Whole-subnet operator trust accepted, no clientcert/passphrase.
+CA /home/rich/.local/share/TwichUI-Workbench/everyday-install-20261106-tls/workbench-home-lan-ca.crt
+fingerprint06:E8:DE:82:AF:EA:0A:86:57:65:70:D1:02:4B:0D:DC:89:D3:8E:9C:9B:03:1F:95:F0:EE:CC:9D:32:E7:71:BD.
+Remote owner page-load00:35:07 saved under everyday-delegated-live-1fdee91, reuse only
+after unchanged fresh topology/CA/TLS/filter gates. Preserve8765, model8080loopback
+auth only, connector Unix/private0700/exact worker cgroup peer, no model/connectorLAN.
 Helper /usr/local/sbin/twichui-workbench-admin SHA
-1fd4a561188560242d5cb5df9bd583d8c922cfa4282e4bd1e46b8dca04bc3afb root-owned755,
-session78 grant expiry1794612571, boot563fe147-ff3a-479e-ac73-65783aee2249. Fixed
-validated operations only, no self-expansion/general root. Application runs as Rich.
-Codex0.166.0 pinned SHA b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8.
-Auth/config contents never read; metadata unchanged since revision3 restoration.
-Earlier config inode/mtime change cause unknown, preserve unrelated settings.
-
-Flight-path source stays local Qwen. Codex support disclosure examples/signatures/
-test-lines1–120 only. Existing signed-in included allowance, no API/extra credits/
-purchases/reload/subscription changes. Owner0/reloadOff snapshots not locked facts;
-accepted snapshot/internal-retry limitation remains. Two affirmative preturn reads,
-primary valid below reserve; explicit-null secondary narrow exception, supplied
-secondary validated. No per-turn included lock claim. No PR/push/merge/publication
-or live game-addon installation. Broader product/live Codex bug repair/in-game/
-draft PR/other task types unfinished; styling then audit only after functional gate.
-
-Earlier detailed lineage preserved in history/before-typed-events-20261107-CONTINUATION.md.
+1fd4a561188560242d5cb5df9bd583d8c922cfa4282e4bd1e46b8dca04bc3afb root:root755,
+grant session78/boot563fe147-ff3a-479e-ac73-65783aee2249 expires1794612571(Nov13),
+fixed validated scope/no expansion; app Rich. Codex0.166.0 SHA
+b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8.
+Auth/config contents never read; metadata unchanged since revision3 restoration;
+earlier config inode/mtime change cause UNKNOWN. Existing signed-in included usage,
+owner0credits/reloadOff reported snapshots, accepted snapshot/internal-retry limits,
+2 affirmative reads/primarybelow90%/narrow explicit-null-secondary exception supplied
+window validated. No per-turn included lock claim, API/extra credits/purchases/reload/
+subscription changes. Flight source LOCAL Qwen only; Codex support disclosures fixed
+examples/signatures/test-lines1–120. No publication/push/PR/merge or live-addon install.
+Broader product/live Codex bug repair/in-game/draftPR/other task types unfinished.
+Styling follows functional gate, then audit; neither begun. Earlier detail preserved
+in history/before-diagnostic-history-20261107-CONTINUATION.md and prior checkpoints.

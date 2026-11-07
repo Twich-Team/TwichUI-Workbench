@@ -1,6 +1,7 @@
 """Authoritative local intake/receipts. Provider work lives in planning_worker."""
 import base64
 import hashlib
+import math
 import struct
 from datetime import datetime
 import zlib
@@ -166,6 +167,32 @@ def retained_source_failure(job):
     ))
 
 
+def diagnostics_view(raw):
+    """Read-only scalar projection; preserve original private diagnostics.
+
+    Early context-count records used a nested object. Flatten that exact known
+    shape without migrating history. Unknown structures remain private and are
+    explicitly unavailable, never interpreted as task or execution authority.
+    """
+    if not isinstance(raw, dict):
+        return dict(diagnostics_unavailable=1)
+    result = {}
+    for key, value in raw.items():
+        if key == 'context_budget' and isinstance(value, dict):
+            if (set(value) == {'prompt_tokens', 'context_tokens'}
+                    and all(type(v) is int and v > 0 for v in value.values())
+                    and value['prompt_tokens'] <= value['context_tokens']):
+                result.update(context_prompt_tokens=value['prompt_tokens'],
+                              context_capacity_tokens=value['context_tokens'])
+            else:
+                result['diagnostics_unavailable'] = 1
+        elif isinstance(value, (str, int, float)) and not (type(value) is float and not math.isfinite(value)):
+            result[key] = value
+        else:
+            result['diagnostics_unavailable'] = 1
+    return result
+
+
 def view_in(connection, identity):
     row = require(connection, intakes, identity)
     jobs = [dict(j) for j in connection.execute(select(planning_jobs).where(
@@ -200,7 +227,7 @@ def view_in(connection, identity):
                 model_attempts.c.backend.is_not(None))
             .order_by(model_attempts.c.started_at.desc(), model_attempts.c.id).limit(10)).mappings().all()
     return dict(provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
-        created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, diagnostics=j['payload'].get('diagnostics', {})) for j in jobs],
+        created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],
         proposals=[proposal_view(connection, dict(p)) for p in connection.execute(select(proposals).where(
             proposals.c.intake_id == identity).order_by(proposals.c.revision.desc())).mappings()
             if not retained or p['revision'] != retained['revision']],

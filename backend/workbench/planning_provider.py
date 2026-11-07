@@ -324,7 +324,7 @@ class LocalProvider:
                         or capacity < 4096 or count > min(22000, capacity-2600-1024)):
                     raise PlanningUnavailable('Local context exceeds the verified planning bound; no generation started.',
                                               'context_budget')
-                self.diagnostics['context_budget'] = counts
+                self.diagnostics.update(context_prompt_tokens=count, context_capacity_tokens=capacity)
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
             encoded_body, {'Authorization': 'Bearer '+secret, 'Content-Type': 'application/json'})
         self.diagnostics['generation_state'] = 'uncertain'

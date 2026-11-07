@@ -1,3 +1,16 @@
+# History display defect diagnosed and repaired locally — November7,20:09 UTC
+
+Nested new context count broke scalar public job diagnostics after task13. Writer
+flattened; readonly public projection repairs browsing without changing stored
+history or authority, unknown structures private/explicitly unavailable. All16 actual
+intakes/list pages/details pass on verified134-row copy, unchanged logical fingerprint.
+100 focused/build/new native process pass, final full suite running.108 Chromium/10
+visual pass identical frontend; final opt-ins repeated with required fixture flags.
+Current installedb7624e2 idle/protected but history500 remains until verified fix;
+preparedac76 unactivated/known defective, do not deploy. No real case complete,
+no owner decision needed.13 tasks34 Qwen requests18807 generated/133035 prompt;
+ordinary connected repair continues. Previous failures/interrupted runs preserved.
+
 # Fresh investigation bounds reconciled — November7,19:56 UTC
 
 Standing owner authority permits choosing practical individual operation settings.
