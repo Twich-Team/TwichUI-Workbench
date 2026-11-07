@@ -1,3 +1,36 @@
+# Delivery campaign running — November 7, 2026 UTC
+
+Following PROJECT_WORKING_PHILOSOPHY.md, the owner confirmed availability.
+The single campaign opened **2026-11-07T04:35:45.612Z**. New admissions
+end at **18:35:45.612Z** and restoration ends at **20:35:45.612Z**.
+The private `delivery-campaign-7b5963a/campaign-clock.json` records the
+original boot ID and uptime; never replace or restart it. The ledger
+and deployment receipt are in that same private operator directory.
+
+The exact approved archive was copied, independently restored and all
+412 original-path lookups verified before pruning only its two matching
+original directories. A routine operator comparison was corrected to
+compare the same root names in canonical order; all 470 entries matched
+the approved inventory without any scope or manifest change.
+
+Initial candidate `cbddecf` is installed temporarily for acceptance.
+Both checked history copies match the original 79-row fingerprint.
+Setup used 2,555,904 counted bytes, with 614,605,040 bytes of headroom.
+All five named probes cleaned up; protected unit bytes, real service
+filters, worker confinement, private connector peer rejection, TLS,
+actual assets, both listeners, Host/Origin/CSRF rejection and exact LAN
+firewall scope passed. Prior separate-device LAN confirmation was reused
+under unchanged network/CA conditions. The four roles remain disabled
+at boot until successful closeout. The original store is preserved.
+
+Attempt 1 is `bug-flight-paths`, intake
+`f3f45977-e4da-4563-b260-4cf565661273`, in the installed normal app.
+The driver is active; Qwen planning was running at this checkpoint.
+Watch its create-only JSONL receipt and inspect the generated plan before
+writing the bound independent review. Do not replay this invocation.
+No provider case is complete. Keep the original limits, settle/restore
+on a gate failure and use only eligible approved revisions/attempts.
+
 # Delivery campaign approved; awaiting initial availability — November 7, 2026 UTC
 
 Following PROJECT_WORKING_PHILOSOPHY.md, the owner approved the exact

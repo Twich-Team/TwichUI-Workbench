@@ -2,6 +2,14 @@
 
 November 6, 2026 Mountain time.
 
+- November 7 UTC: the approved campaign is running from 04:35:45 UTC,
+  with new admissions ending at 18:35:45 and restoration ending at
+  20:35:45. The exact archive and independent restore passed; original
+  history was preserved. Candidate `cbddecf` passed installed network,
+  browser and isolation gates. The real flight-path bug is attempt 1
+  through normal app intake; Qwen planning is in progress. No acceptance
+  case is complete. The later pre-opening entries below are historical.
+
 - November 7 UTC: the owner approved the exact delivery campaign at
   `7b5963a` for candidate `cbddecf`. Fresh seals, administrator authority,
   settled original history, capacity, Qwen authentication and network/

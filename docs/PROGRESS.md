@@ -1,3 +1,16 @@
+## November 7, 2026 UTC — Campaign opened and initial installation verified
+
+The owner confirmed availability. The fixed campaign clock opened at
+04:35:45.612 UTC; admissions end at 18:35:45.612 and restoration at
+20:35:45.612. Exact two-directory archive, independent restore and 412
+original-path lookups passed before scoped pruning. Checked backup and
+working store preserve the original 79-row fingerprint. Initial installed
+candidate `cbddecf` passed service/probe, kernel, browser, TLS, history,
+asset and LAN gates. Existing separate-device LAN evidence remains valid.
+First real flight-path intake is investigating with Qwen. Case completion
+and the working-app outcome remain open. See the latest handoff and the
+private `delivery-campaign-7b5963a` clock, ledger and deployment receipt.
+
 ## November 7, 2026 UTC — Approved campaign preflight
 
 The owner approved checkpoint `7b5963a`, candidate `cbddecf` and the
