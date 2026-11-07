@@ -50,8 +50,7 @@ Original79 SHA4b889a9e8ea11f8683b5750934b73ab12a6293e58ccd72433a8c490a06202204.
 
 ## RUNNING NOW — do not dispatch another attempt
 
-Controller20/revision21, driver exec session79734. Intake47be390f-783c-4d8e-806b-
-4e16ef0960ad; modela91c491b-d7dd-4fa8-9429-5a14c1bd0b5f. Started23:48:46,
+Controller20/revision21, driver exec session79734. Intake47be390f-783c-4d8e-806b-4e16ef0960ad; modela91c491b-d7dd-4fa8-9429-5a14c1bd0b5f. Started23:48:46,
 first server task45091, real first response completed23:50:06. Citation validation
 passed and investigation-diagnosis.json retained. Request2 constructs strict plan.
 Model diagnosis is hypothesis, not reproduction/approval; none of those occurred.

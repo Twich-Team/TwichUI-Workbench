@@ -1,3 +1,12 @@
+# Current facts — November7,23:51 UTC
+
+Installed application1bc2f31 verified1394backend/25frontend/build/145focused/native;
+all21 history entries preserved/readable after restart. Real task20 passed its
+source-diagnosis validation and is constructing a plan. NO real repair or0/4provider
+case complete. See CURRENT_STATUS.md and CONTINUATION.md for live IDs/evidence and
+next steps; the dated entries below are historical facts, not competing current
+instructions. Standing autonomous authority continues without campaign renewal.
+
 # Settled task19; exact citation schema and preparse retention — November7,23:39 UTC
 
 No real flight-path repair/provider case complete. Installed d4f4812 remains healthy
