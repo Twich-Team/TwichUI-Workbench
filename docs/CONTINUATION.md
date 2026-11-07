@@ -1,3 +1,29 @@
+# Delivery campaign approved; awaiting initial availability — November 7, 2026 UTC
+
+Following PROJECT_WORKING_PHILOSOPHY.md, the owner approved the exact
+campaign document at `7b5963a` for initial candidate
+`cbddecff94aefd42830604b40cf22225500a7147`. The source, dormant stage,
+file/link/browser/archive seals and unchanged approval bytes passed fresh
+preflight. The existing root-owned helper hash and session-78 grant match;
+the grant covers the full campaign. The original review services are active,
+the 79-row history is settled with its recorded fingerprint, and normal
+loopback Qwen authentication passed without generation. LAN interface,
+routes, forwarding, CA fingerprint, pinned CLI, resolver and protected
+rollback units were checked. The addon research checkout is clean at the
+bound commit. Capacity remains 504,755,170 counted bytes; the approved
+installation allowance leaves 568,986,654 bytes before the named archive.
+
+Private preflight evidence and campaign-specific operator scripts are at
+`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a`.
+The asynchronous initial availability question is pending. **The campaign
+clock has not opened.** No archive, cutover, service/firewall change,
+provider generation or task transmission occurred in this preflight.
+After the owner confirms availability, recheck freshness, record the
+single UTC/boot/uptime clock and ledger, then perform the exact approved
+archive and installation gates. Start with `bug-flight-paths`. Do not
+reset the clock on a repair or replay uncertain work. Preserve the exact
+approved document; record execution in separate receipts and continuity.
+
 # Bounded delivery campaign prepared — November 6, 2026 Mountain time
 
 Following PROJECT_WORKING_PHILOSOPHY.md, continue the same working-application

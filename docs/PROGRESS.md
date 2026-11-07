@@ -1,3 +1,14 @@
+## November 7, 2026 UTC — Approved campaign preflight
+
+The owner approved checkpoint `7b5963a`, candidate `cbddecf` and the
+bound delivery campaign. Fresh read-only checks passed exact seals,
+unchanged approval bytes, protected helper/grant, settled 79-row history,
+clean committed addon, capacity, normal model authentication and the
+network/rollback baseline. Private receipts and scoped operator scripts
+are in `~/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a`.
+Initial availability confirmation is pending. The campaign clock is
+unopened, and no live generation, archive or cutover occurred.
+
 ## November 6, 2026 — Sealed campaign candidate and complete readiness
 
 Source `cbddecf` and stage `everyday-campaign-cbddecf-bounded` are

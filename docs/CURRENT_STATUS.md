@@ -2,6 +2,13 @@
 
 November 6, 2026 Mountain time.
 
+- November 7 UTC: the owner approved the exact delivery campaign at
+  `7b5963a` for candidate `cbddecf`. Fresh seals, administrator authority,
+  settled original history, capacity, Qwen authentication and network/
+  rollback baseline passed. Initial owner availability is pending; the
+  16-hour clock has not started. No campaign archive, installation or
+  live generation has occurred. See the latest [handoff](CONTINUATION.md).
+
 - The connected reliability repairs and controlled rehearsals are ready
   for one bounded delivery campaign. Source `cbddecf` passed the complete
   backend/frontend suites, three backend opt-ins, complete Chromium/visual
@@ -10,8 +17,8 @@ November 6, 2026 Mountain time.
   providers. [Readiness](DELIVERY_CAMPAIGN_READINESS_20261106.md)
 - The [combined campaign request](DELIVERY_CAMPAIGN_APPROVAL_20261106.md)
   binds the exact sealed stage, 16 hours, eight attempts, three revisions,
-  a proposed 1 GiB installation allowance and one exact browser-evidence
-  archive. Approval is pending. The real flight-path task remains unstarted.
+  an approved 1 GiB installation allowance and one exact browser-evidence
+  archive. Initial availability is pending. The real flight-path task remains unstarted.
 - The historical lock owner remains unknown. The reproducible commit
   contention is repaired and lock-owner diagnostics are available for
   future incidents. The running app is the preserved loopback review
