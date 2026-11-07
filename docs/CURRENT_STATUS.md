@@ -2,13 +2,26 @@
 
 November 6, 2026 Mountain time.
 
+- Candidate `2446199` is sealed for one combined installation and acceptance
+  decision. Workbench now has a local development path for plain-language
+  offline Lua bug reports, reviewed scope, an original-code reproduction,
+  separate repair approval, independent candidate checks and a persistent
+  diff. Controlled Qwen and Codex paths passed. The everyday deployment
+  is still the restored loopback build.
+- The real acceptance report is navigation assuming all flight paths are
+  unlocked. The expected behavior is per-character knowledge learned and
+  refreshed at flight-master visits. The app has not attempted the repair.
+  The exact package covers one Qwen-only bug trial and the four supporting
+  provider cases, with history copy, a conditional archive, scoped HTTPS,
+  delegated browser checks and rollback. [Installation decision](BUG_FIX_INSTALL_APPROVAL_20261106.md)
+
 - The approved read-only Codex diagnostic settled in connector-equivalent
   confinement. The only hold was an explicitly null secondary quota window.
   The service affirmed ordinary included usage and the other required
   checks passed. The window is closed and the second slot stayed unused.
   The owner approved a narrow exception and the local connector implements
   it. Verification with the revised policy is offline. The next authorized
-  assignment must establish live eligibility before cutover.
+  installed acceptance must establish live eligibility before sending task source.
   [Live diagnostic and policy decision](CODEX_ELIGIBILITY_LIVE_RESULT_20261106.md)
 - The owner-approved installation of `8d17534` passed the scoped TLS,
   remote home-LAN access, history copy and installed filter checks. The
@@ -41,7 +54,7 @@ November 6, 2026 Mountain time.
   snapshot uncertainty remain recorded. Live signed-in eligibility and A8
   acceptance remain open. API-key billing, extra credits, purchases, auto
   reload and upgrades remain excluded.
-- Supported existing Lua regression tests remain the candidate's release
+- Supported existing Lua regression tests remain the earlier release
   scope. Functional acceptance also requires a real addon bug to go from
   ordinary app intake through investigation, approval, implementation,
   independent checks and a reviewable fix without developer hand-preparation.

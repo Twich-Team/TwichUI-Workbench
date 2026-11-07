@@ -1,3 +1,44 @@
+# Sealed ordinary bug-fix candidate — November 6, 2026 Mountain time
+
+The owner reported a real navigation bug. The addon assumes all flight paths
+are known. The desired behavior is to learn the paths the character knows
+during a flight-master visit and refresh on later visits. The exact report
+and three acceptance criteria are in `ops/bug-acceptance-input.json`. The
+development session inspected relevant-file selection, not a proposed addon
+solution. The real app must investigate and produce the fix.
+
+Local checkpoints `4377645`, `fdb8372` and `2446199` connect ordinary intake, a bounded
+committed-source search, reviewed behavior and scope, original-code
+reproduction, separate implementation consent, independent candidate checks
+and a persistent local diff. Two distinct Lua fixture shapes reached results.
+Controlled Codex also produced a checked two-file patch. Native smoke
+checks caught a missing environment operation and the real navigation
+fixture's dependency on existing committed test setup. The final
+candidate reuses the bounded setup and started the real fixture in
+confinement. The
+four earlier provider journeys passed the browser rehearsal again with
+controlled provider outcomes. The full real flight-path journey and
+real-provider acceptance are open.
+
+The exact new stage is
+`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-bugfix-2446199`.
+Use the latest bound installation request. The proposed archive is
+conditional and its current sources remain in place. The administrator
+status matched the installed helper and login session 78. The live review
+services and Qwen retained their PIDs, the restored app serves
+`http://127.0.0.1:9487/`, and the original history verified at 79 rows.
+No new provider calls, task source transmission, privileged transition,
+installation, archive or publication occurred. The prior acceptance
+authority is closed.
+
+Await the exact combined approval, then continue the same outcome through
+preflight, installation, the four provider cases and the actual bug.
+Record a read-only review of the generated bug plan against the three
+criteria before the delegated browser can approve it. Keep all
+published-output, live-game and extra-credit permissions separate.
+After success and a settled restart leave a handoff for visual styling,
+followed by the full requirements audit. [Exact approval record](BUG_FIX_INSTALL_APPROVAL_20261106.md)
+
 # Codex quota exception and next functional outcome — November 6, 2026 Mountain time
 
 The owner authorized an explicitly null secondary quota window when both

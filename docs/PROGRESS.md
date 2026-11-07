@@ -1,3 +1,26 @@
+## November 6, 2026 — Ordinary bug workflow and sealed acceptance
+
+- Connected issue intake, bounded committed-file investigation, one optional
+  consented follow-up, scope review, actual original reproduction and separate
+  run review. Both providers use the existing isolated Runtime and independent
+  verification. An unsupported or ambiguous report cannot earn a run.
+- The fixed Lua fixture interpreter checks multiple observations over a sequence
+  of calls. The native real-harness smoke test found and then verified the
+  correction for assigning a fixture environment to a loaded chunk. The
+  revision retains the confined loader and excludes a general Lua tool.
+  The addon load manifest and an existing test's frozen setup allow
+  the actual navigation fixture to start in native confinement.
+- Controlled tests exercised a returned value and a client callback over
+  successive calls, a held reproduction, persistent results after reopening
+  the store, and a checked two-file Codex proposal. Browser screenshots on
+  desktop and phone show the ordinary issue, separate approvals and diff.
+- The owner supplied the real flight-path report. The sealed `2446199` package
+  binds the report and local source envelope, existing four provider cases,
+  independent plan review, history and scoped HTTPS. Forecast and exact archive
+  inventory preserve the existing evidence ceiling. Real acceptance and
+  cutover require the combined approval.
+  [Approval record](BUG_FIX_INSTALL_APPROVAL_20261106.md)
+
 ## November 6, 2026 — Quota exception and functional acceptance decision
 
 - Implemented the owner-approved exception for an explicitly null secondary
