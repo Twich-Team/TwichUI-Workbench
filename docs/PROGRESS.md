@@ -1,3 +1,30 @@
+# Standing direction installed; delivery continues — November 7, 2026 UTC
+
+Exact owner documents are installed and compared byte-for-byte. AGENTS and the
+active execution/plan/handoff/status references now use standing authority;
+older caps/renewal stops are historical. Other-checkout edits are preserved.
+Source-follow-up implementation and active control/retention reconciliation
+continue; no new real task, cutover or completion is claimed. Read CONTINUATION.md
+for current state. Earlier entries below are historical where superseded.
+
+# Current authority: finish the working outcome — November 7, 2026 UTC
+
+Follow [the independently stated owner outcome authority](DELIVERY_OUTCOME_AUTHORITY_20261107.md).
+Former campaign time, attempt, revision and cumulative local request/testing
+ceilings are revoked; do not return for another campaign extension. Preserve
+all usage/evidence and bounded task/operation safeguards, resolve uncertainty,
+renew normal delegated decisions, verify/seal before deployment, and own
+ordinary connected repairs through the real outcome. Earlier cap-exhaustion
+holds and the unapproved extension request below are historical/superseded.
+
+Verified starting point: original loopback app/model/firewall restored,
+latest settled campaign history 93 rows (schema 0012), three finished Qwen
+planning requests / 1,171 generated tokens, no implementation or Codex turn.
+`a8e2004` passed full checks but returned a real limitation due to comment-heavy
+source excerpts omitting allowed implementation. Fix generic source discovery
+and exercise the actual process/browser path before the next activation.
+No case is complete. Preserve the accepted simple interface and broader gaps.
+
 # Restored; real bug and provider acceptance unfinished — November 7, 2026 UTC
 
 Following PROJECT_WORKING_PHILOSOPHY.md, ordinary repairs were owned through
