@@ -16,7 +16,7 @@ from workbench.planning_response import Evidence, ResponseValidationError, wire_
 REQUESTS = 4
 MAX_FILES = 12
 READ_CHARS = 45000
-WIRE_TEXT = 7000
+WIRE_TEXT = 24000
 INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/[A-Za-z0-9_./-]+)\.lua')
 
 
@@ -228,29 +228,8 @@ def inspect(packet, requests):
 
 def next_wire(packet, original, feedback, windows, finding, matches=None):
     _, wire = bug.planning_request(packet, original, feedback)
-    remaining = WIRE_TEXT-sum(len(m['text']) for m in (matches or []))
-    requested = {w['path'] for w in windows}
-    for item in wire['files']:
-        if item['path'] in requested:
-            item['excerpts'] = [{k: v for k, v in w.items() if k not in {'path', 'sha256'}}
-                                for w in windows if w['path'] == item['path']]
-            remaining -= sum(len(e['text']) for e in item['excerpts'])
-    for item in wire['files']:
-        if item['path'] in requested:
-            continue
-        excerpts = []
-        for old in item['excerpts']:
-            lines = []
-            for line in old['text'].splitlines():
-                if len('\n'.join([*lines, line])) > min(remaining, 500):
-                    break
-                lines.append(line)
-            if lines:
-                text = '\n'.join(lines)
-                excerpts.append(dict(line=old['line'], through_line=old['line']+len(lines)-1,
-                                     text=text, coverage='partial earlier context'))
-                remaining -= len(text)
-        item['excerpts'] = excerpts
+    from workbench.source_memory import retain
+    retain(wire, packet, windows, WIRE_TEXT-sum(len(m['text']) for m in (matches or [])))
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
              'omitted ranges do not establish absence. No addon change or behavioral result has been produced.')
@@ -295,6 +274,12 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
         for index in range(REQUESTS):
             if should_stop() or time.monotonic() >= adapter.ends_at:
                 raise PlanningUnavailable('The source investigation was stopped or timed out.', 'cancelled')
+            wire['investigation_progress'] = dict(request_number=index+1,max_requests=REQUESTS,
+                requests_after_this=REQUESTS-index-1,last_request=index+1==REQUESTS,
+                remaining_seconds=max(0,int(adapter.ends_at-time.monotonic())),
+                source_characters_read=read_chars,source_characters_remaining=max(0,READ_CHARS-read_chars),
+                note='Use retained exact source instead of requesting the same visible lines again. '
+                     'Propose a plan once evidence is sufficient; never invent missing behavior to meet a budget.')
             if index and parent:
                 identity = str(uuid5(UUID(parent.identifier), f'committed-source-turn-{index}'))
                 evidence = Evidence(parent.directory.parents[2], identity, schema,
@@ -307,7 +292,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
                 evidence.record('request-schema', schema_sha256=hashlib.sha256(
                     json.dumps(effective, sort_keys=True).encode()).hexdigest(),
                     require_inspection=bool(wire.get('coverage', {}).get('require_inspection')),
-                    corrective=bool(wire.get('validation_feedback')))
+                    corrective=bool(wire.get('validation_feedback')),
+                    request_number=index+1,requests_after_this=REQUESTS-index-1)
             response_added = False
             try:
                 raw, model, basis = adapter.generate(wire, schema, expected_model=expected_model)

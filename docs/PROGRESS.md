@@ -1,3 +1,36 @@
+# Source context repair — November7,2026,19:30 UTC
+
+Task12 definitively settled19:18:40: four valid read-only inspections, no plan,
+approval, repair or uncertain activity.4832 generated/13658 prompt; cumulative12
+settled tasks30 real Qwen requests14026 generated/107837 prompt, zero Codex turns.
+All four task12 responses had a separate reasoning channel; private reasoning
+text was neither parsed nor retained. No real flight-path/provider case complete.
+Current installed9da8bce remains protected/active; latest settled store130 rows,
+schema0012/28tables SHA f8a22bf41345c001f95c640568c7fe21fb3afb7aa497b620108b85ecb828888f.
+Copy this forward, never prior126. Original79/recovery copies remain unchanged.
+
+Concrete defect: stateless follow-ups discarded or shortened earlier exact source,
+causing repeated overlapping Travel/Journey reads. New source_memory.py retains
+bounded exact committed lines, deduplicates overlap, rejects conflicting provenance,
+prioritizes current reads and reports omissions honestly without changing source or
+write/approval authority. Requests expose remaining calls/time/read budget. Bug-only
+local input64KiB preserves source beside schema; responses stay24KiB, generation2600
+including reasoning1024,4 requests/shared300sec, reads45000chars/12files unchanged.
+Larger requests use installed authenticated non-generating input_tokens endpoint
+and current props context before generation: strict count <=22000 and reserved
+output/context room; unavailable/malformed/over-budget holds before generation.
+Other providers/planning retain24KiB. No new external source disclosure.
+
+90 focused tests/build pass. Real local COUNT-ONLY proof (no generation) retains
+11436/16349/22829 source chars in35387/40965/48669-byte follow-ups, counted6602/
+8136/10335 prompt tokens against32768 context. Full suites and native separate-
+process/browser rehearsal running; do not call them complete until logs confirm.
+C/source-memory-{focused-final,check,default-tests,native-process}.log and
+source-memory-context-proof.json bind evidence. Current source changes unactivated.
+Standing autonomous delivery continues, no owner engineering renewal needed.
+
+This section supersedes older task12-in-progress and126-row statements below.
+
 # Verified9da8bce installed; fresh task12 — November7,19:15 UTC
 
 All installed/history/network/browser/isolation/model gates passed; original79 and

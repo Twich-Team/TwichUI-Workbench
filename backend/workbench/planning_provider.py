@@ -19,6 +19,7 @@ from workbench.bug_evidence import BugPlanningResponse
 
 ROOT = Path(__file__).resolve().parents[2]
 MAX_INPUT = 24000
+BUG_INPUT = 65536
 MAX_OUTPUT = 24000
 
 
@@ -168,7 +169,7 @@ class LocalProvider:
         if (issubclass(schema, ScenarioResponse) or schema is BugPlanningResponse) and expected_model is None:
             raise PlanningUnavailable('Grounded local planning requires a saved model selection.', 'model_policy')
         encoded = json.dumps(packet, ensure_ascii=True, separators=(',', ':'))
-        if len(encoded.encode()) > MAX_INPUT:
+        if len(encoded.encode()) > (BUG_INPUT if schema is BugPlanningResponse else MAX_INPUT):
             raise PlanningUnavailable('Planning context exceeds the input budget.')
         # Reuse pilot coordination protocol without importing pilot code or creating files.
         # Shared lifecycle lock prevents a maintenance cycle starting during this one request.
@@ -279,7 +280,8 @@ class LocalProvider:
             body.update(reasoning_budget_tokens=1024, reasoning_format='deepseek',
                         chat_template_kwargs=dict(enable_thinking=True))
         encoded_body = json.dumps(body, separators=(',', ':')).encode()
-        if schema is BugPlanningResponse and len(encoded_body) > MAX_INPUT:
+        request_limit = BUG_INPUT if schema is BugPlanningResponse else MAX_INPUT
+        if schema is BugPlanningResponse and len(encoded_body) > request_limit:
             # Fit source context to the actual serialized request, preserving
             # the report, schema and authority. Never imply a trimmed body is
             # complete; the investigator can request its missing lines.
@@ -290,6 +292,7 @@ class LocalProvider:
                 if not options:
                     break
                 item, part = max(options, key=lambda pair:(
+                    not pair[1].get('current_read', False),
                     pair[1].get('coverage') not in {'requested committed lines', 'partial requested committed lines'},
                     len(pair[1].get('text', ''))))
                 lines = part['text'].splitlines()
@@ -304,13 +307,24 @@ class LocalProvider:
                         part['next_line'] = part['through_line']+1
                 body['messages'][1]['content'] = json.dumps(context, ensure_ascii=True, separators=(',', ':'))
                 encoded_body = json.dumps(body, separators=(',', ':')).encode()
-                if len(encoded_body) <= MAX_INPUT:
+                if len(encoded_body) <= request_limit:
                     break
-        if (issubclass(schema, ScenarioResponse) or schema is BugPlanningResponse) and len(encoded_body) > MAX_INPUT:
+        if (issubclass(schema, ScenarioResponse) or schema is BugPlanningResponse) and len(encoded_body) > request_limit:
             raise PlanningUnavailable('Serialized grounded request exceeds the input budget; narrow the request.')
         if schema is BugPlanningResponse:
             self.diagnostics['input_bytes'] = len(body['messages'][1]['content'].encode())
             self.diagnostics['request_bytes'] = len(encoded_body)
+            if len(encoded_body) > MAX_INPUT:
+                if not hasattr(transport, 'context_budget'):
+                    raise PlanningUnavailable('Exact local context accounting is unavailable; no generation started.',
+                                              'context_budget')
+                counts = transport.context_budget(secret, body)
+                count, capacity = counts.get('prompt_tokens'), counts.get('context_tokens')
+                if (type(count) is not int or type(capacity) is not int or count < 1
+                        or capacity < 4096 or count > min(22000, capacity-2600-1024)):
+                    raise PlanningUnavailable('Local context exceeds the verified planning bound; no generation started.',
+                                              'context_budget')
+                self.diagnostics['context_budget'] = counts
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
             encoded_body, {'Authorization': 'Bearer '+secret, 'Content-Type': 'application/json'})
         self.diagnostics['generation_state'] = 'uncertain'

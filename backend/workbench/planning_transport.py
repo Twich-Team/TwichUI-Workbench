@@ -186,3 +186,43 @@ class LocalHTTP:
             raise PlanningUnavailable(
                 "Configured local model identity is unavailable.", "model_identity"
             ) from None
+
+    def context_budget(self, secret, body):
+        """Count the exact local chat template without starting inference.
+
+        Both endpoints are fixed loopback, authenticated and share this
+        request's cancellation/deadline. Neither source nor token IDs enter the
+        response-evidence observer. Unavailable counts hold before generation.
+        """
+        from workbench.planning_response import strict_json
+
+        observer = self.response_observer
+        self.response_observer = None
+
+        def metadata(path, value=None, limit=262144):
+            data = None if value is None else json.dumps(value, separators=(',', ':')).encode()
+            return strict_json(self.read(urllib.request.Request(
+                'http://127.0.0.1:8080/'+path, data,
+                {'Authorization': 'Bearer '+secret, 'Content-Type': 'application/json'}), limit))
+
+        try:
+            props = metadata('props')
+            size = props['default_generation_settings']['n_ctx']
+            if type(size) is not int or not 4096 <= size <= 1048576:
+                raise ValueError()
+            # Installed count endpoint uses the same chat parser and
+            # tokenize_mixed(add_special=true, parse_special=true) as inference.
+            count = metadata('v1/chat/completions/input_tokens', body, limit=4096)['input_tokens']
+            if type(count) is not int or not 1 <= count <= 65536:
+                raise ValueError()
+            return dict(prompt_tokens=count, context_tokens=size)
+        except PlanningUnavailable as error:
+            if error.reason in {'canceled', 'timeout'}:
+                raise
+            raise PlanningUnavailable('Exact local context accounting is unavailable; no generation started.',
+                                      'context_budget') from None
+        except (ValueError, KeyError, TypeError, IndexError):
+            raise PlanningUnavailable('Exact local context accounting is invalid; no generation started.',
+                                      'context_budget') from None
+        finally:
+            self.response_observer = observer

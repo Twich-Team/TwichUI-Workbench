@@ -31,8 +31,11 @@ def scripted(monkeypatch, answers):
             def models(self, secret):
                 return expected_model
 
+            def context_budget(self, secret, body):
+                return dict(prompt_tokens=8000, context_tokens=32768)  # Controlled count, no provider.
+
             def read(self, request, limit):
-                assert len(request.data) <= 24000
+                assert len(request.data) <= 65536 and limit == 24000
                 system = json.loads(request.data)['messages'][0]['content']
                 assert 'You may request app-owned read-only committed-source search or line inspection' in system
                 assert 'You have no tools' not in system
@@ -272,6 +275,10 @@ def test_source_followup_has_one_claim_two_accounted_requests_and_private_receip
     assert len(calls) == 2 and len(item['provider_activity']) == 1
     assert item['jobs'][0]['attempts'] == 1
     assert calls[1]['inspection_result']['read_only'] is True
+    assert [c['investigation_progress']['request_number'] for c in calls] == [1,2]
+    assert [c['investigation_progress']['requests_after_this'] for c in calls] == [3,2]
+    assert all(c['investigation_progress']['remaining_seconds'] <= 300 for c in calls)
+    assert calls[1]['source_memory']['retained_characters'] > 0
     assert any(e['text'] for f in calls[1]['files'] if f['path'] == PRODUCTION for e in f['excerpts'])
     with store.connect() as connection:
         [attempt] = connection.execute(select(model_attempts).where(model_attempts.c.task_id == identity)).mappings()

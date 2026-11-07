@@ -1,3 +1,16 @@
+# Current November7 continuation —19:30 UTC
+
+No required real-provider acceptance case or real bug repair is complete. Installed
+9da8bce supports the operational paths with offline evidence; actual task12 settled
+four valid Qwen inspections with separate reasoning, no proposal/run/uncertainty.
+Source-memory/context handling repair is under offline verification, unactivated.
+Provider choices/both permitted pre-generation fallback remain required; subscription
+snapshot/internal-retry limitation and all billing/source protections remain.
+Do not treat prior sealed/offline evidence or this status as live Codex bug repair,
+full A8/full product completion. See CONTINUATION/CURRENT_STATUS for current evidence.
+
+Earlier dated report below is historical where superseded.
+
 # A8 signed-in Codex and model routing
 
 ## Current campaign preparation
