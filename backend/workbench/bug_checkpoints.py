@@ -10,7 +10,7 @@ def wire_checkpoints(definitions, references, minimum):
     definitions['CheckpointResult'] = result
     definitions.pop('Observation')  # No flat observation reference remains on the wire.
     definitions['CallCheckpoint'] = dict(type='object', additionalProperties=False,
-        properties=dict(before_call=dict(type='array', minItems=0, maxItems=4,
+        properties=dict(before_call=dict(type='array', minItems=0, maxItems=12,
             items=dict(anyOf=[ref for op, ref in references if op != 'load'])),
             call=next(ref for op, ref in references if op == 'call'),
             observe={'$ref': '#/$defs/CheckpointResult'}),
@@ -38,8 +38,8 @@ def compile_checkpoints(reproducer, validate):
         if not isinstance(item, dict) or set(item) != {'before_call', 'call', 'observe'}:
             reject([index], 'explicit before_call, call and observe fields', None)
         before = item['before_call']
-        if not isinstance(before, list) or len(before) > 4:
-            reject([index, 'before_call'], 'zero to four explicit actions before the observed call', None)
+        if not isinstance(before, list) or len(before) > 12:
+            reject([index, 'before_call'], 'zero to twelve explicit actions; the whole program still has at most24 steps', None)
         for offset, value in enumerate(before):
             step = validate(Step, value, (*location, 'before_call', offset))
             if step.op == 'load':

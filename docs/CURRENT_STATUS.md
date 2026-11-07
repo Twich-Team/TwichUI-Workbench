@@ -10,8 +10,10 @@ history preserved; normal authenticated model/key checked.
 
 Connected revision uses explicit observed-call checkpoints, exact client-root
 context from literal test access, and pruned schemas to preserve more actual code.
-No action/result/permission invented.117 focused and24 actual decoder cases pass;
-complete final suites/native/browser opt-ins underway. No new deployment/live
+No action/result/permission invented.124 focused and29 actual decoder cases pass; table/callback references now support
+actual request-table APIs without code or new authority. Real Lua oracle verifies
+original FAIL/candidate PASS with method/callback/false/nil semantics; native process
+passes serialized references. Full final backend/frontend underway on frozen code. No new deployment/live
 attempt yet. Continue toward real reviewed/checked flight-path fix and provider
 checks. No real case complete; no owner engineering renewal needed.
 

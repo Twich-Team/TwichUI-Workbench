@@ -24,7 +24,7 @@ def fixture_snapshot(value, files, summary):
                     continue
                 before = point.get('before_call')
                 if isinstance(before, list):
-                    fixture['steps'].extend(before[:4])
+                    fixture['steps'].extend(before[:12])
                 if 'call' in point:
                     fixture['steps'].append(point['call'])
                 observed = point.get('observe')
@@ -96,7 +96,8 @@ def fixture_snapshot(value, files, summary):
                 if 'value' in item:
                     row['value'] = scalar(item['value'])
                 if isinstance(item.get('args'), list):
-                    row['args'] = [scalar(v) for v in item['args'][:8]]
+                    row['args'] = [dict(ref=path(v['ref'])) if isinstance(v, dict) and set(v)=={'ref'}
+                                   else scalar(v) for v in item['args'][:8]]
                 row['fields_count'] = len(item.get('fields', [])) if isinstance(item.get('fields', []), list) else None
                 row['method'] = item.get('method') if type(item.get('method')) is bool else False
             else:

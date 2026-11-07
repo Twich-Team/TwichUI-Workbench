@@ -20,13 +20,17 @@ class FixtureField(Data):
     value: Scalar
 
 
+class ArgumentReference(Data):
+    ref: Annotated[Access, Field(min_length=1)]
+
+
 class Step(Data):
     # No free-form program, loader path, or callable supplied by the model.
     op: Literal['load', 'table', 'set', 'stub', 'capture', 'call']
     path: Access = []
     source: LuaPath | None = None
     value: Scalar = None
-    args: Annotated[list[Scalar], Field(max_length=8)] = []
+    args: Annotated[list[Scalar | ArgumentReference], Field(max_length=8)] = []
     fields: Annotated[list[FixtureField], Field(max_length=16)] = []
     method: bool = False
 
@@ -42,6 +46,7 @@ class Step(Data):
                 or (self.args and self.op not in {'stub', 'capture', 'call'})
                 or (self.method and self.op not in {'capture', 'call'})
                 or (self.fields and self.args)
+                or (self.op != 'call' and any(isinstance(a, ArgumentReference) for a in self.args))
                 or any(not f.path for f in self.fields)):
             raise ValueError('Unexpected fixture step data')
         return self
@@ -71,7 +76,8 @@ class Reproducer(Data):
     @model_validator(mode='after')
     def validate_reproducer(self):
         paths = [*(o.path for o in self.observations), *(s.path for s in self.steps),
-                 *(f.path for s in self.steps for f in s.fields)]
+                 *(f.path for s in self.steps for f in s.fields),
+                 *(a.ref for s in self.steps for a in s.args if isinstance(a, ArgumentReference))]
         if any(isinstance(k, str) and (k in FORBIDDEN or k.startswith('__')) for p in paths for k in p):
             raise ValueError('Unsafe fixture access path')
         loads = [s.source for s in self.steps if s.op == 'load']

@@ -45,6 +45,19 @@ def three_observations(client_case):
             fixture["observations"].append(dict(after_step=len(fixture["steps"]),
                                                 source="return", path=[1],
                                                 expected=expected, incorrect=incorrect))
+    if client_case:
+        # Exercise native argument-reference interpretation across processes.
+        # These are ordinary fixture inputs, never an acceptance addon answer.
+        steps, mapping = [], {}
+        for index, step in enumerate(fixture['steps'], 1):
+            if step['op']=='call' and step.get('path')==['Deliver']:
+                steps.append(dict(op='set',path=['FixtureName'],value=step['args'][0]))
+                step=dict(step,args=[dict(ref=['FixtureName'])])
+            steps.append(step)
+            mapping[index]=len(steps)
+        fixture['steps']=steps
+        for observation in fixture['observations']:
+            observation['after_step']=mapping[observation['after_step']]
     return value
 
 

@@ -259,7 +259,7 @@ def test_checkpoint_compilation_rejects_missing_ambiguous_or_unsafe_content(faul
     elif fault=='missing_result':
         point['observe'].pop('expected')
     else:
-        point['before_call']=[dict(op='table',path=['ignored'])]*5
+        point['before_call']=[dict(op='table',path=['ignored'])]*13
     with pytest.raises((ValueError,ResponseValidationError)):
         compiled,_=compile_setup(wire,[dict(path=CLIENT_SOURCE),dict(path=CLIENT_TEST)])
         BugPlanningResponse.model_validate(compiled)
@@ -288,3 +288,58 @@ def test_literal_committed_client_access_paths_are_context_not_guessed_exports()
     actual=client_access_paths(lines,dict(client='c',through_line=6))
     assert [(x['path'],x['line']) for x in actual]==[(['Addon','Widget'],4),(['Real'],6)]
     assert all('unverified' in x['kind'] for x in actual)
+
+
+@pytest.mark.parametrize('method',[False,True])
+def test_reference_arguments_execute_real_table_callback_false_and_nil_in_oracle(tmp_path,method):
+    import subprocess
+    from workbench.bug_evidence import compile_plan, review_digest
+
+    (tmp_path/'!!!TwichUI').mkdir()
+    tests=tmp_path/'tests'
+    tests.mkdir()
+    (tests/'harness.lua').write_text('function MakeClient() return setmetatable({}, {__index=_G}) end\n')
+    original=response(True)
+    r=original['plan']['reproducer']
+    r['steps']=[dict(op='load',source=CLIENT_SOURCE),dict(op='table',path=['Request']),
+        dict(op='set',path=['Request','name'],value='Sam'),
+        dict(op='set',path=['FalseValue'],value=False),dict(op='capture',path=['Notify']),
+        dict(op='call',path=['Deliver'],args=[dict(ref=['Request']),dict(ref=['Notify']),
+                                           dict(ref=['FalseValue']),dict(ref=['MissingValue'])])]
+    r['steps'][-1]['method']=method
+    r['observations']=[dict(after_step=6,source='captured',path=[2],expected='Sam',incorrect='Unknown')]
+    plan=BugPlanningResponse.model_validate(original).plan.model_dump(mode='json')
+    evidence=dict(plan=plan,bootstrap_source='',review_digest=review_digest(plan,''),
+        windows=[dict(path=CLIENT_SOURCE,start=1,end=1)]*4)
+    oracle=compile_plan(evidence)['oracle']
+    (tests/'oracle.lua').write_text(oracle)
+    params='self, request, callback, flag, ...' if method else 'request, callback, flag, ...'
+    receiver=' and self.Request==request' if method else ''
+    code=('function Deliver('+params+') assert(type(request)=="table" and type(callback)=="function" '
+          'and flag==false and select("#",...)==1 and select(1,...)==nil'+receiver+'); '
+          'callback("online", VALUE) end\n')
+    for value,expected in [('"Unknown"','FAIL'),('request.name','PASS')]:
+        (tmp_path/CLIENT_SOURCE).write_text(code.replace('VALUE',value))
+        run=subprocess.run(['lua5.1','-e','ROOT="../!!!TwichUI/";TESTS="./";REPO="../";dofile("oracle.lua")'],
+                           cwd=tests,capture_output=True,text=True,timeout=5)
+        assert 'WB_BEHAVIOR bug-reproducer '+expected in run.stdout,run.stdout+run.stderr
+        assert run.returncode==(1 if expected=='FAIL' else 0)
+
+
+@pytest.mark.parametrize('fault',['empty','unsafe','extra','plain_object','stub'])
+def test_argument_references_cannot_broaden_fixture_authority(fault):
+    value=response(True)
+    step=value['plan']['reproducer']['steps'][-1]
+    step['args']=[dict(ref=['Request'])]
+    if fault=='empty':
+        step['args']=[dict(ref=[])]
+    elif fault=='unsafe':
+        step['args']=[dict(ref=['os','execute'])]
+    elif fault=='extra':
+        step['args']=[dict(ref=['Request'],code='forbidden')]
+    elif fault=='plain_object':
+        step['args']=[dict(name='Sam')]
+    else:
+        step['op']='stub'
+    with pytest.raises(ValueError):
+        BugPlanningResponse.model_validate(value)

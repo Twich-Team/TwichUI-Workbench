@@ -71,6 +71,41 @@ Do not count that mixed-source run as final; the frozen-code rerun is authoritat
 retained. All other code frozen before final checks. No new candidate deployed or
 live attempt11 yet. Continue ordinary engineering under standing authority.
 
+## Table/callback arguments complete the fixture interface —18:22 UTC
+
+Read-only signature inspection verified Journey.PlanNow takes a request table;
+the scalar-only interface could not call it. New ArgumentReference={ref:[bounded
+client/module field path]} is allowed only in call args. Explicit table/set/capture
+actions prepare inputs/callbacks. No code evaluation, filesystem reference or root
+object reference; empty/extra/malformed/forbidden paths and refs in stubs reject.
+Existing native programs remain valid; schema0012/journal boundaries unchanged.
+Oracle resolves refs with raw bounded field reads, preserving false/nil and exact
+argument count for both methods and functions. Model still supplies every action,
+object field, callback selection and result. Native24 steps/write/source/task limits
+and independent expected/incorrect checks remain. Checkpoint before_call allows12
+explicit actions so request tables can be built; whole program still<=24 steps.
+
+124 focused checks pass, including actual Lua original FAIL/candidate PASS with
+real table/callback/false/nil arguments and method receiver. Native separate-process
+browser rehearsal passes with serialized reference inputs, two checked fixture
+bugs/restart/concurrent polling.29 actual decoder cases pass; initial inspection
+schema1202 bytes permits6823 source chars in20127 bytes; plan packet23815/4767 chars.
+No provider contact for these measurements. Check passes; complete final backend/
+frontend is running C/checkpoints-refs-default-tests.log (1271 collected, expect
+1268 pass/3 opt-ins). App code frozen before this run. Prior checkpoint-only full
+run1261/25 passed before reference support; do not label it final reference proof.
+
+Current installed9b0658c remains protected and settled,122-row store preserved.
+No live attempt11 yet. Save candidate, seal/stage, verify current original/latest
+stores, copy122 forward and activate via supported helper after final gates pass.
+Use C/outcome-9b0658c templates: new evidence_roots49, attempt/revision11, append
+08cd682a-dc47-463d-aa04-c487822f409a to prior IDs. New private record and release
+name must bind final commit/tree. Existing Chromium108/visual10/routing4/readiness/
+admin48 receipts remain valid for unchanged UI/runtime/admin code; fresh focused,
+parser/native/browser opt-ins verify new planning/compiler behavior. Earlier
+checkpoint-only browser opt-ins passed23.2/37.2 sec; reference native passed33.01sec.
+All logs/failures retained. Continue without another engineering allowance.
+
 Earlier988/verification-underway statements below are historical and superseded.
 
 ## Prior installed operation —17:43 UTC

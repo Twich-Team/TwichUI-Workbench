@@ -1,3 +1,15 @@
+# Table/callback fixture references — November7,18:22 UTC
+
+Journey.PlanNow request-table signature establishes scalar-only fixture limitation.
+Added bounded call-only client/module field references, explicit input construction,
+forbidden/malformed checks and independent Lua interpretation preserving false/nil/
+argument count/method receivers. No expected value or addon fix supplied. Whole24-
+step/source/write/approval boundaries remain; schema0012 unchanged.124 focused,
+29 installed decoder cases and actual native process/browser pass; full frozen-code
+backend/frontend underway. Prior checkpoint-only full1261/25 is supporting evidence,
+not final reference proof. Still no real bug/provider case complete; installed9b
+protected/latest122-row history preserved. Continue standing outcome without caps.
+
 # Task10 settled; explicit call checkpoints and source-budget repair — Nov7,18:11 UTC
 
 Task10 completed4 requests1330 generated/13034 prompt, rejected2-call/3-observation

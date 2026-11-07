@@ -125,6 +125,9 @@ def wire_schema(model, coverage=None, files=None):
                 variant['required'] = ['op', 'path']
         if op not in ('stub', 'capture', 'call'):
             props['args']['maxItems'] = 0
+        elif op != 'call':
+            props['args']['items']['anyOf'] = [v for v in props['args']['items']['anyOf']
+                if v.get('$ref') != '#/$defs/ArgumentReference']
         if op not in ('stub', 'capture'):
             props['fields']['maxItems'] = 0
         if op != 'set':

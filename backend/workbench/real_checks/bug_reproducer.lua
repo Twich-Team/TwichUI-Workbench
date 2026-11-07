@@ -32,8 +32,16 @@ local function put(root, path, value)
   local owner, key = parent(root, path)
   rawset(owner, key, value)
 end
-local function arguments(step)
-  if #step.fields == 0 then return unpack(step.args, 1, step.args_n) end
+local function arguments(step, root)
+  if #step.fields == 0 then
+    local args = {}
+    for i = 1, step.args_n do
+      local value = step.args[i]
+      if type(value) == 'table' then value = get(root, value.ref) end
+      args[i] = value
+    end
+    return unpack(args, 1, step.args_n)
+  end
   local result = {}
   for _, field in ipairs(step.fields) do
     local node = result
@@ -127,22 +135,22 @@ local function exercise()
     elseif step.op == 'set' then
       put(root, step.path, step.value)
     elseif step.op == 'stub' then
-      put(root, step.path, function() return arguments(step) end)
+      put(root, step.path, function() return arguments(step, root) end)
     elseif step.op == 'capture' then
       captures, captured = 0, nil
       put(root, step.path, function(...)
         captures = captures + 1
         if step.method then captured = values(select(2, ...)) else captured = values(...) end
-        return arguments(step)
+        return arguments(step, root)
       end)
     elseif step.op == 'call' then
       local fn = callable(root, step.path)
       assert(type(fn) == 'function', 'expected a function')
       if step.method then
         local receiver = parent(root, step.path)
-        returned = values(fn(receiver, unpack(step.args, 1, step.args_n)))
+        returned = values(fn(receiver, arguments(step, root)))
       else
-        returned = values(fn(unpack(step.args, 1, step.args_n)))
+        returned = values(fn(arguments(step, root)))
       end
     end
     for observation, item in ipairs(scenario.observations) do
