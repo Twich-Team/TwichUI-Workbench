@@ -6200,3 +6200,16 @@ and settled before history-forward copy; stages/recovery/evidence preserved.
 Fresh attempt5 intake12bd4cc8-626c-46d0-ba72-848e7e6b59fe investigating under
 corrected no-shell/read-only inspection instructions. No real repair completion
 claimed. Continue normal independent plan review and authorized live workflow.
+
+## November7,15:35 UTC — exact reproducer rejection; source-first correction
+
+Attempt5 finished546 generated/3,792 prompt; plan.reproducer had neither load nor
+bootstrap, locally rejected. No approval/execution/uncertainty; normal authenticated
+model verified. Five requests total1,836 generated/20,886 prompt; latest store102
+rows preserved. App-owned source-first grammar for stateful reports and corrective
+feedback for finished single-plan reproducer constraints implemented. Ambiguity,
+unsafe access and scope denials stay terminal; identical rejects stop; all requests
+share four-request/two-minute consent, source/usage/deadline/approval protections.
+67 focused checks and installed converter/parser phase proof passed without model
+loading. Native rehearsal extended to correct missing-load candidates through the
+actual process/browser path. Continue final checks, seal/revise and fresh attempt6.

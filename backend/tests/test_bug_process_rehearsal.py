@@ -100,6 +100,13 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
                 plan=None, question=None, limitation=None,
                 inspection=[dict(path=CLIENT_SOURCE, start=1, end=1) if case['client_case']
                             else dict(query='return')])
+        elif not packet.get('validation_feedback'):
+            # Exercise the actual cross-process correction path: a completed
+            # single-plan candidate omitted its load and cannot be approved.
+            for step in answer['plan']['reproducer']['steps']:
+                if step['op'] == 'load':
+                    step.clear()
+                    step.update(op='table', path=['unused'])
         class Transport:
             seconds = 120
             def models(self, _): return expected_model
@@ -186,8 +193,8 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
             assert len(connection.execute(select(model_attempts).where(
                 model_attempts.c.purpose == "implementation")).all()) == index+1
     assert actors[0] != actors[1] != os.getpid()
-    assert [calls.get(timeout=2) for _ in range(8)] == [('fixture-fault', 'planning'), ('fixture-conflict', 'planning'), *[
-        (case["choice"], phase) for case in cases for phase in ("planning", "planning", "implementation")]]
+    assert [calls.get(timeout=2) for _ in range(10)] == [('fixture-fault', 'planning'), ('fixture-conflict', 'planning'), *[
+        (case["choice"], phase) for case in cases for phase in ("planning", "planning", "planning", "implementation")]]
     with store.connect() as c:
         failures = c.execute(select(intakes.c.id, intakes.c.payload).where(intakes.c.status == 'failed')).all()
         assert len(failures) == 2

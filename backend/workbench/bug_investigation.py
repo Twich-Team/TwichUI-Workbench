@@ -52,6 +52,11 @@ INSTRUCTIONS = (
     'Use visible line numbers, partial-function ranges or literal dependency paths. Source inspection is read-only. '
     'At most four local requests share the investigation deadline; produce a plan when sufficient evidence is available. '
     'Use null for every unused alternative, including inspection. '
+    'When coverage.require_inspection is true, this is a read-only source discovery turn: return inspection only. '
+    'A validation_feedback entry means a completed proposal was rejected locally, never approved or executed. '
+    'Correct the stated constraint using the inspected code, or inspect missing source; do not remove checks or invent results. '
+    'Every reproducer must load its relevant existing source or select the exact supplied client_bootstrap. '
+    'Observation expected/incorrect values are actual scalar results at the selected path, not sentences explaining desired behavior. '
     'For each observation give the expected and a distinct behavior-relevant incorrect scalar; no invented game evidence.'
 )
 

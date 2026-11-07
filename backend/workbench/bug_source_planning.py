@@ -6,16 +6,65 @@ import re
 import time
 from uuid import UUID, uuid5
 
+from pydantic import ValidationError
+
 from workbench import bug_investigation as bug, regression_preparation as source
-from workbench.bug_evidence import BugPlanningResponse
+from workbench.bug_evidence import BugPlanningResponse, Reproducer, Step
 from workbench.planning_provider import PlanningUnavailable
-from workbench.planning_response import Evidence, ResponseValidationError
+from workbench.planning_response import Evidence, ResponseValidationError, wire_schema
 
 REQUESTS = 4
 MAX_FILES = 12
 READ_CHARS = 45000
 WIRE_TEXT = 7000
 INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/[A-Za-z0-9_./-]+)\.lua')
+
+
+def correction(error, raw):
+    """Only a finished, single-plan reproducer error may request a new proposal.
+
+    Ambiguous outcomes, unsafe access and scope/binding denials remain terminal.
+    This supplies validation facts, never missing behavior or an approved plan.
+    """
+    if (not isinstance(raw, dict) or set(raw)-{'finding', 'plan', 'question', 'limitation', 'inspection'}
+            or not isinstance(raw.get('plan'), dict)
+            or any(raw.get(k) is not None for k in ('question', 'limitation', 'inspection'))):
+        return None
+    rules = {value for function in (Reproducer.validate_reproducer, Step.shape)
+             for value in function.__code__.co_consts if isinstance(value, str)}
+    rows = []
+    if isinstance(error, ValidationError):
+        issues = error.errors(include_input=False, include_url=False)
+        if not issues or len(issues) > 4:
+            return None
+        for issue in issues:
+            location = issue['loc']
+            rule = str(issue.get('ctx', {}).get('error', ''))
+            if (location[:2] != ('plan', 'reproducer') or issue['type'] == 'extra_forbidden'
+                    or rule == 'Unsafe fixture access path'):
+                return None
+            # Locations are restricted to schema field names and small indexes;
+            # provider-controlled keys/messages never become system instructions.
+            known = {'plan', 'reproducer', 'description', 'fixture', 'bootstrap', 'client', 'through_line',
+                     'steps', 'observations', 'op', 'path', 'source', 'value', 'args', 'fields', 'method',
+                     'after_step', 'expected', 'incorrect'}
+            if any(not (part in known if type(part) is str else type(part) is int and 0 <= part <= 512)
+                   for part in location):
+                return None
+            rows.append(dict(path=list(location), constraint=issue['type'],
+                             rule=rule if rule in rules else 'Conform to the declared field type and constraint.'))
+    elif isinstance(error, ResponseValidationError) and str(error) in {
+            'The report needs initial and successive action-driven observations.',
+            'The report needs a repeated action to check refreshing.'}:
+        rows.append(dict(path=list(error.path), constraint='behavior_coverage', rule=str(error)))
+    else:
+        return None
+    previous = json.loads(json.dumps(raw))
+    previous.pop('finding', None)
+    return dict(rejected=True, approved=False, executed=False, errors=rows,
+                previous_candidate=previous if len(json.dumps(previous).encode()) <= 5000 else None,
+                note='This completed candidate was rejected locally. Correct it from committed evidence or inspect missing source. '
+                     'Never invent an observation, load, intended behavior or permission. All original limits remain.')
 
 
 def committed(path, base):
@@ -175,6 +224,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
     """One claim/provider/deadline, distinct durable receipts and shared usage."""
     packet = copy.deepcopy(initial)
     schema, wire = bug.planning_request(packet, original, feedback)
+    if wire['coverage'].get('call_driven'):
+        wire['coverage']['require_inspection'] = True
     parent = adapter.response_evidence
     journals, receipts = [], []
     read_chars = sum(len(e['text']) for f in initial['files'] for e in f['excerpts'])
@@ -183,6 +234,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
     diagnostics = {}
     response_added = True
     original_stop = adapter.stop_event
+    rejected = set()
 
     class Stop:
         def is_set(self):
@@ -210,6 +262,12 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
                 journals.append(evidence)
                 parent.record('source-followup', turn=index+1, evidence_id=identity)
             adapter.response_evidence = evidence
+            if evidence:
+                effective = wire_schema(schema, wire.get('coverage'), wire.get('files'))
+                evidence.record('request-schema', schema_sha256=hashlib.sha256(
+                    json.dumps(effective, sort_keys=True).encode()).hexdigest(),
+                    require_inspection=bool(wire.get('coverage', {}).get('require_inspection')),
+                    corrective=bool(wire.get('validation_feedback')))
             response_added = False
             try:
                 raw, model, basis = adapter.generate(wire, schema, expected_model=expected_model)
@@ -228,9 +286,25 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
                 raise PlanningUnavailable('Source investigation usage is unavailable.', 'accounting')
             try:
                 draft = BugPlanningResponse.model_validate(raw)
-            except ValueError as error:
+                if wire['coverage'].get('require_inspection') and draft.inspection is None:
+                    raise ResponseValidationError('Stateful investigation must inspect committed source before a plan.',
+                        ['inspection'], 'a read-only committed source window', None)
+                if draft.inspection is None:
+                    # Compile/revalidate only; no reproducer or addon execution
+                    # takes place before independent plan and run approvals.
+                    bug.resolve(raw, packet, original, feedback)
+            except (ValidationError, ResponseValidationError) as error:
                 if evidence:
                     evidence.rejected(error, raw)
+                facts = correction(error, raw)
+                stamp = hashlib.sha256(json.dumps(dict(raw=raw, facts=facts), sort_keys=True).encode()).hexdigest()
+                if (facts and index+1 < REQUESTS and stamp not in rejected
+                        and diagnostics.get('generation_state') == 'finished'
+                        and diagnostics.get('accounting_state') == 'complete'
+                        and diagnostics.get('finish_reason') == 'stop'):
+                    rejected.add(stamp)
+                    wire['validation_feedback'] = facts
+                    continue
                 raise
             if draft.inspection is None:
                 return raw, model, basis, packet
@@ -247,6 +321,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
             if read_chars > READ_CHARS:
                 raise PlanningUnavailable('The investigation reached its source-read bound.', 'inspection_limit')
             wire = next_wire(packet, original, feedback, windows, draft.finding, matches)
+            if wire['coverage'].get('call_driven') and not packet.get('inspection_windows'):
+                wire['coverage']['require_inspection'] = True
     finally:
         current = dict(adapter.diagnostics)
         # Failed/current uncertain wire activity has no complete aggregate.

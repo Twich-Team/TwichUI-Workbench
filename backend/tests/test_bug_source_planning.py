@@ -39,6 +39,9 @@ def scripted(monkeypatch, answers):
                 assert 'a read-only inspection request, a plan, a useful question, or a limitation' in system
                 assert 'Missing code is not a real-world question or a limitation' in system
                 assert 'no shell, editing, approval, external-tool or publication authority' in system
+                if packet.get('coverage', {}).get('require_inspection'):
+                    outcomes = json.loads(request.data)['response_format']['json_schema']['schema']['$defs']['BugOutcome']['anyOf']
+                    assert len(outcomes) == 1 and outcomes[0]['properties']['plan'] == {'type':'null','const':None}
                 return json.dumps(dict(id='chatcmpl-controlled-inspection', model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
                     choices=[dict(finish_reason='stop', message=dict(content=json.dumps(value)))])).encode()
@@ -54,6 +57,103 @@ def inspection(path=PRODUCTION):
     return dict(finding='I need the exact committed implementation before proposing the check.',
                 plan=None, question=None, limitation=None,
                 inspection=[dict(path=path, start=1, end=1)])
+
+
+def missing_load():
+    value = response()
+    value['plan']['reproducer']['steps'][0] = dict(op='table', path=['unused'])
+    return value
+
+
+@pytest.mark.usefixtures('installed')
+def test_finished_reproducer_error_can_be_corrected_with_one_claim_and_shared_usage(
+    client, headers, store, monkeypatch,
+):
+    enable_bugs(monkeypatch)
+    calls = scripted(monkeypatch, [missing_load(), response()])
+    identity = client.post('/api/intake', headers=headers, json=report()).json()['id']
+    assert worker.tick(store)
+    item = client.get('/api/intake/'+identity).json()
+    assert item['status'] == 'completed' and not item['tasks'] and not item['decisions']
+    facts = calls[1]['validation_feedback']
+    assert facts['rejected'] and facts['approved'] is False and facts['executed'] is False
+    assert facts['errors'][0]['path'] == ['plan','reproducer']
+    assert facts['errors'][0]['rule'] == 'Select one to six distinct existing Lua sources'
+    with store.connect() as connection:
+        [attempt] = connection.execute(select(model_attempts).where(model_attempts.c.task_id == identity)).mappings()
+    assert attempt['usage']['requests_observed'] == 2 and attempt['usage']['values']['completion_tokens'] == 20
+    assert len(calls) == 2 and item['jobs'][0]['attempts'] == 1
+
+
+@pytest.mark.usefixtures('installed')
+def test_unchanged_rejected_candidate_stops_without_unchanged_repeated_generation(
+    client, headers, store, monkeypatch,
+):
+    enable_bugs(monkeypatch)
+    calls = scripted(monkeypatch, [missing_load(), missing_load()])
+    identity = client.post('/api/intake', headers=headers, json=report()).json()['id']
+    assert worker.tick(store)
+    item = client.get('/api/intake/'+identity).json()
+    assert item['status'] == 'failed' and len(calls) == 2 and not item['proposals']
+    with store.connect() as connection:
+        usage = connection.execute(select(model_attempts.c.usage).where(model_attempts.c.task_id == identity)).scalar_one()
+    assert usage['requests_observed'] == 2
+
+
+@pytest.mark.parametrize('denial', ['unsafe','scope','ambiguous'])
+@pytest.mark.usefixtures('installed')
+def test_security_scope_and_ambiguous_denials_do_not_enter_corrective_generation(
+    client, headers, store, monkeypatch, denial,
+):
+    enable_bugs(monkeypatch)
+    value = response()
+    if denial == 'unsafe':
+        value['plan']['reproducer']['steps'][1]['path'] = ['os','execute']
+    elif denial == 'scope':
+        value['plan']['read_paths'].append('!!!TwichUI/uninspected.lua')
+    else:
+        value['question'] = 'A meaningful conflicting outcome.'
+    calls = scripted(monkeypatch, [value])
+    identity = client.post('/api/intake', headers=headers, json=report()).json()['id']
+    assert worker.tick(store)
+    item = client.get('/api/intake/'+identity).json()
+    assert item['status'] == 'failed' and len(calls) == 1 and not item['proposals'] and not item['tasks']
+
+
+@pytest.mark.usefixtures('installed')
+def test_stateful_report_requires_real_committed_line_inspection_before_plan(
+    client, headers, store, monkeypatch,
+):
+    from test_bug_process_rehearsal import three_observations
+
+    enable_bugs(monkeypatch)
+    calls = scripted(monkeypatch, [inspection(), three_observations(False)])
+    request = report();request['description'] += ' Refresh it each time.'
+    identity = client.post('/api/intake', headers=headers, json=request).json()['id']
+    assert worker.tick(store)
+    item = client.get('/api/intake/'+identity).json()
+    assert item['status'] == 'completed', item['jobs']
+    assert calls[0]['coverage']['require_inspection'] is True
+    assert not calls[1]['coverage'].get('require_inspection')
+    assert not item['tasks'] and len(calls) == 2
+
+
+@pytest.mark.usefixtures('installed')
+def test_corrective_requests_share_the_four_request_operation_bound(
+    client, headers, store, monkeypatch,
+):
+    enable_bugs(monkeypatch)
+    values = [missing_load() for _ in range(4)]
+    for i,value in enumerate(values):
+        value['plan']['reproducer']['description'] += f' Candidate {i}.'
+    calls = scripted(monkeypatch, values)
+    identity = client.post('/api/intake', headers=headers, json=report()).json()['id']
+    assert worker.tick(store)
+    item = client.get('/api/intake/'+identity).json()
+    assert item['status'] == 'failed' and len(calls) == 4 and not item['proposals']
+    with store.connect() as connection:
+        usage = connection.execute(select(model_attempts.c.usage).where(model_attempts.c.task_id == identity)).scalar_one()
+    assert usage['requests_observed'] == 4 and usage['values']['completion_tokens'] == 40
 
 
 @pytest.mark.usefixtures('installed')

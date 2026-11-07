@@ -10,6 +10,36 @@ limits this work. Checkpoints are not stop points. Own ordinary repairs and
 continue through the actual functional outcome. No further owner decision is
 currently needed for engineering/live acceptance/deployment inside standing scope.
 
+## Latest settlement and next connected revision — 15:35 UTC
+
+Attempt5 definitively finished with stop/complete accounting and was rejected at
+`plan.reproducer`: no source load and no committed client bootstrap. No approved
+plan, execution, Codex turn or external uncertainty. Private exact diagnostics:
+installed stage `release/artifacts/runs/planning-evidence-1e2d92be-7efe-4460-9f7e-dab6342af67d/events.jsonl`.
+`outcome-534ca9c/attempt-5-accounting.json` records546 generated/3,792 prompt;
+all five real requests total1,836 generated/20,886 prompt. Latest settled store
+is installed534ca9c `artifacts/workbench.sqlite3`,102 rows/schema0012, logical SHA
+`a4085ab5ca0d59f011b7c58fbfb903633d235d9b9f36cd9fefdc8bb6dce0659b`.
+Normal authenticated model/key verified after settlement. Keep this store forward;
+older98/93-row copies are recovery/history, not latest. Driver29930 exited held.
+
+Current development adds source-first phase for stateful reports, using supported
+exclusive inspection grammar, then bounded same-provider validation feedback for
+finished single-plan reproducer errors. It never fills missing plan data, approves
+an invalid proposal, executes a check before approval, retries ambiguous/unsafe/
+scope-denied results, switches after generation, or resets four-request/two-minute
+operation accounting. Repeated identical rejected candidates stop. Source reads,
+corrections and plan share one claim/deadline/budget; private effective schema and
+reject receipts remain. The normal browser disclosure explicitly covers correction.
+67 focused tests passed, and installed C++ converter/character-level parser passed
+inspection-only and ordinary schemas with no model loaded. First linker invocation
+used absent unversioned library names; versioned installed libraries passed.
+Native separate-process rehearsal now injects missing-load candidates after source
+inspection and corrects them before normal independent plan/run browser decisions.
+Run it and complete applicable final checks, then seal/deploy a new candidate via
+existing supported revision process and fresh attempt6. Preserve original79-row
+rollback and current102-row history. No owner engineering renewal is needed.
+
 ## Current installed revision — 15:30 UTC
 
 Candidate `534ca9c40ae687b19be21b782bf434ffc40c4841`, tree

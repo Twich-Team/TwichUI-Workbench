@@ -1,4 +1,4 @@
-# Workbench current status — November 7, 2026, 15:30 UTC
+# Workbench current status — November 7, 2026, 15:35 UTC
 
 Exact owner reference documents are installed at the operating repository root;
 active guidance and executable defaults use standing autonomous-delivery authority.
@@ -11,13 +11,13 @@ https://10.0.0.9:9487/ passed fresh installed checks with the existing CA and
 
 Complete final verification passed: 1,204 backend, 25 frontend, 108 browser,
 10 visual, 48 admin and all applicable opt-ins. These are offline evidence.
-Real attempt 4 finished with a source limitation, no repair or uncertainty.
-Latest retained history is 98 rows. Conflicting planning instructions are corrected
-and installed after complete suites and process/browser verification passed.
-Fresh attempt5 is now investigating with new bindings; independent plan review
-and checked real repair remain ahead. Four
-requests total 1,290 generated / 17,094 prompt tokens. No checked real repair or
-supporting real-provider case is complete yet.
+Real attempt5 finished but its proposed reproducer omitted source loading/setup;
+it was rejected before approval or repair. Exact diagnostics and102-row settled
+history are preserved. Five requests used1,836 generated/20,886 prompt tokens;
+no implementation or Codex turn. Development now enforces source inspection for
+stateful reports and bounded validation correction, with67 focused checks and
+installed grammar proof passing. Full/process verification precedes the next
+revision. No checked real repair or supporting real-provider case is complete.
 
 Delivery continues through independent plan review, authorized repair and checks,
 provider acceptance, durable result/restart and leaving the verified app usable.

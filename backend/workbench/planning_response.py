@@ -138,7 +138,8 @@ def wire_schema(model, coverage=None, files=None):
     props = result['properties']
     outcomes = []
     fields = ('plan', 'question', 'limitation', 'inspection')
-    for selected in fields:
+    selected_fields = ('inspection',) if isinstance(coverage, dict) and coverage.get('require_inspection') else fields
+    for selected in selected_fields:
         choice = {}
         for field in fields:
             choice[field] = (next(v for v in props[field]['anyOf'] if v.get('type') != 'null')
