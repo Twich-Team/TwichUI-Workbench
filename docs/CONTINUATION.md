@@ -7,7 +7,34 @@ ceilings or routine engineering renewal. Checkpoints are not stops. Preserve all
 billing/source/network/task-approval/system-access/recovery protections. Root
 references match owner attachments exactly; REFERENCE_DOCUMENTS.md defines authority.
 
-## Actual state
+## Current installed operation —19:15 UTC
+
+Installed9da8bce1da132fb86b5f2891c2f6d0b428f7f14b, tree
+ddbddf43ac9b6555d031c15f5e88096db4152418,
+stage `/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-9da8bce`, seal
+6ff72ccb227dfaac3cb5f22fb6baa856b22c43e8faa008ed7857584d1672e888.
+R=C/outcome-9da8bce. All installed gates pass original79/latest126 checked copies,
+both listeners/TLS/LAN/browser/filter/five probes/foreign-peer rejection, same
+normal authenticated model/key/CA/helper. Roles active/disabled pending acceptance.
+
+Fresh task12 driver51293 dispatched19:15 UTC; inspect current stage acceptance/
+bug-flight-paths.jsonl for intake ID and R/bug-flight-paths-driver.txt/journals.
+No real repair/provider case complete. Prior11 tasks settled26 requests9194 generated/
+94179 prompt, no implementation/Codex/uncertainty. Current DB may change: never
+copy prior126-row snapshot over it. Real reasoning channel behavior remains to be
+verified in this new live turn; private text must not be retained or exposed.
+
+Final1280 backend/25 frontend/136 focused/34 decoder cases, actual eventful native
+API/worker/browser/restart/concurrency and committed-bootstrap isolated readiness
+pass. R/offline-verification.json binds final source/fixtures/failures/exact reuse.
+366 tracked release files/root owner documents and nonsecret metadata verified.
+Prior0b unactivated stage preserved. No model turn for final candidate before this
+fresh dispatch. Continue under standing authority, no old campaign cutoff.
+
+Earlier installeda271480/verification-underway statements below are historical
+and superseded by this section.
+
+## Prior state
 
 No real flight-path fix or supporting real-provider case complete. Installed app:
 commit a2714806b0bb2874976e04743d579e0a986dac7a, tree
