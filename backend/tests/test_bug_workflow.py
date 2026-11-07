@@ -26,7 +26,15 @@ def enable_bugs(monkeypatch):
     root = Path(os.environ['WORKBENCH_RESEARCH_ROOT'])
     (root / PRODUCTION).write_text(BUGGY)
     (root / CLIENT_SOURCE).write_text(BAD_ALERT)
-    (root / 'tests/harness.lua').write_text('function MakeClient() return setmetatable({}, {__index=_G}) end\n')
+    (root / 'tests/harness.lua').write_text('''
+function MakeClient()
+  local client = setmetatable({}, {__index=_G})
+  local chunk = assert(loadfile(ROOT .. 'normalize.lua'))
+  setfenv(chunk, client)
+  client.Normalize = chunk()
+  return client
+end
+''')
     (root / 'tests/test_client.lua').write_text('assert(1+1==2)\n')
     (root / CLIENT_TEST).write_text('assert(type("message")=="string")\n')
     runner = root / 'tests/run.sh'

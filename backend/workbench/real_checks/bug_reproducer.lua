@@ -67,10 +67,18 @@ local function exercise()
     if type(value) == 'string' then return {__index=env.string} end
     return getmetatable(value)
   end
+  local loaded = {}
   env.loadfile = function(path)
     assert(type(path) == 'string' and match(path, '^%.%./!!!TwichUI/[A-Za-z0-9_./-]+%.lua$')
       and not match(path:sub(#ROOT+1), '%.%.'), 'unsupported harness load')
-    return load(path, env)
+    local chunk = load(path, env)
+    loaded[chunk] = true
+    return chunk
+  end
+  env.setfenv = function(chunk, scope)
+    assert(type(chunk) == 'function' and loaded[chunk] and type(scope) == 'table',
+      'only isolated harness chunks can receive a fixture environment')
+    return setfenv(chunk, scope)
   end
   env.require = function(name)
     assert(name == 'bit', 'only the test harness bit module is available')
