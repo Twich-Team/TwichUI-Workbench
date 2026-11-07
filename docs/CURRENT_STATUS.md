@@ -1,23 +1,19 @@
-# Workbench status — November 7, 2026,17:43 UTC
+# Workbench status — November7,2026,17:56 UTC
 
-Exact supplied owner documents installed; standing autonomous authority active.
-Former campaign caps superseded; accounting, history and actual safeguards remain.
+Exact owner documents installed; autonomous standing authority active. Former
+campaign caps superseded; historical accounting and actual safeguards preserved.
 
-Verified9889377 is installed: original79/latest114-row history copies, both loopback/
-LAN HTTPS addresses, browser boundaries, service isolation and normal authenticated
-Qwen pass.1240 backend/25 frontend/108 Chromium/10 visual plus all opt-ins passed;
-precise reuse/failures/installed grammar and source proofs in bound private record.
+Verified9b0658c installed with checked original79/latest118 history copies,
+loopback/LAN HTTPS, browser/filter/isolation/model restoration protections passing.
+Fresh1247 backend/25 frontend/103 focused/native process and19 parser cases pass;
+uninvalidated UI/routing/readiness/admin evidence reused with exact lineage.
 
-Task9 definitively settled without an approved plan or repair. Two generated
-proposals had identical null results; exact field/rule diagnostics worked.9 tasks
-18 Qwen requests6228 generated/67189 prompt, no implementation/Codex/uncertainty.
-Latest settled118-row store preserved; model/key checked.
+Fresh real flight-path task10 investigating. No real bug repair or provider case
+complete. Prior9 settled tasks18 Qwen requests6228 generated/67189 prompt; no
+implementation/Codex/uncertainty before task10. New wire rejects identical null
+results and preserves bounded private non-executable fixture diagnostics. Continue
+to independently reviewed plan, approved checked repair and saved result, then
+provider checks/restart. No engineering renewal is required.
 
-New supported wire constraint excludes null/null and private bounded fixture
-diagnostics retain operations/known identifiers/types without source/prose/secrets.
-103 focused/native/parser checks pass; backend/frontend underway. No new deployment
-or live request yet. Continue delivery without engineering renewal; no real case
-complete. Current candidate/lineage/accounting are in the handoff.
-
-Broader product, in-game verification, live Codex bug repair and PRs unfinished.
-Styling/audit not begun. See [handoff](CONTINUATION.md).
+Broader product/in-game checks/live Codex bug repair/PRs unfinished. Styling/audit
+not begun. See [handoff](CONTINUATION.md).

@@ -1,3 +1,13 @@
+# Verified9b0658c installed; fresh task10 — November7,17:56 UTC
+
+All installed gates pass, original79/latest118 history preserved, normal model/key
+and network/credential boundaries intact.1247 backend/25 frontend/103 focused/native
+process/19 actual parser cases pass; unchanged UI/routing/readiness/admin evidence
+retained with exact lineage. New <=6000-byte private fixture facts and supported
+null inequality grammar do not fill behavior, values, scopes or approvals.
+Task10 intake210a06ba-9c37-4dee-9e11-54ca330720d8 investigating; no real case complete.
+Standing authority continues; older states below are historical where superseded.
+
 # Task9 settled; null-result schema/diagnostics revision — November7,17:50 UTC
 
 Task9 finished4 accounted Qwen requests,1454 generated/13397 prompt; identical

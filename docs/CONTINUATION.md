@@ -8,7 +8,36 @@ Preserve billing, source, network, task approvals, system access and recovery.
 Root files match owner attachments; REFERENCE_DOCUMENTS.md distinguishes historical
 copies. No document or offline result establishes a completed real task.
 
-## Current installed operation —17:43 UTC
+## Current installed operation —17:56 UTC
+
+Installed9b0658cf87c8175d5bfc573cc02c82fd91402015, tree
+ a487065b7c36afd3fd35d22b6c99e4f72a798184; stage
+`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-9b0658c`, seal
+2c1895e46a7a355997d615b92a024c607f0ac966a9cf9448e73421c0b6ab3150.
+R=C/outcome-9b0658c. All installed gates pass: original79/latest118 copies,
+listeners/TLS/LAN/browser/filter/five probes/foreign-peer rejection, same model/key,
+CA/helper/session grant. Roles active/disabled pending demonstrated success.
+
+Fresh task10 intake210a06ba-9c37-4dee-9e11-54ca330720d8 dispatched17:56:07 UTC;
+chat driver79698. At checkpoint investigating; no real repair/provider case complete.
+Current DB can change: do not overwrite it with prior118-row copy. Watch current
+stage artifacts/acceptance/bug-flight-paths.jsonl and R/driver output/journals.
+No replay while provider activity unresolved. All prior9 task attempts settled;
+18 real Qwen requests6228 generated/67189 prompt, no implementation/Codex turn.
+
+1247 backend/25 frontend,103 focused, native two-bug actual process/browser and
+19 installed parser cases pass. New wire rejects null/null, private <=6000-byte
+fixture diagnostics preserve operations/known identifiers/scalar types without
+source/prose/secret strings. Existing108 full Chromium/10 visual/two browser opt-ins,
+4 controlled routing/native repair readiness/48 admin proof reused only for unchanged
+UI/HTTP/worker/recipe/runtime/ops behavior. Exact changed3 backend files and every
+log/reuse/failure bind R/offline-verification.json; all362 tracked release files and
+root owner docs match. Initial inline-if test lint failure preserved, corrected
+check passes. No missing expected result or addon answer filled.
+
+Earlier988/verification-underway statements below are historical and superseded.
+
+## Prior installed operation —17:43 UTC
 
 Installed9889377c5b353f05342ed78b035db452892a3011, tree
 26829bc10a8a395178525ee12aaf503d4032b5c1; stage
