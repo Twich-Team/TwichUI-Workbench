@@ -70,7 +70,8 @@ try {
     assert.equal(result.tasks.length,0);
     assert.equal(result.decisions.length,0);
     assert.equal(result.jobs[0].diagnostics.generation_state,'finished');
-    assert.equal(result.jobs[0].diagnostics.validation_locations,conflict?'response:value_error':'finding:string_too_long');
+    assert.equal(result.jobs[0].diagnostics.validation_locations,conflict?
+      'plan:missing; question:missing; limitation:missing; unrecognized:extra_forbidden':'finding:string_too_long');
     assert.ok(result.jobs[0].diagnostics.evidence_id);
     assert.equal(result.provider_activity[0].outcome,'failed');
     assert.equal(JSON.stringify(result).includes('PRIVATE_REJECTED_CONTENT'),false);

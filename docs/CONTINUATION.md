@@ -71,10 +71,16 @@ or journal migration. Native24-step/data/write/disclosure bounds unchanged.
 rehearsal passed32.88sec with overridden-frame actual events, refs, two checked
 fixture bugs across restart/concurrent activity.29 earlier reference decoder cases
 and final34 typed/tagged cases pass with installed C++ converter/parser, no model.
-Source packet206? use C/typed-events-namespace-budget.json:20710/23101 bytes,
+Source packet proof C/typed-events-namespace-budget.json:20710/23101 bytes,
 6823/3415 source chars; initial schema1035, planning10433 bytes. Simulated only.
-Full final backend/frontend is actively progressing in C/typed-events-default-tests.log.
-No revised code installed/live task12 yet. All app code frozen before this final run.
+Full final backend/frontend passed1280/25 in C/typed-events-default-tests.log.
+Final eventful native rehearsal31.46sec uses actual compact one-key outcomes and
+a separate controlled reasoning channel, verifies no thought text retention, two
+checked fixture bugs/restart/concurrency/events/refs. First final rehearsal failed
+only its stale expected error string for two-key ambiguous tagged input; app
+correctly rejected it with no proposal/task/decision. Updated exact-shape assertion
+passed; original failure retained. Production bytes unchanged from0b7b96e; only
+native fixture/controller and this handoff differ. No revised live task12 yet.
 
 Generic ACTUAL committed navigation bootstrap readiness passed in isolation,
 C/nav-bootstrap-readiness-v2.json/log: original project archive, exact129-line prefix,
@@ -85,7 +91,7 @@ original/replaced/delegated factories, registration/unregister/hooks/errors and 
 
 ## Next actions
 
-Finish current suite, inspect existing logs without redundant reruns. Save final
+Current suites complete; inspect existing logs without redundant reruns. Save final
 candidate/inventory/seal and precise verification lineage before activation. Reuse
 uninvalidated108 Chromium/10 visual/routing4/readiness/admin48; new native eventful
 process and focused/parser/Lua checks cover changed compiler/harness. Last two

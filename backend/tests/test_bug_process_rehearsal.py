@@ -163,10 +163,12 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             def models(self, _): return expected_model
             def read(self, request, limit):
                 assert len(request.data) < 24000 and limit == 24000
-                outcome = dict(finding=answer['finding'], draft={key:answer.get(key) for key in ('plan', 'question', 'limitation', 'inspection')})
+                outcome = dict(finding=answer['finding'], draft={key:answer[key]
+                    for key in ('plan', 'question', 'limitation', 'inspection') if answer.get(key) is not None})
                 return json.dumps(dict(id='controlled-response', model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
-                    choices=[dict(finish_reason='stop', message=dict(content=json.dumps(outcome)))])).encode()
+                    choices=[dict(finish_reason='stop', message=dict(content=json.dumps(outcome),
+                        reasoning_content='CONTROLLED_NATIVE_REASONING_NOT_A_MODEL'))])).encode()
         value = self._infer(Transport(), 'fixture-no-credential', schema, json.dumps(packet), expected_model=expected_model)
         calls.put(('fixture-conflict' if conflict else 'fixture-fault' if fault else case["choice"], "planning"))
         return value
@@ -263,6 +265,8 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     assert issue['path'] == ['finding'] and issue['expected']['max_length'] == 450
     assert issue['observed']['type'] == 'str'
     assert 'PRIVATE_REJECTED_CONTENT' not in evidence.read_text()
+    assert 'CONTROLLED_NATIVE_REASONING_NOT_A_MODEL' not in evidence.read_text()
+    assert any(row['phase']=='reasoning-channel' and row['present'] and not row['retained'] for row in rows)
     with store.connect() as c:
         payload = c.execute(select(planning_jobs.c.payload).join(intakes).where(
             intakes.c.payload['title'].as_string() == cases[1]['request']['title'],

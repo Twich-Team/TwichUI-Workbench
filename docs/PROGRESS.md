@@ -1,3 +1,15 @@
+# Final typed/eventful verification passed — November7,19:12 UTC
+
+1280 backend/25 frontend,136 focused and34 installed decoder cases pass on frozen
+production code. Final actual API/worker/browser rehearsal passes31.46sec with
+compact one-key outcomes, separate simulated reasoning channel (never retained),
+overridden-frame real event delivery, refs and two checked fixture bugs across
+restart/concurrency. First final native failure was stale expected wording for
+ambiguous two-key tagged input; no proposal/task/approval occurred. Corrected exact
+shape assertion passes; original evidence preserved. App production bytes unchanged
+after full suite; test-only/controller edits bind final candidate next. No new real
+request or installation yet. Continue to checked cutover/latest126 history/fresh12.
+
 # Typed targets, bounded reasoning and event fidelity — November7,19:04 UTC
 
 Task11 settled4 requests1636 generated/13956 prompt, exact result-target errors
