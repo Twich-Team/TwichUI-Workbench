@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from workbench import codex_provider as codex
 from workbench.api import create_app
 import codex_connector as connector
+import codex_eligibility_probe as probe
 
 
 def test_connector_queries_only_the_fixed_hostname_over_unix_socket(tmp_path, monkeypatch):
@@ -153,6 +154,90 @@ def test_account_holds_without_transmitting_task_content(account, limit, reason)
     assert caught.value.reason == reason and not rpc.started
     assert 'task source' not in repr(rpc.calls)
     assert ('account/read', {'refreshToken': False}) in rpc.calls
+
+
+@pytest.mark.parametrize('change,check,state,reason', [
+    (lambda r: r.pop('ordinaryUsageAllowed'), 'ordinary_usage', 'absent', 'accounting'),
+    (lambda r: r.update(ordinaryUsageAllowed=None), 'ordinary_usage', 'null', 'accounting'),
+    (lambda r: r.update(ordinaryUsageAllowed='true'), 'ordinary_usage', 'ambiguous', 'accounting'),
+    (lambda r: r.update(ordinaryUsageAllowed=False), 'ordinary_usage', 'contrary', 'capacity'),
+    (lambda r: r.update(rateLimitsByLimitId={'codex': None}), 'quota_bucket', 'null', 'accounting'),
+    (lambda r: r.update(rateLimitsByLimitId=['codex']), 'quota_bucket', 'ambiguous', 'accounting'),
+    (lambda r: r['rateLimits'].update(secondary=None), 'secondary_window', 'null', 'accounting'),
+    (lambda r: r['rateLimits']['primary'].pop('resetsAt'), 'primary_reset', 'absent', 'accounting'),
+    (lambda r: r['rateLimits']['primary'].update(resetsAt=1), 'primary_reset', 'contrary', 'accounting'),
+    (lambda r: r['rateLimits']['primary'].update(usedPercent=90), 'primary_used', 'contrary', 'capacity'),
+    (lambda r: r['rateLimits']['primary'].update(usedPercent=True), 'primary_used', 'ambiguous', 'accounting'),
+    (lambda r: r['rateLimits']['credits'].update(unlimited=True), 'unlimited', 'contrary', 'credits'),
+])
+def test_pre_generation_hold_identifies_the_exact_redacted_check(change, check, state, reason):
+    limits = allowance()
+    change(limits)
+    rpc = Transcript(limit=limits)
+    with pytest.raises(codex.Hold) as caught:
+        codex.turn(rpc, 'fixture-model', None, 'private task source', {})
+    assert caught.value.reason == reason and not caught.value.started
+    assert caught.value.metadata == {'phase': 'account/rateLimits/read', 'check': check, 'state': state}
+    assert not {'thread/start', 'turn/start'} & {method for method, _ in rpc.calls}
+
+
+def test_documented_legacy_bucket_used_only_without_a_keyed_codex_snapshot():
+    codex.check_allowance(allowance() | {'rateLimitsByLimitId': {'other': {'limitId': 'other'}}})
+    response = allowance()
+    response['rateLimitsByLimitId'] = {'codex': response['rateLimits'] | {'secondary': None}}
+    with pytest.raises(codex.Hold) as caught:
+        codex.check_allowance(response)
+    assert caught.value.metadata['check'] == 'secondary_window'
+
+
+@pytest.mark.parametrize('plan,state', [('unknown', 'ambiguous'), ('free', 'contrary'), (None, 'null')])
+def test_unknown_or_out_of_policy_plan_stops_at_account_read(plan, state):
+    rpc = Transcript()
+    rpc.responses['account/read']['account']['planType'] = plan
+    with pytest.raises(codex.Hold) as caught:
+        codex.turn(rpc, 'fixture-model', None, 'private task source', {})
+    assert caught.value.metadata == {'phase': 'account/read', 'check': 'account_plan', 'state': state}
+    assert [method for method, _ in rpc.calls] == ['initialize', 'account/read']
+
+
+def test_catalog_one_page_is_not_an_entitlement_check():
+    response = {'data': [], 'nextCursor': 'opaque'}
+    assert codex.catalog_checks(response, 'fixture-model', None)[0]['state'] == 'ambiguous'
+    assert codex.catalog_checks({'data': [{'model': 'fixture-model'}]}, 'fixture-model', None)[0]['state'] == 'absent'
+    assert codex.catalog_checks({'data': [{'model': 'fixture-model', 'hidden': False}]},
+                                'fixture-model', None)[0]['reason'] is None
+
+
+@pytest.mark.parametrize('ordinary', [True, None])
+def test_read_only_probe_uses_shared_checks_and_never_sends_turn_or_private_fields(ordinary):
+    rpc = Transcript(limit=allowance() | {'ordinaryUsageAllowed': ordinary, 'accountId': 'fixture-private-account'})
+    rpc.responses['account/read']['account']['email'] = 'fixture-private-email'
+    rpc.responses['model/list']['data'][0]['model'] = probe.MODEL
+    rows = []
+    hold = probe.inspect_eligibility(rpc, lambda event, **values: rows.append(dict(event=event, **values)))
+    expected = ['initialize', 'account/read', 'account/rateLimits/read', 'model/list']
+    if ordinary:
+        expected += ['account/rateLimits/read']
+    assert [method for method, _ in rpc.calls] == expected
+    assert hold is None if ordinary else hold == {'check': 'ordinary_usage', 'state': 'null', 'reason': 'accounting'}
+    assert 'fixture-private' not in json.dumps(rows)
+
+
+def test_read_only_probe_does_not_continue_after_unsettled_account_rpc():
+    rpc = Transcript()
+    original_call = rpc.call
+
+    def lost(method, params):
+        if method == 'account/read':
+            raise codex.Hold('timeout', phase=method)
+        return original_call(method, params)
+
+    rpc.call = lost
+    rows = []
+    with pytest.raises(codex.Hold, match='time limit'):
+        probe.inspect_eligibility(rpc, lambda event, **values: rows.append(dict(event=event, **values)))
+    assert rows[-1] == {'event': 'read_attempt', 'method': 'account/read'}
+    assert not any(row['event'] == 'read_response' for row in rows)
 
 
 def test_single_turn_with_exact_model_and_usage():
