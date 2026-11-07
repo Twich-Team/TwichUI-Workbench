@@ -205,7 +205,8 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
         job = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == failed)).scalar_one()
     evidence = tmp_path/'artifacts/runs'/('planning-evidence-'+job['diagnostics']['evidence_id'])/'events.jsonl'
     rows = [json.loads(row) for row in evidence.read_text().splitlines()]
-    assert [row['phase'] for row in rows][:3] == ['schema', 'wire-received', 'envelope']
+    assert [row['phase'] for row in rows][:4] == ['schema', 'request-schema', 'wire-received', 'envelope']
+    assert len(rows[1]['schema_sha256']) == 64 and rows[1]['corrective'] is False
     assert rows[-1]['phase'] == 'validation-rejected'
     issue = rows[-1]['errors'][0]
     assert issue['path'] == ['finding'] and issue['expected']['max_length'] == 450
