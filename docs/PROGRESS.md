@@ -6213,3 +6213,14 @@ share four-request/two-minute consent, source/usage/deadline/approval protection
 67 focused checks and installed converter/parser phase proof passed without model
 loading. Native rehearsal extended to correct missing-load candidates through the
 actual process/browser path. Continue final checks, seal/revise and fresh attempt6.
+
+## November7,15:55 UTC — source-first/correction build installed
+
+Verified edc912c/tree23f1cd4/sealdb8f64a activated with original79/latest102-row
+checked history copies and all scoped TLS/LAN/browser/isolation gates. Final1211/25
+backend/frontend,108 browser,10 visual, every opt-in passed; helper unchanged48
+checks retained. e518 native fixture completed repairs but stale event-order assert
+failed; edc corrected assertion checks new request-schema hash and native rerun
+passed. No product assertion weakened. Fresh flight-path attempt6 dispatched via
+normal delegated browser, intake0c93920a-4fd1-41b4-a76c-8fd6eb29dc93. Investigating;
+no real repair/provider-case completion claimed. Continue under standing authority.
