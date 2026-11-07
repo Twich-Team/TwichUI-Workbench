@@ -6,7 +6,9 @@ November 6, 2026 Mountain time.
   confinement. The only hold was an explicitly null secondary quota window.
   The service affirmed ordinary included usage and the other required
   checks passed. The window is closed and the second slot stayed unused.
-  The next acceptance package awaits a decision on the two-window policy.
+  The owner approved a narrow exception and the local connector implements
+  it. Verification with the revised policy is offline. The next authorized
+  assignment must establish live eligibility before cutover.
   [Live diagnostic and policy decision](CODEX_ELIGIBILITY_LIVE_RESULT_20261106.md)
 - The owner-approved installation of `8d17534` passed the scoped TLS,
   remote home-LAN access, history copy and installed filter checks. The
@@ -40,8 +42,10 @@ November 6, 2026 Mountain time.
   acceptance remain open. API-key billing, extra credits, purchases, auto
   reload and upgrades remain excluded.
 - Supported existing Lua regression tests remain the candidate's release
-  scope. General addon bug fixing, features, inspections, simulator work and
-  broader initial-product acceptance remain open. Visual styling and the
-  full requirements audit are later phases.
+  scope. Functional acceptance also requires a real addon bug to go from
+  ordinary app intake through investigation, approval, implementation,
+  independent checks and a reviewable fix without developer hand-preparation.
+  That path and broader initial-product acceptance remain open. Visual
+  styling and the full requirements audit are later phases.
 
 [Approved package](EVERYDAY_SYSTEM_INSTALL_APPROVAL_20261106.md) · [A8 readiness](A8_MODEL_ROUTING_READINESS_20261106.md) · [Live closeout](/home/rich/.local/share/TwichUI-Workbench/everyday-system-20261106-acceptance/acceptance-closeout.json)

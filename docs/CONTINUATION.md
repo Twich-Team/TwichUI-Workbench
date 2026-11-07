@@ -1,3 +1,21 @@
+# Codex quota exception and next functional outcome — November 6, 2026 Mountain time
+
+The owner authorized an explicitly null secondary quota window when both
+pre-turn reads affirm ordinary included usage, the primary window is valid
+and below reserve, and every other eligibility check passes. The local
+connector implements this rule. A supplied secondary window still needs
+validation, and a pushed snapshot cannot establish included usage.
+Carry the change into the next outcome-based assignment. Live provider
+calls and cutover require separate authority.
+
+Functional acceptance must include a real addon bug reported through the
+ordinary app, investigated by Workbench, approved through the existing
+workflow, and returned as a checked fix with evidence the owner can review.
+The bug must reach that result without developer hand-preparation. The
+four provider journeys establish regression-test routing and remain a
+narrower milestone. A8 and the required bug-fix journey remain open.
+[Requirements](../TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md)
+
 # Live Codex eligibility held on a null secondary window — November 6, 2026 Mountain time
 
 The approved `fb51e58` one-shot unit verified connector-equivalent kernel

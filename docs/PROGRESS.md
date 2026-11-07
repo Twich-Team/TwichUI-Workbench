@@ -1,3 +1,18 @@
+## November 6, 2026 — Quota exception and functional acceptance decision
+
+- Implemented the owner-approved exception for an explicitly null secondary
+  window. Both full pre-turn reads must affirm ordinary included usage.
+  The primary reserve and all account and credit checks still apply.
+  Supplied secondary windows are validated. Pushed quota updates can stop
+  work after admission but cannot supply either required affirmation.
+- The focused provider and everyday suites passed 95 tests. The revised
+  policy has not been exercised with the live provider.
+- Carry the bug-fix outcome into the next assignment. A real addon report
+  must reach an investigated, approved, independently checked and
+  reviewable fix through the ordinary app without developer hand-preparation.
+  Regression-test provider coverage is a narrower milestone.
+  [Requirements](../TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md)
+
 ## November 6, 2026 — Live eligibility isolated the secondary-window hold
 
 - The approved `fb51e58` transient proved connector-equivalent confinement

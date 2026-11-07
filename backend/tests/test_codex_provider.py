@@ -87,7 +87,8 @@ def test_rpc_phase_receipt_omits_server_error_text_and_parameters():
 def allowance(used=10):
     window = {'usedPercent': used, 'resetsAt': int(time.time()) + 300}
     return {'ordinaryUsageAllowed': True, 'rateLimits': {
-        'limitId': 'codex', 'primary': window, 'secondary': window, 'credits': {'hasCredits': False, 'unlimited': False, 'balance': '0.00'},
+        'limitId': 'codex', 'primary': window, 'secondary': window.copy(),
+        'credits': {'hasCredits': False, 'unlimited': False, 'balance': '0.00'},
     }}
 
 
@@ -163,7 +164,10 @@ def test_account_holds_without_transmitting_task_content(account, limit, reason)
     (lambda r: r.update(ordinaryUsageAllowed=False), 'ordinary_usage', 'contrary', 'capacity'),
     (lambda r: r.update(rateLimitsByLimitId={'codex': None}), 'quota_bucket', 'null', 'accounting'),
     (lambda r: r.update(rateLimitsByLimitId=['codex']), 'quota_bucket', 'ambiguous', 'accounting'),
-    (lambda r: r['rateLimits'].update(secondary=None), 'secondary_window', 'null', 'accounting'),
+    (lambda r: r['rateLimits'].pop('secondary'), 'secondary_window', 'absent', 'accounting'),
+    (lambda r: r['rateLimits'].update(secondary=[]), 'secondary_window', 'ambiguous', 'accounting'),
+    (lambda r: r['rateLimits']['secondary'].update(usedPercent=90), 'secondary_used', 'contrary', 'capacity'),
+    (lambda r: r['rateLimits']['secondary'].update(resetsAt=1), 'secondary_reset', 'contrary', 'accounting'),
     (lambda r: r['rateLimits']['primary'].pop('resetsAt'), 'primary_reset', 'absent', 'accounting'),
     (lambda r: r['rateLimits']['primary'].update(resetsAt=1), 'primary_reset', 'contrary', 'accounting'),
     (lambda r: r['rateLimits']['primary'].update(usedPercent=90), 'primary_used', 'contrary', 'capacity'),
@@ -184,7 +188,7 @@ def test_pre_generation_hold_identifies_the_exact_redacted_check(change, check, 
 def test_documented_legacy_bucket_used_only_without_a_keyed_codex_snapshot():
     codex.check_allowance(allowance() | {'rateLimitsByLimitId': {'other': {'limitId': 'other'}}})
     response = allowance()
-    response['rateLimitsByLimitId'] = {'codex': response['rateLimits'] | {'secondary': None}}
+    response['rateLimitsByLimitId'] = {'codex': response['rateLimits'] | {'secondary': []}}
     with pytest.raises(codex.Hold) as caught:
         codex.check_allowance(response)
     assert caught.value.metadata['check'] == 'secondary_window'
@@ -210,7 +214,9 @@ def test_catalog_one_page_is_not_an_entitlement_check():
 
 @pytest.mark.parametrize('ordinary', [True, None])
 def test_read_only_probe_uses_shared_checks_and_never_sends_turn_or_private_fields(ordinary):
-    rpc = Transcript(limit=allowance() | {'ordinaryUsageAllowed': ordinary, 'accountId': 'fixture-private-account'})
+    limit = allowance() | {'ordinaryUsageAllowed': ordinary, 'accountId': 'fixture-private-account'}
+    limit['rateLimits']['secondary'] = None
+    rpc = Transcript(limit=limit)
     rpc.responses['account/read']['account']['email'] = 'fixture-private-email'
     rpc.responses['model/list']['data'][0]['model'] = probe.MODEL
     rows = []
@@ -240,8 +246,14 @@ def test_read_only_probe_does_not_continue_after_unsettled_account_rpc():
     assert not any(row['event'] == 'read_response' for row in rows)
 
 
-def test_single_turn_with_exact_model_and_usage():
-    rpc = Transcript(events=completed())
+@pytest.mark.parametrize('secondary_is_null', [False, True])
+def test_single_turn_with_exact_model_and_usage(secondary_is_null):
+    limit = allowance()
+    if secondary_is_null:
+        limit['rateLimits']['secondary'] = None
+    update = {'method': 'account/rateLimits/updated', 'params': {'rateLimits': limit['rateLimits']}}
+    rpc = Transcript(limit=limit, events=[update, *completed()])
+    rpc.events.append(update)
     assert codex.turn(rpc, 'fixture-model', 'low', 'task source', {}) == {
         'output': {'old': 'a', 'new': 'b'},
         'usage': dict(prompt_tokens=20, completion_tokens=4, reasoning_tokens=1, total_tokens=24),
@@ -249,7 +261,38 @@ def test_single_turn_with_exact_model_and_usage():
     turns = [p for method, p in rpc.calls if method == 'turn/start']
     assert len(turns) == 1 and turns[0]['effort'] == 'low' and turns[0]['model'] == 'fixture-model'
     assert turns[0]['serviceTierForTurn'] == 'default'
-    assert [method for method, _ in rpc.calls].count('account/rateLimits/read') == 2
+    methods = [method for method, _ in rpc.calls]
+    assert methods[:methods.index('turn/start')].count('account/rateLimits/read') == 2
+
+
+@pytest.mark.parametrize('denied_read', [1, 2])
+@pytest.mark.parametrize('ordinary,reason', [(False, 'capacity'), (None, 'accounting'), ('timeout', 'timeout')])
+def test_null_secondary_requires_both_allowance_reads_to_affirm_usage(denied_read, ordinary, reason):
+    limit = allowance()
+    limit['rateLimits']['secondary'] = None
+    rpc = Transcript(limit=limit)
+    prior_call = rpc.call
+
+    def call(method, params):
+        result = prior_call(method, params)
+        if method == 'account/rateLimits/read' and sum(name == method for name, _ in rpc.calls) == denied_read:
+            if ordinary == 'timeout':
+                raise codex.Hold('timeout', phase=method)
+            return {**result, 'ordinaryUsageAllowed': ordinary}
+        return result
+
+    rpc.call = call
+    with pytest.raises(codex.Hold) as caught:
+        codex.turn(rpc, 'fixture-model', None, 'private task source', {})
+    assert caught.value.reason == reason and not rpc.started
+    assert 'private task source' not in repr(rpc.calls)
+
+
+def test_null_secondary_does_not_pass_on_a_pushed_snapshot_alone():
+    limit = allowance()['rateLimits'] | {'secondary': None}
+    with pytest.raises(codex.Hold) as caught:
+        codex.check_snapshot(limit)
+    assert caught.value.metadata['check'] == 'secondary_window'
 
 
 @pytest.mark.parametrize('events,reason', [
@@ -306,6 +349,7 @@ def test_failed_turn_retains_known_usage_and_partial_output(with_output, termina
 def test_unknown_or_available_credits_hold_before_sending_source(credits):
     limit = allowance()
     limit['rateLimits']['credits'] = credits
+    limit['rateLimits']['secondary'] = None
     rpc = Transcript(limit=limit)
     with pytest.raises(codex.Hold) as caught:
         codex.turn(rpc, 'fixture-model', None, 'task source', {})
@@ -329,8 +373,20 @@ def test_credit_change_before_turn_holds_before_sending_source():
     assert 'task source' not in repr(rpc.calls)
 
 
+def test_null_secondary_keeps_the_primary_reserve():
+    limit = allowance(90)
+    limit['rateLimits']['secondary'] = None
+    rpc = Transcript(limit=limit)
+    with pytest.raises(codex.Hold) as caught:
+        codex.turn(rpc, 'fixture-model', None, 'private task source', {})
+    assert caught.value.reason == 'capacity' and not rpc.started
+    assert caught.value.metadata['check'] == 'primary_used'
+    assert 'private task source' not in repr(rpc.calls)
+
+
 def test_credit_change_during_turn_interrupts_without_replay():
     limit = allowance()['rateLimits']
+    limit['secondary'] = None
     limit['credits']['hasCredits'] = True
     rpc = Transcript(events=[{'method': 'account/rateLimits/updated', 'params': {'rateLimits': limit}}])
     with pytest.raises(codex.Hold) as caught:

@@ -28,20 +28,18 @@ The earlier acceptance receipt lacked the field-level detail needed to
 prove it encountered the same response.
 [Redacted probe receipt](/home/rich/.local/share/TwichUI-Workbench/codex-eligibility-preparation.4OLTtjC0/operator/probe-1.jsonl)
 
-## Owner decision needed before the next acceptance package
+## Owner decision for the next acceptance package
 
-The approved gate requires two usable quota windows. The pinned
-protocol permits an explicit null secondary window. The minimum
-policy change is to accept that explicit null as an unreported
-secondary window when the primary window is valid and below reserve,
-both pre-turn reads affirm ordinary included usage, and every other
-account, credit and spend check passes. Keep the existing hold on
-missing or malformed required evidence. If the provider supplies a
-secondary window, continue checking its utilization and reset time.
-This exception would leave secondary-window capacity unverified and
-would retain the owner's existing snapshot uncertainty.
+The live probe used the former two-window requirement. The owner then
+approved accepting an explicit null secondary window when the primary
+window is valid and below reserve, both pre-turn reads affirm ordinary
+included usage, and every other account, credit and spend check passes.
+The revised policy keeps the existing hold on missing or malformed
+required evidence and validates a supplied secondary window's utilization
+and reset time. Secondary-window capacity remains unverified when null,
+and the owner's existing snapshot uncertainty still applies.
 
-Keep the two-window policy if an observed second window is required.
-In that case the current signed-in Codex path remains held. The live
-diagnostic closed with the existing policy. A8, real-provider acceptance,
-installation and general addon bug fixing remain open.
+The revised policy has been checked offline. Additional live calls and
+cutover require separate authority. A8, real-provider acceptance,
+installation and the required real addon bug-fix journey remain open.
+[Requirements](../TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md)

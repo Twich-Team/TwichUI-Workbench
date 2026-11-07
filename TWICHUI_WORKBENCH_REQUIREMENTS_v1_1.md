@@ -61,7 +61,9 @@ Codex must be available in this initial product as both an intentional developme
 
 Proposed acceptance task: demonstrate at least one real TwichUI code-change task from browser intake through checks and an explicitly authorized draft PR. Synthetic fixtures alone do not establish real-addon readiness.
 
-Exact breadth of task types required on day one remains to be agreed. Do not drop the broader capability vision because the first demonstrated path is narrow.
+Owner decision, November 6, 2026. Functional acceptance must include an ordinary browser report of a real addon bug. Workbench investigates, presents its findings and proposed fix for the required approvals, implements the approved change, verifies the reported behavior and relevant regressions, and presents the checked fix and evidence for review. The workflow must work without developer hand-preparation for that bug. The four regression-test provider journeys prove a narrower workflow and cannot satisfy this outcome. Publication requires its own authority.
+
+Exact breadth beyond this required bug-fix journey remains to be agreed. Retain the broader capability vision.
 
 ## Phase B — Gamer-friendly dashboard
 
@@ -158,6 +160,8 @@ Owner clarification, November 6, 2026. The user chooses Qwen alone, Codex alone,
 Owner acceptance delegation, November 6, 2026. For the four exact cases `codex-once`, `qwen-once`, `codex-with-local-fallback`, and `qwen-with-codex-fallback`, a bounded driver may submit the existing browser planning consent, plan decision and separate run decision during a separately approved live window. It must verify the sealed candidate and committed source, current task and provider binding, exact test scope and check commands, limits, and absence of prior or uncertain work. The ordinary UI, CSRF and server-side approval and verification gates still apply. Record the decisions as owner-delegated automation. The delegation grants no cutover, live attempt, retry, publication, or authority for ordinary tasks.
 
 Eligibility verification, November 6, 2026. Retain a redacted RPC phase and the failed eligibility check. Distinguish absent, null and ambiguous evidence from contrary account evidence. Use the pinned App Server's own fields. A catalog listing is not model entitlement, and quota percentages or reset times do not replace affirmative ordinary included-usage permission. Keep the existing credit and quota checks. A read-only eligibility result is a prerequisite for another cutover and does not complete real-provider acceptance.
+
+Owner decision, November 6, 2026. An explicitly null secondary Codex quota window may pass when both pre-turn allowance reads affirm ordinary included usage, the primary window is valid and below reserve, and every other eligibility check passes. A supplied secondary window must pass its utilization and reset checks. An omitted secondary field, a malformed response, a failed read, an explicit denial, known exhaustion, or contrary account or credit evidence still holds. The null value leaves secondary-window capacity unverified. This policy decision authorizes neither additional live calls nor a cutover.
 
 Basic deliberate Codex use belongs in Phase A. Automatic allowance monitoring and percentage-based allocation belong in Phase C unless separately promoted.
 

@@ -250,7 +250,7 @@ def quota_bucket(result):
     return source.get(key), bucket
 
 
-def snapshot_checks(limits, now=None):
+def snapshot_checks(limits, now=None, *, allow_null_secondary=False):
     if now is None:
         now = time.time()
     checks = [
@@ -271,8 +271,10 @@ def snapshot_checks(limits, now=None):
         checks.append(finding('credits', limits, 'credits', lambda v: False, lambda v: False, 'credits'))
     for name in ('primary', 'secondary'):
         window = finding(f'{name}_window', limits, name, lambda v: isinstance(v, dict), lambda v: True, 'accounting')
+        if name == 'secondary' and allow_null_secondary and window['state'] == 'null':
+            window['reason'] = None
         checks.append(window)
-        if not window['reason']:
+        if window['state'] == 'observed':
             checks.extend([
                 finding(f'{name}_used', limits[name], 'usedPercent', lambda v: type(v) is int and 0 <= v <= 100,
                         lambda v: v < 90, 'accounting', contrary='capacity'),
@@ -286,12 +288,16 @@ def allowance_checks(result, now=None):
     limits, bucket = quota_bucket(result)
     ordinary = finding('ordinary_usage', result, 'ordinaryUsageAllowed', lambda v: type(v) is bool,
                        lambda v: v, 'accounting', contrary='capacity')
-    return [bucket, ordinary, *(snapshot_checks(limits, now) if not bucket['reason'] else [])]
+    checks = [bucket, ordinary]
+    if not bucket['reason']:
+        checks.extend(snapshot_checks(limits, now, allow_null_secondary=ordinary['state'] == 'observed'))
+    return checks
 
 
-def check_snapshot(limits, *, now=None):
-    require_checks(allowance_checks({'rateLimits': limits, 'ordinaryUsageAllowed': True}, now),
-                   'account/rateLimits/read')
+def check_snapshot(limits, *, now=None, allow_null_secondary=False):
+    _, bucket = quota_bucket({'rateLimits': limits})
+    require_checks([bucket], 'account/rateLimits/read')
+    require_checks(snapshot_checks(limits, now, allow_null_secondary=allow_null_secondary), 'account/rateLimits/read')
 
 
 def check_allowance(result, *, now=None):
@@ -335,13 +341,15 @@ def turn(rpc, model, effort, prompt, schema):
         raise Hold('protocol')
     rpc.events[:] = [event for event in rpc.events if event.get('method') != 'account/updated']
     check_allowance(rpc.call('account/rateLimits/read', {}))
+    # The two full reads above affirmed ordinary usage for this turn. A pushed
+    # snapshot can still stop it on new evidence, but cannot establish that permission.
     for event in rpc.events:
         if 'id' in event or event.get('method') in {'account/updated', 'model/rerouted', 'model/verification'}:
             raise Hold('protocol')
         if event.get('method') == 'account/rateLimits/updated':
             limits = event['params']['rateLimits']
             if limits.get('limitId') == 'codex':
-                check_snapshot(limits)
+                check_snapshot(limits, allow_null_secondary=True)
     if rpc.stop() or time.monotonic() >= rpc.deadline:
         raise Hold('canceled' if rpc.stop() else 'timeout')
     rpc.started = True  # A lost send or reply is an uncertain attempt, never a fallback.
@@ -378,7 +386,7 @@ def turn(rpc, model, effort, prompt, schema):
             if method == 'account/rateLimits/updated':
                 limits = p['rateLimits']
                 if limits.get('limitId') == 'codex':
-                    check_snapshot(limits)
+                    check_snapshot(limits, allow_null_secondary=True)
             if method == 'turn/completed':
                 final = p['turn']
                 if final['id'] != turn_id:
