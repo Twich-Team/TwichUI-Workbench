@@ -1,0 +1,30 @@
+[
+  {
+    "title": "Cover map tile just west of the world origin",
+    "test_path": "tests/test_map_viewmath_tileat.lua",
+    "provider": "codex-once",
+    "description": "In tests/test_map_viewmath_tileat.lua, check that the first result of TwichUI.MapViewMath.TileAt(0, 1) is column 31. Reject column 32 for the same call.\nExample 1: {\"args\":[0,1],\"expected\":31,\"incorrect\":32}",
+    "expected": "TileAt(0, 1) returns column 31 as its first result."
+  },
+  {
+    "title": "Cover the map tile at the exact world origin",
+    "test_path": "tests/test_map_viewmath_tileat.lua",
+    "provider": "qwen-once",
+    "description": "In tests/test_map_viewmath_tileat.lua, check that the first result of TwichUI.MapViewMath.TileAt(0, 0) is column 32. Reject column 31 for the same call.\nExample 1: {\"args\":[0,0],\"expected\":32,\"incorrect\":31}",
+    "expected": "TileAt(0, 0) returns column 32 as its first result."
+  },
+  {
+    "title": "Cover map tile just east of the world origin",
+    "test_path": "tests/test_map_viewmath_tileat.lua",
+    "provider": "codex-with-local-fallback",
+    "description": "In tests/test_map_viewmath_tileat.lua, check that the first result of TwichUI.MapViewMath.TileAt(0, -1) is column 32. Reject column 31 for the same call.\nExample 1: {\"args\":[0,-1],\"expected\":32,\"incorrect\":31}",
+    "expected": "TileAt(0, -1) returns column 32 as its first result."
+  },
+  {
+    "title": "Cover a map tile well beyond the west edge",
+    "test_path": "tests/test_map_viewmath_tileat.lua",
+    "provider": "qwen-with-codex-fallback",
+    "description": "In tests/test_map_viewmath_tileat.lua, check that the first result of TwichUI.MapViewMath.TileAt(0, 18000) is column -2. Reject column -1 for the same call.\nExample 1: {\"args\":[0,18000],\"expected\":-2,\"incorrect\":-1}",
+    "expected": "TileAt(0, 18000) returns column -2 as its first result."
+  }
+]

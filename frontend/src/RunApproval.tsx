@@ -17,6 +17,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
   const key=`task-run-approval:${intakeId}:${taskId}`;
   const [draft,setDraft]=useState<Input|null>(()=>readStored<Input>(key));
   const [publication,setPublication]=useState<Publication>('hold');
+  const [note,setNote]=useState('');
   const [accepted,setAccepted]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
   const submitting=useRef(false);
   const [saved,setSaved]=useState<Receipt|null>(null);
@@ -42,7 +43,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
     if(submitting.current||stale||query.isError||(!accepted&&!draft)||!shown?.offer||!shown.binding||!shown.scope_approval_id)return;
     const body=draft||{
       command_id:crypto.randomUUID(),scope_approval_id:shown.scope_approval_id,binding:shown.binding,
-      run_budget:{...shown.offer.budget,publication},note:'',
+      run_budget:{...shown.offer.budget,publication},note,
     };
     submitting.current=true;setBusy(true);setError('');
     try{
@@ -123,6 +124,8 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
     </>}
     <details>
       <summary>Technical run details</summary>
+      <label>Run approval note <span>Optional</span><textarea maxLength={1600} value={draft?.note ?? note}
+        disabled={busy||Boolean(draft)} onChange={e=>{setNote(e.target.value);setAccepted(false);}}/></label>
       <p>{current.message}</p><ExactRunLimits budget={budget} codex={shown.provider?.backend==='codex'}/>
       <p>If the run starts, Workbench checks that it can cancel its own work and restores normal model access afterward.</p>
       <h4>Exact plan scope and exclusions</h4><ul>{[...(scope?.content.scope || []),...(scope?.content.exclusions || [])].map((s,i)=><li key={i}>{s}</li>)}</ul>
