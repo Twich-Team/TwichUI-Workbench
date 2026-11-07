@@ -37,13 +37,20 @@ INSTRUCTIONS = (
     'Required reads are derived from your explicit setup, action loads, writable_paths and focused_test. '
     'Select only additional inspected files in other_reads, or [] if none; do not repeat legacy read_paths. '
     'Support-only sources can be loaded or read but cannot be edited. '
-    'Setup runs before all listed steps. Do not repeat legacy fixture/bootstrap fields in a wire proposal. '
-    'Steps can create tables, set scalar fields, '
-    'stub an API or capture one call, or call an existing function (use method=true for colon calls). '
+    'Setup runs before all checkpoints. Do not repeat legacy fixture/bootstrap/steps/observations fields. '
+    'Each checkpoint supplies before_call (0-4 explicit actions), call (one existing function), '
+    'and observe (source/path/expected/incorrect for that call). The app computes its step index. '
+    'Use three distinct checkpoints for initial behavior and successive events in a stateful report. '
+    'before_call may trigger an existing event then call may query its result. Actions can create tables, '
+    'set scalar fields, stub an API, capture one call, or call an existing function. '
+    'Use method=true for colon calls. '
     'A stub/capture returns args as positional values or one table from fields. Paths are arrays of field names or '
     '1-based indexes. A call with empty path invokes the returned module function. For return/captured observation, '
     'path starts with the return/argument number. For field observation, use the client/module path. '
-    'Number listed action steps from 1, excluding setup; the compiler preserves that meaning when adding explicit loads. '
+    'Paths are relative to the returned module or exact MakeClient environment, not local variables in source. '
+    'A committed client bootstrap returns its client, not the addon table inside it. '
+    'Use literal client_access_paths from tests to locate addon namespaces; local aliases are not fixture exports. '
+    'Do not supply after_step: every observation belongs to its explicitly selected call. '
     'Observe important intermediate and final results for stateful reports. '
     'For stateful reports observe initial behavior and each relevant event, including a repeated event when refresh is requested. '
     'Drive the existing code: do not directly assign the expected result or the state the event is supposed to compute. '
@@ -172,10 +179,29 @@ def context(original, feedback, policy):
         setup = client_bootstrap(inspected[path][2])
         if setup:
             item['client_bootstrap'] = setup
+            item['client_access_paths'] = client_access_paths(inspected[path][2], setup)
         files.append(item)
     from workbench.source_context import excerpts
     excerpts(files, inspected, terms, words)
     return dict(base=base, files=files, declarations=declaration_index(files, inspected, terms), policy_sha256=digest(policy))
+
+
+def client_access_paths(lines, setup):
+    """Literal committed client reads, not an inferred export or runtime claim."""
+    from workbench.grounded_scenarios import LITERALS
+    text = '\n'.join(lines[:setup['through_line']])
+    masked = LITERALS.sub(lambda m: re.sub(r'[^\n]', ' ', m[0]), text)
+    pattern = (r'^[ \t]*local[ \t]+[A-Za-z_]\w*[ \t]*=[ \t]*' + re.escape(setup['client'])
+               + r'((?:\.[A-Za-z_]\w*){1,6})[ \t]*(?:;|$)')
+    result = []
+    for match in re.finditer(pattern, masked, re.MULTILINE):
+        path = match[1].lstrip('.').split('.')
+        if all(len(part) <= 40 for part in path):
+            result.append(dict(path=path, line=masked.count('\n', 0, match.start())+1,
+                               kind='literal committed client read; runtime type unverified'))
+        if len(result) == 4:
+            break
+    return result
 
 
 def declaration_index(files, inspected, terms):

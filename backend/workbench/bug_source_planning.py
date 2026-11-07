@@ -47,7 +47,7 @@ def correction(error, raw):
             # provider-controlled keys/messages never become system instructions.
             known = {'plan', 'reproducer', 'description', 'fixture', 'bootstrap', 'client', 'through_line',
                      'steps', 'observations', 'op', 'path', 'source', 'value', 'args', 'fields', 'method',
-                     'after_step', 'expected', 'incorrect'}
+                     'after_step', 'expected', 'incorrect', 'checkpoints', 'before_call', 'call', 'observe'}
             if any(not (part in known if type(part) is str else type(part) is int and 0 <= part <= 512)
                    for part in location):
                 return None
@@ -90,6 +90,7 @@ def committed(path, base):
         setup = bug.client_bootstrap(lines)
         if setup:
             item['client_bootstrap'] = setup
+            item['client_access_paths'] = bug.client_access_paths(lines, setup)
     elif path.startswith(('!!!TwichUI/', 'TwichUI_Settings/')):
         from workbench.source_context import compiled_shape
         item['top_level_returns_value'] = compiled_shape(raw)[1]

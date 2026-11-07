@@ -11,10 +11,10 @@ from test_verification_profiles import PRODUCTION, TEST
 
 
 def wire_response(client=False):
-    return wire_from_data(response(client))
+    return wire_from_data(response(client), checkpoints=False)
 
 
-def wire_from_data(original):
+def wire_from_data(original, checkpoints=True):
     value = copy.deepcopy(original)
     value['plan']['other_reads'] = value['plan'].pop('read_paths')
     reproducer = value['plan']['reproducer']
@@ -25,7 +25,7 @@ def wire_from_data(original):
             test_path=bootstrap.get('test_path') or value['plan']['focused_test'],
             client=bootstrap['client'], through_line=bootstrap['through_line'])
         value['plan']['reproducer'] = {k: reproducer[k] for k in ('description','setup','steps','observations')}
-        return value
+        return with_checkpoints(value) if checkpoints else value
     steps = reproducer['steps']
     first = next(i for i, step in enumerate(steps) if step['op'] == 'load')
     source = steps[first]['source']
@@ -35,6 +35,22 @@ def wire_from_data(original):
     for observation in reproducer['observations']:
         observation['after_step'] -= first+1
     value['plan']['reproducer'] = {k: reproducer[k] for k in ('description','setup','steps','observations')}
+    return with_checkpoints(value) if checkpoints else value
+
+
+def with_checkpoints(value):
+    value = copy.deepcopy(value)
+    reproducer = value['plan']['reproducer']
+    steps, observations = reproducer.pop('steps'), reproducer.pop('observations')
+    checkpoints, offset = [], 0
+    for observation in observations:
+        result = dict(observation)
+        after = result.pop('after_step')
+        assert after > offset and steps[after-1]['op'] == 'call'
+        checkpoints.append(dict(before_call=steps[offset:after-1],call=steps[after-1],observe=result))
+        offset = after
+    assert offset == len(steps)
+    reproducer['checkpoints'] = checkpoints
     return value
 
 
@@ -208,3 +224,67 @@ def test_observation_rejection_retains_exact_field_without_inventing_results(fie
     issue = failed.value.errors()[0]
     assert issue['loc'] == ('plan','reproducer','observations',0,location)
     assert rule in str(issue['ctx']['error'])
+
+
+@pytest.mark.parametrize('client', [False,True])
+def test_observed_call_checkpoints_preserve_explicit_program_and_results(client):
+    wire = wire_from_data(response(client))
+    frozen = copy.deepcopy(wire)
+    source,test = (CLIENT_SOURCE,CLIENT_TEST) if client else (PRODUCTION,TEST)
+    compiled,facts = compile_setup(wire,[dict(path=source),dict(path=test)])
+    actual = BugPlanningResponse.model_validate(compiled).model_dump()
+    expected = BugPlanningResponse.model_validate(response(client)).model_dump()
+    assert set(actual['plan'].pop('read_paths'))==set(expected['plan'].pop('read_paths'))
+    assert actual==expected and wire==frozen and facts['explicit_checkpoints']
+    assert facts['approved'] is False and facts['executed'] is False
+
+
+@pytest.mark.parametrize('fault',['mixed','missing_call','not_call','index','unsafe','load','missing_result','too_many_actions'])
+def test_checkpoint_compilation_rejects_missing_ambiguous_or_unsafe_content(fault):
+    wire = wire_from_data(response(True))
+    r = wire['plan']['reproducer']
+    point = r['checkpoints'][0]
+    if fault=='mixed':
+        r['steps']=[]
+    elif fault=='missing_call':
+        point.pop('call')
+    elif fault=='not_call':
+        point['call']=dict(op='table',path=['ignored'])
+    elif fault=='index':
+        point['observe']['after_step']=1
+    elif fault=='unsafe':
+        point['call']=dict(op='call',path=['os','execute'])
+    elif fault=='load':
+        point['before_call']=[dict(op='load',source=CLIENT_SOURCE)]
+    elif fault=='missing_result':
+        point['observe'].pop('expected')
+    else:
+        point['before_call']=[dict(op='table',path=['ignored'])]*5
+    with pytest.raises((ValueError,ResponseValidationError)):
+        compiled,_=compile_setup(wire,[dict(path=CLIENT_SOURCE),dict(path=CLIENT_TEST)])
+        BugPlanningResponse.model_validate(compiled)
+
+
+def test_three_state_checkpoints_have_distinct_call_indices_without_filling_values():
+    from test_bug_process_rehearsal import three_observations
+    wire = wire_from_data(three_observations(True))
+    compiled,_=compile_setup(wire,[dict(path=CLIENT_SOURCE),dict(path=CLIENT_TEST)])
+    result=BugPlanningResponse.model_validate(compiled)
+    indexes=[o.after_step for o in result.plan.reproducer.observations]
+    assert len(set(indexes))==3
+    assert all(result.plan.reproducer.steps[i-1].op=='call' for i in indexes)
+    assert [o.expected for o in result.plan.reproducer.observations]==[o['observe']['expected'] for o in wire['plan']['reproducer']['checkpoints']]
+    schema=wire_schema(BugPlanningResponse,dict(minimum_observations=3))
+    r=schema['$defs']['Reproducer']
+    assert r['required']==['description','setup','checkpoints']
+    assert r['properties']['checkpoints']['minItems']==3
+
+
+def test_literal_committed_client_access_paths_are_context_not_guessed_exports():
+    from workbench.bug_investigation import client_access_paths
+    lines=['local c=MakeClient("x")','-- local X=c.Hidden','local S="local X=c.Secret"',
+           'local A = c.Addon.Widget','local B = Other.Private','local D = c.Real',
+           'local Later=c.Later']
+    actual=client_access_paths(lines,dict(client='c',through_line=6))
+    assert [(x['path'],x['line']) for x in actual]==[(['Addon','Widget'],4),(['Real'],6)]
+    assert all('unverified' in x['kind'] for x in actual)

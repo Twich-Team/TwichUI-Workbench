@@ -112,7 +112,12 @@ def compile_setup(raw, files):
         prefix.extend(dict(op='load', source=p) for p in paths)
     else:
         reject('kind', 'module, client-loads or client-bootstrap', kind)
-    actions, observations = original.get('steps'), original.get('observations')
+    checkpoints = 'checkpoints' in original
+    if checkpoints:
+        from workbench.bug_checkpoints import compile_checkpoints
+        actions, observations = compile_checkpoints(original, validate)
+    else:
+        actions, observations = original.get('steps'), original.get('observations')
     if not isinstance(actions, list) or not isinstance(observations, list):
         reject('steps', 'explicit action and observation arrays', None)
     checked = [validate(Observation, o, ('plan', 'reproducer', 'observations', i)).model_dump(mode='json')
@@ -135,7 +140,9 @@ def compile_setup(raw, files):
     plan['read_paths'] = list(dict.fromkeys(reads))
     target = result['plan']['reproducer']
     target.pop('setup')
+    target.pop('checkpoints', None)
     target.update(fixture=fixture, bootstrap=bootstrap, steps=[*prefix, *actions], observations=checked)
     return result, dict(kind=kind, explicit_setup=True, prepended_steps=len(prefix),
                         derived_read_count=len(plan['read_paths']),
+                        explicit_checkpoints=checkpoints,
                         approved=False, executed=False)

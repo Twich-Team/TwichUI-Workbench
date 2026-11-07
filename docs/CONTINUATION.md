@@ -18,12 +18,16 @@ R=C/outcome-9b0658c. All installed gates pass: original79/latest118 copies,
 listeners/TLS/LAN/browser/filter/five probes/foreign-peer rejection, same model/key,
 CA/helper/session grant. Roles active/disabled pending demonstrated success.
 
-Fresh task10 intake210a06ba-9c37-4dee-9e11-54ca330720d8 dispatched17:56:07 UTC;
-chat driver79698. At checkpoint investigating; no real repair/provider case complete.
-Current DB can change: do not overwrite it with prior118-row copy. Watch current
-stage artifacts/acceptance/bug-flight-paths.jsonl and R/driver output/journals.
-No replay while provider activity unresolved. All prior9 task attempts settled;
-18 real Qwen requests6228 generated/67189 prompt, no implementation/Codex turn.
+Task10 intake210a06ba-9c37-4dee-9e11-54ca330720d8 definitively settled17:57:23 UTC;
+model attempt08cd682a-dc47-463d-aa04-c487822f409a, driver79698 held/exited2. Four
+complete requests: inspection, rejected2-call/3-observation plan, inspection, same
+coverage rejection in new plan. No approved plan/repair/uncertainty.1330 generated/
+13034 prompt; cumulative10 tasks22 real Qwen requests7558 generated/80223 prompt.
+No implementation or Codex turn. Null/null schema worked; exact operation/coverage
+diagnostics now retained. R/attempt-10-accounting.json. Normal model/key checked.
+Latest CURRENT settled DB122 rows/schema0012 SHA
+6308b6c49ffee8eb937c48a5d3645d4e0ad59db4ce15c026558ab3fb94599728.
+Copy this forward, never118/114/older stores; preserve all history and diagnostics.
 
 1247 backend/25 frontend,103 focused, native two-bug actual process/browser and
 19 installed parser cases pass. New wire rejects null/null, private <=6000-byte
@@ -34,6 +38,37 @@ UI/HTTP/worker/recipe/runtime/ops behavior. Exact changed3 backend files and eve
 log/reuse/failure bind R/offline-verification.json; all362 tracked release files and
 root owner docs match. Initial inline-if test lint failure preserved, corrected
 check passes. No missing expected result or addon answer filled.
+
+## Explicit call checkpoints and source budget —18:11 UTC
+
+New connected implementation replaces generated cross-referenced steps/observations
+with1–4 checkpoints, each explicit before_call actions, existing call and observe
+source/path/results. Stateful reports require3. Compiler flattens only those actions
+and computes each position, never fills behavior/results/scope/approval. Native
+legacy programs and earlier complete explicit-setup programs stay strict/compatible;
+mixed/incomplete/unsafe/oversized selections reject. Original Reproducer/approved
+BugEvidence storage/independent oracle unchanged. Native24-step/task/write/source
+bounds remain. Call/observation coverage/repeated action checks stay authoritative.
+
+Source context now includes bounded literal committed client_access_paths from a
+chosen test prefix; comments/string literals excluded, runtime type unverified.
+Model instructions explain paths start at exact MakeClient environment; source
+local aliases are not exports. No addon repair/reproducer/expected answer supplied
+by development. Read-only source follow-ups carry same literal context.
+
+Wire schemas prune unreachable definitions. Inspection-only schema1202 bytes rather
+than10045, allowing6823 source chars in19706-byte real-shaped packet; subsequent
+plan packet23520 bytes/5170 source chars. Simulated transport only, no provider.
+All24 actual C++ decoder cases pass (planning15/inspection4/client3/stateful2).
+First stateful fixture used different property order; ordered fixture passes,
+initial failure preserved. New private diagnostics handle checkpoints safely and
+remain<=6000 bytes, non-executable/redacted.117 focused checks pass. Native process
+passed before pruning; final native rerun and full backend/frontend/check/browser
+opt-ins underway in C/checkpoints-*-final.log and checkpoints-*-browser.log.
+First full backend was intentionally interrupted after later schema refinement;
+never count it as a final pass. Eight test-only inline-if lint errors fixed, logs
+retained. All other code frozen before final checks. No new candidate deployed or
+live attempt11 yet. Continue ordinary engineering under standing authority.
 
 Earlier988/verification-underway statements below are historical and superseded.
 

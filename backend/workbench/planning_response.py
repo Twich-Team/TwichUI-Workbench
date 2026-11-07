@@ -159,8 +159,6 @@ def wire_schema(model, coverage=None, files=None):
         outcomes.append(dict(type='object', properties=choice,
                              required=list(fields), additionalProperties=False))
     result['$defs']['BugOutcome'] = {'anyOf': outcomes}
-    if isinstance(coverage, dict) and type(coverage.get('minimum_observations')) is int and coverage['minimum_observations'] == 3:
-        result['$defs']['Reproducer']['properties']['observations']['minItems'] = 3
     if isinstance(files, list):
         selected = [item['path'] for item in files if isinstance(item, dict) and isinstance(item.get('path'), str)]
         plan_reads = [path for path in selected if path.startswith(('!!!TwichUI/', 'TwichUI_Settings/', 'tests/test_'))]
@@ -188,9 +186,14 @@ def wire_schema(model, coverage=None, files=None):
     reproducer['properties'].pop('fixture')
     reproducer['properties'].pop('bootstrap')
     reproducer['properties']['setup'] = setup_schema(files, references)
+    from workbench.bug_checkpoints import wire_checkpoints
+    minimum = 3 if isinstance(coverage, dict) and coverage.get('minimum_observations') == 3 else 1
+    reproducer['properties']['checkpoints'] = wire_checkpoints(result['$defs'], references, minimum)
+    reproducer['properties'].pop('steps')
+    reproducer['properties'].pop('observations')
     reproducer['properties'] = {key: reproducer['properties'][key]
-                                for key in ('description', 'setup', 'steps', 'observations')}
-    reproducer['required'] = ['description', 'setup', 'steps', 'observations']
+                                for key in ('description', 'setup', 'checkpoints')}
+    reproducer['required'] = ['description', 'setup', 'checkpoints']
     # The installed decoder emits object properties in schema order. Select
     # setup before choosing other files. Required reads are derived only from
     # explicit loads/bootstrap, writable paths, focused test and extra reads.
@@ -210,7 +213,28 @@ def wire_schema(model, coverage=None, files=None):
         if isinstance(node, list):
             return [compact(value) for value in node]
         return node
-    return compact(result)
+    result = compact(result)
+    # Inspection-only responses cannot emit a plan. Do not consume their
+    # source context budget with unreachable plan/program definitions.
+    definitions = result.get('$defs', {})
+    needed = set()
+    def references(node):
+        if isinstance(node, dict):
+            ref = node.get('$ref')
+            if isinstance(ref, str) and ref.startswith('#/$defs/'):
+                name = ref[len('#/$defs/'):]
+                if name not in needed:
+                    needed.add(name)
+                    references(definitions[name])
+            for key, value in node.items():
+                if key != '$defs':
+                    references(value)
+        elif isinstance(node, list):
+            for value in node:
+                references(value)
+    references(result)
+    result['$defs'] = {name: value for name, value in definitions.items() if name in needed}
+    return result
 
 
 class Evidence:
@@ -222,7 +246,8 @@ class Evidence:
         self.fixture_files = files
         self.schema_hash = sha(json.dumps(self.schema, sort_keys=True).encode())
         self.keys = {'choices', 'message', 'content', 'model', 'usage', 'id', 'tool_calls',
-                     'finish_reason', 'prompt_tokens', 'completion_tokens', 'total_tokens'}
+                     'finish_reason', 'prompt_tokens', 'completion_tokens', 'total_tokens',
+                     'checkpoints', 'before_call', 'call', 'observe', 'other_reads', 'setup'}
         self.enums, self.patterns = set(), set()
         def collect(node):
             if isinstance(node, dict):

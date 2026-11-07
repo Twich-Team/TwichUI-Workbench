@@ -10,6 +10,29 @@ def fixture_snapshot(value, files, summary):
     fixture = plan.get('reproducer') if isinstance(plan, dict) else None
     if not isinstance(fixture, dict):
         return None
+    checkpoint_facts = None
+    if 'checkpoints' in fixture:
+        points = fixture['checkpoints']
+        checkpoint_facts = dict(wire_format='call-checkpoints',
+            checkpoint_shape=summary(points), legacy_conflict='steps' in fixture or 'observations' in fixture,
+            checkpoint_calls=[])
+        fixture = dict(fixture, steps=[], observations=[])
+        if isinstance(points, list):
+            for index, point in enumerate(points[:4]):
+                if not isinstance(point, dict):
+                    checkpoint_facts['checkpoint_calls'].append(dict(index=index,shape=summary(point)))
+                    continue
+                before = point.get('before_call')
+                if isinstance(before, list):
+                    fixture['steps'].extend(before[:4])
+                if 'call' in point:
+                    fixture['steps'].append(point['call'])
+                observed = point.get('observe')
+                checkpoint_facts['checkpoint_calls'].append(dict(index=index,
+                    call_step=len(fixture['steps']), before_call_shape=summary(before),
+                    call_present='call' in point, observation_shape=summary(observed)))
+                fixture['observations'].append(dict(observed, after_step=len(fixture['steps']))
+                    if isinstance(observed, dict) else observed)
     paths, identifiers = set(), set()
     for item in files or []:
         if not isinstance(item, dict):
@@ -42,6 +65,8 @@ def fixture_snapshot(value, files, summary):
 
     result = dict(executable=False, approved=False, scalar_strings_redacted=True,
                   steps=[], observations=[], truncated=False)
+    if checkpoint_facts:
+        result.update(checkpoint_facts)
     setup = fixture.get('setup')
     if isinstance(setup, dict):
         result['setup'] = dict(kind=setup.get('kind') if isinstance(setup.get('kind'), str) and setup.get('kind') in {

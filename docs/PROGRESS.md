@@ -1,3 +1,16 @@
+# Task10 settled; explicit call checkpoints and source-budget repair — Nov7,18:11 UTC
+
+Task10 completed4 requests1330 generated/13034 prompt, rejected2-call/3-observation
+coverage twice. No approval/repair/uncertainty; latest122-row history/model verified.
+Current cumulative22 requests7558 generated/80223 prompt preserved. New checkpoint
+compiler computes positions from explicit calls/results, never missing content;
+legacy/mixed/unsafe validations remain. Literal test client access clarifies root
+paths without guessed exports. Unreachable wire definitions pruned: inspection
+schema1202 bytes/source6823 chars, plan source5170, packets under24k.117 focused/
+24 actual decoder cases pass. Final complete suites/native/browser opt-ins underway;
+first full run interrupted for final schema refinement, never counted as a pass.
+No revised activation/live call yet. Continue standing delivery; no real case done.
+
 # Verified9b0658c installed; fresh task10 — November7,17:56 UTC
 
 All installed gates pass, original79/latest118 history preserved, normal model/key

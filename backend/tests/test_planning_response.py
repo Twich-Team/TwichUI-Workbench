@@ -194,10 +194,12 @@ def test_private_evidence_is_bounded_and_cannot_reuse_a_symlink(tmp_path):
 
 def test_wire_schema_enforces_load_and_call_shapes_without_changing_local_authority():
     schema = wire_schema(BugPlanningResponse)
-    variants = [schema['$defs'][ref['$ref'].split('/')[-1]] for ref in schema["$defs"]["Step"]["anyOf"]]
+    variants = [value for value in schema['$defs'].values()
+                if value.get('properties', {}).get('op', {}).get('const')]
     by_op = {v["properties"]["op"]["const"]: v for v in variants}
-    assert by_op["load"]["required"] == ["op", "source"]
-    assert by_op["load"]["properties"]["source"]["type"] == "string"
+    assert "load" not in by_op  # Explicit setup selects source loads.
+    setup = schema["$defs"]["Reproducer"]["properties"]["setup"]["anyOf"]
+    assert any(choice["properties"]["kind"]["const"] == "module" for choice in setup)
     assert "source" not in by_op["call"]["properties"]
     assert "args" not in by_op["table"]["properties"]
     bad = response()
@@ -248,7 +250,7 @@ def test_repeat_coverage_is_generic_and_does_not_invent_observations():
     coverage = report_coverage(repeat)
     assert coverage["minimum_observations"] == 3
     schema = wire_schema(BugPlanningResponse, coverage)
-    assert schema["$defs"]["Reproducer"]["properties"]["observations"]["minItems"] == 3
+    assert schema["$defs"]["Reproducer"]["properties"]["checkpoints"]["minItems"] == 3
     assert (
         BugPlanningResponse.model_json_schema()["$defs"]["Reproducer"]["properties"][
             "observations"
@@ -460,3 +462,35 @@ def test_fixture_diagnostics_bound_hostile_lists_and_keep_observation_presence()
     snapshot=fixture_snapshot(dict(plan=dict(reproducer=fixture)),[],lambda v:dict(type=type(v).__name__,sha256='x'*64))
     assert len(json.dumps(snapshot).encode())<=6000 and snapshot['truncated']
     assert snapshot['observations'][0]['expected_present'] is False
+
+
+def test_checkpoint_diagnostics_associate_selected_calls_with_results(tmp_path):
+    from test_bug_wire import wire_from_data
+    wire=wire_from_data(response())
+    evidence=Evidence(tmp_path,str(uuid4()),BugPlanningResponse)
+    evidence.parsed(wire,{})
+    rows=[json.loads(x) for x in evidence.file.read_text().splitlines()]
+    snapshot=next(r for r in rows if r['phase']=='fixture-diagnostics')
+    assert snapshot['wire_format']=='call-checkpoints'
+    assert snapshot['legacy_conflict'] is False
+    assert snapshot['checkpoint_calls'][0]['call_step']==1
+    assert snapshot['steps'][0]['op']=='call' and len(snapshot['observations'])==1
+    assert snapshot['executable'] is False
+    evidence.close()
+
+
+def test_inspection_schema_omits_unreachable_programs_and_all_references_resolve():
+    schema=wire_schema(BugPlanningResponse,dict(require_inspection=True))
+    assert 'BugPlan' not in schema['$defs'] and 'Reproducer' not in schema['$defs']
+    assert len(json.dumps(schema).encode()) < 2500
+    def walk(value):
+        if isinstance(value,dict):
+            if '$ref' in value:
+                assert value['$ref'].split('/')[-1] in schema['$defs']
+            for child in value.values():
+                walk(child)
+        elif isinstance(value,list):
+            for child in value:
+                walk(child)
+    walk(schema)
+    assert 'BugPlan' in wire_schema(BugPlanningResponse)['$defs']

@@ -1,19 +1,19 @@
-# Workbench status — November7,2026,17:56 UTC
+# Workbench status — November7,2026,18:11 UTC
 
-Exact owner documents installed; autonomous standing authority active. Former
-campaign caps superseded; historical accounting and actual safeguards preserved.
+Exact supplied documents installed; standing autonomous authority active. Former
+campaign caps superseded; all usage/history and actual safeguards preserved.
 
-Verified9b0658c installed with checked original79/latest118 history copies,
-loopback/LAN HTTPS, browser/filter/isolation/model restoration protections passing.
-Fresh1247 backend/25 frontend/103 focused/native process and19 parser cases pass;
-uninvalidated UI/routing/readiness/admin evidence reused with exact lineage.
+9b0658c remains installed and protected. Task10 settled without approval/repair:
+3 observations across only2 calls rejected twice.10 settled tasks22 Qwen requests,
+7558 generated/80223 prompt; no implementation/Codex/uncertainty. Latest122-row
+history preserved; normal authenticated model/key checked.
 
-Fresh real flight-path task10 investigating. No real bug repair or provider case
-complete. Prior9 settled tasks18 Qwen requests6228 generated/67189 prompt; no
-implementation/Codex/uncertainty before task10. New wire rejects identical null
-results and preserves bounded private non-executable fixture diagnostics. Continue
-to independently reviewed plan, approved checked repair and saved result, then
-provider checks/restart. No engineering renewal is required.
+Connected revision uses explicit observed-call checkpoints, exact client-root
+context from literal test access, and pruned schemas to preserve more actual code.
+No action/result/permission invented.117 focused and24 actual decoder cases pass;
+complete final suites/native/browser opt-ins underway. No new deployment/live
+attempt yet. Continue toward real reviewed/checked flight-path fix and provider
+checks. No real case complete; no owner engineering renewal needed.
 
-Broader product/in-game checks/live Codex bug repair/PRs unfinished. Styling/audit
-not begun. See [handoff](CONTINUATION.md).
+Broader product/in-game/live Codex bug repair/PRs unfinished. Styling/audit not
+started. See [handoff](CONTINUATION.md).
