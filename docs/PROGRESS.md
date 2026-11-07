@@ -6188,3 +6188,15 @@ and actual-wire assertions, preserving no shell/edit/approval/publication power.
 Private diagnostics include inspection outcome. Focused60 passed; historical model
 choice's exact cause is not proven. Continue full verification, history-forward
 revision and fresh bounded attempt under unchanged standing authority.
+
+## November 7,15:30 UTC — corrected revision installed, fresh investigation
+
+534ca9c sealed and installed after complete1,204/25 backend/frontend,108 browser,
+10 visual and every opt-in passed; unchanged helper/grammar checks reused with
+explicit byte proof. All357 tracked files and exact owner documents verified.
+Original79/latest98-row checked copies, both access paths, scoped ingress,
+browser guards and five confinement probes passed. Previous roles safely closed
+and settled before history-forward copy; stages/recovery/evidence preserved.
+Fresh attempt5 intake12bd4cc8-626c-46d0-ba72-848e7e6b59fe investigating under
+corrected no-shell/read-only inspection instructions. No real repair completion
+claimed. Continue normal independent plan review and authorized live workflow.

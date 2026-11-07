@@ -10,6 +10,29 @@ limits this work. Checkpoints are not stop points. Own ordinary repairs and
 continue through the actual functional outcome. No further owner decision is
 currently needed for engineering/live acceptance/deployment inside standing scope.
 
+## Current installed revision — 15:30 UTC
+
+Candidate `534ca9c40ae687b19be21b782bf434ffc40c4841`, tree
+`023ef8471db0bd71c16b9f0ee3f582d2bdef339d`, is now installed at
+`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-534ca9c`, seal
+`6c04beb4e9a8a4d2c33f2f8631280a25d39daa5ce896e8f58736df3e6b82305d`.
+`delivery-campaign-7b5963a/outcome-534ca9c` private record binds final complete
+verification (1,204/25 backend/frontend,108 browser,10 visual, all opt-ins;48 admin
+and grammar evidence reused for unchanged bytes), 357 tracked files and exact
+owner documents. Original79/latest98-row stores copied and verified. Current
+roles/TLS/listeners/LAN/browser guards/filters and all five confinement probes
+passed after safe closure and settlement of previous roles. Same grant/helper,
+CA and model. Roles remain disabled pending acceptance. Previous stage retained.
+
+Fresh attempt5 intake `12bd4cc8-626c-46d0-ba72-848e7e6b59fe`, model attempt
+`1e2d92be-7efe-4460-9f7e-dab6342af67d`, is investigating under corrected prompt;
+chat driver session29930. Watch new stage `artifacts/acceptance/bug-flight-paths.jsonl`
+and private driver log before doing anything else. The task has not completed.
+Independent plan review still required; do not hand-write its addon fix/reproducer.
+Use new stage for any bound review receipt. Do not replay the settled fourth
+receipt or use the older store as latest after this attempt changes history.
+All prior sections are chronological evidence, superseded where stated here.
+
 ## Live continuation — 15:17 UTC
 
 Installed candidate `6b48d87629e0595d34152a1bd0783eb935612f5f`, tree
