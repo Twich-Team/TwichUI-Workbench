@@ -1,3 +1,65 @@
+# Restored; real bug and provider acceptance unfinished — November 7, 2026 UTC
+
+Following PROJECT_WORKING_PHILOSOPHY.md, ordinary repairs were owned through
+revision 3 and a fresh real investigation. **No campaign case is complete.**
+The existing bug allocations and verified revisions are exhausted; further
+live work and activation are held for the [single consolidated extension](DELIVERY_CAMPAIGN_EXTENSION_APPROVAL_20261107.md).
+That record is proposed authority only. Do not open a new clock, infer new
+allocations, or turn a valid limitation into an approved repair plan.
+
+Candidate `a8e2004`, tree `d88ddca7c13b429120172e24184114cbe5057ebf`,
+seal `d1523a717dcb9a50bdb7727818baefaf895735d88d07e40d965325fac7042ccd`,
+passed complete suites: 1,185 backend, 25 frontend, 108 Chromium, ten visual,
+48 admin; all three backend and both browser opt-ins separately passed.
+Actual API/worker/browser fault rehearsal covered malformed/conflicting
+responses and concurrent polling. Installed history, network, TLS, browser
+and isolation gates passed. See [the correction record](DELIVERY_CAMPAIGN_RESPONSE_CORRECTION_20261107.md).
+
+Fresh attempt 3 completed Qwen generation and passed format/schema validation,
+but returned a limitation: needed implementation was absent from the excerpts.
+Local inspection confirms the function body exists at line 49 in an allowed
+selected file but was omitted; several sent windows were opening comments.
+This is a concrete generic context-selection gap, not proof of a game-only
+blocker. No developer addon solution/reproducer or repair was supplied.
+No plan/run decision, implementation or campaign Codex turn occurred.
+
+Three planning requests consumed 1,171 generated / 13,403 prompt tokens.
+Attempt 1's discarded invalid field remains UNKNOWN. Attempt 2's conflict
+is recorded privately. Attempt 3 is a valid limitation, not schema rejection.
+All three are settled/accounted, with no uncertain execution. Do not renew
+unchanged work or use the local-rejection amendment to admit attempt 3.
+
+The original app is restored at http://127.0.0.1:9487/; LAN HTTPS is closed.
+Original 79-row history, backup, firewall, normal authenticated Qwen,
+absent candidate roles/socket/drop-in and all four stage seals were checked.
+Latest settled campaign store is `everyday-campaign-a8e2004/artifacts/workbench.sqlite3`:
+93 rows, schema 0012, logical SHA-256
+`e278c377887d184267cd31eadeb5b41ad3fcbc615ba6effec72b2d8e1c2f6efa`.
+Copy this latest store forward only under renewed authority, preserving all
+older stores and archives. Sign-in-cache metadata is unchanged. Configuration
+inode/mtime differs from the original baseline at 11:45 UTC, before revisions
+2/3 activation; contents change/cause unknown. Preserve unrelated configuration;
+recheck non-secret metadata and pinned connector behavior next time.
+
+Private canonical clock/ledger/evidence: `delivery-campaign-7b5963a`,
+especially `revision-3/closeout-held.json`, `offline-verification.json`,
+`source-context-diagnosis.json` and `attempt-3-accounting.json`.
+Original opening stays 04:35:45.612Z, November 7; admissions end 18:35:45.612Z,
+restoration ends 20:35:45.612Z unless the specific extension is approved.
+Five attempt slots/two local/four Codex allocations remain conditional, but
+ZERO bug allocations and ZERO verified revisions prevent the required bug-first
+outcome. The still-running clock does not override those limits.
+At final hold: 602,396,483 counted bytes, 471,345,341 bytes headroom, physical
+minimum 32,407,216,128 bytes, owned scratch zero. Re-measure at every gate.
+The installed session-bound administrator grant remains unchanged/valid;
+no broader root, billing, source, network or publication authority exists.
+
+A8 and the required real addon fix remain open. The normal next-bug workflow
+has controlled-process evidence, not a successful real flight-path result.
+In-game checks, live Codex bug repair, draft PR delivery and broader original
+capabilities remain unfinished. Styling and full audit have not begun.
+Earlier sections below are historical when superseded by this entry.
+
 # Revision 3 correction and settled second attempt — November 7, 2026 UTC
 
 Following PROJECT_WORKING_PHILOSOPHY.md, continue the independently amended

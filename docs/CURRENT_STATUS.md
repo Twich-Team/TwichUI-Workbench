@@ -2,6 +2,34 @@
 
 November 6, 2026 Mountain time.
 
+- November 7 UTC, final hold: revision 3 `a8e2004` passed all applicable
+  offline and installed gates. The third real Qwen investigation returned
+  a valid limitation because needed code was missing from its excerpts;
+  local inspection confirms a source-context selection defect. No real
+  fix or provider case is complete. Three planning requests used 1,171
+  generated tokens. Bug/revision allocations are exhausted. The original
+  loopback app, 79-row history, firewall and normal model are restored;
+  latest 93-row campaign history and all seals/evidence remain preserved.
+  [One consolidated extension request](DELIVERY_CAMPAIGN_EXTENSION_APPROVAL_20261107.md)
+  covers the complete remaining outcome. It is not approved. Original
+  clock/totals remain unchanged; no further live work or cutover proceeds.
+  [Current handoff](CONTINUATION.md). Earlier status entries are historical.
+
+- November 7 UTC, 13:21: candidate `a8e2004` is dormant and sealed for
+  revision 3. Both earlier planning rejections are settled; two requests
+  consumed 1,048 generated tokens, with no repair or campaign Codex turn.
+  Attempt 2's private receipt identifies a meaningful plan/question
+  conflict; attempt 1's discarded cause remains unknown. Original app,
+  firewall, model and history are restored. Latest campaign history has
+  88 rows. The correction encodes exclusive outcomes, preserves field
+  diagnostics, and requires action-driven initial/refresh observations.
+  Complete backend (1,185), frontend (25), Chromium (108), administrator
+  (48), all three backend opt-ins and both browser opt-ins passed;
+  visual checks are finishing. One bug allocation and one verified
+  revision remain before this new build is counted. The original clock
+  and limits are unchanged. See [current correction](DELIVERY_CAMPAIGN_RESPONSE_CORRECTION_20261107.md).
+  No campaign case is complete; earlier entries below are historical.
+
 - November 7, 2026 UTC: the owner independently amended the campaign to
   authorize connected repairs and qualifying settled local-validation
   renewals, without a historical-field proof or repeated one-attempt

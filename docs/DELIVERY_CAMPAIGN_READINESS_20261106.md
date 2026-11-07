@@ -1,3 +1,14 @@
+# Current acceptance gap — November 7, 2026 UTC
+
+The original package remains unchanged; this source record is historical.
+Revision 3 `a8e2004` passed complete offline/installed verification, but its
+real Qwen task returned a valid limitation due to omitted implementation
+context. No flight-path fix or campaign provider case passed. Restoration
+is verified; bug/revision allocations are exhausted. Read the latest
+[handoff](CONTINUATION.md), [correction record](DELIVERY_CAMPAIGN_RESPONSE_CORRECTION_20261107.md)
+and [proposed consolidated extension](DELIVERY_CAMPAIGN_EXTENSION_APPROVAL_20261107.md).
+Further live work/activation is not authorized by this readiness entry.
+
 # Delivery campaign readiness
 
 November 6, 2026 Mountain time. Following PROJECT_WORKING_PHILOSOPHY.md,

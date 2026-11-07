@@ -1,3 +1,22 @@
+# Final verification and real response disposition
+
+All applicable final checks passed for source `a8e2004`: 1,185 backend,
+25 frontend, 108 Chromium, ten visual, 48 admin, all three backend opt-ins
+and both browser opt-ins. Inventory 4,517 files / 556,180,537 bytes, 16 links;
+seal `d1523a717dcb9a50bdb7727818baefaf895735d88d07e40d965325fac7042ccd`.
+Actual installed history/network/browser/isolation gates passed. Fresh
+attempt 3 validated the exclusive structured format but returned a limitation;
+123 generated / 4,628 prompt tokens, no repair plan or implementation.
+The claimed missing function body exists in an allowed file and was omitted
+by comment-heavy excerpt selection. Output-schema handling is tested; useful
+source investigation and the real outcome remain unfinished. Original app,
+history, firewall and model were restored. Full private evidence is in
+`delivery-campaign-7b5963a/revision-3`. All four stage seals passed again.
+Bug and verified-revision allocations are exhausted; read the proposed
+[consolidated extension](DELIVERY_CAMPAIGN_EXTENSION_APPROVAL_20261107.md).
+The detailed pre-activation correction record below remains valid within
+these observed limits; it supplies no additional authority.
+
 # Settled response conflict and connected correction
 
 Following PROJECT_WORKING_PHILOSOPHY.md. This records engineering work under

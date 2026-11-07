@@ -195,6 +195,16 @@ The approved Qwen-only interim cutover stopped in preflight. A8 remains open for
 
 ## A9. Recovery and continuity
 
+Acceptance note, November 7, 2026 UTC. The amended campaign has not delivered
+its real bug or A8 provider acceptance. Three settled Qwen investigations
+consumed the approved bug allocations; the latest valid limitation exposed
+omitted permitted implementation context. Do not count structured-output or
+fixture success as product completion, waive the bug outcome, or declare
+Codex impossible. The consolidated resource/inspection extension is proposed,
+not owner-approved. Current disposition and recovery evidence are in the
+handoff; the standing billing, LAN, source and approval policies remain.
+
+
 Owner campaign amendment, November 7, 2026 UTC. A definitively finished
 provider output rejected locally may receive a fresh bounded task attempt
 when no repair execution or uncertain provider activity remains, consumed
