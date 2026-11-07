@@ -8,7 +8,35 @@ Preserve billing, source, network, task approvals, system access and recovery.
 Root files match owner attachments; REFERENCE_DOCUMENTS.md distinguishes historical
 copies. No document or offline result establishes a completed real task.
 
-## Current installed and settled state
+## Current installed operation —17:43 UTC
+
+Installed9889377c5b353f05342ed78b035db452892a3011, tree
+26829bc10a8a395178525ee12aaf503d4032b5c1; stage
+`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-9889377`, seal
+ccabad5a7d504ded6d8d357fb26da178cabb9daeddb282dce7698ef30248d2dd.
+R=C/outcome-9889377. Original79/latest114 checked copies, both listeners/LAN/TLS,
+browser/filters/five probes/foreign-peer rejection pass; same authenticated model,
+CA and root helper. All roles active/disabled pending success.
+
+Fresh task9 intake8fcf02d6-2075-4b0a-8253-fb964ccbf28e dispatched17:43:04 UTC,
+chat driver1685. At checkpoint investigating, no repair/provider case complete.
+Watch current stage artifacts/acceptance/bug-flight-paths.jsonl and R/driver output.
+The working store changes during this task; do not overwrite it with114-row copy.
+Independent review before plan/run approvals still required. Never replay uncertain
+activity. Outcome ledger retains all prior usage, no former campaign gate.
+
+Final verification1240 backend/25 frontend/108 full Chromium/10 visual, all3 backend
+and2 browser opt-ins passed.96 focused checks,15 installed parser cases,11 driver
+guards and pinned-node syntax pass. Offline packet23922/23560 bytes; exact source
+361 tracked files/root docs and nonsecret metadata verified.
+R/offline-verification.json binds reuse and every log/failure disposition; two
+unactivated stages preserved. Full application bytes exercised, final-only operator
+wait/fixture contention corrections separately checked. Desktop/phone screenshots
+inspected. No live real result established by these offline proofs.
+
+Earlier00d78ab/verification-underway statements below are historical and superseded.
+
+## Prior installed and settled state
 
 Installed00d78ab, tree ea67ecaff6649cf1a7f0d0c46dd153b1f7dcacd0, stage
 `/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-00d78ab`, seal

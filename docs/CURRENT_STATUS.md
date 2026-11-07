@@ -1,18 +1,18 @@
-# Workbench status — November 7, 2026
+# Workbench status — November 7, 2026,17:43 UTC
 
-Exact owner documents installed; standing autonomous authority active, former
-campaign caps superseded. Accounting and all actual safeguards remain.
+Exact supplied owner documents installed; standing autonomous authority active.
+Former campaign caps superseded; accounting, history and actual safeguards remain.
 
-00d78ab remains installed with preserved history, working loopback/LAN HTTPS and
-prior verified isolation/browser protections. Task8 definitively settled without
-an approved plan or repair. All8 tasks used14 complete Qwen requests:4774 generated/
-53792 prompt tokens; no implementation/Codex turn or uncertain activity. Current
-settled history114 rows is preserved and must be copied forward.
+Verified9889377 is installed: original79/latest114-row history copies, both loopback/
+LAN HTTPS addresses, browser boundaries, service isolation and normal authenticated
+Qwen pass.1240 backend/25 frontend/108 Chromium/10 visual plus all opt-ins passed;
+precise reuse/failures/installed grammar and source proofs in bound private record.
 
-Connected revision removes redundant source-read declarations from modern wire
-plans and reports exact invalid observation fields.96 focused checks, check/build
-and installed grammar cases pass; full suites and actual-process controlled
-rehearsals continue. No new source revision deployed or new live request yet.
-No real flight-path fix or supporting provider case is complete. Continue delivery
-under existing authority. Broader product, in-game verification, live Codex bug
-repair and PRs remain unfinished. Styling/audit not begun. See [handoff](CONTINUATION.md).
+Fresh real flight-path task9 is investigating in the normal app. No real fix or
+supporting provider case complete yet. Prior8 settled tasks used14 Qwen requests,
+4774 generated/53792 prompt tokens, no implementation/Codex/uncertainty. Current
+store may change; preserve it. Independent plan review, separate delegated plan/run
+approvals and checked patch remain ahead. Continue without engineering renewal.
+
+Broader product, in-game verification, live Codex bug repair and PRs unfinished.
+Styling/audit not begun. See [handoff](CONTINUATION.md).

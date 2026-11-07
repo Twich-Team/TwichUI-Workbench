@@ -1,3 +1,12 @@
+# Verified9889377 installed; fresh task9 — November7,2026,17:43 UTC
+
+Installed gates all pass, including original79/latest114 history copies, TLS/LAN,
+browser/filter/isolation/foreign-peer checks and model/key preservation. Final
+application1240 backend/25 frontend/108 full Chromium/10 visual/all opt-ins pass,
+with exact source/grammar/diagnostic/reuse and failure records.
+Task9 intake8fcf02d6-2075-4b0a-8253-fb964ccbf28e investigating; no real case complete.
+Standing authority continues. Current handoff/status supersede earlier snapshots.
+
 # Task8 settled; explicit read-scope revision — November 7, 2026
 
 Current facts are in CONTINUATION.md/CURRENT_STATUS.md; earlier dated entries below
