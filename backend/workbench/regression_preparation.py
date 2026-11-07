@@ -20,6 +20,7 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import OperationalError
 
 from workbench import intake
+from workbench.bug_evidence import validation_diagnostics as bug_validation_diagnostics
 from workbench.db import intakes, planning_jobs, proposals, model_attempts, write_transaction
 from workbench.planning_transport import deadline_seconds, scenario_failure_message
 from workbench.schemas import ProposalContent, RegressionTaskContract
@@ -314,6 +315,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     planning_end = None
     bug = bug_investigation.requested(original['payload'])
     bug_result, limitation = None, None
+    validation_diagnostics = {}
     choice = original['payload'].get('local_planning')
     everyday_mode = everyday.enabled()
     generation = job['kind'] == 'planning' and scenario_response is None and (
@@ -490,6 +492,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             question = str(error)
         except ValidationError as error:
             if bug:
+                validation_diagnostics = bug_validation_diagnostics(error)
                 failure = ('schema_validation', 'The provider returned an incomplete or invalid bug investigation.')
             elif loaded_selection:
                 # Provider-controlled keys and values must not reach the review UI or ledger.
@@ -576,6 +579,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             diagnostics = {k: v for k, v in getattr(adapter_used, 'diagnostics', {}).items()
                            if k != 'usage'}
             diagnostics['category'] = category
+            diagnostics.update(validation_diagnostics)
             if (loaded_selection or bug) and claimed_generation:
                 diagnostics['retained_failure'] = 1
             state = diagnostics.get('generation_state')

@@ -99,6 +99,47 @@ class BugPlanner:
         return self.answer, 'controlled-bug-planner', 'demo'
 
 
+@pytest.mark.usefixtures('installed')
+def test_invalid_bug_plan_retains_safe_schema_diagnostics_without_replay(
+    client, headers, store, monkeypatch,
+):
+    enable_bugs(monkeypatch)
+    item = client.post('/api/intake', headers=headers, json=report()).json()
+    private_value = 'PRIVATE_PROVIDER_CONTENT'
+    private_key = 'PRIVATE_PROVIDER_KEY'
+    answer = {**response(), 'finding': private_value * 40, private_key: private_value}
+    planner = BugPlanner(answer)
+    planner.diagnostics = dict(generation_state='finished', output_bytes=3300)
+    assert worker.tick(store, planning_adapter=planner)
+    result = client.get('/api/intake/' + item['id']).json()
+    assert result['status'] == 'failed'
+    assert result['proposals'] == [] and result['tasks'] == []
+    diagnostics = result['jobs'][0]['diagnostics']
+    assert diagnostics['generation_state'] == 'finished'
+    assert diagnostics['category'] == 'schema_validation'
+    assert diagnostics['validation_errors'] == 2
+    assert diagnostics['validation_locations'] == (
+        'finding:string_too_long; unrecognized:extra_forbidden')
+    assert len(diagnostics['validation_schema_sha256']) == 64
+    assert private_value not in json.dumps(result) and private_key not in json.dumps(result)
+    assert not worker.tick(store, planning_adapter=planner)
+    assert len(planner.calls) == 1
+
+
+def test_bug_schema_diagnostics_bound_unknown_locations_and_ignore_error_messages():
+    from pydantic import ValidationError
+
+    errors = [dict(type='value_error', loc=('PRIVATE_KEY', i, 'PRIVATE_NESTED'),
+                   input='PRIVATE_INPUT', ctx={'error': ValueError('PRIVATE_MESSAGE')})
+              for i in range(10)]
+    error = ValidationError.from_exception_data('PRIVATE_TITLE', errors)
+    diagnostics = bug_evidence.validation_diagnostics(error)
+    assert diagnostics['validation_errors'] == 10
+    assert len(diagnostics['validation_locations'].split('; ')) == 4
+    assert len(diagnostics['validation_locations']) <= 600
+    assert 'PRIVATE' not in json.dumps(diagnostics)
+
+
 def approve(client, headers, item):
     plan = item['proposals'][0]
     endpoint = f"/api/intake/{item['id']}/decisions"

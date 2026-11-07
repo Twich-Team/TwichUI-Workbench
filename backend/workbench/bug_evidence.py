@@ -112,6 +112,27 @@ class BugPlanningResponse(Data):
         return self
 
 
+def validation_diagnostics(error):
+    """Keep bounded schema locations, never provider values, keys or messages."""
+    fields = set().union(*(model.model_fields for model in (
+        BugPlanningResponse, BugPlan, Reproducer, ClientBootstrap, Step,
+        Observation, FixtureField,
+    )))
+    rows = []
+    for issue in error.errors(include_input=False, include_context=False, include_url=False)[:4]:
+        location = '.'.join(
+            str(part) if type(part) is int and 0 <= part <= 512 else
+            part if type(part) is str and part in fields else 'unrecognized'
+            for part in issue['loc'][:8]
+        ) or 'response'
+        kind = issue['type']
+        kind = kind if re.fullmatch(r'[a-z_]{1,64}', kind) else 'validation_error'
+        rows.append(f'{location}:{kind}')
+    return dict(validation_errors=error.error_count(),
+                validation_locations='; '.join(rows)[:600],
+                validation_schema_sha256=digest(BugPlanningResponse.model_json_schema()))
+
+
 class ReadWindow(Data):
     path: LuaPath | TestPath
     start: int = Field(ge=1)
