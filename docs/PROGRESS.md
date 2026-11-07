@@ -6717,3 +6717,14 @@ prompt processing+allowed generation can exceed120sec. New bug180/shared1200
 v5consent/updated UI and private create-only bounded snapshots pass99 focused/build.
 Combined snapshot+journal64KiB protection retained; ordinary planning unchanged.
 Continue final suites/browser/native and verified new candidate, no owner stop.
+
+## November7,22:29 UTC — controller budget and isolated browser fixtures
+
+Caught098 driver21+38+10+60min reserve exceeding120min watchdog BEFORE live dispatch.
+Actual shared Node timing config now140min bugcase+10cleanup within unchanged150min
+operation; no campaign cap/extra provider authority. Mixed opt-ins uncovered stale
+buggy disposable source in regression baseline; original check properly held. New
+validated settled E2E setup retains old source and creates fresh baseline; both
+opt-ins pass56.5sec.2 focused timing/isolation checks pass.098 appcode had1346/25/
+108browser/10visual/99focused/native34.82sec complete; final backend/affectedbrowser
+checks for new operational/fixture checkpoint continue. No real fix/case complete.

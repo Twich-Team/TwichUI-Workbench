@@ -1,3 +1,47 @@
+# Controller/fixture correction — November7,22:29 UTC
+
+No real flight-path fix/provider case complete. Installed973 remains healthy/idle,
+task17 cancellation/slot40232 idle already reconciled,151-row history and all usage
+facts below unchanged.098f30f source was sealed as UNACTIVATED revision18, not run.
+It must NOT activate: independent inspection caught its longer21min planning reserve
+plus38min preparation/10min review/60min run exceeded old120min case watchdog.
+No live dispatch consumed. Keep098 stage/evidence, mark unactivated/superseded.
+
+New acceptance_timing.mjs is used by actual driver for every phase/watchdog. Bug
+case140min fits129min admission plus1min margin and10min cleanup within unchanged
+150min per-operation watchdog/admin reserve. Ordinary case105min retains original
+2.5min planning/38min preparation/60min run, no bug review. Runtime derived review
+cutoff shares the same values. Unit exercises actual Node module + Python shared
+investigation deadline; no cumulative campaign caps reintroduced.
+
+Combined browser opt-ins exposed E2E source contamination: bug setup deliberately
+made normalize buggy, regression setup reused existing source, so independent
+original-behavior check correctly held. Production app checks were NOT weakened.
+Fresh closed disposable source setup now validates exact owned E2E database and
+settlement, retains old source directory, and creates a fresh controlled baseline.
+Unsafe paths/symlinks reject. Both bug+everyday opt-ins now PASS together56.5sec.
+Exact failing trace/error context retained in artifacts/runs/browser-IqC0qX and
+C/timeout-retention-browser-optins.log; successful C/controller-timing-browser-optins.log.
+2 new timing/fixture unit checks pass, C/controller-timing-fixture-focused.log.
+
+098f30f full1346backend/25frontend/build/99focused/native34.82sec/108Chromium/
+10visual all completed successfully. New source changes ONLY operational driver/
+new timing module/disposable fixture/tests, application backend/frontend/e2e test
+files byte-identical. Final backend suite/check plus affected8 browser cases are
+being checked on new checkpoint; retain prior108/10 for unchanged app behavior
+and fresh2 mixed opt-ins, not claim unchanged fixture behavior. New desktop/phone
+visuals inspected: browser-5mLE1N/screenshots/work-1440.png andwork-390.png.
+
+Next verified source revision19 but next task attempt18 (098 never dispatched).
+Previous installed973,151-row forward, original79; evidence roots67 INCLUDE the
+unactivated098 stage/release pair plus new pair (prior973 had63). Append f63026e9
+prior model ID as098 template already does. Same bug title attempt18, fresh v5
+normal decisions. Use098 templates but previous stays973, new network JS stays
+index-B-R3xVJb.js/CSS index-CBKHT43W.css. Preserve all settled accounting and original
+interrupted_unknown status; final-request usage unavailable, never count idle0 as
+usage. Complete checks/seal/lineage before deployment then continue real task,
+not another owner engineering approval. Existing detailed next steps below apply.
+
 # Autonomous delivery — November7,2026,22:09 UTC
 
 Read authoritative root philosophy/requirements/standing owner direction, then

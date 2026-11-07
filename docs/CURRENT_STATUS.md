@@ -1,17 +1,14 @@
-# Workbench status — November7,2026,22:09 UTC
+# Workbench status — November7,2026,22:29 UTC
 
-No real flight-path fix or supporting provider case complete. Installed9736533 is
-protected/idle. Task17 model self-check rejected first proposed plan; sixth revision
-request timed out. Server cancellation/release and authenticated idle slot verified;
-no uncertain execution or repair remains, but final response/usage is unavailable
-and original interrupted_unknown status is preserved.52 Qwen requests started,
-51 complete receipts; known40022generated/301269prompt, final completion bound2600
-kept separately. Settled151-row history/original79/recovery intact.
+No real flight-path fix/provider case complete. Installed973 is healthy/idle;
+task17 cancellation reconciled,151-row history and52started/51complete receipts
+preserved (one incomplete final usage, not zero). No owner decision/access needed.
 
-Current development increases bug requests to180sec/shared1200sec with fresh v5
-consent; ordinary planning unchanged. Private bounded proposed-plan/review snapshots
-prevent losing valid diagnostic data on later failure.99 focused checks/build pass;
-final complete suites and changed consent/browser/native checks next. No new live
-call yet. Continue verified installation/fresh real workflow under standing authority.
-No owner decision/access needed. Broader product/live Codex bug repair/in-game/PRs
-unfinished; styling/audit not begun. Exact evidence/next steps in CONTINUATION.md.
+Timeout/private-retention code passes1346 backend/25 frontend/99focused/native,
+108browser/10visual. Prepared098 was NOT activated: fixed controller phase-reserve
+arithmetic before live dispatch. Also fixed closed E2E source contamination; bug+
+everyday opt-ins now pass together. New timing module/fixture unit2 pass; final
+backend/affected browser checks on new checkpoint next. Application code/UI remain
+identical to passed098 checks. Continue verified deployment/fresh real bug, then
+provider cases/durability/normal next bug. Exact source/evidence in CONTINUATION.md.
+Broader product/live Codex bug repair/in-game/PRs unfinished, styling/audit not begun.

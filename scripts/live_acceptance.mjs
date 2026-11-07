@@ -6,6 +6,7 @@ import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 import {runJourney} from './browser_acceptance.mjs';
+import {caseTiming} from './acceptance_timing.mjs';
 
 const release = dirname(dirname(fileURLToPath(import.meta.url)));
 const stage = dirname(release);
@@ -84,7 +85,8 @@ need(sha(helper) === helperSha, 'Administrator helper changed');
 const grant = JSON.parse(admin({op:'status'}));
 need(grant.expires * 1000 > (outcome ? now() : campaignOpened) + duration*minute, 'Administrator grant does not cover rollback window');
 const bug = candidate.request.kind === 'issue';
-const blockDeadline = Math.min(cutoff, now() + (bug ? 120 : 105)*minute);
+const timing = caseTiming(bug);
+const blockDeadline = Math.min(cutoff, now() + timing.caseMinutes*minute);
 const receipt = join(evidence, choice + '.jsonl');
 const fd = openSync(receipt, 'wx', 0o600); // An uncertain dispatch consumes this case.
 let count = 0;
@@ -210,15 +212,16 @@ try {
     args:['--disable-dev-shm-usage','--disable-background-networking','--no-proxy-server']});
   const context = await browser.newContext({serviceWorkers:'block'});
   await runJourney(context, origin, policy, candidate, {
-    blockDeadline, now, preparationMs:38*minute, reviewMs:10*minute,
+    blockDeadline, now, preparationMs:timing.preparationMinutes*minute,
+    reviewMs:timing.reviewMinutes*minute, minimumRunMs:timing.runMinutes*minute,
     // The app's bug investigation shares twenty minutes across source reads and
     // corrections. Allow receipt/worker polling to settle after that bound.
-    planningMs:bug ? 21*minute : 2.5*minute,
-    planningReserveMs:bug ? 21*minute : 2.5*minute, record, controlsReady:control,
+    planningMs:timing.planningMinutes*minute,
+    planningReserveMs:timing.planningMinutes*minute, record, controlsReady:control,
     async reviewBug({intake, plan}) {
       callPolicy('admit', 'plan', {intake, proposal:plan});
       record('awaiting-independent-plan-review', {intake, proposal:plan.id, binding:plan.binding});
-      const end = Math.min(blockDeadline - 98*minute, now() + 10*minute);
+      const end = Math.min(blockDeadline - (timing.preparationMinutes + timing.runMinutes)*minute, now() + 10*minute);
       for (;;) {
         try {
           reviewedSha = readBugReview(intake, plan);

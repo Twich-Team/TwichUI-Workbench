@@ -21,6 +21,29 @@ from test_reviewed_offers import source, PreparedLuaRuntime  # noqa: E402
 from test_verification_profiles import TEST, REGRESSION_ORACLE, controls, boundary  # noqa: E402
 
 
+def fresh_controlled_source(path):
+    """Separate closed disposable scenarios without erasing prior source evidence."""
+    import sqlite3
+    from uuid import uuid4
+    from fixture_ctl import fixture_path
+    from everyday_store import require_settled
+    from test_grounded_workflow import controlled_source
+    path = fixture_path(path)
+    with sqlite3.connect(path) as connection:
+        require_settled(connection)
+    research = path.parent / 'reviewed-research'
+    research.mkdir(mode=0o700, exist_ok=True)
+    if research.resolve() != research or research.stat().st_uid != os.getuid():
+        raise ValueError('Research fixture must stay inside its owned disposable directory')
+    source_root = research / 'source'
+    if source_root.exists() or source_root.is_symlink():
+        if source_root.is_symlink() or not source_root.is_dir() or source_root.stat().st_uid != os.getuid():
+            raise ValueError('Refusing an unsafe disposable source fixture')
+        retained = research / ('retained-source-' + str(uuid4()))
+        source_root.rename(retained)
+    return controlled_source(research)
+
+
 def setup(path):
     parent = path.parent / 'reviewed-research'
     parent.mkdir(mode=0o700, exist_ok=True)
@@ -76,7 +99,7 @@ def advance(engine, path, action):
     if action.startswith('bug-'):
         from unittest.mock import patch
         from test_bug_workflow import BugPlanner, enable_bugs, response
-        from test_grounded_workflow import controlled_source, policy_file, ControlledPreparer
+        from test_grounded_workflow import policy_file, ControlledPreparer
         from test_verification_profiles import BUGGY, CORRECT, PRODUCTION
         from pytest import MonkeyPatch
         from workbench import worker, trusted_preparation
@@ -86,7 +109,7 @@ def advance(engine, path, action):
         research = path.parent / 'reviewed-research'
         research.mkdir(mode=0o700, exist_ok=True)
         if action == 'bug-setup':
-            controlled_source(research)
+            fresh_controlled_source(path)
             policy_file(engine, parent)
             setup(path)
         os.environ.update(WORKBENCH_RESEARCH_ROOT=str(research / 'source'),
@@ -104,14 +127,14 @@ def advance(engine, path, action):
         return
     if action.startswith('automatic-'):
         from unittest.mock import patch
-        from test_grounded_workflow import controlled_source, policy_file, ControlledPlanner, ControlledPreparer
+        from test_grounded_workflow import policy_file, ControlledPlanner, ControlledPreparer
         from workbench import worker, trusted_preparation
         parent = path.parent / 'automatic-workflow'
         parent.mkdir(mode=0o700, exist_ok=True)
         if action == 'automatic-setup':
             research = path.parent / 'reviewed-research'
             research.mkdir(mode=0o700, exist_ok=True)
-            controlled_source(research)
+            fresh_controlled_source(path)
             policy_file(engine, parent)
             setup(path)
             return
