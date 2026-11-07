@@ -285,12 +285,27 @@ def campaign_admission(connection, request, case, policy):
         3 if case['choice'] == 'bug-flight-paths' else 2),
         'Campaign case allocation exhausted')
     before = [row for row in rows if row[1] != request.get('intake')]
-    require(all(row[0] in request['prior'] and row[5] and row[4] in
-                {'completed','checked','failed','passed'} for row in before),
+    local_settled = {}
+    if outcome:
+        from workbench.planning_reconciliation import accounting
+        for row in before:
+            if row[2] == 'local' and row[3] == 'planning' and row[4] == 'interrupted_unknown':
+                try:
+                    local_settled[row[0]] = accounting(connection, row[0])
+                except (ValueError, KeyError, TypeError):
+                    pass  # Missing/stale settlement retains the normal hold.
+    require(all(row[0] in request['prior'] and row[5] and (row[4] in
+                {'completed','checked','failed','passed'} or row[0] in local_settled) for row in before),
             'Prior execution is unsettled or uncertain')
     local_tasks, codex_tasks = set(), set()
     qwen_requests = qwen_tokens = codex_turns = 0
     for identity, task, backend, purpose, row_outcome, finished, raw in rows:
+        if identity in local_settled:
+            reserved = local_settled[identity]
+            local_tasks.add(task)
+            qwen_requests += reserved['requests_started']
+            qwen_tokens += reserved['completion_tokens_upper_bound']
+            continue  # Conservatively reserved, never reported as observed usage.
         require(finished and raw, 'Campaign accounting unavailable')
         usage = json.loads(raw)
         require(isinstance(usage, dict) and (purpose == 'capability_validation' or

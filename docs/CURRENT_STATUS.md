@@ -1,14 +1,17 @@
-# Workbench status — November7,2026,22:29 UTC
+# Workbench status — November7,2026,22:57 UTC
 
-No real flight-path fix/provider case complete. Installed973 is healthy/idle;
-task17 cancellation reconciled,151-row history and52started/51complete receipts
-preserved (one incomplete final usage, not zero). No owner decision/access needed.
+No real flight-path fix/provider case complete. Verified eed1b1a installed, all20
+history entries/security/isolation checks pass. Controller18 held BEFORE task submit
+because old admission lacked canonical settlement for stopped17; no new model call.
+17actual tasks/18controller attempts/52started requests51complete receipts, known
+40022generated/301269prompt; final17 usage unavailable(max2600completion), preserved.
+151-row history/recovery intact; model idle and no uncertain execution remains.
 
-Timeout/private-retention code passes1346 backend/25 frontend/99focused/native,
-108browser/10visual. Prepared098 was NOT activated: fixed controller phase-reserve
-arithmetic before live dispatch. Also fixed closed E2E source contamination; bug+
-everyday opt-ins now pass together. New timing module/fixture unit2 pass; final
-backend/affected browser checks on new checkpoint next. Application code/UI remain
-identical to passed098 checks. Continue verified deployment/fresh real bug, then
-provider cases/durability/normal next bug. Exact source/evidence in CONTINUATION.md.
-Broader product/live Codex bug repair/in-game/PRs unfinished, styling/audit not begun.
+New same-user local reconciliation records verified stopped local planning in the
+existing journal without changing original interrupted_unknown/usage/diagnostics
+or granting approval. Readonly OUTCOME admission recognizes it with conservative
+local bound; Codex/implementation/legacy/current-task replay still held.30focused
+checks and actual151-row COPY/admission/HTTP proof pass, live DB untouched so far.
+Finish exact-source tests/candidate/install then supported installed CLI and fresh
+normal browser task. No owner access/decision needed. Details in CONTINUATION.md.
+Broader product/live Codex bug repair/in-game/PRs unfinished; styling/audit not begun.

@@ -6728,3 +6728,16 @@ validated settled E2E setup retains old source and creates fresh baseline; both
 opt-ins pass56.5sec.2 focused timing/isolation checks pass.098 appcode had1346/25/
 108browser/10visual/99focused/native34.82sec complete; final backend/affectedbrowser
 checks for new operational/fixture checkpoint continue. No real fix/case complete.
+
+## November7,22:57 UTC — canonical stopped-planning reconciliation
+
+Installed eed passed1348/25/build/affected8browser/mixed2 and precise identical-app
+108/10/native reuse, all20history/security gates. Case18 held presubmit on historical
+unknown model17, zero task/model calls. Cancellation/idle already proven; old policy
+needed durable journal settlement. New operator-local module verifies dead producer/
+failed no-proposal local planning/known prefix and exact authenticated idle request
+with n_predict2600, records existing journal only. Original model outcome/usage/
+diagnostics unchanged; unknown usage remains unavailable, prefix+bound reserved.
+30focused and actual151-row COPY proof/admission-before-hold/after-pass/all20HTTP
+reads pass; no live DB write or generation. Continue frozen verification/install/
+installed CLI/fresh19 under standing authority, no owner renewal needed.

@@ -1,3 +1,82 @@
+# Local settlement bridge — November7,22:57 UTC
+
+No real flight-path fix/provider case complete. Installed eed1b1ac7544ffbb4ca8bd9abd7422b0cf955d94,
+tree5c0225ee58952ce14102e47b09ca72350fac06fd, stage
+/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-eed1b1a (S),
+seal7a6da2bd3d1a473bf35f6da807bfeb9f04175b26d08314fcb7c24e9a47997a64.
+C/outcome-eed1b1a (R),5200files/16links/560450028bytes/383tracked. Final1348backend/
+25frontend/build +99appfocused/2controllerfixture/8affectedbrowser/2mixed opt-ins,
+precise identical-app108browser/10visual/native34.82sec/decoder7/guard8/history-copy
+reuse bound in R/offline-verification.json. All20 installed history entries HTTP200,
+original79/latest151 checked copies and strict both addresses/TLS/LAN/browser/filter/
+five isolation/foreign connector peer gates pass. Model/key/helper/credentials normal.
+4roles active/disabled pending accepted success. Unactivated098 retained, not installed.
+
+Case18 controller opened22:37:05, held BEFORE submit at admission: prior model17
+still original interrupted_unknown despite cancellation/idle proof. NO task/intake/
+model request created. Driver96039 exited held/closed. Counts17actual tasks,
+18delivery controller attempts,52model requests started/51complete receipts,
+known40022generated/301269prompt plus last17 incomplete usage(max2600completion)
+unchanged. Model remains idle exact server task40232; no uncertainty external activity.
+Latest live store151rows/schema0012/28tables SHAce618953d4807b93badad138486f1f76739e39cfd68a630b3f84b943066ebb19.
+
+New workbench.planning_reconciliation module + read-only acceptance-policy bridge:
+local same-user CLI only, NO HTTP write endpoint/approval/model turn. Requires
+private inode-bound installed config, local tool-free planning interrupted_unknown,
+failed intake/job, stopped original producer, one attempt/no proposal, valid known
+complete prefix and v4/v5 eight-call receipt. Holds model coordination locks while
+bounded15sec authenticated GET /v1/models + /slots verifies exact server task idle,
+matching model and actual n_predict2600. Atomic existing planning_jobs payload
+records local_interruption_settlement and current explanatory message; original
+model outcome/usage/diagnostics/request/approvals stay untouched, old message retained.
+Receipt binds complete model row, input, owner claim, diagnostics and planning receipt.
+Replays validate existing receipt idempotently; changed state during probe rejects.
+
+OUTCOME admission alone recognizes this verified STOPPED local planning operation.
+It reserves known prefix+2600 completion upper bound, never calls it actual usage.
+Legacy campaign/Codex/implementation/current-task replay remain held. Unknown final
+response/usage NOT recovered or fabricated. New local task still needs fresh v5
+normal browser consent/plan/run. No original job is retried or approved.
+
+30 focused settlement/campaign/privacy tests pass, including actual transport probe
+shape/no generation, live producer/Codex/implementation/completed/bad prefix/stale/
+busy/tampering/concurrent-change denials, unknown outcome unchanged and idempotency.
+Actual151-row history COPY proof C/local-settlement-copy-proof.json passed: two
+metadata reads only; original live store/model row unchanged, no schema/approval/
+execution, all20 HTTP history reads pass, admission holds before receipt and passes
+after. Specific record C/local-settlement-rehearsal/workbench.sqlite3 is COPY ONLY.
+Do not treat clone receipt as live. Final source-freeze/full suite/new candidate
+required before installing/using this operation on live store.
+
+Next source revision20, next controller attempt19 (18 had no intake/request).
+Use installed eed as predecessor,151-row/original79 copies, evidence roots69 (eed67
+plus newpair). Prior model IDs unchanged through f63026e9; no extra18 modelID.
+New JS staysindex-B-R3xVJb.js/CSSindex-CBKHT43W.css. New policy cases same6write/9read/
+source/billing/scope. Strict normal gates, no old500 exception. Record source/tests/
+inventory/seal before activation. Reuse unchanged UI108/10/native, focused99, timing/
+fixture8/2 and parser/guard/count-only proofs precisely; new bridge/CLI tests/full
+backend on exact source. All tests/evidence old reports below historical.
+
+AFTER verified new install, run INSTALLED supported CLI exactly once with its own
+private env: WORKBENCH_DB=newstage/artifacts/workbench.sqlite3,
+WORKBENCH_PREPARATION_CONFIG=newstage/ops/preparation.json,
+WORKBENCH_LOCAL_KEY=inputs.normal_key_file, WORKBENCH_RESEARCH_ROOT=inputs.research_root,
+PYTHONPATH=newrelease/backend:newrelease/scripts, then newrelease/.venv/bin/python
+-m workbench.planning_reconciliation f63026e9-7158-4529-b535-033b9cdfb75a --server-task40232
+(use separate --server-task 40232 arguments). No credential contents printed. Save
+before/after logical fingerprints and exact unchanged model row/original request/
+diagnostics, valid receipt/readable20history, and readonly actual admission proof.
+Legitimate receipt changes job message/payload only; latest151-row hash WILL change,
+retain original151 copies/fingerprint. Then fresh19 source investigation normal app,
+not old18 receipt or old17 job. Actual canonical settlement before any new generation.
+No owner permission needed; this is the existing authorized reconciliation/repair.
+
+Continue independent valid plan/real original FAIL/candidate PASS/full addon checks/
+reviewable patch, four provider cases, durable restart/normal next bug. Standing
+owner authority active; no campaign renewal. All prior operational protections,
+precise task17 cancellation and unknown usage details below remain. No paid/API/
+extra credits/publication/game-addon installation. Styling/audit not begun.
+
 # Controller/fixture correction — November7,22:29 UTC
 
 No real flight-path fix/provider case complete. Installed973 remains healthy/idle,
