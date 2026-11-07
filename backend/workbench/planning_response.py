@@ -310,7 +310,7 @@ class Evidence:
             raise OSError('Private planning evidence identity changed')
         raw = (json.dumps(dict(time=datetime.now(timezone.utc).isoformat(), sequence=self.count,
                                phase=phase, **facts), allow_nan=False) + '\n').encode()
-        if self.count >= 16 or len(raw) > 16384 or info.st_size + len(raw) > MAX_EVIDENCE:
+        if self.count >= 32 or len(raw) > 16384 or info.st_size + len(raw) > MAX_EVIDENCE:
             raise OSError('Private planning evidence limit reached')
         offset = 0
         while offset < len(raw):

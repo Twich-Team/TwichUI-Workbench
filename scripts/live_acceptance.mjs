@@ -172,6 +172,8 @@ try {
     need(realpathSync(reviewPath) === reviewPath && info.isFile() && info.uid === process.getuid() &&
       !(info.mode & 0o077) && info.size <= 4096, 'Bug plan review is not private');
     const receipt = read(reviewPath);
+    need(receipt.decision === 'approve' && receipt.approved === true,
+      'Independent review did not explicitly approve this plan');
     need(receipt.approval_reference === approvalReference && receipt.seal === seal &&
       receipt.intake === intake && receipt.plan_binding === plan.binding &&
       receipt.expectation_digest === plan.task_contract.bug_evidence.review_digest &&

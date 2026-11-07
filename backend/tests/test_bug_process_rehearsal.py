@@ -68,6 +68,12 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     from project_env import environment
 
     source = enable_bugs(monkeypatch)
+    # Exercise the installed semantic mode, not only legacy one-pass planning.
+    from test_everyday import write_policy
+    preparation=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
+    settings=json.loads(preparation.read_text())
+    settings['bug_plan_review']='source-grounded-v1'
+    write_policy(preparation,settings)
     harness=source/'tests/harness.lua'
     harness.write_text(harness.read_text().replace('  return client', """
   local frames={}
@@ -135,13 +141,17 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     calls, errors = ctx.Queue(), ctx.Queue()
 
     def scripted(self, packet, schema, expected_model):
-        assert schema is bug_investigation.BugPlanningResponse
+        from workbench.bug_plan_review import ReviewResponse
+        reviewing=schema is ReviewResponse
+        assert reviewing or schema is bug_investigation.BugPlanningResponse
         self.diagnostics = dict(generation_state='not_started')
         conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
         fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
         case = cases[0] if fault else next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
         answer = three_observations(case['client_case'])
-        if conflict:
+        if reviewing:
+            answer=dict(review_binding=packet['review_binding'],ready=True,issues=[])
+        elif conflict:
             answer['question'] = 'A controlled extra question conflicts with the plan.'
         elif fault:
             answer['finding'] = 'PRIVATE_REJECTED_CONTENT' * 30
@@ -170,14 +180,14 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 return dict(prompt_tokens=8000, context_tokens=32768)  # Controlled, not a model call.
             def read(self, request, limit):
                 assert len(request.data) <= 65536 and limit == 24000
-                outcome = dict(finding=answer['finding'], draft={key:answer[key]
+                outcome = answer if reviewing else dict(finding=answer['finding'], draft={key:answer[key]
                     for key in ('plan', 'question', 'limitation', 'inspection') if answer.get(key) is not None})
                 return json.dumps(dict(id='controlled-response', model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
                     choices=[dict(finish_reason='stop', message=dict(content=json.dumps(outcome),
                         reasoning_content='CONTROLLED_NATIVE_REASONING_NOT_A_MODEL'))])).encode()
         value = self._infer(Transport(), 'fixture-no-credential', schema, json.dumps(packet), expected_model=expected_model)
-        calls.put(('fixture-conflict' if conflict else 'fixture-fault' if fault else case["choice"], "planning"))
+        calls.put(('fixture-conflict' if conflict else 'fixture-fault' if fault else case["choice"], "self-review" if reviewing else "planning"))
         return value
 
     monkeypatch.setattr(LocalProvider, "generate", scripted)
@@ -256,6 +266,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     expected = [('fixture-fault', 'planning'), ('fixture-conflict', 'planning')]
     for case in cases:
         expected += [(case['choice'], 'planning')]*(4 if case['client_case'] else 3)
+        expected.append((case['choice'], 'self-review'))
         expected.append((case['choice'], 'implementation'))
     assert [calls.get(timeout=2) for _ in expected] == expected
     with store.connect() as c:

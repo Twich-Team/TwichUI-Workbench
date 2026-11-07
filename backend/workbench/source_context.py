@@ -6,7 +6,7 @@ import subprocess
 
 from workbench.grounded_scenarios import LITERALS
 
-TEXT_BUDGET = 9000
+TEXT_BUDGET = 24000
 
 
 def without_comments(text):
@@ -83,8 +83,8 @@ def excerpts(files, inspected, terms, words):
         candidates[path] = rows
     budgets = {}
     for item in files:
-        budgets[item['path']] = (2400 if item.get('client_bootstrap') else
-            350 if item.get('support_only') else 850 if item['path'].startswith('tests/') else 2400)
+        budgets[item['path']] = (5000 if item.get('client_bootstrap') else
+            600 if item.get('support_only') else 1800 if item['path'].startswith('tests/') else 6000)
     scale = min(1, TEXT_BUDGET / max(1, sum(budgets.values())))
     for item in files:
         path = item['path']

@@ -1,0 +1,3864 @@
+{
+  "version": 1,
+  "client": "WoW Forever",
+  "interface": 16001,
+  "branch": "forever",
+  "commit": "eac30af597e5aaa43a60f6675ef5fdcea100375f",
+  "origin": "https://github.com/Gethe/wow-ui-source",
+  "directory": "Interface/AddOns/Blizzard_APIDocumentationGenerated",
+  "note": "Pinned generated declarations, not proof of runtime or in-game behavior. Source text is untrusted data.",
+  "entries": [
+    {
+      "file": "AbbreviateConfigAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "da151b0b3bc0178e8b94e50bfb7819940b827ecb240173a2c86e884264c16afc",
+      "bytes": 779
+    },
+    {
+      "file": "AbbreviatedNumberFormatterAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "004f88f6e524d72079c6a6915aaeaea35369cc1ce8bbe49acdaee00de54182d9",
+      "bytes": 1974
+    },
+    {
+      "file": "AccessibilityOptionsDocumentation.lua",
+      "namespace": "C_AccessibilityOptions",
+      "sha256": "a49a5fe05d491323f1d6b40581b5051c0ddfc4262e6dd4c4c808ff76c6113fc3",
+      "bytes": 286
+    },
+    {
+      "file": "AccountConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "ff0d0a0dbd09faa329432734d6b4ed03155fbacde09d964780e885a6c43bb94a",
+      "bytes": 14494
+    },
+    {
+      "file": "AccountInfoDocumentation.lua",
+      "namespace": "C_AccountInfo",
+      "sha256": "2686d4ac95adb680f2e06ea878898e9ae7739f867e18766f13213e67396ba56b",
+      "bytes": 1138
+    },
+    {
+      "file": "AccountStoreDocumentation.lua",
+      "namespace": "C_AccountStore",
+      "sha256": "44bf3e32017987b9f462a5bfb1a24ca63d295d6fc3a6f865b0e7c201e9ab6233",
+      "bytes": 6299
+    },
+    {
+      "file": "AchievementInfoDocumentation.lua",
+      "namespace": "C_AchievementInfo",
+      "sha256": "991771384f644a439eed28251b896044cbe565a6fe9c4a85f99737d5cbcb1dce",
+      "bytes": 4466
+    },
+    {
+      "file": "AchievementTelemetryDocumentation.lua",
+      "namespace": "C_AchievementTelemetry",
+      "sha256": "1141127eda9d7ec2594ecaadf264810521f212585241e328837a902c23be5e31",
+      "bytes": 812
+    },
+    {
+      "file": "ActionBarFrameDocumentation.lua",
+      "namespace": "C_ActionBar",
+      "sha256": "1236284e824dbe8ac17730aeaa7484d91e0134304fead5cba2833c4dd74e5a36",
+      "bytes": 26607
+    },
+    {
+      "file": "ActionBarSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "c510217a6aa2613f556491546c1a49efa49b7603aae6c55f4cf3c8174f6ab210",
+      "bytes": 490
+    },
+    {
+      "file": "ActionDocumentation.lua",
+      "namespace": null,
+      "sha256": "55771647d1f8fdd07255d94fa10bc9913b9edcc37f9beae3192faf668b3b6fcc",
+      "bytes": 205
+    },
+    {
+      "file": "AddOnConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "784ede3513097bf8eba11ca17111ad11d52467ec0846e40b980b2db0c1e3de0c",
+      "bytes": 886
+    },
+    {
+      "file": "AddOnProfilerConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "14c7da0f68d272ad0b4271995bbd2783ea7362b59f74a0537a3f9a1cdbb9ef0c",
+      "bytes": 2733
+    },
+    {
+      "file": "AddOnProfilerDocumentation.lua",
+      "namespace": "C_AddOnProfiler",
+      "sha256": "a43d1e6dcf099c9118ef1c01fdeaab66787feb4adb8daf897888f73f24545489",
+      "bytes": 6571
+    },
+    {
+      "file": "AddOnsDocumentation.lua",
+      "namespace": "C_AddOns",
+      "sha256": "8535c5ab5e2a2a4f2ad9e14a355a619d4e12fa2b975e28bda01da6eb6580db75",
+      "bytes": 9386
+    },
+    {
+      "file": "AdventureJournalDocumentation.lua",
+      "namespace": "C_AdventureJournal",
+      "sha256": "51304ab43a8e69031d557e489d064ddfc5a73516927b272442f76eb4c5bdc9a2",
+      "bytes": 2535
+    },
+    {
+      "file": "AdventureMapDocumentation.lua",
+      "namespace": "C_AdventureMap",
+      "sha256": "35024bd02927e8b1cdc53ad73890cb2b8acab172bf7c6ef7ea9ca1af7e4ec370",
+      "bytes": 2474
+    },
+    {
+      "file": "AlliedRacesFrameDocumentation.lua",
+      "namespace": "C_AlliedRaces",
+      "sha256": "ad09f532dd683c073ec65cae5ff9569026811cbed131cfb081c9d5854c805b97",
+      "bytes": 2384
+    },
+    {
+      "file": "AnimaDiversionUIDocumentation.lua",
+      "namespace": "C_AnimaDiversion",
+      "sha256": "de253dd08ff081a728f52c079fb49f10aa5a089e5af80cf12fe4bde42ad5edce",
+      "bytes": 3575
+    },
+    {
+      "file": "AppearanceSourceDocumentation.lua",
+      "namespace": null,
+      "sha256": "674ad43bec203bc82f654f637bdb402314e1fef9db2b5ccf0220eb1f7b102574",
+      "bytes": 1496
+    },
+    {
+      "file": "ArdenwealdGardeningDocumentation.lua",
+      "namespace": "C_ArdenwealdGardening",
+      "sha256": "faf481a888f71275a3908473d8f1d2d81d6697cb2811f0c1daebb3a5a5b1435d",
+      "bytes": 860
+    },
+    {
+      "file": "AreaPoiInfoDocumentation.lua",
+      "namespace": "C_AreaPoiInfo",
+      "sha256": "249786849deef611fc32be1c54de4be425fb29c0c2701318a540101484c24d17",
+      "bytes": 4983
+    },
+    {
+      "file": "ArrowCalloutConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "07fc863f8fcbb2f17202b6b148968c09682605c319c9d81a25980796b031cb8b",
+      "bytes": 1061
+    },
+    {
+      "file": "ArtifactUIDocumentation.lua",
+      "namespace": "C_ArtifactUI",
+      "sha256": "50669cb3a5e20c12ce1966c81be9f3c0bc83de6bcb11c3ea6b2b03f94f488568",
+      "bytes": 26664
+    },
+    {
+      "file": "AssistedCombatDocumentation.lua",
+      "namespace": "C_AssistedCombat",
+      "sha256": "a627eaac71e171d98fa002be2611ca3e2f1ea61b1f47a4495e737eacb1972791",
+      "bytes": 1242
+    },
+    {
+      "file": "AsyncAssistActionsConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "d9a200370232a3706e36e91ff62287c792b0f2912715d10230816e3258b3fa52",
+      "bytes": 790
+    },
+    {
+      "file": "AuctionHouseConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "23b162903f187c41879fb60c16e7e88703b0dc488a3e7aefe873bf4f275eb531",
+      "bytes": 303
+    },
+    {
+      "file": "AuctionHouseDocumentation.lua",
+      "namespace": "C_AuctionHouse",
+      "sha256": "d970632b8175ef98c07cd7876debdef2a29ca023a32063787f7796795cea2372",
+      "bytes": 43476
+    },
+    {
+      "file": "AuctionHouseEnumsDocumentation.lua",
+      "namespace": null,
+      "sha256": "7ba96e85aba77f284f402a2169d6130eb0b3b16ce688a46e1deb3582f3c6a5ca",
+      "bytes": 6281
+    },
+    {
+      "file": "AuraContainerSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "5f80332ae37d5690413bb43e68f14a278b080f42807ecc2da9b635e57058b29c",
+      "bytes": 2232
+    },
+    {
+      "file": "AuraContainerUtilDocumentation.lua",
+      "namespace": "C_AuraContainerUtil",
+      "sha256": "a87c322d2c43da359381d76fdda7f900e6980c5cf5115701d2ad70e1676f6380",
+      "bytes": 14864
+    },
+    {
+      "file": "AutoCompleteDocumentation.lua",
+      "namespace": "C_AutoComplete",
+      "sha256": "693fe6627e43e01647f1767305b6df2d7042107a902c486861a6cf03cb81dc36",
+      "bytes": 2043
+    },
+    {
+      "file": "AutoCompleteSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "a700d3e0e2ec883c2641e071899fc7ed3bce7301f46ea790068bea2fc3e551e6",
+      "bytes": 1627
+    },
+    {
+      "file": "AutoLootDocumentation.lua",
+      "namespace": "C_AutoLoot",
+      "sha256": "12d0a916b6d3976eb82e8f8f75616e26b6f609497859aa1fa0ebcefc8c8787a7",
+      "bytes": 443
+    },
+    {
+      "file": "AzeriteConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "14305d62668bdf031490ffd1db0a9eb9e13747ff7035e8723db16d51adfe7382",
+      "bytes": 572
+    },
+    {
+      "file": "AzeriteEmpoweredItemDocumentation.lua",
+      "namespace": "C_AzeriteEmpoweredItem",
+      "sha256": "06747e918bdf2059f88825c6d58dded13999c3b4c134a30dc7297c5adccb1ebf",
+      "bytes": 8559
+    },
+    {
+      "file": "AzeriteEssenceDocumentation.lua",
+      "namespace": "C_AzeriteEssence",
+      "sha256": "1a4649941da714e176a5f54bd9166b302b2138999b8aac0252a306d778ff04e4",
+      "bytes": 7504
+    },
+    {
+      "file": "AzeriteItemDocumentation.lua",
+      "namespace": "C_AzeriteItem",
+      "sha256": "cac4d3b4cfd8017a46963d13099b114c39603be2ba8aa213734712842f43a532",
+      "bytes": 4571
+    },
+    {
+      "file": "BNetOutageDocumentation.lua",
+      "namespace": null,
+      "sha256": "426d44ed23a9feac8118926b1cb9e21de17fc533d2e15d53c217178a1742b7a1",
+      "bytes": 386
+    },
+    {
+      "file": "BagConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "bafed7a2bed70563de1ee326585583147316e230d933ea2fe6599fbca72efe76",
+      "bytes": 3044
+    },
+    {
+      "file": "BagIndexConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "a79dae711666244af9636b0a89457d78a28af2a588f8791e5362cb6c361cf7a1",
+      "bytes": 2201
+    },
+    {
+      "file": "BankDocumentation.lua",
+      "namespace": "C_Bank",
+      "sha256": "2a2a8d8c2bcc0a7cebe2b8a37cc1828129a589f811f29c98569ecb0df2c9e904",
+      "bytes": 10216
+    },
+    {
+      "file": "BarberShopDocumentation.lua",
+      "namespace": "C_BarberShop",
+      "sha256": "809073800a5a2358649d6456625a35ba0fc85ce1468e36e4486278ad62abdcd7",
+      "bytes": 6487
+    },
+    {
+      "file": "BarberShopInternalDocumentation.lua",
+      "namespace": "C_BarberShopInternal",
+      "sha256": "a65b5734833c9647af4132aeb66f36102f4d7cb79729f1e12f19d82f2d22ea24",
+      "bytes": 460
+    },
+    {
+      "file": "BaseDocumentation.lua",
+      "namespace": null,
+      "sha256": "60a977121d3dd65d0e923d93ca237df4a2762d520e0ff4571e23f738c24109d8",
+      "bytes": 184
+    },
+    {
+      "file": "BattleNetDocumentation.lua",
+      "namespace": "C_BattleNet",
+      "sha256": "09217e7e4fc5795cc0e97c33d859ca3339ec0ef05ca4465e8a643ef3a4fd0ab9",
+      "bytes": 13421
+    },
+    {
+      "file": "BattleNetSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "4a05743de8d1fe962e44b0948dd7f93350f6610d1339c905237178d2a8aca2d8",
+      "bytes": 1338
+    },
+    {
+      "file": "BattlePetConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "b31a2717f467b58d777e83eba86d2d7f10bef33e4d7bfa49ca9f453f5b88a60d",
+      "bytes": 2470
+    },
+    {
+      "file": "BattlePetDocumentation.lua",
+      "namespace": "C_BattlePet",
+      "sha256": "77796e44425c0e72449b01ca98d006d5d046a86e1254606e845a8e4c4e0bbc36",
+      "bytes": 6377
+    },
+    {
+      "file": "BattlepayConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "9f43350f6e8fa9cd5e8bb86719b3680f361147dc996d603897438806c1d2368c",
+      "bytes": 23783
+    },
+    {
+      "file": "BehavioralMessagingDocumentation.lua",
+      "namespace": "C_BehavioralMessaging",
+      "sha256": "f7b738d2143a83d9ff4a1dfe80554b8a5e9208cb901a9a60c4b5da4e4ef13f3b",
+      "bytes": 921
+    },
+    {
+      "file": "BlackMarketInfoDocumentation.lua",
+      "namespace": "C_BlackMarketInfo",
+      "sha256": "067f98395b355835bad88074315fe05be4ae66500ace713427ba5a835a35eca8",
+      "bytes": 1605
+    },
+    {
+      "file": "BlizzCon2026Documentation.lua",
+      "namespace": "C_BlizzCon2026",
+      "sha256": "39c0c84c2062979819cf8c7333252709532bf85bf067b85c62c5c626397ea76a",
+      "bytes": 1784
+    },
+    {
+      "file": "BountySharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "389c7872271c319498286f0a03f932ee9363266e691cdb960d3dff40b9934cf6",
+      "bytes": 517
+    },
+    {
+      "file": "BrowserDocumentation.lua",
+      "namespace": "C_Browser",
+      "sha256": "eaf902445deb6f6e116bd5b895a01eacc8308a1be0666867869567561b909b75",
+      "bytes": 1552
+    },
+    {
+      "file": "BuildDocumentation.lua",
+      "namespace": null,
+      "sha256": "3ecce82ac9cfd7a5140b2278f753a55756cd961d39205745efe9aaf1609ffea6",
+      "bytes": 2485
+    },
+    {
+      "file": "ButtonStateDocumentation.lua",
+      "namespace": null,
+      "sha256": "b82edbe992a2414b1b9ac3b13b8fe0f8ebb39713aaeba63184eb74e009d1f91c",
+      "bytes": 117
+    },
+    {
+      "file": "CVarDocumentation.lua",
+      "namespace": "C_CVar",
+      "sha256": "7e99fe35756236ecf6d723ff755edaefd7c41007ef53f58d48e2d2f6899296b1",
+      "bytes": 4969
+    },
+    {
+      "file": "CalendarConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "22d6d779a2cc22eedfa39a0555c92e80e5f19f7efcbc3f0d9328c929ab513765",
+      "bytes": 14079
+    },
+    {
+      "file": "CalendarDocumentation.lua",
+      "namespace": "C_Calendar",
+      "sha256": "f54af0893aad9f93f1057384bde8ac9e5ef11c63db33fd165d499802c59da47f",
+      "bytes": 27804
+    },
+    {
+      "file": "CameraConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "0000a91e0f5689e5b932b315c5d14d6be3d6008a3aaad5beab976bc6e9b7e049",
+      "bytes": 599
+    },
+    {
+      "file": "CameraDocumentation.lua",
+      "namespace": null,
+      "sha256": "eaba723983d0857089f92c0a113afc0324acf9c22f6b41251bc5d839cf453181",
+      "bytes": 1356
+    },
+    {
+      "file": "CatalogShopConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "2a0d6ccb28b1d47b4c1161b3052023f58b5d7e861245c13018f8802822a67abe",
+      "bytes": 402
+    },
+    {
+      "file": "CatalogShopDocumentation.lua",
+      "namespace": "C_CatalogShop",
+      "sha256": "225994a9db4a41abefc4e1745dafb5c8aec82710eb5be39d776cee82f6d83ebe",
+      "bytes": 23715
+    },
+    {
+      "file": "ChallengeModeInfoDocumentation.lua",
+      "namespace": "C_ChallengeMode",
+      "sha256": "746327cb41189e6be33e91df4b8dfdc8adbf6738d94842e698989e2e06a7ec5e",
+      "bytes": 13808
+    },
+    {
+      "file": "CharacterCreationConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "44e186d01f03e1aa9d510cf50dbc122a5b9622229d46768bf56e9b4c1acf00d1",
+      "bytes": 1397
+    },
+    {
+      "file": "CharacterCustomizationSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "5573a79fe975fd79c1255bc0cd77296338331c852f9a941eb779cafdd567d7ec",
+      "bytes": 5695
+    },
+    {
+      "file": "CharacterSelectionConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "9590ef25e17922110f7851da85e787d9616dff4acb9678d0d62a0d5efa92113d",
+      "bytes": 5230
+    },
+    {
+      "file": "CharacterServicesConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "8d620fe653b3e7a71644ab4ae9f191fcf3e57f0c5fce8d7258615454964ea240",
+      "bytes": 1363
+    },
+    {
+      "file": "ChatBubblesDocumentation.lua",
+      "namespace": "C_ChatBubbles",
+      "sha256": "685122cc1690883f9c871c1674d90631c59951aa0b0eedfba24ecff495742bda",
+      "bytes": 587
+    },
+    {
+      "file": "ChatConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "054dbce92640323faefa4f187526a9ce1b62f3e4a4ec7b3e2615e947a231f69e",
+      "bytes": 8855
+    },
+    {
+      "file": "ChatInfoDocumentation.lua",
+      "namespace": "C_ChatInfo",
+      "sha256": "996cf3c4956d7d79716c082fa7bccf06e008fd191f108c85546f9fdec66e1a73",
+      "bytes": 132990
+    },
+    {
+      "file": "ChatSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "3ba4a6d01baca1a62ddf8c627e1aac5d0eab4f0ff27b2654313b3cb05bf58b96",
+      "bytes": 563
+    },
+    {
+      "file": "ChromieTimeUIDocumentation.lua",
+      "namespace": "C_ChromieTime",
+      "sha256": "d381adc21a8e8a3ca5435c01ee5ef0a9ca32c042ca31c4cd7e3500ec7cff0d6c",
+      "bytes": 1705
+    },
+    {
+      "file": "CinematicConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "3e1e89d1472ab5ad21ae80d840e3fa2f70053a07a211ffb548684d091164f461",
+      "bytes": 553
+    },
+    {
+      "file": "CinematicDocumentation.lua",
+      "namespace": null,
+      "sha256": "c954bb5ca97fcba01d04b439ec3f35adf063d8d20671fb8b0156a08f62a6bf75",
+      "bytes": 2647
+    },
+    {
+      "file": "CinematicListDocumentation.lua",
+      "namespace": "C_CinematicList",
+      "sha256": "ee6fd069922bc5c7826b13fdd956abccaf5364542190f74303c591ae217103df",
+      "bytes": 988
+    },
+    {
+      "file": "ClassColorDocumentation.lua",
+      "namespace": "C_ClassColor",
+      "sha256": "3cfeaf9430b38cf97f2895941d4b133524e1c1652aa968a4a1ef3040c5cb852b",
+      "bytes": 661
+    },
+    {
+      "file": "ClassTalentsDocumentation.lua",
+      "namespace": "C_ClassTalents",
+      "sha256": "6276873b0503b59bb238dbfe11ef13d864c6af6208b872f773f6f654ec9580f7",
+      "bytes": 13258
+    },
+    {
+      "file": "ClassTrialDocumentation.lua",
+      "namespace": "C_ClassTrial",
+      "sha256": "82d144a536dcd39e4d0fe18cabaabd5d0c49aade0a3b731d5d6c139c299e7eba",
+      "bytes": 524
+    },
+    {
+      "file": "ClickBindingsConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "fa4904ab947abb1b7edd05eb47a6cf9290e65ac40d0137ad8d45148b19b984b4",
+      "bytes": 1388
+    },
+    {
+      "file": "ClickBindingsDocumentation.lua",
+      "namespace": "C_ClickBindings",
+      "sha256": "c1d047b56353ea0bb725bdfeb3b5989901dd7f20656f09e9c16b567b4276254b",
+      "bytes": 2642
+    },
+    {
+      "file": "ClientDocumentation.lua",
+      "namespace": null,
+      "sha256": "0fcb4fe81b243137169973c10cec8b0237a61c370fd0b37315e4912d1e36d60a",
+      "bytes": 1893
+    },
+    {
+      "file": "ClientSceneDocumentation.lua",
+      "namespace": "C_ClientScene",
+      "sha256": "0ac6a369cb56819002d4913435565101e3a6d910735e281f18185dffec9893c5",
+      "bytes": 1186
+    },
+    {
+      "file": "ClientSettingsDocumentation.lua",
+      "namespace": null,
+      "sha256": "45901e44d749ef0482f2526b63d9dd43716ee0526a6b6293e010205deb95edb0",
+      "bytes": 1133
+    },
+    {
+      "file": "ClubDocumentation.lua",
+      "namespace": "C_Club",
+      "sha256": "4f60c27a462fa7c919df1cb399d5fc939bf4d3ea31d71e4bdc0c4efb6546ce3c",
+      "bytes": 61011
+    },
+    {
+      "file": "ClubFinderDocumentation.lua",
+      "namespace": "C_ClubFinder",
+      "sha256": "ad7e4a0bb654f3e6e692864a9703b83ef5ea124d8125e2c32ac2bd027a68a82e",
+      "bytes": 27540
+    },
+    {
+      "file": "ClubSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "527418345a8f49a1ef14147981729b8f3962666b400cb0a9f183b17a93bc7ef0",
+      "bytes": 534
+    },
+    {
+      "file": "ColorDocumentation.lua",
+      "namespace": null,
+      "sha256": "8dd6044feeb765114b8298d74a458706cd8c87f9d380a71f5bb0bae61415ec07",
+      "bytes": 105
+    },
+    {
+      "file": "ColorOverrideConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "962de48edef5ad0c7a2980894f6624147dbdbe692553556c8ab3f441aaeacb42",
+      "bytes": 877
+    },
+    {
+      "file": "ColorOverridesDocumentation.lua",
+      "namespace": "C_ColorOverrides",
+      "sha256": "31c28a74598bda11e3dda7e3fe5398977e0bab41afcfe6753f007e4c4e67e892",
+      "bytes": 2434
+    },
+    {
+      "file": "ColorUtilDocumentation.lua",
+      "namespace": "C_ColorUtil",
+      "sha256": "2448e97efd550f445a106b5cfa695b8e59e97eb84bd04e6d2d8dba2d8ea76c83",
+      "bytes": 4497
+    },
+    {
+      "file": "CombatAudioAlertConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "af742414e0def78418d43f3fe3e5787df22edbbb7741412d438db65c5dcba492",
+      "bytes": 3155
+    },
+    {
+      "file": "CombatAudioAlertDocumentation.lua",
+      "namespace": "C_CombatAudioAlert",
+      "sha256": "9d6b02a7aab2a4dfcf3974febb727ab4e0342885cf1708fd291020333527241b",
+      "bytes": 5336
+    },
+    {
+      "file": "CombatAudioAlertSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "36c8343c18653369d58204b06b4e47201d02598f409b57f0e7e58a8607bc748c",
+      "bytes": 12593
+    },
+    {
+      "file": "CombatLogConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "dc794c0da501955b08b63cf0f77a90568e0d4ac0fabf9484d00a70aab29a8d6c",
+      "bytes": 3674
+    },
+    {
+      "file": "CombatLogDocumentation.lua",
+      "namespace": "C_CombatLog",
+      "sha256": "bfd85196ca5a5644f3598c9ae1b08f6f97483b5ad2d49c920039a24fcf66786a",
+      "bytes": 2910
+    },
+    {
+      "file": "CombatLogInternalDocumentation.lua",
+      "namespace": "C_CombatLogInternal",
+      "sha256": "0f428b4552c157175e5d2595010be4f9c25a83447f5d561fb181c408394a6e82",
+      "bytes": 547
+    },
+    {
+      "file": "CombatLogSecureDocumentation.lua",
+      "namespace": "C_CombatLogSecure",
+      "sha256": "e3e590f92eb9b59c0720bbce437703ca153ed0c657155490816c0509d007b66b",
+      "bytes": 3307
+    },
+    {
+      "file": "CombatLogSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "ecaac62be6f8bf82e205c3c8cd0a45ad1022f1df6d88549d8a82a3ed9c6c34d5",
+      "bytes": 500
+    },
+    {
+      "file": "CombatTextDocumentation.lua",
+      "namespace": "C_CombatText",
+      "sha256": "7d9fde63c86193b826f497ac36ec635be3a124dd36231524f5e352ffb192b33b",
+      "bytes": 990
+    },
+    {
+      "file": "CombatTextSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "11837c71c8c62fd65464e17ac72f03e78717d9ef5817b2b4f78c53504961da36",
+      "bytes": 215
+    },
+    {
+      "file": "CommentatorFrameDocumentation.lua",
+      "namespace": "C_Commentator",
+      "sha256": "c6de966278eb97a6ed198ede6805bc6abbeee3752862bb3cf557de4dc253978f",
+      "bytes": 45659
+    },
+    {
+      "file": "CommentatorSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "cf01156f16e684e707cbe3e1531600b5f55293b700089a3ff92e9eb05ab3e192",
+      "bytes": 848
+    },
+    {
+      "file": "CompactUnitFramesDocumentation.lua",
+      "namespace": "C_CompactUnitFrames",
+      "sha256": "b1e804994784631de235350c3b957466a71f336d35fbfb7d185baf02ca8d1085",
+      "bytes": 429
+    },
+    {
+      "file": "ConfigurationWarningConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "9334091b8e53eec8dd701e7b09df7dd1ee6efdefe86e91db69281454d5ce6207",
+      "bytes": 980
+    },
+    {
+      "file": "ConfigurationWarningsDocumentation.lua",
+      "namespace": "C_ConfigurationWarnings",
+      "sha256": "af60cc25fe353119c853c20da1513dbcda28307aae5cd35f2cdb10a740bdd661",
+      "bytes": 1582
+    },
+    {
+      "file": "ConnectionDocumentation.lua",
+      "namespace": null,
+      "sha256": "2bdbb8febaf7948297e30a2cab898bbb70efe163387d9b1500b8184354085f95",
+      "bytes": 1855
+    },
+    {
+      "file": "ConsoleDocumentation.lua",
+      "namespace": null,
+      "sha256": "9479a19903d4430da915bceef3754b86c114442c241f68c3445274ed6cb7ae59",
+      "bytes": 6851
+    },
+    {
+      "file": "ConsoleScriptCollectionDocumentation.lua",
+      "namespace": "C_ConsoleScriptCollection",
+      "sha256": "08a552542e488bc25fad8029a6607acfa12bd2b7d2eb10c312eae96b7828abe2",
+      "bytes": 2625
+    },
+    {
+      "file": "ContainerDocumentation.lua",
+      "namespace": "C_Container",
+      "sha256": "dd3e4741d45720384f814d3f78ce975dab3951458ae894e728ed3aedc8ae56b3",
+      "bytes": 19085
+    },
+    {
+      "file": "ContentTrackingDocumentation.lua",
+      "namespace": "C_ContentTracking",
+      "sha256": "4981409462bc6821c970cc60a050c4daefd0a90a1828ba57c6f5999490c48fda",
+      "bytes": 8595
+    },
+    {
+      "file": "ContentTrackingTypesDocumentation.lua",
+      "namespace": null,
+      "sha256": "bfd958e2ed1c1254c82bfbabb38bcf70b5719deb25d442cdb4b6c604ccf10dc8",
+      "bytes": 3973
+    },
+    {
+      "file": "ContributionCollectorDocumentation.lua",
+      "namespace": "C_ContributionCollector",
+      "sha256": "ca3cedaa38d5003cc241351f773754262ec6e7548c2939126374b218a461860d",
+      "bytes": 8746
+    },
+    {
+      "file": "CooldownFrameConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "b029cd438cc06f74e173b2dd0e2b00c289caa03ac83cfb1780a93ba4c4cfa099",
+      "bytes": 692
+    },
+    {
+      "file": "CooldownViewerConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "914295bcc67f3163d2a2351aa77aa5dc9880ff00a3290c0609f21394a50cc693",
+      "bytes": 11752
+    },
+    {
+      "file": "CooldownViewerDocumentation.lua",
+      "namespace": "C_CooldownViewer",
+      "sha256": "249cd80bb2980dac8ee492ebd94a7f95582811437d65b4fed343422efbbd133f",
+      "bytes": 4691
+    },
+    {
+      "file": "CovenantCallingsConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "ad161f80830d1f3bbf94f60e8eea2efd763232f927c581c275b87e60f6dfba48",
+      "bytes": 625
+    },
+    {
+      "file": "CovenantCallingsDocumentation.lua",
+      "namespace": "C_CovenantCallings",
+      "sha256": "9770ca5f4911783e0302acf710be24519e41b0f502375815ceb869360ed6d6bf",
+      "bytes": 727
+    },
+    {
+      "file": "CovenantPreviewDocumentation.lua",
+      "namespace": "C_CovenantPreview",
+      "sha256": "08f85f0cbff12fe99e52bf9b7ab43b49242612c26cf67e8156ee6823d32c63b5",
+      "bytes": 2841
+    },
+    {
+      "file": "CovenantSanctumConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "dff47e3e113e4881ad07bcdba2b299003e8d7f138de3845423bbefd9b3b1a341",
+      "bytes": 143
+    },
+    {
+      "file": "CovenantSanctumDocumentation.lua",
+      "namespace": "C_CovenantSanctumUI",
+      "sha256": "0a30b076c7dd47c18ada6ac3500ed166c7b29430ff16eff123ba5eed3c05f8cc",
+      "bytes": 4994
+    },
+    {
+      "file": "CovenantsConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "827d6524cab8d78910f57fe9989a0d74c445610156fc80b8bd55174f294ff74d",
+      "bytes": 487
+    },
+    {
+      "file": "CovenantsDocumentation.lua",
+      "namespace": "C_Covenants",
+      "sha256": "ab663b893196beb6b07de1f960c24c605fd6fef48d6abc81b6111fe64b35cd14",
+      "bytes": 2222
+    },
+    {
+      "file": "CraftingOrderUIConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "c17fa3285221e890d47f55669f5fd9f8878b657e32ba3e2545f1b72daf8e3e7f",
+      "bytes": 1185
+    },
+    {
+      "file": "CraftingOrderUIDocumentation.lua",
+      "namespace": "C_CraftingOrders",
+      "sha256": "0231eb92bbe7940ee9f8470593e2cd21aa9d72218c94d96ce8fa2a8ca34e5a5e",
+      "bytes": 14611
+    },
+    {
+      "file": "CraftingOrderUISharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "21f6a624fe4e55f6f932827740a1d413381503fabaa9f10877709ff54b7a5f31",
+      "bytes": 10060
+    },
+    {
+      "file": "CreatureInfoDocumentation.lua",
+      "namespace": "C_CreatureInfo",
+      "sha256": "38354e440e4bd4978a6ce895f9da3feb1f0630ad22b4dd3354eb948d97f02ac0",
+      "bytes": 3536
+    },
+    {
+      "file": "CurrencyConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "b5d2626ac2d580060e59444805a85c29c8ea85e4da3d2c015f59750957c6749b",
+      "bytes": 11832
+    },
+    {
+      "file": "CurrencyConstants_MainlineDocumentation.lua",
+      "namespace": null,
+      "sha256": "f4726767d2d7e5711950fd6d1b22b22606ad9f6fff06ead03e9b8705a166c948",
+      "bytes": 1699
+    },
+    {
+      "file": "CurrencyInfoDocumentation.lua",
+      "namespace": "C_CurrencyInfo",
+      "sha256": "4469ef929c58223c45371876e4364478be0397578f72cc24415f31fa060b47a1",
+      "bytes": 18116
+    },
+    {
+      "file": "CursorConstDocumentation.lua",
+      "namespace": null,
+      "sha256": "2beacc944f7ae89f1e1fa42ba469da3d9dd56eb18ba48d18783e3a58bd8ad4f9",
+      "bytes": 9828
+    },
+    {
+      "file": "CursorDocumentation.lua",
+      "namespace": "C_Cursor",
+      "sha256": "509579c7cc270afd395c251c6a03284c67c86593d190e5c3798c8c71e75b678f",
+      "bytes": 1496
+    },
+    {
+      "file": "CursorUtilDocumentation.lua",
+      "namespace": "C_CursorUtil",
+      "sha256": "22cf63f35fed0c473358bdf6c760974f0f93a4a335507f02425e741580ff75c4",
+      "bytes": 447
+    },
+    {
+      "file": "CurveUtilDocumentation.lua",
+      "namespace": "C_CurveUtil",
+      "sha256": "cc9f435e7a6609301a6b315c49ddcfc7fe494cce698101d9edf9b41fa384fd5f",
+      "bytes": 2176
+    },
+    {
+      "file": "DamageConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "a2ef98c64142528b1d635926e24dcea52f2a6aa56b3acab43f8ccdbc856d56f1",
+      "bytes": 5756
+    },
+    {
+      "file": "DamageMeterConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "d1433275d0268dec98052604fed95ad0fcd63f0f37f515b23cce3a5bc9a41a88",
+      "bytes": 4320
+    },
+    {
+      "file": "DamageMeterDocumentation.lua",
+      "namespace": "C_DamageMeter",
+      "sha256": "d214d0f97152f2ffb48b21d06f132ba67b0515c1d170c6008613700899467a67",
+      "bytes": 8366
+    },
+    {
+      "file": "DateAndTimeDocumentation.lua",
+      "namespace": "C_DateAndTime",
+      "sha256": "f2a70c60474f7f5a208f001a7c8664763fe71690b460c8127786155a668f3a37",
+      "bytes": 3663
+    },
+    {
+      "file": "DeathAlertDocumentation.lua",
+      "namespace": "C_DeathAlert",
+      "sha256": "708804de6c8159d702568ff0d69c5aa5ffb4caab4fefbe739009401bde90fb26",
+      "bytes": 454
+    },
+    {
+      "file": "DeathInfoDocumentation.lua",
+      "namespace": "C_DeathInfo",
+      "sha256": "2f7679bdecf2f458c48ddeb49c7dd2f2ba86ce28ce7cc2573224713bc8bedadd",
+      "bytes": 4960
+    },
+    {
+      "file": "DeathRecapConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "325b75ad4046d8bc716c964ccaef2c650e53c6f4e8395d27a981da8900d45ade",
+      "bytes": 290
+    },
+    {
+      "file": "DeathRecapDocumentation.lua",
+      "namespace": "C_DeathRecap",
+      "sha256": "24836a813f5df75e5c6928588daa49468bcc28ba3c6ad93bea277cf6e346e705",
+      "bytes": 1568
+    },
+    {
+      "file": "DebugToggleDocumentation.lua",
+      "namespace": null,
+      "sha256": "e3560ea51e9eefb341a01e8ec23b380e35a17bb21adf5d2fdea138b68f2dd2f1",
+      "bytes": 856
+    },
+    {
+      "file": "DelvesConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "40986cfae87338fcddc695cc49f3782db2c11a8393e8152a0309bcbf14ce263e",
+      "bytes": 4137
+    },
+    {
+      "file": "DelvesUIDocumentation.lua",
+      "namespace": "C_DelvesUI",
+      "sha256": "86928fc08c34beddf5fc1e0ee1b4c0412d190844dcb6ff64dbe2119f6f4b030b",
+      "bytes": 14156
+    },
+    {
+      "file": "DiscordConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "e2d3f2f46f1a557540ee7aa32733d92074b167456641f7c9c17e228f75d07e1e",
+      "bytes": 3289
+    },
+    {
+      "file": "DiscordDocumentation.lua",
+      "namespace": "C_Discord",
+      "sha256": "c0fe38f7ff4a65899270e316922b76d18090f591bb6931892a43d2ac1db82bf6",
+      "bytes": 5571
+    },
+    {
+      "file": "DistrictConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "03df6cf000c26f27cab273b5a3259eceda1b6a2be05dfb42d98d2a61751f0129",
+      "bytes": 760
+    },
+    {
+      "file": "DuelInfoDocumentation.lua",
+      "namespace": "C_DuelInfo",
+      "sha256": "e14184eaf7922cb08e8c01125606d983da1cfe6d2eba4deb4cec660976efa3b8",
+      "bytes": 1027
+    },
+    {
+      "file": "DungeonEncounterConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "44990b5db1bfb68de3864140737192f2f5975e2e04fb73c134e89757a6ff8fad",
+      "bytes": 1812
+    },
+    {
+      "file": "DurationTextBindingObjectAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "8494c4190860ea529885006016e9e61d41689551f362aa913b7054453e062f18",
+      "bytes": 9182
+    },
+    {
+      "file": "DurationTextBindingSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "328bc4135f319f6a49e09f62da29404e38a8462212797cd76ca1ef71159aded6",
+      "bytes": 1864
+    },
+    {
+      "file": "DurationUtilDocumentation.lua",
+      "namespace": "C_DurationUtil",
+      "sha256": "d3f9e8029b52a518a3f5a8fb6c3e1a11af55b436e89858991418c097624644fc",
+      "bytes": 1079
+    },
+    {
+      "file": "DyeColorInfoDocumentation.lua",
+      "namespace": "C_DyeColor",
+      "sha256": "84c80a4729472c5dcb545c799f731f82d73ad59dacd466dfdcdccd2917b0a87c",
+      "bytes": 3288
+    },
+    {
+      "file": "DyeColorInfoSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "496478ac3e797367d6041d6b9231afdfd9bb585408f7e79dc70ae801725f8ad6",
+      "bytes": 1269
+    },
+    {
+      "file": "EditModeManagerConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "95501e73bc4f4e868c4e461d53af3714cf47d05c29f246efed6d78be7befd3b3",
+      "bytes": 39055
+    },
+    {
+      "file": "EditModeManagerDocumentation.lua",
+      "namespace": "C_EditMode",
+      "sha256": "d72a86e0305ef52d491062501494c8fc58ed52a2693fae061cda57c45c5e297b",
+      "bytes": 5047
+    },
+    {
+      "file": "EncodingUtilConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "f21f8ff7078a3ef9070d26d9104a1fa66730c3672ca6c377ab1e349f4e8530b8",
+      "bytes": 371
+    },
+    {
+      "file": "EncodingUtilDocumentation.lua",
+      "namespace": "C_EncodingUtil",
+      "sha256": "325d34637f5d99ac120714f0eab0907e8647ff85af2c61a75619faeb0832f5b1",
+      "bytes": 5671
+    },
+    {
+      "file": "EncounterEventsDocumentation.lua",
+      "namespace": "C_EncounterEvents",
+      "sha256": "5780f708123c15eb9f5742af6070db5e5b1f9e7c057534d95780b42b3fc403b6",
+      "bytes": 3707
+    },
+    {
+      "file": "EncounterEventsSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "1a54354bdba5c850d641fdf1cac90cd73194d9007fa17998cdb5bca3ec28da37",
+      "bytes": 3243
+    },
+    {
+      "file": "EncounterInfoDocumentation.lua",
+      "namespace": "C_EncounterInfo",
+      "sha256": "4a92f2ad537b1811bc371750e3277bfa159029f750c69403bab1c63787cae8a9",
+      "bytes": 2754
+    },
+    {
+      "file": "EncounterJournalConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "2bf06d651e5b1f7f492998d41d64d55ac113232b5315c787d3f2302f8c3fc937",
+      "bytes": 4475
+    },
+    {
+      "file": "EncounterJournalDocumentation.lua",
+      "namespace": "C_EncounterJournal",
+      "sha256": "aa16d0aef562b74167174bdff95672b284c1a55c6caf61ee6d5a0905d38acc4c",
+      "bytes": 10471
+    },
+    {
+      "file": "EncounterTimelineConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "519cad0c1a85c52fe62c625b1d957b693031b0b365b2a1e441a4977c742f0987",
+      "bytes": 6740
+    },
+    {
+      "file": "EncounterTimelineDocumentation.lua",
+      "namespace": "C_EncounterTimeline",
+      "sha256": "7757358116a3e68d5b96e4e58e83f0438943efacb2a5a21a4c1c7f338e4c0bbb",
+      "bytes": 22975
+    },
+    {
+      "file": "EncounterWarningsDocumentation.lua",
+      "namespace": "C_EncounterWarnings",
+      "sha256": "ba0112c2b3b7e681d4190e3df416a38b4d8079e8fea4fc59a6c9f99d43c2aa9a",
+      "bytes": 4646
+    },
+    {
+      "file": "EndOfMatchUIDocumentation.lua",
+      "namespace": "C_EndOfMatchUI",
+      "sha256": "0ded0f5eff699931fa8d684041f59078ed1c49c282ef835050ad7d5bb0013f6b",
+      "bytes": 1665
+    },
+    {
+      "file": "EquipmentManagerDocumentation.lua",
+      "namespace": "C_EquipmentSet",
+      "sha256": "283be31870b0d173801424399ed63db82cc4e51d299f688d6bc5fa9ec3a4bf9c",
+      "bytes": 7357
+    },
+    {
+      "file": "EventSchedulerConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "d9cb492bd8c67d854881e365092d422baca7feca617b5bf7c4b38cb9db4908c5",
+      "bytes": 558
+    },
+    {
+      "file": "EventSchedulerUIDocumentation.lua",
+      "namespace": "C_EventScheduler",
+      "sha256": "c984cc0cfc51bf7bd2122ca7a816acb881114b9b69b638b757adfedddfdf0b7f",
+      "bytes": 4942
+    },
+    {
+      "file": "EventUtilsDocumentation.lua",
+      "namespace": "C_EventUtils",
+      "sha256": "628b8f5f2475ef4d0981580cfe7c321450aaf4b125c6489ba665389f9b98f41d",
+      "bytes": 811
+    },
+    {
+      "file": "ExpansionConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "97e21876ab8a21498fd573c36e76da6089fb478c631667bd2dbca007da3e67a2",
+      "bytes": 392
+    },
+    {
+      "file": "ExpansionDocumentation.lua",
+      "namespace": null,
+      "sha256": "a37461e90fa9ded067738363b8ccb45411e355db56f9d3249b09bd1ab484aabf",
+      "bytes": 7818
+    },
+    {
+      "file": "ExpansionInfoDocumentation.lua",
+      "namespace": null,
+      "sha256": "948c870a3f8948a79d131b3584b3300796ed0f8e2382c6c7c1cb8685fae9a503",
+      "bytes": 969
+    },
+    {
+      "file": "ExpansionLandingPageConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "9066c7a5b993d66354d82a6f2475cff193b1093e2d7ba58b941e3236e4cd3e60",
+      "bytes": 450
+    },
+    {
+      "file": "ExpansionLevelConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "ba7b5d10bf22733dc275450471bbc571526947a2d6e946e6aa03430a80457cc2",
+      "bytes": 1179
+    },
+    {
+      "file": "ExpansionTrialDocumentation.lua",
+      "namespace": "C_ExpansionTrial",
+      "sha256": "0b70f4697a54a828840ccf1106512ecbced955a1dc0978c9f3ffaaea92261b2a",
+      "bytes": 458
+    },
+    {
+      "file": "ExternalEventURLDocumentation.lua",
+      "namespace": "C_ExternalEventURL",
+      "sha256": "b19c7e3dc159201016ed3ee766bfe9042ef4ed20ef6d694d77824d3d9f4e0c81",
+      "bytes": 1122
+    },
+    {
+      "file": "FlyoutDocumentation.lua",
+      "namespace": "C_Flyout",
+      "sha256": "db0344804e9ba14c97d8a346b6f8d8e5084e0d25f75f48f8930363e850d53445",
+      "bytes": 2729
+    },
+    {
+      "file": "FogOfWarDocumentation.lua",
+      "namespace": "C_FogOfWar",
+      "sha256": "72f2863cc551604c3039b5e92a17546f85c8d54da546f49945aba2952885e4dc",
+      "bytes": 1277
+    },
+    {
+      "file": "FontDocumentation.lua",
+      "namespace": null,
+      "sha256": "346d98e9a536daf10dc9d16440db58ede4d84afe314c13572ea99ea4c71fda4b",
+      "bytes": 2144
+    },
+    {
+      "file": "ForbiddenAspectConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "5d00b7ca64bcd48423134bc36a7069ec898bad6895ffdb397391e05daa7e54ee",
+      "bytes": 2935
+    },
+    {
+      "file": "FrameAPIArchaeologyDigsiteDocumentation.lua",
+      "namespace": null,
+      "sha256": "3ff8df2505aeab77d9080f5454bfe5eedccfe1ddd0b06f16552742942199d2e3",
+      "bytes": 276
+    },
+    {
+      "file": "FrameAPIBlobDocumentation.lua",
+      "namespace": null,
+      "sha256": "ca8b81d55fb74582ddc1960cb5cba8049f3460697d299d2cd7a2488ea9299989",
+      "bytes": 2757
+    },
+    {
+      "file": "FrameAPICharacterModelBaseDocumentation.lua",
+      "namespace": null,
+      "sha256": "52091b62605941c7d137bad054762d30e9a99ee9a30caaa7fb38b786a1abace6",
+      "bytes": 5495
+    },
+    {
+      "file": "FrameAPICinematicModelDocumentation.lua",
+      "namespace": null,
+      "sha256": "47f91f6c1f008f5b2fdeaf4a3b487d6e47120656f06224cc1d15d07103072337",
+      "bytes": 4201
+    },
+    {
+      "file": "FrameAPICooldownDocumentation.lua",
+      "namespace": null,
+      "sha256": "ee67c76884225cbe9186de80137b8f250d3a96ab963952f84094c0dab7691563",
+      "bytes": 13119
+    },
+    {
+      "file": "FrameAPIDressUpModelDocumentation.lua",
+      "namespace": null,
+      "sha256": "17beb79edece97bfb9799203a9345ffd3ca4e6451a2e3ec80c925ada46ad75f7",
+      "bytes": 4805
+    },
+    {
+      "file": "FrameAPIFogOfWarFrameDocumentation.lua",
+      "namespace": null,
+      "sha256": "9e540acf315edc7150e5b484c16628e61a72b2f2617f3d2b43fc46f74ef63ec1",
+      "bytes": 2642
+    },
+    {
+      "file": "FrameAPIModelSceneFrameActorBaseDocumentation.lua",
+      "namespace": null,
+      "sha256": "01236131142c714c5fcd60eaedf62fbbcb6860c4318767e245cf34f9931a8532",
+      "bytes": 12798
+    },
+    {
+      "file": "FrameAPIModelSceneFrameActorDocumentation.lua",
+      "namespace": null,
+      "sha256": "9b30a79110029e908cf9b1a215c5171a39fad2baec743592e14cc53ce46416bd",
+      "bytes": 7485
+    },
+    {
+      "file": "FrameAPIModelSceneFrameDocumentation.lua",
+      "namespace": null,
+      "sha256": "f01a639987f62c8a78dc8362a11416c3a024481bab67e33b17975b79bf155df9",
+      "bytes": 11916
+    },
+    {
+      "file": "FrameAPIModelSceneFrameSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "a6afd5bcb23996bbc22183c55c5edeab41218d55e8c4c4a41934c1389c15f678",
+      "bytes": 424
+    },
+    {
+      "file": "FrameAPINamePlateDocumentation.lua",
+      "namespace": null,
+      "sha256": "f0f7568dbe39cc0eca2dac21dad311b3fd6e1eb4eed00e7cc36b6acadc63d66c",
+      "bytes": 2559
+    },
+    {
+      "file": "FrameAPIQuestPOIDocumentation.lua",
+      "namespace": null,
+      "sha256": "0476ced6d99dcf54813d888c27399c4f864594d3677462d9516f4ff031277fa1",
+      "bytes": 1098
+    },
+    {
+      "file": "FrameAPIScenarioPOIDocumentation.lua",
+      "namespace": null,
+      "sha256": "0ea5d8d4eac77cb8bf21e4c984632ad0f838e31822478e97b992fa2396a4f456",
+      "bytes": 766
+    },
+    {
+      "file": "FrameAPISimpleCheckoutDocumentation.lua",
+      "namespace": null,
+      "sha256": "257c19716709f8a74652ef67cd523030f8c75c91451844dc176dedb37c3e83bb",
+      "bytes": 1343
+    },
+    {
+      "file": "FrameAPITabardModelBaseDocumentation.lua",
+      "namespace": null,
+      "sha256": "de54e7445c3757c9df194601a16cfb59cf297cb4a05ad921e45e08baf9da8dcc",
+      "bytes": 1445
+    },
+    {
+      "file": "FrameAPITabardModelDocumentation.lua",
+      "namespace": null,
+      "sha256": "3452ef71f0f7f66fd1fdd8aedff7dd9d92f48a5ac2e4c79f1e9b08fe07992370",
+      "bytes": 1298
+    },
+    {
+      "file": "FrameAPITooltipDocumentation.lua",
+      "namespace": null,
+      "sha256": "fb5c54b1524b83aeeef3f5d4545670c3d9d9cffa321ec786feaa1d720af939f0",
+      "bytes": 3584
+    },
+    {
+      "file": "FrameAPIUnitPositionFrameDocumentation.lua",
+      "namespace": null,
+      "sha256": "7bb85c79b33a5553556c4c462e088a758c83eedc893d1edf6bdb2d9b8eb2fb38",
+      "bytes": 3268
+    },
+    {
+      "file": "FrameScriptDocumentation.lua",
+      "namespace": null,
+      "sha256": "945c09648a60fe90271ed5fc092608af85774fd24daa615d1410263593de7c2c",
+      "bytes": 17950
+    },
+    {
+      "file": "FriendListDocumentation.lua",
+      "namespace": "C_FriendList",
+      "sha256": "1009b28bd100f734bb124e38389d9e9c8c034ecf05d5de32e261e803361c4c06",
+      "bytes": 15642
+    },
+    {
+      "file": "GARRISON_FOLLOWER_TYPEConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "2f0d06ab77ef33081298fd7e5226d1f53e0760f3709dc8d55eaa4c49dc199036",
+      "bytes": 783
+    },
+    {
+      "file": "GARRISON_TYPEConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "9597d926b52486a2baa01ae5c96573664b4e8c6f5cb39cac2c3a1dc39188fc38",
+      "bytes": 574
+    },
+    {
+      "file": "GMTicketInfoDocumentation.lua",
+      "namespace": "C_GMTicketInfo",
+      "sha256": "1d692d57b86c5cb55e0a6be61b403b2eb09b734df892a3d87a423850d5583c2a",
+      "bytes": 2062
+    },
+    {
+      "file": "GameCursorDocumentation.lua",
+      "namespace": null,
+      "sha256": "2e23295a8ba6a3637560848b92266763598d098e546041f080f0e42e732e63fd",
+      "bytes": 3049
+    },
+    {
+      "file": "GameErrorDocumentation.lua",
+      "namespace": null,
+      "sha256": "a0b55773b091db911c0f992d4727ac47e62832a83154586931e18aabd1a4d2a2",
+      "bytes": 717
+    },
+    {
+      "file": "GamePadConstDocumentation.lua",
+      "namespace": null,
+      "sha256": "82bb6642a8647b1fc2adef12644382df0d7746c4ae4e08adee4d72defd6a8fef",
+      "bytes": 664
+    },
+    {
+      "file": "GamePadDocumentation.lua",
+      "namespace": "C_GamePad",
+      "sha256": "b42cbb4b4a10a2106c116126f7fe93acb652020b1affafcbec47533957519c35",
+      "bytes": 10838
+    },
+    {
+      "file": "GameRulesConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "d82367a9a16df6e7185b1a53c658b9f2f4bd2ae8cacc909ac3a610b50dfe1ed5",
+      "bytes": 1304
+    },
+    {
+      "file": "GameRulesDocumentation.lua",
+      "namespace": "C_GameRules",
+      "sha256": "160341d4bd06813bcd2a2642b6529cb1f9aebc4bd06daf46340443e4b0329f4b",
+      "bytes": 9556
+    },
+    {
+      "file": "GameUIDocumentation.lua",
+      "namespace": null,
+      "sha256": "8231920e9f2299bf72449be245d78b36e97fbc71421bd47a2e98292bae296200",
+      "bytes": 592
+    },
+    {
+      "file": "GamepadTargetingDocumentation.lua",
+      "namespace": "C_GamepadTargeting",
+      "sha256": "6e70696aa7556b2d013e671da8b4d58dafc5fb5157e2d92fc844cb53a9531eec",
+      "bytes": 1047
+    },
+    {
+      "file": "GamepadUIDocumentation.lua",
+      "namespace": "C_GamepadUI",
+      "sha256": "990f58e1fc2e0fc79032b7c620adec753158bf45acf4100ed498bb9fa83bf4b8",
+      "bytes": 6050
+    },
+    {
+      "file": "GarrisonConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "598b37ed0322331875b87180734aa336dda6b6b88f38d277e82b1a75e9ba66ff",
+      "bytes": 14237
+    },
+    {
+      "file": "GarrisonInfoDocumentation.lua",
+      "namespace": "C_Garrison",
+      "sha256": "94ca8d4e647b887301d286e2cb01eeb6b2a5f229a1d990fec72cd0b91f70c89d",
+      "bytes": 40152
+    },
+    {
+      "file": "GarrisonSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "b14ba83c9e6c463da522f2c11d08169983fd2405d26c6a9d6e138407cf2b6cf5",
+      "bytes": 4234
+    },
+    {
+      "file": "GlueDocumentation.lua",
+      "namespace": "C_Glue",
+      "sha256": "a1ba66433c6ed1a1e4d9942910aff8d5bfac5e5622183adf87292387b729bf03",
+      "bytes": 665
+    },
+    {
+      "file": "GlyphConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "f457232d128a20d215dbbbe19178cb84c70e05c8f57379736ffcc7ff0c856861",
+      "bytes": 123
+    },
+    {
+      "file": "GlyphInfoDocumentation.lua",
+      "namespace": "C_GlyphInfo",
+      "sha256": "ebf21edb7b5fabae98f860d7d86df67b64cbbd1db84bbcfe31c4663969f85e72",
+      "bytes": 759
+    },
+    {
+      "file": "GossipConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "877edc888454c3351ce35f7dfb4a602e66557dda37dbd5873f6e9e2743141b12",
+      "bytes": 6284
+    },
+    {
+      "file": "GossipInfoDocumentation.lua",
+      "namespace": "C_GossipInfo",
+      "sha256": "22cd6a48eded91316753af2e40624e542a91c728c713636549b7d3a6ef7916a5",
+      "bytes": 10471
+    },
+    {
+      "file": "GroupFinderConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "e296ff182d7e65f4ff3629ce5bef4524f374a4cf3a32d807c6d7ec6b954619ab",
+      "bytes": 135
+    },
+    {
+      "file": "GuildBankDocumentation.lua",
+      "namespace": "C_GuildBank",
+      "sha256": "c94abc920c39938cbd31d0f4db03e15f07a9f48d67de7e579ac8b7b701037438",
+      "bytes": 1919
+    },
+    {
+      "file": "GuildConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "740e7dea9dc73798a81183cb4f73abf3d5965ce5dfe85769c724a8587abdc109",
+      "bytes": 4317
+    },
+    {
+      "file": "GuildInfoDocumentation.lua",
+      "namespace": "C_GuildInfo",
+      "sha256": "ff45924dd00da1b96a6de71e50dc32ba273e3ce261d19b6251d4f2e339240439",
+      "bytes": 17244
+    },
+    {
+      "file": "GuildInfoSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "0183ad92031653c8b3d03fa044d2237a4efccea9c6b00b034f9b550ca326bd47",
+      "bytes": 606
+    },
+    {
+      "file": "HeirloomInfoDocumentation.lua",
+      "namespace": "C_HeirloomInfo",
+      "sha256": "ae2f06d556bbbb2a49094baa6750e538b3a8ee84b9dbb5d9d9a8f6736842b993",
+      "bytes": 2303
+    },
+    {
+      "file": "HouseEditorUIDocumentation.lua",
+      "namespace": "C_HouseEditor",
+      "sha256": "ebe270ed396c21ac0526dd5c2018e0754f04b8fe69ca777f3f97188516a9cbac",
+      "bytes": 4711
+    },
+    {
+      "file": "HouseExteriorConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "98caad541fb0b1a2e488054d43ddef8cce4951c93bdb81063479bc9a9cbc770c",
+      "bytes": 3465
+    },
+    {
+      "file": "HouseExteriorUIDocumentation.lua",
+      "namespace": "C_HouseExterior",
+      "sha256": "6ab585df5e9c3920a528908428f2f7f6079f9b308fca19ff362bb96b858d0778",
+      "bytes": 9153
+    },
+    {
+      "file": "HousingBasicModeUIDocumentation.lua",
+      "namespace": "C_HousingBasicMode",
+      "sha256": "a478e14b018ce25d1e752ff0c4ec82e984c1394b9b05e188265463ccdb3beeb8",
+      "bytes": 7537
+    },
+    {
+      "file": "HousingBlueprintConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "7e8c6140e73f2dc206d917548c413d89227f6b4fb70b52c82bd86aff6d19a7b4",
+      "bytes": 6213
+    },
+    {
+      "file": "HousingBlueprintUIDocumentation.lua",
+      "namespace": "C_HousingBlueprint",
+      "sha256": "d10050f78c962b2a12b695c72799c495a82970de8b64c7d38dd2102175e0aedb",
+      "bytes": 11718
+    },
+    {
+      "file": "HousingCatalogConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "c21e567c03c6e10328b24d8de9ef8ebe1a1500e63a92e71e4da5397a985808dc",
+      "bytes": 4394
+    },
+    {
+      "file": "HousingCatalogSearcherAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "b7983b22732f1a84887f883b42cc622e5f52828d2f8fd985706a35f99b97553e",
+      "bytes": 11902
+    },
+    {
+      "file": "HousingCatalogUIDocumentation.lua",
+      "namespace": "C_HousingCatalog",
+      "sha256": "6132e7628df7942498062341f9ed6254407391a5ce3b82b7ea3ad0f8dee8296c",
+      "bytes": 21166
+    },
+    {
+      "file": "HousingCleanupModeUIDocumentation.lua",
+      "namespace": "C_HousingCleanupMode",
+      "sha256": "7684b1a3a4fc3acf8ddaf66be60e813d4c84bce0cb192cb8b31efb1e54b46152",
+      "bytes": 1561
+    },
+    {
+      "file": "HousingCustomizeModeUIDocumentation.lua",
+      "namespace": "C_HousingCustomizeMode",
+      "sha256": "7766dc924c9c391041b69ff8b685cea370e576271ab4c46c2d0920b1e4c5bd95",
+      "bytes": 14895
+    },
+    {
+      "file": "HousingDecorSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "59fd20bdabe2a85d1c1b0323064b641aa81a931464ade22f39857a0a1b8fc8ce",
+      "bytes": 3521
+    },
+    {
+      "file": "HousingDecorUIDocumentation.lua",
+      "namespace": "C_HousingDecor",
+      "sha256": "1ee639e06035102c45e362f637c83b2a228b24cffb3697ade561f9ea94095645",
+      "bytes": 14766
+    },
+    {
+      "file": "HousingExpertModeUIDocumentation.lua",
+      "namespace": "C_HousingExpertMode",
+      "sha256": "4c8c58fbed54b9b4e10ea8f1c9a5d215236cc54cd1d011401311fb014578b82f",
+      "bytes": 9432
+    },
+    {
+      "file": "HousingFixturePointFrameAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "dc0363905a2da8afda48a6946b026e0d6ac733933aa8274647ea033428b57bac",
+      "bytes": 1152
+    },
+    {
+      "file": "HousingInspectModeUIDocumentation.lua",
+      "namespace": "C_HousingInspectMode",
+      "sha256": "bce42abf8d8b72108b8101b89702271b18d7e21c32565439ba3aaf01e18f3d11",
+      "bytes": 1620
+    },
+    {
+      "file": "HousingLayoutPinFrameAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "16001b8dcc33a2f1ba8c8c287e68d0a6981766a3d77c1a79ab91cf19a27448bf",
+      "bytes": 3671
+    },
+    {
+      "file": "HousingLayoutUIDocumentation.lua",
+      "namespace": "C_HousingLayout",
+      "sha256": "efa3a85bd180524d694ef97756a9f788b23a6760eeec9381f75c3a0ecbdf572e",
+      "bytes": 15138
+    },
+    {
+      "file": "HousingLayoutUITypesDocumentation.lua",
+      "namespace": null,
+      "sha256": "abb74fd5a23b4e97b63144546e15dfe83ac61dc37e78303816abcf508ddf256c",
+      "bytes": 1935
+    },
+    {
+      "file": "HousingNeighborhoodUIDocumentation.lua",
+      "namespace": "C_HousingNeighborhood",
+      "sha256": "47e6987ef476d739bf47f648f26d0587f57d65d1befb83045b3b8bcfdb1b5239",
+      "bytes": 10384
+    },
+    {
+      "file": "HousingUIDocumentation.lua",
+      "namespace": "C_Housing",
+      "sha256": "7d393b9457622b520528beb29ee23244529275442117312359de9d8ddcd3af26",
+      "bytes": 21733
+    },
+    {
+      "file": "HousingUISharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "cd18b0651b3ac055e2342ad1b432e7909473bc13293cfeddc0527f1a5d547b11",
+      "bytes": 6310
+    },
+    {
+      "file": "ImageSharingConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "c48ae238596ac18ee36b36f947bf02da1f5d6e9819d68eba011a6dac84b663a7",
+      "bytes": 5141
+    },
+    {
+      "file": "ImmersiveInteractionManagerDocumentation.lua",
+      "namespace": "C_ImmersiveInteraction",
+      "sha256": "fa536cce5dd9edaeb55b54825ba7fda7948244e19ec1556c561a53ac5be02512",
+      "bytes": 746
+    },
+    {
+      "file": "InGameNavigationDocumentation.lua",
+      "namespace": "C_Navigation",
+      "sha256": "a654bf24a5b1eee74fee09e7531b13c36e6383bd85c03894f0345d832f2a01c7",
+      "bytes": 2638
+    },
+    {
+      "file": "IncomingSummonDocumentation.lua",
+      "namespace": "C_IncomingSummon",
+      "sha256": "13879e899c8589c68e2ea2c51aa21ea5d5353b8bc5c6c774a894d6195282efbb",
+      "bytes": 1215
+    },
+    {
+      "file": "InputConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "96e132e59feaab82ba3791713fa4426d6f878bc6849240859e1ff61e238f66b4",
+      "bytes": 805
+    },
+    {
+      "file": "InputDocumentation.lua",
+      "namespace": null,
+      "sha256": "f76559ffb2887d6f37f6bb9c6bc8689eb0cf73190c226f7c54413a7164c48c19",
+      "bytes": 7428
+    },
+    {
+      "file": "InputInterfaceStyleDocumentation.lua",
+      "namespace": "C_InputInterfaceStyle",
+      "sha256": "dd1ccc99457e0792c13dc130affe85149ec4ee988921da447364b647f9943fb2",
+      "bytes": 443
+    },
+    {
+      "file": "InstanceDocumentation.lua",
+      "namespace": null,
+      "sha256": "136d6554c346ce090324ac905e086a149a7b7f6a23193c03262a17a0ee85719f",
+      "bytes": 7604
+    },
+    {
+      "file": "InstanceEncounterDocumentation.lua",
+      "namespace": "C_InstanceEncounter",
+      "sha256": "f2d6ce4aa5030c93c7e5fa59576564ae020f3be5f052c4ff2529c51b4395d4e7",
+      "bytes": 2531
+    },
+    {
+      "file": "InstanceLeaverInfoDocumentation.lua",
+      "namespace": "C_InstanceLeaver",
+      "sha256": "37b8964442787d815b6d2487e8b12bdefe43591cfc079c1dda2c0dce3b6e7ea6",
+      "bytes": 766
+    },
+    {
+      "file": "InterfaceFileManifestDocumentation.lua",
+      "namespace": "C_InterfaceFileManifest",
+      "sha256": "853852a0e4ded0c91a5c975312754d85bbf57bc63fadedbb597469ce80697dc2",
+      "bytes": 488
+    },
+    {
+      "file": "IntlDocumentation.lua",
+      "namespace": "C_Intl",
+      "sha256": "fb99d7619d289f62ac47949f14f4820fb1add459ef1defa49dde836f812323e1",
+      "bytes": 19023
+    },
+    {
+      "file": "IntlSharedTypesDocumentation.lua",
+      "namespace": null,
+      "sha256": "31f96168cbb1d917c4d3dded292d81701935b1c2a35a86ccbfcfb6512a7ecdfc",
+      "bytes": 9181
+    },
+    {
+      "file": "InvasionInfoDocumentation.lua",
+      "namespace": "C_InvasionInfo",
+      "sha256": "32ac371a908d8ec51083ed708a8578d86c323884e807da1a24ea27080314f7b1",
+      "bytes": 1843
+    },
+    {
+      "file": "IslandsInfoDocumentation.lua",
+      "namespace": "C_IslandsInfo",
+      "sha256": "204e74e66e02ddd3a1597f9b2985599caa2abbf5a8238d709cff0e3fdc1bca1e",
+      "bytes": 716
+    },
+    {
+      "file": "IslandsQueueUIDocumentation.lua",
+      "namespace": "C_IslandsQueue",
+      "sha256": "8b4fc91b58601c47ec5cc47c47b76dcb8c255fd4201ae07f9521da4def8a6343",
+      "bytes": 1724
+    },
+    {
+      "file": "ItemConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "ae3b654c4d551234e97562552e6aeb9736672f2458945efe19645b387f4b092e",
+      "bytes": 44000
+    },
+    {
+      "file": "ItemConstants_MainlineDocumentation.lua",
+      "namespace": null,
+      "sha256": "4622e7f876cac9ddb446c1c3c1e827b136883f801ba1e37e8e1d2a1607a676d6",
+      "bytes": 3119
+    },
+    {
+      "file": "ItemConstants_SharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "4a3a2937594e8e20e8ffeff74b6ef86a934404e391776bb75fa9b65c65bda292",
+      "bytes": 135
+    },
+    {
+      "file": "ItemDocumentation.lua",
+      "namespace": "C_Item",
+      "sha256": "59c5dd2f70757cdb9bc4511cb0fafe6287bbfb51d58a7389097dcbb485785af0",
+      "bytes": 44454
+    },
+    {
+      "file": "ItemInteractionUIDocumentation.lua",
+      "namespace": "C_ItemInteraction",
+      "sha256": "9503f1c9cea6eb9aea963b867846fd4e8f1773904798433cbe4df5766a43a0fd",
+      "bytes": 3784
+    },
+    {
+      "file": "ItemQualitiesDocumentation.lua",
+      "namespace": null,
+      "sha256": "7701303be7ddf4b0176c3fc04ccb0a51357d3c8e65e9faa8732738f4e523a1f3",
+      "bytes": 818
+    },
+    {
+      "file": "ItemSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "4c073990a7e70b3fdd915daa91ced0ec19145e8f7bfce2d33cf7d29a296b0cfa",
+      "bytes": 115
+    },
+    {
+      "file": "ItemSocketInfoDocumentation.lua",
+      "namespace": "C_ItemSocketInfo",
+      "sha256": "a871d6a31ec4070afe13d388fe1d5e2bfba187638c7483bb7cd8f9c7d9cee9cf",
+      "bytes": 5542
+    },
+    {
+      "file": "ItemTextDocumentation.lua",
+      "namespace": "C_ItemText",
+      "sha256": "f028ac4c60bc34b750a6871f9f4cc37546828b4bd09dc3ebcc19e27f097e8310",
+      "bytes": 810
+    },
+    {
+      "file": "ItemUpgradeDocumentation.lua",
+      "namespace": "C_ItemUpgrade",
+      "sha256": "c4fc16556d173fd9252d16ee24e1d5c1e83ecc822506a89b7192b4693378afb5",
+      "bytes": 8380
+    },
+    {
+      "file": "KeyBindingsDocumentation.lua",
+      "namespace": "C_KeyBindings",
+      "sha256": "96e2a7f8dcd0dd29a07c3e1c645a3a143df2bf77c278174eee01fb6c8f163bb6",
+      "bytes": 5762
+    },
+    {
+      "file": "LFGConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "aa13ba0facf9b354b8478c4db891134c106e91ec458f99d9ecad7a869c066d87",
+      "bytes": 5769
+    },
+    {
+      "file": "LFGInfoDocumentation.lua",
+      "namespace": "C_LFGInfo",
+      "sha256": "b10084b9bcdade75f07971ccb35627007d89b65fd757559bfc3ba8e08e42718a",
+      "bytes": 11337
+    },
+    {
+      "file": "LFGListInfoDocumentation.lua",
+      "namespace": "C_LFGList",
+      "sha256": "474dd07caaf06c48a91bd483f09d67ff1c9090ba192bd754c51ba1c23e1362a2",
+      "bytes": 31255
+    },
+    {
+      "file": "LFGListRolesDocumentation.lua",
+      "namespace": "C_LFGListRoles",
+      "sha256": "22db13b8d0af5eddd761e27d295171c49fa4857c5e7b83dbc11917ca542b30b2",
+      "bytes": 1072
+    },
+    {
+      "file": "LegacyConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "9d6aaae7f892e0de54a5edce4c9326357fedbfd6d9a86fce99c3e11ac129a56b",
+      "bytes": 1411
+    },
+    {
+      "file": "LegendaryCraftingDocumentation.lua",
+      "namespace": "C_LegendaryCrafting",
+      "sha256": "bba7713e940170fe985c4af4ae5cf9ea469d368ccdff2e1eed2839401c8367fe",
+      "bytes": 8196
+    },
+    {
+      "file": "LegendaryCraftingTypesDocumentation.lua",
+      "namespace": null,
+      "sha256": "f7605d00db477e594a0a15463be8c9d739ff02370fca48de94156dc06136d634",
+      "bytes": 2878
+    },
+    {
+      "file": "LevelConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "d5db5a82204ee07e1a8c7c92eef82189e30b516525b7b47382e7438e38394894",
+      "bytes": 421
+    },
+    {
+      "file": "LevelLinkDocumentation.lua",
+      "namespace": "C_LevelLink",
+      "sha256": "8febd708efa8d887658b995821d836abe837241b57744a881a670a4a3f18ab1a",
+      "bytes": 794
+    },
+    {
+      "file": "LevelSquishDocumentation.lua",
+      "namespace": "C_LevelSquish",
+      "sha256": "1b154e8a3efb17e1b69bb37a69c2e2738747880ef9b66566a9e09ccde7a035e8",
+      "bytes": 889
+    },
+    {
+      "file": "LimitedInputDocumentation.lua",
+      "namespace": "C_LimitedInput",
+      "sha256": "0820da251d7042966d9fbdb0e9314e89b2a89fe6f8229c67c2facbda36f673d4",
+      "bytes": 958
+    },
+    {
+      "file": "LiveEventDocumentation.lua",
+      "namespace": "C_LiveEvent",
+      "sha256": "fa96799fa3e609f6f2169776b4466be52b3c490154901bb86d913ac6fbc9d550",
+      "bytes": 721
+    },
+    {
+      "file": "LoadingScreenDocumentation.lua",
+      "namespace": "C_LoadingScreen",
+      "sha256": "b14ad5a95fd73a7403397bd77f797ab07f27dc38c0ae340ca08088c8770cfe1f",
+      "bytes": 526
+    },
+    {
+      "file": "LobbyMatchmakerInfoDocumentation.lua",
+      "namespace": "C_LobbyMatchmakerInfo",
+      "sha256": "2f22598242f56d955e2f4be07979045dcc38cad2478e71117facb3f7022abf85",
+      "bytes": 3133
+    },
+    {
+      "file": "LocaleDocumentation.lua",
+      "namespace": null,
+      "sha256": "0031a714d88e05097aca8c721cb787fb995a11f3247858c7959f320a6c545cb7",
+      "bytes": 1521
+    },
+    {
+      "file": "LocalizationDocumentation.lua",
+      "namespace": "C_StringUtil",
+      "sha256": "b7f0f9d1ec2ae94db98fd3d845a888af7b095e72f09e7b10f7136f0d89d35f99",
+      "bytes": 4628
+    },
+    {
+      "file": "LocalizationSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "680cf086227a0d7fe291cf2cf0c57b0069b744c47c62ef3ed808c5027aa18420",
+      "bytes": 2332
+    },
+    {
+      "file": "LogConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "f7dfa32abae78286108dd7999413827415c3fe7c4daf46fc8f86388d2310531c",
+      "bytes": 625
+    },
+    {
+      "file": "LogDocumentation.lua",
+      "namespace": "C_Log",
+      "sha256": "07d8ce20a7bac353479075f8a615ff62d9676e1396852ac26736db804e115681",
+      "bytes": 1060
+    },
+    {
+      "file": "LogicConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "0244f6c3e9c6c05507c4f5072e082c1973d74528d9a79983b7423b91163e7267",
+      "bytes": 1539
+    },
+    {
+      "file": "LootConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "952b41fab891e045f8fb899c34c47eda742429dc9efe73bb400f857d193d575e",
+      "bytes": 1304
+    },
+    {
+      "file": "LootConstants_MainlineDocumentation.lua",
+      "namespace": null,
+      "sha256": "bf96374f6e1fe0d4dcf0d5f4f58d8d58f689c7ea38c7fe587dc90aa4fc534d12",
+      "bytes": 1547
+    },
+    {
+      "file": "LootDocumentation.lua",
+      "namespace": "C_Loot",
+      "sha256": "09a2ad19fb155772d17c33fc0fea4cfb63f867ad96de4e1b9472d436b65cda01",
+      "bytes": 11531
+    },
+    {
+      "file": "LootFrameDocumentation.lua",
+      "namespace": "C_LootFrame",
+      "sha256": "fe959adee45c5c88aa81900acf049d70c5278a770e41c594ed90152a07f390eb",
+      "bytes": 298
+    },
+    {
+      "file": "LootHistoryDocumentation.lua",
+      "namespace": "C_LootHistory",
+      "sha256": "6bd69e988a14a80b9d61b5adf53893428aa3349b9115d45a15de87302fed0bf9",
+      "bytes": 5330
+    },
+    {
+      "file": "LootJournalDocumentation.lua",
+      "namespace": "C_LootJournal",
+      "sha256": "4e169016fa0de08c6ae84e59680921343fb08059720e47b750d16af0ee0b01f8",
+      "bytes": 1647
+    },
+    {
+      "file": "LoreTextDocumentation.lua",
+      "namespace": "C_LoreText",
+      "sha256": "d6e06fe1643e56b3ef1cad440a3e5475fb42fbfaa45beeaf80256860bb8f82e6",
+      "bytes": 963
+    },
+    {
+      "file": "LossOfControlConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "68b7f7e582a62ffa714410ef520394c3eb4716a94a4857bdf107b12c5933c4b8",
+      "bytes": 302
+    },
+    {
+      "file": "LossOfControlDocumentation.lua",
+      "namespace": "C_LossOfControl",
+      "sha256": "edc1f19160987c0ad70790790b10cd352bc41a5ae3ca78dd1d6309b2c29cb85a",
+      "bytes": 4027
+    },
+    {
+      "file": "LuaColorCurveObjectAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "092c4bde4eb27079bdf7f5498f2a30bea21d11fe32ce17ae726b7ddba406e150",
+      "bytes": 3936
+    },
+    {
+      "file": "LuaCurveObjectAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "bb512ee362b56f7bf014511518eedffae67d03d3ed75339f4111afa53f4981f5",
+      "bytes": 3080
+    },
+    {
+      "file": "LuaCurveObjectBaseAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "e642258428901e843bc4508d4fe87a814db5acc93740dc9ce7bf8ba249bd189b",
+      "bytes": 1153
+    },
+    {
+      "file": "LuaCurveObjectConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "89616cb878bc05735e86ba2ea8b5534516d9538c8b8791c0b84e5618586e8e2b",
+      "bytes": 951
+    },
+    {
+      "file": "LuaDurationClockAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "a688ff973ea460dfa6150f4a19647e69d77105b5019fb44522ec3750d41372e7",
+      "bytes": 530
+    },
+    {
+      "file": "LuaDurationManualClockAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "94ed4dde28ab601732ee1957fb608eabd4a54ca209b9e01a26c7c14bd2d324ec",
+      "bytes": 1231
+    },
+    {
+      "file": "LuaDurationObjectAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "107a28259bc87162370afef60e297dac95ec318ffb32e516f1ea5cdd2a140352",
+      "bytes": 12873
+    },
+    {
+      "file": "LuaDurationObjectSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "edf6dad79281427008f6a2c5af73100e5bc8617481827f504c2c70ee6218232d",
+      "bytes": 677
+    },
+    {
+      "file": "LuaLocaleContextAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "b4045a5dc766767cc01c622af0960ea8c80dd8ef225def695b488f77e65a695e",
+      "bytes": 15544
+    },
+    {
+      "file": "LuaMathExtensionsDocumentation.lua",
+      "namespace": "math",
+      "sha256": "1028bbe768544ccc0b1df56438fb44af962ca4656d20c37747b7262113115c5f",
+      "bytes": 7342
+    },
+    {
+      "file": "LuaStringExtensionsDocumentation.lua",
+      "namespace": "string",
+      "sha256": "739d983e3bc4fb1484e76f7f8301feba11d3355be5cd281dfc107d0abc8d4973",
+      "bytes": 3965
+    },
+    {
+      "file": "LuaTableExtensionsDocumentation.lua",
+      "namespace": "table",
+      "sha256": "3df49d15de648ee6d9edd645538ee5add15581af24c7bc51b12912ec15f6e66a",
+      "bytes": 7671
+    },
+    {
+      "file": "LuaValuePredicatesDocumentation.lua",
+      "namespace": null,
+      "sha256": "af369fe40df5b2c28063456a0520629322023f44338257aa06d04b76a7bdca9f",
+      "bytes": 317
+    },
+    {
+      "file": "MacOptionsDocumentation.lua",
+      "namespace": "C_MacOptions",
+      "sha256": "3d402346893fcce32845427d0c7f75203cd5346cd31aaf6f9e9c5ccb1110297c",
+      "bytes": 1628
+    },
+    {
+      "file": "MacroConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "1f2db5bb01c53390be8a1fc113bd7e62ae0fb05dcefc9cc4506a225003b82d3f",
+      "bytes": 338
+    },
+    {
+      "file": "MailInfoDocumentation.lua",
+      "namespace": "C_Mail",
+      "sha256": "6618a33f99dfce405b314ff4abfcc8cfeec06869595182449b7a78dbb9a43ae1",
+      "bytes": 3570
+    },
+    {
+      "file": "MajorFactionsConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "125384b2ba20556db0ad114a67cf58ef733f3d8693ab8ec98e5932503141ed15",
+      "bytes": 1437
+    },
+    {
+      "file": "MajorFactionsDocumentation.lua",
+      "namespace": "C_MajorFactions",
+      "sha256": "3ea3b1145ae75a64b85255c393edc81b2e40086ff58f7647e822b0ae40478dea",
+      "bytes": 9684
+    },
+    {
+      "file": "MapConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "90b33376f977155e3f06f5a5e2431ed450c22236096de05b0cafe0a5bb31f859",
+      "bytes": 3801
+    },
+    {
+      "file": "MapDocumentation.lua",
+      "namespace": "C_Map",
+      "sha256": "b73a2ed1d1552c1b38bc59df0a586a0986dfad54991efc905abc87799cecce57",
+      "bytes": 17470
+    },
+    {
+      "file": "MapExplorationDocumentation.lua",
+      "namespace": "C_MapExplorationInfo",
+      "sha256": "1ac354a853977e081c5a1a39c80a0d9b83c78e46e9c132d556dbbed7bc16cf2e",
+      "bytes": 2122
+    },
+    {
+      "file": "MatrixSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "29daae99cd5a7319f0c8484267aae51c43242e7c4aa878ad784e3174df38a390",
+      "bytes": 119
+    },
+    {
+      "file": "MerchantFrameDocumentation.lua",
+      "namespace": "C_MerchantFrame",
+      "sha256": "c3d078c8b0667d63094a265f21480e270f9f2cdf75cdc4616f053b587b9847c1",
+      "bytes": 3190
+    },
+    {
+      "file": "MinimapConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "f69dd3f7241ccb7d0deffd967bf8f9ca0e4af76faea5f85a2add3f6aa541ee1a",
+      "bytes": 2338
+    },
+    {
+      "file": "MinimapDocumentation.lua",
+      "namespace": "C_Minimap",
+      "sha256": "64e244af5149ad0e3c578fc4c07795c8bdc09a2e4014138236485acffffa6ebd",
+      "bytes": 6610
+    },
+    {
+      "file": "MinimapFrameAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "77b49560245f1922890c999682e7290d19e04fbbc46922193fd9a0c28d5fd4e2",
+      "bytes": 6387
+    },
+    {
+      "file": "MirrorTimerDocumentation.lua",
+      "namespace": null,
+      "sha256": "1f27e63c4c98a97fb6db1303f72c23069d523040674d80a6a11069206d45546f",
+      "bytes": 1680
+    },
+    {
+      "file": "ModelAnimationSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "db85cf48b729dd96ea7b4c7c80b097df377c0459134bf9696a744162b4c96091",
+      "bytes": 413
+    },
+    {
+      "file": "MoneyConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "867250d28faa69f4570d3855bb075c205902e8332780b1fbe8507d4018c4c7e4",
+      "bytes": 622
+    },
+    {
+      "file": "MountConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "1d78a5c00684a73969c02c43faf20e0bb8ce616eab453de9b33427216448daa5",
+      "bytes": 1206
+    },
+    {
+      "file": "MountJournalDocumentation.lua",
+      "namespace": "C_MountJournal",
+      "sha256": "2e9dd5ac0ce5c7370db17cbfb0f83a024c2bf8377131753c3341bb81d0baf46c",
+      "bytes": 16914
+    },
+    {
+      "file": "MovieDocumentation.lua",
+      "namespace": null,
+      "sha256": "973ebe5036fab5ade0926691aeab1e962f0a8bb99b5b3ff723128abf3fb01bbd",
+      "bytes": 1833
+    },
+    {
+      "file": "MythicPlusInfoDocumentation.lua",
+      "namespace": "C_MythicPlus",
+      "sha256": "84eefff26ee0ec990a4924aef8e73b14f96e447e92319132849f3a9c038f6b7e",
+      "bytes": 8835
+    },
+    {
+      "file": "MythicPlusInfoSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "acede291e46445854b4bbad27e8bd825cf9fb758a0205bee41d77beb3c48d89e",
+      "bytes": 1494
+    },
+    {
+      "file": "NameGenConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "3f71a9239dbb214033993165d10c28dfa1367e8c14509e301adcf12c29a3557a",
+      "bytes": 393
+    },
+    {
+      "file": "NamePlateConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "b372d7dfb773dd3c0926ad0aed21ae28e4222bc69f0bf354bde221bcc19e3fce",
+      "bytes": 5321
+    },
+    {
+      "file": "NamePlateDocumentation.lua",
+      "namespace": "C_NamePlate",
+      "sha256": "1af6fb8f2428211ce696b2af18d09503116a12920d28ca76231bedb72a88292c",
+      "bytes": 1286
+    },
+    {
+      "file": "NamePlateManagerDocumentation.lua",
+      "namespace": "C_NamePlateManager",
+      "sha256": "f578c27a202373b896ae15469e3800dafac55f7e1382ae5a0ab42bd253444c22",
+      "bytes": 4119
+    },
+    {
+      "file": "NameUtilDocumentation.lua",
+      "namespace": "C_NameUtil",
+      "sha256": "bcf55a13a1896f27924715c0da45df888d8206386f313736300248ffedd79286",
+      "bytes": 653
+    },
+    {
+      "file": "NeighborhoodInitiativeDocumentation.lua",
+      "namespace": "C_NeighborhoodInitiative",
+      "sha256": "6c8635b65dd07bff9de328e59d8d74c573b5e0558e2361cf8b7cb9a43716e66f",
+      "bytes": 9091
+    },
+    {
+      "file": "NeighborhoodInitiativesConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "ede19b4bcbaa506c782288b51086e1d1b388522981ebcd9c128fae7f1b41f886",
+      "bytes": 3532
+    },
+    {
+      "file": "NewItemsDocumentation.lua",
+      "namespace": "C_NewItems",
+      "sha256": "1c1a821c598404a2e09f2633446f121a0fe11fec49d108878a3e7cb7c695804e",
+      "bytes": 894
+    },
+    {
+      "file": "NumericFormatterAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "acd8970bc2885ed668cf725e8ed373798bfb2dfd658dc7ff366aa32ca5cb87e0",
+      "bytes": 582
+    },
+    {
+      "file": "NumericRuleFormatterAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "1917f8194b809c3e3312dd8cb967e647346788544a906df7eb5fe6cbc6132a69",
+      "bytes": 1616
+    },
+    {
+      "file": "NumericRuleFormatterSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "8b86556ebad65721635db3513aa941057248e101864ff0e74776b6f1380c45c2",
+      "bytes": 2720
+    },
+    {
+      "file": "OsDocumentation.lua",
+      "namespace": null,
+      "sha256": "2dc9cd61fb5bcccf7349206f525c7374ff54363aa13a28314da47d6ca78d09d9",
+      "bytes": 718
+    },
+    {
+      "file": "PVPMgrConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "c7601ef59e7096ffe9473ca50a5f0d7f9eb7858e561febbf0dd23b0a1d8f2fc4",
+      "bytes": 409
+    },
+    {
+      "file": "PaperDollInfoDocumentation.lua",
+      "namespace": "C_PaperDollInfo",
+      "sha256": "ff7ec82e6fad2b12ce370b043bed4bc6508128ea3a9e7c6ae88b749579d4b776",
+      "bytes": 11551
+    },
+    {
+      "file": "ParentalControlsDocumentation.lua",
+      "namespace": null,
+      "sha256": "5d3bbfeffb56fa3e43a3ddccb5f466025cafed4a486588ab6c5044de21d429ec",
+      "bytes": 401
+    },
+    {
+      "file": "PartyConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "ef71b3a28017332bea1edc20d53be38de051480a1e0a3ee386bcc2782399c8ac",
+      "bytes": 1828
+    },
+    {
+      "file": "PartyInfoDocumentation.lua",
+      "namespace": "C_PartyInfo",
+      "sha256": "8bcc5fed8ddc03c06163da0bcd5a70fcc31afbdc53d21dbd3e9300ce7e3f89ef",
+      "bytes": 22815
+    },
+    {
+      "file": "PartyInfoSystemStatusDocumentation.lua",
+      "namespace": "C_PartyInfo",
+      "sha256": "5d5e6beb65f8b00af3b476c3f1244e2f4904f44b3acdbf4dfc7ab04475219920",
+      "bytes": 759
+    },
+    {
+      "file": "PartyPoseUIConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "35dfcbcfbe16eaa88198e031fb556afb53f40fd5ee3b214561df1c0ed0bc7fb3",
+      "bytes": 354
+    },
+    {
+      "file": "PartyPoseUIDocumentation.lua",
+      "namespace": "C_PartyPose",
+      "sha256": "a72b9b57ee2707be49f56cfc7e978deeb7de7f5e716bac5ee6bf86de7fd54d27",
+      "bytes": 2421
+    },
+    {
+      "file": "PerformanceDocumentation.lua",
+      "namespace": null,
+      "sha256": "c430b72bb5bf09be9ecafc52ad2cdfe8b4383773177c82258a1a94015e4eaa52",
+      "bytes": 1968
+    },
+    {
+      "file": "PerksActivitiesDocumentation.lua",
+      "namespace": "C_PerksActivities",
+      "sha256": "1baa5a6c64a9c0c391edbd543a3b10a8c851bc531b98384fa5fafca1110f39f8",
+      "bytes": 6044
+    },
+    {
+      "file": "PerksProgramDocumentation.lua",
+      "namespace": "C_PerksProgram",
+      "sha256": "456bcb0779d3ad68009c5470b80594d460e1b02c859ed532a13bb82ad3524eca",
+      "bytes": 11515
+    },
+    {
+      "file": "PerksVendorConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "750831da7573cddd7f1b24d8171890f1837bd32ddbdcde7be2a77f6e4ee7c812",
+      "bytes": 1639
+    },
+    {
+      "file": "PetBattleConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "f356a542018a78290bc5a894dfe26b07f27d9579cd8854a8921c5329795f0919",
+      "bytes": 3158
+    },
+    {
+      "file": "PetBattlesDocumentation.lua",
+      "namespace": "C_PetBattles",
+      "sha256": "f6330871830504cc79e8bbc0e19fd5f3a400a0e4d49c1b0ae4df61de8f880e3b",
+      "bytes": 1688
+    },
+    {
+      "file": "PetConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "ea946989345c886f15d1d256d37bc4e3518faee88081abad8cdaf2a177a9cd73",
+      "bytes": 3255
+    },
+    {
+      "file": "PetConstants_SharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "47e545be83e74006f825865bfc4bfd535c2ffcf9ca0c974744ff13150f4229e9",
+      "bytes": 4934
+    },
+    {
+      "file": "PetInfoDocumentation.lua",
+      "namespace": "C_PetInfo",
+      "sha256": "f6fd0e548fa15b7ff1d135215456c027f2e2f3fdeff7fbd3a8b9dbec0a154b04",
+      "bytes": 5923
+    },
+    {
+      "file": "PetJournalInfoDocumentation.lua",
+      "namespace": "C_PetJournal",
+      "sha256": "9d9ebf504da3aee364741fb021084c39107caef1c19465b308aadbc2363076e2",
+      "bytes": 11695
+    },
+    {
+      "file": "PetScalingConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "473f742f1ade43ecd42e50620e2cdf50f238b57a3bd9e0c6da6263d43a3f6fe9",
+      "bytes": 133
+    },
+    {
+      "file": "PhotoSharingUIDocumentation.lua",
+      "namespace": "C_PhotoSharing",
+      "sha256": "410ae528c6bdd1916b173b2fd84f51ff9e4944b6e0fc85ce925c7a7b95596941",
+      "bytes": 2975
+    },
+    {
+      "file": "PingConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "c6549bc7500854030fd1e10017458d1e7aa2758fa8fe980639a360fa243e0353",
+      "bytes": 3218
+    },
+    {
+      "file": "PingManagerDocumentation.lua",
+      "namespace": "C_Ping",
+      "sha256": "e1c8d7eea56de9e3b09456994e54523279ccdfb3cb766ed06c3d7d4bc42f0197",
+      "bytes": 1961
+    },
+    {
+      "file": "PingManagerSecureDocumentation.lua",
+      "namespace": "C_PingSecure",
+      "sha256": "f43dfe9ff47d202da263db6f2a6a185f0ae6adc45041606f35d2859cb716ba25",
+      "bytes": 8597
+    },
+    {
+      "file": "PingManagerSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "dd404221824c36bbab8bf234e2a3660a0c55c90b58756e11532b5fa078dfda87",
+      "bytes": 668
+    },
+    {
+      "file": "PingPinFrameAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "b75a14cfbe1021c164c896128f5fc22ff823643a470dd7c0fdf4b8d71420294e",
+      "bytes": 238
+    },
+    {
+      "file": "PlatformDocumentation.lua",
+      "namespace": "C_Platform",
+      "sha256": "9c74dac3f6549dd15b0ff13170f8006cc4b76e56a55977e1af1cf584d40fefb0",
+      "bytes": 521
+    },
+    {
+      "file": "PlayerChoiceConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "add440aaf7c47816252fb5ed991763d39199adc231a0fb8ce9763a3d47974f39",
+      "bytes": 2437
+    },
+    {
+      "file": "PlayerChoiceDocumentation.lua",
+      "namespace": "C_PlayerChoice",
+      "sha256": "3baf96d8698eebd9e0f1811deb7d0017f28c69d17c16c50612f65ab1191de406",
+      "bytes": 6321
+    },
+    {
+      "file": "PlayerDataConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "200612530891f404a8c4bd0b803a806d84e72ff3717f2b5787bf0816ea2dfc7f",
+      "bytes": 879
+    },
+    {
+      "file": "PlayerDocumentation.lua",
+      "namespace": null,
+      "sha256": "db061985e2cee0f01fd45b935a119ee7b4c509179688e508ee46dc7f6bcfb93a",
+      "bytes": 107
+    },
+    {
+      "file": "PlayerHousingConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "1e03fe2b6b556b16344748423c00d4b6638e88fcdd81c07f9aabbadc6ea657fb",
+      "bytes": 25924
+    },
+    {
+      "file": "PlayerInfoDocumentation.lua",
+      "namespace": "C_PlayerInfo",
+      "sha256": "1b48d47177ec5957d0f04160a1ab12aafbbe89da4f142437e0a83e05d4b54311",
+      "bytes": 8140
+    },
+    {
+      "file": "PlayerInfoSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "6b1f5bd40076b6a8814c077dd851ef0cebe12373b7f373deb4b5405697238ec4",
+      "bytes": 923
+    },
+    {
+      "file": "PlayerInteractionManagerConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "72c46d0287cfd190ab7d4f7f3e2a15c3b3c2f9d3cca50809cf73f76f92771699",
+      "bytes": 6902
+    },
+    {
+      "file": "PlayerInteractionManagerDocumentation.lua",
+      "namespace": "C_PlayerInteractionManager",
+      "sha256": "bf2531b3a1cf94f89dbe405fbe49606acaadbd5ebb74e9d7cd2df9d27b3adf78",
+      "bytes": 2591
+    },
+    {
+      "file": "PlayerLocationDocumentation.lua",
+      "namespace": "C_PlayerInfo",
+      "sha256": "b234a70ac039d27fe480eb1bc56b8c6bc16f970287311ed21de85e30f2a7f33a",
+      "bytes": 2589
+    },
+    {
+      "file": "PlayerMentorshipConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "59c15aa22cdde7a088e2677a154fbef6d9c279d28db2a8fb8372f7857ff86a0d",
+      "bytes": 929
+    },
+    {
+      "file": "PlayerMentorshipDocumentation.lua",
+      "namespace": "C_PlayerMentorship",
+      "sha256": "d42c5bacd49e7f71e8e02f823137f2248a7df587a6af324fbd7b692ef841fe9c",
+      "bytes": 1711
+    },
+    {
+      "file": "PlayerScriptDocumentation.lua",
+      "namespace": null,
+      "sha256": "61ae4d1471b8ac8696a2a56e335bf6484d2cb3a31b2fa81637430afb58bde9a2",
+      "bytes": 36752
+    },
+    {
+      "file": "PonyDocumentation.lua",
+      "namespace": "C_Pony",
+      "sha256": "be09674ce67a3ae7a1a633b768b8248eefceca0d445e1dd659b5db35146d8439",
+      "bytes": 335
+    },
+    {
+      "file": "PowerTypeConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "a5c95aec886bfc31d27bc1c4e6d1b561ecdb36a505a635bccc42a65241235281",
+      "bytes": 3541
+    },
+    {
+      "file": "ProceduralSpawnConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "bcd21894fcdc055594324ca25e5b9b1cf456a396ba28548fb1d6b18f01b249b7",
+      "bytes": 865
+    },
+    {
+      "file": "ProfessionConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "217e2c713f1e76e016b30239256f6469e6569606ddbf59094492d43715681938",
+      "bytes": 16678
+    },
+    {
+      "file": "ProfessionSpecConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "c4237b4b28b3c8cc2a6a88cf3e64fb9e0fa29a86553be5514e36c666c2b5fe52",
+      "bytes": 2805
+    },
+    {
+      "file": "ProfessionSpecUIDocumentation.lua",
+      "namespace": "C_ProfSpecs",
+      "sha256": "8076fa5640012524d8236e7a0dff98821ec33bb671d4b6a2e12dff33029eb30e",
+      "bytes": 8231
+    },
+    {
+      "file": "PvPFactionConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "39db924c2bfe0b55aa35d0d5bdd8d698cde9acf723ddfce2e48079886f7792c1",
+      "bytes": 389
+    },
+    {
+      "file": "PvpInfoConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "c879a83c4a1102c1b628921edd26ebc573f08774f4c8efaac4a44e7aae004723",
+      "bytes": 1636
+    },
+    {
+      "file": "PvpInfoDocumentation.lua",
+      "namespace": "C_PvP",
+      "sha256": "f03f2b9b6ebb4fa4be24ad8f1d078cd70e8a50dcb02713a707901b92237a216a",
+      "bytes": 50502
+    },
+    {
+      "file": "QuestConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "07c806e705af4b35447445c35f32c946ad28397ee5085e217574ec2efb503d07",
+      "bytes": 6418
+    },
+    {
+      "file": "QuestConstants_MainlineDocumentation.lua",
+      "namespace": null,
+      "sha256": "75e117be087d5e55918bf64440d92be8f12cde4b3d0c2cd069732c143af092b0",
+      "bytes": 141
+    },
+    {
+      "file": "QuestHubInfoDocumentation.lua",
+      "namespace": "C_QuestHub",
+      "sha256": "0df9b218b1614750930b1984e73dae213b80ab1b30a27da01f4e301bc363adb0",
+      "bytes": 962
+    },
+    {
+      "file": "QuestInfoSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "deaaa5d8314dee77bfda96b6652a3520657961cdba1163b941bc20dc56266b18",
+      "bytes": 1950
+    },
+    {
+      "file": "QuestInfoSystemDocumentation.lua",
+      "namespace": "C_QuestInfoSystem",
+      "sha256": "8aadb32fda5d60a4459435a61f9968c9724aeba3223d384f6ce8ce5dc58f5339",
+      "bytes": 3225
+    },
+    {
+      "file": "QuestItemUseDocumentation.lua",
+      "namespace": "C_QuestItemUse",
+      "sha256": "26588d1a45a7b0500322df1eb2eed99306a772737001dddb69ebc2059cbe67a9",
+      "bytes": 688
+    },
+    {
+      "file": "QuestLineInfoDocumentation.lua",
+      "namespace": "C_QuestLine",
+      "sha256": "8a88ad0b0bed014d155b033d0a9e970060f53c0529ebdef1d697e52316fab83d",
+      "bytes": 4118
+    },
+    {
+      "file": "QuestLogDocumentation.lua",
+      "namespace": "C_QuestLog",
+      "sha256": "e637368f36d153f8b432455cfa247d0c67c84996dce8d591bc1eb4d1cd7bc098",
+      "bytes": 36588
+    },
+    {
+      "file": "QuestOfferDocumentation.lua",
+      "namespace": "C_QuestOffer",
+      "sha256": "a280bbc1e7d819b0d207eaf52673fba6bb05af73a266cf394026667d1e728fcc",
+      "bytes": 2603
+    },
+    {
+      "file": "QuestRewardsDocumentation.lua",
+      "namespace": null,
+      "sha256": "61d05485ffa11abcad8ae225a2c52371b0105432587364b45785c2b892a1b0ba",
+      "bytes": 1644
+    },
+    {
+      "file": "QuestSessionConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "f54c125e7ae36114dd253fb6cf2e696ec0b999fe24292daf517eb441c603f603",
+      "bytes": 3293
+    },
+    {
+      "file": "QuestSessionDocumentation.lua",
+      "namespace": "C_QuestSession",
+      "sha256": "223870c7e1f0f721bbb04f8fbcc0d8cf6b69d87c9a57d28a695b4d439e67491a",
+      "bytes": 4043
+    },
+    {
+      "file": "QuestTaskInfoDocumentation.lua",
+      "namespace": "C_TaskQuest",
+      "sha256": "54c1323a59fdb5d359cc5769697abf8d8bc544a4a41167b7f0e7e243bcb8c351",
+      "bytes": 4101
+    },
+    {
+      "file": "QueueSpecificDocumentation.lua",
+      "namespace": null,
+      "sha256": "2cadae0a9a2215ffae0dfdd8f1e5013c19a16828e981a2f370c014daaa5b6b19",
+      "bytes": 830
+    },
+    {
+      "file": "RaidLocksDocumentation.lua",
+      "namespace": "C_RaidLocks",
+      "sha256": "07cd3855e1bbd3db7c9d4cc051bddf6054e1f8ec89cc6214fe25e456069dbc4f",
+      "bytes": 1386
+    },
+    {
+      "file": "RaidMarkerConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "7a97f7e85ad21dadb550b2e80d5b007f638afdb80a2749c3a567457119005563",
+      "bytes": 1277
+    },
+    {
+      "file": "RaidMarkersDocumentation.lua",
+      "namespace": null,
+      "sha256": "f3375f723c1a2ba3a02872db3cfec4408f85b383fa192953179925adfc9fd464",
+      "bytes": 2880
+    },
+    {
+      "file": "RecentAlliesConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "d45ca6071c456a4c9fabe97f7698fe25e3ff4f4eae52319e3aa766c4a689a740",
+      "bytes": 1281
+    },
+    {
+      "file": "RecentAlliesDocumentation.lua",
+      "namespace": "C_RecentAllies",
+      "sha256": "dc1de4f8d1e921ff324bbe0d06109317e4e4e3fc508e5641a15f4f690ead7552",
+      "bytes": 8320
+    },
+    {
+      "file": "RecruitAFriendDocumentation.lua",
+      "namespace": "C_RecruitAFriend",
+      "sha256": "5ad12930629fa8f55a5a36e96703b4178449e987568d63d531e8b600ec1c60ef",
+      "bytes": 12450
+    },
+    {
+      "file": "RecruitAFriendSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "ffba9e65fe24d6d715da8a41ba9cd76d7deedcd5f5f721949115cc9fcd96a607",
+      "bytes": 2011
+    },
+    {
+      "file": "RemixArtifactUIDocumentation.lua",
+      "namespace": "C_RemixArtifactUI",
+      "sha256": "a0367d8deddb4a66318547c69f127591bdcbd8f8f188a47985844b45a73e6f41",
+      "bytes": 3745
+    },
+    {
+      "file": "RenownConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "80b75a9e52ded33a21b80a82512d1f9de33788cfec0b042129dc1c68e61b9bef",
+      "bytes": 1459
+    },
+    {
+      "file": "ReportSystemConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "bf85c8397c79964fd9515242c131e63de007e067862c1b68ff5c5eb72466b3d6",
+      "bytes": 6149
+    },
+    {
+      "file": "ReportSystemDocumentation.lua",
+      "namespace": "C_ReportSystem",
+      "sha256": "dec347ed1d2c3660feaf7451f2859fc403278842e5ee91ca88dd8d7d57c0ba94",
+      "bytes": 3954
+    },
+    {
+      "file": "ReputationInfoDocumentation.lua",
+      "namespace": "C_Reputation",
+      "sha256": "f59ca871c2ce55d3cd8e5d9534b307bfc5c1e3537a00459da2bc2c0e586d830a",
+      "bytes": 8201
+    },
+    {
+      "file": "ResearchInfoDocumentation.lua",
+      "namespace": "C_ResearchInfo",
+      "sha256": "022a85dea5e68fe9302b3c7c102909adea8590e0c07216535689825faa58374e",
+      "bytes": 2777
+    },
+    {
+      "file": "RestrictedActionsConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "109b02f69af6f43a5762bd7123e982e0432fff2226ebf927855ba876791a6c32",
+      "bytes": 1972
+    },
+    {
+      "file": "RestrictedActionsDocumentation.lua",
+      "namespace": "C_RestrictedActions",
+      "sha256": "3b22f5e0249d53d492432648c92295aabb4a3a211f50f7e617bd7eaca3676680",
+      "bytes": 3486
+    },
+    {
+      "file": "RolesetSystemDocumentation.lua",
+      "namespace": "C_Roleset",
+      "sha256": "62d028e62bb58595b52e887d9dd0f479f5984f02ffdb0c14b1101bb47485c7c1",
+      "bytes": 1360
+    },
+    {
+      "file": "RolodexConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "3ebf00c0bdd925daada382c929fcb5245e3fbac16faf5023314bda0b53ea0801",
+      "bytes": 3142
+    },
+    {
+      "file": "ScenarioInfoDocumentation.lua",
+      "namespace": "C_ScenarioInfo",
+      "sha256": "c406413b8ca00d79508c5ccdddd8041266a0c3286893ec99ae6190b55df5aee8",
+      "bytes": 10073
+    },
+    {
+      "file": "ScrappingMachineUIDocumentation.lua",
+      "namespace": "C_ScrappingMachineUI",
+      "sha256": "93a27a6e9f2d965d43fa53aa820bae015a2003c9930da862026bc9c3c40b3e49",
+      "bytes": 2620
+    },
+    {
+      "file": "ScreenDocumentation.lua",
+      "namespace": null,
+      "sha256": "3ef50f263dcc26fb17d18aea389afc6018a69ab20cd662abc3e9899e0d59747a",
+      "bytes": 986
+    },
+    {
+      "file": "ScreenLocationConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "9582550aa3a6900429d1c0494f4e79d8cbf77ab47ce632248eb3a8bdafa657af",
+      "bytes": 1138
+    },
+    {
+      "file": "ScriptWarningsDocumentation.lua",
+      "namespace": "C_ScriptWarnings",
+      "sha256": "a66e4257e5f867e9da19a81d6b7d4d5ac21e808491d37883c29fe5773400bfa3",
+      "bytes": 463
+    },
+    {
+      "file": "ScriptedAnimationsDocumentation.lua",
+      "namespace": "C_ScriptedAnimations",
+      "sha256": "41f3fc3f72218ac8c0f5deb1e654c7471da98554c5be7d29e37a1e0bd1ef43b8",
+      "bytes": 4133
+    },
+    {
+      "file": "SeasonInfoDocumentation.lua",
+      "namespace": "C_SeasonInfo",
+      "sha256": "518a533898ef8392d2fda4e9ef41c9960285d3191415762b78c4e4f266bcd6f4",
+      "bytes": 734
+    },
+    {
+      "file": "SeasonsConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "593d0340af80b3986ef49ddfe25f77ba9b176cd438c4f47f7bea28ec0de3987b",
+      "bytes": 645
+    },
+    {
+      "file": "SecondsFormatterAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "9ddd2af27b44aa4d19c113cf60e6a23a640321c8228232e648352e1fbfc5cab4",
+      "bytes": 12247
+    },
+    {
+      "file": "SecondsFormatterSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "1439da4b82977dbdea86535f41626e7e2c263b1badb32192067ec89ae7f2d4e0",
+      "bytes": 2260
+    },
+    {
+      "file": "SecretAspectConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "8aa5a330cfa09a84ac5462ae76bd35370cc0b628ffb72447f394fd15658ec3e7",
+      "bytes": 2419
+    },
+    {
+      "file": "SecretPredicateAPIDocumentation.lua",
+      "namespace": "C_Secrets",
+      "sha256": "668a0c15d372a358fbe169465651cdc1ae2e66d0916c81b41eccdd4da92274ae",
+      "bytes": 11692
+    },
+    {
+      "file": "SecretPredicatesDocumentation.lua",
+      "namespace": null,
+      "sha256": "e4a053e9960da00099f46de2cff25c69d4cb11d051f7c05685d06866ed389815",
+      "bytes": 7974
+    },
+    {
+      "file": "SecretWrapperConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "8658735814b85e4153f6aba296e776d62874c4e6b5869836e5e35005528c937b",
+      "bytes": 763
+    },
+    {
+      "file": "SecureTransferDocumentation.lua",
+      "namespace": "C_SecureTransfer",
+      "sha256": "6d5522b5c2cbe27ade06814c6c95889981d8c4045fcd220737e91097f6f71cff",
+      "bytes": 3606
+    },
+    {
+      "file": "SettingsUtilDocumentation.lua",
+      "namespace": "C_SettingsUtil",
+      "sha256": "918060428445ce0a0d35f65062ee0465f153569455acdfdcb2830a0573926428",
+      "bytes": 1037
+    },
+    {
+      "file": "SharedScriptObjectModelLightDocumentation.lua",
+      "namespace": null,
+      "sha256": "bb20f7e2283925bc77210073e15cb7f928f054c742316d848047953e5ed879ba",
+      "bytes": 861
+    },
+    {
+      "file": "SharedScriptObjectNamePlateFrameDocumentation.lua",
+      "namespace": null,
+      "sha256": "fb1e35647b07cb16762f0a57ddfba0522667fe95f8d033c7de9a512b64b78f85",
+      "bytes": 159
+    },
+    {
+      "file": "SharedScriptObjectUnitPositionFrameDocumentation.lua",
+      "namespace": null,
+      "sha256": "b0b46a57b543d44024af745a807589e168c75b61c1550479007f7a52cf093eba",
+      "bytes": 503
+    },
+    {
+      "file": "SharedTraitsDocumentation.lua",
+      "namespace": "C_Traits",
+      "sha256": "6757fa202575c2362165b77bce6c1c81526a5c3f7a983294de3fc68db52f63db",
+      "bytes": 32407
+    },
+    {
+      "file": "SharedTraitsEnumsDocumentation.lua",
+      "namespace": null,
+      "sha256": "8754a5e2305cf05e3ead32c0028cf7d0c7c63b053641104e496d84e5bd8eb7fd",
+      "bytes": 129
+    },
+    {
+      "file": "SimpleAnimAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "33b4777b0c40ab1b83a8e7bff757eede9619a2c860897fc91e4aaeaa5f5d78f2",
+      "bytes": 9632
+    },
+    {
+      "file": "SimpleAnimAlphaAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "d646fd48d0ef5c7343e6f660dcd549c55bdc9581c3190f8b723549a0ea57e467",
+      "bytes": 1223
+    },
+    {
+      "file": "SimpleAnimFlipBookAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "6fa29487c050484ba95daa0515fbf81e98d5d9e4e000dc4cbed0936db4fc2d41",
+      "bytes": 2098
+    },
+    {
+      "file": "SimpleAnimGroupAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "1af7a2b7ccdaceb57505984ed1b5a6682cac6b13b5056175e1d9f9dfff5b0790",
+      "bytes": 7448
+    },
+    {
+      "file": "SimpleAnimPathAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "7ad879479b904c919a30f38ceb4c398ef669c4287a910212e66c0f79a90445a9",
+      "bytes": 1393
+    },
+    {
+      "file": "SimpleAnimRadialProgressAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "b109cd760d260ba3e8a7e671aa75b9ebcaa9818175d96b7825400ee121a1d3c4",
+      "bytes": 994
+    },
+    {
+      "file": "SimpleAnimRotationAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "72168e552ef96342520263297b598bb2f15951f803e19f076a40d34c0f5a10fe",
+      "bytes": 1552
+    },
+    {
+      "file": "SimpleAnimScaleAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "d38cdd707632ceaf988e3e1c13f3ffb7f419a0fd8fe2ae58c3d2d8330d2b789a",
+      "bytes": 2253
+    },
+    {
+      "file": "SimpleAnimScaleLineAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "e10cf5c3c517a603f2c282dba3691cfb1f98625189584df2d3c36b99e7ff4d09",
+      "bytes": 259
+    },
+    {
+      "file": "SimpleAnimTextureCoordTranslationAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "e40bc59cc9ef0b163ee02cb0058e69e37340f3f0c29a7b140604e250c40d60a4",
+      "bytes": 773
+    },
+    {
+      "file": "SimpleAnimTranslationAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "2300a71eda0563a3f8b5968828521b897bfa4f2a9801226f6f132e8c98785cc6",
+      "bytes": 737
+    },
+    {
+      "file": "SimpleAnimTranslationLineAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "819d57b8438ee8334dfe3908b0d8f0f0208bad37c41de928ffbf7d58e67354eb",
+      "bytes": 277
+    },
+    {
+      "file": "SimpleAnimVertexColorAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "ae207886e072115d9cf8f6e294a24d75e9892f3c5904035fd673b78951f66d39",
+      "bytes": 1069
+    },
+    {
+      "file": "SimpleAnimatableObjectAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "a80a96dc6196947517e8639d2ac08d8d628e1ac9e164aa859ee103cc2b75f58c",
+      "bytes": 894
+    },
+    {
+      "file": "SimpleBrowserAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "9ab9fc04aefdd6c782f8b7e9eed5930bf2b966322fb98a70cc5aa602f33d1fae",
+      "bytes": 1561
+    },
+    {
+      "file": "SimpleButtonAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "77d01584823f347dc819f2eff5771dfd63ef108afae251a7042657f06a52e16e",
+      "bytes": 8888
+    },
+    {
+      "file": "SimpleCheckboxAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "6951ac9ece3d8a216e48bfc72392e32e51c5257723fcf59c8b82cb372d59db9a",
+      "bytes": 1453
+    },
+    {
+      "file": "SimpleColorSelectAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "b4d4e2e946cdfb71c98d24dfff7347254ad46f33c385c151b6e5f5a39d40656e",
+      "bytes": 4388
+    },
+    {
+      "file": "SimpleControlPointAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "62b1d01ba17fcd916a3dc3bf50bde0ee375c0087a4f9674cc4b8cee7d945c190",
+      "bytes": 1358
+    },
+    {
+      "file": "SimpleEditBoxAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "aa932f643f66a880c6191043f7597b59d0c9f45df86f229c0322013d533a1aa8",
+      "bytes": 17005
+    },
+    {
+      "file": "SimpleFontAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "8d1fa0dfe1fe7f114eacfeca960f922300312a09b2d559c04e1af41ea181deed",
+      "bytes": 6099
+    },
+    {
+      "file": "SimpleFontStringAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "156e370421081e6a8ec78afdee8e4306686cecc99f0d2163c1b62ce9a5ddbe96",
+      "bytes": 13725
+    },
+    {
+      "file": "SimpleFrameAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "c00bc77ee27f8fd81ba8b8d1bfd85fbd0ad817b22457adbe5adca6876a1d604a",
+      "bytes": 33561
+    },
+    {
+      "file": "SimpleFrameScriptObjectAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "09c85f7ee160d6f4d39765ba92a93ccd112d9e578b48d6f99b79f65e2ec42b1d",
+      "bytes": 7560
+    },
+    {
+      "file": "SimpleFrameScriptObjectConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "b8f47117380e659b09f06bf011109280d86133013cc7d9ba889d8f03fcd27709",
+      "bytes": 3412
+    },
+    {
+      "file": "SimpleHTMLAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "8e6452c7d5e2a4adc59eb0031bb42c415fcbea3e08d388286b43382b454cfe9a",
+      "bytes": 7667
+    },
+    {
+      "file": "SimpleHTMLSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "ff6bc51efff2cf6c1e270492c9ec2730213147103513439e5199c90c81af808c",
+      "bytes": 401
+    },
+    {
+      "file": "SimpleLineAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "14aa5593e653b448122cff40ba14701a76d5e8940d93ab69db5cef7d808ab322",
+      "bytes": 2651
+    },
+    {
+      "file": "SimpleMapSceneAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "ad6123cfabff705350f7f2f71a9e00655daa68c3b5759f15a71f83f1f522a2e9",
+      "bytes": 1570
+    },
+    {
+      "file": "SimpleMaskTextureAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "b692a07dd9c71857a3ec6fe49d44a1c8ab08dcbf816f8e3d0b6da55da21e1ae7",
+      "bytes": 253
+    },
+    {
+      "file": "SimpleMessageFrameAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "b8cc74b9bb8c9b0b62b0be7f881540cb32e31dabd7c27814c312f9f415174939",
+      "bytes": 7895
+    },
+    {
+      "file": "SimpleModelAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "a851298c372e9a568372c2ddf8a6e44c55dcd113f2cdfa4f315816f82c81c9db",
+      "bytes": 13962
+    },
+    {
+      "file": "SimpleModelFFXAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "3bef97724261841bdac070cd21b5d8e62ef63ceb9ff09894911f9d492b2ac538",
+      "bytes": 1071
+    },
+    {
+      "file": "SimpleMovieAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "966d89ab2d133a700a10e72fa4c145e5f62055378a6da5595a0d72ad842e3eaa",
+      "bytes": 1406
+    },
+    {
+      "file": "SimpleObjectAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "b9def4b5dafa6e1c1c2d5eaf9284c590fc30d4843a1dcd3d9319b28d37962e7a",
+      "bytes": 1333
+    },
+    {
+      "file": "SimpleOffScreenFrameAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "ef0d4f4a8b5463cafb7164a480d177c9cb505b2197cdeef6c4c733e215986ed9",
+      "bytes": 2063
+    },
+    {
+      "file": "SimpleRegionAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "f311fdf12572f2a32df67c3a0cd11195bc699a6f3872dd69f8300cd542bcfbd0",
+      "bytes": 4694
+    },
+    {
+      "file": "SimpleScriptRegionAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "3718e5f81b99525819264d2f50e473080541d655978f88ca85582acc4073fd82",
+      "bytes": 15047
+    },
+    {
+      "file": "SimpleScriptRegionResizingAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "0763ec5e3bb560b94ad7d1b12439fc5c53ea5de33290ffb8fd8de2737225f9af",
+      "bytes": 4656
+    },
+    {
+      "file": "SimpleScrollFrameAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "19cf167464404e1bca37661fb5e41a9f6f0580fd8adcf8a6e2d1ad2de5d4a59a",
+      "bytes": 2331
+    },
+    {
+      "file": "SimpleSliderAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "f988b61cf0b1c777fb6c755e49faf20827a06613649d6f7ae1ec6e99f60fa24b",
+      "bytes": 3746
+    },
+    {
+      "file": "SimpleStatusBarAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "8a1adba0e8b921e31b3d537f5a24095a946bb69ea9014db134f2c175245265e0",
+      "bytes": 7823
+    },
+    {
+      "file": "SimpleStatusBarConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "5ea10963827c338cdf73f2be0c4f585fb44becfa17414b12244f212b01edf719",
+      "bytes": 2628
+    },
+    {
+      "file": "SimpleTextureAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "453c789239e9432546367ccafef7836cac497856306233d948e70e1f803d3b13",
+      "bytes": 1250
+    },
+    {
+      "file": "SimpleTextureBaseAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "e4ccf4dbc0458473f5f31f69986e7aa12171bfa7359a32f7b884b2edfd6bff00",
+      "bytes": 15517
+    },
+    {
+      "file": "SimpleVectorGraphicsAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "f21419c19f72b0a0414ffdadf26602f1ac3aa034e005afaf8804fdd09df82852",
+      "bytes": 941
+    },
+    {
+      "file": "SkillInfoDocumentation.lua",
+      "namespace": "C_SkillInfo",
+      "sha256": "5d7853c927bdf555c2b2679c31b8cfa0ef7f016ec88e1b0253bc86231bff4f7f",
+      "bytes": 3129
+    },
+    {
+      "file": "SlashCommandDocumentation.lua",
+      "namespace": null,
+      "sha256": "d41f4dd28d4dc9779637f250a62e97b27cd84a275e479a7b353334bf594f426b",
+      "bytes": 593
+    },
+    {
+      "file": "SocialConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "0bdca8c36d0df4a87b98524eca2e478483f2460bb9e2f0834895eb6bd807c54d",
+      "bytes": 524
+    },
+    {
+      "file": "SocialQueueDocumentation.lua",
+      "namespace": "C_SocialQueue",
+      "sha256": "ec268fd579ef76039df84f504a8a7e3beaf02eadd83c86bc83bc301cd6c8a9c0",
+      "bytes": 7055
+    },
+    {
+      "file": "SocialQueueSystemStatusDocumentation.lua",
+      "namespace": "C_SocialQueue",
+      "sha256": "c4b724140fae531ad6f66d2c60ab41f0856aca30e907856b52fe7ca60934d323",
+      "bytes": 765
+    },
+    {
+      "file": "SocialRestrictionsDocumentation.lua",
+      "namespace": "C_SocialRestrictions",
+      "sha256": "5e0cb78c39e07b945e0fdf43ef21ba559ec3f97e6148ba5a56890673aa89d374",
+      "bytes": 3216
+    },
+    {
+      "file": "SocialUIDocumentation.lua",
+      "namespace": "C_SocialUI",
+      "sha256": "91b79c32e569e29e6fe92635e1890a9b8ee19d47c274d5711da87d4c9a515d18",
+      "bytes": 1970
+    },
+    {
+      "file": "SoftTargetConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "fa7a5191fc037a7be5c187ae95f7c8f1296302188840e9da6d0fae1dbe1a500d",
+      "bytes": 558
+    },
+    {
+      "file": "SoulbindsConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "32d6dec40e341977c7506a21cbad9465cf191fcf7d52505565fe7252fa184d11",
+      "bytes": 2752
+    },
+    {
+      "file": "SoulbindsDocumentation.lua",
+      "namespace": "C_Soulbinds",
+      "sha256": "dc76e370b98f6dbfdcb6cb6976bb62fa35a87b0af7054957c2acdfba68c3b9da",
+      "bytes": 16785
+    },
+    {
+      "file": "SoundDocumentation.lua",
+      "namespace": "C_Sound",
+      "sha256": "0872bde4963b06134b9bdc923800f9788dd3e8bea4d7e30b99beb08fd1c93821",
+      "bytes": 3608
+    },
+    {
+      "file": "SpecializationConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "7767522cdf236f430984b740cd323052cbd93db5617d12c8ea6e6ce9723e6810",
+      "bytes": 1515
+    },
+    {
+      "file": "SpecializationInfoDocumentation.lua",
+      "namespace": "C_SpecializationInfo",
+      "sha256": "19c7cb135202b93e303880e54d3cdc9ca197584e8b7ac8231bf3dd34aa8aa5b2",
+      "bytes": 16137
+    },
+    {
+      "file": "SpecializationSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "f0e20c71175748dede2d17ae8f0e1a20f72d37c7905734a1521da34ca3b1b8ec",
+      "bytes": 3609
+    },
+    {
+      "file": "SpellActivationOverlayDocumentation.lua",
+      "namespace": "C_SpellActivationOverlay",
+      "sha256": "62a4cc0453e29667b38f7e6128c4a5bc43ceda7bf526372b379a26b2aaf837ba",
+      "bytes": 1883
+    },
+    {
+      "file": "SpellBookConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "6a8d429313fd84fa10b45f3c5d7f7328b5d73ee7441be05ae8045d983ef31fde",
+      "bytes": 1342
+    },
+    {
+      "file": "SpellBookDocumentation.lua",
+      "namespace": "C_SpellBook",
+      "sha256": "509fabe6d33de10f7166dc71bfb853dc969803d86536acac0833d30b1d0f9179",
+      "bytes": 33776
+    },
+    {
+      "file": "SpellConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "8e7b003134e18394cbcc27778b4fa45488a9e43c809ccd1c920fc6ff4ef339b9",
+      "bytes": 1438
+    },
+    {
+      "file": "SpellDiminishConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "789588109072a0841e97822bc8d3ec58c7522ca81571a168722f461dbdc2286f",
+      "bytes": 1218
+    },
+    {
+      "file": "SpellDiminishUIDocumentation.lua",
+      "namespace": "C_SpellDiminish",
+      "sha256": "edd2d5cc1f4e6a9d2d95ec5e20b9e6413951569f6f33d012aa69c979b3a4188a",
+      "bytes": 2789
+    },
+    {
+      "file": "SpellDocumentation.lua",
+      "namespace": "C_Spell",
+      "sha256": "a7cbbfeef002efacac1a4dcc01b7d781fbfe305123a6ad97431ff010ef4de19a",
+      "bytes": 32883
+    },
+    {
+      "file": "SpellIDDocumentation.lua",
+      "namespace": null,
+      "sha256": "b1925def292df25a95495697dc80d58ea607266287f3c6b625e925bc2603d5be",
+      "bytes": 747
+    },
+    {
+      "file": "SpellSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "e143de5645bd6333ba290488d5ada9c4985bdc1e2f49dd728d327aeafcd42846",
+      "bytes": 5476
+    },
+    {
+      "file": "SplashScreenConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "a52a8865a511a7931f35706a8ed47e2024ccddfdd1e20a239dc111b5ae6bef38",
+      "bytes": 420
+    },
+    {
+      "file": "SplashScreenDocumentation.lua",
+      "namespace": "C_SplashScreen",
+      "sha256": "d190bef151d3f809dd91af0eea2ac32cbbc5c12bf412dd8630dc72c834d1e41c",
+      "bytes": 2274
+    },
+    {
+      "file": "StableInfoDocumentation.lua",
+      "namespace": "C_StableInfo",
+      "sha256": "d5a4cdc0a7af875161b83876085615f025925447b54da033fadcc2055084af31",
+      "bytes": 5689
+    },
+    {
+      "file": "StorePublicUIDocumentation.lua",
+      "namespace": "C_StorePublic",
+      "sha256": "aae5d8a3c3f5323102e36b8d2a16ef43c92bbe00f77d260e64c71283770080cc",
+      "bytes": 958
+    },
+    {
+      "file": "StreamingDocumentation.lua",
+      "namespace": null,
+      "sha256": "23a6bb068c935418b629ea779725a59a1fa13969c230b42042ee1730ccb91a2e",
+      "bytes": 822
+    },
+    {
+      "file": "StringUtilDocumentation.lua",
+      "namespace": "C_StringUtil",
+      "sha256": "912b03af096957e6ff7e0887e68f72c8e4acaa4d0f99be07256153c0fd1f51e6",
+      "bytes": 7149
+    },
+    {
+      "file": "SummonConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "4b91c5348b77605713776ce92ac69cd22a268aa4a021956c77695a40de7be22f",
+      "bytes": 387
+    },
+    {
+      "file": "SummonInfoDocumentation.lua",
+      "namespace": "C_SummonInfo",
+      "sha256": "d0ddcb7b47418b1569d2d6ab529340269a192cc56bdf3a00e6b389fc785997f0",
+      "bytes": 1158
+    },
+    {
+      "file": "SuperTrackManagerDocumentation.lua",
+      "namespace": "C_SuperTrack",
+      "sha256": "4fe3b1216557a520d9c6f653fe8acca2b03fa650d5405869eea819d0010e4884",
+      "bytes": 4087
+    },
+    {
+      "file": "SuperTrackManagerSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "277df06498dc940b12d84834152345df4ac835755e99f45b93d3711c3c9135d4",
+      "bytes": 1369
+    },
+    {
+      "file": "SwingTimerDocumentation.lua",
+      "namespace": "C_SwingTimer",
+      "sha256": "26611b187d4677289c0db0484c1655a33b91c841cd9fb236f4af50094b68a11d",
+      "bytes": 2889
+    },
+    {
+      "file": "SystemDocumentation.lua",
+      "namespace": "C_System",
+      "sha256": "33e82b8b399070755ba9cb1f5954271f986c5f1eb1d80a3e1b7a295536af10c9",
+      "bytes": 5953
+    },
+    {
+      "file": "SystemTimeDocumentation.lua",
+      "namespace": null,
+      "sha256": "034f4b9b15c1c8eb661e6c0a4772995a20b6d3c4a729e9a0c6640cefa3f52ac0",
+      "bytes": 1330
+    },
+    {
+      "file": "TTSSettingsDocumentation.lua",
+      "namespace": "C_TTSSettings",
+      "sha256": "68e8c25526869b818b2e488390a8bc2beee0702ab5821d097463c42be74a1012",
+      "bytes": 4609
+    },
+    {
+      "file": "TalentAndGlyphConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "d9ed16579f120857a3c4eb25878e7066991120890fd1b2a8f3d6aefdfcc6f65a",
+      "bytes": 292
+    },
+    {
+      "file": "TalentConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "c3fe000f0652bfda82b11988d8db7854e6a7939250e1047eb838df69066ee582",
+      "bytes": 309
+    },
+    {
+      "file": "TalkingHeadDocumentation.lua",
+      "namespace": "C_TalkingHead",
+      "sha256": "40fcee5b0dcf1ee115fd04816d0a4b01917c946a43a20e19522b01d01e0f532e",
+      "bytes": 506
+    },
+    {
+      "file": "TargetScriptDocumentation.lua",
+      "namespace": null,
+      "sha256": "cc815dc5449118e5f2ebc9f23bee4a80a269907759c3e21e9da878e2d0682ae1",
+      "bytes": 4333
+    },
+    {
+      "file": "TaxiMapDocumentation.lua",
+      "namespace": "C_TaxiMap",
+      "sha256": "83815b83f1fca174d6b746407750b73cb3b353d0c8c45903524f13bbb86dae9d",
+      "bytes": 3751
+    },
+    {
+      "file": "TextureSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "7226d71ffdecd764f756d539c085e4ebbec46a77350143094eed2825d3d5dcd8",
+      "bytes": 121
+    },
+    {
+      "file": "TextureUtilsDocumentation.lua",
+      "namespace": "C_Texture",
+      "sha256": "78c6540e66386cbc2b866cba0d7f13aa975a04fd21ffe6b12fbb78f8b6014442",
+      "bytes": 5762
+    },
+    {
+      "file": "ThreatDocumentation.lua",
+      "namespace": null,
+      "sha256": "11b5fbbccd836d613e23d2dbfbdea15f7256b42c89383a3954e79ce9cba66d29",
+      "bytes": 760
+    },
+    {
+      "file": "TimeDocumentation.lua",
+      "namespace": null,
+      "sha256": "0da99c1c314668c63d853611b27ecdc852c57075347ba84e6094392822b9dcd1",
+      "bytes": 542
+    },
+    {
+      "file": "TimedSignalMapAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "5e8f1fa53fbf790a680eae94e716eed2e37928eaa789e79c0ce72ab78971cbcf",
+      "bytes": 4339
+    },
+    {
+      "file": "TimedSignalMapSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "6969ff25411e05de1fbc13de52a5faebd3efb9282ce27cf9fbd625e188f60ae1",
+      "bytes": 1231
+    },
+    {
+      "file": "TimerConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "d42f7fccff895fa65d36cdd121963caa8df2fdb7782f7a13d1040a71b5ab44b2",
+      "bytes": 567
+    },
+    {
+      "file": "TimerunningConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "db640396bc00434c985f1b798df34785ea20c75abec915ced6d4d239e94556f2",
+      "bytes": 588
+    },
+    {
+      "file": "TimerunningUIDocumentation.lua",
+      "namespace": "C_TimerunningUI",
+      "sha256": "02ff5b2648d36623ad2a80003a45b931668a947c0fbc5c00fa284bf32377a598",
+      "bytes": 558
+    },
+    {
+      "file": "TitleDocumentation.lua",
+      "namespace": null,
+      "sha256": "e49e6771c9e222b0f5b44ce9969f7038d0a7d2f037319709906b7ea76a528616",
+      "bytes": 1302
+    },
+    {
+      "file": "TooltipComparisonDocumentation.lua",
+      "namespace": "C_TooltipComparison",
+      "sha256": "fcc2c2f6428dec02764e58a3d2e0698e7dfe81f61cbc2a3c86982d3860b69edc",
+      "bytes": 2862
+    },
+    {
+      "file": "TooltipConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "bb332fd85fa899b95d3a2cb7e823b867b4cace59c824dccddea70d771f995e82",
+      "bytes": 1475
+    },
+    {
+      "file": "TooltipInfoDocumentation.lua",
+      "namespace": "C_TooltipInfo",
+      "sha256": "0c2184a4ba787a5fbd37646e0f297a6e79a3ac5f60ccbcd07dabcc8048e89718",
+      "bytes": 31341
+    },
+    {
+      "file": "TooltipInfoSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "08292af51fa78edbf2c2f8e1f8dc89812db3d4faa05e01528f3750b802ba3741",
+      "bytes": 9832
+    },
+    {
+      "file": "TotemDocumentation.lua",
+      "namespace": null,
+      "sha256": "4bec64ac75abc3825855b73aed64ac19f515c4eb4e0c83f57b749a97773c5814",
+      "bytes": 2820
+    },
+    {
+      "file": "ToyBoxInfoDocumentation.lua",
+      "namespace": "C_ToyBoxInfo",
+      "sha256": "5d2ebd960b025ad0f55dbbfc29a3585737e07102e253ef073b552f234106f20b",
+      "bytes": 1889
+    },
+    {
+      "file": "TradeInfoDocumentation.lua",
+      "namespace": "C_TradeInfo",
+      "sha256": "b4df84de43473e61344e18c5aba426cf63bcc1ccccd5ecb7676f487124363ac6",
+      "bytes": 3683
+    },
+    {
+      "file": "TradeSkillUIDocumentation.lua",
+      "namespace": "C_TradeSkillUI",
+      "sha256": "e3392e58403283ef5e307268ce51781ef25e7e0d955a199906b9b37278503fd2",
+      "bytes": 31711
+    },
+    {
+      "file": "TradeSkillUITypesDocumentation.lua",
+      "namespace": null,
+      "sha256": "c1fcec130e314052873d0246311f1a554141b0cf5ace55ea849ad8c7275be29b",
+      "bytes": 17329
+    },
+    {
+      "file": "TrainerConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "c837c30251e33128e1ccf36a3219c8904b4dec5891fd8eba4c75bbe77db93061",
+      "bytes": 521
+    },
+    {
+      "file": "TrainerDocumentation.lua",
+      "namespace": "C_Trainer",
+      "sha256": "8428e3ce0247031621cf029041f00a605895e991e96479b949c0fe3d5082eee2",
+      "bytes": 1367
+    },
+    {
+      "file": "TraitConfigDocumentation.lua",
+      "namespace": "C_TraitConfig",
+      "sha256": "9b3510262363452d710a7946448a1d2048f5b59eff22bfa16921e7715685deed",
+      "bytes": 250
+    },
+    {
+      "file": "TraitConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "d3328b7349377b4a17ba1d8eaf79d95f89a280038b201489edea03484c1488e4",
+      "bytes": 12826
+    },
+    {
+      "file": "TransformManipulatorConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "1c2f62b2fa9517dedc08da01bac475a8e5479b99286af8a9dd718a04bcdfa560",
+      "bytes": 2639
+    },
+    {
+      "file": "TransmogConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "8acd1c28102c7408309f8abbf6f62f1d173ffe0053e81509ab157ddf2f7ef927",
+      "bytes": 1437
+    },
+    {
+      "file": "TransmogDocumentation.lua",
+      "namespace": "C_Transmog",
+      "sha256": "a114e45cac56494e7d2d17a617ab68f0204eaaefc516c637412fb5eff8645fd8",
+      "bytes": 8190
+    },
+    {
+      "file": "TransmogItemsDocumentation.lua",
+      "namespace": "C_TransmogCollection",
+      "sha256": "db908934049148ea5f2815994be115e3cf434ba7ce9c481533357dce6c9d0dee",
+      "bytes": 28914
+    },
+    {
+      "file": "TransmogOutfitConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "8a667903bd722391980d844b0f228d1b366209c26c2058c44182beb5c909324d",
+      "bytes": 18912
+    },
+    {
+      "file": "TransmogOutfitInfoDocumentation.lua",
+      "namespace": "C_TransmogOutfitInfo",
+      "sha256": "18480f4952b96df1cd324c78f9a3e9d41c2cc8f93102aa258b041bf51b80820e",
+      "bytes": 24737
+    },
+    {
+      "file": "TransmogSetsDocumentation.lua",
+      "namespace": "C_TransmogSets",
+      "sha256": "a446fd5c74aec49ca05e8191e6937b3e044081886483eaa676f0a8216d358a9e",
+      "bytes": 11757
+    },
+    {
+      "file": "TransmogSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "40234678d84704760893609de7eca52ef18af576c513858217187eadcd144fd7",
+      "bytes": 5747
+    },
+    {
+      "file": "TutorialDocumentation.lua",
+      "namespace": "C_Tutorial",
+      "sha256": "5f7b5c691d71d40b424e829e5b62a02f090efb9bb724f7eec628652cf7c2bd29",
+      "bytes": 6501
+    },
+    {
+      "file": "UIActionConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "07a477028b490670b8668d2e4d84df896fccd5f3ce648ee64442a8f733fe475f",
+      "bytes": 406
+    },
+    {
+      "file": "UIActionDocumentation.lua",
+      "namespace": "C_UIActionHandler",
+      "sha256": "368fd033639a4ab8309ab62243fe3eab20a0177286a65aee67c0fa9f3e1d8cb0",
+      "bytes": 467
+    },
+    {
+      "file": "UIButtonSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "151b7d44fe66846e3b45c78482619ead73b2791110eb6c4e7fbd6d461eba7ab5",
+      "bytes": 536
+    },
+    {
+      "file": "UICharacterClassConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "fc59a2343d8b4d5aa134138bfd6bed64140dcc1bdf090e8c23600b4d2aa35b40",
+      "bytes": 928
+    },
+    {
+      "file": "UIColorDocumentation.lua",
+      "namespace": "C_UIColor",
+      "sha256": "6ad3204fd20e9b90b126ca00635c80346ff72dc5d3c7d919d4deb3f1c72228a4",
+      "bytes": 400
+    },
+    {
+      "file": "UIColorSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "1b3ca2726220727bd073969c7bb0793ebaa9e0a20d9ca2cb22879464626b5cfd",
+      "bytes": 347
+    },
+    {
+      "file": "UICovenantDisplayInfoConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "a0cf976e85d3903c7e00c43504f5503b06c2786ebe777cfc075b2485821f0583",
+      "bytes": 680
+    },
+    {
+      "file": "UIEventToastConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "9b60962c7f9250af0d4941821f45bdd35193a13d3c08fe92617d88af2f9e65d2",
+      "bytes": 4232
+    },
+    {
+      "file": "UIEventToastManagerDocumentation.lua",
+      "namespace": "C_EventToastManager",
+      "sha256": "16c56580469d30414f33e71fc49ef90c3c6c83e511769624e96ddd74d040c53a",
+      "bytes": 2916
+    },
+    {
+      "file": "UIFileAssetAPIDocumentation.lua",
+      "namespace": "C_UIFileAsset",
+      "sha256": "f9b2d9aa24354c1e46c3e7fbfac78aa652e9bebc0400a7dfc2249a6c0c0cc099",
+      "bytes": 1844
+    },
+    {
+      "file": "UIFileAssetSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "0a1c4c017b1002e6a1ca75c4f4d68afcc4c78b8c4e1507b3ecbd8c71bc0ed061",
+      "bytes": 129
+    },
+    {
+      "file": "UIFrameManagerDocumentation.lua",
+      "namespace": "C_FrameManager",
+      "sha256": "07b9073ebfd984b5133d2aa6d1b982669aba3524f27be5d51c574bceab8495c4",
+      "bytes": 1250
+    },
+    {
+      "file": "UIGenericWidgetDisplayDocumentation.lua",
+      "namespace": "C_GenericWidgetDisplay",
+      "sha256": "35f9455bc8ddec5d442854351022dc52bd6a7316e9416fea020653c95be3caab",
+      "bytes": 1191
+    },
+    {
+      "file": "UIMacrosDocumentation.lua",
+      "namespace": "C_Macro",
+      "sha256": "820b53bce826959781b61bb130659876c13e03280b187da0175847e12390c043",
+      "bytes": 1592
+    },
+    {
+      "file": "UIManagerDocumentation.lua",
+      "namespace": "C_UI",
+      "sha256": "3a7f80cedec49138ff4fce077d2b2b5078dd640975ee474a97d7db44010e02ed",
+      "bytes": 2215
+    },
+    {
+      "file": "UIMapPinSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "5b7a3ffcba84a0c8c604a91436647cf5a614f30cc100caaf3f2c22d65a2ee631",
+      "bytes": 477
+    },
+    {
+      "file": "UIModelInfoDocumentation.lua",
+      "namespace": "C_ModelInfo",
+      "sha256": "d2165d97c34342270186ab6fc6e77dc6050e2e281640f478dc698212afce4197",
+      "bytes": 5811
+    },
+    {
+      "file": "UIModelInfoSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "b0fabdb1e8f767e64c39dd9f02ebaa2cd461c5d924c3e10571cd7fc73beb8f02",
+      "bytes": 2901
+    },
+    {
+      "file": "UIModifiedInstanceDocumentation.lua",
+      "namespace": "C_ModifiedInstance",
+      "sha256": "6037efa6fb3784e30b75e9d755d0cef7d57311277b755a21bd8c4f106e797cbb",
+      "bytes": 1094
+    },
+    {
+      "file": "UISharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "caaa7b97a2a37b17240cd3c3d009fcfcdbc3b26cc89c84c4cfb50bdb86750290",
+      "bytes": 1868
+    },
+    {
+      "file": "UISystemVisibilityManagerDocumentation.lua",
+      "namespace": "C_SystemVisibilityManager",
+      "sha256": "638b62855c376f46458b8682e9372bb52e241e44bc69def015e92bbce2b46808",
+      "bytes": 926
+    },
+    {
+      "file": "UITextureAssetSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "5570d644ede096ae7654242453e298fb966f204950df23e9daf967a41ad4eb9e",
+      "bytes": 135
+    },
+    {
+      "file": "UITextureConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "c11a1dcb22b610ea8568c2301f437e49a4fd0e0a1b49500a3b37ea90098abf8f",
+      "bytes": 1147
+    },
+    {
+      "file": "UITimerDocumentation.lua",
+      "namespace": "C_Timer",
+      "sha256": "db087ebb155a349c91ac80d55f3d48c7d56913463217ee33d9403f235b616420",
+      "bytes": 2017
+    },
+    {
+      "file": "UIWidgetManagerDocumentation.lua",
+      "namespace": "C_UIWidgetManager",
+      "sha256": "af6733c5293ba2eefd5c12fca04f2e98358b3dba7dda5275c410842d59e873c5",
+      "bytes": 87148
+    },
+    {
+      "file": "UIWidgetManagerSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "48b2a0498735f9999de08fcd2e3ad1578a5bfb2b9851e23173a57c24c518e3f4",
+      "bytes": 7297
+    },
+    {
+      "file": "URLDocumentation.lua",
+      "namespace": null,
+      "sha256": "5cfb26f0b3a7192c13ce822d8bfcd62a6a801cae31fd19724da55d39f9b5ba6e",
+      "bytes": 650
+    },
+    {
+      "file": "UiModelSceneConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "f0536c846a933014b84262511e58545652daa11f139c93a083e1c83af2cba99b",
+      "bytes": 857
+    },
+    {
+      "file": "UiRpcRequestManagerConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "77e17a83a220f5d25329923909ed02347bbe9b532d9f5a7021c65a630b5ff8c3",
+      "bytes": 151
+    },
+    {
+      "file": "UnitAuraConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "9cbe8e8bb35a36eff93009c3afcec8067edd00b1113745394b4c02a7ca4ba5e1",
+      "bytes": 746
+    },
+    {
+      "file": "UnitAuraDocumentation.lua",
+      "namespace": "C_UnitAuras",
+      "sha256": "4d58b2e5a7033c96b58aff395b6e49197acb2a1b110a648552e69e9cf8380358",
+      "bytes": 19282
+    },
+    {
+      "file": "UnitAuraSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "0b406ed169b747887588c1c04f41ac3ee651fc985db8f3609d6290011b7b962f",
+      "bytes": 2194
+    },
+    {
+      "file": "UnitConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "7bff799fdf9ce1079db5682dba507522b5ac6f157229a59310b85bc0387067a5",
+      "bytes": 3676
+    },
+    {
+      "file": "UnitDocumentation.lua",
+      "namespace": null,
+      "sha256": "93004ac1b260127741471b7861360cdf7536afcb18d4c1db73b7259faa43e61c",
+      "bytes": 121174
+    },
+    {
+      "file": "UnitHealPredictionCalculatorAPIDocumentation.lua",
+      "namespace": null,
+      "sha256": "c9396f4d90c75fcd3929422a4221c948aa4cbbd609357bf13d8ccc43ad1f390a",
+      "bytes": 11711
+    },
+    {
+      "file": "UnitHealPredictionCalculatorSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "523f52a673c5350f2e5a0a3b6cb835a6b7fd1615bd7e9aee9975377b26fcc2b9",
+      "bytes": 5041
+    },
+    {
+      "file": "UnitRoleDocumentation.lua",
+      "namespace": null,
+      "sha256": "bb1a58e0f798c48191598bef2831f7d90285238382506ce117746bed15051cf4",
+      "bytes": 2603
+    },
+    {
+      "file": "UnitSexConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "f970f9aa0a1f79625cf4b22c68e7703ee4b7c3d90be3d0cd9ba5211677041b1e",
+      "bytes": 542
+    },
+    {
+      "file": "UnitSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "992a796bac162356763f1170933ef7d919d0657cbd8dd2500a91524fcdd838c6",
+      "bytes": 25769
+    },
+    {
+      "file": "UserFeedbackDocumentation.lua",
+      "namespace": "C_UserFeedback",
+      "sha256": "d0afdf0ff59851a8036f1e906ed60b61710e4d1c56ebfcc28898bd9a1b4d1b9e",
+      "bytes": 892
+    },
+    {
+      "file": "ValidateNameConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "d93a7673c8637bd0ba70e9ff338f0b7e69b8e8248b4c5be946282a95ce0bc8d2",
+      "bytes": 2133
+    },
+    {
+      "file": "VectorSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "a8df5cff12a1ce94fe6ac6e8d1d78c8c0837cdccd863a0966fe2fcc4f95820e5",
+      "bytes": 119
+    },
+    {
+      "file": "VehicleDocumentation.lua",
+      "namespace": "C_Vehicle",
+      "sha256": "8c9baf806d914e2c3c60318d8c14bc58a926d004ac80d65410552e0678cc9031",
+      "bytes": 3146
+    },
+    {
+      "file": "VideoDocumentation.lua",
+      "namespace": "C_VideoOptions",
+      "sha256": "6a549181ed4a935c1ef2831d78323ae7d35503c9e2410e529e0e5af81e91bec2",
+      "bytes": 7603
+    },
+    {
+      "file": "VignetteConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "53afba5b2e66d3143236900ae2e8910ca86786bd3e497d3e9ac684f3962b8e4a",
+      "bytes": 969
+    },
+    {
+      "file": "VignetteInfoDocumentation.lua",
+      "namespace": "C_VignetteInfo",
+      "sha256": "c9d960bdd338c52cefaacce2cbb0865ad85f593718654eab9ca812b5a10aed8d",
+      "bytes": 3908
+    },
+    {
+      "file": "VisualAlertConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "5fabcad4ab686e06c5266769aa051c9cd8c608a8acde04c3d944b96620990b72",
+      "bytes": 993
+    },
+    {
+      "file": "VoiceChatDocumentation.lua",
+      "namespace": "C_VoiceChat",
+      "sha256": "ae7cc01473ba88660b146c855c518a04a527168f33af84e009682a77469db182",
+      "bytes": 40198
+    },
+    {
+      "file": "WarCampaignDocumentation.lua",
+      "namespace": "C_CampaignInfo",
+      "sha256": "c0b4bdeb34ad14925de39cd25e1e3466c9c91d9bdb793febd85f4e54cbd121b9",
+      "bytes": 4613
+    },
+    {
+      "file": "WarbandSceneInfoConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "a449b9e8b7cc6f3c5d2d89abdf8c3d562e2079b9b9495557dfc98bb729833e6e",
+      "bytes": 671
+    },
+    {
+      "file": "WarbandSceneInfoDocumentation.lua",
+      "namespace": "C_WarbandScene",
+      "sha256": "aa84c128a7157743386d1a80b47b8ea070a70cf5596fceb5aa8c9dfe3de4cdd6",
+      "bytes": 3406
+    },
+    {
+      "file": "WeatherConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "968b29211527ab58e6c86ad47fae4b580865e1483d97f050a28833b6fc2c4307",
+      "bytes": 576
+    },
+    {
+      "file": "WeatherScriptDocumentation.lua",
+      "namespace": "C_Weather",
+      "sha256": "14e1abc1d38c2e83c0854edadd0182204717c051651f8f989c051818c72323ef",
+      "bytes": 921
+    },
+    {
+      "file": "WeeklyRewardsDocumentation.lua",
+      "namespace": "C_WeeklyRewards",
+      "sha256": "ba0594f747574be333ff9a0c943c8dabc3a6f157f39ba55b74096c1073496254",
+      "bytes": 8493
+    },
+    {
+      "file": "WeeklyRewardsSharedDocumentation.lua",
+      "namespace": null,
+      "sha256": "d33b9ceef3a5b7f0db611f7d1f040d8d99817730a5ae52ede7dc4483eba1c1a6",
+      "bytes": 133
+    },
+    {
+      "file": "WorldElapsedTimerConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "ab6c76d9969ac5a25cf664060219620be3eace8d3d937df918719392068fddc8",
+      "bytes": 523
+    },
+    {
+      "file": "WorldLootObjectDocumentation.lua",
+      "namespace": "C_WorldLootObject",
+      "sha256": "883ade648c8282ce776180e6f6a34d87d2bf450d1752fdd6ea4b7e5fa45340c6",
+      "bytes": 3256
+    },
+    {
+      "file": "WorldSafeLocsUIInternalDocumentation.lua",
+      "namespace": "C_WorldSafeLocsUIInternal",
+      "sha256": "2b95a9edaf00f46e97db00ce539cdaa78b9476e345fe58ed526e285c29d0159d",
+      "bytes": 826
+    },
+    {
+      "file": "WorldStateInfoDocumentation.lua",
+      "namespace": "C_WorldStateInfo",
+      "sha256": "94b614e1b1261f6f37b9341cd95fac438ac68e23688eaf3a5bac7c49aab1b1ee",
+      "bytes": 2160
+    },
+    {
+      "file": "WowCSConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "aab23b3d4a5fede47c8d755f884c1a570d90e3311edb4ab127a04823971fd123",
+      "bytes": 5908
+    },
+    {
+      "file": "WowEntitlementInfoDocumentation.lua",
+      "namespace": "C_WowEntitlementInfo",
+      "sha256": "8dbc5c89bb083ce8763f5e6b9a8f77aa3a9d0a479e2b42585a8821ee1b593a33",
+      "bytes": 2176
+    },
+    {
+      "file": "WowSurveyConstantsDocumentation.lua",
+      "namespace": null,
+      "sha256": "baf09db72de37247c546224b2685c53ba39ecff60cc2c810f345f52fcb5d52b7",
+      "bytes": 1502
+    },
+    {
+      "file": "WowSurveyDocumentation.lua",
+      "namespace": "C_WowSurvey",
+      "sha256": "0756479af545b96021202c4a12d7dc3a1a98051d8b39a54db6219d2b2418cbbd",
+      "bytes": 662
+    },
+    {
+      "file": "WowTokenUIDocumentation.lua",
+      "namespace": "C_WowTokenUI",
+      "sha256": "5742977428e275256efc4c9892d48736f92fe323587e5b5f2a9200a6782d3a51",
+      "bytes": 3286
+    },
+    {
+      "file": "XMLUtilDocumentation.lua",
+      "namespace": "C_XMLUtil",
+      "sha256": "f1c0675044581c823ca62723c4f1f236730bb0bfe598c2e908f7bd496cc6f430",
+      "bytes": 1731
+    },
+    {
+      "file": "ZoneAbilityDocumentation.lua",
+      "namespace": "C_ZoneAbility",
+      "sha256": "64259cb2e84655af2e60e40085738e362b56b1db730598b1dfbade63962f3a8e",
+      "bytes": 1139
+    },
+    {
+      "file": "ZoneScriptDocumentation.lua",
+      "namespace": null,
+      "sha256": "c30336e1b943f638413be8fce068b197ebe6d56cff5c2f141368566eb5cfc621",
+      "bytes": 1055
+    }
+  ]
+}

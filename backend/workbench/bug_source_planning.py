@@ -12,6 +12,7 @@ from workbench import bug_investigation as bug, regression_preparation as source
 from workbench.bug_evidence import BugPlanningResponse, Reproducer, Step
 from workbench.planning_provider import PlanningUnavailable
 from workbench.planning_response import Evidence, ResponseValidationError, wire_schema
+from workbench import bug_plan_review
 
 REQUESTS = bug.INVESTIGATION_REQUESTS
 MAX_FILES = 12
@@ -147,6 +148,8 @@ def unread_start(windows, path, start, end):
 def verify_packet(initial, supplied):
     if (set(supplied) - set(initial) - {'inspection_windows'}
             or supplied.get('base') != initial['base'] or supplied.get('policy_sha256') != initial['policy_sha256']
+            or supplied.get('plan_review') != initial.get('plan_review')
+            or supplied.get('api_references') != initial.get('api_references')
             or supplied.get('files', [])[:len(initial['files'])] != initial['files']
             or not len(initial['files']) <= len(supplied['files']) <= MAX_FILES
             or len({f['path'] for f in supplied['files']}) != len(supplied['files'])):
@@ -272,17 +275,22 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
     """One claim/provider/deadline, distinct durable receipts and shared usage."""
     packet = copy.deepcopy(initial)
     schema, wire = bug.planning_request(packet, original, feedback)
-    if wire['coverage'].get('call_driven'):
+    review_required = initial.get('plan_review') == 'source-grounded-v1'
+    pending, planning_wire, review_rounds = None, None, 0
+    if wire['coverage'].get('call_driven') and not review_required:
         wire['coverage']['require_inspection'] = True
     parent = adapter.response_evidence
     journals, receipts = [], []
-    read_chars = sum(len(e['text']) for f in initial['files'] for e in f['excerpts'])
+    read_chars = sum(len(e['text']) for f in [*initial['files'],*initial.get('api_references',[])] for e in f['excerpts'])
+    if read_chars > READ_CHARS:
+        raise PlanningUnavailable('Initial source context exceeds the investigation read bound.', 'inspection_limit')
     adapter.ends_at = adapter.ends_at or time.monotonic()+bug.INVESTIGATION_SECONDS
     evidence = parent
     diagnostics = {}
     response_added = True
     original_stop = adapter.stop_event
     rejected = set()
+    review_rejected = set()
 
     class Stop:
         def is_set(self):
@@ -301,12 +309,14 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
         return False
     try:
         for index in range(REQUESTS):
+            schema = bug_plan_review.ReviewResponse if pending is not None else BugPlanningResponse
             if should_stop() or time.monotonic() >= adapter.ends_at:
                 raise PlanningUnavailable('The source investigation was stopped or timed out.', 'cancelled')
             wire['investigation_progress'] = dict(request_number=index+1,max_requests=REQUESTS,
                 requests_after_this=REQUESTS-index-1,last_request=index+1==REQUESTS,
                 remaining_seconds=max(0,int(adapter.ends_at-time.monotonic())),
                 source_characters_read=read_chars,source_characters_remaining=max(0,READ_CHARS-read_chars),
+                phase='plan_self_check' if pending is not None else 'investigation',
                 note='Use retained exact source instead of requesting the same visible lines again. '
                      'Propose a plan once evidence is sufficient; never invent missing behavior to meet a budget.')
             if index and parent:
@@ -340,6 +350,28 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
             if not response_added:
                 raise PlanningUnavailable('Source investigation usage is unavailable.', 'accounting')
             try:
+                if pending is not None:
+                    review = bug_plan_review.ReviewResponse.model_validate(raw)
+                    if review.review_binding != bug.digest(pending):
+                        raise ResponseValidationError('The model self-review binding changed.',
+                            ['review_binding'], 'the exact proposed-plan binding', review.review_binding)
+                    review_rounds += 1
+                    diagnostics.update(plan_self_review_rounds=review_rounds,
+                                       plan_self_review_ready=int(review.ready))
+                    adapter.diagnostics.update(plan_self_review_rounds=review_rounds,
+                                               plan_self_review_ready=int(review.ready))
+                    if evidence:
+                        evidence.record('plan-self-check',binding=review.review_binding,ready=review.ready,
+                            categories=[issue.category for issue in review.issues],independent_verification=False,
+                            approved=False,executed=False)
+                    if review.ready:
+                        return pending, model, basis, packet
+                    review_rejected.add(review.review_binding)
+                    wire = bug_plan_review.feedback(planning_wire, pending, review)
+                    pending = None
+                    if index+1 == REQUESTS:
+                        raise PlanningUnavailable('The plan needs revision after its model self-check.', 'review_limit')
+                    continue
                 from workbench.bug_wire import compile_setup
                 raw, setup_fact = compile_setup(raw, packet['files'])
                 if setup_fact and evidence:
@@ -366,6 +398,16 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
                     continue
                 raise
             if draft.inspection is None:
+                if review_required and draft.plan is not None:
+                    if bug.digest(raw) in review_rejected:
+                        raise PlanningUnavailable('The proposed plan did not change after its rejected self-check.',
+                                                  'review_unchanged')
+                    if index+1 == REQUESTS:
+                        raise PlanningUnavailable('The plan needs its model self-check before review.', 'review_limit')
+                    pending = raw
+                    planning_wire = copy.deepcopy(wire)
+                    wire = bug_plan_review.request(wire, raw)
+                    continue
                 return raw, model, basis, packet
             if should_stop():
                 raise PlanningUnavailable('The investigation binding changed before source inspection.', 'cancelled')
@@ -376,12 +418,15 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
             if index+1 == REQUESTS:
                 raise PlanningUnavailable('The bounded investigation needs more source inspection.', 'inspection_limit')
             windows, matches, chars = inspect(packet, draft.inspection)
+            if evidence:
+                evidence.record('source-read-result',characters=chars,search_matches=len(matches),
+                    windows=[{key:value for key,value in window.items() if key!='text'} for window in windows])
             read_chars += chars
             if read_chars > READ_CHARS:
                 raise PlanningUnavailable('The investigation reached its source-read bound.', 'inspection_limit')
             wire = next_wire(packet, original, feedback, windows, draft.finding, matches)
             wire['inspection_result']['requested'] = [r.model_dump(mode='json') for r in draft.inspection]
-            if wire['coverage'].get('call_driven') and not packet.get('inspection_windows'):
+            if wire['coverage'].get('call_driven') and not packet.get('inspection_windows') and not review_required:
                 wire['coverage']['require_inspection'] = True
     finally:
         current = dict(adapter.diagnostics)
@@ -392,6 +437,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
         summed = {k: sum(r['values'][k] for r in receipts)
                   for k in ('prompt_tokens', 'completion_tokens', 'total_tokens')}
         diagnostics.update(current, investigation_requests=len(receipts), source_read_chars=read_chars)
+        if review_required:
+            diagnostics['plan_self_review_rounds'] = review_rounds
         if receipts and not unknown:
             diagnostics['usage'] = dict(source='local llama.cpp investigation responses', units='tokens',
                 values=summed, requests_observed=len(receipts), max_request_completion_tokens=max(

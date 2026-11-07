@@ -39,11 +39,12 @@ def read_configuration(engine, path):
         output_root: str
         identity: dict[str, str]
         scenario_generation: StrictBool = False
+        bug_plan_review: Literal['source-grounded-v1'] | None = None
 
     file = owned(path)
     if not file.is_file() or file.stat().st_mode & 0o077 or file.stat().st_size > 8192:
         raise ValueError('Preparation configuration exceeds its bound')
-    config = Configuration.model_validate(json.loads(file.read_text())).model_dump()
+    config = Configuration.model_validate(json.loads(file.read_text())).model_dump(exclude_none=True)
     db = owned(engine.url.database)
     if config['database'] != str(db) or config['database_identity'] != [db.stat().st_dev, db.stat().st_ino]:
         raise ValueError('Preparation policy belongs to another application store')

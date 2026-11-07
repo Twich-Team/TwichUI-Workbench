@@ -20,6 +20,8 @@ def scripted(monkeypatch, answers):
         self.diagnostics = {'generation_state': 'not_started'}
         calls.append(copy.deepcopy(packet))
         value = answers.pop(0)
+        if callable(value):
+            value = value(packet, schema)
         if isinstance(value, Exception):
             if not isinstance(value, LocalBeforeGeneration):
                 self.diagnostics['generation_state'] = 'uncertain'
@@ -37,11 +39,16 @@ def scripted(monkeypatch, answers):
             def read(self, request, limit):
                 assert len(request.data) <= 65536 and limit == 24000
                 system = json.loads(request.data)['messages'][0]['content']
-                assert 'You may request app-owned read-only committed-source search or line inspection' in system
+                from workbench.bug_plan_review import ReviewResponse
+                if schema is ReviewResponse:
+                    assert 'model self-check' in system
+                else:
+                    assert 'You may request app-owned read-only committed-source search or line inspection' in system
                 assert 'You have no tools' not in system
-                assert 'a read-only inspection request, a plan, a useful question, or a limitation' in system
-                assert 'Missing code is not a real-world question or a limitation' in system
-                assert 'no shell, editing, approval, external-tool or publication authority' in system
+                if schema is not ReviewResponse:
+                    assert 'a read-only inspection request, a plan, a useful question, or a limitation' in system
+                    assert 'Missing code is not a real-world question or a limitation' in system
+                    assert 'no shell, editing, approval, external-tool or publication authority' in system
                 if packet.get('coverage', {}).get('require_inspection'):
                     outcomes = json.loads(request.data)['response_format']['json_schema']['schema']['$defs']['BugOutcome']['anyOf']
                     assert len(outcomes) == 1 and set(outcomes[0]['properties']) == {'inspection'}
