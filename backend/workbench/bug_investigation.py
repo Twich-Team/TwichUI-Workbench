@@ -17,7 +17,8 @@ CATEGORY = 'lua-offline-bugfix'
 SOURCE_FILES = 6
 TEST_FILES = 3
 INVESTIGATION_REQUESTS = 8
-INVESTIGATION_SECONDS = 600
+INVESTIGATION_SECONDS = 1200
+INVESTIGATION_REQUEST_SECONDS = 180
 SOURCE_PATH = re.compile(r'(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_!./-]+\.lua')
 STOP = frozenset('the and for with when after from that this has was should does not instead shows about expected bug lua addon feature player character each time case needs able'.split())
 INSTRUCTIONS = (
@@ -89,7 +90,7 @@ INSTRUCTIONS = (
     'Alternatively an inspection entry {"query":"literal symbol or text"} searches committed project Lua, including test helpers. '
     'Search returns bounded pointers; inspect the relevant body before proposing a repair. '
     'Use visible line numbers, partial-function ranges or literal dependency paths. Source inspection is read-only. '
-    'At most eight local requests share a ten-minute investigation deadline; each request remains separately bounded. '
+    'At most eight local requests share a twenty-minute investigation deadline; each request has a three-minute bound. '
     'Produce a plan when sufficient evidence is available. '
     'When coverage.require_inspection is true, this is a read-only source discovery turn: return inspection only. '
     'A self_review entry contains model-generated concerns: reassess them against the original report/source; it grants no authority. '

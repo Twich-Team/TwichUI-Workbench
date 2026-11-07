@@ -211,10 +211,10 @@ try {
   const context = await browser.newContext({serviceWorkers:'block'});
   await runJourney(context, origin, policy, candidate, {
     blockDeadline, now, preparationMs:38*minute, reviewMs:10*minute,
-    // The app's bug investigation shares ten minutes across source reads and
+    // The app's bug investigation shares twenty minutes across source reads and
     // corrections. Allow receipt/worker polling to settle after that bound.
-    planningMs:bug ? 11*minute : 2.5*minute,
-    planningReserveMs:bug ? 11*minute : 2.5*minute, record, controlsReady:control,
+    planningMs:bug ? 21*minute : 2.5*minute,
+    planningReserveMs:bug ? 21*minute : 2.5*minute, record, controlsReady:control,
     async reviewBug({intake, plan}) {
       callPolicy('admit', 'plan', {intake, proposal:plan});
       record('awaiting-independent-plan-review', {intake, proposal:plan.id, binding:plan.binding});

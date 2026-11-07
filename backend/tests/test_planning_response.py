@@ -543,3 +543,74 @@ def test_single_outcome_wire_compiles_only_explicit_selection_and_keeps_content_
     decoded,_=payload(json.dumps(untouched),bug=True)
     with pytest.raises(ValueError):
         BugPlanningResponse.model_validate(decoded)
+
+
+def test_private_proposal_and_review_snapshots_persist_without_public_values(tmp_path):
+    with_evidence=Evidence(tmp_path,str(uuid4()),BugPlanningResponse)
+    try:
+        candidate=dict(finding='PRIVATE_PROPOSED_DATA',plan=None)
+        with_evidence.snapshot('proposed-plan',candidate)
+        path=with_evidence.directory/'proposed-plan.json'
+        assert json.loads(path.read_text())==candidate
+        assert path.stat().st_mode & 0o077==0 and path.stat().st_nlink==1
+        assert 'PRIVATE_PROPOSED_DATA' not in with_evidence.file.read_text()
+        with pytest.raises(OSError):
+            with_evidence.snapshot('proposed-plan',dict(changed=True))
+        assert json.loads(path.read_text())==candidate
+        with pytest.raises(OSError):
+            with_evidence.snapshot('../outside',dict(data=True))
+        with pytest.raises(OSError):
+            with_evidence.snapshot('model-plan-review',dict(data='x'*24000))
+        outside=tmp_path/'outside'
+        outside.write_text('KEEP')
+        (with_evidence.directory/'model-plan-review.json').symlink_to(outside)
+        with pytest.raises(OSError):
+            with_evidence.snapshot('model-plan-review',dict(data=True))
+        assert outside.read_text()=='KEEP'
+    finally:
+        with_evidence.close()
+
+
+def test_private_snapshots_share_the_total_evidence_budget(tmp_path):
+    journal=Evidence(tmp_path,str(uuid4()),BugPlanningResponse)
+    try:
+        journal.snapshot('proposed-plan',dict(data='x'*23000))
+        journal.snapshot('model-plan-review',dict(data='x'*23000))
+        with pytest.raises(OSError):
+            journal.record('bounded-padding',value='x'*15000)
+        assert sum(p.stat().st_size for p in journal.directory.iterdir())<=MAX_EVIDENCE
+    finally:
+        journal.close()
+
+
+@pytest.mark.parametrize('bug_review',[False,True,None])
+def test_bug_transport_timeout_is_explicit_and_shared_deadline_still_wins(monkeypatch,tmp_path,bug_review):
+    import time
+    from contextlib import nullcontext
+    from workbench import planning_provider
+    from workbench.bug_plan_review import ReviewResponse
+    from workbench.regression_evidence import ScenarioResponse
+    from workbench.planning_transport import LocalHTTP
+    monkeypatch.setenv('WORKBENCH_PLANNING_DEADLINE_S','60')
+    key=tmp_path/'fixture-key'
+    key.write_text('CONTROLLED-NOT-A-CREDENTIAL')
+    monkeypatch.setattr(planning_provider,'local_slot',lambda:nullcontext())
+    class Probe(LocalHTTP):
+        def __enter__(self):
+            return self
+        def __exit__(self,*args):
+            pass
+    monkeypatch.setattr(planning_provider,'LocalHTTP',Probe)
+    seen=[]
+    def infer(self,transport,*args,**kwargs):
+        seen.append((transport.seconds,transport.ends_at))
+        return 'CONTROLLED-NO-HTTP'
+    monkeypatch.setattr(LocalProvider,'_infer',infer)
+    schema=ScenarioResponse if bug_review is None else ReviewResponse if bug_review else BugPlanningResponse
+    seconds=60 if bug_review is None else 180
+    now=time.monotonic()
+    assert LocalProvider()._request(schema,'{}',key,'fixture')=='CONTROLLED-NO-HTTP'
+    assert seen[-1][0]==seconds and now+seconds<=seen[-1][1]<=time.monotonic()+seconds
+    shared=time.monotonic()+30
+    LocalProvider(ends_at=shared)._request(schema,'{}',key,'fixture')
+    assert seen[-1][0]==seconds and seen[-1][1]==shared

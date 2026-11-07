@@ -284,7 +284,7 @@ def test_source_followup_has_one_claim_two_accounted_requests_and_private_receip
     assert calls[1]['inspection_result']['read_only'] is True
     assert [c['investigation_progress']['request_number'] for c in calls] == [1,2]
     assert [c['investigation_progress']['requests_after_this'] for c in calls] == [7,6]
-    assert all(c['investigation_progress']['remaining_seconds'] <= 600 for c in calls)
+    assert all(c['investigation_progress']['remaining_seconds'] <= 1200 for c in calls)
     assert calls[1]['source_memory']['retained_characters'] > 0
     assert any(e['text'] for f in calls[1]['files'] if f['path'] == PRODUCTION for e in f['excerpts'])
     with store.connect() as connection:
@@ -342,7 +342,7 @@ def test_literal_search_and_committed_harness_read_can_precede_the_plan(
     assert usage['requests_observed'] == 3 and usage['values']['completion_tokens'] == 30
 
 
-@pytest.mark.parametrize('old_version', [1, 2, 3])
+@pytest.mark.parametrize('old_version', [1, 2, 3, 4])
 @pytest.mark.usefixtures('installed')
 def test_old_one_request_consent_cannot_silently_authorize_source_followups(
     client, headers, store, monkeypatch, old_version,
@@ -352,12 +352,14 @@ def test_old_one_request_consent_cannot_silently_authorize_source_followups(
     with store.begin() as connection:
         job = connection.execute(select(planning_jobs).where(planning_jobs.c.intake_id == identity)).mappings().one()
         payload = copy.deepcopy(job['payload'])
+        if old_version == 4:
+            payload['local_planning_receipt'].pop('local_request_deadline_seconds',None)
         if old_version == 1:
             for key in ('investigation_version', 'max_local_requests', 'max_codex_requests', 'planning_deadline_seconds'):
                 payload['local_planning_receipt'].pop(key)
         else:
-            payload['local_planning_receipt'].update(investigation_version=old_version, max_local_requests=4,
-                planning_deadline_seconds=300 if old_version==3 else 120)
+            payload['local_planning_receipt'].update(investigation_version=old_version, max_local_requests=8 if old_version==4 else 4,
+                planning_deadline_seconds=600 if old_version==4 else 300 if old_version==3 else 120)
         connection.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(payload=payload))
     monkeypatch.setattr(LocalProvider, 'generate', lambda *a, **kw:pytest.fail('Used stale one-request consent'))
     assert worker.tick(store)

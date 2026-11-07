@@ -356,6 +356,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
                         raise ResponseValidationError('The model self-review binding changed.',
                             ['review_binding'], 'the exact proposed-plan binding', review.review_binding)
                     review_rounds += 1
+                    if evidence:
+                        evidence.snapshot('model-plan-review', review.model_dump(mode='json'))
                     diagnostics.update(plan_self_review_rounds=review_rounds,
                                        plan_self_review_ready=int(review.ready))
                     adapter.diagnostics.update(plan_self_review_rounds=review_rounds,
@@ -405,6 +407,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
                     if index+1 == REQUESTS:
                         raise PlanningUnavailable('The plan needs its model self-check before review.', 'review_limit')
                     pending = raw
+                    if evidence:
+                        evidence.snapshot('proposed-plan', raw)
                     planning_wire = copy.deepcopy(wire)
                     wire = bug_plan_review.request(wire, raw)
                     continue

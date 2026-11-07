@@ -289,6 +289,7 @@ class Evidence:
         self.fd = os.open(self.file, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
         self.identity = os.fstat(self.fd).st_ino
         self.count = 0
+        self.snapshot_bytes = 0
         try:
             self.record('schema', version=1, model=model.__name__, schema_sha256=self.schema_hash,
                         schema_bytes=len(json.dumps(self.schema).encode()),
@@ -310,13 +311,34 @@ class Evidence:
             raise OSError('Private planning evidence identity changed')
         raw = (json.dumps(dict(time=datetime.now(timezone.utc).isoformat(), sequence=self.count,
                                phase=phase, **facts), allow_nan=False) + '\n').encode()
-        if self.count >= 32 or len(raw) > 16384 or info.st_size + len(raw) > MAX_EVIDENCE:
+        if self.count >= 32 or len(raw) > 16384 or info.st_size + self.snapshot_bytes + len(raw) > MAX_EVIDENCE:
             raise OSError('Private planning evidence limit reached')
         offset = 0
         while offset < len(raw):
             offset += os.write(self.fd, raw[offset:])
         os.fsync(self.fd)
         self.count += 1
+
+    def snapshot(self, name, value):
+        """Retain bounded proposed data privately; never approval or execution."""
+        if name not in {'proposed-plan', 'model-plan-review'}:
+            raise OSError('Unknown private planning snapshot')
+        from workbench.trusted_preparation import owned
+        owned(self.directory)
+        raw = (json.dumps(value, allow_nan=False) + '\n').encode()
+        if len(raw) > 24000 or os.fstat(self.fd).st_size + self.snapshot_bytes + len(raw) + 1024 > MAX_EVIDENCE:
+            raise OSError('Private planning snapshot exceeds its bound')
+        fd = os.open(self.directory / (name+'.json'), os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_WRONLY, 0o600)
+        try:
+            offset = 0
+            while offset < len(raw):
+                offset += os.write(fd, raw[offset:])
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        self.snapshot_bytes += len(raw)
+        self.record('private-proposed-data', name=name, sha256=sha(raw), bytes=len(raw),
+                    approved=False, executed=False, public=False)
 
     def location(self, path):
         # Known schema fields are exact; untrusted keys use a stable identity.

@@ -200,6 +200,10 @@ class LocalProvider:
         with local_slot():
             secret = Path(key_path).read_text().strip()
             transport = LocalHTTP(self.stop_event)
+            if schema in (BugPlanningResponse, ReviewResponse):
+                from workbench.bug_investigation import INVESTIGATION_REQUEST_SECONDS
+                transport.seconds = INVESTIGATION_REQUEST_SECONDS
+                transport.ends_at = time.monotonic() + transport.seconds
             if self.ends_at is not None:
                 transport.ends_at = min(transport.ends_at, self.ends_at)
             with transport as active:

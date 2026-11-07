@@ -222,3 +222,30 @@ def test_serialized_bug_request_still_holds_at_hard_transport_limit(client,heade
     assert item['status']=='failed' and not item['proposals'] and len(calls)==1
     assert item['jobs'][0]['diagnostics']['generation_state']=='not_started'
     assert attempt['usage'] is None
+
+
+@pytest.mark.usefixtures('installed')
+def test_rejected_self_review_and_unapproved_candidate_survive_in_private_evidence(client,headers,store,monkeypatch,tmp_path):
+    enable_review(monkeypatch)
+    scripted(monkeypatch,[response(),review(False),response()])
+    item,attempt=run(client,headers,store)
+    assert item['status']=='failed' and attempt['usage']['requests_observed']==3
+    candidates=list((tmp_path/'artifacts/runs').glob('planning-evidence-*/proposed-plan.json'))
+    reviews=list((tmp_path/'artifacts/runs').glob('planning-evidence-*/model-plan-review.json'))
+    assert len(candidates)==len(reviews)==1
+    candidate=json.loads(candidates[0].read_text())
+    saved=json.loads(reviews[0].read_text())
+    assert saved['review_binding']==digest(candidate) and saved['ready'] is False
+    assert saved['issues'][0]['explanation']=='The observation must use the actual returned value.'
+    assert all(path.stat().st_mode & 0o077==0 for path in [*candidates,*reviews])
+    assert saved['issues'][0]['explanation'] not in json.dumps(item['jobs'])
+
+
+def test_new_bug_consent_binds_local_request_and_shared_operation_deadlines():
+    from datetime import datetime,timezone
+    from workbench.everyday import planning_receipt
+    value=planning_receipt(report(),datetime.now(timezone.utc).isoformat())
+    assert value['investigation_version']==5
+    assert value['max_local_requests']==8
+    assert value['local_request_deadline_seconds']==180
+    assert value['planning_deadline_seconds']==1200

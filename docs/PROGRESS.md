@@ -6705,3 +6705,15 @@ Original79/latest147 checked copies, all19 installed history reads and strict
 network/browser/isolation/model/auth/credential gates pass. Task16 zero-call
 settlement preserved. Fresh17 intake84baabae-eec1-4fb1-97ba-bdf2d68a5f5d dispatched
 21:49:16, driver93648. No real fix/provider case claimed. Continue same outcome.
+
+## November7,22:09 UTC — cancellation reconciled; timeout/private retention repair
+
+Task17 first5 responses6506generated/67080prompt, self-review rejected proposed
+plan; sixth request timed out120sec. Model task40232 cancellation/release and idle
+verified, no repair/approval. Final response/usage remains unavailable, original
+interrupted_unknown untouched.52started/51complete receipts40022gen/301269prompt
+known, final2600completion bound separate; settled151rows preserved. Measured
+prompt processing+allowed generation can exceed120sec. New bug180/shared1200
+v5consent/updated UI and private create-only bounded snapshots pass99 focused/build.
+Combined snapshot+journal64KiB protection retained; ordinary planning unchanged.
+Continue final suites/browser/native and verified new candidate, no owner stop.
