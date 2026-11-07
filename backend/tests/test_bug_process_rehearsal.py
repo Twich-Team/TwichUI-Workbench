@@ -72,7 +72,7 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     from test_everyday import write_policy
     preparation=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
     settings=json.loads(preparation.read_text())
-    settings['bug_plan_review']='source-grounded-v1'
+    settings['bug_plan_review']='source-grounded-v2'
     write_policy(preparation,settings)
     from test_bug_plan_review import large_reference
     from workbench import game_api_reference
@@ -145,15 +145,32 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
 
     def scripted(self, packet, schema, expected_model):
         from workbench.bug_plan_review import ReviewResponse
+        from workbench.bug_investigation_stage import InvestigationResponse
         reviewing=schema is ReviewResponse
-        assert reviewing or schema is bug_investigation.BugPlanningResponse
+        investigating=schema is InvestigationResponse
+        assert reviewing or investigating or schema is bug_investigation.BugPlanningResponse
         assert 24000 < len(json.dumps(packet).encode()) <= 65536
         self.diagnostics = dict(generation_state='not_started')
         conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
         fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
         case = cases[0] if fault else next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
         answer = three_observations(case['client_case'])
-        if reviewing:
+        if investigating:
+            finding='Controlled committed source diagnosis, no approval or execution.'
+            if conflict:
+                answer=dict(finding=finding, draft=dict(question='A question.',limitation='Conflicting outcome.'))
+            elif fault:
+                answer=dict(finding='PRIVATE_REJECTED_CONTENT'*30,draft=dict(question='A specific question.'))
+            elif 'inspection_result' not in packet or (case['client_case'] and
+                    len(packet.get('source_memory', {}).get('read_windows', [])) == 1):
+                read = (dict(path=CLIENT_SOURCE,start=1,end=9999) if case['client_case']
+                        else dict(query='return'))
+                answer=dict(finding=finding,draft=dict(inspection=[read]))
+            else:
+                answer=dict(finding=finding,draft=dict(diagnosis=dict(
+                    cause='The inspected implementation produces the wrong name for the reported operation.',
+                    evidence_paths=[CLIENT_SOURCE if case['client_case'] else PRODUCTION])))
+        elif reviewing:
             answer=dict(review_binding=packet['review_binding'],ready=True,issues=[])
         elif conflict:
             answer['question'] = 'A controlled extra question conflicts with the plan.'
@@ -184,14 +201,14 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 return dict(prompt_tokens=8000, context_tokens=32768)  # Controlled, not a model call.
             def read(self, request, limit):
                 assert len(request.data) <= 65536 and limit == 24000
-                outcome = answer if reviewing else dict(finding=answer['finding'], draft={key:answer[key]
+                outcome = answer if reviewing or investigating else dict(finding=answer['finding'], draft={key:answer[key]
                     for key in ('plan', 'question', 'limitation', 'inspection') if answer.get(key) is not None})
                 return json.dumps(dict(id='controlled-response', model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
                     choices=[dict(finish_reason='stop', message=dict(content=json.dumps(outcome),
                         reasoning_content='CONTROLLED_NATIVE_REASONING_NOT_A_MODEL'))])).encode()
         value = self._infer(Transport(), 'fixture-no-credential', schema, json.dumps(packet), expected_model=expected_model)
-        calls.put(('fixture-conflict' if conflict else 'fixture-fault' if fault else case["choice"], "self-review" if reviewing else "planning"))
+        calls.put(('fixture-conflict' if conflict else 'fixture-fault' if fault else case["choice"], "self-review" if reviewing else "diagnosis" if investigating else "planning"))
         return value
 
     monkeypatch.setattr(LocalProvider, "generate", scripted)
@@ -267,9 +284,10 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             assert len(connection.execute(select(model_attempts).where(
                 model_attempts.c.purpose == "implementation")).all()) == index+1
     assert actors[0] != actors[1] != os.getpid()
-    expected = [('fixture-fault', 'planning'), ('fixture-conflict', 'planning')]
+    expected = [('fixture-fault', 'diagnosis'), ('fixture-conflict', 'diagnosis')]
     for case in cases:
-        expected += [(case['choice'], 'planning')]*(4 if case['client_case'] else 3)
+        expected += [(case['choice'], 'diagnosis')]*(3 if case['client_case'] else 2)
+        expected += [(case['choice'], 'planning')]*2
         expected.append((case['choice'], 'self-review'))
         expected.append((case['choice'], 'implementation'))
     assert [calls.get(timeout=2) for _ in expected] == expected

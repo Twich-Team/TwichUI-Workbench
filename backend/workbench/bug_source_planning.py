@@ -12,7 +12,7 @@ from workbench import bug_investigation as bug, regression_preparation as source
 from workbench.bug_evidence import BugPlanningResponse, Reproducer, Step
 from workbench.planning_provider import PlanningUnavailable
 from workbench.planning_response import Evidence, ResponseValidationError, wire_schema
-from workbench import bug_plan_review
+from workbench import bug_plan_review, bug_investigation_stage as stage
 
 REQUESTS = bug.INVESTIGATION_REQUESTS
 MAX_FILES = 12
@@ -271,17 +271,29 @@ def next_wire(packet, original, feedback, windows, finding, matches=None):
     return wire
 
 
-def generate(adapter, initial, original, feedback, should_stop, expected_model):
+def generate(adapter, initial, original, feedback, should_stop, expected_model, *, engine=None):
     """One claim/provider/deadline, distinct durable receipts and shared usage."""
     packet = copy.deepcopy(initial)
     schema, wire = bug.planning_request(packet, original, feedback)
-    review_required = initial.get('plan_review') == 'source-grounded-v1'
+    review_required = initial.get('plan_review') in {'source-grounded-v1', 'source-grounded-v2'}
+    investigating = initial.get('plan_review') == 'source-grounded-v2'
+    diagnosis = None
     pending, planning_wire, review_rounds = None, None, 0
     if wire['coverage'].get('call_driven') and not review_required:
         wire['coverage']['require_inspection'] = True
     parent = adapter.response_evidence
     journals, receipts = [], []
-    read_chars = sum(len(e['text']) for f in [*initial['files'],*initial.get('api_references',[])] for e in f['excerpts'])
+    if investigating and parent and engine is not None:
+        from workbench.investigation_memory import seed
+        packet, remembered, predecessor = seed(packet, original, parent.identifier, engine)
+        if remembered:
+            wire = next_wire(packet, original, feedback, remembered,
+                             'Previously read source was checked against the current committed repository. No diagnosis or approval was reused.')
+            parent.record('source-memory-reused', predecessor=predecessor,
+                windows=[{key:value for key,value in window.items() if key != 'text'} for window in remembered],
+                approved=False, executed=False)
+    read_chars = (sum(len(e['text']) for f in [*initial['files'],*initial.get('api_references',[])] for e in f['excerpts'])
+                  + sum(len(w['text']) for w in packet.get('inspection_windows', [])))
     if read_chars > READ_CHARS:
         raise PlanningUnavailable('Initial source context exceeds the investigation read bound.', 'inspection_limit')
     adapter.ends_at = adapter.ends_at or time.monotonic()+bug.INVESTIGATION_SECONDS
@@ -309,14 +321,16 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
         return False
     try:
         for index in range(REQUESTS):
-            schema = bug_plan_review.ReviewResponse if pending is not None else BugPlanningResponse
+            schema = (bug_plan_review.ReviewResponse if pending is not None else
+                      stage.InvestigationResponse if investigating else BugPlanningResponse)
             if should_stop() or time.monotonic() >= adapter.ends_at:
                 raise PlanningUnavailable('The source investigation was stopped or timed out.', 'cancelled')
             wire['investigation_progress'] = dict(request_number=index+1,max_requests=REQUESTS,
                 requests_after_this=REQUESTS-index-1,last_request=index+1==REQUESTS,
                 remaining_seconds=max(0,int(adapter.ends_at-time.monotonic())),
                 source_characters_read=read_chars,source_characters_remaining=max(0,READ_CHARS-read_chars),
-                phase='plan_self_check' if pending is not None else 'investigation',
+                phase='plan_self_check' if pending is not None else
+                      'source_diagnosis' if investigating else 'plan_construction',
                 note='Use retained exact source instead of requesting the same visible lines again. '
                      'Propose a plan once evidence is sufficient; never invent missing behavior to meet a budget.')
             if index and parent:
@@ -374,6 +388,27 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
                     if index+1 == REQUESTS:
                         raise PlanningUnavailable('The plan needs revision after its model self-check.', 'review_limit')
                     continue
+                if investigating:
+                    investigated = stage.resolve(raw, packet)
+                    if isinstance(investigated.draft, stage.Diagnosed):
+                        diagnosis = investigated.draft.diagnosis.model_dump(mode='json')
+                        if evidence:
+                            evidence.snapshot('investigation-diagnosis', raw)
+                            evidence.record('source-diagnosis-completed', approved=False, executed=False)
+                        investigating = False
+                        wire = next_wire(packet, original, feedback, [], investigated.finding)
+                        wire['investigation_diagnosis'] = dict(
+                            **diagnosis, untrusted=True, approved=False, executed=False)
+                        if index+1 == REQUESTS:
+                            raise PlanningUnavailable('Source diagnosis completed without a reviewed repair plan.', 'inspection_limit')
+                        continue
+                    if isinstance(investigated.draft, stage.Inspect):
+                        raw = dict(finding=investigated.finding, inspection=[r.model_dump(mode='json')
+                                   for r in investigated.draft.inspection], plan=None, question=None, limitation=None)
+                    else:
+                        outcome = investigated.draft.model_dump(mode='json')
+                        return {**dict(finding=investigated.finding, plan=None, question=None,
+                                      limitation=None, inspection=None), **outcome}, model, basis, packet
                 from workbench.bug_wire import compile_setup
                 raw, setup_fact = compile_setup(raw, packet['files'])
                 if setup_fact and evidence:
@@ -429,6 +464,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
             if read_chars > READ_CHARS:
                 raise PlanningUnavailable('The investigation reached its source-read bound.', 'inspection_limit')
             wire = next_wire(packet, original, feedback, windows, draft.finding, matches)
+            if diagnosis:
+                wire['investigation_diagnosis'] = dict(**diagnosis, untrusted=True, approved=False, executed=False)
             wire['inspection_result']['requested'] = [r.model_dump(mode='json') for r in draft.inspection]
             if wire['coverage'].get('call_driven') and not packet.get('inspection_windows') and not review_required:
                 wire['coverage']['require_inspection'] = True

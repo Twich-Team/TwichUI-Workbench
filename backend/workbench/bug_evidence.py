@@ -166,7 +166,13 @@ def validation_diagnostics(error):
         Observation, FixtureField,
         InvestigationRead, InvestigationSearch,
     )))
+    from workbench.bug_investigation_stage import InvestigationResponse
+    from workbench.bug_plan_review import ReviewResponse
+    models = {model.__name__:model for model in (BugPlanningResponse, InvestigationResponse, ReviewResponse)}
+    diagnostic_model = models.get(error.title, BugPlanningResponse)
     fields.update({'returns','values','table_fields','checkpoints','before_call','setup','before_load'})
+    fields.update({'draft','Diagnosed','Inspect','Question','Limitation','diagnosis','cause','evidence_paths',
+                   'review_binding','ready','issues','category','explanation'})
     rows = []
     for issue in error.errors(include_input=False, include_context=False, include_url=False)[:4]:
         location = '.'.join(
@@ -179,7 +185,7 @@ def validation_diagnostics(error):
         rows.append(f'{location}:{kind}')
     return dict(validation_errors=error.error_count(),
                 validation_locations='; '.join(rows)[:600],
-                validation_schema_sha256=digest(BugPlanningResponse.model_json_schema()))
+                validation_schema_sha256=digest(diagnostic_model.model_json_schema()))
 
 
 class BugEvidence(Data):

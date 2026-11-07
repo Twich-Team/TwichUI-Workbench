@@ -211,11 +211,11 @@ def context(original, feedback, policy):
     from workbench.source_context import excerpts
     excerpts(files, inspected, terms, words)
     references = {}
-    if policy.get('bug_plan_review') == 'source-grounded-v1':
+    if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2'}:
         from workbench.game_api_reference import collect
         references['api_references'] = collect(files)
     return dict(base=base, files=files, declarations=declaration_index(files, inspected, terms), **references,
-                **({'plan_review':'source-grounded-v1'} if policy.get('bug_plan_review')=='source-grounded-v1' else {}),
+                **({'plan_review':policy['bug_plan_review']} if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2'} else {}),
                 policy_sha256=digest(policy))
 
 

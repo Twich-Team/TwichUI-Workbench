@@ -71,7 +71,7 @@ try {
     assert.equal(result.decisions.length,0);
     assert.equal(result.jobs[0].diagnostics.generation_state,'finished');
     assert.equal(result.jobs[0].diagnostics.validation_locations,conflict?
-      'plan:missing; question:missing; limitation:missing; unrecognized:extra_forbidden':'finding:string_too_long');
+      'draft.Diagnosed.diagnosis:missing; draft.Diagnosed.question:extra_forbidden; draft.Diagnosed.limitation:extra_forbidden; draft.Inspect.inspection:missing':'finding:string_too_long');
     assert.ok(result.jobs[0].diagnostics.evidence_id);
     assert.equal(result.provider_activity[0].outcome,'failed');
     assert.equal(JSON.stringify(result).includes('PRIVATE_REJECTED_CONTENT'),false);

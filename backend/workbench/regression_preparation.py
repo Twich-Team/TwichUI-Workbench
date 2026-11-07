@@ -433,7 +433,11 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             claimed_generation = True
             initial_source_packet = packet
             from workbench.planning_response import create_evidence
-            response_evidence = create_evidence(lease, schema, wire.get('coverage') if bug else None,
+            evidence_schema = schema
+            if bug and packet.get('plan_review') == 'source-grounded-v2' and isinstance(adapter_used, LocalProvider):
+                from workbench.bug_investigation_stage import InvestigationResponse
+                evidence_schema = InvestigationResponse
+            response_evidence = create_evidence(lease, evidence_schema, wire.get('coverage') if bug else None,
                                                 wire.get('files') if bug else None)
             if response_evidence:
                 adapter_used.response_evidence = response_evidence
@@ -441,7 +445,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 if bug and isinstance(adapter_used, LocalProvider) and model_selection:
                     from workbench.bug_source_planning import generate as investigate
                     raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
-                        feedback, provider_stopped, model_selection.model)
+                        feedback, provider_stopped, model_selection.model, engine=engine)
                     inspection_packet = packet
                 elif codex_route or not model_selection:
                     raw, model, basis = adapter_used.generate(wire, schema)
@@ -491,7 +495,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     if bug:
                         from workbench.bug_source_planning import generate as investigate
                         raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
-                            feedback, provider_stopped, target)
+                            feedback, provider_stopped, target, engine=engine)
                         inspection_packet = packet
                     else:
                         raw, model, basis = adapter_used.generate(wire, schema, expected_model=target)
