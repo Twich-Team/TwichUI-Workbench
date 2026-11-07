@@ -243,6 +243,7 @@ def test_explicit_bootstrap_from_another_discovered_test_reaches_a_bound_proposa
     value['plan'].update(focused_test=focused, read_paths=[CLIENT_SOURCE,CLIENT_TEST,focused],
                          writable_paths=[CLIENT_SOURCE,focused])
     wire = wire_from_data(value)
+    wire['plan']['other_reads'] = []  # Setup, write and test selections supply all required reads.
     wire['plan']['reproducer']['setup']['test_path'] = CLIENT_TEST
     calls = scripted(monkeypatch,[wire])
     request = report(True)

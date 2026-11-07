@@ -34,7 +34,8 @@ def compile_setup(raw, files):
     """Serialize only the provider's explicit choice into the existing program.
 
     Setup runs before the listed actions; observation indexes name actions.
-    Read paths, expected results, behavior, scope and permission are never filled.
+    Required reads are the union of explicit file selections and other_reads.
+    Expected results, behavior, write scope and permission are never filled.
     Legacy complete data programs remain valid; a missing setup stays missing.
     """
     from workbench.bug_evidence import Observation, Step
@@ -45,6 +46,9 @@ def compile_setup(raw, files):
         return raw, None
     original = raw['plan'].get('reproducer')
     if not isinstance(original, dict) or 'setup' not in original:
+        if 'other_reads' in raw['plan']:
+            raise ResponseValidationError('Additional reads require explicit fixture setup.',
+                ['plan', 'other_reads'], 'an explicit setup with derived read scope', None)
         return raw, None
 
     def reject(field, expected, value):
@@ -62,6 +66,9 @@ def compile_setup(raw, files):
 
     if 'fixture' in original or 'bootstrap' in original:
         reject('kind', 'one explicit setup without conflicting legacy setup fields', None)
+    if 'read_paths' in raw['plan'] or 'other_reads' not in raw['plan']:
+        raise ResponseValidationError('Use explicit file selections and additional reads.',
+            ['plan', 'other_reads'], 'other_reads without a conflicting legacy read_paths field', None)
     setup = original['setup']
     if not isinstance(setup, dict):
         reject('kind', 'a declared committed fixture setup', setup)
@@ -113,8 +120,22 @@ def compile_setup(raw, files):
     for observation in checked:
         observation['after_step'] += len(prefix)
     result = copy.deepcopy(raw)
+    plan = result['plan']
+    extra = plan.pop('other_reads')
+    writes, focused = plan.get('writable_paths'), plan.get('focused_test')
+    if (not isinstance(extra, list) or len(extra) > 12 or not isinstance(writes, list)
+            or not isinstance(focused, str) or any(not isinstance(p, str) for p in [*extra, *writes])):
+        raise ResponseValidationError('Invalid explicitly selected read scope.',
+            ['plan', 'other_reads'], 'bounded inspected paths and explicit write/test selections', None)
+    reads = [s.get('source') for s in [*prefix, *actions] if isinstance(s, dict) and s.get('op') == 'load']
+    reads += ([bootstrap['test_path']] if bootstrap else []) + writes + [focused] + extra
+    if any(not isinstance(p, str) or p not in selected for p in reads):
+        raise ResponseValidationError('An explicitly selected file was not inspected.',
+            ['plan', 'other_reads'], 'only inspected committed paths in every file selection', None)
+    plan['read_paths'] = list(dict.fromkeys(reads))
     target = result['plan']['reproducer']
     target.pop('setup')
     target.update(fixture=fixture, bootstrap=bootstrap, steps=[*prefix, *actions], observations=checked)
     return result, dict(kind=kind, explicit_setup=True, prepended_steps=len(prefix),
+                        derived_read_count=len(plan['read_paths']),
                         approved=False, executed=False)

@@ -180,10 +180,14 @@ def wire_schema(model, coverage=None, files=None):
                                 for key in ('description', 'setup', 'steps', 'observations')}
     reproducer['required'] = ['description', 'setup', 'steps', 'observations']
     # The installed decoder emits object properties in schema order. Select
-    # setup before repeating its files in the read scope or choosing a test.
+    # setup before choosing other files. Required reads are derived only from
+    # explicit loads/bootstrap, writable paths, focused test and extra reads.
     plan = result['$defs']['BugPlan']
+    plan['properties']['other_reads'] = plan['properties'].pop('read_paths')
+    plan['properties']['other_reads']['minItems'] = 0
+    plan['required'] = [key if key != 'read_paths' else 'other_reads' for key in plan['required']]
     plan['properties'] = {key: plan['properties'][key]
-                          for key in ('scope', 'reproducer', 'read_paths', 'writable_paths', 'focused_test')}
+                          for key in ('scope', 'reproducer', 'writable_paths', 'focused_test', 'other_reads')}
     result['properties'] = {'finding': props['finding'], 'draft': {'$ref': '#/$defs/BugOutcome'}}
     result['required'] = ['finding', 'draft']
     def compact(node):

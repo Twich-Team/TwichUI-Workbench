@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 from fastapi import HTTPException
-from pydantic import Field, StrictInt, StrictStr, model_validator
+from pydantic import Field, StrictInt, StrictStr, ValidationError, model_validator
 
 from workbench.regression_evidence import Data, FORBIDDEN, LuaPath, Scalar, TestPath, lua
 from workbench.visual_scope import digest
@@ -83,18 +83,31 @@ class Reproducer(Data):
                 or self.fixture == 'module' and (len(loads) != 1 or self.steps[0].op != 'load')
                 or len(self.model_dump_json().encode()) > 8200):
             raise ValueError('Specify an operation and a bounded observable failure')
-        for item in self.observations:
-            if (item.after_step > len(self.steps) or item.expected == item.incorrect
-                    or item.source in {'return', 'captured'} and type(item.path[0]) is not int
-                    or item.source == 'captured' and not any(s.op == 'capture' for s in self.steps[:item.after_step])
-                    or item.source == 'return' and self.steps[item.after_step-1].op != 'call'):
-                raise ValueError('Each observation needs an exact step, path, and two distinct results')
+        for index, item in enumerate(self.observations):
+            constraints = [
+                (item.after_step <= len(self.steps), 'after_step', item.after_step,
+                 'Observation step must name an existing listed action'),
+                (item.expected != item.incorrect, 'incorrect', item.incorrect,
+                 'Incorrect result must differ from the expected scalar result'),
+                (item.source not in {'return', 'captured'} or type(item.path[0]) is int, 'path', item.path,
+                 'Return and captured paths must start with a positional result number'),
+                (item.source != 'captured' or any(s.op == 'capture' for s in self.steps[:item.after_step]),
+                 'source', item.source, 'Captured observation requires an earlier explicit capture'),
+                (item.source != 'return' or item.after_step > len(self.steps)
+                 or self.steps[item.after_step-1].op == 'call', 'after_step', item.after_step,
+                 'Return observation must name a call action'),
+            ]
+            for valid, field, value, rule in constraints:
+                if not valid:
+                    raise ValidationError.from_exception_data(type(self).__name__, [dict(
+                        type='value_error', loc=('observations', index, field), input=value,
+                        ctx=dict(error=ValueError(rule)))])
         return self
 
 
 class BugPlan(Data):
     scope: Short
-    read_paths: Annotated[list[LuaPath | TestPath], Field(min_length=2, max_length=8)]
+    read_paths: Annotated[list[LuaPath | TestPath], Field(min_length=2, max_length=12)]
     writable_paths: Annotated[list[LuaPath | TestPath], Field(min_length=1, max_length=3)]
     focused_test: TestPath
     reproducer: Reproducer

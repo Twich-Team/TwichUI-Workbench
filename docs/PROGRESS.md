@@ -1,3 +1,14 @@
+# Task8 settled; explicit read-scope revision — November 7, 2026
+
+Current facts are in CONTINUATION.md/CURRENT_STATUS.md; earlier dated entries below
+are historical where superseded. Task8 completed4 Qwen requests,1545 generated/
+13722 prompt; no approval/repair/uncertainty. Exact retained setup/observation/read
+scope diagnostics motivate modern other_reads derivation from explicit selections,
+with separate unchanged write authority and exact observation-field diagnostics.
+96 focused checks/check/build/installed grammar pass; complete suites and native
+process/browser checks underway. Latest114-row history and normal authenticated
+model verified. No real case complete. Standing authority continues without caps.
+
 # Source inspection and active controls verified in controlled paths — November 7, 2026 UTC
 
 Generic code-focused context now exposes real function bodies, with literal search

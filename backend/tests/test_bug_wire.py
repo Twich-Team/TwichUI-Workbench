@@ -16,6 +16,7 @@ def wire_response(client=False):
 
 def wire_from_data(original):
     value = copy.deepcopy(original)
+    value['plan']['other_reads'] = value['plan'].pop('read_paths')
     reproducer = value['plan']['reproducer']
     fixture = reproducer.pop('fixture')
     bootstrap = reproducer.pop('bootstrap', None)
@@ -44,14 +45,17 @@ def test_explicit_load_selection_preserves_program_observations_and_input(client
     source, test = (CLIENT_SOURCE, CLIENT_TEST) if client else (PRODUCTION, TEST)
     normalized, facts = compile_setup(value, [dict(path=source), dict(path=test)])
     assert value == before
-    assert BugPlanningResponse.model_validate(normalized).model_dump() == BugPlanningResponse.model_validate(response(client)).model_dump()
+    actual = BugPlanningResponse.model_validate(normalized).model_dump()
+    expected = BugPlanningResponse.model_validate(response(client)).model_dump()
+    assert set(actual['plan'].pop('read_paths')) == set(expected['plan'].pop('read_paths'))
+    assert actual == expected
     assert facts['explicit_setup'] and facts['approved'] is False and facts['executed'] is False
     assert facts['prepended_steps'] == (2 if client else 1)
 
 
 def test_explicit_committed_bootstrap_can_differ_from_focused_test():
     value = response(True, bootstrap=True)
-    value['plan']['read_paths'].append('tests/test_setup.lua')
+    value['plan']['other_reads'] = value['plan'].pop('read_paths') + ['tests/test_setup.lua']
     reproducer = value['plan']['reproducer']
     reproducer.pop('fixture')
     reproducer.pop('bootstrap')
@@ -141,3 +145,66 @@ def test_compiler_shape_and_module_prelude_preserve_namespace_without_execution(
     excerpts([item],{CLIENT_SOURCE:('unused',raw,text.splitlines())},{'flight'},words)
     assert any('local TV = Addon.Travel' in e['text'] for e in item['excerpts'])
     assert item['top_level_returns_value'] is False and not marker.exists()
+
+
+def test_required_reads_derive_only_from_explicit_file_selections():
+    value = wire_response(True)
+    value['plan']['other_reads'] = []
+    value['plan']['reproducer']['steps'].insert(0, dict(op='load', source='!!!TwichUI/support.lua'))
+    for observation in value['plan']['reproducer']['observations']:
+        observation['after_step'] += 1
+    files = [dict(path=p) for p in [CLIENT_SOURCE, CLIENT_TEST, '!!!TwichUI/support.lua']]
+    normalized, facts = compile_setup(value, files)
+    assert set(normalized['plan']['read_paths']) == {CLIENT_SOURCE, CLIENT_TEST, '!!!TwichUI/support.lua'}
+    assert normalized['plan']['writable_paths'] == value['plan']['writable_paths']
+    assert normalized['plan']['reproducer']['observations'][0]['expected'] == value['plan']['reproducer']['observations'][0]['expected']
+    assert facts['derived_read_count'] == 3
+    assert 'other_reads' not in normalized['plan']
+
+
+@pytest.mark.parametrize('fault', ['unknown_extra', 'unknown_action', 'unknown_write', 'legacy_conflict', 'missing_extra', 'nonstring'])
+def test_derived_reads_reject_ambiguous_or_uninspected_selections(fault):
+    value = wire_response(True)
+    if fault == 'unknown_extra':
+        value['plan']['other_reads'] = ['!!!TwichUI/uninspected.lua']
+    elif fault == 'unknown_action':
+        value['plan']['reproducer']['steps'].append(dict(op='load', source='!!!TwichUI/uninspected.lua'))
+    elif fault == 'unknown_write':
+        value['plan']['writable_paths'] = ['!!!TwichUI/uninspected.lua']
+    elif fault == 'legacy_conflict':
+        value['plan']['read_paths'] = [CLIENT_SOURCE, CLIENT_TEST]
+    elif fault == 'missing_extra':
+        value['plan'].pop('other_reads')
+    else:
+        value['plan']['other_reads'] = [dict(path=CLIENT_SOURCE)]
+    with pytest.raises(ResponseValidationError):
+        compile_setup(value, [dict(path=CLIENT_SOURCE), dict(path=CLIENT_TEST)])
+
+
+def test_modern_schema_has_only_additional_reads_and_legacy_is_not_repaired():
+    schema = wire_schema(BugPlanningResponse)
+    plan = schema['$defs']['BugPlan']
+    assert 'read_paths' not in plan['properties'] and 'other_reads' in plan['required']
+    assert plan['properties']['other_reads']['minItems'] == 0
+    value = response(True)
+    value['plan']['read_paths'] = [CLIENT_TEST]
+    assert compile_setup(value, [dict(path=CLIENT_SOURCE), dict(path=CLIENT_TEST)]) == (value, None)
+
+
+@pytest.mark.parametrize('field,value,location,rule', [
+    ('after_step', 24, 'after_step', 'existing listed action'),
+    ('incorrect', True, 'incorrect', 'differ from the expected'),
+    ('path', ['named'], 'path', 'positional result number'),
+])
+def test_observation_rejection_retains_exact_field_without_inventing_results(field,value,location,rule):
+    from pydantic import ValidationError
+    original = response()
+    observation = original['plan']['reproducer']['observations'][0]
+    if field == 'incorrect':
+        value = observation['expected']
+    observation[field] = value
+    with pytest.raises(ValidationError) as failed:
+        BugPlanningResponse.model_validate(original)
+    issue = failed.value.errors()[0]
+    assert issue['loc'] == ('plan','reproducer','observations',0,location)
+    assert rule in str(issue['ctx']['error'])

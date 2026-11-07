@@ -303,7 +303,7 @@ def test_wire_paths_cannot_offer_support_only_or_undiscovered_writes():
     schema = wire_schema(BugPlanningResponse, files=files)
     properties = schema['$defs']['BugPlan']['properties']
     assert properties['writable_paths']['items']['enum'] == ['!!!TwichUI/a.lua', 'tests/test_a.lua']
-    assert properties['read_paths']['items']['enum'] == [item['path'] for item in files]
+    assert properties['other_reads']['items']['enum'] == [item['path'] for item in files]
     assert properties['focused_test']['enum'] == ['tests/test_a.lua']
 
 
