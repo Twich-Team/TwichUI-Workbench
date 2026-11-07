@@ -1,3 +1,23 @@
+## November 6, 2026 — Sealed campaign candidate and complete readiness
+
+Source `cbddecf` and stage `everyday-campaign-cbddecf-bounded` are
+ready for the single proposed campaign. The source repairs SQLAlchemy's
+COMMIT handling, bounded controller contention, runtime bytecode and
+accounting of all retained revision roots. Full-source verification
+passed 1,144 backend tests, 25 frontend tests, 108 Chromium tests, ten
+visual tests, 48 administrator tests and all separately enabled checks.
+Native two-bug process rehearsal passed. The complete browser rerun
+used tracing Off and peaked at 511,638,817 counted bytes.
+
+The final forecast requires explicit approval of the 1 GiB installation
+allowance and one archive of two closed browser directories. It does
+not grant further pruning. The archive's original files remain in place.
+The current 79-row app, failed 94-row candidate history and earlier
+preservation work remain intact. The historical lock holder remains
+unknown. New generation, transmission and cutover await the combined
+decision. See [readiness](DELIVERY_CAMPAIGN_READINESS_20261106.md) and
+[approval record](DELIVERY_CAMPAIGN_APPROVAL_20261106.md).
+
 ## November 6, 2026 — Campaign preparation and concurrent-process checks
 
 The owner continued the delivery outcome after the restored `23825bd`

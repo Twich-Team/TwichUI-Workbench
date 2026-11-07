@@ -1,5 +1,29 @@
 # A8 signed-in Codex and model routing
 
+## Current campaign preparation
+
+Source `cbddecf` passed separate-process controlled-provider journeys
+for all four choices, with two browser clients, DELETE journaling,
+repeated/stale decisions and independent Lua checks. Two ordinary
+fixture bugs also reached checked patches across API/worker restarts
+under native confinement. The installed source/runtime binding and
+transaction repair have current offline evidence.
+
+| Evidence tier | Current result |
+| --- | --- |
+| Implemented | Saved Qwen/Codex choices, fallback Off and one eligible planning switch in each direction, plan-bound implementation and shared task limits. |
+| Controlled-provider tested | All four routing journeys and two reusable ordinary bug workflows, including native checked Lua. |
+| Real-provider tested | The prior installed Codex planning turn passed with the existing sign-in and revised quota policy. Its implementation request later rolled back before generation. Earlier Qwen results retain their recorded narrower scope. |
+| Everyday app | The original loopback review build is restored. The newly repaired workflow and provider journeys await installation and live acceptance. |
+
+The [single campaign request](DELIVERY_CAMPAIGN_APPROVAL_20261106.md)
+starts with the real flight-path Qwen repair and retains four separate
+supporting provider cases. Its attempt/revision, source, capacity and
+administration permissions are pending. A8, actual provider switching,
+live Codex bug repair and the real bug-fix outcome remain open.
+The accepted allowance-snapshot limitation and null-secondary rule are
+preserved. [Readiness](DELIVERY_CAMPAIGN_READINESS_20261106.md)
+
 ## Signed-in Codex planning verified during the f507278 cutover
 
 The revised eligibility policy passed inside the first installed case.

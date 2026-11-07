@@ -1,3 +1,71 @@
+# Bounded delivery campaign prepared — November 6, 2026 Mountain time
+
+Following PROJECT_WORKING_PHILOSOPHY.md, continue the same working-application
+outcome. The owner authorized diagnosis, connected repairs, controlled
+production-like rehearsal and one campaign proposal. New live generation
+and revised cutover await the exact
+[campaign approval](DELIVERY_CAMPAIGN_APPROVAL_20261106.md).
+
+The final source is `cbddecf`. The exact dormant stage is
+`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-campaign-cbddecf-bounded`,
+with file seal SHA-256
+`c86c23e89cbb884726432814053065b5f6252313e47dfa53cb6f0bdad2543298`.
+The earlier preliminary stages have different seals and stay outside
+activation authority. The [readiness record](DELIVERY_CAMPAIGN_READINESS_20261106.md)
+documents diagnosis, fixes, complete final-source checks, reused evidence
+and limitations.
+
+The original conflict's reader identity remains unknown. The actual
+status/dispatch contention was reproduced with separate processes and a
+kernel-identified lock holder. COMMIT retry stays inside SQLAlchemy's
+transaction lifecycle, without replaying the body or provider request.
+The controller has bounded local contention handling. Durable-fence
+interruption tests hold uncertain work. Delegated children suppress
+runtime bytecode. Local instrumentation records lock owners and slow
+transaction call sites without SQL, task content or credentials.
+
+Final verification passed 1,144 default backend tests, 25 frontend unit
+tests, 108 default Chromium tests and 10 visual tests. All three backend
+opt-ins and both browser opt-ins were covered separately. The four
+routing journeys use separate API/worker processes and two browser
+clients with DELETE journaling. Two different ordinary fixture bugs
+also passed across restarts with actual native confined checks.
+Actual desktop/phone screenshots were inspected. These controlled
+responses supply no real flight-path solution.
+
+The proposal starts with the real Qwen flight-path journey, then the four
+supporting provider cases. It allows 16 elapsed hours, a final two-hour
+restoration reserve, eight total attempts and at most three reliability
+revisions. Each revised candidate needs its own commit, inventory, seal,
+verification and deployment receipt before activation. Completed cases
+are carried forward. Full diagnostic, usage and restoration review is
+required before authorizing any renewed attempt. Unknown/partial/provider-
+failed work holds.
+
+The combined decision also includes a 1 GiB installation evidence allowance
+and exactly one archive of two closed browser-output directories. Its
+412 files and 48,174,500 bytes are bound to the manifest in the request.
+Current originals remain present. The existing development ceiling is
+512 MiB, and no archival occurred. Re-measure every capacity gate.
+
+The running app is still the restored `http://127.0.0.1:9487/` build
+with the original 79-row fingerprint. The 94-row failed candidate store,
+checked backups, archive restores and credentials remain preserved.
+The existing administrator grant and helper hash were rechecked in
+session 78. Owned offline test units and listeners were cleaned up.
+No new live provider generation, source transmission, service/firewall
+cutover, addon installation or publication occurred.
+
+After exact approval, confirm initial owner availability before opening
+the clock, then continue the same assignment through the campaign.
+Use the existing grant within scope, preserve browser/task binding and
+the accepted billing/null-secondary policies, and own routine repairs
+within the approved envelope. A real independently checked flight-path
+implementation remains the functional gate. Full original scope,
+live Codex bug repair, in-game acceptance and draft PR delivery stay
+open. Leave styling and the following requirements audit for their
+agreed later phases.
+
 # Flight-path acceptance stopped and restored — November 6, 2026 Mountain time
 
 The approved `8dcb17c` window for sealed `f507278` closed after the

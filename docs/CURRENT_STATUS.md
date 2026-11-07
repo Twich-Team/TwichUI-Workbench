@@ -2,6 +2,23 @@
 
 November 6, 2026 Mountain time.
 
+- The connected reliability repairs and controlled rehearsals are ready
+  for one bounded delivery campaign. Source `cbddecf` passed the complete
+  backend/frontend suites, three backend opt-ins, complete Chromium/visual
+  checks and both everyday browser opt-ins. Separate-process,
+  two-client and native confined bug journeys passed with scripted
+  providers. [Readiness](DELIVERY_CAMPAIGN_READINESS_20261106.md)
+- The [combined campaign request](DELIVERY_CAMPAIGN_APPROVAL_20261106.md)
+  binds the exact sealed stage, 16 hours, eight attempts, three revisions,
+  a proposed 1 GiB installation allowance and one exact browser-evidence
+  archive. Approval is pending. The real flight-path task remains unstarted.
+- The historical lock owner remains unknown. The reproducible commit
+  contention is repaired and lock-owner diagnostics are available for
+  future incidents. The running app is the preserved loopback review
+  build. A8 and the working-app delivery outcome remain open.
+
+## Earlier installation evidence
+
 - The approved `f507278` cutover was rolled back. The previous app is
   available at `http://127.0.0.1:9487/` on the Workbench computer.
   Its 79 history rows, original firewall and authenticated Qwen were

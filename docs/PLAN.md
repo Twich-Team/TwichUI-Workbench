@@ -1,5 +1,12 @@
 # Delivery campaign preparation — November 6, 2026 Mountain time
 
+Diagnosis, connected repairs and complete final-source offline verification
+are finished for `cbddecf`. The current milestone awaits the exact
+[campaign approval](DELIVERY_CAMPAIGN_APPROVAL_20261106.md), including its
+bounded revision mechanism, live attempts, source/browser permissions,
+1 GiB installation evidence allowance and two-directory archive.
+The required installed real bug result remains open.
+
 The owner continued the working-application assignment after checkpoint
 `23825bd`. Following PROJECT_WORKING_PHILOSOPHY.md, diagnose the retained
 failure, repair connected persistence and dispatch defects, rehearse

@@ -207,6 +207,14 @@ Manage routine evidence retention automatically under documented preservation ru
 
 Establish what storage is counted, why, and how long evidence is retained. The current 512 MiB development allowance is not automatically a permanent product requirement.
 
+Prepared proposal, November 6, 2026 Mountain time. The bounded delivery
+campaign requests a private, store-bound 1 GiB installation evidence
+allowance and one exactly inventoried archive of two closed browser-output
+directories. Every previous accounting root, history, archive and independent
+restore is preserved. Development uses the existing 512 MiB ceiling.
+This is a proposed resource decision. Activation and pruning await the
+bound campaign approval.
+
 Protect credentials, user data, unrelated work, and important evidence. Use checked installation and rollback procedures.
 
 Dashboard login is not required for initial local/private-network use. This does not remove model-service authentication, approval requirements, limits, or isolation, and does not authorize public exposure.
