@@ -65,8 +65,9 @@ initial failure preserved. New private diagnostics handle checkpoints safely and
 remain<=6000 bytes, non-executable/redacted.117 focused checks pass. Native process
 passed before pruning; final native rerun and full backend/frontend/check/browser
 opt-ins underway in C/checkpoints-*-final.log and checkpoints-*-browser.log.
-First full backend was intentionally interrupted after later schema refinement;
-never count it as a final pass. Eight test-only inline-if lint errors fixed, logs
+First full backend received a requested SIGINT during schema refinement, but
+the signal did not interrupt it: the log shows it completed after source changed.
+Do not count that mixed-source run as final; the frozen-code rerun is authoritative. Eight test-only inline-if lint errors fixed, logs
 retained. All other code frozen before final checks. No new candidate deployed or
 live attempt11 yet. Continue ordinary engineering under standing authority.
 

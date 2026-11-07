@@ -8,7 +8,8 @@ legacy/mixed/unsafe validations remain. Literal test client access clarifies roo
 paths without guessed exports. Unreachable wire definitions pruned: inspection
 schema1202 bytes/source6823 chars, plan source5170, packets under24k.117 focused/
 24 actual decoder cases pass. Final complete suites/native/browser opt-ins underway;
-first full run interrupted for final schema refinement, never counted as a pass.
+first full run continued despite requested SIGINT during refinement, not counted
+as final; frozen-code rerun is authoritative.
 No revised activation/live call yet. Continue standing delivery; no real case done.
 
 # Verified9b0658c installed; fresh task10 — November7,17:56 UTC
