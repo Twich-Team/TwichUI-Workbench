@@ -365,7 +365,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 grounded_scenarios.require_plannable(packet)
                 schema, wire = grounded_scenarios.planning_request(packet)
             loaded_selection = schema is grounded_scenarios.LoadedClientResponse
-            if len(json.dumps(wire).encode()) > 24000:
+            from workbench.planning_provider import BUG_INPUT, MAX_INPUT
+            if len(json.dumps(wire).encode()) > (BUG_INPUT if bug else MAX_INPUT):
                 raise ValueError('Grounded scenario context exceeds the planning input budget; narrow the request.')
             if os.environ.get("WORKBENCH_DEMO_MANIFEST_SHA256"):
                 from browser_demo.stage import require_active_stage

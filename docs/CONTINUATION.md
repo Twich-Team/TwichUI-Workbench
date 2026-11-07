@@ -1,3 +1,44 @@
+# Task16 settled BEFORE generation; dispatcher correction — November7,21:43 UTC
+
+No real bug/provider case complete. Installed2cb6482 remains protected/idle and all
+strict network/history gates healthy. Task16 intake3caf9ef6-1ef9-48ad-a28e-773b013e5352
+failed21:37:40 BEFORE model claim/request: regression_preparation still imposed the
+legacy24000-byte packet guard despite the bug adapter supporting65536. No model
+attempt row, usage0, no approval/repair/uncertainty; driver8581 exited held. Exact
+C/outcome-2cb6482/attempt-16-accounting.json. Total16 tasks but still46 real Qwen
+requests33516 generated/234189 prompt. Current settled DB147 rows/schema0012/28tables,
+SHA0df578f071e766fd5cfe283b8869c3a819078b4287b4b5f0ff2de33891e64981.
+Copy147 forward, never144. Original79 remains unchanged. Earlier ACTIVE16 below is
+historical. False fingerprint check with sqlite.Row was a diagnostic invocation
+error (helper requires tuples), NOT corruption; corrected real integrity/schema/
+foreign-key/fingerprint checks pass and settlement is saved.
+
+New production repair uses shared BUG_INPUT only for bugs at FULL dispatcher;
+nonbug MAX_INPUT and output/request/context limits unchanged. New full-dispatcher
+controlled large-context test and actual separate API/worker/normal browser native
+rehearsal now use >24000-byte context, covering the previously missed early guard.
+Native test's first overlarge Unicode fixture correctly held at later hard body
+limit; mixed bounded Unicode/ASCII fixture exercises allowed larger packets. No
+real model request repeated. Final focused/native checks and new complete suite
+must pass on final checkpoint before next deployment. Inspect dispatcher-budget-*
+logs; preserve failures and only count completed results. No owner access/decision
+needed. Continue ordinary connected correction and fresh app bug under standing
+authority, not a stop after this checkpoint.
+
+Next package uses previous2cb6482,147-row forward history, revision/attempt17,
+evidence_roots63; task16 has NO model attempt ID to append (prior15 IDs retained).
+All6 addon writable/9initial read paths/provider/publication/billing boundaries
+unchanged. Copy pinned Forever API cache into fresh release before sealing, retain
+explicit source-grounded-v1 config flag already in previous configure.py. Stage
+script MUST accept existing flag rather than duplicate it. Use C/outcome-2cb6482
+operational templates/normal preflight; new full suite should1338 backend/25frontend,
+new native large-context, new focused tests. Reuse identical source-review7decoder/
+8negative receipt guard/count-only proof and unchanged frontend/browser/routing/
+readiness/admin evidence precisely. Source context/target API/self-review behavior
+unchanged except early dispatcher budget gate. Then normal NEW bug task after all
+installed gates, actual independent review/approved repair/original-candidate/full
+addon suite, four provider cases and durable next-bug/restart outcome.
+
 # Verified2cb6482 installed; task16 active — November7,21:38 UTC
 
 Installed2cb6482133b97f71102810a6e1eece54c2778a9c, tree

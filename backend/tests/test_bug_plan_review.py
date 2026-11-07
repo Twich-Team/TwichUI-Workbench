@@ -185,3 +185,40 @@ def test_policy_change_after_self_check_cannot_offer_or_start_more_requests(
     item, attempt = run(client, headers, store)
     assert item["status"] == "failed" and not item["proposals"] and len(calls) == 2
     assert attempt["usage"]["requests_observed"] == 2
+
+
+def large_reference(_files):
+    # Controlled source DATA with realistic JSON escaping; no behavior/answer.
+    return [dict(namespace='C_Fixture',requested_functions=['Example'],path='generated/Fixture.lua',
+        source_revision='a'*40,sha256='b'*64,origin='https://example.invalid/public-api',client='fixture',
+        kind='controlled untrusted declaration',excerpts=[dict(line=1,through_line=2,
+            text='-- controlled source declaration\n'+('é'*3900+'x'*3900),coverage='controlled complete declaration')])]
+
+
+@pytest.mark.usefixtures('installed')
+def test_large_bug_packet_reaches_full_dispatcher_and_preserves_review_accounting(client,headers,store,monkeypatch):
+    from workbench import game_api_reference
+    enable_review(monkeypatch)
+    monkeypatch.setattr(game_api_reference,'collect',large_reference)
+    calls=scripted(monkeypatch,[response(),review()])
+    item,attempt=run(client,headers,store)
+    assert len(json.dumps(calls[0]).encode())>24000
+    assert len(json.dumps(calls[0]).encode())<=65536
+    assert item['status']=='completed' and len(calls)==2, item['jobs']
+    assert attempt['usage']['requests_observed']==2
+
+
+@pytest.mark.usefixtures('installed')
+def test_serialized_bug_request_still_holds_at_hard_transport_limit(client,headers,store,monkeypatch):
+    from workbench import game_api_reference
+    enable_review(monkeypatch)
+    def oversized(files):
+        refs=large_reference(files)
+        refs[0]['excerpts'][0]['text']='é'*7800
+        return refs
+    monkeypatch.setattr(game_api_reference,'collect',oversized)
+    calls=scripted(monkeypatch,[response()])
+    item,attempt=run(client,headers,store)
+    assert item['status']=='failed' and not item['proposals'] and len(calls)==1
+    assert item['jobs'][0]['diagnostics']['generation_state']=='not_started'
+    assert attempt['usage'] is None

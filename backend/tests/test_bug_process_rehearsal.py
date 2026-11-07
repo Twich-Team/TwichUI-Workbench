@@ -74,6 +74,9 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     settings=json.loads(preparation.read_text())
     settings['bug_plan_review']='source-grounded-v1'
     write_policy(preparation,settings)
+    from test_bug_plan_review import large_reference
+    from workbench import game_api_reference
+    monkeypatch.setattr(game_api_reference,'collect',large_reference)
     harness=source/'tests/harness.lua'
     harness.write_text(harness.read_text().replace('  return client', """
   local frames={}
@@ -144,6 +147,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         from workbench.bug_plan_review import ReviewResponse
         reviewing=schema is ReviewResponse
         assert reviewing or schema is bug_investigation.BugPlanningResponse
+        assert 24000 < len(json.dumps(packet).encode()) <= 65536
         self.diagnostics = dict(generation_state='not_started')
         conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
         fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
