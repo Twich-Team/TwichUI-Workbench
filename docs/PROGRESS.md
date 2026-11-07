@@ -1,3 +1,19 @@
+# Typed targets, bounded reasoning and event fidelity — November7,19:04 UTC
+
+Task11 settled4 requests1636 generated/13956 prompt, exact result-target errors
+retained; total26 requests9194 generated/94179 prompt. No approval/repair/uncertainty.
+Latest126 rows preserved/model checked. Typed positions/results and explicit one-key
+outcome improve model interface; old complete forms remain strict. Qwen thinking
+1024 inside unchanged2600 total verified supported by installed template/source,
+real behavior still pending. Private reasoning text never retained or treated as plan.
+Frame helper records actual replacement-frame registrations/handlers, preserves
+committed startup and original dispatch, avoids duplicate delivery; no flight data
+or expected fix invented.136 focused/build/34 decoder cases pass; eventful native
+API/worker/browser passes two controlled bugs; actual committed bootstrap isolated
+readiness passes with owned usage log/cgroup cleanup. Full suite progressing. No
+new activation/live request yet. Owner progress check answered honestly: no real
+case complete, no owner decision, continuation under standing authority.
+
 # Verifieda271480 installed; fresh task11 — November7,18:30 UTC
 
 All installed/history/network/isolation/model gates pass. Final1268 backend/25

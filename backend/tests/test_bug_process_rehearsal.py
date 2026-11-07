@@ -52,7 +52,7 @@ def three_observations(client_case):
         for index, step in enumerate(fixture['steps'], 1):
             if step['op']=='call' and step.get('path')==['Deliver']:
                 steps.append(dict(op='set',path=['FixtureName'],value=step['args'][0]))
-                step=dict(step,args=[dict(ref=['FixtureName'])])
+                step=dict(step,path=['FireEvent'],args=['WORKBENCH_FIXTURE_NAME',dict(ref=['FixtureName'])])
             steps.append(step)
             mapping[index]=len(steps)
         fixture['steps']=steps
@@ -68,7 +68,37 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     from project_env import environment
 
     source = enable_bugs(monkeypatch)
-    alert_source = BAD_ALERT + '-- bounded source paging fixture\n'*120
+    harness=source/'tests/harness.lua'
+    harness.write_text(harness.read_text().replace('  return client', """
+  local frames={}
+  client.CreateFrame=function()
+    local f={events={},scripts={}}
+    function f:RegisterEvent(e) self.events[e]=true end
+    function f:SetScript(n,fn) self.scripts[n]=fn end
+    frames[#frames+1]=f
+    return f
+  end
+  client.FireEvent=function(e,...)
+    for _,f in ipairs(frames) do
+      if f.events[e] and f.scripts.OnEvent then f.scripts.OnEvent(f,e,...) end
+    end
+  end
+  return client"""))
+    event_source = """
+CreateFrame=function()
+ local f={scripts={}}
+ function f:RegisterEvent() end
+ function f:UnregisterEvent() end
+ function f:UnregisterAllEvents() end
+ function f:SetScript(n,fn) self.scripts[n]=fn end
+ function f:HookScript() end
+ return f
+end
+local frame=CreateFrame()
+frame:RegisterEvent('WORKBENCH_FIXTURE_NAME')
+frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
+"""
+    alert_source = BAD_ALERT + event_source + '-- bounded source paging fixture\n'*120
     (source / CLIENT_SOURCE).write_text(alert_source)
     git(source, 'add', '.')
     git(source, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid',

@@ -1,304 +1,159 @@
-# Continue autonomous delivery — November 7, 2026
+# Continue autonomous delivery — November7,2026,19:04 UTC
 
-Read the exact authoritative root philosophy, requirements and standing owner
+Read exact root PROJECT_WORKING_PHILOSOPHY.md, requirements and standing owner
 direction, then EXECUTION/PLAN/PROGRESS and DELIVERY_OUTCOME_AUTHORITY_20261107.md.
-Former campaign caps and engineering renewal gates are superseded. Own repairs,
-verification, installation and real completion. Checkpoints are not stops.
-Preserve billing, source, network, task approvals, system access and recovery.
-Root files match owner attachments; REFERENCE_DOCUMENTS.md distinguishes historical
-copies. No document or offline result establishes a completed real task.
+Owner autonomous delivery continues: no campaign clocks/counts/revision/testing
+ceilings or routine engineering renewal. Checkpoints are not stops. Preserve all
+billing/source/network/task-approval/system-access/recovery protections. Root
+references match owner attachments exactly; REFERENCE_DOCUMENTS.md defines authority.
 
-## Current installed operation —18:30 UTC
+## Actual state
 
-Installeda2714806b0bb2874976e04743d579e0a986dac7a, tree
-20f1e8b4ef4ee99a67dafa06d30b4f6830b15d67; stage
+No real flight-path fix or supporting real-provider case complete. Installed app:
+commit a2714806b0bb2874976e04743d579e0a986dac7a, tree
+20f1e8b4ef4ee99a67dafa06d30b4f6830b15d67, stage
 `/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-a271480`, seal
 89842e5de13fb6db64bfb1f02c9b4c45b6799425158e92c918878b79414e5145.
-R=C/outcome-a271480. All installed gates pass: original79/latest122 checked copies,
-both listeners/TLS/LAN/browser/filters/five probes/foreign-peer rejection; same
-normal authenticated model/key, CA/helper/session grant. Four roles active/disabled
-pending success. Original stores/recovery/history/archives preserved.
+All four roles active/disabled pending acceptance; both addresses and all last
+installed history/TLS/browser/filter/isolation/foreign-peer gates passed.
+Original review roles stopped; original store and every recovery copy preserved.
 
-Fresh task11 intake708fc58e-2b10-4486-8bed-7b1839e6fd97 dispatched18:30:07 UTC;
-chat driver13509. At checkpoint investigating, no approved plan/repair or real case
-complete. Watch CURRENT stage artifacts/acceptance/bug-flight-paths.jsonl and
-R/bug-flight-paths-driver.txt/journals. Current DB may change; never overwrite it
-with prior122-row copy. All prior10 tasks settled:22 Qwen requests7558 generated/
-80223 prompt, no implementation/Codex turn/uncertainty before11.
+Private C=`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a`.
+R=C/outcome-a271480. Active outcome-ledger.json imports historical campaign accounting;
+original campaign ledger/clock immutable historical, no active numerical ceiling.
 
-Final1268 backend/25 frontend,124 focused/29 installed decoder cases and actual
-native API/worker/browser two-bug restart/concurrency with refs pass. Independent
-Lua original FAIL/candidate PASS covers table/callback/false/nil/method receiver.
-Browser opt-ins23.2/37.2sec pass for checkpoint workflow. Exact unchanged UI108/
-visual10, routing4/readiness/admin48 evidence reused with bound lineage. All363
-tracked files/root owner docs/nonsecret metadata verified. R/offline-verification.json
-binds every log and reuse. No actual addon source/expected fix supplied by developer;
-no native schema0012 migration or expanded source/write/billing/network permission.
+Task11 intake708fc58e-2b10-4486-8bed-7b1839e6fd97/model attempt
+0056a7fd-e182-4e92-ab89-66692da636ed definitively finished18:31:38 UTC. Driver13509
+exited held2. Four requests: inspection, rejected positional/capture target plan,
+inspection, rejected target plan. Positional paths used strings such as return/1;
+first plan selected captured output without installing capture (retained setup
+ops were table,set,table,set; first call had no preparation). No approval/repair/
+uncertainty.1636 generated/13956 prompt. R/attempt-11-accounting.json and journals.
+All11 tasks26 real Qwen requests9194 generated/94179 prompt; no implementation or
+Codex turn. Task1 historical invalid field UNKNOWN; task6 exact endpoints UNKNOWN.
+Do not pretend later diagnostics recovered those original facts.
 
-Earlier9b/verification-underway states below are historical and superseded.
-
-## Prior installed operation —17:56 UTC
-
-Installed9b0658cf87c8175d5bfc573cc02c82fd91402015, tree
- a487065b7c36afd3fd35d22b6c99e4f72a798184; stage
-`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-9b0658c`, seal
-2c1895e46a7a355997d615b92a024c607f0ac966a9cf9448e73421c0b6ab3150.
-R=C/outcome-9b0658c. All installed gates pass: original79/latest118 copies,
-listeners/TLS/LAN/browser/filter/five probes/foreign-peer rejection, same model/key,
-CA/helper/session grant. Roles active/disabled pending demonstrated success.
-
-Task10 intake210a06ba-9c37-4dee-9e11-54ca330720d8 definitively settled17:57:23 UTC;
-model attempt08cd682a-dc47-463d-aa04-c487822f409a, driver79698 held/exited2. Four
-complete requests: inspection, rejected2-call/3-observation plan, inspection, same
-coverage rejection in new plan. No approved plan/repair/uncertainty.1330 generated/
-13034 prompt; cumulative10 tasks22 real Qwen requests7558 generated/80223 prompt.
-No implementation or Codex turn. Null/null schema worked; exact operation/coverage
-diagnostics now retained. R/attempt-10-accounting.json. Normal model/key checked.
-Latest CURRENT settled DB122 rows/schema0012 SHA
-6308b6c49ffee8eb937c48a5d3645d4e0ad59db4ce15c026558ab3fb94599728.
-Copy this forward, never118/114/older stores; preserve all history and diagnostics.
-
-1247 backend/25 frontend,103 focused, native two-bug actual process/browser and
-19 installed parser cases pass. New wire rejects null/null, private <=6000-byte
-fixture diagnostics preserve operations/known identifiers/scalar types without
-source/prose/secret strings. Existing108 full Chromium/10 visual/two browser opt-ins,
-4 controlled routing/native repair readiness/48 admin proof reused only for unchanged
-UI/HTTP/worker/recipe/runtime/ops behavior. Exact changed3 backend files and every
-log/reuse/failure bind R/offline-verification.json; all362 tracked release files and
-root owner docs match. Initial inline-if test lint failure preserved, corrected
-check passes. No missing expected result or addon answer filled.
-
-## Explicit call checkpoints and source budget —18:11 UTC
-
-New connected implementation replaces generated cross-referenced steps/observations
-with1–4 checkpoints, each explicit before_call actions, existing call and observe
-source/path/results. Stateful reports require3. Compiler flattens only those actions
-and computes each position, never fills behavior/results/scope/approval. Native
-legacy programs and earlier complete explicit-setup programs stay strict/compatible;
-mixed/incomplete/unsafe/oversized selections reject. Original Reproducer/approved
-BugEvidence storage/independent oracle unchanged. Native24-step/task/write/source
-bounds remain. Call/observation coverage/repeated action checks stay authoritative.
-
-Source context now includes bounded literal committed client_access_paths from a
-chosen test prefix; comments/string literals excluded, runtime type unverified.
-Model instructions explain paths start at exact MakeClient environment; source
-local aliases are not exports. No addon repair/reproducer/expected answer supplied
-by development. Read-only source follow-ups carry same literal context.
-
-Wire schemas prune unreachable definitions. Inspection-only schema1202 bytes rather
-than10045, allowing6823 source chars in19706-byte real-shaped packet; subsequent
-plan packet23520 bytes/5170 source chars. Simulated transport only, no provider.
-All24 actual C++ decoder cases pass (planning15/inspection4/client3/stateful2).
-First stateful fixture used different property order; ordered fixture passes,
-initial failure preserved. New private diagnostics handle checkpoints safely and
-remain<=6000 bytes, non-executable/redacted.117 focused checks pass. Native process
-passed before pruning; final native rerun and full backend/frontend/check/browser
-opt-ins underway in C/checkpoints-*-final.log and checkpoints-*-browser.log.
-First full backend received a requested SIGINT during schema refinement, but
-the signal did not interrupt it: the log shows it completed after source changed.
-Do not count that mixed-source run as final; the frozen-code rerun is authoritative. Eight test-only inline-if lint errors fixed, logs
-retained. All other code frozen before final checks. No new candidate deployed or
-live attempt11 yet. Continue ordinary engineering under standing authority.
-
-## Table/callback arguments complete the fixture interface —18:22 UTC
-
-Read-only signature inspection verified Journey.PlanNow takes a request table;
-the scalar-only interface could not call it. New ArgumentReference={ref:[bounded
-client/module field path]} is allowed only in call args. Explicit table/set/capture
-actions prepare inputs/callbacks. No code evaluation, filesystem reference or root
-object reference; empty/extra/malformed/forbidden paths and refs in stubs reject.
-Existing native programs remain valid; schema0012/journal boundaries unchanged.
-Oracle resolves refs with raw bounded field reads, preserving false/nil and exact
-argument count for both methods and functions. Model still supplies every action,
-object field, callback selection and result. Native24 steps/write/source/task limits
-and independent expected/incorrect checks remain. Checkpoint before_call allows12
-explicit actions so request tables can be built; whole program still<=24 steps.
-
-124 focused checks pass, including actual Lua original FAIL/candidate PASS with
-real table/callback/false/nil arguments and method receiver. Native separate-process
-browser rehearsal passes with serialized reference inputs, two checked fixture
-bugs/restart/concurrent polling.29 actual decoder cases pass; initial inspection
-schema1202 bytes permits6823 source chars in20127 bytes; plan packet23815/4767 chars.
-No provider contact for these measurements. Check passes; complete final backend/
-frontend is running C/checkpoints-refs-default-tests.log (1271 collected, expect
-1268 pass/3 opt-ins). App code frozen before this run. Prior checkpoint-only full
-run1261/25 passed before reference support; do not label it final reference proof.
-
-Current installed9b0658c remains protected and settled,122-row store preserved.
-No live attempt11 yet. Save candidate, seal/stage, verify current original/latest
-stores, copy122 forward and activate via supported helper after final gates pass.
-Use C/outcome-9b0658c templates: new evidence_roots49, attempt/revision11, append
-08cd682a-dc47-463d-aa04-c487822f409a to prior IDs. New private record and release
-name must bind final commit/tree. Existing Chromium108/visual10/routing4/readiness/
-admin48 receipts remain valid for unchanged UI/runtime/admin code; fresh focused,
-parser/native/browser opt-ins verify new planning/compiler behavior. Earlier
-checkpoint-only browser opt-ins passed23.2/37.2 sec; reference native passed33.01sec.
-All logs/failures retained. Continue without another engineering allowance.
-
-Earlier988/verification-underway statements below are historical and superseded.
-
-## Prior installed operation —17:43 UTC
-
-Installed9889377c5b353f05342ed78b035db452892a3011, tree
-26829bc10a8a395178525ee12aaf503d4032b5c1; stage
-`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-9889377`, seal
-ccabad5a7d504ded6d8d357fb26da178cabb9daeddb282dce7698ef30248d2dd.
-R=C/outcome-9889377. Original79/latest114 checked copies, both listeners/LAN/TLS,
-browser/filters/five probes/foreign-peer rejection pass; same authenticated model,
-CA and root helper. All roles active/disabled pending success.
-
-Task9 intake8fcf02d6-2075-4b0a-8253-fb964ccbf28e dispatched17:43:04 UTC and
-definitively settled held17:44:27. Model attempt1b90c9c3-dbd6-4667-8f52-93a5d4fe21a0;
-driver1685 exited2. Four complete requests: inspection, rejected plan with identical
-null expected/incorrect observation0, corrected plan with the same null/null error,
-then source inspection. No approval, repair or uncertainty.1454 generated/13397
-prompt; cumulative9 tasks18 requests6228 generated/67189 prompt, no implementation
-or Codex. R/attempt-9-accounting.json and journals preserved. Normal model/key checked.
-Latest settled CURRENT store118 rows/schema0012 SHA
-cb905d88f5aa20906d7a6f0a6a87ff6f3252e92eb2ada76b945cee1d07732319.
-Copy this forward, never the older114/110-row stores.
-Independent review before plan/run approvals still required. Never replay uncertain
-activity. Outcome ledger retains all prior usage, no former campaign gate.
-
-Final verification1240 backend/25 frontend/108 full Chromium/10 visual, all3 backend
-and2 browser opt-ins passed.96 focused checks,15 installed parser cases,11 driver
-guards and pinned-node syntax pass. Offline packet23922/23560 bytes; exact source
-361 tracked files/root docs and nonsecret metadata verified.
-R/offline-verification.json binds reuse and every log/failure disposition; two
-unactivated stages preserved. Full application bytes exercised, final-only operator
-wait/fixture contention corrections separately checked. Desktop/phone screenshots
-inspected. No live real result established by these offline proofs.
-
-## Null comparison and diagnostic revision —17:50 UTC
-
-The next modern schema expresses the already-required null-versus-nonnull result
-constraint through two supported object alternatives. It chooses no result and
-still rejects equal nonnull values locally. New bounded private fixture diagnostic
-records operation/index/known source identifiers, inspected file selections and
-scalar types/null/bools/small numbers; arbitrary strings/unknown identifiers are
-redacted/hashed. Lua comments/string literals and prose are never retained. Missing
-values are distinguished from explicit null; output is explicitly non-executable,
-not approved, <=6000 bytes. Hostile/malformed/list bounds/privacy tests cover it.
-
-103 focused checks, native process/browser rehearsal and installed parser19 cases
-pass. Actual simulated packet23846/23469 bytes with4395/5170 source chars, no provider.
-Full backend/frontend underway in C/non-null-default-tests.log; check rerun fixed
-one test-only inline-if lint error. No new deployment/live request yet. Reuse only
-uninvalidated Chromium/visual/routing/readiness/admin evidence with exact lineage;
-new schema/diagnostics have fresh focused/parser/native checks. Continue to candidate,
-checked118-row history cutover and renewed task10 under standing authority.
-
-Earlier00d78ab/verification-underway statements below are historical and superseded.
-
-## Prior installed and settled state
-
-Installed00d78ab, tree ea67ecaff6649cf1a7f0d0c46dd153b1f7dcacd0, stage
-`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-00d78ab`, seal
-`da83632748181d8251ac5ccc05b3c5d2a4a47ddeaf20e52739da174f4b23d079`.
-Private C=`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a`;
-R=C/outcome-00d78ab. Active outcome-ledger.json imports all historical usage;
-original campaign ledger/clock remain historical. No numerical delivery gate.
-
-Task8 intake d9b9348c-1072-4ccb-8b4e-d07aa3e789a6/model attempt
-c5f87bd7-e2df-4416-990a-6dc83ffb2d77 finished17:20:31 UTC; driver27567 exited2.
-Four complete requests: inspection, explicit setup rejected by observation rule,
-inspection, explicit setup rejected because repeated read_paths omitted a selected
-load. No plan/run approval, repair or uncertain activity.1545 generated/13722 prompt;
-all8 tasks14 real Qwen requests4774 generated/53792 prompt; no implementation or
-Codex turn. R/attempt-8-accounting.json and private journals retain exact evidence.
-Authenticated normal model/key checked after settlement. Task1 historical invalid
-field remains UNKNOWN; task6 exact failed range endpoints remain UNKNOWN.
-
-Latest settled store is CURRENT stage artifacts/workbench.sqlite3,114 rows/schema0012,
-logical SHA f0d93e904b490d222d4897b5fcd59d5dbf390e027fb5d8e6366bde14cab6a5e3.
-Copy it forward, never older110/106/102/98/93 stores. Original review.sqlite3 remains
+Latest settled CURRENT store artifacts/workbench.sqlite3:126 rows/schema0012,
+logical SHA4c5e7f8a1cb0557ccf677095087e265420f9d419be646846362408c7294be588.
+Copy this forward, never prior122/118/etc stores. Original review.sqlite3 remains
 79 rows/schema0012 SHA4b889a9e8ea11f8683b5750934b73ab12a6293e58ccd72433a8c490a06202204.
-All prior stores, stage seals, rollback copies and archives remain preserved.
+Normal authenticated model/key checked after settlement. No live request remains.
 
-## Connected revision being verified
+## Connected revision now being verified
 
-Modern wire now uses other_reads for additional inspected files. Required reads
-are deterministically derived from explicitly chosen setup/action loads, bootstrap
-test, write paths and focused test. No behavior, result, write scope or approval
-is inferred. Native/legacy read_paths stay strict; ambiguous mixed formats,
-uninspected selections and missing setup reject. Read bound12 matches existing
-source-discovery bound; actual addon write/disclosure/150-line limits unchanged.
-Observation rejection identifies exact index/field and static semantic rule,
-instead of one combined error. Controlled tests preserve results and input data,
-readonly support files, legacy strictness and independently reviewed execution.
+Typed result targets separate explicit return_value/client_field/captured_argument
+from numeric position and nested path; results retain provider expected/incorrect
+scalars. Compiler computes only indices/read union, never behavior/results/write
+scope/permission. Strict numeric positions, missing/mixed/unsafe/extra fields reject;
+complete legacy data remains compatible. Single-key draft is an explicit tagged
+union; only absent alternatives become null, never missing plan content. All native
+independent validators,24-step/write/source/approval bounds remain.
 
-96 focused tests and check/build pass. Installed C++ converter/character parser
-passed8 planning/4 inspection/3 non-returning-client cases, without model loading.
-Simulated actual-packet measurement23922/23560 bytes,4981/5780 source chars;
-no provider call. Native API/worker/browser rehearsal passed both fixture repairs across restart with
-concurrent reads. Full suites/remaining opt-ins underway; inspect C/derived-reads-*.log.
-First native launch lacked WORKBENCH_CG_ROOT and failed before worker activity;
-rerun uses supported user delegated transient service. Never claim that failure
-as application proof. Routing rehearsal exposed a temporary SQLite lock killing its
-test worker; normal production worker already retries only busy/locked rolled-back
-transactions. Test now mirrors that tick behavior, preserves nonbusy exceptions and
-never replays its custom implementation. Full failure trace retained. Revised
-source remains uninstalled; no new live request yet. Dormant a9ab5a5 stage/seal is
-retained, superseded before activation by this test-driver-only correction.
+Bug-only Qwen reasoning now requests1024 tokens inside the UNCHANGED2600 total,
+with supported enable_thinking/deepseek separation. Current Qwen3.8 template/server
+metadata and installed parser support controls; R/reasoning-support-preflight.json
+records metadata-only proof. Real reasoning behavior NOT YET VERIFIED. Reasoning
+text never parsed as plan or retained; only presence/budget metadata and aggregate
+usage. Non-bug decoding unchanged. Per-task4 requests/shared300sec/each120sec remain
+explicit operational consent, not delivery caps. Browser planning wait330sec.
 
-## Operating protections and continuation
+Actual test_nav.lua replaces CreateFrame; old FireEvent tracked only original
+frames. New generic bug_frame_events.lua records actual event registrations and
+handlers on replacement table frames, preserves original frames/avoids delegated
+factory double delivery, honors unregister/hooks/nil handlers. Committed startup
+is preserved; supplementation starts after selected setup for explicit task events.
+No handler/event/flight knowledge/expected result is invented. Independent oracle
+hash includes helper. Current known fixture limitation: virtualized factory rawget
+semantics are not general game compatibility; no in-game claim. No SQLite/schema0012
+or journal migration. Native24-step/data/write/disclosure bounds unchanged.
 
-Both http://127.0.0.1:9487/ and https://10.0.0.9:9487/ are live; trusted10.0.0.0/24,
-no client cert/passphrase. Existing CA/remote LAN proof reused only after fresh
-same-topology/TLS/filter gates. Model3300469 authenticated loopback8080; dashboard8765
-preserved. Four everyday roles active but disabled pending acceptance. Helper SHA
+136 focused checks pass; check/build pass. Separate API/worker/normal browser native
+rehearsal passed32.88sec with overridden-frame actual events, refs, two checked
+fixture bugs across restart/concurrent activity.29 earlier reference decoder cases
+and final34 typed/tagged cases pass with installed C++ converter/parser, no model.
+Source packet206? use C/typed-events-namespace-budget.json:20710/23101 bytes,
+6823/3415 source chars; initial schema1035, planning10433 bytes. Simulated only.
+Full final backend/frontend is actively progressing in C/typed-events-default-tests.log.
+No revised code installed/live task12 yet. All app code frozen before this final run.
+
+Generic ACTUAL committed navigation bootstrap readiness passed in isolation,
+C/nav-bootstrap-readiness-v2.json/log: original project archive, exact129-line prefix,
+no addon patch/provider/flight-path behavior. First wrapper omitted mandatory usage
+log and reported error despite rc0; corrected owned log/cgroup run passes, original
+failure retained. Never count this as real task acceptance. Frame unit covers
+original/replaced/delegated factories, registration/unregister/hooks/errors and args.
+
+## Next actions
+
+Finish current suite, inspect existing logs without redundant reruns. Save final
+candidate/inventory/seal and precise verification lineage before activation. Reuse
+uninvalidated108 Chromium/10 visual/routing4/readiness/admin48; new native eventful
+process and focused/parser/Lua checks cover changed compiler/harness. Last two
+browser opt-ins passed23.2/37.2sec on unchanged frontend/HTTP flow. Retain every failure.
+
+Use R/stage.py/common.sh/preflight.sh/install.sh/network.sh/source-proof.py/
+verify-final.py/driver-case.sh/rollback.sh templates. New previous stage a271480,
+new evidence_roots51, attempt/revision12, append0056a7fd-e182-4e92-ab89-66692da636ed
+prior ID. New private R/release name binds exact commit/tree/seal; copy original79
+and latest126 with checked backups. Root files exact owner attachments. Verify
+normal key/model, helper/grant, source and credential metadata, seals, physical
+recovery room; do not rerun historical conditional archives.
+
+Fresh flight-path case first after installed gates, with current outcome authority
+7f10158b0d3eb1ae5314eae423a73562b5ddd331 (standing reference, not exact-candidate
+approval), all actual prior IDs and positive sequence. No former campaign cutoff.
+Never replay uncertain/partial/successful work. Investigate ordinary settled failures
+and renew fresh bindings after meaningful correction, no engineering renewal.
+
+When awaiting-independent-plan-review appears, inspect app-generated program and
+committed sources. Must establish initial route eligibility, learning at first
+flight-master visit, refresh at later visit through actual addon behavior; no direct
+assigned expected state. Then only if valid write current stage artifacts/acceptance/
+bug-plan-review.json <=4096/private binding authority/seal/intake/plan.binding/
+review_digest and exact3 criteria/index/reason rows. Driver uses separate delegated
+browser plan/run decisions. Never developer-write addon patch/reproducer. App must
+prove original failure/candidate behavior/full addon suite and saved reviewable patch.
+Acceptance helper currently expects both true/false expected values; actual PlanNow
+has walkOnly, but do not force a meaningless Boolean or relax criteria to get a pass.
+After real bug, four actual supporting cases codex-once,qwen-once,
+codex-with-local-fallback,qwen-with-codex-fallback; none complete yet. Only pre-generation
+switching, shared accounting/scopes, no replay after any generation.
+
+Success: verify restart/durable history/result and next supported bug discovery
+without registration (controlled two-bug proof is supporting, not second real bug),
+normal model/key restoration, temporary drop-ins/units gone, fallback Off via normal
+UI, both addresses/filters and enable verified roles. Leave separate stable stage
+installed; development checkout stays independent. Unsafe installation/network/data/
+uncertainty: safely settle, close ingress and use R/rollback.sh original app/history/
+firewall/model, retaining newest store/unique diagnostics. Ordinary engineering
+failure does not itself require owner approval or terminate assignment.
+
+## Preserved boundaries
+
+Loopback http://127.0.0.1:9487/; LAN https://10.0.0.9:9487/, enp4s0/10.0.0.0/24,
+gateway10.0.0.1. No client cert/passphrase, full subnet operator trust; HTTPS CA same.
+CA crt at /home/rich/.local/share/TwichUI-Workbench/everyday-install-20261106-tls/
+workbench-home-lan-ca.crt, SHA06:E8:DE:82:AF:EA:0A:86:57:65:70:D1:02:4B:0D:DC:89:D3:8E:9C:9B:03:1F:95:F0:EE:CC:9D:32:E7:71:BD.
+Owner remote page-load00:35:07 UTC reused only after unchanged fresh topology/CA/
+TLS/filter checks. No public/router-forward/model/connector LAN exposure. Preserve8765.
+Normal QwenPID3300469/authenticated loopback8080. Unix connector /run/twichui-workbench-codex/
+connector.sock mode0700, exact worker-cgroup peer; foreign sameUID peer rejected before bytes.
+
+Helper /usr/local/sbin/twichui-workbench-admin SHA
 1fd4a561188560242d5cb5df9bd583d8c922cfa4282e4bd1e46b8dca04bc3afb root-owned755,
-session78 grant expires1794612571. Use only existing validated helper operations.
-No credential contents read; auth/config metadata unchanged since revision3;
-earlier config inode/mtime change cause remains unknown, preserved.
+session78 grant expiry1794612571, boot563fe147-ff3a-479e-ac73-65783aee2249. Fixed
+validated operations only, no self-expansion/general root. Application runs as Rich.
+Codex0.166.0 pinned SHA b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8.
+Auth/config contents never read; metadata unchanged since revision3 restoration.
+Earlier config inode/mtime change cause unknown, preserve unrelated settings.
 
-Finish complete applicable suites, actual API/worker/browser native rehearsal,
-installed parser and relevant opt-ins. Record candidate/inventory/seal before
-activation. Templates in R: stage.py/common.sh/preflight.sh/install.sh/network.sh/
-source-proof.py/verify-final.py/driver-case.sh/rollback.sh. Adapt old-stage references,
-positive attempt/revision sequence, history114 fingerprint and fresh output labels.
-Keep source separate from stable installed release. Copy original79 and latest114
-with checked backups before activation; never rerun old conditional archives.
-New deployment window binds standing authority7f10158b0d3eb1ae5314eae423a73562b5ddd331,
-current seal/commit/boot/model and all actual prior attempt IDs; no campaign expiry.
+Flight-path source stays local Qwen. Codex support disclosure examples/signatures/
+test-lines1–120 only. Existing signed-in included allowance, no API/extra credits/
+purchases/reload/subscription changes. Owner0/reloadOff snapshots not locked facts;
+accepted snapshot/internal-retry limitation remains. Two affirmative preturn reads,
+primary valid below reserve; explicit-null secondary narrow exception, supplied
+secondary validated. No per-turn included lock claim. No PR/push/merge/publication
+or live game-addon installation. Broader product/live Codex bug repair/in-game/
+draft PR/other task types unfinished; styling then audit only after functional gate.
 
-Fresh real flight-path task first. No completed real case exists. Driver awaits
-independent plan review before separate delegated browser plan/run decisions.
-Only if actual generated setup/calls/observations establish initial route eligibility,
-learning at flight-master visit and later refresh, write stage artifacts/acceptance/
-bug-plan-review.json binding authority/seal/intake/plan.binding/review_digest and
-three exact criteria/index/reason rows. Never developer-write addon patch/reproducer
-or assign desired state. App must prove original failure and candidate behavior,
-full addon suite and reviewable saved patch. Then four actual supporting cases:
-codex-once, qwen-once, codex-with-local-fallback, qwen-with-codex-fallback. Keep
-successful evidence; no duplicate successful/partial/uncertain request replay.
-
-Flight-path source stays local Qwen. Codex support disclosure remains examples/
-signatures/test-lines1–120. Signed-in included allowance only, no API/extra credits/
-purchases/reload/subscription change. Owner0 credits/reloadOff are reported snapshots,
-not locked facts. Accepted snapshot/internal-retry limitation remains. Two affirmative
-pre-turn reads, primary valid below reserve; explicit-null secondary narrowly allowed,
-supplied secondary validated. No claim of per-turn included lock.
-
-On success verify restart/durable results, normal next-bug discovery without developer
-registration, model restoration/cleanup, both addresses and enable verified roles.
-Unsafe install/network/data/uncertainty: safely settle, close ingress and use saved
-rollback preserving newest history/evidence. Ordinary settled output rejection:
-repair/test then renew with fresh bindings under standing authority. Do not ask an
-engineering renewal. No PR/push/merge/publication or live-addon installation.
-Broader product, live Codex bug repair, in-game verification, draft PR and other task
-types remain unfinished/unproven. Styling then audit follow functional gate.
-
-Previous detailed lineage is preserved in
-[history/before-derived-reads-20261107-CONTINUATION.md](history/before-derived-reads-20261107-CONTINUATION.md).
-
-## Pre-activation driver reconciliation
-
-Complete backend1240/frontend25/full Chromium108, native process and repair readiness
-passed. Corrected routing rehearsal passed all4 choices. Bug browser opt-in first
-invocation omitted required WORKBENCH_E2E_EVERYDAY fixture flag and failed setup;
-correct invocation with both flags is running, original evidence retained. No live
-call or activation. Driver planning wait/reserve now5.5 minutes for bug investigation
-matching the app's five-minute shared bound plus polling/settlement grace; other
-cases remain2.5 minutes. No task/model/approval/assignment limits changed. Supersedes
-unactivated a9ab5a5/f0c2506 stages; both preserved. Final candidate records follow.
+Earlier detailed lineage preserved in history/before-typed-events-20261107-CONTINUATION.md.

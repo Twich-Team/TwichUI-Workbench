@@ -272,6 +272,12 @@ class LocalProvider:
                     context.get('coverage'), context.get('files')))),
             messages=[dict(role='system', content=general + instructions),
                 dict(role='user', content=encoded)])
+        if schema is BugPlanningResponse:
+            # Installed Qwen template/server support bounded thinking and a
+            # separate reasoning channel. Total generation remains2600, not
+            # an additional token allowance. Never parse/log reasoning as a plan.
+            body.update(reasoning_budget_tokens=1024, reasoning_format='deepseek',
+                        chat_template_kwargs=dict(enable_thinking=True))
         encoded_body = json.dumps(body, separators=(',', ':')).encode()
         if schema is BugPlanningResponse and len(encoded_body) > MAX_INPUT:
             # Fit source context to the actual serialized request, preserving
@@ -370,6 +376,14 @@ class LocalProvider:
             message = choice.get('message')
             if not isinstance(message, dict):
                 raise planning_response.ResponseValidationError('Expected one response message', ['choices', 0, 'message'], 'assistant message object', message)
+            if schema is BugPlanningResponse:
+                self.diagnostics.update(reasoning_budget_requested=1024,
+                    reasoning_channel_present=isinstance(message.get('reasoning_content'), str)
+                    and bool(message['reasoning_content']))
+                if self.response_evidence:
+                    self.response_evidence.record('reasoning-channel',requested_budget=1024,
+                        present=self.diagnostics['reasoning_channel_present'],retained=False,
+                        total_completion_bound=2600)
             if message.get('tool_calls'):
                 raise planning_response.ResponseValidationError('Planning has no tool authority', ['choices', 0, 'message', 'tool_calls'], 'no tool calls', message['tool_calls'])
             value, changes = planning_response.payload(message.get('content'), bug=schema is BugPlanningResponse)

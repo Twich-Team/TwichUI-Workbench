@@ -228,6 +228,9 @@ def compile_plan(evidence):
     if checked.review_digest != review_digest(plan, checked.bootstrap_source):
         raise ValueError('The reviewed reproducer changed')
     body = Path(__file__).with_name('real_checks').joinpath('bug_reproducer.lua').read_text()
+    frame_events = Path(__file__).with_name('real_checks').joinpath('bug_frame_events.lua').read_text()
+    assert body.count('-- WB_FRAME_EVENT_HELPER') == 1
+    body = body.replace('-- WB_FRAME_EVENT_HELPER', frame_events)
     data = plan['reproducer']
     data['bootstrap_source'] = checked.bootstrap_source
     for step in data['steps']:

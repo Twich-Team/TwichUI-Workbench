@@ -1,5 +1,41 @@
 """Compile explicit observed calls, without inventing actions or results."""
 import copy
+from typing import Annotated
+
+from pydantic import Field, StrictInt, TypeAdapter
+from workbench.bug_evidence import Access, Data, Scalar
+
+
+class ResultPosition(Data):
+    number: StrictInt = Field(ge=1, le=512)
+    path: Annotated[Access, Field(max_length=7)]
+
+
+def compile_observation(value, validate, location):
+    from workbench.planning_response import ResponseValidationError
+
+    def reject(path, rule):
+        raise ResponseValidationError('Invalid explicit observation target.',
+            [*location, *path], rule, None)
+    if not isinstance(value, dict) or not ({'at', 'results'} & value.keys()):
+        return value  # Complete older data programs keep their strict validation.
+    if set(value) != {'at', 'results'}:
+        reject([], 'exact at and results fields without conflicting legacy observation fields')
+    at, results = value['at'], value['results']
+    kinds = {'return_value': 'return', 'client_field': 'field', 'captured_argument': 'captured'}
+    if not isinstance(at, dict) or len(at) != 1 or next(iter(at), None) not in kinds:
+        reject(['at'], 'one explicit return_value, client_field or captured_argument target')
+    kind = next(iter(at))
+    if kind == 'client_field':
+        path = validate(TypeAdapter(Annotated[Access, Field(min_length=1)]), at[kind], (*location,'at',kind))
+    else:
+        position = validate(ResultPosition, at[kind], (*location,'at',kind))
+        path = [position.number, *position.path]
+    if not isinstance(results, dict) or set(results) != {'expected', 'incorrect'}:
+        reject(['results'], 'explicit expected and distinct incorrect scalar results')
+    values = {key:validate(TypeAdapter(Scalar), results[key], (*location,'results',key))
+              for key in ('expected','incorrect')}
+    return dict(source=kinds[kind], path=path, **values)
 
 
 def wire_checkpoints(definitions, references, minimum):
@@ -7,7 +43,18 @@ def wire_checkpoints(definitions, references, minimum):
     for branch in result.get('anyOf', [result]):
         branch['properties'].pop('after_step')
         branch['required'].remove('after_step')
-    definitions['CheckpointResult'] = result
+    branches = result.get('anyOf', [result])
+    definitions['CheckpointComparison'] = dict(anyOf=[dict(type='object',additionalProperties=False,
+        properties={key:branch['properties'][key] for key in ('expected','incorrect')},
+        required=['expected','incorrect']) for branch in branches])
+    field_path = copy.deepcopy(branches[0]['properties']['path'])
+    position = ResultPosition.model_json_schema()
+    targets = []
+    for key, value in [('return_value',position),('client_field',field_path),('captured_argument',position)]:
+        targets.append(dict(type='object',additionalProperties=False,properties={key:value},required=[key]))
+    definitions['CheckpointResult'] = dict(type='object',additionalProperties=False,
+        properties=dict(at=dict(anyOf=targets),results={'$ref':'#/$defs/CheckpointComparison'}),
+        required=['at','results'])
     definitions.pop('Observation')  # No flat observation reference remains on the wire.
     definitions['CallCheckpoint'] = dict(type='object', additionalProperties=False,
         properties=dict(before_call=dict(type='array', minItems=0, maxItems=12,
@@ -52,6 +99,7 @@ def compile_checkpoints(reproducer, validate):
         observation = item['observe']
         if not isinstance(observation, dict) or 'after_step' in observation:
             reject([index, 'observe'], 'one result of this call without a separately supplied step index', None)
+        observation = compile_observation(observation, validate, (*location,'observe'))
         checked = validate(Observation, dict(observation, after_step=len(steps)), (*location, 'observe'))
         observations.append(checked.model_dump(mode='json'))
     return steps, observations

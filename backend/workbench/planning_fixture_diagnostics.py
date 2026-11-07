@@ -28,6 +28,16 @@ def fixture_snapshot(value, files, summary):
                 if 'call' in point:
                     fixture['steps'].append(point['call'])
                 observed = point.get('observe')
+                if isinstance(observed, dict) and isinstance(observed.get('at'), dict):
+                    at, values = observed['at'], observed.get('results')
+                    native = {key:values[key] for key in ('expected','incorrect') if isinstance(values,dict) and key in values}
+                    if len(at)==1 and next(iter(at)) in {'return_value','client_field','captured_argument'}:
+                        kind=next(iter(at))
+                        native['source']={'return_value':'return','client_field':'field','captured_argument':'captured'}[kind]
+                        target=at[kind]
+                        native['path']=(target if kind=='client_field' else
+                            [target.get('number'),*target.get('path',[])] if isinstance(target,dict) and isinstance(target.get('path'),list) else None)
+                    observed=native
                 checkpoint_facts['checkpoint_calls'].append(dict(index=index,
                     call_step=len(fixture['steps']), before_call_shape=summary(before),
                     call_present='call' in point, observation_shape=summary(observed)))

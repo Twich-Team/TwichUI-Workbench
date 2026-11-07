@@ -216,7 +216,8 @@ def test_wire_outcomes_are_mutually_exclusive_and_unwrap_without_choosing():
     for selected, variant in zip(
         ("plan", "question", "limitation", "inspection"), schema["$defs"]["BugOutcome"]["anyOf"], strict=True
     ):
-        assert variant["required"] == ["plan", "question", "limitation", "inspection"]
+        assert variant["required"] == [selected]
+        assert set(variant["properties"]) == {selected}
         assert variant["properties"][selected].get("type") != "null"
         assert all(
             v.get("const") is None and v.get("type") == "null"
@@ -494,3 +495,51 @@ def test_inspection_schema_omits_unreachable_programs_and_all_references_resolve
                 walk(child)
     walk(schema)
     assert 'BugPlan' in wire_schema(BugPlanningResponse)['$defs']
+
+
+@pytest.mark.parametrize('content_present',[True,False])
+def test_bounded_bug_reasoning_is_separate_from_plan_and_counted_in_total(tmp_path,content_present):
+    evidence=Evidence(tmp_path,str(uuid4()),BugPlanningResponse)
+    provider=LocalProvider()
+    provider.response_evidence=evidence
+    class Transport:
+        seconds=120
+        def models(self,_):
+            return MODEL
+        def read(self,request,limit):
+            body=json.loads(request.data)
+            assert body['reasoning_budget_tokens']==1024
+            assert body['max_tokens']==2600 and body['reasoning_format']=='deepseek'
+            assert body['chat_template_kwargs']==dict(enable_thinking=True)
+            message=dict(reasoning_content='PRIVATE_REASONING_DO_NOT_STORE',
+                         content=json.dumps(response()) if content_present else None)
+            return json.dumps(dict(id='controlled-reasoning',model=MODEL,
+                usage=dict(prompt_tokens=40,completion_tokens=1100,total_tokens=1140),
+                choices=[dict(finish_reason='stop',message=message)])).encode()
+    if content_present:
+        decoded,_,_=provider._infer(Transport(),'inert',BugPlanningResponse,'{}',expected_model=MODEL)
+        assert decoded==response()
+    else:
+        with pytest.raises(PlanningUnavailable):
+            provider._infer(Transport(),'inert',BugPlanningResponse,'{}',expected_model=MODEL)
+    assert provider.diagnostics['usage']['values']['completion_tokens']==1100
+    assert provider.diagnostics['reasoning_channel_present'] is True
+    raw=evidence.file.read_text()
+    assert 'PRIVATE_REASONING_DO_NOT_STORE' not in raw
+    assert '"retained": false' in raw
+    evidence.close()
+
+
+def test_single_outcome_wire_compiles_only_explicit_selection_and_keeps_content_strict():
+    original=response()
+    wire=dict(finding=original['finding'],draft=dict(plan=original['plan']))
+    decoded,changes=payload(json.dumps(wire),bug=True)
+    assert decoded==dict(original,inspection=None) and changes==['unwrap-single-outcome']
+    for draft in [dict(plan={}),dict(plan=None),dict(plan=original['plan'],question='conflict'),dict(unknown='private')]:
+        decoded,_=payload(json.dumps(dict(finding=original['finding'],draft=draft)),bug=True)
+        with pytest.raises(ValueError):
+            BugPlanningResponse.model_validate(decoded)
+    untouched=dict(finding=original['finding'],plan=original['plan'])
+    decoded,_=payload(json.dumps(untouched),bug=True)
+    with pytest.raises(ValueError):
+        BugPlanningResponse.model_validate(decoded)

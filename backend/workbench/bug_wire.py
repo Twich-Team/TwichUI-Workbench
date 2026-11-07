@@ -57,12 +57,12 @@ def compile_setup(raw, files):
 
     def validate(model, value, location):
         try:
-            return model.model_validate(value)
+            return model.model_validate(value) if hasattr(model, 'model_validate') else model.validate_python(value)
         except ValidationError as error:
             issues = error.errors(include_input=True, include_url=False)
             for issue in issues:
                 issue['loc'] = (*location, *issue['loc'])
-            raise ValidationError.from_exception_data(model.__name__, issues) from None
+            raise ValidationError.from_exception_data(getattr(model, '__name__', 'FixtureField'), issues) from None
 
     if 'fixture' in original or 'bootstrap' in original:
         reject('kind', 'one explicit setup without conflicting legacy setup fields', None)

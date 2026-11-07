@@ -47,11 +47,18 @@ def with_checkpoints(value):
         result = dict(observation)
         after = result.pop('after_step')
         assert after > offset and steps[after-1]['op'] == 'call'
-        checkpoints.append(dict(before_call=steps[offset:after-1],call=steps[after-1],observe=result))
+        checkpoints.append(dict(before_call=steps[offset:after-1],call=steps[after-1],observe=wire_observation(result)))
         offset = after
     assert offset == len(steps)
     reproducer['checkpoints'] = checkpoints
     return value
+
+
+def wire_observation(result):
+    source,path=result['source'],result['path']
+    kind={'return':'return_value','field':'client_field','captured':'captured_argument'}[source]
+    at=path if source=='field' else dict(number=path[0],path=path[1:])
+    return dict(at={kind:at},results={key:result[key] for key in ('expected','incorrect')})
 
 
 @pytest.mark.parametrize('client', [False, True])
@@ -257,7 +264,7 @@ def test_checkpoint_compilation_rejects_missing_ambiguous_or_unsafe_content(faul
     elif fault=='load':
         point['before_call']=[dict(op='load',source=CLIENT_SOURCE)]
     elif fault=='missing_result':
-        point['observe'].pop('expected')
+        point['observe']['results'].pop('expected')
     else:
         point['before_call']=[dict(op='table',path=['ignored'])]*13
     with pytest.raises((ValueError,ResponseValidationError)):
@@ -273,7 +280,7 @@ def test_three_state_checkpoints_have_distinct_call_indices_without_filling_valu
     indexes=[o.after_step for o in result.plan.reproducer.observations]
     assert len(set(indexes))==3
     assert all(result.plan.reproducer.steps[i-1].op=='call' for i in indexes)
-    assert [o.expected for o in result.plan.reproducer.observations]==[o['observe']['expected'] for o in wire['plan']['reproducer']['checkpoints']]
+    assert [o.expected for o in result.plan.reproducer.observations]==[o['observe']['results']['expected'] for o in wire['plan']['reproducer']['checkpoints']]
     schema=wire_schema(BugPlanningResponse,dict(minimum_observations=3))
     r=schema['$defs']['Reproducer']
     assert r['required']==['description','setup','checkpoints']
@@ -343,3 +350,29 @@ def test_argument_references_cannot_broaden_fixture_authority(fault):
         step['op']='stub'
     with pytest.raises(ValueError):
         BugPlanningResponse.model_validate(value)
+
+
+@pytest.mark.parametrize('number',['1',True,0,513])
+def test_result_positions_require_actual_bounded_numbers_with_exact_wire_location(number):
+    from pydantic import ValidationError
+    wire=wire_from_data(response())
+    wire['plan']['reproducer']['checkpoints'][0]['observe']['at']['return_value']['number']=number
+    with pytest.raises(ValidationError) as failed:
+        compile_setup(wire,[dict(path=PRODUCTION),dict(path=TEST)])
+    assert failed.value.errors()[0]['loc']==('plan','reproducer','checkpoints',0,'observe','at','return_value','number')
+
+
+@pytest.mark.parametrize('fault',['mixed_target','unknown_target','legacy_conflict','missing_results'])
+def test_result_targets_never_infer_a_missing_or_ambiguous_selection(fault):
+    wire=wire_from_data(response())
+    o=wire['plan']['reproducer']['checkpoints'][0]['observe']
+    if fault=='mixed_target':
+        o['at']['client_field']=['somewhere']
+    elif fault=='unknown_target':
+        o['at']={'arbitrary':[]}
+    elif fault=='legacy_conflict':
+        o['source']='return'
+    else:
+        o.pop('results')
+    with pytest.raises(ResponseValidationError):
+        compile_setup(wire,[dict(path=PRODUCTION),dict(path=TEST)])

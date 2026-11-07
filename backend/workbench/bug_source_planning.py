@@ -47,7 +47,8 @@ def correction(error, raw):
             # provider-controlled keys/messages never become system instructions.
             known = {'plan', 'reproducer', 'description', 'fixture', 'bootstrap', 'client', 'through_line',
                      'steps', 'observations', 'op', 'path', 'source', 'value', 'args', 'fields', 'method',
-                     'after_step', 'expected', 'incorrect', 'checkpoints', 'before_call', 'call', 'observe'}
+                     'after_step', 'expected', 'incorrect', 'checkpoints', 'before_call', 'call', 'observe',
+                     'at','results','return_value','client_field','captured_argument','number'}
             if any(not (part in known if type(part) is str else type(part) is int and 0 <= part <= 512)
                    for part in location):
                 return None

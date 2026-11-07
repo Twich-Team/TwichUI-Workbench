@@ -76,7 +76,13 @@ def normalize_bug(value, changes=()):
     changes = list(changes)
     if isinstance(value, dict) and set(value) == {'finding', 'draft'}:
         draft = value['draft']
-        if isinstance(draft, dict) and set(draft) in ({'plan', 'question', 'limitation'},
+        fields = ('plan','question','limitation','inspection')
+        if isinstance(draft, dict) and len(draft)==1 and set(draft) <= set(fields):
+            # An explicit single-key outcome is a tagged union, not missing
+            # plan data. Only absent alternatives become null.
+            value = dict(finding=value['finding'], **{key:draft.get(key) for key in fields})
+            changes.append('unwrap-single-outcome')
+        elif isinstance(draft, dict) and set(draft) in ({'plan', 'question', 'limitation'},
                                                     {'plan', 'question', 'limitation', 'inspection'}):
             value = dict(finding=value['finding'], **draft)
             changes.append('unwrap-outcome-draft')
@@ -155,12 +161,9 @@ def wire_schema(model, coverage=None, files=None):
     fields = ('plan', 'question', 'limitation', 'inspection')
     selected_fields = ('inspection',) if isinstance(coverage, dict) and coverage.get('require_inspection') else fields
     for selected in selected_fields:
-        choice = {}
-        for field in fields:
-            choice[field] = (next(v for v in props[field]['anyOf'] if v.get('type') != 'null')
-                             if field == selected else {'type': 'null', 'const': None})
+        choice = {selected:next(v for v in props[selected]['anyOf'] if v.get('type') != 'null')}
         outcomes.append(dict(type='object', properties=choice,
-                             required=list(fields), additionalProperties=False))
+                             required=[selected], additionalProperties=False))
     result['$defs']['BugOutcome'] = {'anyOf': outcomes}
     if isinstance(files, list):
         selected = [item['path'] for item in files if isinstance(item, dict) and isinstance(item.get('path'), str)]
@@ -250,7 +253,8 @@ class Evidence:
         self.schema_hash = sha(json.dumps(self.schema, sort_keys=True).encode())
         self.keys = {'choices', 'message', 'content', 'model', 'usage', 'id', 'tool_calls',
                      'finish_reason', 'prompt_tokens', 'completion_tokens', 'total_tokens',
-                     'checkpoints', 'before_call', 'call', 'observe', 'other_reads', 'setup'}
+                     'checkpoints', 'before_call', 'call', 'observe', 'other_reads', 'setup',
+                     'at','results','return_value','client_field','captured_argument','number'}
         self.enums, self.patterns = set(), set()
         def collect(node):
             if isinstance(node, dict):

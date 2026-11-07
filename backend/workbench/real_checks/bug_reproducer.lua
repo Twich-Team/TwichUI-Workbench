@@ -13,6 +13,7 @@ end
 local function values(...)
   return {n=select('#', ...), ...}
 end
+-- WB_FRAME_EVENT_HELPER
 local function get(root, path)
   for _, key in ipairs(path) do
     if type(root) ~= 'table' then error('missing observation') end
@@ -85,7 +86,19 @@ local function exercise()
     loaded[chunk] = true
     return chunk
   end
-  env.dofile = function(path) return env.loadfile(path)() end
+  local wrapped_makers = {}
+  local function instrument_factory()
+    local make = rawget(env, 'MakeClient')
+    if type(make) ~= 'function' or wrapped_makers[make] then return end
+    local wrapped = function(...) return instrument_client_events(make(...)) end
+    wrapped_makers[wrapped] = true
+    env.MakeClient = wrapped
+  end
+  env.dofile = function(path)
+    local returned = values(env.loadfile(path)())
+    instrument_factory()
+    return unpack(returned, 1, returned.n)
+  end
   env.setfenv = function(chunk, scope)
     assert(type(chunk) == 'function' and loaded[chunk] and type(scope) == 'table',
       'only isolated harness chunks can receive a fixture environment')
@@ -109,8 +122,10 @@ local function exercise()
       assert(type(root) == 'table', 'expected a client from the committed setup')
     else
       load(TESTS .. 'harness.lua', env)()
+      instrument_factory()
       root = env.MakeClient('Workbench', {'!!!TwichUI', 'TwichUI_Settings'})
     end
+    activate_client_events(root)
   end
   local function observe(item)
     if item.source == 'field' then return get(root, item.path) end
