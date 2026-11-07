@@ -219,7 +219,8 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     assert 'PRIVATE_REJECTED_CONTENT' not in evidence.read_text()
     with store.connect() as c:
         payload = c.execute(select(planning_jobs.c.payload).join(intakes).where(
-            intakes.c.payload['title'].as_string() == cases[1]['request']['title'])).scalar_one()
+            intakes.c.payload['title'].as_string() == cases[1]['request']['title'],
+            planning_jobs.c.kind == 'planning')).scalar_one()
     [page] = payload['bug_inspection_packet']['inspection_windows']
     assert page['through_line'] == 80 and page['next_line'] == 81
     assert page['requested_through_line'] == 9999 and page['coverage'] == 'partial requested committed lines'
