@@ -163,6 +163,22 @@ def wire_schema(model, coverage=None, files=None):
             for variant in alternatives:
                 if variant['properties']['op']['const'] == 'load':
                     variant['properties']['source'] = {'type': 'string', 'enum': sources}
+    # A generated plan must explicitly select its executable fixture setup.
+    # Optional bootstrap/implicit loads repeatedly produced unusable proposals.
+    from workbench.bug_wire import setup_schema
+    references = []
+    for index, variant in enumerate(alternatives):
+        name = f'FixtureStep{index}'
+        result['$defs'][name] = variant
+        references.append((variant['properties']['op']['const'], {'$ref': '#/$defs/'+name}))
+    result['$defs']['Step'] = {'anyOf': [ref for _, ref in references]}
+    reproducer = result['$defs']['Reproducer']
+    reproducer['properties'].pop('fixture')
+    reproducer['properties'].pop('bootstrap')
+    reproducer['properties']['setup'] = setup_schema(files, references)
+    reproducer['properties'] = {key: reproducer['properties'][key]
+                                for key in ('description', 'setup', 'steps', 'observations')}
+    reproducer['required'] = ['description', 'setup', 'steps', 'observations']
     result['properties'] = {'finding': props['finding'], 'draft': {'$ref': '#/$defs/BugOutcome'}}
     result['required'] = ['finding', 'draft']
     def compact(node):
@@ -201,6 +217,7 @@ class Evidence:
                 for v in node:
                     collect(v)
         collect(self.schema)
+        collect(model.model_json_schema())  # Names in the compiled data program are safe too.
         self.identifier = str(UUID(attempt))
         base = owned(root)
         for name in ('artifacts', 'runs'):

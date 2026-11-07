@@ -58,13 +58,14 @@ class Observation(Data):
 class ClientBootstrap(Data):
     through_line: int = Field(ge=1, le=200)
     client: Annotated[str, Field(pattern=r'^[A-Za-z_][A-Za-z0-9_]{0,39}$')]
+    test_path: TestPath | None = None
 
 
 class Reproducer(Data):
     description: Short
     fixture: Literal['module', 'client']
     bootstrap: ClientBootstrap | None = None
-    steps: Annotated[list[Step], Field(min_length=2, max_length=24)]
+    steps: Annotated[list[Step], Field(min_length=1, max_length=24)]
     observations: Annotated[list[Observation], Field(min_length=1, max_length=4)]
 
     @model_validator(mode='after')
@@ -178,7 +179,7 @@ def committed_bootstrap(root, base, plan):
         return ''
     from workbench import regression_preparation as source
 
-    path = plan['focused_test']
+    path = spec.get('test_path') or plan['focused_test']
     lines = source.git(root, 'show', f'{base}:{path}').decode().splitlines(keepends=True)
     if spec['through_line'] > len(lines):
         raise ValueError('The reviewed client setup exceeds the committed test.')

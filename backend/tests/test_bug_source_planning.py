@@ -228,6 +228,37 @@ def test_read_endpoint_diagnostics_preserve_safe_values_and_schema_branch_names(
 
 
 @pytest.mark.usefixtures('installed')
+def test_explicit_bootstrap_from_another_discovered_test_reaches_a_bound_proposal(
+    client, headers, store, monkeypatch,
+):
+    from test_bug_wire import wire_from_data
+    from test_bug_workflow import CLIENT_SOURCE, CLIENT_TEST
+
+    root = enable_bugs(monkeypatch)
+    focused = 'tests/test_alert_history.lua'
+    (root/focused).write_text('dofile(TESTS .. "test_alerts.lua")\n')
+    git(root,'add','.')
+    git(root,'-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Existing alert-history regression')
+    value = response(True, bootstrap=True)
+    value['plan'].update(focused_test=focused, read_paths=[CLIENT_SOURCE,CLIENT_TEST,focused],
+                         writable_paths=[CLIENT_SOURCE,focused])
+    wire = wire_from_data(value)
+    wire['plan']['reproducer']['setup']['test_path'] = CLIENT_TEST
+    calls = scripted(monkeypatch,[wire])
+    request = report(True)
+    request['title'] = 'Wrong name in the online alert history'
+    identity = client.post('/api/intake',headers=headers,json=request).json()['id']
+    assert worker.tick(store)
+    item = client.get('/api/intake/'+identity).json()
+    assert item['status'] == 'completed', item['jobs']
+    evidence = item['proposals'][0]['task_contract']['bug_evidence']
+    assert evidence['plan']['focused_test'] == focused
+    assert evidence['plan']['reproducer']['bootstrap']['test_path'] == CLIENT_TEST
+    assert evidence['bootstrap_source'].endswith('return c\n')
+    assert len(calls) == 1 and not item['tasks'] and not item['decisions']
+
+
+@pytest.mark.usefixtures('installed')
 def test_source_followup_has_one_claim_two_accounted_requests_and_private_receipts(
     client, headers, store, monkeypatch,
 ):

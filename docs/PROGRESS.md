@@ -6252,3 +6252,18 @@ reuse and failures/traces recorded privately; no product assertion weakened.
 Fresh intake606011c2-68b7-4052-adbf-4f42878a2d40 investigating under v3 four-request/
 five-minute shared consent, each transport120s. No real repair/provider case complete.
 Continue independently under standing authority, preserving all accounting/history.
+
+## November7,17:04 UTC — explicit setup selection after settled task7
+
+Task7 finished4 requests,1208gen/15289prompt; two missing-load/bootstrap plans
+rejected, no approval/repair/uncertainty. Total10requests3229gen/40070prompt, latest
+store110rows retained, normal authenticated model verified. Implemented explicit
+wire setup selection and deterministic compiler into existing data-only program;
+no missing behavior/expected values/scope/permission filled. Different inspected
+committed setup test supported with exact source binding; unsafe/ambiguous/unknown
+choices reject. Follow-up tests expose bootstrap metadata. Compile-only return
+facts prevent non-returning source offered as module; exact namespace preludes
+retained.85 focused+14 final targeted passed; installed parser verified explicit
+setup/phase/client restrictions offline. Real packet sizes23742/23380 bytes with
+4981/5780 source chars, fake transport/no provider calls. Native fixture now uses
+modern wire setup. Continue full tests, seal/history-forward revision and fresh8.

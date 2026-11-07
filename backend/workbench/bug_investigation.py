@@ -30,17 +30,19 @@ INSTRUCTIONS = (
     'after using available inspection to establish that boundary. Offline API stubs are permitted and do not claim in-game verification. '
     'For a plan, use existing selected files, at least one writable addon source and a focused existing test. '
     'Describe the symptom, expected outcome and bounded repair. Build one data-only reproducer from the observed code. '
-    'For fixture=module, first load a source that returns a function/table. For fixture=client, use the repository '
-    'MakeClient harness and ordered loads sharing an addon namespace. Use the committed load_order and '
-    'support_only sources if the selected modules depend on them. Support-only files cannot be edited. '
-    'Prefer a supplied client_bootstrap from a focused test when it already loads the relevant modules. '
-    'Use its through_line and client in reproducer.bootstrap. This setup runs before the first step. '
+    'Every reproducer must explicitly select setup. Choose kind=module and one source returning a function/table; '
+    'kind=client-loads with ordered sources and a before_load list of table/set/stub/capture preparation; or '
+    'kind=client-bootstrap with the exact test_path/client/through_line of a supplied client_bootstrap. '
+    'Prefer a committed client bootstrap that already loads the relevant modules. It may be a different test from focused_test; '
+    'include both tests in read_paths. Support-only sources can be loaded but cannot be edited. '
+    'Setup runs before all listed steps. Do not repeat legacy fixture/bootstrap fields in a wire proposal. '
     'Steps can create tables, set scalar fields, '
     'stub an API or capture one call, or call an existing function (use method=true for colon calls). '
     'A stub/capture returns args as positional values or one table from fields. Paths are arrays of field names or '
     '1-based indexes. A call with empty path invokes the returned module function. For return/captured observation, '
     'path starts with the return/argument number. For field observation, use the client/module path. '
-    'Number steps from 1. Observe important intermediate and final results for stateful reports. '
+    'Number listed action steps from 1, excluding setup; the compiler preserves that meaning when adding explicit loads. '
+    'Observe important intermediate and final results for stateful reports. '
     'For stateful reports observe initial behavior and each relevant event, including a repeated event when refresh is requested. '
     'Drive the existing code: do not directly assign the expected result or the state the event is supposed to compute. '
     'Use null for unused plan/question/limitation alternatives. Stub/capture fields and args are mutually exclusive. '
@@ -58,7 +60,7 @@ INSTRUCTIONS = (
     'When coverage.require_inspection is true, this is a read-only source discovery turn: return inspection only. '
     'A validation_feedback entry means a completed proposal was rejected locally, never approved or executed. '
     'Correct the stated constraint using the inspected code, or inspect missing source; do not remove checks or invent results. '
-    'Every reproducer must load its relevant existing source or select the exact supplied client_bootstrap. '
+    'Previous rejected candidates may use the compiled data form; select setup explicitly in a new proposal. '
     'Observation expected/incorrect values are actual scalar results at the selected path, not sentences explaining desired behavior. '
     'For each observation give the expected and a distinct behavior-relevant incorrect scalar; no invented game evidence.'
 )
@@ -275,6 +277,8 @@ def planning_request(packet, original, feedback):
 
 
 def resolve(raw, packet, original, feedback):
+    from workbench.bug_wire import compile_setup
+    raw, _ = compile_setup(raw, packet['files'])
     draft = BugPlanningResponse.model_validate(raw)
     if draft.inspection:
         raise ResponseValidationError('Read-only source inspection must finish before a repair proposal.',
@@ -296,12 +300,15 @@ def resolve(raw, packet, original, feedback):
                     ['plan', 'reproducer', 'steps'], 'repeat a relevant existing action', steps)
         by_path = {item['path']: item for item in packet['files']}
         loads = {step.source for step in plan.reproducer.steps if step.op == 'load'}
+        bootstrap_path = (plan.reproducer.bootstrap.test_path or plan.focused_test) if plan.reproducer.bootstrap else None
         requirements = [
             (len(set(plan.read_paths)) == len(plan.read_paths), ['plan', 'read_paths'], 'unique paths', plan.read_paths),
             (len(set(plan.writable_paths)) == len(plan.writable_paths), ['plan', 'writable_paths'], 'unique paths', plan.writable_paths),
             (set(plan.read_paths) <= by_path.keys(), ['plan', 'read_paths'], 'only inspected committed paths', plan.read_paths),
             ((loads | set(plan.writable_paths) | {plan.focused_test}) <= set(plan.read_paths),
              ['plan', 'read_paths'], 'include every load, writable path and focused test', plan.read_paths),
+            (bootstrap_path is None or bootstrap_path in plan.read_paths,
+             ['plan', 'read_paths'], 'include the explicitly selected committed bootstrap test', plan.read_paths),
             (all(path in by_path and not by_path[path].get('support_only') for path in plan.writable_paths),
              ['plan', 'writable_paths'], 'inspected writable files, excluding support-only files', plan.writable_paths),
             (any(SOURCE_PATH.fullmatch(path) for path in plan.writable_paths),
@@ -332,7 +339,7 @@ def resolve(raw, packet, original, feedback):
         proposed = plan.model_dump(mode='json')
         bootstrap_source = committed_bootstrap(root, base, proposed)
         if plan.reproducer.bootstrap:
-            if (plan.reproducer.bootstrap.model_dump() != by_path[plan.focused_test].get('client_bootstrap')
+            if (plan.reproducer.bootstrap.model_dump(exclude={'test_path'}) != by_path[bootstrap_path].get('client_bootstrap')
                     or not any(path.removeprefix('!!!TwichUI/') in bootstrap_source
                                for path in paths if SOURCE_PATH.fullmatch(path))):
                 raise ResponseValidationError('The proposed existing client setup is outside the discovered fixture.',

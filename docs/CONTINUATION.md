@@ -9,6 +9,47 @@ active from historical copies. Former campaign clocks/counts/revisions/cumulativ
 local-testing limits and renewal gates are superseded. Checkpoints are not stops.
 Own ordinary repairs through the demonstrated outcome; no engineering renewal needed.
 
+## Latest settled state and next revision —17:04 UTC
+
+Attempt7 definitively finished four requests: inspection→rejected plan→inspection→
+rejected plan. Both plans omitted loads/bootstrap despite validation feedback.
+No plan/run approval, repair or uncertainty. Model attempt8d04ce3c-8919-491d-aa39-29231622fc7e,
+intake606011c2-68b7-4052-adbf-4f42878a2d40; driver95216 exited held. Used1208 generated/
+15289 prompt tokens. Total10 real Qwen requests across7 tasks:3229 generated/40070
+prompt, no implementation/Codex turn. `outcome-183702c/attempt-7-accounting.json`
+preserves exact disposition. Latest settled installed store110 rows/schema0012,
+logical SHA `4dd7fd1f89ef4c51369feb561c96f25c0e8f10b0fc60e729e89c128c8cf7a21b`.
+Keep this store forward, not prior106/102/98/93 copies. Authenticated normal model
+verified after settlement; installed183702c remains protected and all evidence retained.
+
+Connected development replaces optional fixture setup in real structured output
+with mandatory explicit selection: exact committed bootstrap (including its source
+test), or explicit module/client source loads and bounded preparation. New
+bug_wire.py compiles only that selection into the existing data program and shifts
+observation indexes by the explicitly selected preparation steps. It never fills
+behavior, results, read/write scope or approval. Missing/ambiguous/unavailable/unsafe
+selections reject. A bootstrap can come from a different discovered test, must be
+in read_paths, match exact committed metadata and load relevant writable code.
+Legacy complete data programs remain compatible; missing setup remains invalid.
+Source follow-ups also expose discovered bootstrap metadata. Compile-only main-
+chunk return facts omit non-returning chunks from module choices; module preludes
+preserve namespace declarations. Actual callable type still requires checks.
+
+85 focused checks plus final14 targeted setup/discovery checks passed. Installed
+converter/character-level parser passed modern explicit setups, missing/invalid
+choices, inspection-only and non-returning-client restrictions without model loading.
+First grammar probe used different JSON property order; ordered fixtures passed;
+original logs retained. Offline real-packet measurement:23521/23507 bytes before
+namespace additions; latest23742/23380 bytes,4981/5780 source chars,2 valid setup
+choices; fake transport only, no provider contact. Generated contracts unchanged.
+Native process fixture now returns the actual modern setup wire format after
+inspection/rejection, preserving plan/run/checked result workflow. Run full final
+suites/native opt-ins, seal and deploy connected revision, copy latest110-row
+history, then fresh task8 under standing authority. No owner renewal needed.
+
+All older investigating/106-row statements below are historical and superseded by
+this settled state. No real flight-path fix or real provider case is complete.
+
 ## Prior settlement and installed correction
 
 Attempt6 finished185 generated/3,895 prompt and was rejected in the third source

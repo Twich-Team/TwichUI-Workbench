@@ -193,7 +193,8 @@ def test_private_evidence_is_bounded_and_cannot_reuse_a_symlink(tmp_path):
 
 
 def test_wire_schema_enforces_load_and_call_shapes_without_changing_local_authority():
-    variants = wire_schema(BugPlanningResponse)["$defs"]["Step"]["anyOf"]
+    schema = wire_schema(BugPlanningResponse)
+    variants = [schema['$defs'][ref['$ref'].split('/')[-1]] for ref in schema["$defs"]["Step"]["anyOf"]]
     by_op = {v["properties"]["op"]["const"]: v for v in variants}
     assert by_op["load"]["required"] == ["op", "source"]
     assert by_op["load"]["properties"]["source"]["type"] == "string"

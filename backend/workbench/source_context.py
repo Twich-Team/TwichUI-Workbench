@@ -14,21 +14,28 @@ def without_comments(text):
 
 
 @lru_cache(maxsize=64)
-def function_ranges(raw):
+def compiled_shape(raw):
     # luac parses/compiles only (-p): no libraries, source execution or output
     # chunk. Input and time are bounded. Disassembly is private and discarded.
     if len(raw) > 131072 or raw.startswith(b'\x1b'):
-        return ()
+        return (), None
     try:
         run = subprocess.run(['/usr/bin/luac5.1', '-p', '-l', '-'], input=raw,
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=2,
             env={'PATH': '/usr/bin:/bin', 'LANG': 'C'})
     except (OSError, subprocess.TimeoutExpired):
-        return ()
+        return (), None
     if run.returncode or len(run.stdout) > 8 << 20:
-        return ()
-    return tuple((int(a), int(b)) for a, b in re.findall(
+        return (), None
+    ranges = tuple((int(a), int(b)) for a, b in re.findall(
         rb'^function <stdin:(\d+),(\d+)>', run.stdout, re.M))
+    main = run.stdout.split(b'\nfunction <stdin:', 1)[0]
+    returns = any(int(count) != 1 for count in re.findall(rb'\bRETURN\s+\d+\s+(\d+)\b', main))
+    return ranges, returns
+
+
+def function_ranges(raw):
+    return compiled_shape(raw)[0]
 
 
 def excerpts(files, inspected, terms, words):
@@ -49,6 +56,8 @@ def excerpts(files, inspected, terms, words):
         _, raw, lines = inspected[path]
         code = without_comments('\n'.join(lines)).splitlines()
         spans = function_ranges(raw)
+        if path.startswith(('!!!TwichUI/', 'TwichUI_Settings/')):
+            item['top_level_returns_value'] = compiled_shape(raw)[1]
         rows = []
         for start, end in spans:
             if not 1 <= start <= end <= len(lines):
@@ -108,6 +117,10 @@ def excerpts(files, inspected, terms, words):
             budget -= len(chosen[-1]['text'])
 
         setup = item.get('client_bootstrap')
+        if path.startswith(('!!!TwichUI/', 'TwichUI_Settings/')):
+            first = next((i for i, line in enumerate(without_comments('\n'.join(lines)).splitlines(), 1)
+                          if line.strip()), 1)
+            add(first, min(len(lines), first+12), 'module prelude', min(500, budget//3))
         if setup:
             end = setup['through_line']
             # The exact committed full prefix remains independently compiled by

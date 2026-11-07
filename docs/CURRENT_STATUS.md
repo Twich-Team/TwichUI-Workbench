@@ -1,21 +1,19 @@
-# Workbench status — November7,2026,16:28 UTC
+# Workbench status — November7,2026,17:04 UTC
 
-Owner reference files are installed verbatim and active guidance/controls follow
-standing autonomous delivery. Former campaign caps are superseded; accounting,
-recovery and meaningful billing/source/network/approval safeguards remain.
+Exact owner references and standing authority remain active; old campaign caps
+are superseded without losing usage, evidence, recovery or meaningful safeguards.
 
-Candidate183702c is installed. Original79/latest106-row history copies, loopback/
-LAN HTTPS, browser guards and isolation all passed. Same model/helper/grant/CA.
-1,215 backend/25 frontend,108 applicable browser cases,10 visual and all opt-ins
-are verified with explicit reuse. One full-run screenshot race was fixed and its
-affected test passed; other107 cases were unchanged. Unique evidence retained.
+Installed183702c is protected/available on approved loopback and LAN HTTPS. Latest
+history110 rows. Real task7 settled after source reads and two rejected missing-
+setup plans; no repair or uncertainty. Total10 requests:3229 generated/40070 prompt,
+no implementation/Codex turn. No real flight-path/provider case is complete.
 
-Real attempt7 is investigating in the normal app with bounded source paging and
-fresh v3 consent: four requests shared over five minutes, each request120s.
-No real flight-path repair or supporting provider case is complete yet. Six prior
-requests settled:2,021 generated/24,781 prompt; no implementation/Codex/uncertainty.
-Continue independent plan review, approved real repair/checks, provider cases and
-durable restart/usable-app proof. No owner engineering renewal needed.
+Development now requires explicit fixture setup in structured output, compiles only
+that selection into data-only checks, allows exact committed setup from another
+inspected test and exposes namespace/compile-return facts.85 focused plus14 final
+targeted checks and installed parser proof passed without live provider contact.
+Full/process/browser verification precedes connected revision and fresh task8.
 
-Broader initial product, in-game verification, live Codex bug repair and draft PR
-remain unfinished/unproven. Styling and audit have not begun. See [handoff](CONTINUATION.md).
+Delivery continues; no owner engineering renewal needed. Source/billing/network/
+publication safeguards remain. Broader product, live Codex bug repair, game checks
+and PR delivery are unfinished; styling/audit have not begun. See [handoff](CONTINUATION.md).

@@ -83,8 +83,17 @@ def committed(path, base):
             or fields[1] != 'blob' or int(fields[3]) > 131072):
         raise ValueError('The requested committed source is unavailable.')
     raw = source.blob(root, fields[2])
-    return raw, dict(path=path, git_blob=fields[2], sha256=hashlib.sha256(raw).hexdigest(),
-                     file_lines=len(raw.decode().splitlines()), support_only=True, excerpts=[])
+    lines = raw.decode().splitlines()
+    item = dict(path=path, git_blob=fields[2], sha256=hashlib.sha256(raw).hexdigest(),
+                file_lines=len(lines), support_only=True, excerpts=[])
+    if path.startswith('tests/test_'):
+        setup = bug.client_bootstrap(lines)
+        if setup:
+            item['client_bootstrap'] = setup
+    elif path.startswith(('!!!TwichUI/', 'TwichUI_Settings/')):
+        from workbench.source_context import compiled_shape
+        item['top_level_returns_value'] = compiled_shape(raw)[1]
+    return raw, item
 
 
 def search(base, query):
@@ -314,6 +323,10 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model):
             if not response_added:
                 raise PlanningUnavailable('Source investigation usage is unavailable.', 'accounting')
             try:
+                from workbench.bug_wire import compile_setup
+                raw, setup_fact = compile_setup(raw, packet['files'])
+                if setup_fact and evidence:
+                    evidence.record('explicit-setup-compiled', **setup_fact)
                 draft = BugPlanningResponse.model_validate(raw)
                 if wire['coverage'].get('require_inspection') and draft.inspection is None:
                     raise ResponseValidationError('Stateful investigation must inspect committed source before a plan.',

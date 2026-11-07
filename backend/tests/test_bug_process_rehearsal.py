@@ -23,6 +23,7 @@ from test_bug_workflow import (
     BAD_ALERT, GOOD_ALERT, CLIENT_SOURCE, enable_bugs, report, response,
 )
 from test_everyday import installed  # noqa: F401
+from test_bug_wire import wire_from_data
 from test_verification_profiles import BUGGY, CORRECT, PRODUCTION, git
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -112,6 +113,8 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
                 if step['op'] == 'load':
                     step.clear()
                     step.update(op='table', path=['unused'])
+        elif not fault:
+            answer = wire_from_data(answer)
         class Transport:
             seconds = 120
             def models(self, _): return expected_model
