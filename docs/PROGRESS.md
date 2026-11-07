@@ -1,3 +1,35 @@
+# Verifiedbda668f installed; task15 active — November7,20:49 UTC
+
+Installedbda668f0f81a88f3b80d9efb4ad98bc7f3f6000d, tree
+2fc8af0ebd7deb7b541be18f5f5e8d29aad1922f,
+stage /home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-bda668f,
+seal3707541934297f5017cc2e610ad0e1e2a5d841e095ab681d0bdf1fe8fd183ce1.
+R=C/outcome-bda668f.4546 files/16links/556582864 logicalbytes,371 tracked source
+files/root owner docs exact, pinnedCLI/auth-config metadata unchanged. Full1318
+backend/25 frontend,152 focused/build/40 installed C++ grammar cases, final actual
+native API/worker/normal browser/restart/concurrency33.50sec pass. Exact unchanged
+108 Chromium/10 visual/2 browser opt-ins/routing/readiness/bootstrap/event/admin48
+reuse bound in R/offline-verification.json; no applicable check omitted.
+
+Installed ALL17 history list/detail HTTP200 with raw139-row content/old proposal
+preserved. Original79/latest139 checked copies match, all strict normal both-listener/
+TLS/LAN/browser/filter/five isolation probes/foreign connector peer gates pass. No
+historical500 override used. Model/key/helper/CA/source unchanged;4roles active/
+disabled pending final acceptance. Explicit outputs preserve native nested fields,
+no new interpreter/expected game behavior. New-scope checks preserve old history;
+static operator denials structured/tested. All14 prior tasks39 Qwen requests25085
+generated/170996 prompt preserved; task14 generated plan independently rejected,
+no prior approval/repair/Codex/uncertainty. Never approve/replay its invalid plan.
+
+Fresh task15 dispatched20:48:28, intakec0ad4265-69f7-4496-bb89-5a81c1d0329c,
+driver82092, fresh8-call600sec consent. CURRENT live DB changes, do not overwrite
+with historical139. Read current stage artifacts/acceptance/bug-flight-paths.jsonl
+and R/bug-flight-paths-driver.txt/journals. No real repair/provider case complete.
+When awaiting-independent-plan-review appears, follow exact review instructions
+below; do not supply addon patch/reproducer. Continue actual bug then provider
+cases/durable restart/normal next supported bug under standing authority, no renewed
+engineering allowance. Older source-unactivated/task14-active statements historical.
+
 # Task14 settled; explicit stub outputs under final verification — November7,20:42 UTC
 
 No real fix/provider case complete. Installed5442405 remains protected/idle and
