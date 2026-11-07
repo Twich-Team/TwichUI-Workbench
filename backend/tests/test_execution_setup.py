@@ -69,7 +69,7 @@ def test_ready_requires_real_desktop_and_phone_artifacts(tmp_path):
 
 
 def test_timeout_stops_a_process_without_retry_and_writes_safe_metadata(tmp_path, monkeypatch):
-    monkeypatch.setattr(milestone, 'artifact_bytes', lambda: 0)
+    monkeypatch.setattr(milestone, 'physical_headroom', lambda: 8 * 2**30)
     log = tmp_path / 'events.json'
     status, code = milestone.execute_bounded(
         [sys.executable, '-c', 'import time; time.sleep(30)'], {}, time.monotonic() + .15, log)
@@ -78,7 +78,7 @@ def test_timeout_stops_a_process_without_retry_and_writes_safe_metadata(tmp_path
 
 
 def test_logs_do_not_retain_tool_text_secrets_or_stderr(tmp_path, monkeypatch):
-    monkeypatch.setattr(milestone, 'artifact_bytes', lambda: 0)
+    monkeypatch.setattr(milestone, 'physical_headroom', lambda: 8 * 2**30)
     secret = 'SYNTHETIC_SECRET_DO_NOT_RETAIN'
     program = f'import json; print(json.dumps({{"type":"item.completed", "output":"{secret}"}}))'
     log = tmp_path / 'events.json'
@@ -114,7 +114,7 @@ def test_successful_model_exit_does_not_override_failed_acceptance(tmp_path, mon
     monkeypatch.setattr(milestone, 'current_model', lambda: 'fixture-model')
     monkeypatch.setattr(milestone, 'active_session_guard', lambda: None)
     monkeypatch.setattr(milestone, 'require_ports', lambda _: None)
-    monkeypatch.setattr(milestone, 'artifact_bytes', lambda: 0)
+    monkeypatch.setattr(milestone, 'physical_headroom', lambda: 8 * 2**30)
     monkeypatch.setattr(milestone.subprocess, 'run', lambda *a, **k: subprocess.CompletedProcess(a[0], 0, b'ChatGPT', b''))
     (tmp_path / 'milestones').mkdir()
     (tmp_path / 'milestones/milestone-2.md').write_text('Sanitized test prompt, no real agent.')
