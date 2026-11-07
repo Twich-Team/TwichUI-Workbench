@@ -1,3 +1,19 @@
+# Live Codex eligibility held on a null secondary window — November 6, 2026 Mountain time
+
+The approved `fb51e58` one-shot unit verified connector-equivalent kernel
+restrictions and settled one account, one allowance and one catalog read.
+ChatGPT identity, eligible plan, affirmative ordinary usage, no extra
+credits or unlimited use, a current primary window below reserve and a
+visible model listing were observed. The only hold was `secondary: null`.
+The second slot stayed unused, the window closed, and both transient
+names and runtime directories are absent. The original app, Qwen process
+and 79-row fingerprint match preflight.
+
+The observed null is missing quota-window evidence. The current policy
+still requires both windows. The next acceptance package awaits the
+owner's decision on whether an explicit null secondary may pass with
+all other checks enforced. [Live result and policy decision](CODEX_ELIGIBILITY_LIVE_RESULT_20261106.md)
+
 # Codex eligibility diagnostics staged — November 6, 2026 Mountain time
 
 The prior accounting receipt cannot identify the failed account or quota

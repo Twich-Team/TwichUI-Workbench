@@ -2,13 +2,12 @@
 
 November 6, 2026 Mountain time.
 
-- Local checkpoint `969adfa` identifies the failed eligibility check in
-  future receipts and distinguishes missing evidence from a confirmed
-  denial. The pinned CLI fixtures and delegated browser rehearsal
-  passed offline. The historical field remains unknown. The existing
-  grant cannot run the equivalent signed-in diagnostic alongside the
-  restored app. A narrowly scoped transient launch awaits approval.
-  [Diagnostic approval and findings](CODEX_ELIGIBILITY_PROBE_APPROVAL_20261106.md)
+- The approved read-only Codex diagnostic settled in connector-equivalent
+  confinement. The only hold was an explicitly null secondary quota window.
+  The service affirmed ordinary included usage and the other required
+  checks passed. The window is closed and the second slot stayed unused.
+  The next acceptance package awaits a decision on the two-window policy.
+  [Live diagnostic and policy decision](CODEX_ELIGIBILITY_LIVE_RESULT_20261106.md)
 - The owner-approved installation of `8d17534` passed the scoped TLS,
   remote home-LAN access, history copy and installed filter checks. The
   delegated Codex-only submission held on pre-generation accounting. It

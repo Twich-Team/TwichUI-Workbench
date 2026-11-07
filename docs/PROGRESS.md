@@ -1,3 +1,14 @@
+## November 6, 2026 — Live eligibility isolated the secondary-window hold
+
+- The approved `fb51e58` transient proved connector-equivalent confinement
+  and performed exactly one signed-in account, allowance and model catalog
+  read. No model turn started and no task source was transmitted.
+- The only failed check was `secondary_window` with state `null`. The
+  allowance snapshot affirmed ordinary usage and passed the primary window,
+  credit and spend checks. Closed the window and verified cleanup and the
+  original app and 79-row history. The existing two-window policy awaits
+  the owner's decision. [Live result](CODEX_ELIGIBILITY_LIVE_RESULT_20261106.md)
+
 ## November 6, 2026 — Exact eligibility diagnostics prepared
 
 - Used the pinned CLI's offline schema to distinguish account, catalog,
