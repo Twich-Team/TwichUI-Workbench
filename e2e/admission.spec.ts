@@ -129,6 +129,8 @@ test('an admitted historical receipt does not represent current authority after 
 test('missing applied approval prevents the action without removing receipt history',async({page})=>{
   const {box,path} = await ready(page);
   fixture('admission-revoke');
+  await expect(page.getByRole('heading',{name:'Review the current plan again'})).toBeVisible();
+  await page.getByText('Original request, planning history and evidence',{exact:true}).click();
   await expect(box.getByText('This task needs attention',{exact:true})).toBeVisible();
   await expect(box.getByRole('button',{name:'Check this task’s approval',exact:true})).toHaveCount(0);
   expect((await (await page.request.get(path)).json()).receipts).toEqual([]);

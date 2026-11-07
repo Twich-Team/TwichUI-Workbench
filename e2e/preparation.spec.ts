@@ -148,8 +148,11 @@ test('changed approval after save holds preparation; missing comparison is expli
   const {box} = await ready(page);
   await box.getByRole('button',{name:'Prepare sample PR',exact:true}).click();
   fixture('admission-revoke');fixture('worker');
+  await expect(page.getByRole('heading',{name:'Review the current plan again'})).toBeVisible();
   await page.getByText('Original request, planning history and evidence',{exact:true}).click();
-  await box.getByRole('button',{name:'Review changes',exact:true}).click();
+  const review = box.getByRole('button',{name:'Review changes',exact:true});
+  await review.click();
+  await expect(review).toHaveAttribute('aria-expanded','true');
   await expect(box.getByRole('heading',{name:'Sample PR needs attention',exact:true})).toBeVisible();
   await shot(page,'approval-held-390');
   fixture('sample-artifact-missing');
