@@ -1,3 +1,30 @@
+# Fresh investigation bounds reconciled — November7,19:56 UTC
+
+Standing owner authority permits choosing practical individual operation settings.
+Actual page measurement: repeated Journey requests advance59–110,111–157,158–213;
+three character-bounded pages do not cover requested252-line endpoint. Fresh bug
+consent v4 therefore permits8 local requests/shared600sec (each120sec/2600 total
+completion including1024 reasoning), driver planning wait/reserve11min. Model
+usage is observed/summed across all8; no campaign reset. Old v1–v3 consent cannot
+authorize the new operation. Read45000chars/12files,24-step reproducer, source/write/
+disclosure/task-plan/run/independent checks and billing limits are unchanged.
+Verified inspection-window bound24 follows8x3 requests, not an evidence waiver.
+
+190 focused/build and actual native normal-browser process/restart/concurrency
+checks pass. Final complete backend/frontend, Chromium/visual and both browser
+opt-ins running on frozen code. No new activation/live call yet; installedb7624e2
+idle/protected and latest134-row settled history preserved. No real bug/provider
+case complete;13 tasks34 Qwen requests18807 generated/133035 prompt, no prior
+repair/Codex/uncertainty. Generic paging and source-context-only proof retain22844
+source chars/10751 counted prompt tokens inside32768; generation simulated and
+only local authenticated count metadata contacted. Initial incorrect80-line
+measurement expectation corrected to actual whole-line character-bound pages.
+
+Continue final checks/identity/seal/checked134-row cutover/fresh flight-path journey
+under standing authority, then provider cases/durable result/restart/normal next
+eligible bug. New candidate identity will be recorded before activation. Earlier
+four-request/five-minute values describe previous versions, not fresh operation.
+
 # Task13 settled; verified cached paging repair — November7,19:51 UTC
 
 No real bug/provider case complete. Task13 intake9fa60357-7184-44cf-b6de-bbda712f6bf8,

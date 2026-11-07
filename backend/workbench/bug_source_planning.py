@@ -13,7 +13,7 @@ from workbench.bug_evidence import BugPlanningResponse, Reproducer, Step
 from workbench.planning_provider import PlanningUnavailable
 from workbench.planning_response import Evidence, ResponseValidationError, wire_schema
 
-REQUESTS = 4
+REQUESTS = bug.INVESTIGATION_REQUESTS
 MAX_FILES = 12
 READ_CHARS = 45000
 WIRE_TEXT = 24000
@@ -161,7 +161,7 @@ def verify_packet(initial, supplied):
         if expected != item:
             raise ValueError('An inspected committed dependency changed.')
     windows = supplied.get('inspection_windows', [])
-    if len(windows) > 12 or sum(len(w['text']) for w in windows) > READ_CHARS:
+    if len(windows) > REQUESTS*3 or sum(len(w['text']) for w in windows) > READ_CHARS:
         raise ValueError('The committed inspection evidence exceeds its operation bound.')
     for index, window in enumerate(windows):
         raw, item = committed(window['path'], initial['base'])

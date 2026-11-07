@@ -231,10 +231,10 @@ def local_selection(connection):
 def planning_receipt(original, created_at):
     from workbench.intake import digest
 
-    from workbench.bug_investigation import INVESTIGATION_SECONDS, requested
+    from workbench.bug_investigation import INVESTIGATION_SECONDS, INVESTIGATION_REQUESTS, requested
     return dict(binding=digest(original), expires_at=(
         datetime.fromisoformat(created_at) + timedelta(minutes=PLANNING_MINUTES)).isoformat(),
-        **(dict(investigation_version=3, max_local_requests=4, max_codex_requests=1,
+        **(dict(investigation_version=4, max_local_requests=INVESTIGATION_REQUESTS, max_codex_requests=1,
                 planning_deadline_seconds=INVESTIGATION_SECONDS) if requested(original) else {}))
 
 

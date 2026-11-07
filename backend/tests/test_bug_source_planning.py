@@ -143,21 +143,21 @@ def test_stateful_report_requires_real_committed_line_inspection_before_plan(
 
 
 @pytest.mark.usefixtures('installed')
-def test_corrective_requests_share_the_four_request_operation_bound(
+def test_corrective_requests_share_the_eight_request_operation_bound(
     client, headers, store, monkeypatch,
 ):
     enable_bugs(monkeypatch)
-    values = [missing_load() for _ in range(4)]
+    values = [missing_load() for _ in range(8)]
     for i,value in enumerate(values):
         value['plan']['reproducer']['description'] += f' Candidate {i}.'
     calls = scripted(monkeypatch, values)
     identity = client.post('/api/intake', headers=headers, json=report()).json()['id']
     assert worker.tick(store)
     item = client.get('/api/intake/'+identity).json()
-    assert item['status'] == 'failed' and len(calls) == 4 and not item['proposals']
+    assert item['status'] == 'failed' and len(calls) == 8 and not item['proposals']
     with store.connect() as connection:
         usage = connection.execute(select(model_attempts.c.usage).where(model_attempts.c.task_id == identity)).scalar_one()
-    assert usage['requests_observed'] == 4 and usage['values']['completion_tokens'] == 40
+    assert usage['requests_observed'] == 8 and usage['values']['completion_tokens'] == 80
 
 
 @pytest.mark.usefixtures('installed')
@@ -276,8 +276,8 @@ def test_source_followup_has_one_claim_two_accounted_requests_and_private_receip
     assert item['jobs'][0]['attempts'] == 1
     assert calls[1]['inspection_result']['read_only'] is True
     assert [c['investigation_progress']['request_number'] for c in calls] == [1,2]
-    assert [c['investigation_progress']['requests_after_this'] for c in calls] == [3,2]
-    assert all(c['investigation_progress']['remaining_seconds'] <= 300 for c in calls)
+    assert [c['investigation_progress']['requests_after_this'] for c in calls] == [7,6]
+    assert all(c['investigation_progress']['remaining_seconds'] <= 600 for c in calls)
     assert calls[1]['source_memory']['retained_characters'] > 0
     assert any(e['text'] for f in calls[1]['files'] if f['path'] == PRODUCTION for e in f['excerpts'])
     with store.connect() as connection:
@@ -335,7 +335,7 @@ def test_literal_search_and_committed_harness_read_can_precede_the_plan(
     assert usage['requests_observed'] == 3 and usage['values']['completion_tokens'] == 30
 
 
-@pytest.mark.parametrize('old_version', [1, 2])
+@pytest.mark.parametrize('old_version', [1, 2, 3])
 @pytest.mark.usefixtures('installed')
 def test_old_one_request_consent_cannot_silently_authorize_source_followups(
     client, headers, store, monkeypatch, old_version,
@@ -349,7 +349,8 @@ def test_old_one_request_consent_cannot_silently_authorize_source_followups(
             for key in ('investigation_version', 'max_local_requests', 'max_codex_requests', 'planning_deadline_seconds'):
                 payload['local_planning_receipt'].pop(key)
         else:
-            payload['local_planning_receipt'].update(investigation_version=2, planning_deadline_seconds=120)
+            payload['local_planning_receipt'].update(investigation_version=old_version, max_local_requests=4,
+                planning_deadline_seconds=300 if old_version==3 else 120)
         connection.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(payload=payload))
     monkeypatch.setattr(LocalProvider, 'generate', lambda *a, **kw:pytest.fail('Used stale one-request consent'))
     assert worker.tick(store)

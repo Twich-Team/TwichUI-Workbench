@@ -155,10 +155,10 @@ def closeout(connection, identity, execution, case):
             require(0 < values['total_tokens'] <= 32768, 'Codex observed threshold exceeded')
         else:
             if purpose == 'planning':
-                require(1 <= usage.get('requests_observed', 1) <= (4 if case['request']['kind'] == 'issue' else 1),
+                require(1 <= usage.get('requests_observed', 1) <= (bug_investigation.INVESTIGATION_REQUESTS if case['request']['kind'] == 'issue' else 1),
                         'planning request count exceeds its task consent')
             require(0 <= values['completion_tokens'] <= {
-                'planning': 10400 if case['request']['kind'] == 'issue' else 2600,
+                'planning': bug_investigation.INVESTIGATION_REQUESTS*2600 if case['request']['kind'] == 'issue' else 2600,
                 'implementation': 24000, 'capability_validation': 60,
             }[purpose], 'Qwen completion token bound exceeded')
     [run] = connection.execute('SELECT * FROM real_execution_requests WHERE id=?', (execution,)).fetchall()
@@ -212,9 +212,9 @@ def check_review(connection, request, case, preparation):
     usage = json.loads(usage)
     require(outcome == 'completed' and model == case['model'] and usage['units'] == 'tokens',
             'planning usage or provider identity was not reported')
-    key, cap = ('total_tokens', 32768) if case['provider'] == 'codex' else ('completion_tokens', 10400 if bug else 2600)
+    key, cap = ('total_tokens', 32768) if case['provider'] == 'codex' else ('completion_tokens', bug_investigation.INVESTIGATION_REQUESTS*2600 if bug else 2600)
     if bug and case['provider'] == 'local':
-        require(1 <= usage.get('requests_observed', 1) <= 4
+        require(1 <= usage.get('requests_observed', 1) <= bug_investigation.INVESTIGATION_REQUESTS
                 and usage.get('max_request_completion_tokens', usage['values'][key]) <= 2600,
                 'local inspection request accounting changed')
     elif case['provider'] == 'local':
@@ -303,7 +303,7 @@ def campaign_admission(connection, request, case, policy):
                         'Local usage incomplete')
                 value = usage.get('values', {}).get('completion_tokens')
                 count = usage.get('requests_observed', 1) if purpose == 'planning' else usage.get('requests_observed')
-                require(type(value) is int and 0 <= value <= ((10400 if outcome else 2600) if purpose == 'planning' else 24000)
+                require(type(value) is int and 0 <= value <= ((bug_investigation.INVESTIGATION_REQUESTS*2600 if outcome else 2600) if purpose == 'planning' else 24000)
                         and type(count) is int and count >= 1,
                         'Local request accounting unavailable')
                 qwen_requests += count
