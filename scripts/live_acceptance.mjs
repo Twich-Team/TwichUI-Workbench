@@ -185,11 +185,23 @@ try {
   }
   let reviewedSha;
   const callPolicy = (verb, action, value) => {
-    const result = host(join(release, '.venv/bin/python'), [join(release, 'scripts/acceptance_policy.py'), verb,
+    let result;
+    try {
+      result = host(join(release, '.venv/bin/python'), [join(release, 'scripts/acceptance_policy.py'), verb,
       '--policy', join(ops,'browser-policy.json'), '--database', join(stage,'artifacts/workbench.sqlite3'),
       '--preparation', join(ops,'preparation.json')],
     JSON.stringify({...value, action, choice, opened:outcome ? window.outcome.opened_at : campaign ? window.campaign.opened_at : window.opened_at,
       prior, ...(outcome ? {outcome:window.outcome} : campaign ? {campaign:window.campaign} : {})}), 15000);
+    } catch (error) {
+      let reason = 'Acceptance policy input or state is unavailable.';
+      try {
+        const held = JSON.parse(String(error.stderr).trim());
+        if (held.held === true && typeof held.reason === 'string' && held.reason.length <= 200 &&
+          /^[A-Za-z0-9 .,:_()\/-]+$/.test(held.reason)) reason = held.reason;
+      } catch { /* No raw child error, command body or private source reaches the receipt. */ }
+      record('policy-held', {action, reason});
+      throw new Error('acceptance policy check held');
+    }
     return JSON.parse(result);
   };
   browser = await chromium.launch({executablePath:join(stage,'browser/chrome-headless-shell-linux64/chrome-headless-shell'),

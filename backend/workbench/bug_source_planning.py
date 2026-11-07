@@ -21,7 +21,7 @@ INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+
 
 
 def correction(error, raw):
-    """Only a finished, single-plan reproducer error may request a new proposal.
+    """Only finished single-plan wording/reproducer errors may be corrected.
 
     Ambiguous outcomes, unsafe access and scope/binding denials remain terminal.
     This supplies validation facts, never missing behavior or an approved plan.
@@ -45,10 +45,11 @@ def correction(error, raw):
                 return None
             # Locations are restricted to schema field names and small indexes;
             # provider-controlled keys/messages never become system instructions.
-            known = {'plan', 'reproducer', 'description', 'fixture', 'bootstrap', 'client', 'through_line',
+            known = {'plan', 'scope', 'reproducer', 'description', 'fixture', 'bootstrap', 'client', 'through_line',
                      'steps', 'observations', 'op', 'path', 'source', 'value', 'args', 'fields', 'method',
                      'after_step', 'expected', 'incorrect', 'checkpoints', 'before_call', 'call', 'observe',
-                     'at','results','return_value','client_field','captured_argument','number'}
+                     'at','results','return_value','client_field','captured_argument','number',
+                     'returns','values','table_fields'}
             if any(not (part in known if type(part) is str else type(part) is int and 0 <= part <= 512)
                    for part in location):
                 return None
@@ -56,7 +57,8 @@ def correction(error, raw):
                              rule=rule if rule in rules else 'Conform to the declared field type and constraint.'))
     elif isinstance(error, ResponseValidationError) and str(error) in {
             'The report needs initial and successive action-driven observations.',
-            'The report needs a repeated action to check refreshing.'}:
+            'The report needs a repeated action to check refreshing.',
+            'Describe the bounded repair in plain language, not only a file path'}:
         rows.append(dict(path=list(error.path), constraint='behavior_coverage', rule=str(error)))
     else:
         return None

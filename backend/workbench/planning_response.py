@@ -149,10 +149,15 @@ def wire_schema(model, coverage=None, files=None):
         if op == 'set':
             variant['required'] = ['op', 'path', 'value']
         if op in ('stub', 'capture'):
-            for excluded in ('args', 'fields'):
-                branch = json.loads(json.dumps(variant))
-                branch['properties'].pop(excluded)
-                alternatives.append(branch)
+            values, fields = props['args'], props['fields']
+            fields['minItems'] = 1  # Empty fields previously meant nil, never invent an empty table.
+            variant['properties'].pop('args')
+            variant['properties'].pop('fields')
+            variant['properties']['returns'] = dict(anyOf=[
+                dict(type='object',additionalProperties=False,properties={key:items},required=[key])
+                for key,items in (('values',values),('table_fields',fields))])
+            variant['required'].append('returns')
+            alternatives.append(variant)
         else:
             alternatives.append(variant)
     result['$defs']['Step'] = {'anyOf': alternatives}

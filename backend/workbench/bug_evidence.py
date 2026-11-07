@@ -119,6 +119,7 @@ class BugPlan(Data):
     reproducer: Reproducer
 
 
+
 class ReadWindow(Data):
     path: LuaPath | TestPath
     start: int = Field(ge=1)
@@ -165,6 +166,7 @@ def validation_diagnostics(error):
         Observation, FixtureField,
         InvestigationRead, InvestigationSearch,
     )))
+    fields.update({'returns','values','table_fields','checkpoints','before_call','setup','before_load'})
     rows = []
     for issue in error.errors(include_input=False, include_context=False, include_url=False)[:4]:
         location = '.'.join(
@@ -217,6 +219,8 @@ def validate_expectation_review(review, payload):
     if not evidence:
         return validate_regression(review, payload)
     checked = BugEvidence.model_validate(evidence)
+    if re.fullmatch(r'[A-Za-z0-9_!./-]+\.lua', checked.plan.scope.strip()):
+        raise HTTPException(422, 'Describe the bounded repair in plain language before approving this plan.')
     actual = review_digest(checked.plan.model_dump(mode='json'), checked.bootstrap_source)
     if checked.review_digest != actual or payload.get('expectation_review') != actual:
         raise HTTPException(422, 'Confirm that the reproduction and expected behavior match your report before approving this plan.')

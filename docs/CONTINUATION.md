@@ -1,3 +1,59 @@
+# Task14 settled; explicit stub outputs under final verification — November7,20:42 UTC
+
+No real fix/provider case complete. Installed5442405 remains protected/idle and
+history healthy. Task14 intake4dd5212e-31d8-47d5-8680-279031d43c34/model
+1a02946f-571b-46aa-acf7-dae1f6af7bcd completed20:19:59 with5 Qwen requests,
+6278 generated/37961 prompt and an application-generated plan. Independent review
+REJECTED it before any decision/repair: numeric stub return where consumer reads
+node records, no initial route eligibility/flight-master events, listener flag
+standing in for behavior, scope onlyfilename. Original read-only policy denial
+confirmed and saved in R/task14-policy-rejection.json. It is provider-completed,
+not a checked real task. No uncertainty, implementation or Codex turn.
+
+All14 tasks39 real Qwen requests25085 generated/170996 prompt preserved. Latest
+CURRENT settled DB139 rows/schema0012/28tables SHA
+ d60559004a94abc7a24e05b826f537891e6ce5ea324b828204108c39ac94c4eb.
+Copy139 forward, never134. Original79/history/recovery/evidence and normal model/
+authentication/key unchanged after settlement. R=C/outcome-5442405 contains exact
+private plan and attempt-14-accounting.json; active outcome-ledger reflects rejection.
+
+The native fixture ALREADY supports nested table fields; no new stub-reference or
+Lua program authority needed. New wire stub/capture returns={values:[...]} or
+returns={table_fields:[{path:[...],value:scalar}]} explicitly separates OUTPUTS from
+call.args INPUTS. Pure compiler maps explicit outputs to existing native args/fields;
+missing/ambiguous/mixed/empty-table alternatives reject, false/nil/numeric indexes
+preserved. Nested arrays/records verified with actual Lua original FAIL/candidate PASS
+on an unrelated fixture, never a developer flight-path solution. Native oracle
+semantics/24steps/read/write/source limits unchanged. Generic prompt asks concise
+complete descriptions and initial user behavior + actual successive actions, not
+query/listener stand-ins. Plain filename scope rejected only in new planning and
+new approvals, preserving historical plan serialization. Local safe wording feedback
+is bounded within8 requests; scope/binding/security failures remain terminal.
+
+Operator policy denials now produce bounded structured STATIC reasons; no raw child
+errors/commands/source escape. CLI literal-message and privacy tests pass. Original
+policy masking fixed without weakening initial behavior/event criteria or approval.
+152 focused/build,40 actual installed C++ decoder cases and native separate-process
+browser/restart/concurrency33.20sec pass. Actual17 saved intake list/detail reads on
+verified139-row copy pass; raw/original fingerprints unchanged, no model. Final
+complete1318 expected backend/25 frontend suite and final native now progressing,
+C/explicit-returns-final-*.log; do not claim complete before log markers. Earlier
+full interrupted for history-compatible validation repair, preserved/not counted.
+
+Source currently final frozen, pending checkpoint/seal/activation. Use current544
+R templates but RESTORE normal previous network preflight (no historical500 override).
+New previous stage544, evidence roots59, attempt/revision15, append1a02946f priorID;
+latest139 and original79 checked copies. Frontend unchanged from544/ac76:108 Chromium/
+10 visual/both browser opt-ins22.9/37.3sec retained with precise new native coverage.
+New40 decoder cases replace old34; source context-only proof
+C/explicit-returns-context-proof.json10944 prompt/22844 source chars inside32768.
+No new owner engineering decision/renewal needed. Finish final checks/identity/seal/
+cutover then fresh normal app task, independent plan review before delegated plan/run,
+actual behavioral patch, provider cases and durable restart. Do not approve task14
+or replay its invalid plan. No live request active. Broader limitations remain below.
+
+This section supersedes earlier task14-active/134-row/verification counts below.
+
 # Verified5442405 installed; task14 active — November7,20:15 UTC
 
 Installed5442405ebf7431a1b2a967411446cf59b39272d9, tree

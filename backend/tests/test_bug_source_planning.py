@@ -544,3 +544,18 @@ def test_repeated_read_advances_only_over_verified_contiguous_returned_prefix(mo
     assert windows[0]['line']==1 and windows[0]['text']=='\n'.join(lines[:20])
     assert unread_start([dict(path=path,line=5,through_line=80)],path,1,90)==1
     assert unread_start([dict(path='other.lua',line=1,through_line=80)],path,1,90)==1
+
+
+@pytest.mark.usefixtures('installed')
+def test_file_only_scope_is_corrected_before_any_plan_approval(client,headers,store,monkeypatch):
+    enable_bugs(monkeypatch)
+    bad=response()
+    bad['plan']['scope']=PRODUCTION
+    calls=scripted(monkeypatch,[bad,response()])
+    identity=client.post('/api/intake',headers=headers,json=report()).json()['id']
+    assert worker.tick(store)
+    item=client.get('/api/intake/'+identity).json()
+    assert item['status']=='completed' and len(calls)==2 and not item['decisions'] and not item['tasks']
+    facts=calls[1]['validation_feedback']
+    assert facts['errors'][0]['path']==['plan','scope']
+    assert facts['errors'][0]['rule']=='Describe the bounded repair in plain language, not only a file path'

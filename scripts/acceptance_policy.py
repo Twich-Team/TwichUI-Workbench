@@ -35,9 +35,13 @@ OUTCOME = dict(mode='owner-outcome-v1', authority='STANDING_OWNER_DIRECTION_AUTO
                cumulative_caps=False, preserve_accounting=True)
 
 
+class AcceptanceHeld(ValueError):
+    """Only static policy-check text may be exposed by the operator driver."""
+
+
 def require(condition, message):
     if not condition:
-        raise ValueError(message)
+        raise AcceptanceHeld(message)
 
 
 def build_policy(inputs, *, bug_input=None):
@@ -389,6 +393,11 @@ def main():
 if __name__ == '__main__':
     try:
         main()
+    except AcceptanceHeld as error:
+        # All require() reasons are literal application text, never provider
+        # output, file contents, credentials or arbitrary exception messages.
+        print(json.dumps(dict(held=True, reason=str(error))), file=sys.stderr)
+        raise SystemExit(2) from None
     except (OSError, ValueError, TypeError, KeyError, RuntimeError, sqlite3.Error):
-        print('Acceptance policy check held. Inspect the stage and redacted browser receipt.', file=sys.stderr)
+        print(json.dumps(dict(held=True, reason='Acceptance policy input or state is unavailable.')), file=sys.stderr)
         raise SystemExit(2) from None

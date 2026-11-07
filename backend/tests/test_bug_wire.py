@@ -42,6 +42,12 @@ def with_checkpoints(value):
     value = copy.deepcopy(value)
     reproducer = value['plan']['reproducer']
     steps, observations = reproducer.pop('steps'), reproducer.pop('observations')
+    for step in [*steps,*reproducer.get('setup',{}).get('before_load',[])]:
+        if step['op'] in {'stub','capture'}:
+            fields=step.pop('fields',[])
+            args=step.pop('args',[])
+            assert not (fields and args)
+            step['returns']={'table_fields':fields} if fields else {'values':args}
     checkpoints, offset = [], 0
     for observation in observations:
         result = dict(observation)
@@ -376,3 +382,69 @@ def test_result_targets_never_infer_a_missing_or_ambiguous_selection(fault):
         o.pop('results')
     with pytest.raises(ResponseValidationError):
         compile_setup(wire,[dict(path=PRODUCTION),dict(path=TEST)])
+
+
+@pytest.mark.parametrize('returned,native',[
+    ({'values':[]},{'args':[]}),
+    ({'values':[None,False,7]},{'args':[None,False,7]}),
+    ({'table_fields':[{'path':[1,'id'],'value':7},{'path':[1,'ready'],'value':False}]},
+     {'fields':[{'path':[1,'id'],'value':7},{'path':[1,'ready'],'value':False}]}),
+])
+def test_explicit_returns_preserve_selected_values_without_filling_contents(returned,native):
+    from workbench.bug_wire import compile_returns
+    value=dict(op='stub',path=['Provider','Rows'],returns=returned)
+    before=copy.deepcopy(value)
+    assert compile_returns(value,['step'])==dict(op='stub',path=['Provider','Rows'],**native)
+    assert value==before
+
+
+@pytest.mark.parametrize('returned,extra',[
+    ({'values':[],'table_fields':[]},{}),({},{}),({'unknown':[]},{}),
+    ({'table_fields':[]},{}),({'values':[]},{'args':[]}),({'values':[]},{'fields':[]}),
+])
+def test_ambiguous_missing_and_empty_table_returns_cannot_be_reinterpreted(returned,extra):
+    from workbench.bug_wire import compile_returns
+    with pytest.raises(ResponseValidationError):
+        compile_returns(dict(op='stub',path=['Provider'],returns=returned,**extra),['step'])
+
+
+def test_nested_stub_table_fields_execute_original_fail_candidate_pass(tmp_path):
+    import subprocess
+    from workbench.bug_evidence import compile_plan,review_digest
+    (tmp_path/'!!!TwichUI').mkdir()
+    tests=tmp_path/'tests'
+    tests.mkdir()
+    (tests/'harness.lua').write_text('function MakeClient() return setmetatable({}, {__index=_G}) end\n')
+    value=response(True)
+    fixture=value['plan']['reproducer']
+    fixture['steps']=[dict(op='load',source=CLIENT_SOURCE),
+        dict(op='stub',path=['Rows'],fields=[dict(path=[1,'id'],value=7),dict(path=[1,'ready'],value=False)]),
+        dict(op='call',path=['ReadRow'],args=[])]
+    fixture['observations']=[dict(after_step=3,source='return',path=[1],expected=False,incorrect=True)]
+    wire=wire_from_data(value)
+    output,_=compile_setup(wire,[dict(path=CLIENT_SOURCE),dict(path=CLIENT_TEST)])
+    plan=BugPlanningResponse.model_validate(output).plan.model_dump(mode='json')
+    evidence=dict(plan=plan,bootstrap_source='',review_digest=review_digest(plan,''),
+                  windows=[dict(path=CLIENT_SOURCE,start=1,end=1)]*4)
+    (tests/'oracle.lua').write_text(compile_plan(evidence)['oracle'])
+    for expression,wanted in [('true','FAIL'),('row.ready','PASS')]:
+        (tmp_path/CLIENT_SOURCE).write_text('function ReadRow() local row=Rows()[1]; assert(row.id==7); return '+expression+' end\n')
+        result=subprocess.run(['lua5.1','-e','ROOT="../!!!TwichUI/";TESTS="./";REPO="../";dofile("oracle.lua")'],
+                              cwd=tests,capture_output=True,text=True,timeout=5)
+        assert 'WB_BEHAVIOR bug-reproducer '+wanted in result.stdout,result.stdout+result.stderr
+        assert result.returncode==(1 if wanted=='FAIL' else 0)
+
+
+def test_historical_file_scope_stays_readable_but_cannot_gain_new_approval():
+    from fastapi import HTTPException
+    from workbench.bug_evidence import BugEvidence,review_digest,validate_expectation_review
+    value=response()
+    value['plan']['scope']=PRODUCTION
+    plan=BugPlanningResponse.model_validate(value).plan.model_dump(mode='json')
+    evidence=dict(plan=plan,bootstrap_source='',review_digest=review_digest(plan,''),
+                  windows=[dict(path=PRODUCTION,start=1,end=1)]*4)
+    assert BugEvidence.model_validate(evidence).plan.scope==PRODUCTION
+    with pytest.raises(HTTPException) as error:
+        validate_expectation_review(dict(task_contract=dict(bug_evidence=evidence)),
+                                   dict(expectation_review=evidence['review_digest']))
+    assert error.value.status_code==422

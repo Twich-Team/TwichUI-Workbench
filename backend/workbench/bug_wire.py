@@ -2,6 +2,29 @@
 import copy
 
 
+def compile_returns(value, location):
+    """Translate explicitly selected stub outputs; never fill missing data."""
+    from workbench.planning_response import ResponseValidationError
+
+    if not isinstance(value, dict) or 'returns' not in value:
+        return value
+    returned = value['returns']
+    if (value.get('op') not in {'stub', 'capture'} or {'args','fields'} & value.keys()
+            or not isinstance(returned, dict) or len(returned) != 1
+            or next(iter(returned), None) not in {'values','table_fields'}):
+        raise ResponseValidationError('Invalid explicit fixture return.',
+            [*location,'returns'], 'one values or table_fields return without legacy args/fields', returned)
+    key = next(iter(returned))
+    items = returned[key]
+    if not isinstance(items, list) or (key == 'table_fields' and not items):
+        raise ResponseValidationError('Invalid explicit fixture return.',
+            [*location,'returns',key], 'explicit bounded values or nonempty nested table fields', items)
+    result = copy.deepcopy(value)
+    result.pop('returns')
+    result['args' if key == 'values' else 'fields'] = items
+    return result
+
+
 def setup_schema(files, steps):
     sources = [f['path'] for f in files or [] if isinstance(f, dict)
                and isinstance(f.get('path'), str) and f['path'].startswith(('!!!TwichUI/', 'TwichUI_Settings/'))]
@@ -56,12 +79,18 @@ def compile_setup(raw, files):
             ['plan', 'reproducer', 'setup', field], expected, value)
 
     def validate(model, value, location):
+        returned = model is Step and isinstance(value, dict) and 'returns' in value
+        if model is Step:
+            value = compile_returns(value, location)
         try:
             return model.model_validate(value) if hasattr(model, 'model_validate') else model.validate_python(value)
         except ValidationError as error:
             issues = error.errors(include_input=True, include_url=False)
             for issue in issues:
-                issue['loc'] = (*location, *issue['loc'])
+                native = issue['loc']
+                if returned and native and native[0] in {'args','fields'}:
+                    native = ('returns','values' if native[0]=='args' else 'table_fields',*native[1:])
+                issue['loc'] = (*location, *native)
             raise ValidationError.from_exception_data(getattr(model, '__name__', 'FixtureField'), issues) from None
 
     if 'fixture' in original or 'bootstrap' in original:
