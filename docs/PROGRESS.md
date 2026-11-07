@@ -1,3 +1,40 @@
+# Source inspection and active controls verified in controlled paths — November 7, 2026 UTC
+
+Generic code-focused context now exposes real function bodies, with literal search
+and committed-line reads across project Lua/test helpers. One local investigation
+claim permits four accounted requests within the existing 120-second operation;
+new receipt version 2 prevents silently reusing old one-request consent. Requested
+source remains read-only, cannot change provider after generation, and is revalidated
+before a scoped plan. Safe private per-turn receipts preserve validation and usage;
+unknown accounting holds. Source fitting labels shortened windows honestly.
+
+The separate-process browser/native rehearsal passed two fresh fixture bugs with
+search/read follow-ups, malformed/conflicting outputs, restarts and concurrent
+polling (33 seconds, 551.9 MiB peak). Four provider-routing fixture journeys passed
+in 109.55 seconds. The installed grammar accepted complete/read/search outcomes and
+rejected malformed alternatives without loading a model. Actual initial packet
+measurement remains below 24,000 bytes. Fourteen source guard tests and 41 archive/
+retention/browser-stage checks passed; earlier focused groups also passed.
+
+A complete backend/frontend run passed 1,204 / 25. An earlier owned SIGINT caused
+one controlled test interruption, preserved separately. The first Chromium run
+passed 107 and exposed a timed-lock fixture race; an explicit bounded release
+handshake now passes its exact contention/retry test. Final full checks are being
+repeated after the last physical-storage and fixture changes before deployment.
+These are supporting offline results, not a real flight-path fix.
+
+Current default acceptance policy uses standing outcome authority, without former
+campaign ceilings. Accounting, uncertain-work rejection, source bindings, task
+limits and completed-case duplicate protection remain. Active development/restore/
+rehearsal helpers use physical recovery room rather than the former 512 MiB cap.
+The resident evidence field is a retention watermark. Owned closed browser output
+can be archived only after byte/metadata, independent restore and lookup proof;
+runtime/history/recovery trees are excluded. Actual physical/scratch reserves remain.
+
+No new live Workbench request, revised cutover, addon edit or publication occurred.
+The original app remains restored, latest campaign history 93 rows and usage three
+Qwen planning requests / 1,171 generated tokens. Standing authority continues.
+
 # Standing direction installed; delivery continues — November 7, 2026 UTC
 
 Exact owner documents are installed and compared byte-for-byte. AGENTS and the

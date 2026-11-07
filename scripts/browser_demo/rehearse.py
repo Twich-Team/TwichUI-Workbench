@@ -16,7 +16,7 @@ from urllib.error import HTTPError, URLError
 from browser_demo.launch import api_client, run_owned, stop_process, utc_now
 from browser_demo.gate import SYNTHETIC_TASK
 from browser_demo.supervisor import RunHeld
-from project_env import ARTIFACT_LIMIT, ROOT, artifact_bytes, environment, require_ports
+from project_env import ROOT, artifact_bytes, environment, require_ports, physical_headroom
 from reviewed_offer_fixture import setup
 from test_grounded_workflow import policy_file
 from workbench.db import engine_for
@@ -143,8 +143,8 @@ def run(case, source, backup, output, task=SYNTHETIC_TASK):
                 # A browser can unlink files during measurement. The next
                 # supervisor tick rechecks while Runtime owns its own limit.
                 scratch_bytes = None
-            if counted >= ARTIFACT_LIMIT or (scratch_bytes is not None and scratch_bytes > 1 << 30):
-                raise RunHeld("Rehearsal exceeded its evidence or scratch budget.")
+            if physical_headroom() < _reserve or (scratch_bytes is not None and scratch_bytes > 1 << 30):
+                raise RunHeld("Rehearsal exceeded its physical recovery room or scratch bound.")
             return {"offline": True, "counted": counted, "scratch": scratch_bytes}
         return {"offline": True}
 

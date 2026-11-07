@@ -173,16 +173,20 @@ def test_worker_ownership_prevents_overlap(store, client, installed):
     assert real_execution.alive(real_execution.owner_identity())
 
 
-def test_evidence_allowance_is_private_store_bound_and_bounded(store, installed):
+def test_retention_watermark_does_not_reinstate_a_cumulative_execution_cap(store, installed, monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(everyday.shutil, 'disk_usage', lambda _:SimpleNamespace(free=8 << 30))
     path = everyday.ROOT / '.local/policy.json'
     original = json.loads(path.read_text())
     baseline = everyday.measure(everyday.configuration(store))[0]
-    assert everyday.configuration(store).evidence_limit_bytes == 512 << 20
+    assert everyday.configuration(store).evidence_limit_bytes == 1024 << 20
     write_policy(path, {**original, 'evidence_limit_bytes': 1024 << 20})
-    assert everyday.measure(everyday.configuration(store))[0] == baseline + (512 << 20)
+    assert everyday.measure(everyday.configuration(store))[0] == baseline
     write_policy(path, {**original, 'evidence_limit_bytes': 2048 << 20})
-    with pytest.raises(ValueError):
-        everyday.configuration(store)
+    assert everyday.measure(everyday.configuration(store))[0] == baseline
+    monkeypatch.setattr(everyday.shutil, 'disk_usage', lambda _:SimpleNamespace(free=3 << 30))
+    with pytest.raises(everyday.CapacityHold, match='4 GiB'):
+        everyday.require_room(everyday.configuration(store))
 
 
 def test_accounting_keeps_all_prior_release_roots_across_three_revisions(store, installed):

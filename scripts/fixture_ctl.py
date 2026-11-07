@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import select as io_select
 import tempfile
 import time
 
@@ -89,6 +90,7 @@ def main():
             "worker",
             "crash",
             "lock",
+            "lock-until-release",
             "count",
             "missing",
             "pilot-fresh",
@@ -301,9 +303,14 @@ def main():
             )
         elif args.action == "missing":
             connection.execute(tasks.update().values(subsystem="", summary=""))
-        elif args.action == "lock":
+        elif args.action in {"lock", "lock-until-release"}:
             print("locked", flush=True)
-            time.sleep(1.1)
+            if args.action == 'lock':
+                time.sleep(1.1)
+            else:
+                ready, _, _ = io_select.select([sys.stdin], [], [], 10)
+                if not ready or sys.stdin.readline().strip() != 'release':
+                    raise SystemExit('Disposable fixture lock release timed out or was invalid')
         elif args.action == "count":
             print(len(connection.execute(select(applications)).all()))
     if args.action == "reset":

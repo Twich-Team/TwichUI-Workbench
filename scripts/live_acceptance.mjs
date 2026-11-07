@@ -47,9 +47,16 @@ const seal = sha(join(ops, 'bundle.sha256'));
 const opened = Date.parse(window.opened_at);
 const policy = read(join(ops, 'browser-policy.json'));
 const campaign = policy.campaign;
-const duration = campaign ? campaign.minutes : policy.windowMinutes === 600 ? 600 : 480;
-const campaignOpened = campaign ? Date.parse(window.campaign?.opened_at) : opened;
-const cutoff = campaignOpened + (duration - (campaign?.restorationMinutes ?? 30))*minute;
+const outcome = policy.outcome;
+need(!outcome || (!campaign && outcome.mode === 'owner-outcome-v1' && outcome.cumulative_caps === false &&
+  outcome.preserve_accounting === true && outcome.authority === 'STANDING_OWNER_DIRECTION_AUTONOMOUS_DELIVERY.md' &&
+  Number.isInteger(window.outcome?.attempt) && window.outcome.attempt >= 1 &&
+  Number.isInteger(window.outcome?.revision) && window.outcome.revision >= 0 &&
+  Array.isArray(window.outcome?.prior_attempts)), 'Standing outcome authority is missing or changed');
+const duration = outcome ? 150 : campaign ? campaign.minutes : policy.windowMinutes === 600 ? 600 : 480;
+const campaignOpened = outcome ? Date.parse(window.outcome.opened_at) : campaign ? Date.parse(window.campaign?.opened_at) : opened;
+// This watchdog bounds only this driver operation; it is not an assignment clock.
+const cutoff = outcome ? now()+duration*minute : campaignOpened + (duration - (campaign?.restorationMinutes ?? 30))*minute;
 need(!campaign || (duration === 960 && campaign.restorationMinutes === 120 &&
   Number.isInteger(window.campaign?.attempt) && window.campaign.attempt >= 1 &&
   window.campaign.attempt <= 8 && Number.isInteger(window.campaign.revision) &&
@@ -63,9 +70,9 @@ need(['kernel_filters', 'history_preserved', 'lan_tls', 'remote_lan_access'].eve
   'Installed preflight is incomplete');
 const index = policy.cases.findIndex(c => c.choice === choice);
 need(index >= 0, 'Unknown case');
-need(index !== 0 || now() < opened + 30*minute, 'Installation preflight window expired');
+need(outcome || index !== 0 || now() < opened + 30*minute, 'Installation preflight window expired');
 const candidate = policy.cases[index];
-const prior = campaign ? [...window.campaign.prior_attempts] : [];
+const prior = outcome ? [...window.outcome.prior_attempts] : campaign ? [...window.campaign.prior_attempts] : [];
 for (const earlier of policy.cases.slice(0, index)) {
   const rows = readFileSync(join(evidence, earlier.choice + '.jsonl'), 'utf8').trim().split('\n').map(JSON.parse);
   const last = rows.at(-1);
@@ -75,7 +82,7 @@ for (const earlier of policy.cases.slice(0, index)) {
 }
 need(sha(helper) === helperSha, 'Administrator helper changed');
 const grant = JSON.parse(admin({op:'status'}));
-need(grant.expires * 1000 > campaignOpened + duration*minute, 'Administrator grant does not cover rollback window');
+need(grant.expires * 1000 > (outcome ? now() : campaignOpened) + duration*minute, 'Administrator grant does not cover rollback window');
 const bug = candidate.request.kind === 'issue';
 const blockDeadline = Math.min(cutoff, now() + (bug ? 120 : 105)*minute);
 const receipt = join(evidence, choice + '.jsonl');
@@ -181,8 +188,8 @@ try {
     const result = host(join(release, '.venv/bin/python'), [join(release, 'scripts/acceptance_policy.py'), verb,
       '--policy', join(ops,'browser-policy.json'), '--database', join(stage,'artifacts/workbench.sqlite3'),
       '--preparation', join(ops,'preparation.json')],
-    JSON.stringify({...value, action, choice, opened:campaign ? window.campaign.opened_at : window.opened_at,
-      prior, ...(campaign ? {campaign:window.campaign} : {})}), 15000);
+    JSON.stringify({...value, action, choice, opened:outcome ? window.outcome.opened_at : campaign ? window.campaign.opened_at : window.opened_at,
+      prior, ...(outcome ? {outcome:window.outcome} : campaign ? {campaign:window.campaign} : {})}), 15000);
     return JSON.parse(result);
   };
   browser = await chromium.launch({executablePath:join(stage,'browser/chrome-headless-shell-linux64/chrome-headless-shell'),

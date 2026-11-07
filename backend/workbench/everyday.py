@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 import shutil
 import threading
-from typing import Literal
 
 from pydantic import Field
 from sqlalchemy import select
@@ -35,9 +34,10 @@ class LocalWorkStatus(StrictModel):
 class Installation(StrictModel):
     database: str
     database_identity: list[int] = Field(min_length=2, max_length=2)
-    evidence_roots: list[str] = Field(min_length=1, max_length=40)
+    evidence_roots: list[str] = Field(min_length=1)
     scratch: str
-    evidence_limit_bytes: Literal[536870912, 1073741824] = 536870912
+    # Legacy field name: this is now a retention watermark, not a delivery cap.
+    evidence_limit_bytes: int = Field(default=1073741824, ge=64 << 20)
 
 
 def enabled():
@@ -48,7 +48,7 @@ def configuration(engine=None):
     from workbench.trusted_preparation import owned
 
     path = owned(os.environ.get('WORKBENCH_EVERYDAY_CONFIG') or '/nonexistent')
-    if not path.is_file() or path.stat().st_mode & 0o077 or path.stat().st_size > 8192:
+    if not path.is_file() or path.stat().st_mode & 0o077 or path.stat().st_size > 1 << 20:
         raise ValueError('The private Workbench installation policy is unavailable.')
     policy = Installation.model_validate_json(path.read_bytes())
     database = owned(policy.database)
@@ -70,16 +70,26 @@ def configuration(engine=None):
 
 
 def measure(policy):
-    # The same four evidence roots and fixed ceiling as the development launcher.
-    from project_env import artifact_bytes
-
+    # Admission uses actual physical recovery room. Historical evidence totals
+    # remain measured for retention, without reinstating a cumulative cap.
     roots = [Path(root) for root in policy.evidence_roots]
     scratch = Path(policy.scratch)
     free = min(shutil.disk_usage(path).free for path in (*roots, scratch, Path('/dev/shm')))
     scratch_bytes = sum(path.stat().st_size for path in scratch.rglob('*')
                         if path.is_file() and not path.is_symlink())
-    counted = sum(artifact_bytes(root) for root in roots)
-    return policy.evidence_limit_bytes - counted, free, scratch_bytes
+    return free-(4 << 30), free, scratch_bytes
+
+
+def housekeep(policy):
+    from evidence_retention import maintain
+    from project_env import artifact_bytes
+
+    # Generic retention only touches closed owned browser evidence. Histories,
+    # execution/recovery records and original stores are never candidates.
+    for name in policy.evidence_roots:
+        root = Path(name)
+        if artifact_bytes(root) > policy.evidence_limit_bytes:
+            maintain(root)
 
 
 class CapacityHold(ValueError):
@@ -100,7 +110,7 @@ def require_room(policy, reserve=START_RESERVE):
     if free < 4 << 30 or scratch > 1 << 30:
         raise CapacityHold('Waiting for resources. Workbench needs 4 GiB free and at most 1 GiB of scratch in use.', remaining)
     if remaining < reserve:
-        raise CapacityHold(f'Waiting for storage. Workbench needs {reserve >> 20} MiB of evidence headroom at this stage.', remaining)
+        raise CapacityHold(f'Waiting for storage. Workbench needs {reserve >> 20} MiB beyond its physical recovery reserve.', remaining)
     return remaining
 
 
@@ -221,8 +231,11 @@ def local_selection(connection):
 def planning_receipt(original, created_at):
     from workbench.intake import digest
 
+    from workbench.bug_investigation import requested
     return dict(binding=digest(original), expires_at=(
-        datetime.fromisoformat(created_at) + timedelta(minutes=PLANNING_MINUTES)).isoformat())
+        datetime.fromisoformat(created_at) + timedelta(minutes=PLANNING_MINUTES)).isoformat(),
+        **(dict(investigation_version=2, max_local_requests=4, max_codex_requests=1,
+                planning_deadline_seconds=120) if requested(original) else {}))
 
 
 def check_planning(c, original, job=None):
@@ -233,7 +246,7 @@ def check_planning(c, original, job=None):
     expected = planning_receipt(original['payload'], original['created_at'])
     if (original['payload'].get('local_planning') not in CHOICES
             or not any(all(job.get('local_planning_receipt', {}).get(k) == v for k, v in expected.items()) for job in jobs)):
-        raise ValueError('A saved one-request planning approval is required. Open a new task to give that permission.')
+        raise ValueError('A current saved planning approval is required. Open a new task to give that permission.')
     claimed = sum(bool(payload.get('scenario_generation_claim')) for payload in jobs)
     followup = job['payload'].get('bug_followup') if job else None
     if followup:
@@ -249,6 +262,6 @@ def check_planning(c, original, job=None):
             raise ValueError('The follow-up no longer matches the approved investigation.')
         expected = followup
     elif claimed:
-        raise ValueError('The one approved planning request has already been claimed. Start a new task with updated details.')
+        raise ValueError('The approved planning operation has already been claimed. Start a new task with updated details.')
     if datetime.now(timezone.utc) + timedelta(seconds=120) >= datetime.fromisoformat(expected['expires_at']):
         raise ValueError('The planning approval expired before the worker could start. Start a new task to approve planning again.')

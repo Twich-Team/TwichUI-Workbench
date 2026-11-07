@@ -211,9 +211,9 @@ def test_wire_outcomes_are_mutually_exclusive_and_unwrap_without_choosing():
     schema = wire_schema(BugPlanningResponse)
     assert set(schema["properties"]) == {"finding", "draft"}
     for selected, variant in zip(
-        ("plan", "question", "limitation"), schema["$defs"]["BugOutcome"]["anyOf"], strict=True
+        ("plan", "question", "limitation", "inspection"), schema["$defs"]["BugOutcome"]["anyOf"], strict=True
     ):
-        assert variant["required"] == ["plan", "question", "limitation"]
+        assert variant["required"] == ["plan", "question", "limitation", "inspection"]
         assert variant["properties"][selected].get("type") != "null"
         assert all(
             v.get("const") is None and v.get("type") == "null"
@@ -298,12 +298,12 @@ def test_declaration_context_is_literal_selected_bounded_and_not_an_export_claim
 
 def test_wire_paths_cannot_offer_support_only_or_undiscovered_writes():
     files = [dict(path='!!!TwichUI/a.lua'), dict(path='!!!TwichUI/helper.lua', support_only=True),
-             dict(path='tests/a_test.lua')]
+             dict(path='tests/test_a.lua')]
     schema = wire_schema(BugPlanningResponse, files=files)
     properties = schema['$defs']['BugPlan']['properties']
-    assert properties['writable_paths']['items']['enum'] == ['!!!TwichUI/a.lua', 'tests/a_test.lua']
+    assert properties['writable_paths']['items']['enum'] == ['!!!TwichUI/a.lua', 'tests/test_a.lua']
     assert properties['read_paths']['items']['enum'] == [item['path'] for item in files]
-    assert properties['focused_test']['enum'] == ['tests/a_test.lua']
+    assert properties['focused_test']['enum'] == ['tests/test_a.lua']
 
 
 def test_oracle_reports_every_original_and_candidate_observation(tmp_path):

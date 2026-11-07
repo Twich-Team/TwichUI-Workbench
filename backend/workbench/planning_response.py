@@ -76,7 +76,8 @@ def normalize_bug(value, changes=()):
     changes = list(changes)
     if isinstance(value, dict) and set(value) == {'finding', 'draft'}:
         draft = value['draft']
-        if isinstance(draft, dict) and set(draft) == {'plan', 'question', 'limitation'}:
+        if isinstance(draft, dict) and set(draft) in ({'plan', 'question', 'limitation'},
+                                                    {'plan', 'question', 'limitation', 'inspection'}):
             value = dict(finding=value['finding'], **draft)
             changes.append('unwrap-outcome-draft')
     if isinstance(value, dict):
@@ -136,24 +137,26 @@ def wire_schema(model, coverage=None, files=None):
     result['$defs']['Step'] = {'anyOf': alternatives}
     props = result['properties']
     outcomes = []
-    for selected in ('plan', 'question', 'limitation'):
+    fields = ('plan', 'question', 'limitation', 'inspection')
+    for selected in fields:
         choice = {}
-        for field in ('plan', 'question', 'limitation'):
+        for field in fields:
             choice[field] = (next(v for v in props[field]['anyOf'] if v.get('type') != 'null')
                              if field == selected else {'type': 'null', 'const': None})
         outcomes.append(dict(type='object', properties=choice,
-                             required=['plan', 'question', 'limitation'], additionalProperties=False))
+                             required=list(fields), additionalProperties=False))
     result['$defs']['BugOutcome'] = {'anyOf': outcomes}
     if isinstance(coverage, dict) and type(coverage.get('minimum_observations')) is int and coverage['minimum_observations'] == 3:
         result['$defs']['Reproducer']['properties']['observations']['minItems'] = 3
     if isinstance(files, list):
         selected = [item['path'] for item in files if isinstance(item, dict) and isinstance(item.get('path'), str)]
+        plan_reads = [path for path in selected if path.startswith(('!!!TwichUI/', 'TwichUI_Settings/', 'tests/test_'))]
         writable = [item['path'] for item in files if isinstance(item, dict) and isinstance(item.get('path'), str) and not item.get('support_only')]
         sources = [path for path in selected if path.startswith(('!!!TwichUI/', 'TwichUI_Settings/'))]
-        tests = [path for path in selected if path.startswith('tests/')]
+        tests = [path for path in selected if path.startswith('tests/test_')]
         if selected and writable and sources and tests:
             plan = result['$defs']['BugPlan']['properties']
-            plan['read_paths']['items'] = {'type': 'string', 'enum': selected}
+            plan['read_paths']['items'] = {'type': 'string', 'enum': plan_reads}
             plan['writable_paths']['items'] = {'type': 'string', 'enum': writable}
             plan['focused_test'] = {'type': 'string', 'enum': tests}
             for variant in alternatives:

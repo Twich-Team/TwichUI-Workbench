@@ -1,0 +1,271 @@
+"""Read-only, accounted source follow-ups inside one local investigation claim."""
+import copy
+import hashlib
+import json
+import re
+import time
+from uuid import UUID, uuid5
+
+from workbench import bug_investigation as bug, regression_preparation as source
+from workbench.bug_evidence import BugPlanningResponse
+from workbench.planning_provider import PlanningUnavailable
+from workbench.planning_response import Evidence, ResponseValidationError
+
+REQUESTS = 4
+MAX_FILES = 12
+READ_CHARS = 45000
+WIRE_TEXT = 7000
+INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/[A-Za-z0-9_./-]+)\.lua')
+
+
+def committed(path, base):
+    if (not INSPECT_PATH.fullmatch(path)
+            or '..' in path.split('/') or any(p.startswith('.') for p in path.split('/'))
+            or {'lib', 'libs', 'vendor'} & {p.lower() for p in path.split('/')}):
+        raise ValueError('Source inspection is restricted to committed project Lua and tests.')
+    root, actual, _ = source.repository()
+    if actual != base:
+        raise ValueError('The committed project changed during investigation.')
+    bug.clean_base(root, base)
+    record = source.git(root, 'ls-tree', '-l', base, '--', path).decode().strip()
+    metadata, name = record.split('\t') if '\t' in record else ('', '')
+    fields = metadata.split()
+    if (name != path or len(fields) != 4 or fields[0] not in {'100644', '100755'}
+            or fields[1] != 'blob' or int(fields[3]) > 131072):
+        raise ValueError('The requested committed source is unavailable.')
+    raw = source.blob(root, fields[2])
+    return raw, dict(path=path, git_blob=fields[2], sha256=hashlib.sha256(raw).hexdigest(),
+                     file_lines=len(raw.decode().splitlines()), support_only=True, excerpts=[])
+
+
+def search(base, query):
+    root, actual, _ = source.repository()
+    if actual != base:
+        raise ValueError('The committed project changed during search.')
+    bug.clean_base(root, base)
+    result, scanned = [], 0
+    inventory = source.git(root, 'ls-tree', '-rz', '-l', base, '--',
+                           '!!!TwichUI', 'TwichUI_Settings', 'tests', max_bytes=1 << 20)
+    for entry in inventory.split(b'\0'):
+        if not entry:
+            continue
+        meta, raw_path = entry.split(b'\t', 1)
+        mode, kind, oid, size = meta.decode().split()
+        path = raw_path.decode()
+        if (mode not in {'100644', '100755'} or kind != 'blob' or int(size) > 131072
+                or not INSPECT_PATH.fullmatch(path) or any(p.startswith('.') for p in path.split('/'))
+                or {'lib', 'libs', 'vendor'} & {p.lower() for p in path.split('/')}):
+            continue
+        raw = source.blob(root, oid)
+        scanned += len(raw)
+        if scanned > 16 << 20:
+            raise ValueError('The source search exceeded its bounded local scan.')
+        for number, line in enumerate(raw.decode().splitlines(), 1):
+            if query.casefold() in line.casefold():
+                result.append(dict(path=path, line=number, text=line[:280], truncated=len(line)>280))
+                if len(result) == 12:
+                    return result
+    return result
+
+
+def verify_packet(initial, supplied):
+    if (set(supplied) - set(initial) - {'inspection_windows'}
+            or supplied.get('base') != initial['base'] or supplied.get('policy_sha256') != initial['policy_sha256']
+            or supplied.get('files', [])[:len(initial['files'])] != initial['files']
+            or not len(initial['files']) <= len(supplied['files']) <= MAX_FILES
+            or len({f['path'] for f in supplied['files']}) != len(supplied['files'])):
+        raise ValueError('The inspected source binding changed.')
+    for item in supplied['files'][len(initial['files']):]:
+        raw, expected = committed(item['path'], initial['base'])
+        lines = raw.decode().splitlines()
+        for window in item['excerpts']:
+            start, end = window['line'], window['through_line']
+            if (not 1 <= start <= end <= len(lines)
+                    or window['text'] != '\n'.join(lines[start-1:end])):
+                raise ValueError('An inspected source range changed.')
+        expected['excerpts'] = item['excerpts']
+        if expected != item:
+            raise ValueError('An inspected committed dependency changed.')
+    windows = supplied.get('inspection_windows', [])
+    if len(windows) > 12 or sum(len(w['text']) for w in windows) > READ_CHARS:
+        raise ValueError('The committed inspection evidence exceeds its operation bound.')
+    for window in windows:
+        raw, item = committed(window['path'], initial['base'])
+        lines = raw.decode().splitlines()
+        start, end = window['line'], window['through_line']
+        if (not 1 <= start <= end < start+80 or end > len(lines)
+                or window['sha256'] != item['sha256'] or window['text'] != '\n'.join(lines[start-1:end])):
+            raise ValueError('The inspected source evidence changed.')
+    return supplied
+
+
+def inspect(packet, requests):
+    total = 0
+    windows, matches = [], []
+    for index, request in enumerate(requests):
+        if hasattr(request, 'query'):
+            found = search(packet['base'], request.query)
+            matches += found
+            total += sum(len(item['text']) for item in found)
+            continue
+        try:
+            raw, item = committed(request.path, packet['base'])
+        except ValueError as error:
+            raise ResponseValidationError('The requested committed source is unavailable or disallowed.',
+                ['inspection', index, 'path'], 'an allowed regular committed Lua/test file', request.path) from error
+        lines = raw.decode().splitlines()
+        if not 1 <= request.start <= request.end <= len(lines):
+            raise ResponseValidationError('The requested source lines are outside the committed file.',
+                ['inspection', index, 'end'], f'committed line range 1..{len(lines)}', request.end)
+        text = '\n'.join(lines[request.start-1:request.end])
+        total += len(text)
+        if total > 6500:
+            raise ResponseValidationError('The requested source windows exceed their bounded response size.',
+                ['inspection'], 'at most 6500 source characters per inspection', total)
+        window = dict(line=request.start, through_line=request.end, text=text,
+                      coverage='requested committed lines')
+        selected = next((f for f in packet['files'] if f['path'] == request.path), None)
+        if selected is None:
+            if len(packet['files']) >= MAX_FILES:
+                raise ValueError('The bounded investigation already selected twelve files.')
+            item['excerpts'] = [window]
+            packet['files'].append(item)
+        windows.append(dict(path=request.path, sha256=item['sha256'], **window))
+    if total > 6500:
+        raise ResponseValidationError('The source inspection result exceeds its bounded size.',
+            ['inspection'], 'at most 6500 source characters', total)
+    packet.setdefault('inspection_windows', []).extend(windows)
+    return windows, matches, total
+
+
+def next_wire(packet, original, feedback, windows, finding, matches=None):
+    _, wire = bug.planning_request(packet, original, feedback)
+    remaining = WIRE_TEXT-sum(len(m['text']) for m in (matches or []))
+    requested = {w['path'] for w in windows}
+    for item in wire['files']:
+        if item['path'] in requested:
+            item['excerpts'] = [{k: v for k, v in w.items() if k not in {'path', 'sha256'}}
+                                for w in windows if w['path'] == item['path']]
+            remaining -= sum(len(e['text']) for e in item['excerpts'])
+    for item in wire['files']:
+        if item['path'] in requested:
+            continue
+        excerpts = []
+        for old in item['excerpts']:
+            lines = []
+            for line in old['text'].splitlines():
+                if len('\n'.join([*lines, line])) > min(remaining, 500):
+                    break
+                lines.append(line)
+            if lines:
+                text = '\n'.join(lines)
+                excerpts.append(dict(line=old['line'], through_line=old['line']+len(lines)-1,
+                                     text=text, coverage='partial earlier context'))
+                remaining -= len(text)
+        item['excerpts'] = excerpts
+    wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
+        note='Requested committed source is supplied. No addon change or behavioral result has been produced.')
+    if matches is not None:
+        wire['inspection_result']['search_matches'] = matches
+        wire['inspection_result']['search_limit'] = 'At most twelve literal matches; not an exhaustive absence proof.'
+    return wire
+
+
+def generate(adapter, initial, original, feedback, should_stop, expected_model):
+    """One claim/provider/deadline, distinct durable receipts and shared usage."""
+    packet = copy.deepcopy(initial)
+    schema, wire = bug.planning_request(packet, original, feedback)
+    parent = adapter.response_evidence
+    journals, receipts = [], []
+    read_chars = sum(len(e['text']) for f in initial['files'] for e in f['excerpts'])
+    adapter.ends_at = adapter.ends_at or time.monotonic()+120
+    evidence = parent
+    diagnostics = {}
+    response_added = True
+    original_stop = adapter.stop_event
+
+    class Stop:
+        def is_set(self):
+            return should_stop()
+
+    adapter.stop_event = Stop()
+
+    def observe_usage(facts):
+        usage = facts.get('usage')
+        values = usage.get('values') if isinstance(usage, dict) else None
+        if (isinstance(values, dict) and all(type(values.get(k)) is int and values[k] >= 0
+                for k in ('prompt_tokens', 'completion_tokens', 'total_tokens'))
+                and values['prompt_tokens']+values['completion_tokens'] == values['total_tokens']):
+            receipts.append(usage)
+            return True
+        return False
+    try:
+        for index in range(REQUESTS):
+            if should_stop() or time.monotonic() >= adapter.ends_at:
+                raise PlanningUnavailable('The source investigation was stopped or timed out.', 'cancelled')
+            if index and parent:
+                identity = str(uuid5(UUID(parent.identifier), f'committed-source-turn-{index}'))
+                evidence = Evidence(parent.directory.parents[2], identity, schema,
+                                    wire.get('coverage'), wire.get('files'))
+                journals.append(evidence)
+                parent.record('source-followup', turn=index+1, evidence_id=identity)
+            adapter.response_evidence = evidence
+            response_added = False
+            try:
+                raw, model, basis = adapter.generate(wire, schema, expected_model=expected_model)
+            except PlanningUnavailable as error:
+                diagnostics = dict(adapter.diagnostics)
+                response_added = observe_usage(diagnostics)
+                if index:
+                    # A later readiness refusal cannot re-enable pre-generation
+                    # fallback after an earlier inspection generation.
+                    raise PlanningUnavailable('Source investigation stopped after generation began.',
+                                               'investigation_stopped') from error
+                raise
+            diagnostics = dict(adapter.diagnostics)
+            response_added = observe_usage(diagnostics)
+            if not response_added:
+                raise PlanningUnavailable('Source investigation usage is unavailable.', 'accounting')
+            try:
+                draft = BugPlanningResponse.model_validate(raw)
+            except ValueError as error:
+                if evidence:
+                    evidence.rejected(error, raw)
+                raise
+            if draft.inspection is None:
+                return raw, model, basis, packet
+            if should_stop():
+                raise PlanningUnavailable('The investigation binding changed before source inspection.', 'cancelled')
+            if evidence:
+                evidence.record('source-inspection', turn=index+1,
+                    windows=[dict(query_sha256=hashlib.sha256(r.query.encode()).hexdigest()) if hasattr(r, 'query')
+                             else dict(path=r.path, start=r.start, end=r.end) for r in draft.inspection])
+            if index+1 == REQUESTS:
+                raise PlanningUnavailable('The bounded investigation needs more source inspection.', 'inspection_limit')
+            windows, matches, chars = inspect(packet, draft.inspection)
+            read_chars += chars
+            if read_chars > READ_CHARS:
+                raise PlanningUnavailable('The investigation reached its source-read bound.', 'inspection_limit')
+            wire = next_wire(packet, original, feedback, windows, draft.finding, matches)
+    finally:
+        current = dict(adapter.diagnostics)
+        # Failed/current uncertain wire activity has no complete aggregate.
+        unknown = (current.get('generation_state') in {'uncertain', 'partial'}
+                   or current.get('accounting_state') == 'unavailable'
+                   or not response_added and current.get('generation_state') != 'not_started')
+        summed = {k: sum(r['values'][k] for r in receipts)
+                  for k in ('prompt_tokens', 'completion_tokens', 'total_tokens')}
+        diagnostics.update(current, investigation_requests=len(receipts), source_read_chars=read_chars)
+        if receipts and not unknown:
+            diagnostics['usage'] = dict(source='local llama.cpp investigation responses', units='tokens',
+                values=summed, requests_observed=len(receipts), max_request_completion_tokens=max(
+                    r['values']['completion_tokens'] for r in receipts), status='complete')
+            diagnostics['generation_state'] = 'finished'
+        elif receipts:
+            diagnostics['known_usage'] = json.dumps(summed, sort_keys=True)
+            diagnostics['usage'] = None
+        adapter.diagnostics = diagnostics
+        adapter.response_evidence = parent
+        adapter.stop_event = original_stop
+        for journal in journals:
+            journal.close()

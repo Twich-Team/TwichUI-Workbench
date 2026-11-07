@@ -316,6 +316,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     bug = bug_investigation.requested(original['payload'])
     bug_result, limitation = None, None
     validation_diagnostics = {}
+    inspection_packet = None
     response_evidence = None
     choice = original['payload'].get('local_planning')
     everyday_mode = everyday.enabled()
@@ -429,13 +430,19 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 c.execute(intakes.update().where(intakes.c.id == original['id']).values(status='investigating'))
                 original['status'] = 'investigating'
             claimed_generation = True
+            initial_source_packet = packet
             from workbench.planning_response import create_evidence
             response_evidence = create_evidence(lease, schema, wire.get('coverage') if bug else None,
                                                 wire.get('files') if bug else None)
             if response_evidence:
                 adapter_used.response_evidence = response_evidence
             try:
-                if codex_route or not model_selection:
+                if bug and isinstance(adapter_used, LocalProvider) and model_selection:
+                    from workbench.bug_source_planning import generate as investigate
+                    raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
+                        feedback, provider_stopped, model_selection.model)
+                    inspection_packet = packet
+                elif codex_route or not model_selection:
                     raw, model, basis = adapter_used.generate(wire, schema)
                 else:
                     raw, model, basis = adapter_used.generate(wire, schema, expected_model=model_selection.model)
@@ -480,7 +487,13 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 else:
                     adapter_used = LocalProvider(stop_event, ends_at=planning_end)
                     adapter_used.response_evidence = response_evidence
-                    raw, model, basis = adapter_used.generate(wire, schema, expected_model=target)
+                    if bug:
+                        from workbench.bug_source_planning import generate as investigate
+                        raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
+                            feedback, provider_stopped, target)
+                        inspection_packet = packet
+                    else:
+                        raw, model, basis = adapter_used.generate(wire, schema, expected_model=target)
             if planning_end is not None and time.monotonic() >= planning_end:
                 raise PlanningUnavailable('The shared planning deadline expired.', 'timeout')
             if len(json.dumps(raw, allow_nan=False).encode()) > 24000 or basis not in {'demo', 'local', 'codex'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
@@ -494,9 +507,11 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 if isinstance(getattr(adapter_used, 'diagnostics', None), dict):
                     adapter_used.diagnostics['evidence_id'] = response_evidence.identifier
             # Re-read committed evidence and private policy after the response.
-            if inspect_source(trusted_preparation.configuration(engine)) != packet:
+            if inspect_source(trusted_preparation.configuration(engine)) != initial_source_packet:
                 raise ValueError('Committed source or preparation policy changed during generation; review fresh evidence.')
             if bug:
+                from workbench.bug_source_planning import verify_packet
+                verify_packet(initial_source_packet, packet)
                 if job['payload'].get('bug_followup') and isinstance(raw, dict) and raw.get('question'):
                     raw = {**raw, 'limitation': raw['question'], 'question': None}
                 bug_result = bug_investigation.resolve(raw, packet, original['payload'], feedback)
@@ -663,7 +678,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         references.append(dict(kind='addon', id=f'bug-source-{index+1}', label=item['path'],
                             sha256=item['sha256'], source_revision=packet['base'],
                             excerpt='\n\n'.join(f"From line {part['line']}:\n{part['text']}" for part in item['excerpts'])))
-                payload = {**job['payload'], **({'scenario_generation': dict(model=model, basis=basis, evidence_sha256=(digest(packet['files']) if bug else packet['evidence_sha256']) if packet else None, policy_sha256=packet['policy_sha256'] if packet else None, diagnostics=getattr(adapter_used, 'diagnostics', {}))} if generation else {}), 'prepared_proposal_id': identity, 'task_contract': contract,
+                payload = {**job['payload'], **({'bug_inspection_packet': inspection_packet} if inspection_packet else {}), **({'scenario_generation': dict(model=model, basis=basis, evidence_sha256=(digest(packet['files']) if bug else packet['evidence_sha256']) if packet else None, policy_sha256=packet['policy_sha256'] if packet else None, diagnostics=getattr(adapter_used, 'diagnostics', {}))} if generation else {}), 'prepared_proposal_id': identity, 'task_contract': contract,
                     'basis': 'preparation', 'evidence': references, 'result': dict(summary=content['summary'],
                         clarification=('' if limitation else ' '.join(clarification)[:800]),
                         evidence_ids=[ref['id'] for ref in references], related_ids=[], proposal=content)}

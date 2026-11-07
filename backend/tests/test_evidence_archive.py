@@ -204,11 +204,11 @@ def test_invalid_sources_are_refused_without_archiving(evidence, source):
     assert not storage.exists()
 
 
-def test_restore_into_workspace_respects_counted_cap(evidence, monkeypatch):
+def test_restore_into_workspace_preserves_actual_physical_recovery_reserve(evidence, monkeypatch):
     root, storage, source, _ = evidence
     ea.archive(root, storage, 'closed', [source], remove=True)
-    monkeypatch.setattr(ea, 'ARTIFACT_LIMIT', 1)
-    with pytest.raises(ValueError, match='counted evidence budget'):
+    monkeypatch.setattr(ea, 'physical_headroom', lambda *args:0)
+    with pytest.raises(ValueError, match='physical recovery reserve'):
         ea.restore(root, 'closed', root)
     assert not (root / source).exists()
 

@@ -151,7 +151,7 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   <label htmlFor="request-interface">Does this request change the interface?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.</p>
   {localWork.data?.enabled&&(regression||bugWork)&&<div role="group" aria-label="Planning provider">
     <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('qwen-')||false} disabled={body.visual_requirement!=='nonvisual'}
-      onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>Allow one local Qwen request to {bugWork?'investigate this report':'plan this task'}</span></label>
+      onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>{bugWork?'Allow local Qwen to investigate this report':'Allow one local Qwen request to plan this task'}</span></label>
     {localWork.data.codex_configured ? <>
       {!localWork.data.codex_available&&<p className="detail-copy">The Codex connector is unavailable. If you choose Codex first, planning can proceed with Qwen only if you allow that switch.</p>}
       {body.local_planning?.startsWith('qwen-')&&<>
@@ -167,7 +167,7 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
           onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-with-local-fallback':'codex-once'})}/><span>Allow one switch to local Qwen if Codex is unavailable or reaches its included allowance reserve before generation</span></label>
       </>}
     </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
-    {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. It cannot edit files or publish. If a detail is missing, Workbench may ask for one reply and separate permission for a follow-up with the same provider.</p>}
+    {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. Local Qwen can use up to four requests within two minutes to inspect source and propose a plan. It cannot edit files or publish. If a real-world detail is missing, Workbench may ask for one reply and separate permission for a follow-up with the same provider.</p>}
     <p className="detail-copy">Choose “Does not change the interface” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. Permission expires after 30 minutes. Fallback applies only to planning before generation starts. Failed, partial or uncertain generation stops for review. Review the plan and approve the run separately. The run keeps the provider that made the plan.</p>
   </div>}
 </fieldset>

@@ -41,6 +41,13 @@ INSTRUCTIONS = (
     'Use null for unused plan/question/limitation alternatives. Stub/capture fields and args are mutually exclusive. '
     'Omit unused optional step fields and keep the plan concise enough for the bounded response. '
     'Declaration and test-call indexes are source context, not proof of a fixture export. Choose a matching committed bootstrap. '
+    'If source context is incomplete, request inspection instead of inventing details or asking the owner to find code. '
+    'An inspection requests 1-3 committed path/start/end windows, each at most 80 lines and 6500 total characters. '
+    'Alternatively an inspection entry {"query":"literal symbol or text"} searches committed project Lua, including test helpers. '
+    'Search returns bounded pointers; inspect the relevant body before proposing a repair. '
+    'Use visible line numbers, partial-function ranges or literal dependency paths. Source inspection is read-only. '
+    'At most four local requests share the investigation deadline; produce a plan when sufficient evidence is available. '
+    'Use null for every unused alternative, including inspection. '
     'For each observation give the expected and a distinct behavior-relevant incorrect scalar; no invented game evidence.'
 )
 
@@ -121,16 +128,16 @@ def context(original, feedback, policy):
     rankings = []
     for path, oid, raw, lines, name_hits, blocks in candidates:
         def score_block(index):
-            return sum(weight(term) for term in blocks[index])
+            return sum(weight(term) for term in sorted(blocks[index]))
         selected = sorted(blocks, key=lambda index: (-score_block(index), index))[:2]
-        score = (sum(weight(term) for term in name_hits)
+        score = (sum(weight(term) for term in sorted(name_hits))
                  + sum(score_block(index) for index in selected)
                  + max((len(blocks[index]) for index in selected), default=0) ** 2)
         excerpts = []
         for block in selected or [0]:
             start = max(0, block * 16 - 2)
             excerpts.append(dict(line=start + 1, text='\n'.join(lines[start:start + 18])[:625]))
-        rankings.append((score, path, sum(weight(term) for term in name_hits), dict(path=path, git_blob=oid,
+        rankings.append((score, path, sum(weight(term) for term in sorted(name_hits)), dict(path=path, git_blob=oid,
             sha256=hashlib.sha256(raw).hexdigest(), excerpts=excerpts)))
     order = sorted(rankings, key=lambda entry: (-entry[0], entry[1]))
     core = [item for _, path, _, item in order if path.startswith('!!!TwichUI/')]
@@ -150,6 +157,8 @@ def context(original, feedback, policy):
         if setup:
             item['client_bootstrap'] = setup
         files.append(item)
+    from workbench.source_context import excerpts
+    excerpts(files, inspected, terms, words)
     return dict(base=base, files=files, declarations=declaration_index(files, inspected, terms), policy_sha256=digest(policy))
 
 
@@ -243,14 +252,21 @@ def report_coverage(original):
 
 def planning_request(packet, original, feedback):
     return BugPlanningResponse, dict(
-        purpose='investigate-addon-bug', base=packet['base'], files=packet['files'],
+        purpose='investigate-addon-bug', base=packet['base'],
+        files=[{k: v for k, v in item.items() if k not in ('git_blob', 'sha256')}
+               for item in packet['files']],
         report=dict(title=original['title'], description=original['description'],
                     lua_error=original.get('lua_error', '')), owner_reply=feedback,
-        coverage=report_coverage(original), declarations=packet.get('declarations', []))
+        coverage=report_coverage(original),
+        context_note='Exact committed lines. Coverage labels distinguish complete and partial functions. '
+                     'A bootstrap tail shows final loads; its full committed prefix is independently checked.')
 
 
 def resolve(raw, packet, original, feedback):
     draft = BugPlanningResponse.model_validate(raw)
+    if draft.inspection:
+        raise ResponseValidationError('Read-only source inspection must finish before a repair proposal.',
+            ['inspection'], 'a completed plan, question or limitation', draft.inspection)
     paths, acceptance, checks, evidence, bug = [], [], [], [], None
     if draft.plan:
         plan = draft.plan
@@ -314,7 +330,10 @@ def resolve(raw, packet, original, feedback):
         windows = []
         for i in range(4):
             path = ordered[i % len(ordered)]
-            chunks = by_path[path]['excerpts']
+            chunks = [w for w in reversed(packet.get('inspection_windows', [])) if w['path'] == path] or by_path[path]['excerpts']
+            if not chunks:
+                raise ResponseValidationError('The plan selected code without an inspected source window.',
+                    ['plan', 'read_paths'], 'visible committed source context', path)
             start = chunks[(i // len(ordered)) % len(chunks)]['line']
             windows.append(dict(path=path, start=start, end=start+35))
         bug = dict(plan=proposed, windows=windows, bootstrap_source=bootstrap_source,

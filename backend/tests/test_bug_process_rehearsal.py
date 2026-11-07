@@ -95,12 +95,17 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
             answer['question'] = 'A controlled extra question conflicts with the plan.'
         elif fault:
             answer['finding'] = 'PRIVATE_REJECTED_CONTENT' * 30
+        elif 'inspection_result' not in packet:
+            answer = dict(finding='Inspect the exact committed implementation before proposing its check.',
+                plan=None, question=None, limitation=None,
+                inspection=[dict(path=CLIENT_SOURCE, start=1, end=1) if case['client_case']
+                            else dict(query='return')])
         class Transport:
             seconds = 120
             def models(self, _): return expected_model
             def read(self, request, limit):
                 assert len(request.data) < 24000 and limit == 24000
-                outcome = dict(finding=answer['finding'], draft={key:answer[key] for key in ('plan', 'question', 'limitation')})
+                outcome = dict(finding=answer['finding'], draft={key:answer.get(key) for key in ('plan', 'question', 'limitation', 'inspection')})
                 return json.dumps(dict(id='controlled-response', model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
                     choices=[dict(finish_reason='stop', message=dict(content=json.dumps(outcome)))])).encode()
@@ -181,8 +186,8 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
             assert len(connection.execute(select(model_attempts).where(
                 model_attempts.c.purpose == "implementation")).all()) == index+1
     assert actors[0] != actors[1] != os.getpid()
-    assert [calls.get(timeout=2) for _ in range(6)] == [('fixture-fault', 'planning'), ('fixture-conflict', 'planning'), *[
-        (case["choice"], phase) for case in cases for phase in ("planning", "implementation")]]
+    assert [calls.get(timeout=2) for _ in range(8)] == [('fixture-fault', 'planning'), ('fixture-conflict', 'planning'), *[
+        (case["choice"], phase) for case in cases for phase in ("planning", "planning", "implementation")]]
     with store.connect() as c:
         failures = c.execute(select(intakes.c.id, intakes.c.payload).where(intakes.c.status == 'failed')).all()
         assert len(failures) == 2

@@ -266,8 +266,35 @@ class LocalProvider:
             messages=[dict(role='system', content=general + instructions),
                 dict(role='user', content=encoded)])
         encoded_body = json.dumps(body, separators=(',', ':')).encode()
+        if schema is BugPlanningResponse and len(encoded_body) > MAX_INPUT:
+            # Fit source context to the actual serialized request, preserving
+            # the report, schema and authority. Never imply a trimmed body is
+            # complete; the investigator can request its missing lines.
+            context['context_note'] = (context.get('context_note', '') +
+                ' Some source windows were shortened to the request bound; inspect missing lines when needed.')
+            for _ in range(512):
+                options = [(item, part) for item in context.get('files', []) for part in item.get('excerpts', [])]
+                if not options:
+                    break
+                item, part = max(options, key=lambda pair:(
+                    pair[1].get('coverage') != 'requested committed lines', len(pair[1].get('text', ''))))
+                lines = part['text'].splitlines()
+                if len(lines) < 2:
+                    item['excerpts'].remove(part)
+                else:
+                    part.setdefault('requested_through_line', part.get('through_line', part['line']+len(lines)-1))
+                    lines = lines[:max(1,len(lines)//2)]
+                    part.update(text='\n'.join(lines), through_line=part['line']+len(lines)-1,
+                                coverage='partial model-input window')
+                body['messages'][1]['content'] = json.dumps(context, ensure_ascii=True, separators=(',', ':'))
+                encoded_body = json.dumps(body, separators=(',', ':')).encode()
+                if len(encoded_body) <= MAX_INPUT:
+                    break
         if (issubclass(schema, ScenarioResponse) or schema is BugPlanningResponse) and len(encoded_body) > MAX_INPUT:
             raise PlanningUnavailable('Serialized grounded request exceeds the input budget; narrow the request.')
+        if schema is BugPlanningResponse:
+            self.diagnostics['input_bytes'] = len(body['messages'][1]['content'].encode())
+            self.diagnostics['request_bytes'] = len(encoded_body)
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
             encoded_body, {'Authorization': 'Bearer '+secret, 'Content-Type': 'application/json'})
         self.diagnostics['generation_state'] = 'uncertain'

@@ -277,6 +277,8 @@ def test_followup_requires_explicit_bound_consent_and_one_settled_route(
 
     def generate(self, packet, schema, expected_model):
         result, _, _ = planner.generate(packet, schema)
+        self.diagnostics = dict(generation_state='finished', accounting_state='complete',
+            usage=dict(units='tokens', values=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50)))
         return result, expected_model, 'local'
 
     monkeypatch.setattr(LocalProvider, 'generate', generate)

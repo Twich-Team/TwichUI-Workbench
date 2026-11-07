@@ -99,16 +99,42 @@ class BugPlan(Data):
     reproducer: Reproducer
 
 
+class ReadWindow(Data):
+    path: LuaPath | TestPath
+    start: int = Field(ge=1)
+    end: int = Field(ge=1)
+
+
+class InvestigationRead(ReadWindow):
+    path: Annotated[str, Field(pattern=r'^(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/[A-Za-z0-9_./-]+)\.lua$', max_length=240)]
+    @model_validator(mode='after')
+    def bounded(self):
+        if not self.start <= self.end < self.start+80:
+            raise ValueError('Request one to eighty committed lines per source window')
+        return self
+
+
+class InvestigationSearch(Data):
+    query: Annotated[StrictStr, Field(min_length=3, max_length=80)]
+
+    @model_validator(mode='after')
+    def literal(self):
+        if len(self.query.strip()) < 3 or '\n' in self.query or '\r' in self.query:
+            raise ValueError('Use one bounded literal source search')
+        return self
+
+
 class BugPlanningResponse(Data):
     finding: Short
     plan: BugPlan | None
     question: Short | None
     limitation: Short | None
+    inspection: Annotated[list[InvestigationRead | InvestigationSearch], Field(min_length=1, max_length=3)] | None = None
 
     @model_validator(mode='after')
     def one_outcome(self):
-        if sum(value is not None for value in (self.plan, self.question, self.limitation)) != 1:
-            raise ValueError('Return exactly one of a plan, clarification, or unsupported finding')
+        if sum(value is not None for value in (self.plan, self.question, self.limitation, self.inspection)) != 1:
+            raise ValueError('Return exactly one of a plan, clarification, unsupported finding, or source inspection')
         return self
 
 
@@ -117,6 +143,7 @@ def validation_diagnostics(error):
     fields = set().union(*(model.model_fields for model in (
         BugPlanningResponse, BugPlan, Reproducer, ClientBootstrap, Step,
         Observation, FixtureField,
+        InvestigationRead, InvestigationSearch,
     )))
     rows = []
     for issue in error.errors(include_input=False, include_context=False, include_url=False)[:4]:
@@ -131,12 +158,6 @@ def validation_diagnostics(error):
     return dict(validation_errors=error.error_count(),
                 validation_locations='; '.join(rows)[:600],
                 validation_schema_sha256=digest(BugPlanningResponse.model_json_schema()))
-
-
-class ReadWindow(Data):
-    path: LuaPath | TestPath
-    start: int = Field(ge=1)
-    end: int = Field(ge=1)
 
 
 class BugEvidence(Data):

@@ -31,6 +31,8 @@ NOTE = 'Owner-delegated acceptance automation · four sealed regression cases.'
 CAMPAIGN = dict(minutes=960, restorationMinutes=120, attempts=8, revisions=3,
                 localRuns=5, codexRuns=4, qwenRequests=110, qwenGeneratedTokens=133300,
                 codexTurns=8)
+OUTCOME = dict(mode='owner-outcome-v1', authority='STANDING_OWNER_DIRECTION_AUTONOMOUS_DELIVERY.md',
+               cumulative_caps=False, preserve_accounting=True)
 
 
 def require(condition, message):
@@ -74,11 +76,11 @@ def build_policy(inputs, *, bug_input=None):
             excerptSha=sha256(b''.join(excerpt)).hexdigest(), bindings=wire['binding_options'], fixtureResponse=raw))
     budget = TaskBudget(activate_once=True, offer_id='00000000-0000-0000-0000-000000000000',
                         offer_fingerprint='0' * 64).model_dump(mode='json')
-    policy = dict(base=BASE, models=MODELS, cases=cases, budget=budget, limits=LIMITS, note=NOTE)
+    policy = dict(base=BASE, models=MODELS, cases=cases, budget=budget, limits=LIMITS, note=NOTE,
+                  outcome=OUTCOME)
     if bug_input:
         case = build_bug_case(bug_input)
-        policy.update(windowMinutes=600,
-            note='Owner-delegated acceptance automation · sealed provider cases and flight-path report.')
+        policy.update(note='Owner-delegated acceptance automation · sealed provider cases and flight-path report.')
         cases.append(case)
     return policy
 
@@ -100,7 +102,7 @@ def build_bug_case(bug_input):
                 readPaths=paths, writablePaths=writable)
 
 
-def check_bug_plan(plan, original, case, preparation):
+def check_bug_plan(plan, original, case, preparation, inspection_packet=None):
     contract = plan['task_contract']
     evidence = contract['bug_evidence']
     packet = bug_investigation.context(original, '', preparation)
@@ -108,6 +110,11 @@ def check_bug_plan(plan, original, case, preparation):
             and [f['path'] for f in packet['files']] == case['readPaths']
             and set(contract['writable_paths']) <= set(case['writablePaths']),
             'bug source or write envelope changed')
+    if inspection_packet:
+        from workbench.bug_source_planning import verify_packet
+        packet = verify_packet(packet, inspection_packet)
+    require(contract['scenario_grounding']['evidence_sha256'] == digest(packet['files']),
+            'investigated source binding changed')
     reviewed = evidence['plan']
     check = reviewed['reproducer']
     steps = check['steps']
@@ -147,8 +154,12 @@ def closeout(connection, identity, execution, case):
         if case['provider'] == 'codex':
             require(0 < values['total_tokens'] <= 32768, 'Codex observed threshold exceeded')
         else:
+            if purpose == 'planning':
+                require(1 <= usage.get('requests_observed', 1) <= (4 if case['request']['kind'] == 'issue' else 1),
+                        'planning request count exceeds its task consent')
             require(0 <= values['completion_tokens'] <= {
-                'planning': 2600, 'implementation': 24000, 'capability_validation': 60,
+                'planning': 10400 if case['request']['kind'] == 'issue' else 2600,
+                'implementation': 24000, 'capability_validation': 60,
             }[purpose], 'Qwen completion token bound exceeded')
     [run] = connection.execute('SELECT * FROM real_execution_requests WHERE id=?', (execution,)).fetchall()
     [session] = connection.execute('''SELECT s.* FROM task_sessions s
@@ -178,7 +189,10 @@ def check_review(connection, request, case, preparation):
                                             (request['intake'],)).fetchone()[0])
     bug = case['request']['kind'] == 'issue'
     if bug:
-        actual = check_bug_plan(plan, original, case, preparation)
+        job = connection.execute("SELECT payload FROM planning_jobs WHERE intake_id=? AND kind='planning'",
+                                 (request['intake'],)).fetchone()
+        inspected = json.loads(job[0]).get('bug_inspection_packet') if job else None
+        actual = check_bug_plan(plan, original, case, preparation, inspected)
     else:
         actual = plan['task_contract']['behavioral_evidence']
         require(actual['review_digest'] == behavior.expectation_digest(actual)
@@ -198,7 +212,13 @@ def check_review(connection, request, case, preparation):
     usage = json.loads(usage)
     require(outcome == 'completed' and model == case['model'] and usage['units'] == 'tokens',
             'planning usage or provider identity was not reported')
-    key, cap = ('total_tokens', 32768) if case['provider'] == 'codex' else ('completion_tokens', 2600)
+    key, cap = ('total_tokens', 32768) if case['provider'] == 'codex' else ('completion_tokens', 10400 if bug else 2600)
+    if bug and case['provider'] == 'local':
+        require(1 <= usage.get('requests_observed', 1) <= 4
+                and usage.get('max_request_completion_tokens', usage['values'][key]) <= 2600,
+                'local inspection request accounting changed')
+    elif case['provider'] == 'local':
+        require(usage.get('requests_observed', 1) == 1, 'supporting planning request count changed')
     require(0 < usage['values'][key] <= cap, 'planning usage exceeds the approved bound')
     if request['action'] == 'run':
         offer = request['offer']['offer']
@@ -223,13 +243,15 @@ def check_review(connection, request, case, preparation):
 
 def campaign_admission(connection, request, case, policy):
     """Campaign reservations supplement the unchanged per-task application bounds."""
-    if not policy.get('campaign'):
+    outcome = policy.get('outcome')
+    if not policy.get('campaign') and not outcome:
         require(not request.get('campaign'), 'Unexpected campaign authority')
         return
-    require(policy['campaign'] == CAMPAIGN, 'Campaign limits changed')
-    campaign = request.get('campaign') or {}
-    require(type(campaign.get('attempt')) is int and 1 <= campaign['attempt'] <= 8
-            and type(campaign.get('revision')) is int and 0 <= campaign['revision'] <= 3
+    require(outcome == OUTCOME if outcome else policy['campaign'] == CAMPAIGN, 'Delivery authority changed')
+    require(not outcome or not policy.get('campaign') and not request.get('campaign'), 'Obsolete campaign ceiling supplied')
+    campaign = request.get('outcome' if outcome else 'campaign') or {}
+    require(type(campaign.get('attempt')) is int and 1 <= campaign['attempt'] and (outcome or campaign['attempt'] <= 8)
+            and type(campaign.get('revision')) is int and 0 <= campaign['revision'] and (outcome or campaign['revision'] <= 3)
             and campaign.get('opened_at') == request['opened']
             and set(campaign.get('prior_attempts', [])) <= set(request['prior']),
             'Campaign receipt changed')
@@ -237,7 +259,8 @@ def campaign_admission(connection, request, case, policy):
         FROM model_attempts WHERE julianday(started_at)>=julianday(?)''', (request['opened'],)).fetchall()
     intakes = connection.execute('''SELECT id, payload FROM intakes
         WHERE julianday(created_at)>=julianday(?)''', (request['opened'],)).fetchall()
-    require(intakes or case['choice'] == 'bug-flight-paths',
+    needs_bug = not outcome or any(c['choice'] == 'bug-flight-paths' for c in policy.get('cases', []))
+    require(not needs_bug or intakes or case['choice'] == 'bug-flight-paths',
             'The campaign must start with the real bug journey')
     same_case = []
     for identity, raw in intakes:
@@ -254,7 +277,7 @@ def campaign_admission(connection, request, case, policy):
                     json_extract(g.snapshot,'$.workflow_task.intake_id')=?''', (identity,)).fetchone(),
                     'A checked case cannot be replayed')
     admission = int(request['action'] == 'submit')
-    require(len(intakes)+admission <= 8 and len(same_case)+admission <= (
+    require(outcome or len(intakes)+admission <= 8 and len(same_case)+admission <= (
         3 if case['choice'] == 'bug-flight-paths' else 2),
         'Campaign case allocation exhausted')
     before = [row for row in rows if row[1] != request.get('intake')]
@@ -263,7 +286,7 @@ def campaign_admission(connection, request, case, policy):
             'Prior execution is unsettled or uncertain')
     local_tasks, codex_tasks = set(), set()
     qwen_requests = qwen_tokens = codex_turns = 0
-    for identity, task, backend, purpose, outcome, finished, raw in rows:
+    for identity, task, backend, purpose, row_outcome, finished, raw in rows:
         require(finished and raw, 'Campaign accounting unavailable')
         usage = json.loads(raw)
         require(isinstance(usage, dict) and (purpose == 'capability_validation' or
@@ -279,8 +302,8 @@ def campaign_admission(connection, request, case, policy):
                 require(purpose == 'planning' or usage.get('status') == 'complete',
                         'Local usage incomplete')
                 value = usage.get('values', {}).get('completion_tokens')
-                count = 1 if purpose == 'planning' else usage.get('requests_observed')
-                require(type(value) is int and 0 <= value <= (2600 if purpose == 'planning' else 24000)
+                count = usage.get('requests_observed', 1) if purpose == 'planning' else usage.get('requests_observed')
+                require(type(value) is int and 0 <= value <= ((10400 if outcome else 2600) if purpose == 'planning' else 24000)
                         and type(count) is int and count >= 1,
                         'Local request accounting unavailable')
                 qwen_requests += count
@@ -299,7 +322,7 @@ def campaign_admission(connection, request, case, policy):
         (local_tasks if case['provider'] == 'local' else codex_tasks).add(new)
         require(len({row[1] for row in rows}) < campaign['attempt'],
                 'Campaign attempt number reused')
-    require(len(local_tasks) <= 5 and len(codex_tasks) <= 4 and
+    require(outcome or len(local_tasks) <= 5 and len(codex_tasks) <= 4 and
             qwen_requests <= 110 and qwen_tokens <= 133300 and codex_turns <= 8,
             'Campaign usage limit reached')
 
@@ -324,7 +347,7 @@ def main():
         case = next(c for c in policy['cases'] if c['choice'] == request['choice'])
         if case['request']['kind'] == 'issue':
             sealed = json.loads((ROOT / 'ops/bug-acceptance-input.json').read_text())
-            require(policy.get('windowMinutes') == 600 and case['request'] == sealed['request']
+            require((policy.get('outcome') == OUTCOME or policy.get('windowMinutes') == 600) and case['request'] == sealed['request']
                     and case['criteria'] == sealed['criteria'], 'pinned bug request changed')
             if request['action'] == 'submit':
                 require(build_bug_case(sealed) == case, 'pinned bug source envelope changed')

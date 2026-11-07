@@ -66,13 +66,18 @@ test('a lost submission response recovers the same durable receipt after retry',
 
 test('contention preserves choices and retries the exact command', async ({ page }) => {
   await openReview(page); await answerAll(page);
-  const lock = spawn('.venv/bin/python', ['scripts/fixture_ctl.py', 'lock'], { env: { ...process.env, PYTHONPATH: 'backend' } });
+  const lock = spawn('.venv/bin/python', ['scripts/fixture_ctl.py', 'lock-until-release'], { env: { ...process.env, PYTHONPATH: 'backend' } });
   await new Promise<void>(resolve => lock.stdout.once('data', () => resolve()));
   const released = new Promise<void>(resolve => lock.once('exit', () => resolve()));
-  await page.getByRole('button', { name: 'Save review decisions' }).click();
-  await expect(page.getByRole('alert')).toContainText('busy');
-  const draft = await page.evaluate(() => localStorage.getItem('review:cozy-step-review'));
-  await released;
+  let draft: string | null = null;
+  try {
+    await page.getByRole('button', { name: 'Save review decisions' }).click();
+    await expect(page.getByRole('alert')).toContainText('busy');
+    draft = await page.evaluate(() => localStorage.getItem('review:cozy-step-review'));
+  } finally {
+    lock.stdin.end('release\n');
+    await released;
+  }
   await page.getByRole('button', { name: 'Retry same decision' }).click();
   await expect(page.getByRole('dialog').getByText('Saved · Pending application')).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('review:cozy-step-review'))).toBe(draft);

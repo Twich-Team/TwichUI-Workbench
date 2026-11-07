@@ -45,12 +45,16 @@ four local requests sharing the existing two-minute investigation deadline.
 New inspection paths, accounting, cancellation and invalid source requests need
 focused/process tests and final full suites before activation.
 
-55 focused parser/workflow/legacy-admission tests passed after wire/fixture
-corrections. This does not yet verify source-follow-up branches or a new build.
-Acceptance controls are being changed to standing outcome authority while
-retaining prior activity reconciliation, duplicate protection and per-operation
-limits; finish the driver and tests before deployment. Replace the 512 MiB
-local-test stop with practical verified retention and actual capacity checks.
+Source-follow-up guard tests passed (14), native separate-process/browser search/read
+rehearsal passed (two fixture bugs, concurrent polling, restarts), and all four
+controlled provider journeys passed. Backend/frontend passed 1,204/25 before final
+archive/fixture edits; rerun complete final checks before activation. Chromium
+found a timed-lock fixture race, now fixed with an explicit bounded release and
+its targeted check passed. Active acceptance policy now uses standing outcome
+authority, preserves accounting/no-replay/scope gates and has no campaign caps.
+Development, restoration and rehearsal entry points use actual physical recovery
+room and verified retention instead of the obsolete 512 MiB stop. The installed
+policy field is a soft retention watermark, not a cumulative execution ceiling.
 The proposed extension at 25d3e48 is superseded, not approved or needed.
 
 ## Evidence and next operations

@@ -8,7 +8,14 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 CODEX = Path('/home/rich/.local/bin/codex')
+# Historical reporting compatibility only. Active admission uses physical
+# recovery room and verified retention, not this former delivery allowance.
 ARTIFACT_LIMIT = 512 * 1024 * 1024
+
+
+def physical_headroom(paths=(ROOT, Path('/dev/shm'))):
+    """Usable physical space beyond recovery reserve, never a campaign total."""
+    return min(shutil.disk_usage(path).free for path in paths)-(4 << 30)
 
 
 def environment():

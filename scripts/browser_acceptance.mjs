@@ -59,8 +59,8 @@ export function reviewPlan(item, candidate, identity, revision, now) {
     exact(without(scenario, 'id'), without(candidate.contract.behavioral_evidence.scenarios[0], 'id'),
       'example operation, setup, file or expected result changed');
   }
-  check(hex(ground.policy_sha256), 'preparation policy binding missing');
-  exact(ground, {evidence_sha256: candidate.evidenceSha, policy_sha256: ground.policy_sha256,
+  check(hex(ground.policy_sha256) && hex(ground.evidence_sha256), 'preparation policy binding missing');
+  exact(ground, {evidence_sha256: bug ? ground.evidence_sha256 : candidate.evidenceSha, policy_sha256: ground.policy_sha256,
     basis: candidate.provider, ...(candidate.reason ? {fallback_reason: candidate.reason} : {}),
     model_selection: {policy_revision: revision, model: candidate.model}}, 'grounding or provider route changed');
   const [attempt] = item.provider_activity || [];
@@ -227,7 +227,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
     }
     await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
     const local = candidate.request.local_planning.startsWith('qwen-');
-    await page.getByRole('checkbox', {name:local ? /Allow one local Qwen request/ : /Allow one signed-in Codex turn/}).check();
+    await page.getByRole('checkbox', {name:local ? (bug ? /Allow local Qwen to investigate/ : /Allow one local Qwen request/) : /Allow one signed-in Codex turn/}).check();
     if (candidate.reason) await page.getByRole('checkbox', {name:local ?
       /Allow one switch to signed-in Codex/ : /Allow one switch to local Qwen/}).check();
     const capacity = async () => {

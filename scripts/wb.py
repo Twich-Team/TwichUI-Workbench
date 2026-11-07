@@ -2,7 +2,8 @@
 import argparse
 import subprocess
 import sys
-from project_env import ARTIFACT_LIMIT, ROOT, artifact_bytes, environment
+from project_env import ROOT, environment
+from evidence_retention import maintain
 
 RECOVERY = {'recover-preparation', 'run-preparation-recovery'}
 
@@ -23,9 +24,7 @@ def main():
     parser.add_argument('--job-id', help='Recovery only: full ID of the original preparation job')
     parser.add_argument('--review-binding', help='Recovery authorization only: exact approved proposal binding')
     args = parser.parse_args()
-    if artifact_bytes() >= ARTIFACT_LIMIT:
-        print('BUDGET_EXHAUSTED: local evidence exceeds 512 MiB. Archive it explicitly before retrying.')
-        return 4
+    maintain()
     preparation_args = [args.database, args.intake_id, args.task_id, args.scope_approval_id, args.evidence_root]
     if args.command in RECOVERY:
         authorize = args.command == 'recover-preparation'
@@ -39,9 +38,7 @@ def main():
         if authorize:
             command += ['--authorize-review-binding', args.review_binding]
         result = subprocess.run(command, cwd=ROOT, env=env, check=False)
-        if artifact_bytes() > ARTIFACT_LIMIT:
-            print('BUDGET_EXHAUSTED: evidence exceeded 512 MiB; no files were deleted.')
-            return 4
+        maintain()
         return result.returncode
     if args.job_id is not None or args.review_binding is not None:
         parser.error('--job-id and --review-binding require a preparation recovery command')
@@ -52,9 +49,7 @@ def main():
         command = [str(ROOT / '.venv/bin/python'), '-m', 'workbench.trusted_preparation',
                    *preparation_args]
         result = subprocess.run(command, cwd=ROOT, env=environment(), check=False)
-        if artifact_bytes() > ARTIFACT_LIMIT:
-            print('BUDGET_EXHAUSTED: evidence exceeded 512 MiB; no files were deleted.')
-            return 4
+        maintain()
         return result.returncode
     if any(preparation_args):
         parser.error('Preparation arguments require prepare-offer')
@@ -78,9 +73,7 @@ def main():
     if args.review:
         command += ['--review']
     result = subprocess.run(command, cwd=ROOT, env=environment(), check=False)
-    if artifact_bytes() > ARTIFACT_LIMIT:
-        print('BUDGET_EXHAUSTED: evidence exceeded 512 MiB; no files were deleted.')
-        return 4
+    maintain()
     return result.returncode
 
 

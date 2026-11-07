@@ -8,9 +8,11 @@ const [, , origin, policyPath, phase, database, preparation] = process.argv;
 const policy = JSON.parse(readFileSync(policyPath));
 const opened = new Date().toISOString();
 const prior = [];
+let attempt = 1;
 const verify = (verb, candidate, action, data) => JSON.parse(execFileSync('.venv/bin/python',
   ['scripts/acceptance_policy.py', verb, '--policy', policyPath, '--database', database, '--preparation', preparation],
-  {input:JSON.stringify({...data, action, choice:candidate.choice, prior, opened}), timeout:4500}));
+  {input:JSON.stringify({...data, action, choice:candidate.choice, prior, opened,
+    ...(policy.outcome ? {outcome:{attempt,revision:0,opened_at:opened,prior_attempts:[...prior]}} : {})}), timeout:4500}));
 const browser = await chromium.launch({args:['--disable-dev-shm-usage', '--disable-background-networking']});
 try {
   for (const attack of ['missing control', 'dialog', 'duplicate']) {
@@ -126,6 +128,7 @@ try {
       });
       assert.equal(events.filter(event => event === 'reviewed').length, 2);
       assert.equal(events.at(-1), 'checked');
+      attempt++;
     } finally {
       await observer.close();
       await context.close();

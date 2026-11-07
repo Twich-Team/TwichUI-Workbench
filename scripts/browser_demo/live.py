@@ -17,7 +17,7 @@ import runpy
 from browser_demo.launch import run_owned, utc_now
 from browser_demo import stage as layout
 from browser_demo.supervisor import RESERVE, RunHeld
-from project_env import ARTIFACT_LIMIT, artifact_bytes, require_ports
+from project_env import artifact_bytes, require_ports
 
 def require(condition, message):
     if not condition:
@@ -136,9 +136,9 @@ def run(manifest_path, evidence, fingerprint, *, rehearsal=False):
             else:
                 raise RunHeld("Evidence and scratch capacity could not be verified.")
             physical = min(shutil.disk_usage(path).free for path in (evidence, stage, scratch, "/dev/shm"))
-            require(counted + reserve <= ARTIFACT_LIMIT and scratch_bytes <= 1 << 30 and physical >= 4 << 30,
-                    "Evidence headroom, physical space or scratch exceeded the approved limit.")
-            return dict(counted=counted, headroom=ARTIFACT_LIMIT-counted, scratch=scratch_bytes, physical_free=physical)
+            require(scratch_bytes <= 1 << 30 and physical >= (4 << 30)+reserve,
+                    "Physical recovery room or scratch exceeded the operational limit.")
+            return dict(counted=counted, headroom=physical-(4 << 30), scratch=scratch_bytes, physical_free=physical)
 
         def activate():
             room(RESERVE)

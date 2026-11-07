@@ -15,8 +15,8 @@ import time
 import tomllib
 from uuid import uuid4
 
-from project_env import (ARTIFACT_LIMIT, CODEX, ROOT, artifact_bytes, config_arguments,
-                         environment, require_ports)
+from project_env import (CODEX, ROOT, config_arguments,
+                         environment, require_ports, physical_headroom)
 
 STATUSES = {'READY_FOR_REVIEW', 'BLOCKED', 'BUDGET_EXHAUSTED', 'INTERRUPTED'}
 EXIT_CODES = {'READY_FOR_REVIEW': 0, 'BLOCKED': 2, 'BUDGET_EXHAUSTED': 4, 'INTERRUPTED': 130}
@@ -133,7 +133,7 @@ def execute_bounded(command, env, deadline, event_log, prompt=None, interrupted=
         while True:
             if interrupted():
                 return 'INTERRUPTED', None
-            if time.monotonic() >= deadline or artifact_bytes() > ARTIFACT_LIMIT or byte_count > 8 * 1024 * 1024:
+            if time.monotonic() >= deadline or physical_headroom() < 0 or byte_count > 8 * 1024 * 1024:
                 return 'BUDGET_EXHAUSTED', None
             if select.select([process.stdout], [], [], .2)[0]:
                 raw = os.read(process.stdout.fileno(), 65536)
@@ -199,8 +199,8 @@ def main():
         atomic_json(local / 'milestone-status.json', state)
         try:
             require_ports([5180, 8787, 5280, 9187, 19880, 19881])
-            if artifact_bytes() > ARTIFACT_LIMIT:
-                return finish('BUDGET_EXHAUSTED', 'Local evidence exceeds 512 MiB; archive explicitly, then retry.')
+            if physical_headroom() < 0:
+                return finish('BUDGET_EXHAUSTED', 'Actual physical recovery reserve is unavailable; preserve evidence and free owned temporary space.')
             auth = subprocess.run([str(CODEX), 'login', 'status'], capture_output=True, timeout=10)
             if auth.returncode or b'ChatGPT' not in auth.stdout + auth.stderr:
                 return finish('BLOCKED', 'Existing ChatGPT authentication could not be verified; no login change was attempted.')

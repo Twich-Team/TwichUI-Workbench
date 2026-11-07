@@ -179,8 +179,18 @@ def main():
 
 def run(engine, args, stopped, policy):
     from workbench.everyday import watch_capacity
+    import time
+
+    next_housekeeping = 0
 
     while not stopped.is_set():
+        if policy and time.monotonic() >= next_housekeeping:
+            from workbench.everyday import housekeep
+            try:
+                housekeep(policy)
+            except (OSError, RuntimeError, ValueError):
+                log.exception('Retention could not safely archive; originals remain preserved')
+            next_housekeeping = time.monotonic()+60
         try:
             if args.session_config:
                 from workbench import task_session

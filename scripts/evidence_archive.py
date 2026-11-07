@@ -1,7 +1,7 @@
 """Explicit local copy/verify/prune, lookup and restore for CLOSED evidence trees.
 
-No automatic retention or application integration. The operator must first check
-ownership/references and obtain authorization for each source directory.
+Callers must check ownership/references and have explicit or standing authority.
+Automatic retention uses this same verified mechanism for closed owned outputs.
 """
 import argparse
 from contextlib import contextmanager
@@ -15,7 +15,7 @@ import shutil
 import stat
 import tempfile
 
-from project_env import ARTIFACT_LIMIT, ROOT, artifact_bytes
+from project_env import ROOT, artifact_bytes, physical_headroom
 
 ARCHIVES = Path.home() / '.local/share/TwichUI-Workbench/evidence-archives'
 INDEX = 'artifacts/archive-index'
@@ -244,10 +244,12 @@ def restore(root, archive_id, destination):
     verify(bundle / 'data', manifest)
     plain(destination)
     surviving = verify(destination, manifest, missing=True)
-    if destination == root:
-        required = sum(e.get('size', 0) for n, e in manifest['entries'].items() if n not in surviving)
-        if artifact_bytes(root) + required > ARTIFACT_LIMIT:
-            raise ValueError('Restore would exceed the counted evidence budget; use an isolated destination')
+    required = sum(e.get('size', 0) for n, e in manifest['entries'].items() if n not in surviving)
+    capacity_path = destination
+    while not capacity_path.exists():
+        capacity_path = capacity_path.parent
+    if physical_headroom((capacity_path, Path('/dev/shm'))) < required:
+        raise ValueError('Restore would consume the physical recovery reserve; preserve the archive and free owned space')
     copy_entries(bundle / 'data', destination, manifest,
                  staging=destination / '.local/evidence-restore-partials')
     verify(destination, manifest)
@@ -291,8 +293,8 @@ def main():
                 result = lookup(ROOT, args.original)
             elif args.command == 'status':
                 used = artifact_bytes()
-                result = dict(counted_bytes=used, limit_bytes=ARTIFACT_LIMIT,
-                              headroom_bytes=ARTIFACT_LIMIT - used)
+                result = dict(counted_bytes=used, cumulative_limit=False,
+                              physical_headroom_bytes=physical_headroom())
             elif args.command == 'restore':
                 restore(ROOT, args.archive_id, args.destination.absolute())
                 result = dict(restored_to=str(args.destination.absolute()))

@@ -7,13 +7,27 @@ import sqlite3
 import pytest
 from sqlalchemy import text
 
-from acceptance_policy import CAMPAIGN, campaign_admission
+from acceptance_policy import CAMPAIGN, OUTCOME, campaign_admission
 
 
 def request():
     opened = datetime.now(timezone.utc).isoformat()
     return dict(action="submit", choice="bug-flight-paths", opened=opened, prior=[],
                 campaign=dict(attempt=1, revision=0, opened_at=opened, prior_attempts=[]))
+
+
+def test_standing_authority_removes_old_delivery_caps_but_keeps_prior_reconciliation(store):
+    value = request()
+    value['outcome'] = value.pop('campaign')
+    value['outcome'].update(attempt=25, revision=18)
+    for i in range(12):
+        add_intake(store, value, str(i))
+    with sqlite3.connect(store.url.database) as connection:
+        campaign_admission(connection, value, dict(choice='bug-flight-paths', provider='local'), dict(outcome=OUTCOME))
+    changed = copy.deepcopy(value)
+    changed['outcome']['opened_at'] = 'changed'
+    with sqlite3.connect(store.url.database) as connection, pytest.raises(ValueError, match='receipt'):
+        campaign_admission(connection, changed, dict(choice='bug-flight-paths', provider='local'), dict(outcome=OUTCOME))
 
 
 def check(store, value, *, choice="bug-flight-paths", limits=None):
