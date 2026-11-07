@@ -132,6 +132,11 @@ test('rejection, changed settings and historical success remain separate from cu
   await box.getByRole('button',{name:'Prepare sample PR',exact:true}).click();fixture('worker');
   await expect(box.getByRole('heading',{name:'Sample PR prepared',exact:true})).toBeVisible();
   fixture('admission-revoke');
+  // The intake poll moves revoked work into history. Wait for that displayed
+  // decision before opening/capturing its remounted historical review panel.
+  await expect(page.getByRole('region',{name:'Latest plan decision'}).getByRole('heading',{
+    name:'Review the current plan again',exact:true,
+  })).toBeVisible();
   await page.getByText('Original request, planning history and evidence',{exact:true}).click();
   await box.getByRole('button',{name:'Review changes',exact:true}).click();
   await expect(box.getByText('Historical result only.',{exact:false})).toBeVisible();
