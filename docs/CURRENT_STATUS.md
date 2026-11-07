@@ -2,11 +2,12 @@
 
 November 6, 2026 Mountain time.
 
-- Candidate `2446199` is sealed for one combined installation and acceptance
+- Candidate `f507278` is sealed for one combined installation and acceptance
   decision. Workbench now has a local development path for plain-language
   offline Lua bug reports, reviewed scope, an original-code reproduction,
   separate repair approval, independent candidate checks and a persistent
-  diff. Controlled Qwen and Codex paths passed. The everyday deployment
+  diff. The complete backend and frontend suites and separate opt-ins
+  passed. Controlled Qwen and Codex paths passed. The everyday deployment
   is still the restored loopback build.
 - The real acceptance report is navigation assuming all flight paths are
   unlocked. The expected behavior is per-character knowledge learned and

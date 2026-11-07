@@ -1,3 +1,24 @@
+# Complete offline verification and revised seal — November 6, 2026 Mountain time
+
+The owner requested the full suites after the committed fixture-loader
+adjustment. The first full Chromium run found two stale browser tests for
+revoked approvals. Both now follow the task into saved history and retain
+their original assertions. The new candidate `f507278` carries those
+test fixes with byte-identical application code and deployed assets.
+
+The complete backend and frontend unit suites, Chromium and visual suites,
+all four separately enabled checks, administrator suite, and native
+navigation setup smoke passed. The revised seal includes an exact
+conditional archive inventory for the additional closed browser evidence.
+The original history still matches 79 rows. Production and provider
+acceptance await the new binding.
+
+The everyday issue workflow builds its own source shortlist and bounded
+repair plan for each supported report. The six named writable files and
+Qwen-only route apply to the delegated flight-path trial. The four
+provider cases are still supporting evidence. Use the latest [exact
+approval record](BUG_FIX_INSTALL_APPROVAL_20261106.md), not the prior seal.
+
 # Sealed ordinary bug-fix candidate — November 6, 2026 Mountain time
 
 The owner reported a real navigation bug. The addon assumes all flight paths

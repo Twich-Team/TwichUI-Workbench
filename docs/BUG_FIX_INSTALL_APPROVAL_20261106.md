@@ -2,7 +2,7 @@
 
 November 6, 2026 Mountain time.
 
-**Decision requested.** Approve the sealed `2446199` package for one reversible
+**Decision requested.** Approve the sealed `f507278` package for one reversible
 installation, the named evidence archive if needed, four bounded provider
 checks, and one real bug task using local Qwen. The real task is your report
 that navigation assumes every flight path is available. The app must show
@@ -20,9 +20,9 @@ unsupported, ambiguous or failed bug task holds acceptance.
 
 | Item | Binding |
 | --- | --- |
-| Workbench commit and tree | `24461998cf0642a50b04189903c5a7c8b4236834` / `d597e6447407170307202fc324691adcd645c02c` |
-| Private stage `S` | `/home/rich/TwichUI-Workbench/.local/m5-review/everyday-bugfix-2446199` |
-| Regular-file seal | `ops/bundle.sha256`, SHA-256 `05db600a17a94a926ef0f99679ed90e07811aeb50e044e02cec993d238aaf1bd`, 4,506 files, 556,234,534 logical bytes |
+| Workbench commit and tree | `f5072783177c77d45ef41ee6d597e6e046b1dc6c` / `af821f7b49ee1fc30a55cc64615f69a8654c93bb` |
+| Private stage `S` | `/home/rich/TwichUI-Workbench/.local/m5-review/everyday-bugfix-f507278` |
+| Regular-file seal | `ops/bundle.sha256`, SHA-256 `26f8848eac8d5a5884455db6453c8a6db5dc2ff3d26168d3e5d7e41a533a2ccc`, 4,507 files, 556,413,416 logical bytes |
 | Symbolic links | `ops/symlinks.json`, SHA-256 `3fdc4a7ffbf1f7bf5bcc98ca7fcd757cc6d794a451be60aa791c495c918caee0`, 16 links |
 | Browser policy | `ops/browser-policy.json`, SHA-256 `8deca24916ac815411d1f73a689e9a5ba4b9febf20f8089bd4eb3bd71fb19e43` |
 | Inputs | `release/ops/acceptance-input.json` SHA-256 `a8f65253ef713b8e8373214dc3c09f0f622c9619079ec17dee99cd0149ad4d18` and `release/ops/bug-acceptance-input.json` SHA-256 `c8db86e07f4489f65256dde899f69be67baa6ec0180a280a5676620744bf43c0` |
@@ -58,18 +58,18 @@ current checks listed below before live activity. [Previous package](EVERYDAY_DE
    most 6 MiB counted setup, 72 MiB before each planning and run
    admission, 64 MiB per run and 4 MiB settlement reserve. Require at
    least 4 GiB physical free and at most 1 GiB owned scratch. The stage
-   forecast found 92,331,721 counted headroom bytes. If below 96 MiB,
-   approve only archive `everyday-bugfix-2446199-browser-results` using
+   forecast found 30,402,898 counted headroom bytes. If below 96 MiB,
+   approve only archive `everyday-bugfix-f507278-browser-results` using
    `S/ops/conditional-archive.json` SHA-256
-   `9cc8e652fc42474dd9b93093770b405be7676f0b83de221ab1deb173826476b5`.
-   It binds 14 closed browser directories, 100 regular files and
-   9,977,222 logical bytes, with source paths, hashes and metadata.
+   `45080ec59752653a91dd00949fc44fe29bc5b5b7d10db3ba7733781ffbfff899`.
+   It binds 34 closed browser directories, 605 regular files and
+   72,531,982 logical bytes, with source paths, hashes and metadata.
    Recheck the exact inventory, ownership, original-path references and
-   absence of open handles. Reserve 32 MiB physical for the copy and
+   absence of open handles. Reserve 192 MiB physical for the copy and
    independent restore. Copy to the existing private evidence-archive
    root, verify the bytes and metadata, restore separately, and verify
    original-path lookup before removing only matching originals.
-   Projected headroom is 102,308,943 bytes. Hold if the approved archive
+   Projected headroom is 102,934,880 bytes. Hold if the approved archive
    or capacity checks cannot meet the thresholds. Preserve the three
    previous verified archives, both previously retained history copies
    and all other evidence.
@@ -82,7 +82,7 @@ current checks listed below before live activity. [Previous package](EVERYDAY_DE
    private store-bound config, normal model key path, and
    `verify-active S`. The store remains on schema `0012`.
 5. Install the four exact rendered service files from `S/ops` using the
-   administrator helper for release `everyday-bugfix-2446199`.
+   administrator helper for release `everyday-bugfix-f507278`.
    `workbench-everyday-{worker,codex,api,lan}.service` run as Rich.
    Match the installed root-owned bytes. Provision TLS using the helper's
    fixed operation and issue only the owned inbound rule for TCP 9487 on
@@ -267,15 +267,26 @@ release.
 
 After successful acceptance the owner can report supported offline Lua
 bugs in ordinary language, approve the proposed repair, and review a
-checked local patch. The same app can add supported regression tests,
+checked local patch. For the next supported report, Workbench searches the
+configured committed addon and existing tests, selects evidence relevant
+to the report, and proposes a fresh bounded repair scope. It uses the same
+investigation, approval, isolated repair, independent checks and saved
+result. The existing installation configuration is reused. The owner
+uses the normal task decisions, with no developer registration or new
+setup prompt per task. The six eligible write targets and the Qwen-only
+route in this record apply to the delegated flight-path trial.
+
+The same app can add supported regression tests,
 choose local Qwen or signed-in Codex for eligible work, and explicitly
 allow one safe planning switch in either direction. The browser records
 and verification results persist. The supported scope is existing
-committed Lua files that the bounded harness can reproduce and check.
-Arbitrary addon defects, actual in-game acceptance, broader features,
-inspections, simulator tasks, draft PR delivery and autonomous maintenance
-remain separate requirements. The visual redesign and full requirements
-audit follow functional acceptance.
+committed Lua files whose behavior the bounded harness can reproduce and
+check. Success establishes a real Qwen bug repair and the four separate
+provider-routing cases. Live Codex bug repair, in-game acceptance, draft
+PR delivery and the full original scope remain open, including broader
+features, inspections, simulator tasks and autonomous maintenance.
+The visual redesign and full requirements audit follow functional
+acceptance.
 
 The full local suites and the final targeted checks distinguish controlled
 providers from installed acceptance. The reusable module and client
@@ -294,11 +305,31 @@ was used only to verify local committed-source selection and seal the
 request. Its plan, reproduction and repair remain for Workbench.
 
 
-The most recent full run before the final fixture-loader adjustment
-passed 1,123 backend tests with two opt-in tests skipped and 25 frontend
-tests. On the final source, build, schema, lint, the five focused bug
-checks, the confined committed navigation setup smoke, and the bug
-Chromium journey passed. The four unchanged regression inputs and
-contracts passed the separate controlled browser rehearsal. The installed
-helper's 48 offline tests passed and a disposable checked copy verified
-the setup script. [Desktop plan](/home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench/artifacts/runs/browser-r4tJyR/screenshots/bug-plan-1440.png) · [Phone result](/home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench/artifacts/runs/browser-r4tJyR/screenshots/bug-result-390.png) · [Native fixture smoke](/home/rich/.local/share/TwichUI-Workbench/bugfix-package-proof.eROk9R/pinned-harness-bootstrap.txt)
+## Complete offline verification on the sealed revision
+
+Both checks that failed in the first Chromium run were checking stale
+panels after a task moved to history. The tests now wait for the revoked
+approval warning, open the historical task, and exercise the original
+assertions. Both passed in a focused rerun and in the complete suite.
+The application, fixture loader, deployed assets and live case contracts
+are byte-identical to the previous candidate. The revised seal includes
+the corrected browser tests and the updated inventory of closed evidence
+needed to meet the same installation headroom threshold.
+
+| Check | Result on `f507278` |
+| --- | --- |
+| Exact-source build, types, lint and disposable schema check | Passed. The isolated rebuild adds one unused `.table` utility. The JavaScript matches after normalizing the CSS asset reference. The delegated browser rehearsal used the exact sealed distribution files. |
+| Default backend suite | 1,123 passed. Two explicit opt-ins ran separately below. The native private-loopback check ran and passed. |
+| Pinned-addon delegated browser opt-in | Passed all four cases against the sealed assets, with controlled provider outcomes. Default mode skips this rehearsal because it needs the pinned addon checkout. |
+| Confined repair readiness opt-in | Passed using actual sandboxed checks and scripted HTTP on historical fixture controls. Default mode skips this check because it needs an explicitly owned delegated cgroup and historical control inputs. The temporary unit was collected. |
+| Administrator helper tests | 48 passed. |
+| Frontend unit tests | 25 passed. |
+| Complete Chromium suite | 108 passed in default mode. Both default skips ran separately and passed with their isolated everyday fixtures. |
+| Everyday-mode Chromium opt-ins | The two-task regression journey and the ordinary bug-to-patch journey both passed. Default mode excludes each case because it requires its own disposable fixture. |
+| Chromium visual suite | 10 passed. Desktop and phone bug screenshots were inspected. |
+| Committed navigation setup smoke | The pinned addon's real client setup started in confinement. This verifies setup and does not establish the flight-path behavior or repair. |
+
+All four default-mode skips were covered by their dedicated invocations.
+Real provider acceptance and the actual flight-path fix await approval
+of this record. The restored loopback deployment and its verified history
+remained active throughout verification. [Verification receipt](/home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench/.local/runs/verification-f507278/result.json) · [Desktop plan](/home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench/artifacts/runs/browser-n6PoaX/screenshots/bug-plan-1440.png) · [Phone result](/home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench/artifacts/runs/browser-n6PoaX/screenshots/bug-result-390.png)

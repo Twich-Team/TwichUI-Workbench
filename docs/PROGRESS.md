@@ -1,3 +1,16 @@
+## November 6, 2026 — Complete verification of the sealed bug workflow
+
+- Ran complete suites from exact source after the fixture-loader adjustment.
+  Corrected two Chromium tests that opened stale panels after task approval
+  was revoked. Both passed in isolation and in the full rerun.
+- Final candidate `f507278` passed the default backend and frontend suites,
+  full Chromium and visual suites, both backend opt-ins, both browser
+  opt-ins, administrator tests and native navigation setup smoke. The four
+  provider cases used the exact sealed built assets and controlled providers.
+- Retained the earlier failure evidence and sealed the revised conditional
+  archive inventory. The actual flight-path task remains the real acceptance
+  gate, with local Qwen. [Updated approval record](BUG_FIX_INSTALL_APPROVAL_20261106.md)
+
 ## November 6, 2026 — Ordinary bug workflow and sealed acceptance
 
 - Connected issue intake, bounded committed-file investigation, one optional
