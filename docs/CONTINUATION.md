@@ -1,3 +1,48 @@
+# Flight-path acceptance stopped and restored — November 6, 2026 Mountain time
+
+The approved `8dcb17c` window for sealed `f507278` closed after the
+first case held. The expanded archive matched its approved inventory.
+The independent restore and all 605 original-path lookups passed before
+only the matching 34 browser-evidence directories were pruned. Cutover
+and setup measured 98.17 and 95.73 MiB of counted headroom respectively.
+The original 79 history rows matched both checked copies. The sealed
+build passed loopback and LAN HTTPS, browser Host, Origin and CSRF
+checks, effective kernel filters, and connector peer rejection. The
+prior independent LAN browser confirmation was reused under the
+unchanged interface, address, subnet, firewall scope and server CA.
+
+The installed app honored the saved signed-in `gpt-6.1-sol` choice
+and completed one planning turn for the sealed regression case. The
+browser applied the reviewed plan and separately approved the certified
+run. The Codex controller then failed with `SQLITE_BUSY` during commit
+of the implementation request. The transaction rolled back before a
+run request or model attempt was recorded. The session settled as
+`ended-before-result`. No Qwen generation, provider switch, flight-path
+reproduction, patch or publication occurred. All four later cases
+remained unstarted.
+
+Verified rollback restored the prior app at `http://127.0.0.1:9487/`,
+the matching 79-row history, the firewall baseline and normal
+authenticated Qwen. The package's HTTPS listener, connector, owned
+rule and transient controller were removed. The checked history backup
+and the 94-row candidate store remain available. The clean owned
+scratch clone was removed. The controller generated 38 unsealed Python
+bytecode files. Their inventory and bytes were retained separately, and
+the candidate seal passed again.
+
+The exact log traces the failure through `real_execution.submit` to
+`write_transaction` commit. A separate disposable SQLite database
+reproduced a successful insert followed by a 150 ms busy commit and a
+rolled-back row. The connection that held the live lock is unknown.
+The next offline work needs to address commit contention without
+replaying a transaction body or a provider turn, exercise the real
+controller path under concurrent browser reads, and keep runtime
+bytecode outside the immutable tree. Any new candidate and live
+acceptance need fresh authority. A8, real flight-path repair, broader
+bug acceptance, live Codex bug repair, in-game verification and
+draft PR delivery remain open.
+[Closeout](/home/rich/.local/share/TwichUI-Workbench/bugfix-live-8dcb17c/closeout.json)
+
 # Complete offline verification and revised seal — November 6, 2026 Mountain time
 
 The owner requested the full suites after the committed fixture-loader

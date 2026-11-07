@@ -2,19 +2,28 @@
 
 November 6, 2026 Mountain time.
 
-- Candidate `f507278` is sealed for one combined installation and acceptance
-  decision. Workbench now has a local development path for plain-language
+- The approved `f507278` cutover was rolled back. The previous app is
+  available at `http://127.0.0.1:9487/` on the Workbench computer.
+  Its 79 history rows, original firewall and authenticated Qwen were
+  verified. The candidate's LAN HTTPS and browser protections passed
+  during the cutover. The rollback removed its LAN listener and rule.
+  [Installation closeout](/home/rich/.local/share/TwichUI-Workbench/bugfix-live-8dcb17c/closeout.json)
+- The installed candidate honored signed-in Codex selection for one
+  live planning turn. The implementation request hit a SQLite lock at
+  commit before a model turn started. The Qwen-only case, both provider
+  switches and the flight-path task stayed unstarted. No fresh checked
+  task or patch was delivered.
+- Candidate `f507278` remains sealed. Workbench has a local development path for plain-language
   offline Lua bug reports, reviewed scope, an original-code reproduction,
   separate repair approval, independent candidate checks and a persistent
   diff. The complete backend and frontend suites and separate opt-ins
-  passed. Controlled Qwen and Codex paths passed. The everyday deployment
-  is still the restored loopback build.
+  passed. Controlled Qwen and Codex paths passed.
 - The real acceptance report is navigation assuming all flight paths are
   unlocked. The expected behavior is per-character knowledge learned and
-  refreshed at flight-master visits. The app has not attempted the repair.
-  The exact package covers one Qwen-only bug trial and the four supporting
-  provider cases, with history copy, a conditional archive, scoped HTTPS,
-  delegated browser checks and rollback. [Installation decision](BUG_FIX_INSTALL_APPROVAL_20261106.md)
+  refreshed at flight-master visits. The closed package covered one
+  Qwen-only bug trial and the four supporting provider cases. Real bug
+  repair, live Codex bug repair, in-game verification and draft PR
+  delivery remain open. [Installation decision](BUG_FIX_INSTALL_APPROVAL_20261106.md)
 
 - The approved read-only Codex diagnostic settled in connector-equivalent
   confinement. The only hold was an explicitly null secondary quota window.

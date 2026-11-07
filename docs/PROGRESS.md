@@ -1,3 +1,21 @@
+## November 6, 2026 — Flight-path package restored after SQLite commit contention
+
+Owner approval bound `f507278`, checkpoint `8dcb17c` and the expanded
+archive. Verified archive copy, independent restore, all 605 original
+path lookups, scoped prune, measured capacity, checked history,
+installed TLS and browser/kernel protections. The first installed
+case completed one signed-in Codex planning turn. Its separately
+approved implementation hit `SQLITE_BUSY` at the request commit
+before generation. A disposable database reproduced the lock and
+verified rollback of the insert. All later cases stayed unstarted.
+
+Verified the prescribed restoration and preserved the candidate
+history, failure receipts, archive and backup. Removed the settled
+transient and its clean scratch clone. Retained the 38 generated
+Python bytecode files outside the sealed tree and reverified the
+seal. See [continuation](CONTINUATION.md) and the
+[closeout receipt](/home/rich/.local/share/TwichUI-Workbench/bugfix-live-8dcb17c/closeout.json).
+
 ## November 6, 2026 — Complete verification of the sealed bug workflow
 
 - Ran complete suites from exact source after the fixture-loader adjustment.

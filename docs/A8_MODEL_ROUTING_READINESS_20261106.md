@@ -1,5 +1,21 @@
 # A8 signed-in Codex and model routing
 
+## Signed-in Codex planning verified during the f507278 cutover
+
+The revised eligibility policy passed inside the first installed case.
+Saved deliberate Codex selection with fallback Off led to one real
+`gpt-6.1-sol` planning turn using the existing sign-in. The bound plan
+and separate run approval passed the browser checks. A SQLite commit
+lock interrupted the implementation controller before a request or
+implementation turn was recorded. The original loopback app and
+normal Qwen were restored. The Qwen-only case and both live switch
+directions remained unstarted. Controlled-provider evidence still
+applies, and A8 remains open. This turn used the approved allowance
+snapshot policy, which leaves the per-turn billing limitation open.
+[Closeout](/home/rich/.local/share/TwichUI-Workbench/bugfix-live-8dcb17c/closeout.json)
+
+## Earlier delegated installation
+
 The owner-approved `8d17534` cutover passed separate-device HTTPS, history
 and installed filters. The first delegated Codex-only planning submission
 held on accounting before generation. The receipt does not identify the
