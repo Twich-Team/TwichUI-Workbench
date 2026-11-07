@@ -10,7 +10,42 @@ limits this work. Checkpoints are not stop points. Own ordinary repairs and
 continue through the actual functional outcome. No further owner decision is
 currently needed for engineering/live acceptance/deployment inside standing scope.
 
-## Actual starting point
+## Live continuation — 15:13 UTC
+
+Installed candidate `6b48d87629e0595d34152a1bd0783eb935612f5f`, tree
+`5814db14a4cdf43eb0ebb1ab783a0c258046147e`, stage
+`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-6b48d87`, seal
+`7d6c728c781b6e5f07c32a11ee0f244e75edcda4c8ad126c9af6fe0a4432c526`.
+Private operational record: `delivery-campaign-7b5963a/outcome-6b48d87` under
+`/home/rich/.local/share/TwichUI-Workbench`. `deployment-4-verified.json` confirms
+fresh original/latest history copies (79/93 rows), both listeners, same CA/LAN,
+Host/Origin/CSRF guards, effective filters and all five confinement probes.
+Roles remain disabled pending successful acceptance. Helper/grant unchanged.
+Latest root-reference hashes and tracked release bytes verified; auth/config
+metadata unchanged since restoration, contents not read.
+
+Final verification: 1,204 backend/25 frontend, 108 Chromium/10 visual, 48 admin;
+all three backend and both browser opt-ins passed. Native rehearsal covers actual
+separate API/worker/browser, read/search follow-ups, two fixture bug repairs,
+restarts and concurrent polling. Only change from 6e7254e to 6b48d87 is three
+stale test monkeypatches updated to physical-headroom control; runtime/driver
+bytes identical, so native/routing/full-browser evidence remains applicable.
+`offline-verification.json` binds logs and reuse. Desktop/phone bug-result images
+inspected. Original failure logs retained. No real task completion yet.
+
+Fresh attempt 4 dispatched through normal browser at 15:13:06 UTC, intake
+`88923854-b90f-4560-8966-1bac1eb791e5`; driver execution session 22306 in this chat.
+Watch stage `artifacts/acceptance/bug-flight-paths.jsonl`, private driver log and
+actual database before any replay. At this checkpoint it is investigating.
+Independent plan review is still required; create the bound private
+`artifacts/acceptance/bug-plan-review.json` only after reviewing the generated
+three action-driven observations. Never hand-write the addon repair/reproducer.
+`outcome-ledger.json` reserves attempt 4 and preserves all prior usage; no global
+clock/count/revision cap. Continue settled failure investigation/repair autonomously.
+Source HEAD may advance for documentation only; that does not alter installed seal.
+
+## Verified pre-activation baseline (historical, superseded by installation above)
+
 
 No real flight-path fix or provider case is complete. Original app is restored
 at http://127.0.0.1:9487/; candidate LAN HTTPS is closed. Original 79-row store,
@@ -33,7 +68,7 @@ ten visual, 48 admin, all three backend and both browser opt-ins; installed
 history/TLS/LAN/browser/isolation gates passed. It was rolled back after the
 limitation. That is evidence for those exact bytes, not the current working edits.
 
-## Current connected implementation (not yet deployed)
+## Connected implementation verified in the installed candidate
 
 `source_context.py` compiles Lua only for function ranges, never executes it;
 code-focused bounded excerpts now include the formerly omitted definition.
@@ -69,7 +104,9 @@ Codex auth metadata unchanged; config inode/mtime differs from baseline at
 11:45 UTC before revisions 2/3; contents change/cause unknown. Preserve it and
 recheck pinned connector behavior/non-secret metadata before deployment.
 
-Finish/test the current implementation, complete suites and process rehearsals,
+The former pending instructions below describe the pre-activation plan; final checks and deployment above are now complete. Continue the real task rather than repeating them.
+
+Previous plan: finish/test the current implementation, complete suites and process rehearsals,
 save/seal a fresh candidate, adapt prior revision-3 installation/network/rollback
 scripts to latest history and standing outcome authority (no old clock/counters),
 then live flight-path first with independent generated-plan review. Continue

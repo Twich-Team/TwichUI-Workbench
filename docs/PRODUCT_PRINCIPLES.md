@@ -1,5 +1,10 @@
 # TwichUI Workbench — Product Direction and Goals
 
+This earlier direction is subordinate to the exact owner-supplied root
+requirements, philosophy and standing owner direction. Historical proposals and
+delivery limits below do not override those documents or certify implementation.
+Use [the current handoff](CONTINUATION.md) for demonstrated status.
+
 Date: November 3, 2026
 Status: Product-direction document. Requirements and proposed designs, not an implementation inventory.
 

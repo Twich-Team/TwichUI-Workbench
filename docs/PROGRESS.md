@@ -6157,3 +6157,23 @@ publication hold because the browser approval form always includes
 draft-PR consent. The retained real-addon base still lacks supported
 fixture mapping. The recovery and evidence receipts are under
 `artifacts/runs/original-preparation-recovery-20261105T230557Z-dKmVKq/`.
+
+## November 7, 15:13 UTC — standing-authority verified installation
+
+Candidate 6b48d87 sealed/activated after final 1,204 backend, 25 frontend,
+108 Chromium, 10 visual, 48 admin and every applicable opt-in passed. Exact
+runtime/driver identity allows reuse of 6e native/routing/browser evidence;
+three stale test patches alone changed to the physical-headroom replacement.
+Original failed logs preserved. All 357 unchanged tracked release files and
+exact owner documents verified. Latest 93-row history copied forward with
+independently verified original 79-row recovery copy. Both installed listeners,
+LAN/TLS/browser guards, filters and five isolation probes passed. Same helper,
+grant and non-secret auth/config metadata; no credentials read or exposed.
+
+Fresh real flight-path intake 88923854-b90f-4560-8966-1bac1eb791e5 dispatched at
+15:13:06 through the delegated browser; investigating, no real completion claimed.
+Private outcome ledger preserves all attempts/usage; old third-attempt allocation
+hold is marked superseded without changing historical campaign facts. Older
+README/ownership/product/design guidance now explicitly defers to root owner
+references; actual physical controls and verified retention replace old caps.
+Continue live journey and ordinary engineering under standing authority.

@@ -1,20 +1,22 @@
-# Workbench current status — November 7, 2026 UTC
+# Workbench current status — November 7, 2026, 15:13 UTC
 
-Standing autonomous-delivery authority is active; former campaign caps and the
-proposed extension are superseded. Owner-supplied philosophy, requirements and
-standing direction are installed verbatim at the operating repository root.
+Exact owner reference documents are installed at the operating repository root;
+active guidance and executable defaults use standing autonomous-delivery authority.
+Historical campaign accounting remains intact; former delivery caps are superseded.
 
-The real bug has not completed. The last Qwen investigation returned a valid
-limitation due to omitted source context. Original loopback app/history/firewall/
-model are restored; all evidence and latest 93-row campaign history are retained.
-Three Qwen planning requests used 1,171 generated tokens; no repair or campaign
-Codex turn occurred. No case or broader product requirement is newly complete.
+Candidate 6b48d87 is installed with verified 79-row original and 93-row latest
+history preservation. Loopback http://127.0.0.1:9487/ and private LAN
+https://10.0.0.9:9487/ passed fresh installed checks with the existing CA and
+10.0.0.0/24 boundary. Internal services remain isolated; helper/grant unchanged.
 
-Generic code-focused context, app-owned read-only search/follow-ups and accounting
-have passed controlled separate-process/browser checks. Active delivery caps are
-removed; physical reserves and verified retention preserve real protections.
-Final complete verification follows the last fixture/storage corrections before
-the next candidate deployment.
-Delivery continues without an engineering renewal gate. See [handoff](CONTINUATION.md)
-and [operating decisions](DELIVERY_OUTCOME_AUTHORITY_20261107.md). Historical status
-is preserved in `history/before-standing-reconciliation-20261107-CURRENT_STATUS.md`.
+Complete final verification passed: 1,204 backend, 25 frontend, 108 browser,
+10 visual, 48 admin and all applicable opt-ins. These are offline evidence.
+The real flight-path task is investigating in the normal app as fresh attempt 4;
+no checked real repair or supporting real-provider case is complete yet.
+
+Delivery continues through independent plan review, authorized repair and checks,
+provider acceptance, durable result/restart and leaving the verified app usable.
+No engineering renewal decision is needed. Billing/disclosure/network/publication
+protections remain. Broader missing capabilities, in-game verification, live Codex
+bug repair and draft PR delivery remain explicit. Styling/audit have not begun.
+See [handoff](CONTINUATION.md) for exact bindings, live identity and evidence.

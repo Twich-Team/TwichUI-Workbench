@@ -1,5 +1,12 @@
 # Ownership and compatibility boundary
 
+Current authority: the root philosophy, requirements and standing owner direction
+govern delivery. The dated sections below preserve implementation and ownership
+history; their old campaign limits and one-session permission statements are
+superseded. Current archival uses verified retention under standing authority.
+Keep the field/transaction ownership and unrelated safety boundaries described
+below. See [current handoff](CONTINUATION.md) for actual installed behavior.
+
 ## Development evidence and local source preservation (2026-11-05)
 
 The explicitly invoked `scripts/evidence_archive.py` owns only its closed-tree

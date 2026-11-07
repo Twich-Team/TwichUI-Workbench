@@ -1,5 +1,13 @@
 # TwichUI Workbench
 
+Current delivery authority and demonstrated state are in the root
+[philosophy](PROJECT_WORKING_PHILOSOPHY.md),
+[requirements](TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md),
+[standing owner direction](STANDING_OWNER_DIRECTION_AUTONOMOUS_DELIVERY.md) and
+[handoff](docs/CONTINUATION.md). Older milestone descriptions below preserve
+their historical scope; they do not override the current installation, LAN,
+billing or autonomous-engineering decisions.
+
 A local, fixture-backed application baseline for reviewing TwichUI behavior.
 Open a task, review each expected behavior, save a decision, and watch a separate
 Python worker apply it. Saving first produces a **pending** receipt; the actual
@@ -57,8 +65,11 @@ development baseline on local disk, not a production commitment.
 
 For autonomous milestone work, start with [the execution contract](docs/EXECUTION.md),
 [one implementation plan](docs/PLAN.md), and [current progress](docs/PROGRESS.md).
-Setup does not approve the next milestone. `AGENTS.md` and `CLAUDE.md` use those
-same shared documents.
+Follow the root [standing owner direction](STANDING_OWNER_DIRECTION_AUTONOMOUS_DELIVERY.md)
+and [philosophy](PROJECT_WORKING_PHILOSOPHY.md). Connected delivery work is already
+authorized; former campaign and routine renewal gates are superseded. `AGENTS.md`
+and `CLAUDE.md` point to the same active references. Setup itself grants no new
+billing, disclosure, publication or system privileges.
 
 On this host, the noninteractive wrapper discovers the existing toolchain:
 
@@ -254,16 +265,21 @@ fresh `artifacts/runs/browser-*` directories (screenshots/workflow data plus
 Visual reference images remain in `e2e/*.spec.ts-snapshots`; do not update them merely
 to pass a run. Existing CI's `artifacts/` upload includes the new run directories.
 
-Evidence has a shared 512 MiB (536,870,912 byte) limit across `artifacts`,
-`test-results`, `playwright-report`, and `.local/runs`. Check counted headroom:
+Evidence admission uses actual physical space with a recovery reserve. The old
+512 MiB cumulative delivery limit is superseded. Closed owned browser evidence
+is retained or independently restored and verified before matching originals
+are pruned; databases, recovery copies and unique failures remain protected.
+The configured watermark triggers housekeeping, not an execution stop. Inspect
+storage and the archive index with:
 
 ```sh
 python3 scripts/evidence_archive.py status
 ```
 
-Only after checking ownership/references and obtaining explicit authorization for
-each **closed** directory, preserve it with the local tool. Choose a new archive ID
-and list only authorized workspace-relative directory paths:
+Standing authority covers routine verified retention of owned temporary evidence.
+For a deliberate manual archive, check ownership, references and preservation
+requirements first. Choose a new archive ID and list only eligible **closed**
+workspace-relative directory paths:
 
 ```sh
 python3 scripts/evidence_archive.py archive ARCHIVE_ID artifacts/runs/CLOSED_RUN/CLOSED_OUTPUT --remove-originals

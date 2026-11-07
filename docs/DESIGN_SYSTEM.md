@@ -1,5 +1,10 @@
 # Shared design system and provenance
 
+Use the root requirements and standing owner direction for current priorities
+and engineering authority. The dated milestone statements below are historical;
+they do not reimpose old campaign or routine engineering approval restrictions.
+The broader styling phase remains after functional delivery.
+
 Shared Tailwind theme tokens live in `frontend/src/styles.css`: espresso background,
 walnut panels, aged bronze borders/actions, ivory text and muted olive for applied
 outcomes. Georgia provides a local serif title face; system fonts cover body text.
