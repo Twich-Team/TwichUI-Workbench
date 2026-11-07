@@ -196,7 +196,11 @@ try {
     args:['--disable-dev-shm-usage','--disable-background-networking','--no-proxy-server']});
   const context = await browser.newContext({serviceWorkers:'block'});
   await runJourney(context, origin, policy, candidate, {
-    blockDeadline, now, preparationMs:38*minute, reviewMs:10*minute, record, controlsReady:control,
+    blockDeadline, now, preparationMs:38*minute, reviewMs:10*minute,
+    // The app's bug investigation shares five minutes across source reads and
+    // corrections. Allow receipt/worker polling to settle after that bound.
+    planningMs:bug ? 5.5*minute : 2.5*minute,
+    planningReserveMs:bug ? 5.5*minute : 2.5*minute, record, controlsReady:control,
     async reviewBug({intake, plan}) {
       callPolicy('admit', 'plan', {intake, proposal:plan});
       record('awaiting-independent-plan-review', {intake, proposal:plan.id, binding:plan.binding});

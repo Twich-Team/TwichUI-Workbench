@@ -109,3 +109,14 @@ types remain unfinished/unproven. Styling then audit follow functional gate.
 
 Previous detailed lineage is preserved in
 [history/before-derived-reads-20261107-CONTINUATION.md](history/before-derived-reads-20261107-CONTINUATION.md).
+
+## Pre-activation driver reconciliation
+
+Complete backend1240/frontend25/full Chromium108, native process and repair readiness
+passed. Corrected routing rehearsal passed all4 choices. Bug browser opt-in first
+invocation omitted required WORKBENCH_E2E_EVERYDAY fixture flag and failed setup;
+correct invocation with both flags is running, original evidence retained. No live
+call or activation. Driver planning wait/reserve now5.5 minutes for bug investigation
+matching the app's five-minute shared bound plus polling/settlement grace; other
+cases remain2.5 minutes. No task/model/approval/assignment limits changed. Supersedes
+unactivated a9ab5a5/f0c2506 stages; both preserved. Final candidate records follow.
