@@ -1,3 +1,19 @@
+## November 6, 2026 — Exact eligibility diagnostics prepared
+
+- Used the pinned CLI's offline schema to distinguish account, catalog,
+  usage permission, quota windows and credits. Added phase and check
+  diagnostics, corrected keyed-bucket precedence and kept all existing
+  substantive eligibility requirements.
+- Reproduced two distinct historical-accounting-class failures with the
+  real pinned CLI and synthetic data. The historical field is still
+  unknown. Passed 83 targeted tests, 48 administrator tests, the build
+  check and the separate four-case controlled Chromium rehearsal.
+- Verified the restored app, 79-row fingerprint, empty scratch, evidence
+  headroom and no outstanding prior operations. The unprivileged user
+  manager did not enforce the required bind restriction. Sealed the
+  read-only diagnostic for one exact system-manager approval.
+  [Diagnostic request](CODEX_ELIGIBILITY_PROBE_APPROVAL_20261106.md)
+
 ## November 6, 2026 — Delegated live cutover restored after accounting hold
 
 - Approved checkpoint `1fdee91` installed `8d17534` for the bounded trial.

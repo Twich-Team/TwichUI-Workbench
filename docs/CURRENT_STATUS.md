@@ -2,6 +2,13 @@
 
 November 6, 2026 Mountain time.
 
+- Local checkpoint `969adfa` identifies the failed eligibility check in
+  future receipts and distinguishes missing evidence from a confirmed
+  denial. The pinned CLI fixtures and delegated browser rehearsal
+  passed offline. The historical field remains unknown. The existing
+  grant cannot run the equivalent signed-in diagnostic alongside the
+  restored app. A narrowly scoped transient launch awaits approval.
+  [Diagnostic approval and findings](CODEX_ELIGIBILITY_PROBE_APPROVAL_20261106.md)
 - The owner-approved installation of `8d17534` passed the scoped TLS,
   remote home-LAN access, history copy and installed filter checks. The
   delegated Codex-only submission held on pre-generation accounting. It

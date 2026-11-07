@@ -1,3 +1,22 @@
+# Codex eligibility diagnostics staged — November 6, 2026 Mountain time
+
+The prior accounting receipt cannot identify the failed account or quota
+field. Checkpoint `969adfa` propagates the exact check, evidence state and
+RPC phase. The pinned CLI reproduced a null ordinary-usage signal and
+a null secondary window separately with synthetic data. An eligible
+fixture passed. The repaired parser keeps the approved eligibility rules.
+All four delegated Chromium cases passed again with controlled providers.
+
+The administrator grant cannot run a signed-in read-only command with
+the connector's actual system-manager filters while the restored app is
+up. The user-manager offline check allowed a bind despite its configured
+deny. The missing operation is a named, auto-collected system unit
+launched by Rich with interactive sudo. The sealed six-file diagnostic
+uses the pinned CLI and identical network and filesystem restrictions.
+Await approval of that exact operation before opening a ten-minute
+window. No signed-in reads, generation or new cutover occurred.
+[Diagnostic approval and findings](CODEX_ELIGIBILITY_PROBE_APPROVAL_20261106.md)
+
 # Delegated installation rolled back — November 6, 2026 Mountain time
 
 The owner approved checkpoint `1fdee91` for sealed candidate `8d17534`
