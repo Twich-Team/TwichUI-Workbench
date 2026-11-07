@@ -5,11 +5,12 @@ import multiprocessing
 import os
 from pathlib import Path
 import subprocess
+import traceback
 
 import pytest
 from sqlalchemy import select
 
-from workbench import bug_investigation, codex_provider, worker
+from workbench import bug_investigation, codex_provider, trusted_preparation, worker
 from workbench.bug_evidence import BugPlan
 from workbench.api import create_app
 from workbench.db import intakes, model_attempts, proposal_decisions, task_sessions as sessions
@@ -53,6 +54,10 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     from project_env import environment
 
     source = enable_bugs(monkeypatch)
+    native = os.environ.get("WB_PROCESS_NATIVE") == "1"
+    if native:
+        from workbench.real_workspace import Runtime
+        monkeypatch.setattr(trusted_preparation, "Runtime", Runtime)
     monkeypatch.setenv("WORKBENCH_STATIC_ROOT", str(ROOT / "frontend/dist"))
     monkeypatch.setattr(local_browser_fixture, "install_offline_guard", lambda: None)
     cases = []
@@ -93,8 +98,18 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     monkeypatch.setattr(codex_provider, "connector_path", lambda: tmp_path / "controlled.sock")
     monkeypatch.setenv("WORKBENCH_CODEX_SOCKET", str(tmp_path / "controlled.sock"))
 
-    def advance(stopped):
+    def advance(stopped, index):
         try:
+            if native:
+                group = Path(os.environ["WORKBENCH_CG_ROOT"]) / f"workbench-real-rehearsal-worker-{index}"
+                group.mkdir()
+                for name, value in {"memory.max":str(6 << 30), "memory.swap.max":"0",
+                                    "pids.max":"128", "cpu.max":"200000 100000"}.items():
+                    (group / name).write_text(value)
+                (group / "main").mkdir()
+                (group / "main/cgroup.procs").write_text(str(os.getpid()))
+                (group / "cgroup.subtree_control").write_text("+cpu +memory +pids")
+                os.environ["WORKBENCH_CG_ROOT"] = str(group)
             while not stopped.wait(.04):
                 with store.connect() as connection:
                     pending = connection.execute(select(intakes.c.id, intakes.c.payload).join_from(
@@ -105,21 +120,22 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
                     client_case = case["client_case"]
                     local_browser_fixture.advance_local(
                         store, Path(store.url.database), "pass", None,
+                        native=native,
                         bug_edit=dict(path=CLIENT_SOURCE if client_case else PRODUCTION,
                                       old=BAD_ALERT if client_case else BUGGY,
                                       new=GOOD_ALERT if client_case else CORRECT))
                     calls.put((case["choice"], "implementation"))
                 else:
                     worker.tick(store)
-        except Exception as error:
-            errors.put(repr(error))
+        except Exception:
+            errors.put(traceback.format_exc(limit=12))
 
     actors = []
     for index in range(len(cases)):
         stopped = ctx.Event()
         with serve(create_app(store)) as origin:
             store.dispose()
-            child = ctx.Process(target=advance, args=(stopped,), daemon=True)
+            child = ctx.Process(target=advance, args=(stopped, index), daemon=True)
             child.start()
             actors.append(child.pid)
             try:
@@ -134,6 +150,11 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
                     child.join(5)
                 assert errors.empty(), errors.get_nowait() if not errors.empty() else ""
                 assert child.exitcode == 0
+                if native:
+                    group = Path(os.environ["WORKBENCH_CG_ROOT"]) / f"workbench-real-rehearsal-worker-{index}"
+                    assert not (group / "main/cgroup.procs").read_text().strip()
+                    (group / "main").rmdir()
+                    group.rmdir()
         with store.connect() as connection:
             assert connection.exec_driver_sql("PRAGMA journal_mode").scalar_one() == "delete"
             assert len(connection.execute(select(model_attempts).where(

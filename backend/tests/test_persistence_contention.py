@@ -36,6 +36,37 @@ def status_reader(database, ref, ready, release, report):
         report.close()
 
 
+def interrupted_controller(database, boundary, identity, marker, paused):
+    from test_real_execution import ControlledRuntime
+    engine = engine_for(database)
+    runtime = ControlledRuntime()
+    execute = runtime.execute
+
+    def pause():
+        paused.set()
+        time.sleep(10)
+
+    def external(*args):
+        with sqlite3.connect(database, timeout=.15) as connection:
+            connection.execute("BEGIN EXCLUSIVE")
+            connection.rollback()
+        if boundary == "after_fence":
+            pause()
+        with Path(marker).open("a") as stream:
+            stream.write(identity+"\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        if boundary == "after_external":
+            pause()
+        return execute(*args)
+
+    runtime.execute = external
+    if boundary == "before_claim":
+        pause()
+    real_execution.process_one(engine, runtime)
+    engine.dispose()
+
+
 @pytest.mark.parametrize(("release_reader", "legacy_commit"),
                          [(True, False), (False, False), (True, True)])
 def test_actual_dispatch_commit_with_overlapping_status_process(
@@ -43,6 +74,7 @@ def test_actual_dispatch_commit_with_overlapping_status_process(
 ):
     ref, runtime, grant = linked
     if legacy_commit:
+        monkeypatch.setattr(store.dialect, "do_commit", lambda connection: connection.commit())
         @contextmanager
         def prior_transaction(engine):
             # f507278 used SQLAlchemy commit directly after BEGIN IMMEDIATE.
@@ -178,41 +210,13 @@ def test_process_loss_preserves_pending_work_and_holds_uncertain_execution(
 ):
     from test_real_execution import granted
     runtime, grant, request = granted(store)
-    ctx = multiprocessing.get_context("fork")
+    ctx = multiprocessing.get_context("spawn")
     paused = ctx.Event()
     marker = tmp_path / "scripted-external-submissions.jsonl"
 
-    def run():
-        store.dispose()
-        execute = runtime.execute
-
-        def pause():
-            paused.set()
-            time.sleep(10)
-
-        def external(*args):
-            # A separate exclusive connection proves no application transaction
-            # spans this stand-in for the irreversible provider operation.
-            with sqlite3.connect(store.url.database, timeout=.15) as connection:
-                connection.execute("BEGIN EXCLUSIVE")
-                connection.rollback()
-            if boundary == "after_fence":
-                pause()
-            with marker.open("a") as stream:
-                stream.write(request["id"]+"\n")
-                stream.flush()
-                os.fsync(stream.fileno())
-            if boundary == "after_external":
-                pause()
-            return execute(*args)
-
-        runtime.execute = external
-        if boundary == "before_claim":
-            pause()
-        real_execution.process_one(store, runtime)
-
     store.dispose()
-    child = ctx.Process(target=run)
+    child = ctx.Process(target=interrupted_controller,
+                        args=(store.url.database, boundary, request["id"], str(marker), paused))
     child.start()
     try:
         assert paused.wait(5)

@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shutil
 import threading
+from typing import Literal
 
 from pydantic import Field
 from sqlalchemy import select
@@ -36,6 +37,7 @@ class Installation(StrictModel):
     database_identity: list[int] = Field(min_length=2, max_length=2)
     evidence_roots: list[str] = Field(min_length=1, max_length=32)
     scratch: str
+    evidence_limit_bytes: Literal[536870912, 1073741824] = 536870912
 
 
 def enabled():
@@ -69,7 +71,7 @@ def configuration(engine=None):
 
 def measure(policy):
     # The same four evidence roots and fixed ceiling as the development launcher.
-    from project_env import ARTIFACT_LIMIT, artifact_bytes
+    from project_env import artifact_bytes
 
     roots = [Path(root) for root in policy.evidence_roots]
     scratch = Path(policy.scratch)
@@ -77,7 +79,7 @@ def measure(policy):
     scratch_bytes = sum(path.stat().st_size for path in scratch.rglob('*')
                         if path.is_file() and not path.is_symlink())
     counted = sum(artifact_bytes(root) for root in roots)
-    return ARTIFACT_LIMIT - counted, free, scratch_bytes
+    return policy.evidence_limit_bytes - counted, free, scratch_bytes
 
 
 class CapacityHold(ValueError):

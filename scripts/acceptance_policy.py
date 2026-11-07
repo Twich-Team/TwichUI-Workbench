@@ -28,6 +28,9 @@ ROUTES = (
     ('qwen-with-codex-fallback', 'codex', 'local_unreachable', [0, 18000], -2, -1),
 )
 NOTE = 'Owner-delegated acceptance automation · four sealed regression cases.'
+CAMPAIGN = dict(minutes=960, restorationMinutes=120, attempts=8, revisions=3,
+                localRuns=5, codexRuns=4, qwenRequests=110, qwenGeneratedTokens=133300,
+                codexTurns=8)
 
 
 def require(condition, message):
@@ -218,6 +221,89 @@ def check_review(connection, request, case, preparation):
                                        (request['task'],)).fetchone(), 'prior task session exists')
 
 
+def campaign_admission(connection, request, case, policy):
+    """Campaign reservations supplement the unchanged per-task application bounds."""
+    if not policy.get('campaign'):
+        require(not request.get('campaign'), 'Unexpected campaign authority')
+        return
+    require(policy['campaign'] == CAMPAIGN, 'Campaign limits changed')
+    campaign = request.get('campaign') or {}
+    require(type(campaign.get('attempt')) is int and 1 <= campaign['attempt'] <= 8
+            and type(campaign.get('revision')) is int and 0 <= campaign['revision'] <= 3
+            and campaign.get('opened_at') == request['opened']
+            and set(campaign.get('prior_attempts', [])) <= set(request['prior']),
+            'Campaign receipt changed')
+    rows = connection.execute('''SELECT id, task_id, backend, purpose, outcome, finished_at, usage
+        FROM model_attempts WHERE julianday(started_at)>=julianday(?)''', (request['opened'],)).fetchall()
+    intakes = connection.execute('''SELECT id, payload FROM intakes
+        WHERE julianday(created_at)>=julianday(?)''', (request['opened'],)).fetchall()
+    require(intakes or case['choice'] == 'bug-flight-paths',
+            'The campaign must start with the real bug journey')
+    same_case = []
+    for identity, raw in intakes:
+        original = json.loads(raw)
+        choice = ('bug-flight-paths' if original['kind'] == 'issue' else original.get('local_planning'))
+        require(choice in {row[0] for row in ROUTES} | {'bug-flight-paths'},
+                'Unapproved campaign intake')
+        if choice == case['choice']:
+            same_case.append(identity)
+            if identity != request.get('intake'):
+                require(not connection.execute('''SELECT 1 FROM real_execution_requests r
+                    JOIN real_execution_grants g ON g.id=r.grant_id
+                    WHERE r.status='checked' AND
+                    json_extract(g.snapshot,'$.workflow_task.intake_id')=?''', (identity,)).fetchone(),
+                    'A checked case cannot be replayed')
+    admission = int(request['action'] == 'submit')
+    require(len(intakes)+admission <= 8 and len(same_case)+admission <= (
+        3 if case['choice'] == 'bug-flight-paths' else 2),
+        'Campaign case allocation exhausted')
+    before = [row for row in rows if row[1] != request.get('intake')]
+    require(all(row[0] in request['prior'] and row[5] and row[4] in
+                {'completed','checked','failed','passed'} for row in before),
+            'Prior execution is unsettled or uncertain')
+    local_tasks, codex_tasks = set(), set()
+    qwen_requests = qwen_tokens = codex_turns = 0
+    for identity, task, backend, purpose, outcome, finished, raw in rows:
+        require(finished and raw, 'Campaign accounting unavailable')
+        usage = json.loads(raw)
+        require(isinstance(usage, dict) and (purpose == 'capability_validation' or
+                usage.get('units') == 'tokens'), 'Campaign usage malformed')
+        if backend == 'local':
+            local_tasks.add(task)
+            if purpose == 'capability_validation':
+                require(usage.get('passed') is True and usage.get('generated_upper_bound') == 60,
+                        'Cancellation probe accounting changed')
+                qwen_requests += 1
+                qwen_tokens += 60
+            else:
+                require(purpose == 'planning' or usage.get('status') == 'complete',
+                        'Local usage incomplete')
+                value = usage.get('values', {}).get('completion_tokens')
+                count = 1 if purpose == 'planning' else usage.get('requests_observed')
+                require(type(value) is int and 0 <= value <= (2600 if purpose == 'planning' else 24000)
+                        and type(count) is int and count >= 1,
+                        'Local request accounting unavailable')
+                qwen_requests += count
+                qwen_tokens += value
+        elif backend == 'codex':
+            codex_tasks.add(task)
+            require(purpose in {'planning','implementation'} and
+                    type(usage.get('values', {}).get('total_tokens')) is int and
+                    0 < usage['values']['total_tokens'] <= 32768,
+                    'Codex observations unavailable')
+            codex_turns += 1
+        else:
+            raise ValueError('Unexpected campaign provider')
+    if request['action'] == 'submit':
+        new = 'reserved-next-task'
+        (local_tasks if case['provider'] == 'local' else codex_tasks).add(new)
+        require(len({row[1] for row in rows}) < campaign['attempt'],
+                'Campaign attempt number reused')
+    require(len(local_tasks) <= 5 and len(codex_tasks) <= 4 and
+            qwen_requests <= 110 and qwen_tokens <= 133300 and codex_turns <= 8,
+            'Campaign usage limit reached')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=['freeze', 'admit', 'closeout'])
@@ -244,7 +330,7 @@ def main():
                 require(build_bug_case(sealed) == case, 'pinned bug source envelope changed')
         else:
             legacy = frozen(False)
-            require(policy['cases'][:len(ROUTES)] == legacy['cases']
+            require(case == next(c for c in legacy['cases'] if c['choice'] == request['choice'])
                     and all(policy[key] == legacy[key] for key in ('base', 'models', 'budget', 'limits')),
                     'pinned regression source or policy changed')
         db = args.database
@@ -255,6 +341,7 @@ def main():
             require_settled(connection)
             require(not connection.execute("SELECT 1 FROM model_attempts WHERE outcome='running' OR finished_at IS NULL").fetchone(),
                     'provider activity is unsettled')
+            campaign_admission(connection, request, case, policy)
             new_attempts = connection.execute('''SELECT id, task_id, purpose FROM model_attempts
                 WHERE julianday(started_at)>=julianday(?)''', (request['opened'],)).fetchall()
             expected = set(request['prior'])

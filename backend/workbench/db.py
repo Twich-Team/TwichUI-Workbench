@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 import os
 import logging
+import sqlite3
 import time
 import traceback
 from sqlalchemy.exc import OperationalError
@@ -13,10 +14,10 @@ metadata = MetaData()
 log = logging.getLogger("workbench.sqlite")
 
 
-def busy_owners(connection, phase):
+def busy_owners(engine, phase, connection):
     """Record only lock owners for this database, without SQL or task content."""
     try:
-        path = Path(connection.engine.url.database)
+        path = Path(engine.url.database)
         info = path.stat()
         identity = f"{os.major(info.st_dev):02x}:{os.minor(info.st_dev):02x}:{info.st_ino}"
         rows = Path("/proc/locks").read_text().splitlines()
@@ -26,7 +27,7 @@ def busy_owners(connection, phase):
     except OSError:
         owners = []
     log.warning("SQLite busy phase=%s pid=%s connection=%s lock_pids=%s",
-                phase, os.getpid(), id(connection.connection.driver_connection), owners)
+                phase, os.getpid(), id(connection.driver_connection), owners)
 tasks = Table(
     "tasks", metadata,
     Column("id", String, primary_key=True),
@@ -74,6 +75,24 @@ def engine_for(path=None):
     path = Path(path or database_path()).resolve()
     engine = create_engine(f"sqlite:///{path}", connect_args={"timeout": 0.15})
 
+    def commit(connection):
+        # COMMIT BUSY leaves the SQLite transaction active. Keep SQLAlchemy's
+        # commit and rollback lifecycle intact by waiting inside its dialect
+        # operation. Retry this same commit, never the body or provider work.
+        deadline = time.monotonic() + 1.0
+        while True:
+            try:
+                connection.commit()
+                return
+            except sqlite3.OperationalError as error:
+                if (getattr(error, "sqlite_errorcode", 0) & 0xFF != 5
+                        or not connection.in_transaction or time.monotonic() >= deadline):
+                    raise
+                busy_owners(engine, "commit", connection)
+                time.sleep(min(.02, max(0, deadline-time.monotonic())))
+
+    engine.dialect.do_commit = commit
+
     @event.listens_for(engine, "connect")
     def pragmas(connection, _):
         connection.execute("PRAGMA foreign_keys=ON")
@@ -113,27 +132,10 @@ def write_transaction(engine):
                 connection.rollback()
                 if getattr(error.orig, "sqlite_errorcode", 0) & 0xFF not in {5, 6} or time.monotonic() >= deadline:
                     raise
-                busy_owners(connection, "begin")
+                busy_owners(engine, "begin", connection.connection)
                 time.sleep(min(0.02, max(0, deadline-time.monotonic())))
         try:
             yield connection
-            # A reader can block COMMIT after BEGIN IMMEDIATE and all writes
-            # succeeded. SQLite keeps that same transaction active on BUSY.
-            # Retry COMMIT itself, never the body or an external operation.
-            # SQLAlchemy's commit() ends its transaction on an error, so issue
-            # the SQLite statement first and then close SQLAlchemy's bookkeeping.
-            deadline = time.monotonic() + 1.0
-            while True:
-                try:
-                    connection.exec_driver_sql("COMMIT")
-                    break
-                except OperationalError as error:
-                    if (getattr(error.orig, "sqlite_errorcode", 0) & 0xFF != 5
-                            or not connection.connection.driver_connection.in_transaction
-                            or time.monotonic() >= deadline):
-                        raise
-                    busy_owners(connection, "commit")
-                    time.sleep(min(0.02, max(0, deadline-time.monotonic())))
             connection.commit()
         except BaseException:
             connection.rollback()
