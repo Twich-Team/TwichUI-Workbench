@@ -1,5 +1,15 @@
 # Shared milestone execution contract
 
+Current campaign amendment, November 7, 2026 UTC: follow the independently
+stated [owner amendment](DELIVERY_CAMPAIGN_AMENDMENT_20261107.md). Own ordinary
+connected engineering repairs through verification and acceptance within
+the unchanged campaign limits. Qualifying settled local validation failures
+can be renewed after the recorded diagnostic/testing/purpose conditions;
+the exact discarded historical field is not a prerequisite. Do not return
+ordinary repairs for one-attempt permission or apply the older two-approach
+stop as a procedural deadlock. Partial/uncertain execution and actual
+permission/resource boundaries still hold. The original clock continues.
+
 The owner approves one delivery milestone, the agent carries it through internal
 implementation/check/repair tasks, then the owner reviews the working result.
 Do not ask routine plan questions. Choose the smallest reversible in-scope option

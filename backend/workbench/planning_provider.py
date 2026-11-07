@@ -161,6 +161,7 @@ class LocalProvider:
         self.stop_event = stop_event
         self.ends_at = ends_at
         self.diagnostics = {}
+        self.response_evidence = None
 
     def generate(self, packet, schema, *, expected_model=None):
         self.diagnostics = {'generation_state': 'not_started'}
@@ -182,6 +183,9 @@ class LocalProvider:
             self.diagnostics['category'] = 'contention'
             raise PlanningUnavailable('Existing maintenance/model lock is in use.', 'contention') from None
         except OSError:
+            if self.response_evidence and self.diagnostics.get('parse_phase'):
+                self.diagnostics['category'] = 'diagnostic_io'
+                raise PlanningUnavailable('Private response evidence could not be preserved.', 'diagnostic_io') from None
             self.diagnostics['category'] = 'credential_or_lock'
             raise PlanningUnavailable('Configured credential or lock file is unavailable.', 'credential_or_lock') from None
         except PlanningUnavailable as error:
@@ -200,7 +204,8 @@ class LocalProvider:
                 return self._infer(active, secret, schema, encoded, expected_model=expected_model)
 
     def _infer(self, transport, secret, schema, encoded, *, expected_model=None):
-        from workbench.grounded_scenarios import LoadedClientResponse, unique_json_object
+        from workbench.grounded_scenarios import LoadedClientResponse
+        from workbench import planning_response
 
         try:
             actual = transport.models(secret)
@@ -255,7 +260,7 @@ class LocalProvider:
             instructions = INSTRUCTIONS
         body = dict(model=expected_model or actual, temperature=0, max_tokens=2600, reasoning_budget_tokens=0,
             tools=[], response_format=dict(type='json_schema', json_schema=dict(
-                name='planning', strict=True, schema=schema.model_json_schema())),
+                name='planning', strict=True, schema=planning_response.wire_schema(schema))),
             messages=[dict(role='system', content=general + instructions),
                 dict(role='user', content=encoded)])
         encoded_body = json.dumps(body).encode()
@@ -264,33 +269,78 @@ class LocalProvider:
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
             encoded_body, {'Authorization': 'Bearer '+secret, 'Content-Type': 'application/json'})
         self.diagnostics['generation_state'] = 'uncertain'
+        observed = False
+        def observe_response(data, complete=True):
+            nonlocal observed
+            observed = True
+            self.diagnostics.update(output_bytes=len(data), parse_phase='wire')
+            if not complete:
+                self.diagnostics['partial_output'] = 1
+            if self.response_evidence:
+                try:
+                    self.response_evidence.received(data, complete=complete)
+                except OSError:
+                    raise PlanningUnavailable('Private response evidence could not be preserved.', 'diagnostic_io') from None
+        if self.response_evidence and hasattr(transport, 'response_observer'):
+            transport.response_observer = observe_response
         raw = transport.read(request, MAX_OUTPUT)
         self.diagnostics['output_bytes'] = len(raw)
+        self.diagnostics['parse_phase'] = 'envelope'
+        if not observed:
+            observe_response(raw)
+            self.diagnostics['parse_phase'] = 'envelope'
+        result = None
         try:
-            result = json.loads(raw)
+            result = planning_response.strict_json(raw)
+            if not isinstance(result, dict):
+                raise planning_response.ResponseValidationError('Expected one response envelope', [], 'response envelope object', result)
             usage = result.get('usage', {})
             if isinstance(usage, dict):
                 tokens = {k:v for k,v in usage.items() if k in {'prompt_tokens','completion_tokens','total_tokens'} and type(v) is int and v >= 0}
                 if tokens:
                     self.diagnostics['usage'] = {'source':'local llama.cpp response', 'units':'tokens', 'observed_at':datetime.now(timezone.utc).isoformat(), 'values':tokens}
-            choice = result['choices'][0]
+            complete_usage = (isinstance(usage, dict) and all(type(usage.get(k)) is int and usage[k] >= 0
+                for k in ('prompt_tokens', 'completion_tokens', 'total_tokens'))
+                and usage['total_tokens'] == usage['prompt_tokens'] + usage['completion_tokens'])
+            self.diagnostics['accounting_state'] = 'complete' if complete_usage else 'unavailable'
+            choices = result.get('choices')
+            if not isinstance(choices, list) or len(choices) != 1:
+                raise planning_response.ResponseValidationError('Expected exactly one response choice', ['choices'], 'one choice array', choices)
+            choice = choices[0]
+            if not isinstance(choice, dict):
+                raise planning_response.ResponseValidationError('Expected one response choice object', ['choices', 0], 'choice object', choice)
             reason = choice.get('finish_reason')
+            self.diagnostics['finish_reason'] = reason if reason in {'length', 'stop', 'content_filter'} else 'unknown'
             if reason == 'length':
                 self.diagnostics['generation_state'] = 'partial'
             elif reason in {'stop', 'content_filter'}:
                 self.diagnostics['generation_state'] = 'finished'
-            if reason != 'stop':
-                raise PlanningUnavailable('Generation stopped before a complete proposal.', 'incomplete_output')
             model = result.get('model')
             if isinstance(model, str) and len(model) <= 160 and re.fullmatch(r'[A-Za-z0-9_.:/-]+', model):
                 self.diagnostics['actual_model'] = model
+            self.diagnostics['model_matches'] = int(model == actual)
+            if self.response_evidence:
+                self.response_evidence.envelope(result, self.diagnostics)
+            if reason != 'stop':
+                raise PlanningUnavailable('Generation stopped before a complete proposal.', 'incomplete_output')
             if model != actual:
                 raise PlanningUnavailable('Returned model differs from observed configured identity.', 'model_identity')
-            value = json.loads(choice['message']['content'], object_pairs_hook=unique_json_object
-                               if schema is LoadedClientResponse else None)
+            if expected_model is not None and (not complete_usage or usage['completion_tokens'] > 2600):
+                raise PlanningUnavailable('Planning usage is missing, inconsistent or beyond its bound.', 'accounting')
+            self.diagnostics['parse_phase'] = 'payload'
+            message = choice.get('message')
+            if not isinstance(message, dict):
+                raise planning_response.ResponseValidationError('Expected one response message', ['choices', 0, 'message'], 'assistant message object', message)
+            if message.get('tool_calls'):
+                raise planning_response.ResponseValidationError('Planning has no tool authority', ['choices', 0, 'message', 'tool_calls'], 'no tool calls', message['tool_calls'])
+            value, changes = planning_response.payload(message.get('content'), bug=schema is BugPlanningResponse)
+            if self.response_evidence:
+                self.response_evidence.parsed(value, self.diagnostics, changes)
             self.diagnostics.update(actual_model=model, category='response_received')
             return value, model, 'local'
-        except (ValueError, KeyError, IndexError, TypeError):
+        except (ValueError, KeyError, IndexError, TypeError, AttributeError) as error:
+            if self.response_evidence:
+                self.response_evidence.rejected(error, result, phase=self.diagnostics['parse_phase'])
             raise PlanningUnavailable('Local provider returned invalid JSON/envelope.', 'invalid_json') from None
 
 def provider(stop_event=None):

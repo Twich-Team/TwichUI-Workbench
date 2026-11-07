@@ -11,6 +11,7 @@ from workbench.real_workspace import PRELUDE
 from workbench.schemas import ProposalContent, RegressionTaskContract
 from workbench.verification_profiles import select as select_profile
 from workbench.visual_scope import digest
+from workbench.planning_response import ResponseValidationError
 
 CATEGORY = 'lua-offline-bugfix'
 SOURCE_FILES = 6
@@ -35,6 +36,10 @@ INSTRUCTIONS = (
     '1-based indexes. A call with empty path invokes the returned module function. For return/captured observation, '
     'path starts with the return/argument number. For field observation, use the client/module path. '
     'Number steps from 1. Observe important intermediate and final results for stateful reports. '
+    'For stateful reports observe initial behavior and each relevant event, including a repeated event when refresh is requested. '
+    'Drive the existing code: do not directly assign the expected result or the state the event is supposed to compute. '
+    'Use null for unused plan/question/limitation alternatives. Stub/capture fields and args are mutually exclusive. '
+    'Omit unused optional step fields and keep the plan concise enough for the bounded response. '
     'For each observation give the expected and a distinct behavior-relevant incorrect scalar; no invented game evidence.'
 )
 
@@ -200,14 +205,23 @@ def resolve(raw, packet, original, feedback):
         plan = draft.plan
         by_path = {item['path']: item for item in packet['files']}
         loads = {step.source for step in plan.reproducer.steps if step.op == 'load'}
-        if (len(set(plan.read_paths)) != len(plan.read_paths)
-                or len(set(plan.writable_paths)) != len(plan.writable_paths)
-                or not set(plan.read_paths) <= by_path.keys()
-                or not (loads | set(plan.writable_paths) | {plan.focused_test}) <= set(plan.read_paths)
-                or any(by_path[path].get('support_only') for path in plan.writable_paths)
-                or not any(SOURCE_PATH.fullmatch(path) for path in plan.writable_paths)
-                or not plan.reproducer.bootstrap and not loads.intersection(plan.writable_paths)):
-            raise ValueError('The proposed repair or reproducer goes beyond the inspected files.')
+        requirements = [
+            (len(set(plan.read_paths)) == len(plan.read_paths), ['plan', 'read_paths'], 'unique paths', plan.read_paths),
+            (len(set(plan.writable_paths)) == len(plan.writable_paths), ['plan', 'writable_paths'], 'unique paths', plan.writable_paths),
+            (set(plan.read_paths) <= by_path.keys(), ['plan', 'read_paths'], 'only inspected committed paths', plan.read_paths),
+            ((loads | set(plan.writable_paths) | {plan.focused_test}) <= set(plan.read_paths),
+             ['plan', 'read_paths'], 'include every load, writable path and focused test', plan.read_paths),
+            (all(path in by_path and not by_path[path].get('support_only') for path in plan.writable_paths),
+             ['plan', 'writable_paths'], 'inspected writable files, excluding support-only files', plan.writable_paths),
+            (any(SOURCE_PATH.fullmatch(path) for path in plan.writable_paths),
+             ['plan', 'writable_paths'], 'at least one inspected addon source', plan.writable_paths),
+            (bool(plan.reproducer.bootstrap or loads.intersection(plan.writable_paths)),
+             ['plan', 'reproducer', 'steps'], 'load writable code or use its discovered bootstrap', plan.reproducer.steps),
+        ]
+        for valid, location, expected, observed in requirements:
+            if not valid:
+                raise ResponseValidationError('The proposed repair or reproducer goes beyond the inspected files.',
+                                              location, expected, observed)
         paths = plan.writable_paths
         root, base, inventory = source.repository()
         if base != packet['base']:
@@ -230,7 +244,9 @@ def resolve(raw, packet, original, feedback):
             if (plan.reproducer.bootstrap.model_dump() != by_path[plan.focused_test].get('client_bootstrap')
                     or not any(path.removeprefix('!!!TwichUI/') in bootstrap_source
                                for path in paths if SOURCE_PATH.fullmatch(path))):
-                raise ValueError('The proposed existing client setup is outside the discovered fixture.')
+                raise ResponseValidationError('The proposed existing client setup is outside the discovered fixture.',
+                    ['plan', 'reproducer', 'bootstrap'], 'exact discovered bootstrap loading writable addon code',
+                    plan.reproducer.bootstrap.model_dump())
         ordered = list(dict.fromkeys([*paths, *plan.read_paths]))
         windows = []
         for i in range(4):

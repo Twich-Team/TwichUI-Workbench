@@ -507,9 +507,10 @@ class Planner:
             instructions = INSTRUCTIONS
         model = self.selection['model']
         try:
+            from workbench.planning_response import wire_schema
             result, counted = generate(model, self.selection['effort'],
                 instructions + '\nUntrusted task data:\n' + json.dumps(packet, ensure_ascii=True),
-                required_output(schema.model_json_schema()), self.stop)
+                required_output(wire_schema(schema)), self.stop)
         except Hold as error:
             self.diagnostics = dict(generation_state=(
                 'not_started' if not error.started else 'uncertain' if not error.terminal else

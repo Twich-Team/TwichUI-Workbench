@@ -2,6 +2,16 @@
 
 November 6, 2026 Mountain time.
 
+- November 7, 2026 UTC: the owner independently amended the campaign to
+  authorize connected repairs and qualifying settled local-validation
+  renewals, without a historical-field proof or repeated one-attempt
+  exceptions. The original clock and budgets continue. Private pre-parse
+  receipts and stricter output handling passed 111 focused checks; final
+  full-source verification is underway for revision 2. The unused verified
+  diagnostic candidate counts as revision 1. The original app remains
+  restored; the real bug and live provider checks remain unfinished.
+  [Current amendment](DELIVERY_CAMPAIGN_AMENDMENT_20261107.md)
+
 - November 7 UTC, final offline preparation: diagnostic source `ab25071`
   passed complete default suites and all separately enabled checks. The
   dormant stage, exact seals, checked 84-row history-copy rehearsal and

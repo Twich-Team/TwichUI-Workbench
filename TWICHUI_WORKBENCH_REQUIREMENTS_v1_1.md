@@ -195,6 +195,17 @@ The approved Qwen-only interim cutover stopped in preflight. A8 remains open for
 
 ## A9. Recovery and continuity
 
+Owner campaign amendment, November 7, 2026 UTC. A definitively finished
+provider output rejected locally may receive a fresh bounded task attempt
+when no repair execution or uncertain provider activity remains, consumed
+usage/disposition are recorded, corrected private diagnostics and validation
+are tested, known/unknown facts and differences are recorded, and renewal
+has a concrete diagnostic/corrective purpose. A discarded historical
+response need not be reconstructed. Preserve fresh approvals, scope and
+shared campaign limits; do not replay partial/uncertain work or successful
+cases or switch after generation. This is campaign authority, not an
+unbounded ordinary-task retry policy. See the saved campaign amendment.
+
 Reloads, restarts, duplicate clicks, and repeated decisions must not duplicate work, approvals, or publication.
 
 Keep task history and previous failures. Support safe recovery without recreating unchanged tasks or seeking duplicate approval. Renew approval when the actual binding changes.

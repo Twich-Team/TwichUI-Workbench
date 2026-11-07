@@ -21,6 +21,8 @@ SCENARIO_FAILURE_MESSAGES = {
     "provider_rejection": "The local model service rejected the planning request.",
     "contention": "Workbench could not get access to the local model.",
     "credential_or_lock": "Workbench could not verify access to the local model.",
+    "accounting": "Workbench could not establish complete planning usage within its bound. The task is held.",
+    "diagnostic_io": "Workbench could not preserve the private response evidence. The task is held.",
     "loaded_client_schema": "The model did not return a complete proposal selecting a verified addon operation.",
     "loaded_client_core_source": "The model's proposal did not bind its example to the one core addon source loaded by the selected test.",
 }
@@ -67,6 +69,7 @@ class LocalHTTP:
         self.sockets = []
         self.lock = threading.Lock()
         self.seconds = deadline_seconds()
+        self.response_observer = None
         self.ends_at = time.monotonic() + self.seconds
         owner = self
 
@@ -130,6 +133,8 @@ class LocalHTTP:
                 request, timeout=min(timeout or self.seconds, remaining)
             ) as response:
                 raw = response.read(limit + 1)
+            if self.response_observer is not None:
+                self.response_observer(raw, len(raw) <= limit)
             if self.stop_event.is_set() or self.canceled.is_set():
                 raise PlanningUnavailable("Worker shutdown canceled planning.", "canceled")
             if self.expired.is_set() or time.monotonic() >= self.ends_at:

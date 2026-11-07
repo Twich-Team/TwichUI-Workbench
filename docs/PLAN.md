@@ -1,3 +1,16 @@
+# Delivery campaign amendment — November 7, 2026 UTC
+
+Continue the same approved working-application outcome under the
+[independent owner amendment](DELIVERY_CAMPAIGN_AMENDMENT_20261107.md).
+Complete and verify connected response handling, commit/seal revision 2,
+check latest settled history and activation gates, renew the real Qwen
+flight-path task through normal delegated decisions, then the four required
+provider cases. Retain successes and eligible repairs within the existing
+clock and intersecting limits. No ordinary engineering repair needs a new
+owner prompt. Partial/uncertain execution and genuine exhausted or expanded
+boundaries still stop work. Completion remains the checked real fix,
+provider acceptance, stable installed app and normal next-bug workflow.
+
 # Delivery campaign preparation — November 6, 2026 Mountain time
 
 Diagnosis, connected repairs and complete final-source offline verification

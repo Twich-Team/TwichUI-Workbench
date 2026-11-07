@@ -1,3 +1,20 @@
+## November 7, 2026 UTC — Owner amendment and connected response handling
+
+Recorded the independent owner amendment, unchanged original clock and
+canonical one-request/608-generated-token disposition. Conservatively
+counted the verified unused diagnostic build as revision 1; revision 2
+is reserved. The renewed path journals private bounded response/schema/
+completion/usage/phase data before parsing, captures field/constraint/type
+failures, rejects ambiguous/truncated/unaccounted output and normalizes
+only harmless unambiguous formatting. The supported installed grammar
+converter/parser accepted the wire schema. Focused tests passed (111),
+including the corrected accounting in older synthetic HTTP responses.
+The normal browser/process rehearsal exercises a controlled rejection,
+fresh task bindings and concurrent observer traffic. Full final suites,
+opt-ins and a new sealed candidate precede live renewal. No new generation
+or activation occurred. See the [amendment](DELIVERY_CAMPAIGN_AMENDMENT_20261107.md)
+and private amendment receipts. The historical invalid field remains unknown.
+
 ## November 7, 2026 UTC — Diagnostic revision verified without live renewal
 
 Complete checks now cover `ab25071`: 1,146 backend, 25 frontend, 108 default

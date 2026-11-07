@@ -938,7 +938,7 @@ def test_9187_scenario_shape_through_local_parser_and_preparation(
                 # body. Each synthetic payload reproduces one possible trigger.
                 with pytest.raises(ValidationError, match="Module scenarios support a scalar first return only"):
                     ScenarioResponse.model_validate(response)
-            return json.dumps(dict(model=selected, choices=[
+            return json.dumps(dict(model=selected, usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50), choices=[
                 dict(finish_reason="stop", message=dict(content=json.dumps(response)))
             ])).encode()
 

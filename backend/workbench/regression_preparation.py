@@ -316,6 +316,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     bug = bug_investigation.requested(original['payload'])
     bug_result, limitation = None, None
     validation_diagnostics = {}
+    response_evidence = None
     choice = original['payload'].get('local_planning')
     everyday_mode = everyday.enabled()
     generation = job['kind'] == 'planning' and scenario_response is None and (
@@ -428,6 +429,10 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 c.execute(intakes.update().where(intakes.c.id == original['id']).values(status='investigating'))
                 original['status'] = 'investigating'
             claimed_generation = True
+            from workbench.planning_response import create_evidence
+            response_evidence = create_evidence(lease, schema)
+            if response_evidence:
+                adapter_used.response_evidence = response_evidence
             try:
                 if codex_route or not model_selection:
                     raw, model, basis = adapter_used.generate(wire, schema)
@@ -469,14 +474,20 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 model_selection = model_selection.model_copy(update={'model': target})
                 if codex_route:
                     adapter_used = codex_provider.Planner(codex_route, provider_stopped)
+                    adapter_used.response_evidence = response_evidence
                     raw, model, basis = adapter_used.generate(wire, schema)
                 else:
                     adapter_used = LocalProvider(stop_event, ends_at=planning_end)
+                    adapter_used.response_evidence = response_evidence
                     raw, model, basis = adapter_used.generate(wire, schema, expected_model=target)
             if planning_end is not None and time.monotonic() >= planning_end:
                 raise PlanningUnavailable('The shared planning deadline expired.', 'timeout')
             if len(json.dumps(raw, allow_nan=False).encode()) > 24000 or basis not in {'demo', 'local', 'codex'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
                 raise ValueError('Invalid bounded scenario provider response')
+            if response_evidence:
+                response_evidence.parsed(raw, getattr(adapter_used, 'diagnostics', {}))
+                if isinstance(getattr(adapter_used, 'diagnostics', None), dict):
+                    adapter_used.diagnostics['evidence_id'] = response_evidence.identifier
             # Re-read committed evidence and private policy after the response.
             if inspect_source(trusted_preparation.configuration(engine)) != packet:
                 raise ValueError('Committed source or preparation policy changed during generation; review fresh evidence.')
@@ -488,9 +499,16 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 parsed = grounded_scenarios.resolve_response(raw, schema, wire, packet)
                 scenario_response = parsed.model_dump(exclude={'evidence_sha256', 'policy_sha256'})
                 scenario_response['model'] = model  # Actual adapter attribution, never a generated identity claim.
+            if response_evidence:
+                response_evidence.record('validated', generation_state=getattr(adapter_used, 'diagnostics', {}).get('generation_state'))
         except grounded_scenarios.ScenarioInputRequired as error:
             question = str(error)
         except ValidationError as error:
+            if response_evidence:
+                try:
+                    response_evidence.rejected(error, raw)
+                except OSError:
+                    adapter_used.diagnostics['evidence_write_failed'] = 1
             if bug:
                 validation_diagnostics = bug_validation_diagnostics(error)
                 failure = ('schema_validation', 'The provider returned an incomplete or invalid bug investigation.')
@@ -513,9 +531,17 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             else:
                 failure = (error.reason, str(error) if isinstance(error, (codex_provider.Hold, LocalBeforeGeneration)) else None)
         except ValueError as error:
+            if response_evidence:
+                try:
+                    response_evidence.rejected(error, raw, phase='local-validation')
+                except OSError:
+                    adapter_used.diagnostics['evidence_write_failed'] = 1
             failure = ('planning_validation', str(error))
         except OSError:
             failure = ('planning_io', 'Workbench could not read the files it needs for planning.')
+        finally:
+            if response_evidence:
+                response_evidence.close()
     contract, bug_content = None, None
     if job['kind'] == 'planning' and not failure:
         if bug:
@@ -580,6 +606,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                            if k != 'usage'}
             diagnostics['category'] = category
             diagnostics.update(validation_diagnostics)
+            if response_evidence:
+                diagnostics['evidence_id'] = response_evidence.identifier
             if (loaded_selection or bug) and claimed_generation:
                 diagnostics['retained_failure'] = 1
             state = diagnostics.get('generation_state')

@@ -1,3 +1,59 @@
+# Owner amendment applied; connected revision verification — November 7, 2026 UTC
+
+Following PROJECT_WORKING_PHILOSOPHY.md, the owner independently amended
+the campaign's working method and renewal prerequisite. Read
+[the saved amendment](DELIVERY_CAMPAIGN_AMENDMENT_20261107.md). This is
+not blanket approval of `95cefb9`. Qualifying definitively finished local
+rejections may be renewed after usage/disposition, bounded private evidence,
+diagnostic/validation testing, known/unknown/difference and concrete-purpose
+conditions, with fresh ordinary delegated decisions. The discarded
+historical field need not be reconstructed. Ordinary connected engineering
+repairs stay within this assignment; do not return for a one-attempt
+exception or developer prompt. Partial/uncertain work, unsafe restoration
+and genuine permission/resource boundaries still hold.
+
+The original clock is unchanged: opened `2026-11-07T04:35:45.612Z`,
+admissions end `18:35:45.612Z`, restoration ends `20:35:45.612Z`.
+At 11:36 UTC canonical reconciliation still found exactly one campaign
+model attempt: the finished local schema rejection, one request and
+608 generated tokens, no implementation or Codex turn. Original 79-row
+and failed 84-row stores, model, helper/grant and both seals matched.
+The original loopback app remains active; LAN and candidate roles are off.
+
+Revision accounting is conservatively corrected: fully verified but unused
+`ab25071` counts as verified revision 1. The next verified build is revision
+2, leaving one further revision. Preserve the unused stage and both roots.
+The private ledger now records this correction and reservation, without
+changing attempts, provider accounting or original time. Seven attempt
+slots, four local/two bug allocations and four Codex/eight turns remain
+subject to the original intersecting limits and actual gates.
+
+Connected implementation adds `planning_response.py`: a private bounded
+pre-validation journal, strict field-aware decoder, supported wire shape
+constraints and conservative completion/accounting classification. Known
+schema errors and local scope/bootstrap errors retain exact locations,
+constraints and observed types privately. Arbitrary source text/values
+remain redacted. Only unambiguous JSON wrappers and present empty unused
+outcome alternatives normalize; no plan content or approval is invented.
+The installed llama.cpp converter/parser accepted the new wire schema
+offline. The actual task's serialized packet remains below 24,000 bytes.
+
+111 focused tests passed. The process rehearsal now sends a controlled
+schema rejection through the actual local decoder and normal browser
+driver, then fresh fixture tasks, with concurrent second-client polling.
+Its private receipt and no-execution/accounting checks passed. The initial
+full backend run found 13 older HTTP cases without usage; their controlled
+envelope now includes complete usage, with assertions unchanged. An early
+browser run was gracefully interrupted for final field-diagnostic work;
+its output remains preserved. Final complete suites/opt-ins and a fresh
+candidate seal/deployment record must pass before activation.
+
+Private new evidence: `delivery-campaign-7b5963a/amendment-20261107`.
+No new live task has started. Renew attempt 2 only after all amendment
+conditions and original gates are verified; preserve attempt 1 and copy
+the latest settled 84-row history forward. Do not repeat the archive.
+The real flight-path fix remains first and unfinished.
+
 # Campaign live work held; original app restored — November 7, 2026 UTC
 
 Latest continuation: diagnostic source `ab25071` now has complete offline

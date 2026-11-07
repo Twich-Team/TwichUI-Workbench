@@ -13,7 +13,7 @@ from sqlalchemy import select
 from workbench import bug_investigation, codex_provider, trusted_preparation, worker
 from workbench.bug_evidence import BugPlan
 from workbench.api import create_app
-from workbench.db import intakes, model_attempts, proposal_decisions, task_sessions as sessions
+from workbench.db import intakes, model_attempts, planning_jobs, proposal_decisions, task_sessions as sessions
 from workbench.planning_provider import LocalProvider
 from workbench.real_execution import LIMITS
 from workbench.schemas import TaskBudget
@@ -85,12 +85,22 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
 
     def scripted(self, packet, schema, expected_model):
         assert schema is bug_investigation.BugPlanningResponse
-        case = next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
-        calls.put((case["choice"], "planning"))
-        self.diagnostics = dict(actual_model=expected_model, generation_state="finished",
-                                usage=codex_provider.usage_record(dict(prompt_tokens=40,
-                                    completion_tokens=10, reasoning_tokens=0, total_tokens=50)))
-        return three_observations(case["client_case"]), expected_model, "local"
+        fault = packet['report']['title'].endswith(' · controlled malformed response')
+        case = cases[0] if fault else next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
+        answer = three_observations(case['client_case'])
+        if fault:
+            answer['finding'] = 'PRIVATE_REJECTED_CONTENT' * 30
+        class Transport:
+            seconds = 120
+            def models(self, _): return expected_model
+            def read(self, request, limit):
+                assert len(request.data) < 24000 and limit == 24000
+                return json.dumps(dict(id='controlled-response', model=expected_model,
+                    usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
+                    choices=[dict(finish_reason='stop', message=dict(content=json.dumps(answer)))])).encode()
+        value = self._infer(Transport(), 'fixture-no-credential', schema, json.dumps(packet), expected_model=expected_model)
+        calls.put(('fixture-fault' if fault else case["choice"], "planning"))
+        return value
 
     monkeypatch.setattr(LocalProvider, "generate", scripted)
     # No real connector is used. The real browser gate observes the explicitly
@@ -139,6 +149,10 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
             child.start()
             actors.append(child.pid)
             try:
+                if index == 0:
+                    fault = subprocess.run(["node", "e2e/bug_process_rehearsal.mjs", origin, str(path), "fault"],
+                                           cwd=ROOT, env=environment(), capture_output=True, text=True, timeout=40)
+                    assert fault.returncode == 0, fault.stdout + fault.stderr
                 run = subprocess.run(["node", "e2e/bug_process_rehearsal.mjs", origin, str(path), str(index)],
                                      cwd=ROOT, env=environment(), capture_output=True, text=True, timeout=150)
                 assert run.returncode == 0, run.stdout + run.stderr
@@ -160,8 +174,22 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
             assert len(connection.execute(select(model_attempts).where(
                 model_attempts.c.purpose == "implementation")).all()) == index+1
     assert actors[0] != actors[1] != os.getpid()
-    assert [calls.get(timeout=2) for _ in range(4)] == [
-        (case["choice"], phase) for case in cases for phase in ("planning", "implementation")]
+    assert [calls.get(timeout=2) for _ in range(5)] == [('fixture-fault', 'planning'), *[
+        (case["choice"], phase) for case in cases for phase in ("planning", "implementation")]]
+    with store.connect() as c:
+        failed = c.execute(select(intakes.c.id).where(intakes.c.status == 'failed')).scalar_one()
+        attempt = c.execute(select(model_attempts).where(model_attempts.c.task_id == failed)).mappings().one()
+        assert attempt['outcome'] == 'failed' and attempt['finished_at']
+        assert attempt['usage']['values']['completion_tokens'] == 10
+        job = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == failed)).scalar_one()
+    evidence = tmp_path/'artifacts/runs'/('planning-evidence-'+job['diagnostics']['evidence_id'])/'events.jsonl'
+    rows = [json.loads(row) for row in evidence.read_text().splitlines()]
+    assert [row['phase'] for row in rows][:3] == ['schema', 'wire-received', 'envelope']
+    assert rows[-1]['phase'] == 'validation-rejected'
+    issue = rows[-1]['errors'][0]
+    assert issue['path'] == ['finding'] and issue['expected']['max_length'] == 450
+    assert issue['observed']['type'] == 'str'
+    assert 'PRIVATE_REJECTED_CONTENT' not in evidence.read_text()
     assert not git(source, "status", "--porcelain").strip()
     assert (source / PRODUCTION).read_text() == BUGGY
     assert (source / CLIENT_SOURCE).read_text() == BAD_ALERT
