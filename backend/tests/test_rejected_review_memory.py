@@ -41,3 +41,30 @@ def test_reuse_only_complete_bound_private_rejection(tmp_path,monkeypatch,fault)
         assert 'Untrusted' in result['note'] and not {'plan','expected','approved','code'}&result.keys()
     else:
         assert result is None
+
+
+@pytest.mark.parametrize('fault',['none','changed','cycle'])
+def test_source_only_renewal_keeps_validated_origin_feedback(tmp_path,monkeypatch,fault):
+    from workbench import everyday
+    monkeypatch.setattr(everyday,'configuration',lambda engine:SimpleNamespace(evidence_roots=[str(tmp_path)]))
+    prior=str(uuid4())
+    original=Evidence(tmp_path,prior,ReviewResponse)
+    original.record('envelope',generation_state='finished',accounting_state='complete',completion='stop',model_matches=1)
+    value=dict(review_binding='a'*64,ready=False,issues=[dict(category='source',explanation='The source does not contain that proposed cache.')])
+    original.snapshot('model-plan-review',value)
+    original.record('plan-self-check',binding='a'*64,ready=False)
+    original.close()
+    lessons=review_lessons(prior,None)
+    fresh=str(uuid4())
+    parent=Evidence(tmp_path,fresh,ReviewResponse)
+    if fault=='changed':
+        lessons['issues'][0]['explanation']='Changed unbound feedback.'
+    if fault=='cycle':
+        lessons['predecessor']=fresh
+    parent.record('rejected-plan-feedback-reused',**lessons,approved=False,executed=False)
+    parent.close()
+    answer=review_lessons(fresh,None)
+    if fault=='none':
+        assert answer['predecessor']==prior and answer['issues']==value['issues']
+    else:
+        assert answer is None

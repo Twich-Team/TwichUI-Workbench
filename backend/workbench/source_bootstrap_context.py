@@ -44,7 +44,7 @@ def complete(packet, remaining, should_stop, focus_paths=None):
             index+=1
         if should_stop():
             raise ValueError('Investigation stopped during committed bootstrap inspection')
-        if len(packet.get('inspection_windows',[]))>=24:
+        if len(packet.get('inspection_windows',[]))>=source.window_limit(packet):
             raise ValueError('Committed bootstrap exceeds the source window bound')
         returned,_,count=source.inspect(packet,[InvestigationRead(path=path,start=start,end=end)])
         windows.extend(returned)

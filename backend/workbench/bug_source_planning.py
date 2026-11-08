@@ -22,7 +22,11 @@ INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+
 
 
 def read_limit(packet):
-    return 60000 if packet.get('plan_review') == 'source-grounded-lua-v1' else READ_CHARS
+    return 128000 if packet.get('plan_review') == 'source-grounded-lua-v1' else READ_CHARS
+
+
+def window_limit(packet):
+    return 64 if packet.get('plan_review') == 'source-grounded-lua-v1' else REQUESTS*3
 
 
 def source_characters(packet):
@@ -192,7 +196,7 @@ def verify_packet(initial, supplied):
         if expected != item:
             raise ValueError('An inspected committed dependency changed.')
     windows = supplied.get('inspection_windows', [])
-    if len(windows) > REQUESTS*3 or (source_characters(supplied) > read_limit(supplied)
+    if len(windows) > window_limit(supplied) or (source_characters(supplied) > read_limit(supplied)
             if supplied.get('plan_review') == 'source-grounded-lua-v1' else sum(len(w['text']) for w in windows) > READ_CHARS):
         raise ValueError('The committed inspection evidence exceeds its operation bound.')
     for index, window in enumerate(windows):
@@ -286,7 +290,7 @@ def inspect(packet, requests):
 def next_wire(packet, original, feedback, windows, finding, matches=None):
     _, wire = bug.planning_request(packet, original, feedback)
     from workbench.source_memory import retain
-    retain(wire, packet, windows, (32000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
+    retain(wire, packet, windows, (60000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
            -sum(len(m['text']) for m in (matches or [])))
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
@@ -324,9 +328,11 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     parent.record('rejected-plan-feedback-reused', **lessons, approved=False, executed=False)
             wire = next_wire(packet, original, feedback, remembered,
                              'Previously read source was checked against the current committed repository. No diagnosis or approval was reused.')
-            parent.record('source-memory-reused', predecessor=predecessor,
-                windows=[{key:value for key,value in window.items() if key != 'text'} for window in remembered],
-                approved=False, executed=False)
+            for offset in range(0,len(remembered),16):
+                parent.record('source-memory-reused', predecessor=predecessor,
+                    windows=[{key:window[key] for key in ('path','sha256','line','through_line')}
+                             for window in remembered[offset:offset+16]],
+                    approved=False, executed=False)
     program_mode = initial.get('plan_review') == 'source-grounded-lua-v1'
     limit = read_limit(packet)
     search_chars = 0

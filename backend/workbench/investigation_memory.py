@@ -125,7 +125,7 @@ def seed(packet, original, current_attempt, engine):
                     if key in seen:
                         continue
                     seen.add(key)
-                    if len(seen) > 24:
+                    if len(seen) > source.window_limit(candidate):
                         raise ValueError('Source memory exceeds window bound')
                     _, item = source.committed(key[0], packet['base'])
                     if item['sha256'] != key[3]:
@@ -151,7 +151,7 @@ def seed(packet, original, current_attempt, engine):
     return packet, [], None
 
 
-def review_lessons(prior, engine):
+def review_lessons(prior, engine, _seen=()):
     """Completed rejected self-check DATA, never a replacement plan or authority.
 
     Caller must first obtain prior from seed's settled/current-source validation.
@@ -161,6 +161,8 @@ def review_lessons(prior, engine):
     from workbench import everyday
     from workbench.bug_plan_review import ReviewResponse
     from workbench.planning_response import strict_json
+    if prior in _seen or len(_seen)>=8:
+        return None
     roots=[Path(root) for root in everyday.configuration(engine).evidence_roots]
     result=None
     for index in range(8):
@@ -174,6 +176,11 @@ def review_lessons(prior, engine):
             if any(j!=journals[0] for j in journals[1:]):
                 continue
             events=journals[0]
+            for inherited in events:
+                if inherited.get('phase')=='rejected-plan-feedback-reused' and inherited.get('approved') is False and inherited.get('executed') is False:
+                    original=review_lessons(inherited.get('predecessor'),engine,(*_seen,prior))
+                    if original and all(original[k]==inherited.get(k) for k in ('predecessor','review_binding','issues','note')):
+                        result=original
             if not any(e.get('phase')=='envelope' and e.get('generation_state')=='finished'
                     and e.get('accounting_state')=='complete' and e.get('completion')=='stop'
                     and e.get('model_matches')==1 for e in events):

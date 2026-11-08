@@ -6956,3 +6956,24 @@ and only mocks provider_request; first dummy-key fixture failure preserved/fixed
 with a private controlled key. Existing protections remain. Current history167
 rows/24entries, original79 preserved. Continue verifiedrevision24/real23, no owner
 stop;0/4realprovidercases/no checkedflightrepair.
+
+
+## November8 — measured complete working set replaces source-window thrashing
+
+Real23 learned from prior critique and inspected missing callers, but32kretention
+evicted already-read Travel.Flights and forced rereads; local unique61010thenhit
+60000.3finished responses3719generated/49498prompt, exactidle69430twice, no plan/
+repair/uncertainty. Latest171rows/25entries preserved, source/disclosure/write scope
+unchanged. Newmode128k localread/64windows,60ksource retained with compact old
+provenance/recentcontinuations,98304HTTP/131072prepared, realtokenizer26000/32768
+bound. Per-request300/freshconsent6, same8requests/1200claim/2600output; original
+oldreceipts/usage preserved andcanonical readers support6. Prior rejected feedback
+retains validated origin through settledsource-only attempts, no priorplanapproval.
+Actual171rowCOPY no-generation proof: all inspected source in25deduplicated windows
+visible in diagnosis/plan/review23372/23695/24927tokens and89564/93733/93692HTTPbytes.
+No developer flight reproduction/patch. Complete frozen1449backend/25frontend/
+staticbuild/contracts pass;2native normalbrowser/separateworker modes pass66.56sec
+626.4MiB with faults/concurrency/restarts/2controlledfixes per mode. Default4backend
+opt-ins:2native freshly run,2unchanged regressionrouting/readiness retained; unchanged
+108Chromium/10visual/2browser opt-ins/admin evidence bound by lineage.0/4realprovider
+cases/no realcheckedrepair still. Continue verifiedrevision25/controller24 promptly.

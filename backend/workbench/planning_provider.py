@@ -22,7 +22,9 @@ from workbench.bug_investigation_stage import InvestigationResponse
 ROOT = Path(__file__).resolve().parents[2]
 MAX_INPUT = 24000
 BUG_INPUT = 65536
-BUG_PREPARED_INPUT = 98304  # Private source + rejected-plan feedback; actual HTTP stays BUG_INPUT.
+BUG_PREPARED_INPUT = 98304
+PROGRAM_INPUT = 98304
+PROGRAM_PREPARED_INPUT = 131072
 MAX_OUTPUT = 24000
 
 
@@ -172,7 +174,8 @@ class LocalProvider:
         if (issubclass(schema, ScenarioResponse) or schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse)) and expected_model is None:
             raise PlanningUnavailable('Grounded local planning requires a saved model selection.', 'model_policy')
         encoded = json.dumps(packet, ensure_ascii=True, separators=(',', ':'))
-        prepared_limit = BUG_PREPARED_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse) else MAX_INPUT
+        program = packet.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1'
+        prepared_limit = PROGRAM_PREPARED_INPUT if program else BUG_PREPARED_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse) else MAX_INPUT
         self.diagnostics.update(prepared_input_bytes=len(encoded.encode()), prepared_input_limit=prepared_limit)
         if len(encoded.encode()) > prepared_limit:
             self.diagnostics['category'] = 'input_budget'
@@ -303,7 +306,8 @@ class LocalProvider:
             body.update(reasoning_budget_tokens=1024, reasoning_format='deepseek',
                         chat_template_kwargs=dict(enable_thinking=True))
         encoded_body = json.dumps(body, separators=(',', ':')).encode()
-        request_limit = BUG_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse) else MAX_INPUT
+        program = context.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1'
+        request_limit = PROGRAM_INPUT if program else BUG_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse) else MAX_INPUT
         if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse) and len(encoded_body) > request_limit:
             # Fit source context to the actual serialized request, preserving
             # the report, schema and authority. Never imply a trimmed body is
@@ -349,7 +353,7 @@ class LocalProvider:
                 counts = transport.context_budget(secret, body)
                 count, capacity = counts.get('prompt_tokens'), counts.get('context_tokens')
                 if (type(count) is not int or type(capacity) is not int or count < 1
-                        or capacity < 4096 or count > min(22000, capacity-2600-1024)):
+                        or capacity < 4096 or count > min(26000 if program else 22000, capacity-2600-1024)):
                     raise PlanningUnavailable('Local context exceeds the verified planning bound; no generation started.',
                                               'context_budget')
                 self.diagnostics.update(context_prompt_tokens=count, context_capacity_tokens=capacity)

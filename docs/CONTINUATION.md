@@ -1,23 +1,56 @@
-# Latest installed revision24 / active real23
+# Current state after settled real23 — November8
 
-S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-81b713e
-R=C/outcome-81b713e. Installed81b713e991145fdc55ab3042f83b0f0b6d654d22,
+InstalledS=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-81b713e
+R=C/outcome-81b713e, source81b713e991145fdc55ab3042f83b0f0b6d654d22,
 tree766291883a7a64c574d02fb1e390e77edc692c28,
 sealbae78a57e72b263501b34a30b4b77f3e89de90ac3766c6bcf2ba7e0da09e275c.
-R/deployment-24-verified.json all strict gates, original79/forward167/all24HTTP
-historyreads verified.4rolesactive/disabled. R/offline-verification.json binds
-190focused/native32.17sec630MiB/actual4response replay/copyfeedback proofs and
-precise retained unaffected complete/frontend/browser/admin evidence.
+4rolesactive/disabled, originalreviewstopped. All24HTTPreads before23, now25entries.
+R/deployment-24-verified.json all strict network/TLS/browser/filter/5probes/peer/
+history gates; original79/current171 preserved. Latest171/schema0012/28tables
+SHA88199f0bcdc16ca304fb424241f2feda758ae0591607ea4bfd6258ae002eb5a4.
 
-Real23 submitted01:26:22Z, intakec0fd95f6-b79b-4964-ad01-96a50f6dc585,
+No provider/driver active; real23 intakec0fd95f6-b79b-4964-ad01-96a50f6dc585,
 modele1ce0787-883a-4f33-aaa9-ba0fa5d6d4a6, job09c092e5-923d-4fc5-aa05-5438f72d5f27.
-Driver execsession81659, R/active-attempt.json. Provider active; do not replay.
-Monitor real journal/driver, review actual plan when ready and continue.67/66
-request/usage totals below are SETTLED pre23; add only actualnewreceipts.
-No checkedrealrepair/provider cases, no owner decision needed.
+3finished stop/usage receipts3719generated/49498prompt, no plan/approval/repair.
+Prior rejections DID improve behavior: model investigated missing callers instead
+of repeating imaginarycache plan. But32kretained source evicted already-read
+Travel.Flights, forcing rereads; unique61010thenexceeded60000. Exactidle69430/2600
+twice; R/attempt-23-accounting.json. No uncertain external activity.
 
-The correction described below IS NOW INSTALLED. Remaining below paths/identity
-bcaf describe preserved predecessor; currentS/R above supersede them.
+Uninstalled measured architecture correction: newmode read128000/64windows; retain
+60000sourcecharacters, compact historical provenance with recent continuation
+pointers, actualHTTP98304/privateprepared131072, actualtokenizercap26000 within
+verified32768 minus2600output/1024margin. Legacyactual65k/22ktoken/source45k bounds
+unchanged. Per-request bug timeout300seconds/freshconsentversion6, same8requests/
+1200wholeclaim/2600output, normal fresh approval binding. Canonical receipt readers
+support6 while preserving historical4/5limits and originalrows. Model evidence
+64KiB perresponse unchanged; no new privateCodexdisclosure/writableaddonscope.
+
+C/complete-working-set-proof.json actual171rowCOPY+currenttokenizer, no generation/
+livewrite: all inspected lines in25deduplicated windows visible for diagnosis/plan/
+review;23372/23695/24927tokens,89564/93733/93692HTTPbytes. Prior22negativefeedback
+validated through settledsource-only23; no oldplan/approval/expectedanswer reused.
+C/complete-working-set-measurement.json earlier exploratory27raw-window measurement
+also preserved, no generation. Native now mocks only provider_request, actual
+generate/rawguard runs. Bothmodes pass66.56sec626.4MiB: two unrelatedcontrolled
+checkedbugs per mode, faults/concurrency/restarts. C/working-set-native-both.log.
+239focused+96packing checks pass; final complete1449backend/25frontend pass
+C/working-set-complete-tests.log (4defaultopt-ins:2native newly run, unchanged
+regressionrouting/readiness retained). Staticbuild/contracts/check
+C/working-set-check.log passes. Do not edit code during frozen full verification
+without rerunning affected checks. No real task result or provider case complete.
+
+Next checkpoint/verifiedrevision25/controller24: predecessor81b, forward171/original79,
+evidence_roots79, add modele1ce0787 to20prior IDs=21. CurrentR scripts templates,
+copyrollbackbaselines/keyhash/configreconciliation, recordsource/inventory/seal/tests
+beforeactivation. Fresh task with complete working set and retained rejection
+feedback, normal independent review and delegated plan/run. No owner renewal.
+Totals pre24:70Qwen starts/69usage/68stoptexts/1partial/1oldunknown,67960generated/
+567956prompt observed; old17max2600missing separately. C/outcome-ledger.json current.
+
+Below is preserved predecessor detail; newest facts above supersede old identities/
+counts and uninstalled instructions. Continue until realjourney/4provider checks/
+installedcompletedresultrestart/nextordinarybug/cleanup complete.
 
 # Continue the complete useful outcome — November8,2026
 

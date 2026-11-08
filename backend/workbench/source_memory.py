@@ -43,13 +43,17 @@ def retain(wire, packet, current, budget=24000):
                 coverage='retained exact committed lines',current_read=current_read))
         item['excerpts'] = excerpts
     available = sum(len(text)+1 for text in lines.values())
+    keys=('path','line','through_line','requested_start_line','requested_through_line',
+          'file_lines','next_line','cached_prefix_through_line','coverage')
+    compact=packet.get('plan_review')=='source-grounded-lua-v1'
     wire['source_memory'] = dict(source_base=packet['base'],available_characters=available,
         retained_characters=used,omitted_characters=available-used,
-        read_windows=[{key:window[key] for key in ('path','line','through_line',
-                          'requested_start_line','requested_through_line','file_lines',
-                          'next_line','cached_prefix_through_line','coverage') if key in window}
+        read_windows=[{key:window[key] for key in (keys[:3] if compact else keys) if key in window}
                       for window in packet.get('inspection_windows',[])],
         note='Previously inspected exact lines remain in file excerpts. Read windows are provenance, '
              'not a claim that every line is visible. Excerpt endpoints identify actual visible coverage. '
              'Missing ranges never establish absence. No addon state, behavior or expected result is remembered or invented.')
+    if compact:
+        wire['source_memory']['recent_read_windows']=[{key:w[key] for key in keys if key in w}
+            for w in packet.get('inspection_windows',[])[-3:]]
     return wire

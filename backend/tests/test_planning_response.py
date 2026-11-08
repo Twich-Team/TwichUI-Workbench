@@ -611,7 +611,7 @@ def test_bug_transport_timeout_is_explicit_and_shared_deadline_still_wins(monkey
         return 'CONTROLLED-NO-HTTP'
     monkeypatch.setattr(LocalProvider,'_infer',infer)
     schema=ScenarioResponse if bug_review is None else ReviewResponse if bug_review else BugPlanningResponse
-    seconds=60 if bug_review is None else 180
+    seconds=60 if bug_review is None else 300
     now=time.monotonic()
     assert LocalProvider()._request(schema,'{}',key,'fixture')=='CONTROLLED-NO-HTTP'
     assert seen[-1][0]==seconds and now+seconds<=seen[-1][1]<=time.monotonic()+seconds
@@ -722,3 +722,35 @@ def test_private_corrective_context_is_fitted_before_http_bound(monkeypatch):
         provider.generate(packet,InvestigationResponse,expected_model=MODEL)
     assert failure.value.reason=='input_budget' and len(seen)==1
     assert provider.diagnostics['generation_state']=='not_started'
+
+
+@pytest.mark.parametrize('count,allowed',[(24543,True),(26000,True),(26001,False),(29000,False)])
+def test_program_working_set_uses_exact_verified_context_capacity(count,allowed):
+    from workbench.bug_investigation_stage import InvestigationResponse
+    packet=dict(coverage=dict(reproducer_format='lua-phases-v1'),files=[dict(path='!!!TwichUI/Example.lua',
+        excerpts=[dict(line=1,text='local a = 1\n'*3500)])])
+    calls=[]
+    class Transport:
+        seconds=300
+        def models(self,_):return MODEL
+        def context_budget(self,_,body):
+            calls.append('count')
+            assert body['max_tokens']==2600 and body['reasoning_budget_tokens']==1024
+            return dict(prompt_tokens=count,context_tokens=32768)
+        def read(self,request,limit):
+            calls.append('generate')
+            assert len(request.data)<=98304 and limit==24000
+            return json.dumps(dict(id='controlled-full-source',model=MODEL,
+                usage=dict(prompt_tokens=10,completion_tokens=5,total_tokens=15),choices=[
+                    dict(finish_reason='stop',message=dict(content=json.dumps(dict(
+                        finding='A controlled stop.',draft=dict(question='A real-world detail.')))))])).encode()
+    provider=LocalProvider()
+    provider.diagnostics=dict(generation_state='not_started')
+    if allowed:
+        provider._infer(Transport(),'inert',InvestigationResponse,json.dumps(packet),expected_model=MODEL)
+        assert calls==['count','generate']
+    else:
+        with pytest.raises(PlanningUnavailable) as failure:
+            provider._infer(Transport(),'inert',InvestigationResponse,json.dumps(packet),expected_model=MODEL)
+        assert failure.value.reason=='context_budget' and calls==['count']
+        assert provider.diagnostics['generation_state']=='not_started'

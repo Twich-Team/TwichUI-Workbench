@@ -88,7 +88,7 @@ def state(connection, identity):
     )
     receipt = payload.get("local_planning_receipt", {})
     require(
-        receipt.get("investigation_version") in (4, 5) and receipt.get("max_local_requests") == 8,
+        receipt.get("investigation_version") in (4, 5, 6) and receipt.get("max_local_requests") == 8,
         "The local investigation request bound is unavailable",
     )
     diag = payload.get("diagnostics", {})

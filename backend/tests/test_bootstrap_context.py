@@ -55,7 +55,7 @@ def test_unique_context_budget_does_not_charge_overlapping_source_twice():
         excerpts=[dict(line=1,text='one\ntwo')])],inspection_windows=[dict(path='tests/test_example.lua',
         line=2,text='two\nthree')])
     assert bug_source_planning.source_characters(p)==len('one\ntwo\nthree\n')
-    assert bug_source_planning.read_limit(p)==60000
+    assert bug_source_planning.read_limit(p)==128000
     p['inspection_windows'].append(dict(path='tests/test_example.lua',line=1,text='one\ntwo'))
     assert bug_source_planning.source_characters(p)==len('one\ntwo\nthree\n')
     p['inspection_windows'][-1]['text']='changed'
