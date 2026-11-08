@@ -69,7 +69,54 @@ write authority; final offer binds prepared program/certificate. Do not weaken o
 FAIL/candidatePASS/full suite or fake success. Model self-review is not independent
 verification. Ordinary check debugging is not another owner approval gate.
 
-## Current development code (NOT installed; incomplete integration)
+## Latest integrated development — NOT installed, verification ongoing
+
+The following older development notes describe the starting checkpoint, not current
+integration status. Scope/phase separation is now connected through intake renewal,
+worker, preparation, run-offer display, UI and normal browser driver. See the final
+section of DELIVERY_PROCESS_REPAIR_20261108.md for the implementation. New module
+bug_check_preparation.py constructs checks after scope approval, actually runs them on
+the isolated original, preserves diagnostics and usage, and certifies before separate
+run approval. Prepared observations are visible in the run offer. Acceptance-only
+live driver waits for private bug-prepared-check-review.json binding every approved
+criterion to actual frozen observations; the development agent supplies genuine review,
+not a model answer or an owner renewal request. No addon fix/reproducer was hand-written.
+
+Codex coding can correct known local check failures with current bounded approved
+source and per-turn receipts; uncertainty stops without replay, retaining known usage.
+Normal new-mode clarification/renewal uses independent completed-turn receipts, actual
+read-only capabilities, all old usage and a new operation bound. Current task's next
+processing sequence is4, not proposalrevision+1=3. Old cumulativev2/v3 history stays.
+
+Private evidence: C/delivery-process-offline-proof (real255-row copy unchanged; next4,
+16priorrequests/1154096tokens, ZERO model calls), including native browser logs and
+inspected desktop/phone screenshots. Both adapter rehearsals completed TWO fixture
+bug repairs each with real confined Lua/full suite and restarted API/worker; these are
+CONTROLLED providers, not required real-provider passes. Latest native log
+/tmp/wb-delivery-intent-native-final.log:2passed63.27s; unit collected/cgroup absent.
+Focused82+73+9 tests passed on successive relevant edits; static check passes.
+The final full run is currently /tmp/wb-delivery-sealed-full-test.log, exec session72795;
+inspect its result before claiming final verification. Earlier full runs were invalidated
+by connected corrections; one control-input hash changed while code was edited, and a
+monitor read hit its bounded query timeout during concurrent rehearsal. Do not edit
+runtime helpers during the final full run or race frontend builds with browser tests.
+No current provider activity or service/network/model changes. InstalledFCC stillhealthy.
+No real flight implementation or 4real provider pass. No owner decision needed.
+
+Next: finish full/static/relevant opt-ins on frozen code, record candidate before
+activation, stage with new private bug_plan_review='source-grounded-intent-v1', checked
+cutover48 from installedFCC/latest255. Reuse dynamic sealed asset validation and exact
+history/recovery/network/helper checks. Do not claim old module hash identity: Planner
+schema support and coding workflow changed; auth/sandbox/account controls stay. Resume
+SAME41 via normal browser renewal with processing_sequence4, revision2, all3settled
+attempt identities and2prior proposal bindings. Scope approval and later run approval
+are separate normal delegated decisions. Inspect every prepared criterion before run;
+never approve missing persistence/character/unknown/initial/visit/refresh checks. Finish
+real workflow,4provider cases, actual-result restart and normal subsequent bug, then
+broader scope. Do not stop at checkpoint or installed internal correction.
+
+## Earlier development starting point (historical notes)
+
 
 New bug_intent.py defines typed readable source/behavior criteria scope without executable
 code, binds ALL owner feedback/committed hashes, and never grants execution/publication.

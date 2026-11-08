@@ -13,6 +13,7 @@ from workbench.visual_scope import digest
 Key = Annotated[StrictStr, Field(min_length=1, max_length=80)] | Annotated[StrictInt, Field(ge=1, le=512)]
 Access = Annotated[list[Key], Field(max_length=8)]
 Short = Annotated[str, Field(min_length=1, max_length=450)]
+ReadPath = Annotated[str, Field(pattern=r'^(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/[A-Za-z0-9_./-]+)\.lua$',max_length=240)]
 
 
 class FixtureField(Data):
@@ -82,9 +83,9 @@ class Reproducer(Data):
     fixture: Literal['module', 'client']
     bootstrap: ClientBootstrap | None = None
     steps: Annotated[list[Step], Field(max_length=24)]
-    phases: Annotated[list[LuaPhase], Field(max_length=4)] = []
+    phases: Annotated[list[LuaPhase], Field(max_length=12)] = []
     event_coverage: bool = False
-    observations: Annotated[list[Observation], Field(min_length=1, max_length=4)]
+    observations: Annotated[list[Observation], Field(min_length=1, max_length=12)]
 
     @model_validator(mode='after')
     def validate_reproducer(self):
@@ -93,7 +94,7 @@ class Reproducer(Data):
                     or any(o.after_step != i+1 or o.source != 'return' or o.path != [1] for i,o in enumerate(self.observations))
                     or self.fixture == 'client' and (not self.bootstrap or self.steps)
                     or self.fixture == 'module' and (self.bootstrap or len(self.steps) != 1 or self.steps[0].op != 'load')
-                    or len(self.model_dump_json().encode()) > 8200):
+                    or len(self.model_dump_json().encode()) > 32768):
                 raise ValueError('Specify separately reviewed bounded Lua phases and explicit scalar results')
             if not any(o.expected != o.incorrect for o in self.observations):
                 raise ValueError('At least one observation must distinguish an original failure')
@@ -112,7 +113,7 @@ class Reproducer(Data):
             raise ValueError('Select one to six distinct existing Lua sources')
         if (not any(s.op == 'call' for s in self.steps)
                 or self.fixture == 'module' and (len(loads) != 1 or self.steps[0].op != 'load')
-                or len(self.model_dump_json().encode()) > 8200):
+                or len(self.model_dump_json().encode()) > 32768):
             raise ValueError('Specify an operation and a bounded observable failure')
         for index, item in enumerate(self.observations):
             constraints = [
@@ -137,8 +138,8 @@ class Reproducer(Data):
 
 
 class BugPlan(Data):
-    scope: Short
-    read_paths: Annotated[list[LuaPath | TestPath], Field(min_length=2, max_length=12)]
+    scope: Annotated[str, Field(min_length=1,max_length=800)]
+    read_paths: Annotated[list[ReadPath], Field(min_length=2, max_length=12)]
     writable_paths: Annotated[list[LuaPath | TestPath], Field(min_length=1, max_length=3)]
     focused_test: TestPath
     reproducer: Reproducer
@@ -146,7 +147,7 @@ class BugPlan(Data):
 
 
 class ReadWindow(Data):
-    path: LuaPath | TestPath
+    path: ReadPath
     start: int = Field(ge=1)
     end: int = Field(ge=1)
 

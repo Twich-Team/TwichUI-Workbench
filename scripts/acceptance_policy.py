@@ -108,9 +108,38 @@ def build_bug_case(bug_input):
                 readPaths=paths, writablePaths=writable)
 
 
+def delivery_chain(connection,identity,revision=None):
+    """Keep historical local rejection separate from independently proved completion."""
+    renewed=connection.execute("SELECT 1 FROM planning_jobs WHERE intake_id=? AND json_extract(payload,'$.bug_followup.budget_version')=4",(identity,)).fetchone()
+    if not renewed:
+        return settled_planning_chain(connection,identity,revision)
+    from workbench.delivery_phase import observe,renewable
+    db=Path(connection.execute('PRAGMA database_list').fetchone()[2])
+    policy=db.parent.parent/'ops/everyday.json'
+    require(policy.resolve()==policy and policy.is_file() and not policy.stat().st_mode&0o077,
+            'installation evidence policy unavailable')
+    config=json.loads(policy.read_text())
+    info=db.stat()
+    require(config['database']==str(db) and config['database_identity']==[info.st_dev,info.st_ino],
+            'installation history identity changed')
+    snapshot=observe(connection,identity,config['evidence_roots'])
+    require(renewable(snapshot),'provider generation is active or uncertain')
+    result=[]
+    for phase in snapshot['phases']:
+        require(phase['requests']<=operation_request_bound(json.loads(connection.execute(
+            'SELECT payload FROM planning_jobs WHERE id=?',(phase['job'],)).fetchone()[0])),
+            'operation request bound exceeded')
+        payload=json.loads(connection.execute('SELECT payload FROM planning_jobs WHERE id=?',(phase['job'],)).fetchone()[0])
+        result.append(dict(id=phase['attempt'],job_id=phase['job'],revision=phase['sequence'],payload=payload,
+            usage=phase['usage'],outcome=phase['database_outcome'],finished_at=phase['local_finished'],
+            backend=phase['backend'],actual_model=phase['actual_model'],requested_model=phase['requested_model']))
+    require(revision is None or result[-1]['revision']==revision,'current processing sequence changed')
+    return result
+
+
 def check_bug_plan(plan, original, case, preparation, inspection_packet=None, feedback=""):
     contract = plan['task_contract']
-    evidence = contract['bug_evidence']
+    evidence = contract.get('bug_intent') or contract['bug_evidence']
     packet = bug_investigation.context(original, '', preparation)
     require(digest(packet['files']) == case['evidenceSha'] and packet['base'] == BASE
             and [f['path'] for f in packet['files']] == case['readPaths']
@@ -122,6 +151,15 @@ def check_bug_plan(plan, original, case, preparation, inspection_packet=None, fe
     require(contract['scenario_grounding']['evidence_sha256'] == digest(packet['files']),
             'investigated source binding changed')
     reviewed = evidence['plan']
+    if contract.get('bug_intent'):
+        from workbench import bug_intent
+        bug_intent.validate_review(evidence,original,feedback,packet)
+        rebuilt,content,question,limitation=bug_intent.resolve(dict(finding=plan['content']['value'],plan=reviewed),packet,original,feedback)
+        require(not question and not limitation and rebuilt=={k:v for k,v in contract.items() if k!='scenario_grounding'}
+                and content==plan['content'] and contract['scenario_grounding']['policy_sha256']==digest(preparation),
+                'approved intent or behavior requirements changed')
+        require(len(reviewed['criteria'])>=len(case['criteria']), 'owner behavior criteria are missing')
+        return evidence
     check = reviewed['reproducer']
     steps = check['steps']
     observations = check['observations']
@@ -145,8 +183,9 @@ def closeout(connection, identity, execution, case):
     """Independently check the persisted terminal result and restoration fence."""
     connection.row_factory = sqlite3.Row
     attempts = connection.execute('SELECT * FROM model_attempts WHERE task_id=?', (identity,)).fetchall()
-    chain=settled_planning_chain(connection,identity)
-    expected = ['implementation', *(['planning']*len(chain))] + (['capability_validation'] if case['provider'] == 'local' else [])
+    chain=delivery_chain(connection,identity)
+    prepared_count=sum(a['purpose']=='check_preparation' for a in attempts)
+    expected = ['implementation', *(['planning']*len(chain)), *(['check_preparation']*prepared_count)] + (['capability_validation'] if case['provider'] == 'local' else [])
     require(sorted(a['purpose'] for a in attempts) == sorted(expected), 'provider attempt count differs')
     require(all(a['finished_at'] and a['backend'] == case['provider'] and a['requested_model'] == case['model']
                 and a['actual_model'] == case['model'] and a['usage'] for a in attempts), 'attempt attribution or usage missing')
@@ -162,15 +201,20 @@ def closeout(connection, identity, execution, case):
         if case['provider'] == 'codex':
             bug = case['request']['kind'] == 'issue'
             by_purpose_id = attempt['id']
-            codex_observations(connection, by_purpose_id, usage, bug=bug, planning=purpose=='planning')
+            codex_observations(connection, by_purpose_id, usage, bug=bug, planning=purpose in {'planning','check_preparation'})
         else:
             if purpose == 'planning':
                 require(1 <= usage.get('requests_observed', 1) <= operation_request_bound(next(r['payload'] for r in chain if r['id']==attempt['id'])),
                         'planning request count exceeds its task consent')
-            require(0 <= values['completion_tokens'] <= {
-                'planning': next(operation_request_bound(r['payload']) for r in chain if r['id']==attempt['id'])*model_cap(connection, attempt['id']) if case['request']['kind'] == 'issue' else 2600,
-                'implementation': 24000, 'capability_validation': 60,
-            }[purpose], 'Qwen completion token bound exceeded')
+            if purpose=='planning':
+                cap=(next(operation_request_bound(r['payload']) for r in chain if r['id']==attempt['id'])*model_cap(connection,attempt['id'])
+                     if case['request']['kind']=='issue' else 2600)
+            elif purpose=='check_preparation':
+                from workbench.planning_limits import attempt_request_bound
+                cap=attempt_request_bound(connection,attempt['id'])*model_cap(connection,attempt['id'])
+            else:
+                cap=24000
+            require(0<=values['completion_tokens']<=cap,'Qwen completion token bound exceeded')
     [run] = connection.execute('SELECT * FROM real_execution_requests WHERE id=?', (execution,)).fetchall()
     [session] = connection.execute('''SELECT s.* FROM task_sessions s
         JOIN proposal_decisions d ON d.id=s.id WHERE d.intake_id=?''', (identity,)).fetchall()
@@ -198,12 +242,12 @@ def check_review(connection, request, case, preparation):
     original = json.loads(connection.execute('SELECT payload FROM intakes WHERE id=?',
                                             (request['intake'],)).fetchone()[0])
     bug = case['request']['kind'] == 'issue'
-    chain=settled_planning_chain(connection,request['intake'],plan['revision'])
+    chain=delivery_chain(connection,request['intake'],plan['revision'])
     latest=chain[-1]
     payload=latest['payload']
     if bug:
         actual=check_bug_plan(plan,original,case,preparation,
-            payload.get('bug_inspection_packet'),payload.get('feedback',''))
+            payload.get('bug_inspection_packet'),'\n'.join(dict.fromkeys(p['payload']['feedback'] for p in chain if p['payload'].get('feedback'))))
     else:
         require(len(chain)==1,'supporting regression phase history changed')
         actual=plan['task_contract']['behavioral_evidence']
@@ -238,8 +282,8 @@ def check_review(connection, request, case, preparation):
         recipe = json.loads(selected[0])['specification']
         if bug:
             require(recipe['focused_test'] == actual['plan']['focused_test']
-                    and recipe['read_paths'] == actual['plan']['read_paths']
-                    and recipe['initial_reads'] == actual['windows']
+                    and (set(recipe['read_paths'])==set(actual['plan']['read_paths']) if plan['task_contract'].get('bug_intent') else recipe['read_paths']==actual['plan']['read_paths'])
+                    and (bool(recipe.get('source_context')) if plan['task_contract'].get('bug_intent') else recipe['initial_reads']==actual['windows'])
                     and recipe['contract']['paths'] == actual['plan']['writable_paths']
                     and recipe['contract']['publication_allowed'] is False,
                     'bug implementation read, write or publication scope changed')
@@ -265,10 +309,11 @@ def check_clarification(connection, request, case):
     original=json.loads(row[2])
     require({k:v for k,v in original.items() if k!='request_id' and v is not None}==
         {k:v for k,v in case['request'].items() if v is not None},'clarification original request changed')
-    chain=settled_planning_chain(connection,request['intake'],revision)
+    chain=delivery_chain(connection,request['intake'],reply.get('processing_sequence',revision+1)-1 if reply.get('renew_operation') else revision)
     phase=chain[-1]
     from workbench.planning_limits import continuation_budget
-    continuation_budget(dict(payload=chain[0]['payload']),phase,chain)
+    if not reply.get('renew_operation'):
+        continuation_budget(dict(payload=chain[0]['payload']),phase,chain)
     require(phase['backend']==case['provider'] and phase['actual_model']==case['model'],
         'clarification provider changed')
     questions=connection.execute('SELECT id,revision FROM proposals WHERE intake_id=?',
@@ -387,9 +432,9 @@ def campaign_admission(connection, request, case, policy):
                         'Local usage incomplete')
                 value = usage.get('values', {}).get('completion_tokens')
                 count = usage.get('requests_observed', 1) if purpose == 'planning' else usage.get('requests_observed')
-                cap=model_cap(connection,identity) if purpose=='planning' else 24000
+                cap=model_cap(connection,identity) if purpose in {'planning','check_preparation'} else 24000
                 require(type(count) is int and count>=1 and type(value) is int and 0<=value<=
-                        (min(count,bug_investigation.INVESTIGATION_REQUESTS)*cap if purpose=='planning' and outcome else cap)
+                        (min(count,bug_investigation.INVESTIGATION_REQUESTS)*cap if purpose in {'planning','check_preparation'} and outcome else cap)
                         and (purpose!='planning' or type(usage.get('max_request_completion_tokens',0)) is int
                              and 0<=usage.get('max_request_completion_tokens',0)<=cap),
                         'Local request accounting unavailable')
@@ -399,8 +444,8 @@ def campaign_admission(connection, request, case, policy):
             codex_tasks.add(task)
             count = usage.get('requests_observed', 1) if purpose == 'planning' else 1
             if outcome:
-                require(purpose in {'planning','implementation'}, 'Unexpected Codex operation')
-                count=codex_observations(connection,identity,usage,bug=task in bug_intakes,planning=purpose=='planning')
+                require(purpose in {'planning','implementation','check_preparation'}, 'Unexpected Codex operation')
+                count=codex_observations(connection,identity,usage,bug=task in bug_intakes,planning=purpose in {'planning','check_preparation'})
             else:
                 require(purpose in {'planning','implementation'} and type(count) is int and
                         1 <= count <= (8 if task in bug_intakes else 1) and
@@ -472,9 +517,13 @@ def main():
             else:
                 current = [a for a in new_attempts if a[1:] == (request['intake'], 'planning')]
                 revision=request['clarification'].get('revision',1) if request['action']=='clarify' else request['proposal']['revision']
-                chain=settled_planning_chain(connection,request['intake'],revision)
+                chain=delivery_chain(connection,request['intake'],request['clarification']['processing_sequence']-1 if request['action']=='clarify' and request['clarification'].get('renew_operation') else revision)
                 require({a[0] for a in current}=={r['id'] for r in chain},'owned planning phase identities changed')
                 expected.update(r['id'] for r in chain)
+                if request['action']=='run':
+                    preparations=connection.execute("SELECT id,backend,requested_model,actual_model,outcome,usage,finished_at FROM model_attempts WHERE task_id=? AND purpose='check_preparation'",(request['intake'],)).fetchall()
+                    require(all(a[1:5]==(case['provider'],case['model'],case['model'],'completed') and a[5] and a[6] for a in preparations),'check preparation is uncertain or changed provider')
+                    expected.update(a[0] for a in preparations)
                 if request['action']=='clarify':
                     check_clarification(connection,request,case)
                 else:

@@ -8,7 +8,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
-from workbench.bug_evidence import Data, Short, InvestigationRead, InvestigationSearch
+from workbench.bug_evidence import Data, Short, InvestigationRead, InvestigationSearch,ReadPath
 from workbench.regression_evidence import Scalar, LuaPath, TestPath
 from workbench.planning_response import ResponseValidationError
 
@@ -36,14 +36,14 @@ class Checkpoint(Data):
 class Reproduction(Data):
     description: Short
     setup: Bootstrap | Module
-    phases: Annotated[list[Checkpoint], Field(min_length=1, max_length=4)]
+    phases: Annotated[list[Checkpoint], Field(min_length=1, max_length=12)]
 
 
 class Plan(Data):
-    scope: Short
+    scope: Annotated[str, Field(min_length=1,max_length=800)]
     writable_paths: Annotated[list[LuaPath | TestPath], Field(min_length=1, max_length=3)]
     focused_test: TestPath
-    other_reads: Annotated[list[LuaPath | TestPath], Field(max_length=12)]
+    other_reads: Annotated[list[ReadPath], Field(max_length=12)]
     reproducer: Reproduction
 
 
@@ -94,7 +94,7 @@ INSTRUCTIONS = (
     'table for fixture inputs between phases. Existing safe Lua math/string/table primitives are available. '
     'Write ordinary Lua in phase.code; return ONE actual observed scalar. expected and incorrect are supplied '
     'separately and are never exposed to the program. Source errors or an unexpected result hold, never prove a bug. '
-    'For a stateful report use three or four ordered phases: initial user behavior before the action, the real '
+    'For a stateful report use at least three ordered phases and additional phases for all approved criteria: initial user behavior before the action, the real '
     'reported action and its result, then a later repeated action with newly changed inputs and its result. '
     'Call the existing client.FireEvent for actual game events and existing addon functions to observe their result. '
     'The runtime independently records event dispatches and requires a repeated event in successive phases. '
@@ -103,7 +103,7 @@ INSTRUCTIONS = (
     'expected answer, or substitute a diagnostic/listening flag for the reported user behavior. '
     'Bootstrap already loads its committed modules and startup; preserve it and change only needed fixture inputs. '
     'No io, process execution, network, debug, arbitrary loading or verdict access. Execution and memory/time are bounded. '
-    'Keep the entire reproducer concise (under8200 serialized bytes). Do not include an addon implementation fix. '
+    'Keep the entire reproducer concise (under32768 serialized bytes). Do not include an addon implementation fix. '
     'writable_paths must include at least one inspected eligible addon source; tests alone cannot implement a bug repair. '
     'scope describes the actual behavioral change in plain English, never just a filename or an instruction to describe it. '
     'Do not infer an existing cache or listener from desired behavior; inspect the actual implementation. '
@@ -145,7 +145,7 @@ def schema(coverage, files):
         plan = result['$defs']['Plan']['properties']
         plan['writable_paths']['items'] = dict(type='string',enum=writable)
         plan['focused_test'] = dict(type='string',enum=tests)
-        plan['other_reads']['items'] = dict(type='string',enum=[p for p,f in items.items() if not f.get('support_dependency')])
+        plan['other_reads']['items'] = dict(type='string',enum=list(items))
     result['$defs']['Reproduction']['properties']['phases']['minItems'] = (
         3 if coverage.get('minimum_observations') == 3 else 1)
     return result

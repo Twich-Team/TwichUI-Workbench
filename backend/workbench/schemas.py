@@ -465,6 +465,7 @@ class ScenarioGrounding(StrictModel):
 
 class RegressionTaskContract(StrictModel):
     scenario_grounding: ScenarioGrounding | None = Field(default=None, exclude_if=lambda value: value is None)
+    bug_workflow: Literal['scope-then-checks-v1'] | None = Field(default=None, exclude_if=lambda value: value is None)
     bug_intent: BugIntent | None = Field(default=None, exclude_if=lambda value: value is None)
     bug_evidence: BugEvidence | None = Field(default=None, exclude_if=lambda value: value is None)
     behavioral_evidence: BehavioralPreparation | None = Field(default=None, exclude_if=lambda value: value is None)
@@ -606,6 +607,7 @@ class PlanningRetry(StrictModel):
 
 
 class ClarificationInput(StrictModel):
+    renew_operation: bool = False
     continue_investigation: bool = False
     command_id: UUID
     revision: Annotated[int, Field(ge=0)]

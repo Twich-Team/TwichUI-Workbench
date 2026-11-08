@@ -70,8 +70,17 @@ local function program_phases(env, root, scenario, control)
     setfenv(chunk, scope)
     control.begin()
     local output
-    local ok = pcall(function() output = values(chunk()) end)
+    local ok, why = pcall(function() output = values(chunk()) end)
     control.finish()
+    if not ok then
+      local message=tostring(why)
+      local line=message:match('reviewed%-reproduction%-phase:(%d+):') or '?'
+      local member=message:match("attempt to [%w ]+ field '([%w_]+)'") or ''
+      local category=message:match('attempt to index') and 'invalid-index'
+        or message:match('attempt to call') and 'invalid-call'
+        or message:match('arithmetic') and 'invalid-arithmetic' or 'fixture-error'
+      print('WB_FIXTURE_ERROR phase=' .. index .. ' line=' .. line .. ' category=' .. category .. ' member=' .. member)
+    end
     assert(ok, 'approved reproduction failed')
     local events = phase_events[index]
     if scenario.event_coverage then
@@ -80,7 +89,7 @@ local function program_phases(env, root, scenario, control)
       elseif index == 2 then
         assert(#events > 0, 'missing first reported event')
         for _, event in ipairs(events) do first_events[event] = true end
-      else
+      elseif index == 3 then
         local repeated = false
         for _, event in ipairs(events) do if first_events[event] then repeated = true end end
         assert(repeated, 'missing repeated reported event')

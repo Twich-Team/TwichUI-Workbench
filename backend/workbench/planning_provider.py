@@ -448,7 +448,7 @@ class LocalProvider:
                         total_completion_bound=completion_limit)
             if message.get('tool_calls'):
                 raise planning_response.ResponseValidationError('Planning has no tool authority', ['choices', 0, 'message', 'tool_calls'], 'no tool calls', message['tool_calls'])
-            value, changes = planning_response.payload(message.get('content'), bug=schema is BugPlanningResponse)
+            value, changes = planning_response.payload(message.get('content'), bug=schema in (BugPlanningResponse,IntentResponse))
             if self.response_evidence:
                 self.response_evidence.parsed(value, self.diagnostics, changes)
             self.diagnostics.update(actual_model=model, category='response_received')

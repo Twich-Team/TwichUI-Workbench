@@ -244,7 +244,7 @@ def view_in(connection, identity):
             model_attempts.c.outcome, model_attempts.c.routing_reason,
         ).where(model_attempts.c.task_id == identity, model_attempts.c.source == 'workbench',
                 model_attempts.c.backend.is_not(None))
-            .order_by(model_attempts.c.started_at.desc(), model_attempts.c.id).limit(10)).mappings().all()
+            .order_by(model_attempts.c.started_at.desc(), model_attempts.c.id)).mappings().all()
     return dict(provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
         created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],
         proposals=[proposal_view(connection, dict(p)) for p in connection.execute(select(proposals).where(
@@ -429,7 +429,8 @@ def clarify(engine, identity, body):
         for job in jobs:
             if job['payload'].get('clarification_id') == str(body.command_id):
                 if (job['payload'].get('feedback') != body.text
-                        or bool(job['payload'].get('bug_followup')) != body.continue_investigation):
+                        or bool(job['payload'].get('bug_followup')) != body.continue_investigation
+                        or bool(job['payload'].get('explicit_renewal',job['payload'].get('renew_operation',False))) != body.renew_operation):
                     raise HTTPException(409, 'Clarification ID already used.')
                 return
         bug_continuation=(bug_investigation.requested(row['payload']) and row['status']=='failed'
@@ -437,10 +438,13 @@ def clarify(engine, identity, body):
                 and j['payload'].get('task_contract',{}).get('scope_missing') for j in jobs)
             and not connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
             and not connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
-        if (row['status'] != 'waiting_for_information' and not bug_continuation or row['revision'] != body.revision
+        if (row['status'] != 'waiting_for_information' and not bug_continuation and not (body.renew_operation and row['status']=='failed') or row['revision'] != body.revision
                 or retained_planning_failure(row, jobs)):
             raise HTTPException(409, 'The request changed. Refresh before answering.')
         next_input = {'feedback': body.text, 'clarification_id': str(body.command_id)}
+        next_sequence=row['revision']+1
+        if body.renew_operation:
+            next_input.update(renew_operation=True,explicit_renewal=True)
         if bug_investigation.requested(row['payload']):
             if not body.continue_investigation:
                 raise HTTPException(422, 'Confirm the follow-up investigation before sending your answer.')
@@ -450,8 +454,18 @@ def clarify(engine, identity, body):
                 raise HTTPException(409, 'The original settled investigation is unavailable.')
             grounding = initial['payload'].get('task_contract', {}).get('scenario_grounding', {})
             try:
-                from workbench.planning_limits import followup_budget
-                continuation=followup_budget(connection,initial,row['revision'])
+                from workbench.planning_limits import followup_budget, renewed_budget
+                from workbench.trusted_preparation import configuration
+                fresh_operation=body.renew_operation or configuration(engine).get('bug_plan_review')=='source-grounded-intent-v1'
+                if fresh_operation:
+                    next_input.update(renew_operation=True,explicit_renewal=body.renew_operation)
+                    if (connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
+                            or connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first()):
+                        raise ValueError('An approved or dispatched task cannot be renewed through investigation')
+                    continuation=renewed_budget(connection,initial)
+                    next_sequence=continuation['next_sequence']
+                else:
+                    continuation=followup_budget(connection,initial,row['revision'])
                 next_input['local_planning_receipt']=initial['payload']['local_planning_receipt']
                 route = provider_routes.approved(connection, row)
                 next_input['bug_followup'] = dict(
@@ -462,9 +476,9 @@ def clarify(engine, identity, body):
                     fallback_reason=grounding.get('fallback_reason'),**continuation)
             except ValueError as error:
                 raise HTTPException(409, str(error)) from None
-        elif body.continue_investigation:
+        elif body.continue_investigation or body.renew_operation:
             raise HTTPException(422, 'This request has no bug investigation to continue.')
-        enqueue(connection, identity, 'planning', row['revision']+1, next_input)
+        enqueue(connection, identity, 'planning', next_sequence, next_input)
         connection.execute(intakes.update().where(intakes.c.id == identity).values(status='queued'))
 
 

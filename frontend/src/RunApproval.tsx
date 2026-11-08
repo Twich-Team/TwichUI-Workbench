@@ -130,6 +130,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
       <p>If the run starts, Workbench checks that it can cancel its own work and restores normal model access afterward.</p>
       <h4>Exact plan scope and exclusions</h4><ul>{[...(scope?.content.scope || []),...(scope?.content.exclusions || [])].map((s,i)=><li key={i}>{s}</li>)}</ul>
       <p>Repository {offer.repository} · Base {offer.base}</p>
+      {offer.prepared_behavior&&<details><summary>Prepared behavioral checks</summary><p>These frozen checks reproduced a failure on the original. Every expected observation must pass on the repair. This is offline evidence, not in-game acceptance.</p><pre>{JSON.stringify(offer.prepared_behavior.reproducer,null,2)}</pre><p>Frozen check identity {offer.prepared_behavior.oracle_sha256}</p></details>}
       <h4>Required checks</h4><ul>{offer.checks.map((c,i)=><li key={i}>{c.purpose} <code>{c.argv.join(' ')}</code> (from {c.cwd})</li>)}</ul>
       <pre>{JSON.stringify(offer.limits,null,2)}</pre><p>Offer fingerprint {offer.fingerprint}</p>
     </details>

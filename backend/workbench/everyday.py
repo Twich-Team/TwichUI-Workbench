@@ -276,7 +276,8 @@ def check_planning(c, original, job=None):
         data = job['payload']
         binding = digest(dict(original=original['payload'], revision=original['revision'],
                               feedback=data['feedback'], clarification_id=data['clarification_id']))
-        if (job['revision'] != original['revision']+1 or claimed > original['revision']
+        fresh=followup.get('budget_version')==4
+        if (not fresh and (job['revision'] != original['revision']+1 or claimed > original['revision'])
                 or followup['binding'] != binding or followup['route'] != approved(c, original)
                 or data.get('scenario_generation_claim')):
             raise ValueError('The follow-up no longer matches the approved investigation.')
@@ -289,6 +290,14 @@ def check_planning(c, original, job=None):
                 raise ValueError('The original investigation is unavailable')
             if any(followup.get(k)!=v for k,v in followup_budget(c,initial,original['revision']).items()):
                 raise ValueError('The continuation source or consumed accounting changed')
+        if fresh:
+            from workbench.planning_limits import renewed_budget
+            initial=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==original['id'],
+                planning_jobs.c.kind=='planning',planning_jobs.c.revision==1)).mappings().one()
+            actual=renewed_budget(c,initial,exclude_job=job['id'])
+            if (not data.get('renew_operation') or job['revision']!=actual['next_sequence']
+                    or any(followup.get(k)!=v for k,v in actual.items())):
+                raise ValueError('Fresh operation binding or retained phase accounting changed')
         expected = followup
     elif claimed:
         raise ValueError('The approved planning operation has already been claimed. Start a new task with updated details.')

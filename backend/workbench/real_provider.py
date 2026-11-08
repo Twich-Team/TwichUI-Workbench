@@ -127,7 +127,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         left = LIMITS['total_tokens']-completion
         if left <= 0 or time.monotonic() >= end:
             raise BudgetError('Attempt token or wall budget exhausted')
-        reviewing = reads_done < initial_read_calls and edits_done == 0
+        scope_workflow=bool(getattr(runtime,'recipe',None) and runtime.recipe.get('source_context'))
+        reviewing = edits_done==0 and (scope_workflow or reads_done < initial_read_calls)
         first_edit = not reviewing and edits_done == 0
         names = ({t['function']['name'] for t in definitions} if reviewing else
                  set(WORKFLOW['first_edit_tools'] if first_edit else WORKFLOW['edit_tools']))
@@ -306,7 +307,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             messages.append(dict(role='tool', tool_call_id=call['id'], content=clipped))
         if force_edit and repair.edit_required:
             raise BudgetError('No progress after repeated checks or reads of a rejected candidate')
-        if reads_done >= initial_read_calls and not editing_announced:
+        if reads_done >= initial_read_calls and not editing_announced and not scope_workflow:
             messages.append(dict(role='user',content='Focused context review is complete. '
                 'Now implement small changes with replace_text. Checks become available after an edit succeeds. '+
                 'A failed check or safe correction reopens a focused source/search turn; check logs remain retrievable after an edit. '+

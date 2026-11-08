@@ -37,7 +37,7 @@ def valid_contract(contract):
                     and contract.get("authoring") == "explicit-current-session"
                 )
             )
-            and contract["limits"] in (execution.LIMITS, {**execution.LIMITS, "read_chars": 98304})
+            and contract["limits"] in (execution.LIMITS, {**execution.LIMITS, "read_chars": 98304}, {**execution.LIMITS, "read_chars":262144})
             and contract["decoding"] == execution.DECODING
             and contract["workflow"] == execution.WORKFLOW
             and contract["publication_allowed"] is False
@@ -170,9 +170,14 @@ def _reviewed_spec(c, ref, runtime):
     from workbench.real_recipes import from_review
 
     spec = runtime.recipe
+    from workbench import bug_check_preparation,task_execution
+    linked=task_execution.snapshot(c,**ref)
+    reviewed=linked['proposal_review']['task_contract']
+    prepared=(bug_check_preparation.load(runtime.root,reviewed)['evidence']
+              if reviewed.get('bug_intent') else None)
     actual = from_review(c, ref, oracle=runtime.oracle_source.read_text(),
                         behavior_id=spec['behavior']['id'], read_paths=spec['read_paths'],
-                        focused_test=spec['focused_test'], identity=spec['identity'])
+                        focused_test=spec['focused_test'], identity=spec['identity'],prepared=prepared)
     if actual != spec:
         raise ValueError('Certified recipe differs from the current reviewed contract')
     return actual
@@ -384,6 +389,7 @@ def offer_view(c, proposal, selected):
             checks=(reviewed and
                     intake.proposal_view(c, proposal)['task_contract']['verification_commands']) or [],
             limits=contract["limits"],
+            **prepared_behavior_view(c,selected),
             budget=TaskBudget(
                 offer_id=selected["id"],
                 offer_fingerprint=selected["fingerprint"],
@@ -392,6 +398,24 @@ def offer_view(c, proposal, selected):
             ).model_dump(mode="json"),
         ),
     )
+
+
+def prepared_behavior_view(c,selected):
+    """Show the exact frozen check separately from the already approved intent."""
+    saved=selected['snapshot']
+    ref=saved.get('reviewed_task',{}).get('ref')
+    if not ref or not saved.get('specification',{}).get('source_context'):
+        return {}
+    from workbench import task_execution,bug_check_preparation
+    linked=task_execution.snapshot(c,**ref)
+    reviewed=linked['proposal_review']['task_contract']
+    if not reviewed.get('bug_intent'):
+        return {}
+    prepared=bug_check_preparation.load(Path(saved['certified_preparation']['root']),reviewed)
+    return dict(prepared_behavior=dict(intent_digest=prepared['intent_digest'],
+        review_digest=prepared['evidence']['review_digest'],
+        oracle_sha256=saved['specification']['oracle_sha256'],
+        reproducer=prepared['evidence']['plan']['reproducer']))
 
 
 def preparation_status(c, proposal):
@@ -410,7 +434,7 @@ def preparation_status(c, proposal):
             return 'Preparation held: ' + str(error), False
     if contract and contract['scope_missing']:
         return 'Preparation held: ' + ' '.join(contract['scope_missing']), False
-    prepared = (contract or {}).get('behavioral_evidence') or (contract or {}).get('bug_evidence')
+    prepared = (contract or {}).get('behavioral_evidence') or (contract or {}).get('bug_evidence') or (contract or {}).get('bug_intent')
     if prepared:
         payload = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == proposal['intake_id'],
             planning_jobs.c.revision == proposal['revision'], planning_jobs.c.kind == 'planning',

@@ -8,11 +8,11 @@ from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
-from workbench.bug_evidence import Data, InvestigationRead, InvestigationSearch
+from workbench.bug_evidence import Data, InvestigationRead, InvestigationSearch,ReadPath
 from workbench.regression_evidence import LuaPath, TestPath
 from workbench.visual_scope import digest
 
-Text = Annotated[str, Field(min_length=1, max_length=1600)]
+Text = Annotated[str, Field(min_length=1, max_length=800)]
 
 
 class Criterion(Data):
@@ -22,10 +22,10 @@ class Criterion(Data):
 
 class Plan(Data):
     scope: Text
-    read_paths: Annotated[list[LuaPath | TestPath], Field(min_length=1, max_length=12)]
+    read_paths: Annotated[list[ReadPath], Field(min_length=1, max_length=12)]
     writable_paths: Annotated[list[LuaPath | TestPath], Field(min_length=1, max_length=3)]
     focused_test: TestPath
-    criteria: Annotated[list[Criterion], Field(min_length=1, max_length=16)]
+    criteria: Annotated[list[Criterion], Field(min_length=1, max_length=12)]
     risks: Annotated[list[Text], Field(max_length=8)] = []
 
     @model_validator(mode='after')
@@ -138,14 +138,25 @@ def resolve(raw,packet,original,feedback):
     acceptance=[c.description for c in intent.plan.criteria] if intent else []
     evidence=[{k:f[k] for k in ('path','git_blob','sha256')} for f in packet['files']
               if intent and f['path'] in intent.plan.read_paths]
+    if intent:
+        from workbench import regression_preparation as source
+        import hashlib
+        root,base,inventory=source.repository()
+        if base!=packet['base']:
+            raise ValueError('Committed source changed before scope binding')
+        present={e['path'] for e in evidence}
+        for path in ('tests/run.sh','tests/harness.lua'):
+            if path not in present:
+                raw=source.blob(root,inventory[path])
+                evidence.append(dict(path=path,git_blob=inventory[path],sha256=hashlib.sha256(raw).hexdigest()))
     blockers=missing or ['Executable behavior checks must be prepared and independently certified before a run is offered.']
-    contract=RegressionTaskContract(category='lua-offline-bugfix',bug_intent=intent,
+    contract=RegressionTaskContract(category='lua-offline-bugfix',bug_workflow='scope-then-checks-v1',bug_intent=intent,
         verification_profile=select('lua-offline-bugfix'),resolved_base=packet['base'],
         intended_behavior=original['description'],acceptance=acceptance,review_feedback=feedback,
         writable_paths=intent.plan.writable_paths if intent else [],path_candidates=[],
         change_policy='bounded-existing-lua-files',verification_commands=checks,
         independent_checks=select('lua-offline-bugfix')['requirements'],evidence=evidence,
-        resource_limits={**LIMITS,'overall_seconds':5400,'implementation_attempts':1,'publication_seconds':900,'fallback_attempts':0},
+        resource_limits={**LIMITS,'read_chars':262144,'overall_seconds':5400,'implementation_attempts':1,'publication_seconds':900,'fallback_attempts':0},
         scope_missing=missing,execution_blockers=blockers).model_dump(mode='json')
     content=ProposalContent(summary=original['title'],value=value.finding,feasibility=blockers[0],
         uncertainty=blockers,evidence_ids=[],behavior=[value.finding],

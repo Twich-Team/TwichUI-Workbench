@@ -17,7 +17,7 @@ def validate(spec):
     paths = spec.get("read_paths", spec["contract"]["paths"])
     if (
         not isinstance(paths, list)
-        or not 1 <= len(paths) <= 8
+        or not 1 <= len(paths) <= 12
         or not set(spec["contract"]["paths"]).issubset(paths)
         or any(
             not isinstance(p, str)
@@ -25,22 +25,22 @@ def validate(spec):
             or PurePosixPath(p).is_absolute()
             or ".." in PurePosixPath(p).parts
             or not p.endswith(".lua")
-            or not p.startswith(("!!!TwichUI/", "TwichUI_Settings/", "tests/test_"))
+            or not p.startswith(("!!!TwichUI/", "TwichUI_Settings/", "tests/"))
             for p in paths
         )
         or spec.get("focused_test") not in paths
         or not spec["focused_test"].startswith("tests/test_")
         or not re.fullmatch("[0-9a-f]{64}", spec.get("oracle_sha256", ""))
         or not isinstance(spec.get("instruction"), str)
-        or not 1 <= len(spec["instruction"]) <= 12000
+        or not 1 <= len(spec["instruction"]) <= 32768
         or spec.get("base_branch") != "main"
         or spec.get("draft") is not True
     ):
         raise ValueError("Invalid fixed recipe paths, oracle or instruction")
-    reads = spec.get("initial_reads")
+    reads = spec.get("initial_reads",[])+spec.get("source_context",[])
     if (
         not isinstance(reads, list)
-        or len(reads) != 4
+        or not 1 <= len(reads) <= 256
         or any(
             not isinstance(r, dict)
             or r.get("path") not in paths
@@ -50,7 +50,7 @@ def validate(spec):
             for r in reads
         )
     ):
-        raise ValueError("Exactly four bounded initial windows required")
+        raise ValueError("Bounded initial source windows required")
     identity = spec.get("identity")
     if (
         not isinstance(identity, dict)
@@ -114,7 +114,7 @@ def load(root):
     return spec
 
 
-def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity):
+def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity, prepared=None):
     """Compile task data from the actual applied review, never a task registry.
 
     Oracle semantics and bounded read selection still require trusted preparation.
@@ -146,16 +146,18 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         raise ValueError('Current clean repository/main base differs from the reviewed contract')
     limits = {**real_execution.LIMITS, 'overall_seconds': 5400, 'implementation_attempts': 1,
               'publication_seconds': 900, 'fallback_attempts': 0}
+    if reviewed.get('bug_intent'):
+        limits['read_chars']=262144
     if (reviewed['resource_limits'] != limits or reviewed['pr_repository'] != reviewed['repository']
             or reviewed['pr_base_branch'] != 'main' or reviewed['pr_draft'] is not True):
         raise ValueError('Reviewed resource limits or PR destination are unsupported')
     if not isinstance(oracle, str) or not 1 <= len(oracle.encode()) <= 65536:
         raise ValueError('Bounded independent task oracle required')
-    prepared = reviewed.get('behavioral_evidence')
-    if prepared and prepared['status'] == 'review_required':
+    scenario = reviewed.get('behavioral_evidence')
+    if scenario and scenario['status'] == 'review_required':
         from workbench.regression_evidence import compile_plan, validate_expectation_review
         validate_expectation_review(linked['proposal_review'], linked['approval']['payload'])
-        compiled = compile_plan(prepared)
+        compiled = compile_plan(scenario)
         if (oracle != compiled['oracle'] or behavior_id != compiled['behavior_id']
                 or read_paths != compiled['read_paths'] or focused_test != compiled['focused_test']):
             raise ValueError('Scenario oracle/read selection differs from the independently reviewed examples')
@@ -168,7 +170,21 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         if (oracle != compiled['oracle'] or behavior_id != compiled['behavior_id']
                 or read_paths != compiled['read_paths'] or focused_test != compiled['focused_test']):
             raise ValueError('Reproducer differs from the independently reviewed bug plan')
+    if intent:=reviewed.get('bug_intent'):
+        from workbench import bug_check_preparation,bug_evidence
+        bug_evidence.validate_expectation_review(linked['proposal_review'],linked['approval']['payload'])
+        if prepared is None:
+            raise ValueError('Approved intent requires app-prepared executable checks before a recipe exists')
+        compiled=bug_check_preparation.validate_evidence(intent,prepared)
+        if (oracle!=compiled['oracle'] or behavior_id!=compiled['behavior_id']
+                or read_paths!=compiled['read_paths'] or focused_test!=compiled['focused_test']):
+            raise ValueError('Prepared oracle or source differs from approved intent')
+        if prepared['bootstrap_source']!=bug_evidence.committed_bootstrap(root,base,prepared['plan']):
+            raise ValueError('Prepared bootstrap differs from current committed source')
+        bug=prepared
     contract = real_execution.contract()
+    if reviewed.get('bug_intent'):
+        contract['limits']={**contract['limits'],'read_chars':262144}
     contract.update(task_id=linked['task']['id'], title=linked['task']['title'],
                     repository=reviewed['repository'], source=str(root), base=base,
                     paths=reviewed['writable_paths'])
@@ -189,10 +205,18 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
             task=linked['task']['title'], report=linked['original']['description'],
             owner_reply=reviewed['review_feedback'], scope=bug['plan']['scope'],
             finding=linked['proposal_review']['content']['value'], behavior=bug['plan']['reproducer']['description'],
+            acceptance=reviewed['acceptance'],
             exclusions=linked['proposal_review']['content']['exclusions']), ensure_ascii=True)
         # Pin the reviewed excerpts so both providers start with the relevant
         # sections instead of assuming that the target is at the top of a file.
         spec['initial_reads'] = bug['windows']
+    if reviewed.get('bug_intent'):
+        spec['source_context']=[]
+        for path in read_paths:
+            raw=regression_preparation.git(root,'show',base+':'+path).decode()
+            for start in range(1,len(raw.splitlines())+1,60):
+                spec['source_context'].append(dict(path=path,start=start,end=min(start+59,len(raw.splitlines()))))
+        spec['read_budget_policy']='distinct-lines-v1'
     validate(spec)
     # Every command advertised to the reviewer must be consumed by this runtime.
     checks = [dict(argv=['luac5.1', '-p', p], cwd='.') for p in contract['paths']]
@@ -203,7 +227,7 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
     # Pin actual committed regular bytes, including the harness and selected scope.
     evidence = {e['path']: e for e in reviewed['evidence']}
     if (not set(['tests/run.sh', 'tests/harness.lua', *read_paths]).issubset(evidence)
-            or len(evidence) != len(reviewed['evidence']) or len(evidence) > 12):
+            or len(evidence) != len(reviewed['evidence']) or len(evidence) > 14):
         raise ValueError('Reviewed file/framework evidence is incomplete')
     for path in evidence:
         entry = regression_preparation.git(root, 'ls-tree', base, '--', path).decode().strip().split()
@@ -213,3 +237,9 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         if evidence[path] != dict(path=path, git_blob=entry[2], sha256=hashlib.sha256(raw).hexdigest()):
             raise ValueError('Reviewed repository evidence differs')
     return spec
+
+
+def from_review_for_preparation(engine,ref,compiled,identity,prepared):
+    with engine.connect() as c:
+        return from_review(c,ref,oracle=compiled['oracle'],behavior_id=compiled['behavior_id'],
+            read_paths=compiled['read_paths'],focused_test=compiled['focused_test'],identity=identity,prepared=prepared)

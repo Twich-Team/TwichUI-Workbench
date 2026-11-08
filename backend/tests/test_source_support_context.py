@@ -47,6 +47,7 @@ def test_selected_tests_discover_their_own_helpers_without_registration(store,mo
     from workbench.bug_program import schema
     original=copy.deepcopy(packet)
     wire=schema({'minimum_observations':3},packet['files'])
-    assert helper not in wire['$defs']['Plan']['properties']['other_reads']['items']['enum']
+    # Read-only helpers may be selected for relevant fixture/context reads; they remain outside all write enums.
+    assert helper in wire['$defs']['Plan']['properties']['other_reads']['items']['enum']
     assert helper not in wire['$defs']['Plan']['properties']['writable_paths']['items']['enum']
     assert packet==original

@@ -79,8 +79,15 @@ try {
     planningReserveMs:1000, planningMs:7000, uiMs:7000, pollMs:100,
     async controlsReady() {},
     async reviewBug({intake,plan}) {
-      assert.deepEqual(plan.task_contract.bug_evidence.plan,candidate.reviewed);
+      if(plan.task_contract.bug_intent) assert.deepEqual(plan.task_contract.bug_intent.plan,candidate.intent);
+      else assert.deepEqual(plan.task_contract.bug_evidence.plan,candidate.reviewed);
       await other.goto(origin+'/intake/'+intake);
+      if(plan.task_contract.bug_intent) {
+        await other.screenshot({path:join(dirname(path),'scope-'+index+'-desktop.png'),fullPage:true});
+        await other.setViewportSize({width:390,height:844});
+        await other.screenshot({path:join(dirname(path),'scope-'+index+'-phone.png'),fullPage:true});
+        await other.setViewportSize({width:1280,height:720});
+      }
     },
     async beforeAction(action,data) {
       if(action === 'run') {

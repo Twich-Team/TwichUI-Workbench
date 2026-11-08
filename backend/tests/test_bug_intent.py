@@ -22,7 +22,10 @@ def plan():
                   dict(id='saved-state',description='Check separate identities and preserved state after a fresh client startup.')])
 
 
-def test_scope_is_bound_to_all_owner_requirements_without_execution_or_test_program():
+def test_scope_is_bound_to_all_owner_requirements_without_execution_or_test_program(monkeypatch):
+    from workbench import regression_preparation as source_module
+    monkeypatch.setattr(source_module,'repository',lambda:(None,'a'*40,{'tests/run.sh':'d'*40,'tests/harness.lua':'e'*40}))
+    monkeypatch.setattr(source_module,'blob',lambda root,oid:b'controlled framework')
     original=dict(title='A reported bug',description='The actual behavior is wrong.')
     feedback='Keep each identity separate and preserve unknown data.'
     contract,content,question,limitation=bug_intent.resolve(dict(finding='The inspected operation differs from the request.',

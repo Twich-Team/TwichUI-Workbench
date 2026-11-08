@@ -420,9 +420,9 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 lease = str(uuid4())
                 job['payload'].pop('diagnostics', None)
                 job['payload']['scenario_generation_claim'] = owner_identity()
-                if isinstance(adapter_used, codex_provider.Planner):
+                if bug:
                     from workbench.investigation_recovery import capabilities
-                    job['payload']['recovery_capabilities'] = capabilities()
+                    job['payload']['recovery_capabilities'] = (capabilities() if isinstance(adapter_used,codex_provider.Planner) else dict(kind='local-message-investigation-v1',source_writes=False,execution_dispatch=False,external_action_tools=False))
                 job.update(status='running', lease=lease, attempts=job['attempts']+1, message=('Investigating the bug and preparing a repair plan.' if bug else 'Preparing grounded behavioral examples for independent review.'))
                 c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
                     status='running', lease=lease, payload=job['payload'], attempts=job['attempts'], message=job['message']))
@@ -526,7 +526,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         raw, model, basis = adapter_used.generate(wire, schema, expected_model=target)
             if planning_end is not None and time.monotonic() >= planning_end:
                 raise PlanningUnavailable('The shared planning deadline expired.', 'timeout')
-            if len(json.dumps(raw, allow_nan=False).encode()) > 24000 or basis not in {'demo', 'local', 'codex'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
+            if len(json.dumps(raw, allow_nan=False).encode()) > (40000 if bug else 24000) or basis not in {'demo', 'local', 'codex'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
                 raise ValueError('Invalid bounded scenario provider response')
             normalization = []
             if bug:
@@ -724,7 +724,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 selected = intake.require(c, proposals, job['payload']['proposal_id'])
                 reviewed_contract = contract_for(c, selected) or {}
                 prepared = reviewed_contract.get('behavioral_evidence') or {}
-                if reviewed_contract.get('bug_evidence') or (prepared.get('status') == 'review_required' and not prepared['holds']):
+                if reviewed_contract.get('bug_evidence') or reviewed_contract.get('bug_intent') or (prepared.get('status') == 'review_required' and not prepared['holds']):
                     intake.enqueue(c, original['id'], 'behavioral_preparation', job['revision'],
                         dict(ref=dict(intake_id=original['id'], task_id=task_id, approval_id=job['payload']['approval_id'])))
             c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(status='completed',

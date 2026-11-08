@@ -69,8 +69,15 @@ def operation_request_bound(payload):
     bound=request_bound(payload.get('local_planning_receipt',{}))
     followup=payload.get('bug_followup',{})
     version=followup.get('budget_version')
-    if version is not None and (type(version) is not int or version not in (2,3)):
+    if version is not None and (type(version) is not int or version not in (2,3,4)):
         raise ValueError('The continuation accounting version is unavailable')
+    if version == 4:
+        if (followup.get('operation_request_bound') != bound
+                or type(followup.get('consumed_requests')) is not int
+                or followup['consumed_requests'] < 1 or not followup.get('prior_phases')
+                or not followup.get('source_scope') or not followup.get('renewal_consent')):
+            raise ValueError('Fresh operation consent or preserved phase accounting is unavailable')
+        return bound
     if version in (2,3):
         used,remaining=followup.get('consumed_requests'),followup.get('remaining_requests')
         if (type(used) is not int or type(remaining) is not int or not 1<=used<bound or
@@ -180,7 +187,22 @@ def codex_observations(connection, identity, usage, *, bug, planning):
     if not isinstance(usage, dict) or not isinstance(usage.get('values'), dict):
         raise ValueError('Codex usage observations are unavailable')
     bound = attempt_request_bound(connection, identity) if planning and bug else 1
-    count = usage.get('requests_observed', 1) if planning else 1
+    count = usage.get('requests_observed', 1)
+    if not planning and bug and count!=1:
+        query='''SELECT g.snapshot FROM model_attempts a JOIN real_execution_requests r ON a.execution_id=r.id
+                 JOIN real_execution_grants g ON r.grant_id=g.id WHERE a.id=?'''
+        cursor=(connection.exec_driver_sql(query,(identity,)) if hasattr(connection,'exec_driver_sql')
+                else connection.execute(query,(identity,)))
+        row=cursor.fetchone()
+        if not row:
+            raise ValueError('The implementation operation grant is unavailable')
+        grant=json.loads(row[0]) if isinstance(row[0],str) else row[0]
+        spec=grant.get('task_budget',{}).get('offer',{}).get('snapshot',{}).get('specification',{})
+        from workbench.task_budget import valid_contract
+        if (not spec.get('source_context') or not valid_contract(spec.get('contract',{}))
+                or spec['contract']!=grant.get('contract')):
+            raise ValueError('Multiple implementation turns require the exact reviewed runtime')
+        bound=spec['contract']['limits']['turns']
     total = usage.get('values', {}).get('total_tokens')
     limit = BUG_OBSERVED if bug else MAX_OBSERVED
     maximum = usage.get('max_request_total_tokens', total)
@@ -189,3 +211,32 @@ def codex_observations(connection, identity, usage, *, bug, planning):
             and type(maximum) is int and 0 < maximum <= limit):
         raise ValueError('Codex observations exceed the saved operation or current post-observation guard')
     return count
+
+
+def renewed_budget(connection, initial, *, exclude_job=None):
+    """A fresh bounded operation preserves settled history instead of resetting it.
+
+    This is explicit same-provider consent. It grants neither implementation nor
+    permission to repeat an active, unknown or consequential operation.
+    """
+    from workbench import delivery_phase, everyday
+    roots=everyday.configuration(connection.engine).evidence_roots
+    snapshot=delivery_phase.observe(connection,initial['intake_id'],roots,exclude_job=exclude_job)
+    if not delivery_phase.renewable(snapshot):
+        raise ValueError('Previous generation is active, uncertain, consequential or lacks terminal evidence')
+    phases=snapshot['phases']
+    provider=phases[0]['backend']
+    model=phases[0]['actual_model']
+    if any(p['backend']!=provider or p['actual_model']!=model for p in phases):
+        raise ValueError('Renewal cannot silently switch the investigation provider')
+    packet=initial['payload'].get('bug_inspection_packet')
+    if not isinstance(packet,dict) or not packet.get('files') or not packet.get('base'):
+        raise ValueError('The original committed disclosure scope is unavailable')
+    return dict(budget_version=4,renewal_consent=True,
+        operation_request_bound=request_bound(initial['payload']['local_planning_receipt']),
+        consumed_requests=sum(p['requests'] for p in phases),
+        known_prior_usage=snapshot['known_usage'],
+        prior_phases=[{k:p[k] for k in ('job','sequence','attempt','backend','actual_model',
+                       'database_outcome','provider_state','usage','input_binding')} for p in phases],
+        next_sequence=snapshot['next_sequence'],
+        source_scope=dict(base=packet['base'],files={f['path']:f['sha256'] for f in packet['files']}))

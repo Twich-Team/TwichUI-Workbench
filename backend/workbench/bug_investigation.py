@@ -211,14 +211,14 @@ def context(original, feedback, policy):
     from workbench.source_context import excerpts
     excerpts(files, inspected, terms, words)
     references = {}
-    if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1'}:
+    if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1','source-grounded-intent-v1'}:
         from workbench.game_api_reference import collect
         references['api_references'] = collect(files)
     declarations = declaration_index(files, inspected, terms)
     from workbench.source_support_context import add as add_support
     add_support(files, inspected, base)
     return dict(base=base, files=files, declarations=declarations, **references,
-                **({'plan_review':policy['bug_plan_review']} if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1'} else {}),
+                **({'plan_review':policy['bug_plan_review']} if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1','source-grounded-intent-v1'} else {}),
                 policy_sha256=digest(policy))
 
 
@@ -334,7 +334,7 @@ def planning_request(packet, original, feedback):
     return model, dict(
         purpose='investigate-addon-bug', base=packet['base'],
         **({'api_references':packet['api_references']} if 'api_references' in packet else {}),
-        **({'declarations':packet.get('declarations',[])} if packet.get('plan_review') == 'source-grounded-lua-v1' else {}),
+        **({'declarations':packet.get('declarations',[])} if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'} else {}),
         files=[{k: v for k, v in item.items() if k not in ('git_blob', 'sha256')}
                for item in packet['files']],
         report=dict(title=original['title'], description=original['description'],

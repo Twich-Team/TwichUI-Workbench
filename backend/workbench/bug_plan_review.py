@@ -46,7 +46,7 @@ INSTRUCTIONS = (
     "or deliberately assigned expected state. Wrong/missing parents, nil-vs-false, wrong return positions or keys fail this check. "
     "Check scope covers the proposed cause, stays within selected writable files and explains the repair in plain English. "
     "Missing source/unknown API support is an issue, never a reason to guess. Reference declarations do not prove live-game behavior. "
-    "For a Lua-phase reproducer inspect every phase's code: client is the returned committed client, subject the module. "
+    "For a Lua-phase reproducer inspect every phase's code: client and the exact selected bootstrap alias (including c) are the same returned committed client; subject is the returned module. "
     "steps contains only module setup, while observations index the Lua phases. Expected values are outside the program. "
     "Require actual addon calls and environment-only stubs; never replace the function/state being checked or return an assigned answer. "
     "For stateful reports require initial behavior before events and actual repeated client.FireEvent dispatches with changed inputs. "

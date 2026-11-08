@@ -110,24 +110,30 @@ def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=
     if not root.is_dir() or any(root.iterdir()):
         raise ValueError('A fresh empty owned preparation directory is required; retained evidence is never overwritten')
     with engine.connect() as c:
-        linked = task_execution.snapshot(c, **ref)
-        reviewed = linked['proposal_review'].get('task_contract') or {}
-        validate_reviewed_policy(engine, reviewed)
-        bug = reviewed.get('category') == 'lua-offline-bugfix'
-        if bug and reviewed.get('bug_evidence'):
-            compiled = bug_evidence.compile_plan(reviewed['bug_evidence'])
-            template = dict(control_patches={})
-        elif reviewed.get('category') == 'lua-regression-tests' and reviewed.get('behavioral_evidence'):
-            prepared = reviewed['behavioral_evidence']
-            compiled = compile_plan(prepared)
-            template = dict(scenario_preparation=prepared)
-        else:
-            raise ValueError('A reviewed offline reproducer or regression example is required.')
-        bug_evidence.validate_expectation_review(linked['proposal_review'], linked['approval']['payload'])
-        spec = real_recipes.from_review(c, ref, oracle=compiled['oracle'], behavior_id=compiled['behavior_id'],
-            read_paths=compiled['read_paths'], focused_test=compiled['focused_test'], identity=identity)
+        linked=task_execution.snapshot(c,**ref)
+    reviewed=linked['proposal_review'].get('task_contract') or {}
+    validate_reviewed_policy(engine,reviewed)
+    prepared=None
+    if reviewed.get('bug_intent'):
+        from workbench.bug_check_preparation import construct
+        prepared=construct(engine,ref,root,identity,stop_event)['evidence']
+        compiled=bug_evidence.compile_plan(prepared)
+        template=dict(control_patches={})
+    elif reviewed.get('category')=='lua-offline-bugfix' and reviewed.get('bug_evidence'):
+        compiled=bug_evidence.compile_plan(reviewed['bug_evidence'])
+        template=dict(control_patches={})
+    elif reviewed.get('category')=='lua-regression-tests' and reviewed.get('behavioral_evidence'):
+        prepared_scenarios=reviewed['behavioral_evidence']
+        compiled=compile_plan(prepared_scenarios)
+        template=dict(scenario_preparation=prepared_scenarios)
+    else:
+        raise ValueError('A reviewed behavior scope, reproducer or regression example is required.')
+    bug_evidence.validate_expectation_review(linked['proposal_review'],linked['approval']['payload'])
+    with engine.connect() as c:
+        spec=real_recipes.from_review(c,ref,oracle=compiled['oracle'],behavior_id=compiled['behavior_id'],
+            read_paths=compiled['read_paths'],focused_test=compiled['focused_test'],identity=identity,prepared=prepared)
         if recovery:
-            _validate_recovery_binding(c, linked, spec, recovery['authorization'])
+            _validate_recovery_binding(c,linked,spec,recovery['authorization'])
     durable(root / 'recipe.json', json.dumps(spec, sort_keys=True).encode())
     durable(root / 'recipe-oracle.lua', compiled['oracle'].encode())
     try:

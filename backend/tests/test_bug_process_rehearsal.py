@@ -85,7 +85,7 @@ def program_answer(client_case):
     return value
 
 @pytest.mark.parametrize('case_provider',['local','codex'])
-@pytest.mark.parametrize('reproduction_mode',['source-grounded-v2','source-grounded-lua-v1'])
+@pytest.mark.parametrize('reproduction_mode',['source-grounded-v2','source-grounded-lua-v1','source-grounded-intent-v1'])
 def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     store, installed, tmp_path, monkeypatch, reproduction_mode, case_provider,  # noqa: F811
 ):
@@ -143,7 +143,12 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         monkeypatch.setattr(trusted_preparation, "Runtime", Runtime)
     monkeypatch.setenv("WORKBENCH_STATIC_ROOT", str(ROOT / "frontend/dist"))
     monkeypatch.setattr(local_browser_fixture, "install_offline_guard", lambda: None)
-    program_mode=reproduction_mode=='source-grounded-lua-v1'
+    intent_mode=reproduction_mode=='source-grounded-intent-v1'
+    program_mode=reproduction_mode in {'source-grounded-lua-v1','source-grounded-intent-v1'}
+    if intent_mode and not native:
+        from workbench import bug_check_preparation
+        from test_regression_evidence import ControlledPreparer
+        monkeypatch.setattr(bug_check_preparation,'Runtime',ControlledPreparer)
     cases = []
     for index, client_case in enumerate([False, True]):
         request = report(client_case)
@@ -159,11 +164,15 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         if program_mode:
             from workbench.bug_program import compile as compile_program
             answer,_=compile_program(answer,packet['files'],bug_investigation.report_coverage(request))
+        intent_plan={k:answer['plan'][k] for k in ('scope','read_paths','writable_paths','focused_test')}
+        intent_plan['criteria']=[dict(id='observation-'+str(i+1),description='The actual operation produces '+str(o['expected'])+' for measured input '+str(i+1)+'.')
+                                 for i,o in enumerate(answer['plan']['reproducer']['observations'])]
+        intent_plan['risks']=[]
         cases.append(dict(choice="fixture-bug-" + str(index), request=request,
                           provider=case_provider, reason=None, model="pilot-qwen38-27b" if case_provider=="local" else "gpt-6.1-sol",
                           evidenceSha=digest(packet["files"]), writablePaths=answer["plan"]["writable_paths"],
                           reviewed=BugPlan.model_validate(answer["plan"]).model_dump(mode="json"),
-                          client_case=client_case,clarification=case_provider=="codex" and program_mode and not client_case))
+                          client_case=client_case,intent=intent_plan,criteria=[c['description'] for c in intent_plan['criteria']],clarification=case_provider=="codex" and program_mode and not intent_mode and not client_case))
     policy = dict(base=git(source, "rev-parse", "HEAD").strip(), limits=LIMITS, cases=cases,
                   models=dict(local="pilot-qwen38-27b", codex="gpt-6.1-sol"),
                   budget=TaskBudget(activate_once=True, offer_id="00000000-0000-0000-0000-000000000000",
@@ -177,9 +186,12 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     def answer_for(packet,schema):
         from workbench.bug_plan_review import ReviewResponse
         from workbench.bug_investigation_stage import InvestigationResponse
+        from workbench.bug_intent import Response as IntentResponse
+        scoping=schema is IntentResponse
+        preparing=bool(packet.get('approved_intent'))
         reviewing=schema is ReviewResponse
         investigating=schema is InvestigationResponse
-        assert reviewing or investigating or schema is bug_investigation.BugPlanningResponse
+        assert scoping or reviewing or investigating or schema is bug_investigation.BugPlanningResponse
         assert 24000 < len(json.dumps(packet).encode()) <= 196608
         conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
         fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
@@ -203,6 +215,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 answer=dict(finding=finding,draft=dict(diagnosis=dict(
                     cause='The inspected implementation produces the wrong name for the reported operation.',
                     evidence_paths=[CLIENT_SOURCE if case['client_case'] else PRODUCTION])))
+        elif scoping:
+            answer=dict(finding='The reported behavior needs a bounded source repair.',plan=case['intent'])
+        elif preparing and not reviewing:
+            if not packet.get('sandbox_feedback') and not packet.get('self_review'):
+                answer['plan']['reproducer']['phases'][0]['code']='return state.nonexistent()'
         elif reviewing:
             rejected = program_mode and 'BOGUS_INPUT' in packet['candidate_plan']['plan']['reproducer']['phases'][0]['code']
             answer=dict(review_binding=packet['review_binding'],ready=not rejected,
@@ -232,7 +249,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                         step.update(op='table', path=['unused'])
         elif not fault and not program_mode:
             answer = wire_from_data(answer)
-        if program_mode and not reviewing and not investigating and not fault:
+        if program_mode and not scoping and not preparing and not reviewing and not investigating and not fault:
             if packet.get('self_review'):
                 assert 'previous_candidate' not in packet['self_review']
             elif packet.get('validation_feedback'):
@@ -252,7 +269,8 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             def context_budget(self, _, body):
                 return dict(prompt_tokens=8000, context_tokens=32768)
             def read(self, request, limit):
-                assert len(request.data) <= (131072 if program_mode else 65536) and limit == (65536 if program_mode else 24000)
+                program=packet.get('coverage',{}).get('reproducer_format')=='lua-phases-v1'
+                assert len(request.data)<=(131072 if program else 65536) and limit==(65536 if program else 24000)
                 return json.dumps(dict(id='controlled-response', model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
                     choices=[dict(finish_reason='stop', message=dict(content=json.dumps(answer),
@@ -265,9 +283,10 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             packet=json.loads(prompt.split('\nUntrusted task data:\n',1)[1])
             from workbench.bug_plan_review import ReviewResponse
             from workbench.bug_investigation_stage import InvestigationResponse
-            actual_schema=ReviewResponse if schema.get('title')=='ReviewResponse' else InvestigationResponse if schema.get('title')=='InvestigationResponse' else bug_investigation.BugPlanningResponse
+            from workbench.bug_intent import Response as IntentResponse
+            actual_schema=IntentResponse if schema.get('title')=='Response' else ReviewResponse if schema.get('title')=='ReviewResponse' else InvestigationResponse if schema.get('title')=='InvestigationResponse' else bug_investigation.BugPlanningResponse
             answer=answer_for(packet,actual_schema)
-            if actual_schema is not ReviewResponse:
+            if actual_schema not in (ReviewResponse,IntentResponse):
                 draft=answer['draft']
                 value=dict(finding=answer['finding'],action='inspect',reads=[],searches=[],
                            question=None,limitation=None)
@@ -342,7 +361,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                     calls.put((case["choice"], "implementation"))
                 else:
                     worker.tick(store)
-                    if case_provider=='codex' and program_mode:
+                    if case_provider=='codex' and program_mode and not intent_mode:
                         with store.begin() as connection:
                             connection.execute(intakes.update().where(intakes.c.revision==2,
                                 intakes.c.status=='waiting_for_information').values(status='failed'))
@@ -384,15 +403,30 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             assert len(connection.execute(select(model_attempts).where(
                 model_attempts.c.purpose == "implementation")).all()) == index+1
     assert actors[0] != actors[1] != os.getpid()
-    expected = [('fixture-fault', 'diagnosis'), ('fixture-conflict', 'diagnosis')]
-    for case in cases:
-        expected += [(case['choice'], 'diagnosis')]*((3 if case['client_case'] else 2)+2*int(case.get('clarification',False)))
-        expected += [(case['choice'], 'planning')]*2
-        expected.append((case['choice'], 'self-review'))
-        if program_mode:
-            expected += [(case['choice'], 'planning'),(case['choice'], 'self-review')]
-        expected.append((case['choice'], 'implementation'))
-    assert [calls.get(timeout=2) for _ in expected] == expected
+    if intent_mode:
+        from queue import Empty
+        observed=[]
+        while True:
+            try:
+                observed.append(calls.get(timeout=.2))
+            except Empty:
+                break
+        assert observed[:2]==[('fixture-fault','diagnosis'),('fixture-conflict','diagnosis')]
+        for case in cases:
+            events=[r[1] for r in observed if r[0]==case['choice']]
+            assert events.count('implementation')==1
+            assert events.count('self-review')>=1 and events.count('planning')>=3
+            assert events[-1]=='implementation'
+    else:
+        expected = [('fixture-fault', 'diagnosis'), ('fixture-conflict', 'diagnosis')]
+        for case in cases:
+            expected += [(case['choice'], 'diagnosis')]*((3 if case['client_case'] else 2)+2*int(case.get('clarification',False)))
+            expected += [(case['choice'], 'planning')]*2
+            expected.append((case['choice'], 'self-review'))
+            if program_mode:
+                expected += [(case['choice'], 'planning'),(case['choice'], 'self-review')]
+            expected.append((case['choice'], 'implementation'))
+        assert [calls.get(timeout=2) for _ in expected] == expected
     with store.connect() as c:
         failures = c.execute(select(intakes.c.id, intakes.c.payload).where(intakes.c.status == 'failed')).all()
         assert len(failures) == 2
@@ -403,7 +437,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         job = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == failed)).scalar_one()
     evidence = tmp_path/'artifacts/runs'/('planning-evidence-'+job['diagnostics']['evidence_id'])/'events.jsonl'
     rows = [json.loads(row) for row in evidence.read_text().splitlines()]
-    prefix=['schema','request-schema']+(['request-limits'] if program_mode else [])+['wire-received','envelope'] if case_provider=='local' else ['schema','request-schema','codex-wire-schema','codex-request-budget','private-proposed-data','provider-result']
+    prefix=['schema','request-schema']+(['request-limits'] if program_mode and not intent_mode else [])+['wire-received','envelope'] if case_provider=='local' else ['schema','request-schema','codex-wire-schema','codex-request-budget','private-proposed-data','provider-result']
     assert [row['phase'] for row in rows][:len(prefix)] == prefix
     assert len(rows[1]['schema_sha256']) == 64 and rows[1]['corrective'] is False
     if case_provider=='codex':

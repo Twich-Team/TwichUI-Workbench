@@ -190,7 +190,22 @@ try {
     const receipt = read(reviewPath);
     need(receipt.decision === 'approve' && receipt.approved === true,
       'Independent review did not explicitly approve this plan');
-    need(receipt.approval_reference === approvalReference && receipt.seal === seal &&
+    const intent=plan.task_contract.bug_intent;
+    need(receipt.approval_reference===approvalReference && receipt.seal===seal &&
+      receipt.intake===intake && receipt.plan_binding===plan.binding &&
+      receipt.expectation_digest===(intent||plan.task_contract.bug_evidence).review_digest,
+      'Independent review differs from current scope binding');
+    if(intent) {
+      need(Array.isArray(receipt.criteria) && receipt.criteria.length===intent.plan.criteria.length &&
+        receipt.criteria.every((row,i)=>row.id===intent.plan.criteria[i].id &&
+          row.description===intent.plan.criteria[i].description && typeof row.reason==='string'&&row.reason.length>=12) &&
+        Array.isArray(receipt.owner_requirements) && receipt.owner_requirements.length>=candidate.criteria.length &&
+        receipt.owner_requirements.every(row=>intent.plan.criteria.some(c=>c.id===row.criterion) &&
+          typeof row.requirement==='string'&&row.requirement.length>=12) &&
+        candidate.criteria.every(c=>receipt.owner_requirements.some(row=>row.requirement===c)),
+        'Independent scope review does not cover owner requirements');
+    } else {
+      need(receipt.approval_reference === approvalReference && receipt.seal === seal &&
       receipt.intake === intake && receipt.plan_binding === plan.binding &&
       receipt.expectation_digest === plan.task_contract.bug_evidence.review_digest &&
       Array.isArray(receipt.observations) && receipt.observations.length === candidate.criteria.length &&
@@ -199,7 +214,24 @@ try {
         typeof row.reason === 'string' && row.reason.trim().length >= 12 && row.reason.length <= 500) &&
       new Set(receipt.observations.map(row => row.index)).size === candidate.criteria.length,
       'Independent review does not bind the three acceptance observations');
+    }
     return sha(reviewPath);
+  }
+  let preparedReviewSha;
+  function readPreparedReview(data) {
+    const path=join(evidence,'bug-prepared-check-review.json');
+    const info=lstatSync(path);
+    need(realpathSync(path)===path&&info.isFile()&&info.uid===process.getuid()&&!(info.mode&0o077)&&info.size<=16384,'Prepared review is not private');
+    const receipt=read(path),checks=data.offer.offer.prepared_behavior,intent=data.proposal.task_contract.bug_intent;
+    need(receipt.approved===true&&receipt.approval_reference===approvalReference&&receipt.seal===seal&&
+      receipt.intake===data.intake&&receipt.plan_binding===data.proposal.binding&&receipt.offer_fingerprint===data.offer.offer.fingerprint&&
+      receipt.oracle_sha256===checks.oracle_sha256&&receipt.review_digest===checks.review_digest&&
+      Array.isArray(receipt.criteria)&&receipt.criteria.length===intent.plan.criteria.length&&
+      receipt.criteria.every((row,i)=>row.id===intent.plan.criteria[i].id&&Array.isArray(row.observations)&&row.observations.length>0&&
+        row.observations.every(n=>Number.isSafeInteger(n)&&n>=0&&n<checks.reproducer.observations.length)&&
+        typeof row.reason==='string'&&row.reason.length>=12&&row.reason.length<=800),
+      'Prepared check review does not bind every approved behavior criterion');
+    return sha(path);
   }
   let reviewedSha;
   const callPolicy = (verb, action, value) => {
@@ -249,6 +281,17 @@ try {
         await wait(500);
       }
     },
+    async reviewPreparedBug(data) {
+      record('awaiting-independent-check-review',{intake:data.intake,offer:data.offer.offer.id,oracle:data.offer.offer.prepared_behavior.oracle_sha256});
+      const end=Math.min(blockDeadline-timing.runMinutes*minute,now()+10*minute);
+      for(;;) {
+        try {preparedReviewSha=readPreparedReview(data);break;}
+        catch(error){if(error.code!=='ENOENT')throw error;}
+        need(now()<end,'Prepared behavioral check review did not settle');
+        await wait(500);
+      }
+      record('independent-check-review',{intake:data.intake,reviewSha:preparedReviewSha});
+    },
     async beforeAction(action, data) {
       need(now() < blockDeadline && sha(join(ops,'bundle.sha256')) === seal, 'Case window or seal changed');
       for (const role of ['api','lan','worker','codex']) installed(role,
@@ -256,6 +299,7 @@ try {
       // The approved controller checks effective cgroups and LAN TLS separately.
       if (bug && !['submit','clarify'].includes(action))
         need(reviewedSha === readBugReview(data.intake, data.proposal), 'Independent bug plan review changed');
+      if(action==='run'&&data.proposal.task_contract.bug_intent) need(preparedReviewSha===readPreparedReview(data),'Prepared check review changed');
       callPolicy('admit', action, data);
     },
     async finish(data) {

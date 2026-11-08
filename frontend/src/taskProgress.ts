@@ -8,6 +8,7 @@ export type RunApprovalContext = {
   scope?: components['schemas']['ProposalView']; receipt?: components['schemas']['ProposalReceipt'] | null;
   offer: null | {id: string; fingerprint: string; title: string; repository: string; base_branch: string;
     base: string; paths: string[]; checks: {argv: string[]; cwd: string; purpose?: string}[];
+    prepared_behavior?: {intent_digest:string;review_digest:string;oracle_sha256:string;reproducer:components['schemas']['Reproducer']};
     limits: Record<string, number>; budget: Budget};
 };
 export type Budget = components['schemas']['TaskBudget'];

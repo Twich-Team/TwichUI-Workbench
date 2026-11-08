@@ -22,11 +22,11 @@ INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+
 
 
 def read_limit(packet):
-    return 262144 if packet.get('plan_review') == 'source-grounded-lua-v1' else READ_CHARS
+    return 262144 if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'} else READ_CHARS
 
 
 def window_limit(packet):
-    return 256 if packet.get('plan_review') == 'source-grounded-lua-v1' else REQUESTS*3
+    return 256 if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'} else REQUESTS*3
 
 
 def source_characters(packet):
@@ -305,7 +305,7 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
     if packing_context is not None:
         packing_context.clear()
         packing_context.update(windows=list(windows),requested=list(requested))
-    retain(wire, packet, windows, (text_budget if text_budget is not None else 36000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
+    retain(wire, packet, windows, (text_budget if text_budget is not None else 36000 if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'} else WIRE_TEXT)
            -sum(len(m['text']) for m in (matches or [])), requested=requested)
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
@@ -362,6 +362,10 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             for offset in range(0,len(added),16):
                 parent.record('source-function-context',windows=[{k:w[k] for k in ('path','sha256','line','through_line')}
                     for w in added[offset:offset+16]],approved=False,executed=False)
+        if getattr(adapter,'approved_intent',None):
+            result['approved_intent']=adapter.approved_intent
+            result['purpose']='construct-checks-for-approved-intent'
+            result['preparation_notice']='Scope is approved; construct isolated checks, not an addon patch. Copy the exact approved scope, read_paths, writable_paths and focused_test. All criteria must be observed through actual behavior. Failed sandbox feedback is data, not permission to alter expectations or scope.'
         return result
     if investigating and parent and engine is not None:
         from workbench.investigation_memory import seed
@@ -396,6 +400,10 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                          'Current committed source and existing startup context; no diagnosis or approval reused.')
         if bootstrap_fact:
             wire['committed_bootstrap_context'] = bootstrap_fact
+    if getattr(adapter,'approved_intent',None):
+        investigating=False
+        wire=make_wire(packet,original,feedback,packet.get('inspection_windows',[]),
+            'Construct executable tests for this exact approved behavior scope using actual sandbox feedback.')
     if intent_mode:
         wire=make_wire(packet,original,feedback,packet.get('inspection_windows',[]),
             'Retained committed source supports a repair scope; executable checks are a later preparation phase.')
@@ -554,6 +562,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                         pending=None
                         continue
                     if review.ready:
+                        if getattr(adapter,'approved_intent',None):
+                            adapter.preparation_review=review.model_dump(mode='json')
                         return pending, model, basis, packet
                     review_rejected.add(review.review_binding)
                     wire = bug_plan_review.feedback(planning_wire, pending, review)
@@ -625,6 +635,19 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     continue
                 raise
             if draft.inspection is None:
+                checker=getattr(adapter,'preparation_check',None)
+                if checker and draft.plan:
+                    diagnostic=checker(raw,packet)
+                    if diagnostic:
+                        if evidence:
+                            evidence.snapshot('sandbox-feedback',diagnostic)
+                        wire['sandbox_feedback']=dict(approved=False,source_modified=False,**diagnostic)
+                        wire['rejected_candidate']=raw
+                        if index+1==requests:
+                            raise PlanningUnavailable('Check construction ended with a retained original-tree diagnostic.','preparation_limit')
+                        continue
+                    wire.pop('sandbox_feedback',None)
+                    wire.pop('rejected_candidate',None)
                 if review_required and draft.plan is not None:
                     if bug.digest(raw) in review_rejected or (program_mode and bug_plan_review.behavior_binding(raw) in rejected_behaviors):
                         raise PlanningUnavailable('The proposed plan did not change after its rejected self-check.',
@@ -638,7 +661,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     planning_wire = copy.deepcopy(wire)
                     if program_mode:
                         focused=make_wire(packet,original,feedback,bootstrap_priority,'Read exact definitions used by the proposed program.',
-                            programs=[p['code'] for p in raw['plan']['reproducer']['phases']])
+                            programs=[p['code'] for p in raw['plan']['reproducer'].get('phases',[])])
                         focused['committed_bootstrap_context']=bootstrap_fact
                         planning_wire.update({k:focused[k] for k in ('files','source_memory','selected_source_interface','requested_behavior_clauses')})
                     wire = bug_plan_review.request(planning_wire, raw)

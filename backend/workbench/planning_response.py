@@ -338,7 +338,7 @@ class Evidence:
 
     def snapshot(self, name, value):
         """Retain bounded proposed data privately; never approval or execution."""
-        if name not in {'proposed-plan', 'model-plan-review', 'investigation-diagnosis', 'provider-content'}:
+        if name not in {'proposed-plan', 'model-plan-review', 'investigation-diagnosis', 'provider-content','sandbox-feedback'}:
             raise OSError('Unknown private planning snapshot')
         from workbench.trusted_preparation import owned
         owned(self.directory)
