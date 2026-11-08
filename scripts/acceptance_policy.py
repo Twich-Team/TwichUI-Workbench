@@ -93,7 +93,7 @@ def build_policy(inputs, *, bug_input=None):
 def build_bug_case(bug_input):
     request = bug_input['request']
     require(bug_input['id'] == 'bug-flight-paths' and request['kind'] == 'issue'
-            and request['local_planning'] == 'qwen-once', 'bug case or provider changed')
+            and request['local_planning'] in {'qwen-once','codex-once'}, 'bug case or provider changed')
     packet = bug_investigation.context(request, '', dict(
         allowed_classes=[bug_investigation.CATEGORY], scenario_generation=True))
     require(packet['base'] == BASE, 'bug case source base changed')
@@ -102,7 +102,8 @@ def build_bug_case(bug_input):
                 and f['path'].startswith(('!!!TwichUI/nav/', 'tests/test_nav'))]
     require(any(p.startswith('!!!TwichUI/nav/') for p in writable)
             and any(p.startswith('tests/test_nav') for p in writable), 'bug source envelope is insufficient')
-    return dict(choice=bug_input['id'], provider='local', model=MODELS['local'], reason=None,
+    provider='codex' if request['local_planning']=='codex-once' else 'local'
+    return dict(choice=bug_input['id'], provider=provider, model=MODELS[provider], reason=None,
                 request=request, criteria=bug_input['criteria'], evidenceSha=digest(packet['files']),
                 readPaths=paths, writablePaths=writable)
 
@@ -219,7 +220,10 @@ def check_review(connection, request, case, preparation):
     require(outcome == 'completed' and model == case['model'] and usage['units'] == 'tokens',
             'planning usage or provider identity was not reported')
     local_cap = consent_cap(json.loads(row[2]).get('local_planning_receipt', {}))
-    key, cap = ('total_tokens', 32768) if case['provider'] == 'codex' else ('completion_tokens', bug_investigation.INVESTIGATION_REQUESTS*local_cap if bug else 2600)
+    key, cap = ('total_tokens', 32768*(bug_investigation.INVESTIGATION_REQUESTS if bug else 1)) if case['provider'] == 'codex' else ('completion_tokens', bug_investigation.INVESTIGATION_REQUESTS*local_cap if bug else 2600)
+    if bug and case['provider'] == 'codex':
+        require(1 <= usage.get('requests_observed', 1) <= bug_investigation.INVESTIGATION_REQUESTS,
+                'Codex inspection request accounting changed')
     if bug and case['provider'] == 'local':
         require(1 <= usage.get('requests_observed', 1) <= bug_investigation.INVESTIGATION_REQUESTS
                 and usage.get('max_request_completion_tokens', usage['values'][key]) <= local_cap,

@@ -245,7 +245,9 @@ def test_new_bug_consent_binds_local_request_and_shared_operation_deadlines():
     from datetime import datetime,timezone
     from workbench.everyday import planning_receipt
     value=planning_receipt(report(),datetime.now(timezone.utc).isoformat())
-    assert value['investigation_version']==7
+    assert value['investigation_version']==8
+    assert value['max_codex_requests']==8 and value['max_total_model_requests']==8
+    assert value['codex_request_deadline_seconds']==120
     assert value['max_local_requests']==8
     assert value['local_request_deadline_seconds']==300
     assert value['planning_deadline_seconds']==1800

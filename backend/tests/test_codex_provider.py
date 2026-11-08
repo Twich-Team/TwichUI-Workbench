@@ -411,3 +411,95 @@ def test_lan_rejects_broad_mismatched_and_noncanonical_networks(monkeypatch, net
     monkeypatch.setenv('WORKBENCH_PRIVATE_LAN_SUBNET', network)
     with pytest.raises(ValueError):
         configured()
+
+
+def test_bug_input_roundtrip_is_larger_without_widening_output_or_legacy_limit(
+    tmp_path, monkeypatch
+):
+    path = tmp_path / "connector.sock"
+    monkeypatch.setattr(codex, "connector_path", lambda: path)
+    observed = []
+    with socket.socket(socket.AF_UNIX) as listener:
+        listener.bind(str(path))
+        listener.listen()
+
+        def reply():
+            peer, _ = listener.accept()
+            with peer:
+                raw = peer.makefile("rb").readline(codex.MAX_BUG_INPUT + 2)
+                observed.append(json.loads(raw))
+                peer.sendall(
+                    json.dumps(
+                        dict(
+                            output=dict(answer="controlled"),
+                            usage=dict(
+                                prompt_tokens=40,
+                                completion_tokens=10,
+                                total_tokens=50,
+                                reasoning_tokens=0,
+                            ),
+                        )
+                    ).encode()
+                    + b"\n"
+                )
+
+        thread = Thread(target=reply, daemon=True)
+        thread.start()
+        output, usage = codex.generate(
+            "fixture-model", None, "source" * 6000, {}, input_limit=codex.MAX_BUG_INPUT
+        )
+        thread.join(2)
+    assert output == dict(answer="controlled") and usage["total_tokens"] == 50
+    assert len(observed) == 1 and len(observed[0]["prompt"]) > 24000
+    assert codex.MAX_PACKET == 24000 and codex.MAX_BUG_INPUT == 196608
+    with pytest.raises(ValueError):
+        codex.generate("fixture-model", None, "source" * 6000, {})
+    with pytest.raises(ValueError):
+        codex.generate(
+            "fixture-model", None, "x" * codex.MAX_BUG_INPUT, {}, input_limit=codex.MAX_BUG_INPUT
+        )
+
+
+def test_connector_accepts_bounded_bug_context_only_from_allowed_peer_without_starting_real_cli(
+    tmp_path, monkeypatch
+):
+    from contextlib import contextmanager
+    from types import SimpleNamespace
+
+    monkeypatch.setattr(connector, "allowed_cgroup", lambda group, uid: True)
+    monkeypatch.setattr(
+        connector, "resolve_backend", lambda stop, deadline: "1.1.1.1 chatgpt.com\n"
+    )
+
+    @contextmanager
+    def app_server(*args):
+        yield SimpleNamespace(started=False)
+
+    monkeypatch.setattr(codex, "app_server", app_server)
+    seen = []
+
+    def turn(rpc, **body):
+        seen.append(body)
+        return dict(
+            output=dict(ok=True),
+            usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
+        )
+
+    monkeypatch.setattr(codex, "turn", turn)
+    left, right = socket.socketpair()
+    with left, right:
+        thread = Thread(
+            target=connector.handle,
+            args=(right, "/fixture/cli", "/fixture/auth", tmp_path),
+            daemon=True,
+        )
+        thread.start()
+        left.sendall(
+            json.dumps(
+                dict(model="fixture-model", effort=None, prompt="source" * 6000, schema={})
+            ).encode()
+            + b"\n"
+        )
+        result = json.loads(left.makefile("rb").readline())
+        thread.join(2)
+    assert result["output"] == dict(ok=True) and len(seen) == 1 and len(seen[0]["prompt"]) > 24000

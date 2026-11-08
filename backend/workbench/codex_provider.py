@@ -14,6 +14,7 @@ import time
 from workbench.planning_transport import PlanningUnavailable
 
 MAX_PACKET = 24_000
+MAX_BUG_INPUT = 196608  # Private committed investigation context, not an output allowance.
 MAX_WIRE = 2 << 20
 MAX_LINE = 256 << 10
 SECONDS = 120
@@ -56,6 +57,7 @@ class Hold(PlanningUnavailable):
             'credits': 'Codex could not verify that the account has no additional usage credits.',
             'unavailable': 'The approved Codex connector is unavailable.',
             'model_identity': 'The selected Codex model or effort could not be verified.',
+            'disclosure': 'The investigation needs source outside its saved disclosure binding.',
             'canceled': 'The Codex operation was stopped.',
             'timeout': 'The Codex operation reached its time limit.',
             'protocol': 'Codex returned an unexpected or incomplete response.',
@@ -434,7 +436,7 @@ def connector_path():
     return None
 
 
-def generate(model, effort, prompt, schema, stop=lambda: False):
+def generate(model, effort, prompt, schema, stop=lambda: False, *, input_limit=MAX_PACKET):
     if stop():
         raise Hold('canceled')
     path = connector_path()
@@ -442,7 +444,9 @@ def generate(model, effort, prompt, schema, stop=lambda: False):
         raise Hold('unavailable')
     payload = json.dumps(dict(model=model, effort=effort, prompt=prompt, schema=schema),
                          ensure_ascii=True, allow_nan=False).encode()
-    if len(payload) > MAX_PACKET:
+    if type(input_limit) is not int or input_limit not in (MAX_PACKET, MAX_BUG_INPUT):
+        raise ValueError('Unsupported Codex input bound')
+    if len(payload) > input_limit:
         raise ValueError('The approved Codex request exceeds its input limit.')
     stop_at = time.monotonic() + SECONDS + 5
     with socket.socket(socket.AF_UNIX) as connection:
@@ -483,10 +487,42 @@ def required_output(node):
 
 
 class Planner:
-    def __init__(self, selection, stop):
-        self.selection, self.stop, self.diagnostics = selection, stop, {}
+    source_investigation = True
+    reuse_review_lessons = False
+    usage_source = 'Codex app-server investigation turn tokens'
 
-    def generate(self, packet, schema):
+    def __init__(self, selection, stop):
+        import threading
+        self.selection, self.stop, self.diagnostics = selection, stop, {}
+        self.stop_event = threading.Event()
+        self.ends_at = None
+        self.response_evidence = None
+        self.source_manifest = None
+        self.reference_manifest = None
+        self.source_lines = {}
+
+    def bind_source(self, packet):
+        """Freeze the task's selected source disclosure before any provider turn.
+
+        Local dependency reads remain permitted, but a new private file or search
+        match cannot silently extend this external disclosure.
+        """
+        self.source_manifest = {item['path']:item['sha256'] for item in packet['files']}
+        self.reference_manifest = {item['path']:item['sha256'] for item in packet.get('api_references', [])}
+        from workbench.bug_source_planning import committed
+        for item in packet['files']:
+            raw,actual=committed(item['path'],packet['base'])
+            if actual['sha256'] != item['sha256']:
+                raise Hold('disclosure')
+            self.source_lines[item['path']]=raw.decode().splitlines()
+        if not self.source_manifest or len(self.source_manifest)>12:
+            raise Hold('disclosure')
+
+    def stopped(self):
+        return (self.stop() or self.stop_event.is_set()
+                or self.ends_at is not None and time.monotonic() >= self.ends_at)
+
+    def generate(self, packet, schema, *, expected_model=None):
         from workbench.grounded_scenarios import LoadedClientResponse
 
         instructions = (
@@ -502,16 +538,49 @@ class Planner:
                              'fixture_bindings. Use the first return unless an explicitly supported '
                              'client field is requested. Return specific unresolved questions when uncertain.')
         from workbench.bug_evidence import BugPlanningResponse
+        from workbench.bug_plan_review import ReviewResponse
+        from workbench.bug_investigation_stage import InvestigationResponse
+        bug_schema = schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse)
         if schema is BugPlanningResponse:
-            from workbench.bug_investigation import INSTRUCTIONS
+            if packet.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1':
+                from workbench.bug_program import INSTRUCTIONS
+            else:
+                from workbench.bug_investigation import INSTRUCTIONS
+            instructions = INSTRUCTIONS
+        elif schema is ReviewResponse:
+            from workbench.bug_plan_review import INSTRUCTIONS
+            instructions = INSTRUCTIONS
+        elif schema is InvestigationResponse:
+            from workbench.bug_investigation_stage import INSTRUCTIONS
             instructions = INSTRUCTIONS
         model = self.selection['model']
+        self.diagnostics = dict(generation_state='not_started')
+        if bug_schema:
+            if self.source_manifest is None:
+                raise Hold('disclosure')
+            for key,allowed in [('files',self.source_manifest),('api_references',self.reference_manifest)]:
+                if any(item.get('path') not in allowed or ('sha256' in item and item['sha256'] != allowed[item['path']])
+                       for item in packet.get(key, [])):
+                    raise Hold('disclosure')
+            for item in packet.get('files', []):
+                lines=self.source_lines[item['path']]
+                for excerpt in item.get('excerpts', []):
+                    start=excerpt['line']
+                    actual=excerpt['text'].splitlines()
+                    if type(start) is not int or start<1 or lines[start-1:start-1+len(actual)] != actual:
+                        raise Hold('disclosure')
+            if any(match.get('path') not in self.source_manifest
+                   for match in packet.get('inspection_result', {}).get('search_matches', [])):
+                raise Hold('disclosure')
+        if expected_model is not None and model != expected_model:
+            raise Hold('model_identity')
         try:
             from workbench.planning_response import wire_schema
             result, counted = generate(model, self.selection['effort'],
                 instructions + '\nUntrusted task data:\n' + json.dumps(packet, ensure_ascii=True),
-                required_output(wire_schema(schema, packet.get('coverage') if schema is BugPlanningResponse else None,
-                                            packet.get('files') if schema is BugPlanningResponse else None)), self.stop)
+                required_output(wire_schema(schema, packet.get('coverage') if bug_schema else None,
+                                            packet.get('files') if bug_schema else None)), self.stopped,
+                **({'input_limit':MAX_BUG_INPUT} if bug_schema else {}))
         except Hold as error:
             self.diagnostics = dict(generation_state=(
                 'not_started' if not error.started else 'uncertain' if not error.terminal else
@@ -519,7 +588,23 @@ class Planner:
             if error.counted is not None:
                 self.diagnostics['usage'] = usage_record(error.counted)
             raise
-        self.diagnostics = dict(actual_model=model, generation_state='finished', usage=usage_record(counted))
+        # generate returns only after the supported protocol confirms a completed
+        # turn and validates its usage. This is not a provider finish_reason.
+        self.diagnostics = dict(actual_model=model, generation_state='finished',
+                                completion_state='completed', accounting_state='complete',
+                                usage=usage_record(counted))
+        if bug_schema:
+            from workbench.planning_response import normalize_bug
+            if self.response_evidence:
+                self.response_evidence.capture_content(json.dumps(result, ensure_ascii=True), None)
+                self.response_evidence.record('provider-result', provider='codex', generation_state='finished',
+                    accounting_state='complete', usage=self.diagnostics['usage'], actual_model=model,
+                    response_identity_available=False)
+            changes=[]
+            if schema is BugPlanningResponse:
+                result,changes=normalize_bug(result)
+            if self.response_evidence:
+                self.response_evidence.parsed(result,self.diagnostics,changes)
         return result, model, 'codex'
 
 

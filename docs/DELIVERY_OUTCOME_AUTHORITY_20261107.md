@@ -28,9 +28,13 @@ installed protected helper/session grant, never self-expand its privileges.
 Keep schema 0012, rollback journaling, checked history copies and recovery.
 
 Local investigation may follow relevant project code/dependencies under the
-replacement source authority. It does not expand external disclosure. Flight-path
-source stays local Qwen; Codex supporting checks keep their sealed limited task,
-examples/signatures and test lines 1–120. Read access is not write authority;
+replacement source authority. The former flight-path local-Qwen-only disclosure
+restriction is superseded FOR THE CODEX-ONLY FLIGHT-PATH RUN by the owner's explicit
+November 8 permission in [the source disclosure decision](OWNER_SOURCE_DISCLOSURE_20261108.md).
+Only that report and relevant excerpts/follow-up reads from the nine listed files
+at commit1caf530212bbc6eaf37e41d668902a391aa936c1 may be sent for this bug run.
+Codex supporting checks retain their limited examples/signatures/testlines1–120.
+Read access is not write authority;
 the independently reviewed repair scope and separate run approval control edits.
 Keep uncertainty holds, one permitted pre-generation provider switch, task-wide
 accounting, independent verification and duplicate protection.

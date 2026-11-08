@@ -119,8 +119,8 @@ def handle(connection, binary, credential, runtime):
     started = False
     try:
         with connection.makefile('rb') as stream:
-            raw = stream.readline(codex.MAX_PACKET + 2)
-        if not raw.endswith(b'\n') or len(raw) > codex.MAX_PACKET + 1:
+            raw = stream.readline(codex.MAX_BUG_INPUT + 2)
+        if not raw.endswith(b'\n') or len(raw) > codex.MAX_BUG_INPUT + 1:
             raise codex.Hold('protocol')
         request = json.loads(raw)
         if (set(request) != {'model','effort','prompt','schema'}

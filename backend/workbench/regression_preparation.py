@@ -434,7 +434,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             initial_source_packet = packet
             from workbench.planning_response import create_evidence
             evidence_schema = schema
-            if bug and packet.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'} and isinstance(adapter_used, LocalProvider):
+            if bug and packet.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'} and (isinstance(adapter_used, LocalProvider) or getattr(adapter_used, 'source_investigation', False)):
                 from workbench.bug_investigation_stage import InvestigationResponse
                 evidence_schema = InvestigationResponse
             response_evidence = create_evidence(lease, evidence_schema, wire.get('coverage') if bug else None,
@@ -442,7 +442,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             if response_evidence:
                 adapter_used.response_evidence = response_evidence
             try:
-                if bug and isinstance(adapter_used, LocalProvider) and model_selection:
+                if bug and (isinstance(adapter_used, LocalProvider) or getattr(adapter_used, 'source_investigation', False)) and model_selection:
                     from workbench.bug_source_planning import generate as investigate
                     raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
                         feedback, provider_stopped, model_selection.model, engine=engine)
@@ -488,7 +488,13 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 if codex_route:
                     adapter_used = codex_provider.Planner(codex_route, provider_stopped)
                     adapter_used.response_evidence = response_evidence
-                    raw, model, basis = adapter_used.generate(wire, schema)
+                    if bug:
+                        from workbench.bug_source_planning import generate as investigate
+                        raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
+                            feedback, provider_stopped, target, engine=engine)
+                        inspection_packet = packet
+                    else:
+                        raw, model, basis = adapter_used.generate(wire, schema)
                 else:
                     adapter_used = LocalProvider(stop_event, ends_at=planning_end)
                     adapter_used.response_evidence = response_evidence

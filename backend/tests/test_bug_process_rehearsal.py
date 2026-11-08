@@ -84,9 +84,10 @@ def program_answer(client_case):
     plan['reproducer']=dict(description='The existing operation must produce the requested name.',setup=setup,phases=phases)
     return value
 
+@pytest.mark.parametrize('case_provider',['local','codex'])
 @pytest.mark.parametrize('reproduction_mode',['source-grounded-v2','source-grounded-lua-v1'])
 def test_two_bugs_with_two_browsers_and_separate_process_restarts(
-    store, installed, tmp_path, monkeypatch, reproduction_mode,  # noqa: F811
+    store, installed, tmp_path, monkeypatch, reproduction_mode, case_provider,  # noqa: F811
 ):
     import local_browser_fixture
     from project_env import environment
@@ -146,6 +147,8 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     cases = []
     for index, client_case in enumerate([False, True]):
         request = report(client_case)
+        if case_provider=='codex':
+            request['local_planning']='codex-once'
         if client_case:
             request['description'] += ' It should refresh each time.'
         request.pop("request_id")
@@ -157,7 +160,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             from workbench.bug_program import compile as compile_program
             answer,_=compile_program(answer,packet['files'],bug_investigation.report_coverage(request))
         cases.append(dict(choice="fixture-bug-" + str(index), request=request,
-                          provider="local", reason=None, model="pilot-qwen38-27b",
+                          provider=case_provider, reason=None, model="pilot-qwen38-27b" if case_provider=="local" else "gpt-6.1-sol",
                           evidenceSha=digest(packet["files"]), writablePaths=answer["plan"]["writable_paths"],
                           reviewed=BugPlan.model_validate(answer["plan"]).model_dump(mode="json"),
                           client_case=client_case))
@@ -171,8 +174,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     ctx = multiprocessing.get_context("fork")
     calls, errors = ctx.Queue(), ctx.Queue()
 
-    def scripted(self, schema, encoded, key_path, expected_model):
-        packet = json.loads(encoded)
+    def answer_for(packet,schema):
         from workbench.bug_plan_review import ReviewResponse
         from workbench.bug_investigation_stage import InvestigationResponse
         reviewing=schema is ReviewResponse
@@ -234,28 +236,47 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             elif packet.get('validation_feedback'):
                 phase=answer['plan']['reproducer']['phases'][0]
                 phase['code']=phase['code'].replace("'Sam'", "'BOGUS_INPUT'").replace('ALICE', 'BOGUS_INPUT')
+        outcome = answer if reviewing or investigating else dict(finding=answer['finding'], draft={key:answer[key]
+            for key in ('plan', 'question', 'limitation', 'inspection') if answer.get(key) is not None})
+        calls.put(('fixture-conflict' if conflict else 'fixture-fault' if fault else case["choice"], "self-review" if reviewing else "diagnosis" if investigating else "planning"))
+        return outcome
+
+    def scripted(self, schema, encoded, key_path, expected_model):
+        packet=json.loads(encoded)
+        answer=answer_for(packet,schema)
         class Transport:
             seconds = 120
             def models(self, _): return expected_model
             def context_budget(self, _, body):
-                return dict(prompt_tokens=8000, context_tokens=32768)  # Controlled, not a model call.
+                return dict(prompt_tokens=8000, context_tokens=32768)
             def read(self, request, limit):
                 assert len(request.data) <= (131072 if program_mode else 65536) and limit == (65536 if program_mode else 24000)
-                outcome = answer if reviewing or investigating else dict(finding=answer['finding'], draft={key:answer[key]
-                    for key in ('plan', 'question', 'limitation', 'inspection') if answer.get(key) is not None})
                 return json.dumps(dict(id='controlled-response', model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
-                    choices=[dict(finish_reason='stop', message=dict(content=json.dumps(outcome),
+                    choices=[dict(finish_reason='stop', message=dict(content=json.dumps(answer),
                         reasoning_content='CONTROLLED_NATIVE_REASONING_NOT_A_MODEL'))])).encode()
-        value = self._infer(Transport(), 'fixture-no-credential', schema, json.dumps(packet), expected_model=expected_model)
-        calls.put(('fixture-conflict' if conflict else 'fixture-fault' if fault else case["choice"], "self-review" if reviewing else "diagnosis" if investigating else "planning"))
-        return value
+        return self._infer(Transport(), 'fixture-no-credential', schema, json.dumps(packet), expected_model=expected_model)
+
+    def controlled_codex(model,effort,prompt,schema,stop,**kwargs):
+        assert model=='gpt-6.1-sol' and not stop() and kwargs.get('input_limit')==codex_provider.MAX_BUG_INPUT
+        if '\nUntrusted task data:\n' in prompt:
+            packet=json.loads(prompt.split('\nUntrusted task data:\n',1)[1])
+            from workbench.bug_plan_review import ReviewResponse
+            from workbench.bug_investigation_stage import InvestigationResponse
+            actual_schema=ReviewResponse if schema.get('title')=='ReviewResponse' else InvestigationResponse if schema.get('title')=='InvestigationResponse' else bug_investigation.BugPlanningResponse
+            answer=answer_for(packet,actual_schema)
+        else:
+            client_case=CLIENT_SOURCE in schema['properties']['edits']['items']['properties']['path']['enum']
+            answer=dict(edits=[dict(path=CLIENT_SOURCE if client_case else PRODUCTION,
+                old=BAD_ALERT if client_case else BUGGY,new=GOOD_ALERT if client_case else CORRECT)])
+        return answer,dict(prompt_tokens=40,completion_tokens=10,total_tokens=50,reasoning_tokens=2)
 
     key = tmp_path / "controlled-local.key"
     key.write_text("CONTROLLED-NOT-A-LIVE-CREDENTIAL")
     key.chmod(0o600)
     monkeypatch.setenv("WORKBENCH_LOCAL_KEY", str(key))
     monkeypatch.setattr(LocalProvider, "_request", scripted)
+    monkeypatch.setattr(codex_provider, "generate", controlled_codex)
     # No real connector is used. The real browser gate observes the explicitly
     # controlled availability that this fixture declared.
     monkeypatch.setattr(codex_provider, "connector_path", lambda: tmp_path / "controlled.sock")
@@ -281,12 +302,17 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 if pending:
                     case = next(c for c in cases if c["request"]["title"] == pending.payload["title"])
                     client_case = case["client_case"]
+                    from workbench import provider_routes
+                    with store.connect() as connection:
+                        codex_route = (provider_routes.approved(connection, dict(id=pending.id, payload=pending.payload))
+                                       if case_provider == 'codex' else None)
                     local_browser_fixture.advance_local(
                         store, Path(store.url.database), "pass", None,
                         native=native,
                         bug_edit=dict(path=CLIENT_SOURCE if client_case else PRODUCTION,
                                       old=BAD_ALERT if client_case else BUGGY,
-                                      new=GOOD_ALERT if client_case else CORRECT))
+                                      new=GOOD_ALERT if client_case else CORRECT),
+                        codex_route=codex_route)
                     calls.put((case["choice"], "implementation"))
                 else:
                     worker.tick(store)
@@ -347,7 +373,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         job = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == failed)).scalar_one()
     evidence = tmp_path/'artifacts/runs'/('planning-evidence-'+job['diagnostics']['evidence_id'])/'events.jsonl'
     rows = [json.loads(row) for row in evidence.read_text().splitlines()]
-    prefix=['schema','request-schema']+(['request-limits'] if program_mode else [])+['wire-received','envelope']
+    prefix=['schema','request-schema']+(['request-limits'] if program_mode else [])+['wire-received','envelope'] if case_provider=='local' else ['schema','request-schema','private-proposed-data','provider-result']
     assert [row['phase'] for row in rows][:len(prefix)] == prefix
     assert len(rows[1]['schema_sha256']) == 64 and rows[1]['corrective'] is False
     assert rows[-1]['phase'] == 'validation-rejected'
@@ -356,7 +382,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     assert issue['observed']['type'] == 'str'
     assert 'PRIVATE_REJECTED_CONTENT' not in evidence.read_text()
     assert 'CONTROLLED_NATIVE_REASONING_NOT_A_MODEL' not in evidence.read_text()
-    assert any(row['phase']=='reasoning-channel' and row['present'] and not row['retained'] for row in rows)
+    assert (any(row['phase']=='reasoning-channel' and row['present'] and not row['retained'] for row in rows) if case_provider=='local' else any(row['phase']=='provider-result' and row['provider']=='codex' for row in rows))
     with store.connect() as c:
         payload = c.execute(select(planning_jobs.c.payload).join(intakes).where(
             intakes.c.payload['title'].as_string() == cases[1]['request']['title'],

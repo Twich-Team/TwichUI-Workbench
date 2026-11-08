@@ -125,3 +125,17 @@ def test_large_bug_context_is_counted_before_any_generation(count,capacity,allow
             provider._infer(Transport(),'inert',BugPlanningResponse,context,expected_model='controlled')
         assert error.value.reason == 'context_budget'
         assert calls == ['count'] and provider.diagnostics['generation_state'] == 'not_started'
+
+
+def test_namespace_prelude_survives_function_pressure_and_new_current_reads():
+    from workbench.source_memory import retain
+    import copy
+    path='!!!TwichUI/Example.lua'
+    header='local R=Example\nlocal M={}\nR.Module=M'
+    item=dict(path=path,excerpts=[dict(line=1,text=header,coverage='module prelude')])
+    packet=dict(base='fixed',plan_review='source-grounded-lua-v1',files=[item],inspection_windows=[])
+    wire=copy.deepcopy(packet)
+    function=dict(path=path,line=5,text='function M.Read()\n'+'local many=1\n'*100+'end',context_rank=-200)
+    retain(wire,packet,[function],250)
+    visible='\n'.join(e['text'] for e in wire['files'][0]['excerpts'])
+    assert header in visible and wire['source_memory']['retained_characters']<=250

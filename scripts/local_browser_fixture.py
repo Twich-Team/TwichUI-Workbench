@@ -62,7 +62,7 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
         if codex_route:
             from workbench.codex_runtime import CodexRuntime
 
-            class SimulatedCodex(CodexRuntime, ControlledPreparer):
+            class SimulatedCodex(CodexRuntime, real_workspace.Runtime if native else ControlledPreparer):
                 def preflight(self):
                     return self.static_preflight()
 

@@ -130,14 +130,14 @@ def committed(path, base):
     return raw, item
 
 
-def search(base, query):
+def search(base, query, paths=None):
     root, actual, _ = source.repository()
     if actual != base:
         raise ValueError('The committed project changed during search.')
     bug.clean_base(root, base)
     result, scanned = [], 0
     inventory = source.git(root, 'ls-tree', '-rz', '-l', base, '--',
-                           '!!!TwichUI', 'TwichUI_Settings', 'tests', max_bytes=1 << 20)
+                           *(sorted(paths) if paths is not None else ['!!!TwichUI', 'TwichUI_Settings', 'tests']), max_bytes=1 << 20)
     for entry in inventory.split(b'\0'):
         if not entry:
             continue
@@ -225,12 +225,12 @@ def verify_packet(initial, supplied):
     return supplied
 
 
-def inspect(packet, requests):
+def inspect(packet, requests, *, disclosure_paths=None):
     total = 0
     windows, matches = [], []
     for index, request in enumerate(requests):
         if hasattr(request, 'query'):
-            found = search(packet['base'], request.query)
+            found = search(packet['base'], request.query, disclosure_paths) if disclosure_paths is not None else search(packet['base'], request.query)
             allowance = (6500-total)//max(1, len(requests)-index)
             for match in found:
                 if len(match['text']) > allowance:
@@ -239,6 +239,8 @@ def inspect(packet, requests):
                 allowance -= len(match['text'])
                 total += len(match['text'])
             continue
+        if disclosure_paths is not None and request.path not in disclosure_paths:
+            raise PlanningUnavailable('This investigation read needs additional source disclosure permission.', 'disclosure')
         try:
             raw, item = committed(request.path, packet['base'])
         except ValueError as error:
@@ -296,7 +298,7 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
         windows=[*windows,*priority]
         wire['selected_source_interface']=interface
         wire['requested_behavior_clauses']=[s.strip() for s in re.split(r'(?<=[.!?])\s+',original['description']) if s.strip()][:12]
-    retain(wire, packet, windows, (32000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
+    retain(wire, packet, windows, (36000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
            -sum(len(m['text']) for m in (matches or [])))
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
@@ -312,6 +314,8 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
 def generate(adapter, initial, original, feedback, should_stop, expected_model, *, engine=None):
     """One claim/provider/deadline, distinct durable receipts and shared usage."""
     packet = copy.deepcopy(initial)
+    if callable(getattr(adapter, 'bind_source', None)):
+        adapter.bind_source(initial)
     schema, wire = bug.planning_request(packet, original, feedback)
     review_required = initial.get('plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1'}
     investigating = initial.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'}
@@ -339,7 +343,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         from workbench.investigation_memory import seed
         packet, remembered, predecessor = seed(packet, original, parent.identifier, engine)
         if remembered:
-            if initial.get('plan_review') == 'source-grounded-lua-v1':
+            if initial.get('plan_review') == 'source-grounded-lua-v1' and getattr(adapter, 'reuse_review_lessons', True):
                 from workbench.investigation_memory import review_lessons
                 lessons = review_lessons(predecessor, engine)
                 if lessons:
@@ -420,7 +424,9 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         values = usage.get('values') if isinstance(usage, dict) else None
         if (isinstance(values, dict) and all(type(values.get(k)) is int and values[k] >= 0
                 for k in ('prompt_tokens', 'completion_tokens', 'total_tokens'))
-                and values['prompt_tokens']+values['completion_tokens'] == values['total_tokens']):
+                and (values['prompt_tokens']+values['completion_tokens'] == values['total_tokens']
+                     or getattr(adapter, 'source_investigation', False) and
+                     values['prompt_tokens']+values['completion_tokens'] <= values['total_tokens'])):
             receipts.append(usage)
             return True
         return False
@@ -456,6 +462,9 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     corrective=bool(wire.get('validation_feedback')),
                     request_number=index+1,requests_after_this=REQUESTS-index-1)
             response_added = False
+            if getattr(adapter, 'source_manifest', None) is not None:
+                wire['external_source_scope']=dict(paths=sorted(adapter.source_manifest),
+                    note='Searches and follow-up disclosure are restricted to these selected committed files. Outside reads hold for new source permission.')
             if lessons:
                 wire['prior_rejected_plan_feedback'] = lessons
             try:
@@ -569,7 +578,9 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 if (facts and index+1 < REQUESTS and stamp not in rejected
                         and diagnostics.get('generation_state') == 'finished'
                         and diagnostics.get('accounting_state') == 'complete'
-                        and diagnostics.get('finish_reason') == 'stop'):
+                        and (diagnostics.get('finish_reason') == 'stop' or
+                             getattr(adapter, 'source_investigation', False) and
+                             diagnostics.get('completion_state') == 'completed')):
                     rejected.add(stamp)
                     wire['validation_feedback'] = facts
                     continue
@@ -602,7 +613,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                              else dict(path=r.path, start=r.start, end=r.end) for r in draft.inspection])
             if index+1 == REQUESTS:
                 raise PlanningUnavailable('The bounded investigation needs more source inspection.', 'inspection_limit')
-            windows, matches, chars = inspect(packet, draft.inspection)
+            windows, matches, chars = (inspect(packet, draft.inspection, disclosure_paths=adapter.source_manifest)
+                if getattr(adapter, 'source_manifest', None) is not None else inspect(packet, draft.inspection))
             if evidence:
                 evidence.record('source-read-result',characters=chars,search_matches=len(matches),
                     windows=[{key:value for key,value in window.items() if key!='text'} for window in windows])
@@ -629,11 +641,13 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                    or not response_added and current.get('generation_state') != 'not_started')
         summed = {k: sum(r['values'][k] for r in receipts)
                   for k in ('prompt_tokens', 'completion_tokens', 'total_tokens')}
+        if receipts and all('reasoning_tokens' in r['values'] for r in receipts):
+            summed['reasoning_tokens']=sum(r['values']['reasoning_tokens'] for r in receipts)
         diagnostics.update(current, investigation_requests=len(receipts), source_read_chars=read_chars)
         if review_required:
             diagnostics['plan_self_review_rounds'] = review_rounds
         if receipts and not unknown:
-            diagnostics['usage'] = dict(source='local llama.cpp investigation responses', units='tokens',
+            diagnostics['usage'] = dict(source=getattr(adapter, 'usage_source', 'local llama.cpp investigation responses'), units='tokens',
                 values=summed, requests_observed=len(receipts), max_request_completion_tokens=max(
                     r['values']['completion_tokens'] for r in receipts), status='complete')
             if current.get('generation_state') != 'partial':

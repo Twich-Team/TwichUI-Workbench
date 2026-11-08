@@ -418,7 +418,7 @@ def test_codex_before_generation_fallback_can_complete_local_source_followups(
     enable_bugs(monkeypatch)
     save_codex_policy(store, both=True)
 
-    def unavailable(*args):
+    def unavailable(*args, **kwargs):
         raise codex_provider.Hold('unavailable')
 
     monkeypatch.setattr(codex_provider, 'generate', unavailable)

@@ -1,3 +1,97 @@
+# Current: Codex source permission recorded; shared bug path verified offline
+
+Owner disclosure permission is in OWNER_SOURCE_DISCLOSURE_20261108.md and authority;
+no duplicate permission required. Installed remains700e8b1/settled191rows/29history;
+no realCodexturn/flightimplementation/providercasepass yet. Qwen27 safelysettled.
+
+Current source fixes generic coherent source retention and operational Codex shared
+investigation/plan/selfcheck with exact path/hash/excerpt disclosure binding and v8
+consent. Actual191COPY wire proof C/codex-bug-wire-proof.json:88864inputbytes, nine
+approvedpaths, namespace/prelude/statewriter/helper/registration/consumer retained,
+no externalturn/liveDBwrite. No developer flightfix orfixtureanswer.
+
+Static/build/contracts pass C/codex-bug-final-check-v2.log;126terminal/privacy/limits/
+source/provider tests pass codex-bug-terminal-focused.log. Native separateAPIworker/
+normalbrowser program-mode Qwen+Codex controlled journeys now BOTH PASS (50.88s,
+codex-bug-native-v4.log), two unrelated checked repairs each, concurrent reads,
+malformed/conflicting outputs, semantic rejection/correction and process restarts.
+Controlled results are NOT real acceptance. Earlier native failures preserved:
+stalefrontend first, then actual Codex terminal accounting classification missing
+blocked correction; fixed completed-turn marker separate from Qwen finish_reason.
+Partial/uncertain turns still cannot renew. Last failure was test-only incomplete
+provider route missing policyrevision/fallback; use actual saved reviewed binding,
+not weakening runtime route check. NativeCodex now uses real confined checks.
+
+Full final backend/frontend suite and legacy native/browser opt-ins running before
+activation; do not claim completion yet. Prepare revision29/controller28: previous700,
+original79/latest191, roots87,25priorIDs including5f19cdf2. Frozen bug choice Codex-only,
+same9read/6eligiblewrite/3criteria. Verify source isolation AST unchanged except
+boundedgenerateinput; auth/pinnedCLI/network unchanged. Deployment only after final
+checks/inventory/seal and strict current history/preflight. Then REAL Codex bug first,
+normaldelegated plan/run and independent behavioral review, not anotherQwenrenewal.
+Standing authority continues complete realrepair/provider4/restart/nextbug/product;
+no ownerdecision pending. No arbitrary campaign cap or checkpoint stop.
+
+# Current: Qwen27 safely settled; Codex-only bug integration in development
+
+Owner November8 changes investigation order: next REAL run must be Codex-only on
+actualflightreport, then continue Qwen/provider4/realrepair/restart/nextordinarybug/
+remainingproduct. No ownerdecision pending. The owner EXPLICITLY authorized external
+report/relevant excerpts/followups from ninefiles at1caf530; exactpermission in
+OWNER_SOURCE_DISCLOSURE_20261108.md and updatedDELIVERY_OUTCOME_AUTHORITY_20261107.md.
+Do not request duplicate disclosure approval. SupportingCodexcases remain separately
+limited; billing/write/network/publication constraints unchanged. No source sentyet.
+
+Installed remains700e8b1. Qwen27 canceled safely throughnormal provider-disablecontrol,
+then supportedhelperstop/canonicalsettlement. Six complete stop responses21624gen/
+120037prompt; seventhunknownfinalusage capped6144separately. Exact125562idle twice,
+R=C/outcome-700e8b1/stopped-local-reconciliation.json andattempt-27-accounting.json.
+Allsettings/model/network restored, policyrevision6,4rolesactive/disabled. Current
+191rows/schema0012/28tables SHA ec01f25da5661691c90c361c7690c790807bee612dd233e49c95b2b7afa3ca22,
+29historyentries. Never forward185over191. Ledger89starts/86completeusage/85stop/
+1partial/3unknown,120689generated/943421prompt. Unknown17max2600/26max6144/27max6144
+are notactualusage. No execution uncertainty remains. No flightimplementation,
+independentrealbehaviorpass or realprovidercasepassed. Preserve all oldstores/evidence.
+
+Verified actualsharedcontextdefect:191/185copy serialization retained TV.Flights and
+TV.Request but dropped R.NavTravel=TV. Flightset IS a booleanmap (earlier developer
+suspicion of wrongtype wasincorrect). Genericcoherencecorrection pins modulepreludes,
+related enclosing declarations/statewriterfunctions/registrations andtwo-levelcallees,
+not a specialcase forflightalias.36kprogramsourcecontext, same128kread/64windows/
+6144completion/local32768context exacttokencheck. No sourceexecution oraddonanswer.
+Controlled late-declaration/helper/statewriter/registration test added. Initial
+namespaceproof C/module-context-before.json and correctedactual191proof preserved;
+further Codexexactwire proof and integrated/native checks pending forfinalcode.
+
+Operational Codexbugpath gaps found BEFORElivecall: oldone-turn route skippedshared
+sourcefollowups/selfreview;24kinputbound couldnotcarrysource. Uninstalled integration
+uses same source/diagnosis/program/selfcheck path, retained sourcefacts ONLY (no Qwen
+plan/critique), with Codex adapter. Input196608 separatelybounded; output24000 and
+observedpostturn32768 guard unchanged. Source path/hash/exactline binding prevents
+newprivatefile/searchmatch disclosure; searches scopedto nineinitialfiles. Auth/
+isolation/featuresoff/accountgates unchanged. Newbugconsent8:8sharedWorkbenchturns,
+local6144output/300request, Codex120request,1800whole/45minexpiry. InternalCodexretries
+andobservedusageare nothardper-providerrequest/token guarantees. Oldconsents1–7/
+canonicalreceipts preserved. GUI/driver/casebuilder reflectfreshCodexonlyselection.
+Codeximplementation sourceinputbound widenedonlybug path, sameexact-replacement/
+independentverification/nopublication/writecontract. No CodexturnorAPIkeyused.
+
+198integratedcontrolled tests pass (codex-bug-integrated-v2.log,1browseroptinskip),
+additionalcoherence/v8 tests andfullcandidate verification ongoing. Do notdeploy
+unverifiedwork. Need currentfullbackend/frontend/static, nativeQwen+controlledCodex
+separateprocess browser journeys exercising sharedpath, connectorlargeinput/nooutput
+expansion/privacy/cancel/accounting controls. Existing broadunchangedbrowser/admin
+proofs retainpreciselineage. No repetitivefullsuite per smallfix. Save finalsource/
+inventory/seal/tests before authorizedrevision29/controller28; previous700, forward191/
+original79, roots87, append5f19cdf2 to24priorIDs=25. Stagebug_input codex-once; source
+policycomparemust explicitly allowonlyprovider/model/requestchoicechange plus fresh
+bindings, preserving3criteria/9reads/6eligiblewrites/sourcebase. CodexProvider code
+changed onlyadapter/inputhandling: compare unchanged command/app_server authisolation
+blocks before refreshing protected-runtime metadata proof wholefilehash. Newprovider
+case must go throughnormaldriver, notdev-writtenaddonpatch. Keep allrealgates.
+
+Below is historical state, not activeQwenexecution.
+
 # Current installed revision28 / ACTIVE real27 — supersedes pending identity below
 
 S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-700e8b1;

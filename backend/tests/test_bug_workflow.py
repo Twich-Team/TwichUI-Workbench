@@ -176,10 +176,10 @@ def test_ordinary_report_reproduces_and_returns_checked_patch(
         original['local_planning'] = 'codex-once'
         monkeypatch.setattr(codex_provider, 'connector_path', lambda: Path('/controlled-connector'))
 
-        def generate(model, effort, prompt, schema, stop):
+        def generate(model, effort, prompt, schema, stop, **kwargs):
             assert model == 'simulated-codex' and effort is None and not stop()
             provider_calls.append(prompt)
-            usage = dict(total_tokens=120, input_tokens=100, output_tokens=20, cached_input_tokens=0, reasoning_output_tokens=0)
+            usage = dict(total_tokens=120, prompt_tokens=100, completion_tokens=20, reasoning_tokens=0)
             if 'Untrusted task data:' in prompt:
                 return response(client_case, bootstrap=True), usage
             assert schema['properties']['edits']['items']['properties']['path']['enum'] == [CLIENT_SOURCE, CLIENT_TEST]

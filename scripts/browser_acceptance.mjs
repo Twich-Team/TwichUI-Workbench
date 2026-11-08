@@ -227,7 +227,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
     }
     await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
     const local = candidate.request.local_planning.startsWith('qwen-');
-    await page.getByRole('checkbox', {name:local ? (bug ? /Allow local Qwen to investigate/ : /Allow one local Qwen request/) : /Allow one signed-in Codex turn/}).check();
+    await page.getByRole('checkbox', {name:local ? (bug ? /Allow local Qwen to investigate/ : /Allow one local Qwen request/) : (bug ? /Allow signed-in Codex to investigate/ : /Allow one signed-in Codex turn/)}).check();
     if (candidate.reason) await page.getByRole('checkbox', {name:local ?
       /Allow one switch to signed-in Codex/ : /Allow one switch to local Qwen/}).check();
     const capacity = async () => {

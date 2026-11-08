@@ -66,3 +66,45 @@ def test_changed_interface_hash_is_not_used(monkeypatch):
     monkeypatch.setattr(source,'committed',lambda *a:(b'return {}',dict(sha256='changed')))
     with pytest.raises(ValueError,match='changed'):
         context(packet,dict(title='A bug',description='An ordinary report.'))
+
+
+def test_related_context_keeps_late_state_declarations_callees_writers_and_registration(monkeypatch):
+    from workbench.source_interface import surrounding
+    path='!!!TwichUI/Example.lua'
+    text='local Root=Example\nlocal M={}\nRoot.Module=M\n'
+    text+='\n'.join(f'function M.Noise{i}() local inside=99; return inside end' for i in range(20))+'\n'
+    text+='''local prefix="note:"
+local current="before"
+local function Finish(v) return prefix..v end
+local function Render(v) return Finish(v) end
+function M.Whisker() return Render(current) end
+function M.Refresh(v)
+ current=v
+end
+Root.On("VISIT",function(_,v)
+ M.Refresh(v)
+end)
+'''
+    raw=text.encode()
+    declarations=surrounding(raw)
+    assert not any('inside' in r['names'] for r in declarations)
+    assert any('Root.On' in r['text'] and 'M.Refresh' in r['text'] for r in declarations)
+    monkeypatch.setattr(source,'committed',lambda p,b:(raw,dict(sha256='fixed')))
+    packet=dict(base='fixed',plan_review='source-grounded-lua-v1',files=[dict(path=path,sha256='fixed',
+        excerpts=[dict(line=1,text='local Root=Example')])])
+    def inspect(packet,requests):
+        windows=[]
+        for r in requests:
+            w=dict(path=path,sha256='fixed',line=r.start,through_line=r.end,
+                   text='\n'.join(text.splitlines()[r.start-1:r.end]))
+            windows.append(w)
+        packet.setdefault('inspection_windows',[]).extend(windows)
+        return windows,[],sum(len(w['text']) for w in windows)
+    monkeypatch.setattr(source,'inspect',inspect)
+    priority,_=context(packet,dict(title='Whisker stale',description='Whisker should refresh.'))
+    wire=dict(files=copy.deepcopy(packet['files']))
+    retain(wire,packet,priority,1500)
+    visible='\n'.join(w['text'] for w in wire['files'][0]['excerpts'])
+    for required in ['Root.Module=M','local prefix=','local current=', 'function Render', 'function Finish',
+                     'function M.Whisker','function M.Refresh','Root.On("VISIT"']:
+        assert required in visible,required

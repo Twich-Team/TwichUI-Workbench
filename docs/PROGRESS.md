@@ -1,3 +1,16 @@
+# November8: shared Codex bug path and bounded source context
+
+Owner authorized nine-file committed external flightcontext for Codex-only journey;
+recorded in OWNER_SOURCE_DISCLOSURE_20261108.md/authority. No source sentyet.
+Generic coherence and shared Codex investigation/plan/selfcheck implemented. Actual
+191rowCOPY wire proof passes.126focused/static pass; separateAPIworker/browser
+program-mode native Qwen+Codex both pass two unrelated checked repairs/restarts.
+Found/fixed actual terminal classification difference before live calls; preserved
+partial/uncertain hold. Incomplete route in controlled fixture corrected to actual
+saved binding. Full final/backend/frontend and extra opt-ins pending. Installed700
+and real outcome unchanged: no flightimplementation/checkedrepair/0of4providercases.
+Continue verified deployment then actual Codex-only bug, full remaining outcome.
+
 # Owner reassessment — November8,2026
 
 Task20 settled without repair; source/citation corrections worked, but the complex
@@ -7053,3 +7066,16 @@ Real27 intake55c28bbd-d071-4c86-b407-570881a75fb0/model5f19cdf2-232b-4d0c-8cfc-0
 firstactualfreshconstruction fromverifiedobjections/source WITHOUTrejectedprogram
 orcriticreplay.103882processing/6144bound03:38:14Z. No implementation/realfix/provider
 pass yet. Continue actualjourney; no ownerdecision orcampaigncaps reinstated.
+
+## November8 — owner directs real Codex bug comparison and permits scopedsource
+
+Qwen27 settled viaapp providerdisable/supporthelper/canonicalexact125562idle6144.
+Sixcomplete21624gen/120037prompt; seventhunknownfinalusage6144maxseparate.191rows/
+29entries retained/settingsrevision6 restored/network/modelactive. No repairpass.
+Actualnamespacecontextloss reproduced; fix nowgenericdecls/statewriters/registrations/
+two-levelcallees/modulepreludes. Booleanflightmaptype isvalid; earlier suspicionwrong.
+Ownerexplicitly supersededQwen-onlysource restriction forCodex-onlyreport/ninefiles
+at1caf530; exactnewpermission saved inOWNER_SOURCE_DISCLOSURE_20261108.md/authority.
+No duplicatepermissionrequest. SharedCodexbuginspection/review/input-size integration
+beingimplementedoffline beforelivecomparison.198controlledaffected pass; final
+proofs/native/fullverification pending. No Codexturn orsource transmission yet.

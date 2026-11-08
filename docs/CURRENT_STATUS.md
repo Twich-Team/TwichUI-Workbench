@@ -1,33 +1,32 @@
-# Current delivery status — November 8, 2026
+# Current delivery status — November8,2026
 
-Following the Project Working Philosophy: no independently checked real flight-path
-repair, implementation turn or Codex turn;0/4real provider cases passed. Full product
-scope remains required. No owner decision or unavailable access currently needed.
+Following the Project Working Philosophy: no realflightimplementation/checkedrepair
+or realprovideracceptancepass. Fullscope remains. Owner directs next actualbug run
+throughCodex, thenallremainingprovider/Qwen/recovery/subsequenttask requirements.
 
-Installed700e8b1 preserves originalhistory/recovery and185currentrows/28entries,
-approvedloopback/home-LAN/internal/browser protections. Four servicesactive/disabled.
-Real26 stopped safely; allsettings/model/network restored. Threefinishedresponses
-10496generated/59946prompt; canceled fourthfinalusage unknown,6144max separate.
-No uncertain execution remains, no partialoutput reused. No addon installed.
+Qwen27 safely stopped. Sixcomplete responses21624gen/120037prompt; canceledseventh
+finalusageunknown/6144max separate. Allproviderchoices/model/LAN restored;191rows/
+29historyentries preserved. Installed700e8b1 stillrunning,4rolesactive/disabled.
+No externalexecutionuncertainty. No liveCodexturn/source transmission yet.
 
-Live critique now worked and identified meaningful flaws, but freshgeneration copied
-identical rejected observations while changingreadpaths. That was not convergence.
-Installed corrective code omits rejected program bodies and rejects identical behavior despite
-read/prose changes before another review. Retains matched verified objections and
-current source, directly constructs fresh proposal. All normal approval/check gates
-remain. Actual185copy/tokenizer proof19725tokens/no-generation and local replay of
-realcopiedoutput confirm new guard.172focused and newnative32.58sec615.5MiB two
-controlledrepairs/selfreviewrejection/freshconstruction/concurrency/restarts pass;
-staticbuild/contracts pass. Checked deployment passed allprotection/historygates; changed real27 nowactive. Frozen
-full1484backend/25frontend belongs to installeda592; unchanged evidence reused.
+The owner explicitly authorized Codex-only flightreport/relevantsource/followups from
+ninecommittedfiles at1caf530. Recorded in[ownerdecision](OWNER_SOURCE_DISCLOSURE_20261108.md)
+and[authority](DELIVERY_OUTCOME_AUTHORITY_20261107.md). No furtherdecisionneeded for
+thatdisclosure. Billing/write/publication/network safeguards unchanged.
 
-Active real27 firstrequest actually constructs from verified objections/current
-source without rejectedcode. Model103882processing/6144limit03:38:14Z. No replay
-whileactive; freshplan/selfcheck/independentreview/normalplanrun/behavioralchecks
-still required. No new completionclaimed.
+Verifiedcontextloss droppednamespacebinding while retainingmethods. Correctinggeneric
+module/dependency/statewriter/registration/callercontext, notinjectingflightanswer.
+Codexbugroutealso lacked sharedinspection/selfreview andhad24kinputceiling. Connected
+uninstalledintegration repairs both; sourcebindinglimits externaldisclosure, same
+account/isolation/output/postusage safeguards. Freshv8consent binds8sharedturns and
+operationdeadlines; actualproviderinternalretry/token ceiling notguaranteed.
 
-Known SETTLED PRE27 totals82Qwen requests/80complete usage/79stop/1partial/2unknown,99065generated/
-823384prompt. Unknowncompletion maxima2600+6144 separate, neveractualusage/cost.
-Completed-real-resultrestart/nextordinarybug/provideracceptance/broadercapabilities
-remain unproven. No API/extra-credit spending, publication, public exposure orlive
-addon change. Continue under standing authority; [CONTINUATION](CONTINUATION.md).
+Actual191-copy Codex wire proof passes:88864bytes, approved9sourcepaths, coherent
+module/state/dependency context, no source transmission. Native separate-process
+Qwen+Codex controlled browser journeys both pass, including independently checked
+unrelated repairs/restarts.126terminal/provider/privacy/limits tests and static/build
+pass. Full final suites plus legacy/browser opt-ins running beforedeployment. Existingfull1484backend/25frontend baseline remains
+validforunchangedcode only. Controlledtests are notrealprovider evidence. Next:
+verifiedcandidate/install, realCodexbugjourney withfreshnormalbindings/independent
+review andbehavioralchecks. No developer addonfix, liveaddoninstallation orpublication.
+Broader capabilities remainunfinished. Exactcontinuity:[CONTINUATION](CONTINUATION.md).
