@@ -151,7 +151,7 @@ def test_explicit_requested_body_survives_higher_scoring_inferred_context():
                    coverage='requested committed lines')
     inferred=dict(path=path,line=40,text='local unused = 1\n'*100,context_rank=-200)
     wire=copy.deepcopy(packet)
-    retain(wire,packet,[requested,inferred],budget=100)
+    retain(wire,packet,[requested,inferred],budget=100,requested=[requested])
     assert requested_visibility(wire,[requested])==[dict(path=path,line=20,through_line=22,provided=True)]
     assert any('local Module = {}' in e['text'] for e in wire['files'][0]['excerpts'])
     assert wire['source_memory']['retained_characters']<=100
@@ -164,3 +164,17 @@ def test_outgoing_visibility_guard_holds_instead_of_repeatedly_claiming_an_omitt
     with pytest.raises(PlanningUnavailable) as held:
         requested_visibility(dict(files=[dict(path=request['path'],excerpts=[])]),[request])
     assert held.value.reason=='context_budget'
+
+
+def test_cached_requested_windows_are_not_all_treated_as_newly_requested_output():
+    from workbench.source_memory import requested_visibility
+    path='!!!TwichUI/Example.lua'
+    old=dict(path=path,line=1,through_line=200,text='old context\n'*200,
+             coverage='requested committed lines')
+    new=dict(path=path,line=300,through_line=301,text='local ready = true\nreturn ready',
+             coverage='requested committed lines')
+    packet=dict(base='fixed',files=[dict(path=path,excerpts=[])],inspection_windows=[old])
+    wire=copy.deepcopy(packet)
+    retain(wire,packet,[old,new],budget=100,requested=[new])
+    assert requested_visibility(wire,[new])[0]['provided']
+    assert wire['source_memory']['omitted_characters']>0

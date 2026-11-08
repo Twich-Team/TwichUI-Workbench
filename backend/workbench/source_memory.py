@@ -1,9 +1,10 @@
 """Keep exact committed lines across otherwise stateless model requests."""
 
 
-def retain(wire, packet, current, budget=24000):
+def retain(wire, packet, current, budget=24000, *, requested=()):
     lines, priority = {}, {}
     by_path = {item['path']: item for item in wire['files']}
+    fresh = {(w['path'],w['line'],w['through_line']) for w in requested}
 
     def add(path, excerpt, rank):
         for offset, text in enumerate(excerpt['text'].splitlines()):
@@ -25,8 +26,8 @@ def retain(wire, packet, current, budget=24000):
         # Explicit completed reads must survive inferred function/dependency
         # context. Otherwise the provider asks again for code we read locally
         # but repeatedly evict before the next stateless request.
-        requested = excerpt.get('coverage') in {'requested committed lines','partial requested committed lines'}
-        add(excerpt['path'], excerpt, -20000 if requested else
+        immediate = (excerpt['path'],excerpt['line'],excerpt.get('through_line')) in fresh
+        add(excerpt['path'], excerpt, -20000 if immediate else
             -10000 if excerpt.get('coverage') == 'complete committed test bootstrap' else excerpt.get('context_rank',0))
     chosen, used = {}, 0
     for key in sorted(lines, key=lambda key:(priority[key], key[0], key[1])):

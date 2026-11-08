@@ -289,7 +289,7 @@ def inspect(packet, requests, *, disclosure_paths=None):
     return windows, matches, total
 
 
-def next_wire(packet, original, feedback, windows, finding, matches=None, *, programs=()):
+def next_wire(packet, original, feedback, windows, finding, matches=None, *, programs=(), requested=()):
     _, wire = bug.planning_request(packet, original, feedback)
     from workbench.source_memory import retain, requested_visibility
     if packet.get('plan_review')=='source-grounded-lua-v1':
@@ -299,13 +299,13 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
         wire['selected_source_interface']=interface
         wire['requested_behavior_clauses']=[s.strip() for s in re.split(r'(?<=[.!?])\s+',original['description']) if s.strip()][:12]
     retain(wire, packet, windows, (36000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
-           -sum(len(m['text']) for m in (matches or [])))
+           -sum(len(m['text']) for m in (matches or [])), requested=requested)
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
              'a repeated range advances past a contiguous previously returned prefix when unread lines remain. '
              'requested_start_line preserves the request and cached_prefix_through_line identifies that exact prior prefix. '
              'omitted ranges do not establish absence. No addon change or behavioral result has been produced.')
-    wire['inspection_result']['visible_requested_windows'] = requested_visibility(wire, windows)
+    wire['inspection_result']['visible_requested_windows'] = requested_visibility(wire, requested)
     if matches is not None:
         wire['inspection_result']['search_matches'] = matches
         wire['inspection_result']['search_limit'] = 'At most twelve literal matches; not an exhaustive absence proof.'
@@ -631,7 +631,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 read_chars += chars
             if read_chars > limit:
                 raise PlanningUnavailable('The investigation reached its source-read bound.', 'inspection_limit')
-            wire = make_wire(packet, original, feedback, [*windows, *bootstrap_priority], draft.finding, matches)
+            wire = make_wire(packet, original, feedback, [*windows, *bootstrap_priority], draft.finding, matches,
+                             requested=windows)
             if bootstrap_fact:
                 wire['committed_bootstrap_context'] = bootstrap_fact
             if diagnosis:

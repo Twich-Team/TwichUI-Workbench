@@ -1,3 +1,19 @@
+## November8 — cached-read distinction and zero-generation accounting verified
+
+Real31 failed before any model request: outgoing-visibility guard incorrectly pinned
+all old cached reads. Original207-row history and NULL raw usage preserved. Separate
+content-bound audit proves0turns, not unknown usage converted to zero. Codex totals
+remain12starts/10complete/2historical unknown, known318975tokens. No implementation.
+
+Correction pins only the immediate requested response; cached reads may be honestly
+omitted. Actual84kcache replay reaches all requested text at same36kbudget, no provider
+or live write. Planner/finisher distinguish non-dispatch from uncertain generation;
+admission recognises verified0and historical audit without rewriting records. Unknown
+usage cannot pass that path.200focused plus API no-generation test/native17.69s and
+full1584backend/25frontend/static pass. No owner question/campaign gate. Next checked
+207-row cutover and genuinely corrected fresh task32, preserving all scopes/billing/
+network/approval/recovery/publication protections. Full functional outcome unfinished.
+
 ## November8 — standing recovery installed and exercised; actual context eviction identified
 
 Owner's independent standing recovery policy applied without treating the proposal

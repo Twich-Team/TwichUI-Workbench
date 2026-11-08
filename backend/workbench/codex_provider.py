@@ -1176,7 +1176,8 @@ class Planner:
     def __init__(self, selection, stop):
         import threading
 
-        self.selection, self.stop, self.diagnostics = selection, stop, {}
+        self.selection, self.stop = selection, stop
+        self.diagnostics = dict(generation_state="not_started")
         self.stop_event = threading.Event()
         self.ends_at = None
         self.response_evidence = None

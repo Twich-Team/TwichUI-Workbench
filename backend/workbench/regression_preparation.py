@@ -642,6 +642,8 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                          or intake.human_scope(c, original['id']) != scope)
         if failure:
             category, detail = failure
+            if category == 'context_budget':
+                detail = 'Workbench held source preparation before sending this request because the required context did not fit.'
             diagnostics = {k: v for k, v in getattr(adapter_used, 'diagnostics', {}).items()
                            if k != 'usage'}
             diagnostics['category'] = category

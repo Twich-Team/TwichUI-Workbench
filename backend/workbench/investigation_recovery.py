@@ -283,6 +283,78 @@ def recover_one(engine):
     return False
 
 
+def no_generation_accounting(connection, identity):
+    """A planning claim is not a model turn. Never reinterpret an unknown turn as zero."""
+    [a] = rows(connection, "SELECT * FROM model_attempts WHERE id=?", (identity,))
+    [j] = rows(connection, "SELECT * FROM planning_jobs WHERE id=?", (a["job_id"],))
+    [i] = rows(connection, "SELECT * FROM intakes WHERE id=?", (a["task_id"],))
+    require(
+        a["source"] == "workbench"
+        and a["backend"] == "codex"
+        and a["purpose"] == "planning"
+        and a["finished_at"]
+        and j["status"] == "failed"
+        and j["lease"] is None,
+        "Not a stopped pre-generation claim",
+    )
+    payload = strict_json(j["payload"])
+    zero = dict(prompt_tokens=0, completion_tokens=0, reasoning_tokens=0, total_tokens=0)
+    if a["usage"] not in (None, "null"):
+        usage = strict_json(a["usage"])
+        require(
+            usage.get("status") == "not_started"
+            and usage.get("units") == "tokens"
+            and type(usage.get("requests_observed")) is int
+            and usage["requests_observed"] == 0
+            and usage.get("values") == zero
+            and all(type(value) is int for value in usage['values'].values())
+            and payload.get("diagnostics", {}).get("generation_state") == "not_started"
+            and a["outcome"] != "interrupted_unknown",
+            "No verified zero-dispatch accounting",
+        )
+    else:
+        # One audited local context failure predates the explicit nonstart record.
+        # Preserve its NULL historical usage; expose the independently verified
+        # application fact separately. It never reached the provider loop.
+        require(
+            identity == "8a477e53-0a61-4995-922e-d389d3d679b8"
+            and digest(dict(attempt=a, job=j, intake=i))
+            == "97d63357fce5316c342837aea6d47d6edd440295fd280f98c2238ac61af5b18d"
+            and a["outcome"] == "failed"
+            and payload.get("diagnostics", {}).get("category") == "context_budget",
+            "Historical generation absence is not established",
+        )
+        stage = HISTORICAL_ROOT.parent / "everyday-outcome-0cb1432"
+        for path, sha in {
+            "backend/workbench/bug_source_planning.py": "63d02f6a36a36d7b47ee90699dbf5e8693281c78c647005b12d20c7fdf538dc3",
+            "backend/workbench/source_memory.py": "44a075573a15b697d85e3f42ac91d55a4d80323b4839d742490ef193d5c2f462",
+            "backend/workbench/regression_preparation.py": "8596888014aec227db43d65f0557e5daccf00cd12907d5fb5763848f862a573e",
+        }.items():
+            require(
+                hashlib.sha256((stage / "release" / path).read_bytes()).hexdigest() == sha,
+                "Historical pre-dispatch code changed",
+            )
+        evidence = (
+            stage / "release/artifacts/runs" / ("planning-evidence-" + identity) / "events.jsonl"
+        )
+        events = private_json(evidence, lines=True)
+        require(
+            not any(
+                e.get("phase") in {"request-schema", "provider-result", "request-stopped"}
+                for e in events
+            )
+            and not list((stage / "artifacts/codex-evidence").glob("*.jsonl")),
+            "Historical provider activity is not absent",
+        )
+    return dict(
+        kind="verified-no-generation-v1",
+        requests_started=0,
+        known_completed_values=zero,
+        historical_binding=digest(dict(attempt=a, job=j, intake=i)),
+        original_records_unchanged=True,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("database", type=Path)

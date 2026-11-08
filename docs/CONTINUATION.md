@@ -1,3 +1,38 @@
+# Latest: cached-read guard corrected; known non-dispatch accounted separately
+
+Installed0cb1432 passed1578backend/25frontend/static/native and checked203-row cutover.
+Latest history is now207 after one new FAILED LOCAL CLAIM. Original stores preserved.
+No real implementation or required provider case complete. No owner question pending.
+
+Real31intake90e80b53-9ea2-4ab8-8cf3-39450dcb5af3,
+model8a477e53-0a61-4995-922e-d389d3d679b8,
+jobfd6021c6-c419-4c0f-b681-5317450a50f8 stopped in6seconds BEFORE ANY PROVIDER REQUEST.
+The visibility guard mistakenly treated all cached reads as freshly requested, causing
+initial context hold. No Codex journal/model turn/partial output/approval/implementation.
+Original NULL usage row unchanged. R/attempt-31-accounting.json binds full historical
+triple SHA97d63357fce5316c342837aea6d47d6edd440295fd280f98c2238ac61af5b18d,
+audited actual pre-loop source path and private evidence; independently proves0turns.
+Codex global totals remain12starts/10complete/2historical unknown, known318975tokens.
+This is known non-dispatch, NOT a quarantine or unknown-usage zero substitution.
+
+Connected fix now passes full applicable suites (see C/context-nonstart-full-tests.log:1584backend/25frontend),
+200focused plus API no-generation case and native17.69s, build/static. Explicit
+requested=windows applies ONLY to the immediate read response; cached source remains
+honest bounded context. Planner starts in not_started state; finisher records verified
+zero-dispatch accounting separately. Admission recognises typed no-start records and
+one content-bound audited older claim without rewriting history. Unknown turns cannot
+become zero. Source preparation hold now explains local phase in the normal app.
+C/cached-context-actual-replay-v3/proof.json exercises actual84304-character cache,
+same36koutgoing budget, two controlled source-only responses, all current ranges
+visible, no model calls/live writes/plan/patch. C/requested-source-actual-wire-proof-v2
+.json retains actual prompt omission/correction proof. Do not repeat the old guard.
+
+Next: seal final correction, checked207-row cutover, exact old/standing quarantine
+receipts, normal admission +33history reads; fresh normal task32,revision35,99roots,
+add8a477e53 to priorIDs (29total). Continue real checked repair/provider4/result restart/
+next ordinary bug and broader outcome. No old campaign caps or another owner exception.
+Older lower sections preserve historical observed states; latest block governs.
+
 # Current handoff — November 8, 2026, real30 settled; requested-source correction
 
 Following the Project Working Philosophy: delivery is unfinished. No real flight-path
@@ -11,14 +46,14 @@ receipts. They are historical, not competing current instructions.
 
 ## Installed correction and evidence
 
-Installed candidate fb392be13c7b743cd6ddc2660dd8f7221e67e3ec, tree
-9f60b1b2131987d7bf887560b02a596421322bb8, seal
-399147e8180bbc7252ae1267f488d8c9445527ec2e3b016fe566341ee0018b44.
+Installed candidate 0cb1432b2fdee8f6701a85f5e92153b15858c4ae, tree
+35cf6825baac88ca94b7f370ca40c4eab7cb023d, seal
+32b53802daf5fb96b432827aeb3a4f07925757befdc0d5961bb2dce2183da097.
 C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a
-R=C/outcome-fb392be
-S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-fb392be
+R=C/outcome-0cb1432
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-0cb1432
 Predecessor S_parent/everyday-outcome-cbcf8d0 and all recovery stores retained.
-R/offline-verification.json and deployment-33-verified.json bind exact verification,
+R/offline-verification.json and deployment-34-verified.json bind exact verification,
 seal, install, history, isolation, effective filters, TLS and browser boundaries.
 
 The standing recovery build passed1573backend/25frontend/static plus23final policy/
@@ -40,7 +75,7 @@ job20b31c53-5905-4f9d-bdb4-47d22f229f73. All8real Codex turns COMPLETED with fin
 usage/terminal receipts. They used the tagged wire successfully; source searches/
 reads and a diagnosis completed, but no plan/approval/implementation. Final local
 inspection_limit at diagnosis on eighth turn, not new external uncertainty.
-R/attempt-30-accounting.json and C/outcome-ledger.json preserve all usage. Aggregate
+C/outcome-fb392be/attempt-30-accounting.json and C/outcome-ledger.json preserve all usage. Aggregate
 Codex12starts/10complete/2olderunknown; known316893prompt/2082completion/662reasoning/
 318975total (reasoning included). Qwen unchanged. No completed case replayed.
 
@@ -58,7 +93,7 @@ context; namespace/test bootstrap remain preserved when within budget. New outgo
 text guard rejects a missing requested line before another provider request.
 82affected checks and native17.73s pass; full/static verification currently running.
 Do not renew unchanged request; finish verified source correction then new normal
-Codex task at futureattempt31/revision34, include real30 ID in prior list, preserve203.
+Codex task at futureattempt32/revision35, include real30 ID in prior list, preserve203.
 The obsolete source/formatter failures are independently classified, not generic
 planning failure. Existing bounds8shared turns/1800s remain operation controls.
 
@@ -137,8 +172,8 @@ per-attempt receipts. Do not request another covered quarantine exception. Prese
 historical SQLite records and exact old18 receipt. No actual pending owner decision.
 
 Then fresh same-provider Codex flight task via normal delegated browser, new consent/
-plan/run bindings. Next future attempt31/revision34 is not started; append45fc281a to prior IDs;
-next stage will have97evidence roots. Recreate old18 exact receipt if needed, never overwrite203rows.
+plan/run bindings. Next future attempt32/revision35 is not started; append45fc281a to prior IDs;
+next stage will have99evidence roots. Recreate old18 exact receipt if needed, never overwrite207rows.
 Do not repeat unchanged formatting failures; use fresh retained guard/terminal evidence.
 If needed replace provider formatting with supported app-owned read-only tool path,
 within approved source boundaries. Real evidence, not presumed model incapability.

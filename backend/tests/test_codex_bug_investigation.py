@@ -26,6 +26,29 @@ def enable(store, monkeypatch):
     )
 
 
+@pytest.mark.usefixtures('installed')
+def test_context_failure_before_transport_records_no_generation_and_can_be_renewed(
+    client,headers,store,monkeypatch,
+):
+    from workbench import bug_source_planning as source
+    from workbench.planning_transport import PlanningUnavailable
+    from workbench.investigation_recovery import no_generation_accounting
+    enable(store,monkeypatch)
+    def fail_context(*args,**kwargs):
+        raise PlanningUnavailable('Controlled context assembly hold.','context_budget')
+    monkeypatch.setattr(source,'next_wire',fail_context)
+    monkeypatch.setattr(codex_provider,'generate',lambda *a,**k:pytest.fail('Context failure reached a provider'))
+    identity=client.post('/api/intake',headers=headers,json={**report(),'local_planning':'codex-once'}).json()['id']
+    assert worker.tick(store)
+    item=client.get('/api/intake/'+identity).json()
+    assert item['status']=='failed' and not item['proposals'] and not item['tasks'] and not item['decisions']
+    with store.connect() as c:
+        attempt=c.execute(select(model_attempts).where(model_attempts.c.task_id==identity)).mappings().one()
+        assert attempt['usage']['status']=='not_started' and attempt['usage']['requests_observed']==0
+        assert no_generation_accounting(c,attempt['id'])['requests_started']==0
+    assert 'source preparation' in item['jobs'][0]['message']
+
+
 @pytest.mark.parametrize("consent_version", [8, 9])
 @pytest.mark.usefixtures("installed")
 def test_codex_uses_same_investigation_plan_and_review_before_normal_approval(

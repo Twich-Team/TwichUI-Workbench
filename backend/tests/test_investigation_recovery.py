@@ -140,3 +140,45 @@ def test_worker_recovery_and_normal_admission_need_no_repeated_owner_exception(e
         c, request, dict(choice="bug-flight-paths", provider="codex"), dict(outcome=OUTCOME)
     )
     assert list(c.iterdump()) == before
+
+
+@pytest.mark.parametrize("state", ["not_started", "uncertain", "finished"])
+def test_zero_turn_accounting_requires_a_verified_nonstart_and_never_erases_unknown(
+    eligible, state
+):
+    c, _, payload = eligible
+    payload["diagnostics"]["generation_state"] = state
+    c.execute(
+        "UPDATE planning_jobs SET payload=? WHERE id=?", (json.dumps(payload), "historical-job")
+    )
+    c.execute(
+        "UPDATE model_attempts SET outcome='failed',usage=? WHERE id=?",
+        (
+            json.dumps(
+                dict(
+                    units="tokens",
+                    status="not_started",
+                    requests_observed=0,
+                    values=dict(
+                        prompt_tokens=0, completion_tokens=0, reasoning_tokens=0, total_tokens=0
+                    ),
+                )
+            ),
+            ATTEMPT,
+        ),
+    )
+    before = list(c.iterdump())
+    if state == "not_started":
+        assert recovery.no_generation_accounting(c, ATTEMPT)["requests_started"] == 0
+    else:
+        with pytest.raises(ValueError):
+            recovery.no_generation_accounting(c, ATTEMPT)
+    assert list(c.iterdump()) == before
+
+
+def test_unknown_historical_usage_is_not_a_zero_dispatch(eligible):
+    c, _, _ = eligible
+    before = list(c.iterdump())
+    with pytest.raises(ValueError):
+        recovery.no_generation_accounting(c, ATTEMPT)
+    assert list(c.iterdump()) == before

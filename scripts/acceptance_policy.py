@@ -301,10 +301,16 @@ def campaign_admission(connection, request, case, policy):
         3 if case['choice'] == 'bug-flight-paths' else 2),
         'Campaign case allocation exhausted')
     before = [row for row in rows if row[1] != request.get('intake')]
-    local_settled, quarantined = {}, {}
+    local_settled, quarantined, nonstarted = {}, {}, {}
     if outcome:
         from workbench.planning_reconciliation import accounting
         for row in before:
+            if row[2:4] == ('codex','planning') and row[5]:
+                try:
+                    from workbench.investigation_recovery import no_generation_accounting
+                    nonstarted[row[0]]=no_generation_accounting(connection,row[0])
+                except (ValueError,OSError,KeyError,TypeError):
+                    pass
             if row[2:5] == ('codex', 'planning', 'interrupted_unknown'):
                 try:
                     from workbench.codex_quarantine import accounting as quarantined_accounting
@@ -327,11 +333,14 @@ def campaign_admission(connection, request, case, policy):
                 except (ValueError, KeyError, TypeError):
                     pass  # Missing/stale settlement retains the normal hold.
     require(all(row[0] in request['prior'] and row[5] and (row[4] in
-                {'completed','checked','failed','passed'} or row[0] in local_settled or row[0] in quarantined) for row in before),
+                {'completed','checked','failed','passed'} or row[0] in local_settled or row[0] in quarantined or row[0] in nonstarted) for row in before),
             'Prior execution is unsettled or uncertain')
     local_tasks, codex_tasks = set(), set()
     qwen_requests = qwen_tokens = codex_turns = 0
     for identity, task, backend, purpose, row_outcome, finished, raw in rows:
+        if identity in nonstarted:
+            codex_tasks.add(task)
+            continue  # Verified no generation, distinct from unknown provider usage.
         if identity in quarantined:
             codex_tasks.add(task)
             codex_turns += quarantined[identity]['requests_started']
