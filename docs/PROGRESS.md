@@ -7041,3 +7041,15 @@ actual185copy/tokenizer19725/no-generation/local replay rejectsbeforere-review,
 newnative32.58sec615.5MiB2controlledrepairs withsemantic-rejection/freshconstruction/
 concurrency/restarts/staticbuild pass. Preserve full1484/25a592baseline forunchanged
 code. Nextverifieddeployment/real27, notcheckpointstop orownerpermissionrequest.
+
+## November8 — revision28 checked install; real27 changed first request
+
+700e8b1/tree6d3957d/seal719d6a9cbf06b2772c4751d5a5b9461d02c32bdf42240337638bab1e31913d19
+installedafterallsource/credentialmetadata/helper/grant/history/networkgates. Original79/
+latest185 copied/checked andall28HTTPentriesread.4rolesactive/disabled. Exact172/37/
+newnative32.58sec615.5MiB/static/actual185copy+copiedresponseguard proof bound in
+R/offline-verification.json; full1484/25baseline retainedforunchangedcode, notrerun.
+Real27 intake55c28bbd-d071-4c86-b407-570881a75fb0/model5f19cdf2-232b-4d0c-8cfc-0a6f754aa8ec,
+firstactualfreshconstruction fromverifiedobjections/source WITHOUTrejectedprogram
+orcriticreplay.103882processing/6144bound03:38:14Z. No implementation/realfix/provider
+pass yet. Continue actualjourney; no ownerdecision orcampaigncaps reinstated.

@@ -1,3 +1,30 @@
+# Current installed revision28 / ACTIVE real27 — supersedes pending identity below
+
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-700e8b1;
+R=C/outcome-700e8b1, C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a.
+Installed700e8b1a326b8a83019d3cbe63550a44320f81ae,
+tree6d3957dfe1c254be44f7769e80c1ccb5645ca19c,
+seal719d6a9cbf06b2772c4751d5a5b9461d02c32bdf42240337638bab1e31913d19.
+All strict installed protection/history gates pass R/deployment-28-verified.json:
+original79/latest185 preserved, all28historyHTTPreads pass,4rolesactive/disabled.
+R/offline-verification.json binds172focused/37review/newnative32.58sec615.5MiB/
+staticbuild/actual185copy+realresponse replay, exactretainedfull1484backend/25frontend
+and unchangedoptins/browser/admin lineage. No newcompletefullsuite claimed.
+
+Real27 active intake55c28bbd-d071-4c86-b407-570881a75fb0,
+model5f19cdf2-232b-4d0c-8cfc-0a6f754aa8ec,
+job62990ff6-8f1d-4d64-a859-bb9f19a435ac. Driverexecsession82416,
+R/active-attempt.json, S/artifacts/acceptance/bug-flight-paths.jsonl. Firstrequest
+ACTUALLY freshBugPlanningResponse from source/verified objections, NO rejectedbody/
+renewedcritique. Privatejournal rejected-review-to-fresh-construction verifiesorigin
+0771e2dd and no prior-draft-for-critique event. Exactserver103882processing/6144
+observed03:38:14Z. No replay whileactive/uncertain. Watch actualgeneratedphasecode,
+freshselfreview, independent3criterionreview and normaldelegatedplan/run, originalFAIL/
+candidatePASS/fulladdon suite/savedpatch. Never developer-write flightfixture/fix.
+Currentno-copy/behavioralguard code below NOW INSTALLED, notpending. Totals82starts/
+99065generated/823384prompt are SETTLED PRE27; add actualreceiptslater. No owneraction
+needed. Continue realoutcome/provider4/restart/nextordinarybug/cleanup, no checkpointstop.
+
 # Latest real26 settled / no-copy revision verified, pending deployment
 
 Installed remains a5929e6,4rolesactive/disabled, protectedloopback/LAN restored.
