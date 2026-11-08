@@ -1,14 +1,12 @@
-# Current status — original app restored; history-display repair being verified
+# Current status — corrected app installed; real Codex investigation active
 
-Following the Project Working Philosophy: no real checked addon repair or required
-supporting provider case complete. Candidate491 activation failed on a history-read
-HTTP500; I advanced cutover after failed preflight, then restored the approved original
-loopback app/firewall/model. No new provider call or task36 occurred. All224newer history
-rows remain preserved separately; original79unchanged. LAN is currently closed.
+Following the Project Working Philosophy: verifiedc778e42 is installed at both approved
+addresses. History display is fixed; all37saved task reads/listing and224-row cutover
+preservation passed, along with network/browser/isolation gates and full offline checks.
+Older failed installation was restored safely; its evidence and stores are retained.
 
-The defect was an oversized display preview. Fixed read/write previews preserve raw
-records and bindings; the actual224-row copy now passes listing/all37detail reads.
-Full1618backend/25frontend suites, actual-history replay and affected confined browser checks passed. A mandatory fresh-successful-
-preflight guard prevents cutover after a failed gate. Owner approved the three exact
-read-only support files; no decision is pending. Continue verified installation and
-real task under standing authority. [Handoff](CONTINUATION.md) binds the exact state.
+Fresh real flight-path task36 is actively inspecting source with the twelve approved
+read-only files. No approved repair plan, addon implementation or independent behavioral
+pass yet; zero of four supporting real-provider cases demonstrated. No owner decision
+pending. Continue real repair, provider checks, restart persistence, next ordinary bug
+and the broader agreed outcome. [Handoff](CONTINUATION.md) binds active identities.

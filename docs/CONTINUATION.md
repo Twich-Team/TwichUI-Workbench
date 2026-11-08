@@ -1,3 +1,52 @@
+# LIVE CURRENT STATE — November8 16:02UTC
+
+Following the Project Working Philosophy: continue; no owner decision needed.
+Verified installed candidate c778e4202cb73dee9c42339c10e6e355c5d597e1,
+tree113c49cf049e5042040115c863b706569116a8f1,
+seal b0ceb308c7c8759e9a1efd2ac79708571f3bfead2ddb16655ac258545f8851b1.
+C=~/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
+R=C/outcome-c778e42; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-c778e42.
+Fresh successful guarded preflight, deployment40, original79/latest224 cutover,
+all37normalhistory/detail+listing reads, previews bounded, source/runtime/browser/
+network/TLS/5isolation gates passed. Both approved addresses available. Four everyday
+roles active/disabled; review roles stopped. Model/auth/context/8765 unchanged.
+All old quarantine/recovery receipts recreated; original224rows unchanged before trial.
+Original rollback stores and failed491stage retained. Original-app restoration below
+is HISTORICAL; new corrected app is installed now. Full1618backend/25frontend and
+actual224row37read replay pass; controlled true-confined browser3+affected1rerun pass.
+
+Fresh real task36 IS ACTIVE, normalbrowser driver exec28930. Intake
+51a06cb9-0a42-4f3c-9fbd-286d3728055f, model7642490f-9715-49b5-ac1f-4e4e775612b9,
+jobc7311a02-2c8a-40d9-8e39-3f3f63687578. Codex-only, approved12sources, normal fresh
+bindings/delegated decisions; no old partial/approval reuse. Several source turns
+completed; still investigating, no plan/implementation/independent behavior result.
+DO NOT replay or cut over while active. Monitor S/artifacts/acceptance/bug-flight-paths.jsonl,
+R/bug-flight-paths-driver.txt and private codex journals; read-only task/usage SQL.
+Persist identities/accounting before parsing, settle any uncertainty per standing
+readonlypolicy before renewal. Old settled totals38Codexstarts/34completeusage/
+4missingfinalusage and1365632known tokens EXCLUDE current active task pending settlement.
+Qwen89starts unchanged. All4required real provider cases still NOT demonstrated.
+
+Owner support permission already approved for exact three helpers at1caf530; generic
+discovery/context implemented and real integration now being exercised. No new source
+permission request required for these12. Source write scope still6files/max3repair.
+When real plan arrives, independently inspect actual event/initial route/refresh
+observations, no assigned answer or computed learned-state replacement, then private
+review receipt bound to currentseal/intake/planbinding/expectationdigest, exact3criteria
+indices/reasons. Driver owns normal plan/run approvals and implementation/checking.
+Do not write addon fix/reproducer on Workbench's behalf. Full real repair/provider4/
+resultrestart/nextordinarybug remain required; not complete at plan or this installation.
+
+Operational reusable corrections in R: install-preflight-gate.py mandatory receipt
+before any install mutation; preflight successful end records it, five-minute freshness
+is operational notcampaign. R/preflight.sh handles original-review restoration;
+conditional everyday-stop install handles removed roles. Precise firewall counter-
+insensitive port verifier supports expected3(active)/0(restored). Helpers/script hashes
+bound in offline-verification.json. Pinned API cache eac30af642files reverified; preserve
+independently advanced external reference checkout9dc84f0. On future packaging preserve
+these private scripts and guard; don't recopy stale predecessor assumptions/substrings.
+Lower records remain historical evidence, not active installation state.
+
 # CURRENT — rollback completed; do not assume everyday services are installed
 
 November8 15:46UTC: candidate491ae5b staged/sealed then activation failed. I advanced
