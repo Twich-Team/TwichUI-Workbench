@@ -5,7 +5,7 @@ cases complete. No implementation or Codex turn has started. Full agreed product
 scope remains required. Styling and audit follow the functional gate. No owner
 decision or unavailable access is currently needed.
 
-Installed502c6f7ab8116ac908464fa3b4f2dd7220c37ca4 preserves all26history entries,
+Installed31429994c099286a61277b7e3900dd8f32aaea4c preserves all26history entries,
 approved loopback/home-LAN HTTPS, browser and internal-service protections. Four
 everyday services active/disabled pending completed acceptance. Completed-real-
 result restart recovery and the next ordinary bug journey are not demonstrated.
@@ -44,14 +44,17 @@ HTTPreads. Real24 settled with4complete responses7142generated/96150prompt; no a
 or repair. Full source removed rereads; modelself-review rejected flawed behavior.
 Revised plan then hit the initial equal-baseline gate. Provider idle, all usage known.
 
-Uninstalled correction supports committed client aliases, natural unchanged
+Installed correction supports committed client aliases, natural unchanged
 baselines with at least1real contrasting failure, and a larger bounded local
 reasoning/output profile (6144total includes3072requestedreasoning). Freshconsent7
 binds8requests/1800seconds/300perrequest/45minexpiry. Actual modelcontext26000/32768
 with6144output+512margin; no API/Codex spending/disclosure changes.264focused and
-nativebrowser/aliasescape/accounting/oldreceipt/context/replay checks pass. New
-reasoning quality still live-unverified. Continue checkedrevision26/real25; no
-owner decision needed.
+nativebrowser/aliasescape/accounting/oldreceipt/context/replay checks pass. Actual installed consent7 and server6144n_predict verified on fresh real25.
+Qwen is processing a23405-token prompt; reasoning3072isrequested, higherprofile
+quality not yet demonstrated.264focused/54accounting/native/build/context/replay
+evidence bound before activation; all26histories/protectiongates verified. Continue
+real25 toindependentlycheckedfix/providercases/restart/ordinarynextbug. No owner
+decision needed.
 
 Earlier bcaf correction supplied full startup before generation, counted unique
 source lines and protected startup through retention/fitting. That removed real21

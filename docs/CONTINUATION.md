@@ -1,3 +1,30 @@
+# Latest installed revision26 / ACTIVE real25
+
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-3142999
+R=C/outcome-3142999. Installed31429994c099286a61277b7e3900dd8f32aaea4c,
+treea4103ce8ddc79c4b0d9ed5865d2b3bab0fb07e8b,
+seal(canonical value R/dormant-stage.json). All26historyHTTPreads and original79/
+forward175 checked, strict network/TLS/browser/5probes/connectorpeer gates pass
+R/deployment-26-verified.json.4rolesactive/disabled. R/offline-verification.json
+binds264focused+54accounting/build/nativelegacy success/newnative33.60sec614.3MiB/
+actual175-copy/oldreceipts/4recordedoutputs localreplay/supportingC++control proof
+and precise retained1449backend/25frontend/unaffectedbrowser/admin evidence.
+
+REAL25 running via normal delegatedbrowser: intake18392d91-f57a-4d5b-b13e-49a39a829ffc,
+model66c66de6-c4e9-4d65-901a-5f86089a5224, job9643b1af-33bc-48f6-bae3-8e95148cc2d6.
+Driver execsession68384, R/active-attempt.json. Savedconsent7 confirmed8requests/
+6144completion/300request/1800shared. Actualserver77890processing/6144n_predict,
+prompt23405 tokens/prefill2022 observed firstprobe. Reasoning3072isrequested,
+not independently observed; total6144hardserverparam verified. Newprofilequality
+still awaiting live output. Do not replay active/uncertain work. Monitor journals/
+normaldriver and follow actualplan toindependentreview/implementation. No owner
+decision needed.0realfix/0of4realprovidercases/0implementation/Codex.
+
+Newsource-native interface/baseline/reasoning/consent/timing changes below ARE NOW
+INSTALLED. Model mustauthor actualflightrepro/fix; no developeranswer. Previous
+74Qwenstarts/73usage/72stop/1partial/1oldunknown;75102gen/664106prompt are SETTLED
+pre25 totals. Add actualnewreceipts later. No cumulativecampaigncap reinstated.
+
 # Latest settled24 / source-native reasoning revision pending
 
 No active provider/driver. Installed remains502c6f7, current175rows/schema0012/
