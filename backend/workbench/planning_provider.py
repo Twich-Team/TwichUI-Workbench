@@ -279,6 +279,9 @@ class LocalProvider:
             from workbench.bug_investigation_stage import INSTRUCTIONS as SOURCE_INSTRUCTIONS
             instructions = SOURCE_INSTRUCTIONS
         context = json.loads(encoded) if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse) else {}
+        if schema is BugPlanningResponse and context.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1':
+            from workbench.bug_program import INSTRUCTIONS as PROGRAM_INSTRUCTIONS
+            instructions = PROGRAM_INSTRUCTIONS
         body = dict(model=expected_model or actual, temperature=0, max_tokens=2600, reasoning_budget_tokens=0,
             tools=[], response_format=dict(type='json_schema', json_schema=dict(
                 name='planning', strict=True, schema=planning_response.wire_schema(schema,

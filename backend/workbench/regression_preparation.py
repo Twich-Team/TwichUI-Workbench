@@ -434,7 +434,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             initial_source_packet = packet
             from workbench.planning_response import create_evidence
             evidence_schema = schema
-            if bug and packet.get('plan_review') == 'source-grounded-v2' and isinstance(adapter_used, LocalProvider):
+            if bug and packet.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'} and isinstance(adapter_used, LocalProvider):
                 from workbench.bug_investigation_stage import InvestigationResponse
                 evidence_schema = InvestigationResponse
             response_evidence = create_evidence(lease, evidence_schema, wire.get('coverage') if bug else None,

@@ -97,6 +97,10 @@ def normalize_bug(value, changes=()):
 
 
 def wire_schema(model, coverage=None, files=None):
+    if (model.__name__ == 'BugPlanningResponse' and isinstance(coverage, dict)
+            and coverage.get('reproducer_format') == 'lua-phases-v1'):
+        from workbench.bug_program import schema
+        return schema(coverage, files)
     result = model.model_json_schema()
     if model.__name__ == 'InvestigationResponse':
         selected = [item['path'] for item in (files or [])
@@ -201,6 +205,8 @@ def wire_schema(model, coverage=None, files=None):
         references.append((variant['properties']['op']['const'], {'$ref': '#/$defs/'+name}))
     result['$defs']['Step'] = {'anyOf': [ref for _, ref in references]}
     reproducer = result['$defs']['Reproducer']
+    reproducer['properties'].pop('phases', None)
+    reproducer['properties'].pop('event_coverage', None)
     reproducer['properties'].pop('fixture')
     reproducer['properties'].pop('bootstrap')
     reproducer['properties']['setup'] = setup_schema(files, references)

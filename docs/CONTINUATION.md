@@ -1,4 +1,4 @@
-# Continue the active real bug journey — November7, 23:51 UTC
+# Continue the simplified real bug journey — November8,2026
 
 Read root PROJECT_WORKING_PHILOSOPHY.md, requirements and standing owner direction,
 then EXECUTION/PLAN/ownership. Exact supplied root documents are authoritative.
@@ -43,17 +43,67 @@ sealed assets/TLS/LAN/browser/filter/5isolation/foreign connector peer/model/key
 checks. R/deployment-21-verified.json. Four everyday roles active/disabled pending
 accepted success; original review roles stopped. All21 installed list/details pass
 and stopped17receipt/admission valid: R/installed-history-and-admission-proof.json.
-Current live store CHANGES while task active; never overwrite it from older copies.
+The159-row latest settled store supersedes this historical155-row checkpoint. Never overwrite newer history from older copies.
 Latest SETTLED pre-task20:155rows/schema0012/28tables SHA
  da2f25e019b8fdfe8df007961f0b45b2608bac7ef9ec71ebd649432c47854291.
 Original79 SHA4b889a9e8ea11f8683b5750934b73ab12a6293e58ccd72433a8c490a06202204.
 
-## RUNNING NOW — do not dispatch another attempt
+## Current settled task and uninstalled connected repair
 
-Controller20/revision21, driver exec session79734. Intake47be390f-783c-4d8e-806b-4e16ef0960ad; modela91c491b-d7dd-4fa8-9429-5a14c1bd0b5f. Started23:48:46,
-first server task45091, real first response completed23:50:06. Citation validation
-passed and investigation-diagnosis.json retained. Request2 constructs strict plan.
-Model diagnosis is hypothesis, not reproduction/approval; none of those occurred.
+No active driver/model request. Driver79734 ended held at00:00:04. Controller20/
+revision21 intake47be390f-783c-4d8e-806b-4e16ef0960ad,
+modela91c491b-d7dd-4fa8-9429-5a14c1bd0b5f. Real diagnosis passed and was retained;
+first plan/self-check exposed incorrect stubs, missing events and meaningless
+observations; two subsequent drafts exceeded24steps. Final request7 hit length.
+No plan approval, proposal, implementation or Codex. Exact R/attempt-20-accounting.json:
+7complete usage receipts12293generated/98113prompt,6stop texts and1partialtext;
+original model row outcome=incomplete_output,usageNull remains untouched. Exact
+owned server task54834idle confirmed twice, no uncertain external execution.
+
+CURRENT live history159rows/schema0012/28tables hash
+b53186bdd982c2f80a11e0d0750e16f9f74e02ca0b85491fa7a4e9fd8c396b57.
+All61Qwen requests started:60complete usage receipts,59complete texts,1length stop,
+1oldcancelled missingreceipt. Known54792generated/426784prompt plus old17max2600
+reserved separately.0implementation/Codex/fourrealprovider cases. No model call
+made during the new engineering work. All prior155-row notes are historical.
+
+UNINSTALLED worktree code adds protected source-grounded-lua-v1, bug_program.py /
+real_checks/bug_program.lua, source_bootstrap_context.py and partial_planning_
+reconciliation.py. No DB schema change. Simpler wire schema5090bytes/13actualC++
+cases no model loaded; syntax compilation never executes code before plan approval.
+Reviewed Lua phases run only afterward in the existing isolated fixture VM, with
+expected values/verdict outside code, safe libraries, reviewed-only loads, event
+tracing/initial-before-action/repeated-event checks and instruction/coroutine bounds.
+Legacy data plans and their review hashes remain supported. Generic complete
+bootstrap enrichment supplies existing committed context, NOT an acceptance answer.
+
+242integrated focused/build checks pass; earlier2mode separate API/worker/native/
+normal browser rehearsal64.78sec627.8MiB passes on controlled unrelated bugs. Native
+escape/false-verdict/loop/real event refresh tests pass. Relevant complete final
+suite/native checks still required on frozen source before deployment. Avoid full
+cycles for each local repair. See C/lua-program-*, program-native-*, partial-planning-
+settlement-focused.log. New code uncommitted at reassessment; save checkpoint when
+ready. Do not claim these controlled results delivered the real bug or providers.
+
+Actual159-row COPY proof C/program-current-history-copy-proof.json passes: fixed
+metadata only/no generation/source transmission/live DB write. New partial receipt
+binds all7unique real response journals and exact usage, changes ONLY existing job
+payload/message. Original model row/usage/diagnostics/input unchanged; copied
+admission holds before receipt/passes after. All22history list/details pass. Reuses
+9source windows and supplies full tests/test_nav.lua129-line startup;42026read chars
+under45000,45727wire bytes. Current source unchanged by copy proof. It is NOT a live
+receipt. Once verified new candidate installed, run INSTALLED
+python -m workbench.partial_planning_reconciliation a91c491b-d7dd-4fa8-9429-5a14c1bd0b5f
+--server-task 54834 in exact new private environment, verify immutable model/job facts
+and actual admission before fresh model dispatch. This records settled unsuccessful
+planning, does NOT resume/reuse partial output or allow a post-generation switch.
+Original17stopped receipt copied forward; do not rewrite or rerun it.
+
+Next source revision22/controller21, previous installed1bc, forward159/original79,
+evidence_roots73,newmode source-grounded-lua-v1 in sealed configure.py. Append
+modela91c491b to17previousIDs (18total priorIDs). R scripts are templates only;
+record identity/tests/inventory/seal before activation. Fresh browser bindings /
+consent and independent plan/run remain. No owner engineering renewal needed.
 
 Monitor S/artifacts/acceptance/bug-flight-paths.jsonl and R/bug-flight-paths-driver.txt.
 Private response journals: S/release/artifacts/runs/planning-evidence-MODEL/events.jsonl;

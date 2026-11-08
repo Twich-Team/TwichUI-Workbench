@@ -66,15 +66,39 @@ class ClientBootstrap(Data):
     test_path: TestPath | None = None
 
 
+class LuaPhase(Data):
+    description: Short
+    code: Annotated[str, Field(min_length=1, max_length=6000)]
+
+    @model_validator(mode='after')
+    def text_only(self):
+        if any(ord(c) < 32 and c not in '\n\r\t' for c in self.code):
+            raise ValueError('Reproduction must be Lua source text, never bytecode or control data')
+        return self
+
+
 class Reproducer(Data):
     description: Short
     fixture: Literal['module', 'client']
     bootstrap: ClientBootstrap | None = None
-    steps: Annotated[list[Step], Field(min_length=1, max_length=24)]
+    steps: Annotated[list[Step], Field(max_length=24)]
+    phases: Annotated[list[LuaPhase], Field(max_length=4)] = []
+    event_coverage: bool = False
     observations: Annotated[list[Observation], Field(min_length=1, max_length=4)]
 
     @model_validator(mode='after')
     def validate_reproducer(self):
+        if self.phases:
+            if (len(self.observations) != len(self.phases)
+                    or any(o.after_step != i+1 or o.source != 'return' or o.path != [1]
+                           or o.expected == o.incorrect for i,o in enumerate(self.observations))
+                    or self.fixture == 'client' and (not self.bootstrap or self.steps)
+                    or self.fixture == 'module' and (self.bootstrap or len(self.steps) != 1 or self.steps[0].op != 'load')
+                    or len(self.model_dump_json().encode()) > 8200):
+                raise ValueError('Specify separately reviewed bounded Lua phases and distinct scalar results')
+            return self
+        if self.event_coverage:
+            raise ValueError('Event coverage requires reviewed Lua phases')
         paths = [*(o.path for o in self.observations), *(s.path for s in self.steps),
                  *(f.path for s in self.steps for f in s.fields),
                  *(a.ref for s in self.steps for a in s.args if isinstance(a, ArgumentReference))]
@@ -164,7 +188,7 @@ def validation_diagnostics(error):
     fields = set().union(*(model.model_fields for model in (
         BugPlanningResponse, BugPlan, Reproducer, ClientBootstrap, Step,
         Observation, FixtureField,
-        InvestigationRead, InvestigationSearch,
+        InvestigationRead, InvestigationSearch, LuaPhase,
     )))
     from workbench.bug_investigation_stage import InvestigationResponse
     from workbench.bug_plan_review import ReviewResponse
@@ -196,6 +220,12 @@ class BugEvidence(Data):
 
 
 def review_digest(plan, bootstrap_source):
+    # New optional representation must not invalidate historical data-plan hashes.
+    import copy
+    plan = copy.deepcopy(plan)
+    if not plan.get('reproducer', {}).get('phases'):
+        plan.get('reproducer', {}).pop('phases', None)
+        plan.get('reproducer', {}).pop('event_coverage', None)
     return digest(dict(kind='offline-lua-reproducer-v1', plan=plan, bootstrap_source=bootstrap_source))
 
 
@@ -241,8 +271,13 @@ def compile_plan(evidence):
     frame_events = Path(__file__).with_name('real_checks').joinpath('bug_frame_events.lua').read_text()
     assert body.count('-- WB_FRAME_EVENT_HELPER') == 1
     body = body.replace('-- WB_FRAME_EVENT_HELPER', frame_events)
+    program = Path(__file__).with_name('real_checks').joinpath('bug_program.lua').read_text()
+    assert body.count('-- WB_PROGRAM_HELPER') == 1
+    body = body.replace('-- WB_PROGRAM_HELPER', program)
     data = plan['reproducer']
     data['bootstrap_source'] = checked.bootstrap_source
+    if data.get('phases'):
+        data['reviewed_read_paths'] = plan['read_paths']
     for step in data['steps']:
         step['args_n'] = len(step['args'])
     source = lua(data)

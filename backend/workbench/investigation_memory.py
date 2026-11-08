@@ -56,6 +56,10 @@ def settled(connection, attempt, job):
     if connection.execute(select(proposals.c.id).where(
             proposals.c.intake_id == attempt['task_id'])).first():
         return False
+    if attempt['outcome'] == 'incomplete_output':
+        from workbench.partial_planning_reconciliation import accounting
+        accounting(connection, attempt['id'], connection.engine)
+        return True
     if attempt['outcome'] == 'interrupted_unknown':
         from workbench.planning_reconciliation import accounting
         accounting(connection, attempt['id'])

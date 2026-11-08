@@ -211,11 +211,11 @@ def context(original, feedback, policy):
     from workbench.source_context import excerpts
     excerpts(files, inspected, terms, words)
     references = {}
-    if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2'}:
+    if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1'}:
         from workbench.game_api_reference import collect
         references['api_references'] = collect(files)
     return dict(base=base, files=files, declarations=declaration_index(files, inspected, terms), **references,
-                **({'plan_review':policy['bug_plan_review']} if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2'} else {}),
+                **({'plan_review':policy['bug_plan_review']} if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1'} else {}),
                 policy_sha256=digest(policy))
 
 
@@ -333,13 +333,16 @@ def planning_request(packet, original, feedback):
                for item in packet['files']],
         report=dict(title=original['title'], description=original['description'],
                     lua_error=original.get('lua_error', '')), owner_reply=feedback,
-        coverage=report_coverage(original),
+        coverage={**report_coverage(original), **({'reproducer_format':'lua-phases-v1'}
+            if packet.get('plan_review') == 'source-grounded-lua-v1' else {})},
         context_note='Exact committed lines. Coverage labels distinguish complete and partial functions. '
                      'A bootstrap tail shows final loads; its full committed prefix is independently checked.')
 
 
 def resolve(raw, packet, original, feedback):
     from workbench.bug_wire import compile_setup
+    from workbench.bug_program import compile as compile_program
+    raw, _ = compile_program(raw, packet['files'], report_coverage(original))
     raw, _ = compile_setup(raw, packet['files'])
     draft = BugPlanningResponse.model_validate(raw)
     if draft.inspection:
@@ -348,6 +351,8 @@ def resolve(raw, packet, original, feedback):
     paths, acceptance, checks, evidence, bug = [], [], [], [], None
     if draft.plan:
         plan = draft.plan
+        if plan.reproducer.phases and packet.get('plan_review') != 'source-grounded-lua-v1':
+            raise ValueError('Reviewed Lua reproductions require the installed protected program mode')
         if re.fullmatch(r'[A-Za-z0-9_!./-]+\.lua', plan.scope.strip()):
             raise ResponseValidationError('Describe the bounded repair in plain language, not only a file path',
                 ['plan','scope'], 'a plain description of the bounded repair', plan.scope)
@@ -355,12 +360,15 @@ def resolve(raw, packet, original, feedback):
         if coverage['minimum_observations'] == 3:
             observations = plan.reproducer.observations
             steps = plan.reproducer.steps
-            if (len(observations) < 3 or len({o.after_step for o in observations}) < 3
+            if plan.reproducer.phases:
+                if len(observations) < 3 or plan.reproducer.event_coverage is not True:
+                    raise ValueError('Stateful Lua reproduction requires initial and repeated event phases')
+            elif (len(observations) < 3 or len({o.after_step for o in observations}) < 3
                     or any(steps[o.after_step-1].op != 'call' for o in observations)):
                 raise ResponseValidationError('The report needs initial and successive action-driven observations.',
                     ['plan', 'reproducer', 'observations'], 'three distinct observations after relevant calls', observations)
             actions = [tuple(step.path) for step in steps if step.op == 'call']
-            if len(actions) == len(set(actions)):
+            if not plan.reproducer.phases and len(actions) == len(set(actions)):
                 raise ResponseValidationError('The report needs a repeated action to check refreshing.',
                     ['plan', 'reproducer', 'steps'], 'repeat a relevant existing action', steps)
         by_path = {item['path']: item for item in packet['files']}

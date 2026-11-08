@@ -1,4 +1,4 @@
-# Current delivery status — November 7, 2026, 23:51 UTC
+# Current delivery status — November 8, 2026 — after owner reassessment
 
 **No independently checked real flight-path repair yet. None of the four real
 provider acceptance cases has passed. The broader initial product is unfinished.**
@@ -8,10 +8,21 @@ services are active; loopback and approved home-LAN HTTPS remain protected.
 All21 existing history entries survived the latest checked cutover/restart.
 That demonstrates preserved history, not restart recovery of a completed real fix.
 
-Real task20 is active: the app revalidated8 prior committed source windows, obtained
-and privately retained a real Qwen diagnosis, passed exact citation validation,
-and advanced to repair-plan construction. No plan/run approval or addon repair yet.
-Model hypotheses remain unverified. No Codex turn has run.
+Real task20 ended with no valid plan or implementation. Source diagnosis and exact
+citation validation passed; its proposed fixture was correctly rejected for missing
+real actions and incorrect setup. Further drafts exceeded the24-step representation,
+and request7 ended with partial text at the2600-token limit. All7usage receipts are
+known; provider is idle. No request is running or being replayed.
+
+Uninstalled development replaces that complex fixture representation with ordinary
+Lua test phases after separately reviewed committed startup. The existing isolated
+VM keeps expected values/verdicts outside model code, denies unsafe APIs/loading,
+records repeated event dispatch and bounds execution. App-owned source context now
+supplies the complete129-line existing bootstrap; no flight-path fixture or fix was
+handwritten by development. Controlled native original FAIL/candidate PASS and
+separate-process normal browser checks pass for unrelated examples. New partial-text
+settlement distinguishes complete usage from unfinished content without rewriting
+the original model outcome or authorizing reuse of a partial plan.
 
 Latest implementation separates source diagnosis from strict plan construction,
 reuses only current-hash-verified source facts after settled failures, constrains
@@ -29,7 +40,8 @@ inspected paths; third remains unknown. No implementation or external uncertaint
 The original task17 final response/usage remains unavailable; a verified stopped-
 execution receipt permits fresh work without rewriting that original outcome.
 
-Next: finish the real app-generated plan, independent review, delegated plan/run,
+Next: finish integrated verification/checked deployment of the simplified path,
+then evaluate it on the real task and finish the app-generated plan, independent review, delegated plan/run,
 original FAIL/candidate PASS/full addon suite/reviewable patch; four real-provider
 cases; installed completed-result restart and next ordinary supported bug. No
 owner decision/access is currently required. Continue under standing authority.

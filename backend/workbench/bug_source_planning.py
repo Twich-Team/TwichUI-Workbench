@@ -50,12 +50,14 @@ def correction(error, raw):
                      'steps', 'observations', 'op', 'path', 'source', 'value', 'args', 'fields', 'method',
                      'after_step', 'expected', 'incorrect', 'checkpoints', 'before_call', 'call', 'observe',
                      'at','results','return_value','client_field','captured_argument','number',
-                     'returns','values','table_fields'}
+                     'returns','values','table_fields','phases','code','event_coverage'}
             if any(not (part in known if type(part) is str else type(part) is int and 0 <= part <= 512)
                    for part in location):
                 return None
             rows.append(dict(path=list(location), constraint=issue['type'],
                              rule=rule if rule in rules else 'Conform to the declared field type and constraint.'))
+    elif isinstance(error, ResponseValidationError) and str(error) == 'The proposed reproduction contains invalid Lua syntax.':
+        rows.append(dict(path=list(error.path),constraint='Lua_syntax',rule=error.expected))
     elif isinstance(error, ResponseValidationError) and str(error) in {
             'The report needs initial and successive action-driven observations.',
             'The report needs a repeated action to check refreshing.',
@@ -66,7 +68,7 @@ def correction(error, raw):
     previous = json.loads(json.dumps(raw))
     previous.pop('finding', None)
     return dict(rejected=True, approved=False, executed=False, errors=rows,
-                previous_candidate=previous if len(json.dumps(previous).encode()) <= 5000 else None,
+                previous_candidate=previous if len(json.dumps(previous).encode()) <= (10000 if raw['plan'].get('reproducer', {}).get('phases') else 5000) else None,
                 note='This completed candidate was rejected locally. Correct it from committed evidence or inspect missing source. '
                      'Never invent an observation, load, intended behavior or permission. All original limits remain.')
 
@@ -275,9 +277,10 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     """One claim/provider/deadline, distinct durable receipts and shared usage."""
     packet = copy.deepcopy(initial)
     schema, wire = bug.planning_request(packet, original, feedback)
-    review_required = initial.get('plan_review') in {'source-grounded-v1', 'source-grounded-v2'}
-    investigating = initial.get('plan_review') == 'source-grounded-v2'
+    review_required = initial.get('plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1'}
+    investigating = initial.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'}
     diagnosis = None
+    bootstrap_priority, bootstrap_fact = [], None
     pending, planning_wire, review_rounds = None, None, 0
     if wire['coverage'].get('call_driven') and not review_required:
         wire['coverage']['require_inspection'] = True
@@ -396,7 +399,18 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                             evidence.snapshot('investigation-diagnosis', raw)
                             evidence.record('source-diagnosis-completed', approved=False, executed=False)
                         investigating = False
-                        wire = next_wire(packet, original, feedback, [], investigated.finding)
+                        if initial.get('plan_review') == 'source-grounded-lua-v1':
+                            from workbench.source_bootstrap_context import complete
+                            bootstrap_priority, extra, added, bootstrap_fact = complete(
+                                packet, READ_CHARS-read_chars, should_stop, diagnosis['evidence_paths'])
+                            read_chars += added
+                            if extra and evidence:
+                                evidence.record('source-read-result',characters=added,search_matches=0,
+                                    purpose='complete-existing-test-bootstrap',
+                                    windows=[{k:v for k,v in w.items() if k!='text'} for w in extra])
+                        wire = next_wire(packet, original, feedback, bootstrap_priority, investigated.finding)
+                        if bootstrap_fact:
+                            wire['committed_bootstrap_context'] = bootstrap_fact
                         wire['investigation_diagnosis'] = dict(
                             **diagnosis, untrusted=True, approved=False, executed=False)
                         if index+1 == REQUESTS:
@@ -410,6 +424,10 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                         return {**dict(finding=investigated.finding, plan=None, question=None,
                                       limitation=None, inspection=None), **outcome}, model, basis, packet
                 from workbench.bug_wire import compile_setup
+                from workbench.bug_program import compile as compile_program
+                raw, program_fact = compile_program(raw, packet['files'], wire['coverage'])
+                if program_fact and evidence:
+                    evidence.record('reviewed-program-compiled', **program_fact)
                 raw, setup_fact = compile_setup(raw, packet['files'])
                 if setup_fact and evidence:
                     evidence.record('explicit-setup-compiled', **setup_fact)
@@ -463,7 +481,9 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             read_chars += chars
             if read_chars > READ_CHARS:
                 raise PlanningUnavailable('The investigation reached its source-read bound.', 'inspection_limit')
-            wire = next_wire(packet, original, feedback, windows, draft.finding, matches)
+            wire = next_wire(packet, original, feedback, [*windows, *bootstrap_priority], draft.finding, matches)
+            if bootstrap_fact:
+                wire['committed_bootstrap_context'] = bootstrap_fact
             if diagnosis:
                 wire['investigation_diagnosis'] = dict(**diagnosis, untrusted=True, approved=False, executed=False)
             wire['inspection_result']['requested'] = [r.model_dump(mode='json') for r in draft.inspection]
@@ -472,7 +492,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     finally:
         current = dict(adapter.diagnostics)
         # Failed/current uncertain wire activity has no complete aggregate.
-        unknown = (current.get('generation_state') in {'uncertain', 'partial'}
+        unknown = (current.get('generation_state') == 'uncertain'
                    or current.get('accounting_state') == 'unavailable'
                    or not response_added and current.get('generation_state') != 'not_started')
         summed = {k: sum(r['values'][k] for r in receipts)
@@ -484,7 +504,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             diagnostics['usage'] = dict(source='local llama.cpp investigation responses', units='tokens',
                 values=summed, requests_observed=len(receipts), max_request_completion_tokens=max(
                     r['values']['completion_tokens'] for r in receipts), status='complete')
-            diagnostics['generation_state'] = 'finished'
+            if current.get('generation_state') != 'partial':
+                diagnostics['generation_state'] = 'finished'
         elif receipts:
             diagnostics['known_usage'] = json.dumps(summed, sort_keys=True)
             diagnostics['usage'] = None

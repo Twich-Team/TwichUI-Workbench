@@ -14,6 +14,7 @@ local function values(...)
   return {n=select('#', ...), ...}
 end
 -- WB_FRAME_EVENT_HELPER
+-- WB_PROGRAM_HELPER
 local function get(root, path)
   for _, key in ipairs(path) do
     if type(root) ~= 'table' then error('missing observation') end
@@ -64,6 +65,8 @@ local function exercise()
     coroutine=copy(coroutine), os={clock=os.clock, time=os.time, date=os.date, difftime=os.difftime},
     ROOT=ROOT, REPO=REPO, TESTS=TESTS, print=function() end}
   env._G = env
+  local program_control
+  if scenario.phases and #scenario.phases > 0 then program_control = prepare_program_environment(env) end
   env.string.dump = nil
   env.getfenv = function(level)
     assert(level == 0, 'only fixture globals are available')
@@ -77,7 +80,14 @@ local function exercise()
     return getmetatable(value)
   end
   local loaded = {}
+  local program_active = false
+  local allowed_program_reads = {}
+  for _, path in ipairs(scenario.reviewed_read_paths or {}) do allowed_program_reads[path] = true end
   env.loadfile = function(path)
+    if program_active then
+      local key = type(path) == 'string' and (path:sub(1,3) == '../' and path:sub(4) or 'tests/' .. path:sub(3))
+      assert(allowed_program_reads[key], 'unreviewed reproduction load')
+    end
     assert(type(path) == 'string' and (
       match(path, '^%.%./!!!TwichUI/[A-Za-z0-9_./-]+%.lua$') and not match(path:sub(#ROOT+1), '%.%.')
       or match(path, '^%./[A-Za-z0-9_./-]+%.lua$') and not match(path:sub(3), '%.%.')),
@@ -136,6 +146,16 @@ local function exercise()
     end
     assert(output and item.path[1] <= output.n, 'missing return or callback argument')
     return get(output, item.path)
+  end
+  if scenario.phases and #scenario.phases > 0 then
+    if scenario.fixture == 'module' then
+      local step = scenario.steps[1]
+      assert(step and step.op == 'load', 'missing reviewed module')
+      root = load('../' .. step.source, env)()
+      assert(type(root) == 'function' or type(root) == 'table', 'expected a returned module')
+    end
+    program_active = true
+    return program_phases(env, root, scenario, program_control)
   end
   local namespace, reproduced = {}, false
   for index, step in ipairs(scenario.steps) do

@@ -61,8 +61,32 @@ def three_observations(client_case):
     return value
 
 
+
+def program_answer(client_case):
+    from test_bug_workflow import CLIENT_TEST
+    value=copy.deepcopy(response(client_case))
+    plan=value['plan']
+    plan['other_reads']=[]
+    plan.pop('read_paths')
+    if client_case:
+        phases=[dict(description='Observe the actual notification before another event.',
+            code="state.actual=nil; client.Notify=function(_,name)state.actual=name end;client.Deliver('Sam');return state.actual",
+            expected='Sam',incorrect='Unknown')]
+        phases += [dict(description='Observe the next event-driven notification.',
+            code="state.actual=nil;client.FireEvent('WORKBENCH_FIXTURE_NAME','"+name+"');return state.actual",
+            expected=name,incorrect='Unknown') for name in ('Lee','Pat')]
+        setup=dict(kind='client-bootstrap',test_path=CLIENT_TEST,client='c',through_line=5)
+    else:
+        phases=[dict(description='Observe the actual exported name normalization.',
+            code="return subject('"+text+"')",expected=expected,incorrect=incorrect)
+            for text,expected,incorrect in [('  ALICE ','alice','ALICE'),(' BOB ','bob','BOB'),(' Lee ','lee','Lee')]]
+        setup=dict(kind='module',source=PRODUCTION)
+    plan['reproducer']=dict(description='The existing operation must produce the requested name.',setup=setup,phases=phases)
+    return value
+
+@pytest.mark.parametrize('reproduction_mode',['source-grounded-v2','source-grounded-lua-v1'])
 def test_two_bugs_with_two_browsers_and_separate_process_restarts(
-    store, installed, tmp_path, monkeypatch,  # noqa: F811
+    store, installed, tmp_path, monkeypatch, reproduction_mode,  # noqa: F811
 ):
     import local_browser_fixture
     from project_env import environment
@@ -72,7 +96,7 @@ def test_two_bugs_with_two_browsers_and_separate_process_restarts(
     from test_everyday import write_policy
     preparation=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
     settings=json.loads(preparation.read_text())
-    settings['bug_plan_review']='source-grounded-v2'
+    settings['bug_plan_review']=reproduction_mode
     write_policy(preparation,settings)
     from test_bug_plan_review import large_reference
     from workbench import game_api_reference
@@ -118,6 +142,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         monkeypatch.setattr(trusted_preparation, "Runtime", Runtime)
     monkeypatch.setenv("WORKBENCH_STATIC_ROOT", str(ROOT / "frontend/dist"))
     monkeypatch.setattr(local_browser_fixture, "install_offline_guard", lambda: None)
+    program_mode=reproduction_mode=='source-grounded-lua-v1'
     cases = []
     for index, client_case in enumerate([False, True]):
         request = report(client_case)
@@ -127,7 +152,10 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         request["lua_error"] = ""
         policy = json.loads(Path(os.environ["WORKBENCH_PREPARATION_CONFIG"]).read_text())
         packet = bug_investigation.context(request, "", policy)
-        answer = three_observations(client_case)
+        answer = program_answer(client_case) if program_mode else three_observations(client_case)
+        if program_mode:
+            from workbench.bug_program import compile as compile_program
+            answer,_=compile_program(answer,packet['files'],bug_investigation.report_coverage(request))
         cases.append(dict(choice="fixture-bug-" + str(index), request=request,
                           provider="local", reason=None, model="pilot-qwen38-27b",
                           evidenceSha=digest(packet["files"]), writablePaths=answer["plan"]["writable_paths"],
@@ -154,7 +182,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
         fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
         case = cases[0] if fault else next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
-        answer = three_observations(case['client_case'])
+        answer = program_answer(case['client_case']) if program_mode else three_observations(case['client_case'])
         if investigating:
             finding='Controlled committed source diagnosis, no approval or execution.'
             if conflict:
@@ -188,11 +216,14 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         elif not packet.get('validation_feedback'):
             # Exercise the actual cross-process correction path: a completed
             # single-plan candidate omitted its load and cannot be approved.
-            for step in answer['plan']['reproducer']['steps']:
-                if step['op'] == 'load':
-                    step.clear()
-                    step.update(op='table', path=['unused'])
-        elif not fault:
+            if program_mode:
+                answer['plan']['reproducer']['phases'][0]['code']='function incomplete('
+            else:
+                for step in answer['plan']['reproducer']['steps']:
+                    if step['op'] == 'load':
+                        step.clear()
+                        step.update(op='table', path=['unused'])
+        elif not fault and not program_mode:
             answer = wire_from_data(answer)
         class Transport:
             seconds = 120

@@ -1,3 +1,14 @@
+# Owner reassessment — November8,2026
+
+Task20 settled without repair; source/citation corrections worked, but the complex
+fixture format did not converge: invalid stubs/events, excessive steps, then final
+length stop. Gates correctly prevented approval/execution. Ordinary code-oriented
+Lua reproduction in the existing sandbox plus complete committed bootstrap context
+is implemented locally; independent checks and scope remain. Controlled checks and
+actual159-row COPY/usage/partial settlement proof pass. No new model call, cutover,
+provider acceptance or actual bug fix yet. CURRENT_STATUS/CONTINUATION hold exact
+current facts; dated entries below are historical. Standing authority continues.
+
 # Current facts — November7,23:51 UTC
 
 Installed application1bc2f31 verified1394backend/25frontend/build/145focused/native;

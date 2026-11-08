@@ -125,7 +125,8 @@ def check_bug_plan(plan, original, case, preparation, inspection_packet=None):
     observations = check['observations']
     actions = [step['path'] for step in steps if step['op'] == 'call']
     require(len({obs['after_step'] for obs in observations}) >= 3
-            and len({tuple(path) for path in actions}) < len(actions)
+            and (check.get('phases') and check.get('event_coverage') is True
+                 or len({tuple(path) for path in actions}) < len(actions))
             and {True, False} <= {obs['expected'] for obs in observations if type(obs['expected']) is bool},
             'initial behavior and two successive flight-master observations are required')
     rebuilt, content, question, limitation = bug_investigation.resolve(dict(
@@ -289,9 +290,13 @@ def campaign_admission(connection, request, case, policy):
     if outcome:
         from workbench.planning_reconciliation import accounting
         for row in before:
-            if row[2] == 'local' and row[3] == 'planning' and row[4] == 'interrupted_unknown':
+            if row[2] == 'local' and row[3] == 'planning' and row[4] in {'interrupted_unknown','incomplete_output'}:
                 try:
-                    local_settled[row[0]] = accounting(connection, row[0])
+                    if row[4]=='incomplete_output':
+                        from workbench.partial_planning_reconciliation import accounting as partial_accounting
+                        local_settled[row[0]] = partial_accounting(connection,row[0])
+                    else:
+                        local_settled[row[0]] = accounting(connection, row[0])
                 except (ValueError, KeyError, TypeError):
                     pass  # Missing/stale settlement retains the normal hold.
     require(all(row[0] in request['prior'] and row[5] and (row[4] in
@@ -305,7 +310,7 @@ def campaign_admission(connection, request, case, policy):
             local_tasks.add(task)
             qwen_requests += reserved['requests_started']
             qwen_tokens += reserved['completion_tokens_upper_bound']
-            continue  # Conservatively reserved, never reported as observed usage.
+            continue  # Receipt distinguishes observed usage from a conservative missing-receipt bound.
         require(finished and raw, 'Campaign accounting unavailable')
         usage = json.loads(raw)
         require(isinstance(usage, dict) and (purpose == 'capability_validation' or
