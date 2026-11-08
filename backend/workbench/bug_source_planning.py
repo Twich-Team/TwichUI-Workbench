@@ -175,7 +175,7 @@ def unread_start(windows, path, start, end):
 
 
 def verify_packet(initial, supplied):
-    if (set(supplied) - set(initial) - {'inspection_windows'}
+    if (set(supplied) - set(initial) - {'inspection_windows','inspection_searches'}
             or supplied.get('base') != initial['base'] or supplied.get('policy_sha256') != initial['policy_sha256']
             or supplied.get('plan_review') != initial.get('plan_review')
             or supplied.get('api_references') != initial.get('api_references')
@@ -222,6 +222,8 @@ def verify_packet(initial, supplied):
                     or window.get('next_line') != (end+1 if more else None)
                     or window['coverage'] != ('partial requested committed lines' if end < wanted else 'requested committed lines')):
                 raise ValueError('The source continuation metadata changed.')
+    from workbench.investigation_notebook import verify
+    verify(initial,supplied,search)
     return supplied
 
 
@@ -231,6 +233,8 @@ def inspect(packet, requests, *, disclosure_paths=None):
     for index, request in enumerate(requests):
         if hasattr(request, 'query'):
             found = search(packet['base'], request.query, disclosure_paths) if disclosure_paths is not None else search(packet['base'], request.query)
+            from workbench.investigation_notebook import record
+            record(packet,request.query,found,disclosure_paths)
             allowance = (6500-total)//max(1, len(requests)-index)
             for match in found:
                 if len(match['text']) > allowance:
@@ -306,6 +310,9 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
              'requested_start_line preserves the request and cached_prefix_through_line identifies that exact prior prefix. '
              'omitted ranges do not establish absence. No addon change or behavioral result has been produced.')
     wire['inspection_result']['visible_requested_windows'] = requested_visibility(wire, requested)
+    if packet.get('inspection_searches'):
+        from workbench.investigation_notebook import wire as completed_searches
+        wire['completed_searches'] = completed_searches(packet)
     if matches is not None:
         wire['inspection_result']['search_matches'] = matches
         wire['inspection_result']['search_limit'] = 'At most twelve literal matches; not an exhaustive absence proof.'
@@ -613,6 +620,11 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 return raw, model, basis, packet
             if should_stop():
                 raise PlanningUnavailable('The investigation binding changed before source inspection.', 'cancelled')
+            if wire.get('completed_searches') and all(hasattr(r,'query') for r in draft.inspection):
+                known={entry['query'].casefold() for entry in wire['completed_searches']['searches']}
+                if all(r.query.casefold() in known for r in draft.inspection):
+                    raise PlanningUnavailable('The provider repeated completed searches already present in its request.',
+                                              'inspection_unchanged')
             if evidence:
                 evidence.record('source-inspection', turn=index+1,
                     windows=[dict(query_sha256=hashlib.sha256(r.query.encode()).hexdigest()) if hasattr(r, 'query')

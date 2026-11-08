@@ -311,7 +311,7 @@ def campaign_admission(connection, request, case, policy):
                     nonstarted[row[0]]=no_generation_accounting(connection,row[0])
                 except (ValueError,OSError,KeyError,TypeError):
                     pass
-            if row[2:5] == ('codex', 'planning', 'interrupted_unknown'):
+            if row[2:4] == ('codex', 'planning') and row[4] in {'interrupted_unknown','incomplete_output','failed'}:
                 try:
                     from workbench.codex_quarantine import accounting as quarantined_accounting
                     quarantined[row[0]] = quarantined_accounting(connection, row[0])

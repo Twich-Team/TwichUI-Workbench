@@ -26,27 +26,51 @@ def enable(store, monkeypatch):
     )
 
 
-@pytest.mark.usefixtures('installed')
+@pytest.mark.usefixtures("installed")
 def test_context_failure_before_transport_records_no_generation_and_can_be_renewed(
-    client,headers,store,monkeypatch,
+    client,
+    headers,
+    store,
+    monkeypatch,
 ):
     from workbench import bug_source_planning as source
     from workbench.planning_transport import PlanningUnavailable
     from workbench.investigation_recovery import no_generation_accounting
-    enable(store,monkeypatch)
-    def fail_context(*args,**kwargs):
-        raise PlanningUnavailable('Controlled context assembly hold.','context_budget')
-    monkeypatch.setattr(source,'next_wire',fail_context)
-    monkeypatch.setattr(codex_provider,'generate',lambda *a,**k:pytest.fail('Context failure reached a provider'))
-    identity=client.post('/api/intake',headers=headers,json={**report(),'local_planning':'codex-once'}).json()['id']
+
+    enable(store, monkeypatch)
+
+    def fail_context(*args, **kwargs):
+        raise PlanningUnavailable("Controlled context assembly hold.", "context_budget")
+
+    monkeypatch.setattr(source, "next_wire", fail_context)
+    monkeypatch.setattr(
+        codex_provider,
+        "generate",
+        lambda *a, **k: pytest.fail("Context failure reached a provider"),
+    )
+    identity = client.post(
+        "/api/intake", headers=headers, json={**report(), "local_planning": "codex-once"}
+    ).json()["id"]
     assert worker.tick(store)
-    item=client.get('/api/intake/'+identity).json()
-    assert item['status']=='failed' and not item['proposals'] and not item['tasks'] and not item['decisions']
+    item = client.get("/api/intake/" + identity).json()
+    assert (
+        item["status"] == "failed"
+        and not item["proposals"]
+        and not item["tasks"]
+        and not item["decisions"]
+    )
     with store.connect() as c:
-        attempt=c.execute(select(model_attempts).where(model_attempts.c.task_id==identity)).mappings().one()
-        assert attempt['usage']['status']=='not_started' and attempt['usage']['requests_observed']==0
-        assert no_generation_accounting(c,attempt['id'])['requests_started']==0
-    assert 'source preparation' in item['jobs'][0]['message']
+        attempt = (
+            c.execute(select(model_attempts).where(model_attempts.c.task_id == identity))
+            .mappings()
+            .one()
+        )
+        assert (
+            attempt["usage"]["status"] == "not_started"
+            and attempt["usage"]["requests_observed"] == 0
+        )
+        assert no_generation_accounting(c, attempt["id"])["requests_started"] == 0
+    assert "source preparation" in item["jobs"][0]["message"]
 
 
 @pytest.mark.parametrize("consent_version", [8, 9])
@@ -152,7 +176,18 @@ def test_codex_uses_same_investigation_plan_and_review_before_normal_approval(
     )
 
 
-@pytest.mark.parametrize("change", ["new_path", "changed_text", "changed_hash", "new_search_match"])
+@pytest.mark.parametrize(
+    "change",
+    [
+        "new_path",
+        "changed_text",
+        "changed_hash",
+        "new_search_match",
+        "notebook_project",
+        "notebook_match",
+        "notebook_base",
+    ],
+)
 @pytest.mark.usefixtures("installed")
 def test_codex_never_transmits_source_outside_initial_task_binding(store, monkeypatch, change):
     enable(store, monkeypatch)
@@ -174,6 +209,20 @@ def test_codex_never_transmits_source_outside_initial_task_binding(store, monkey
         wire["inspection_result"] = dict(
             search_matches=[dict(path="!!!TwichUI/new-private.lua", text="PRIVATE")]
         )
+    if change.startswith("notebook_"):
+        wire["completed_searches"] = dict(
+            base=packet["base"],
+            scopes=dict(selected=dict(paths=sorted(adapter.source_manifest))),
+            searches=[dict(query="needle", matches=[])],
+        )
+        if change == "notebook_project":
+            wire["completed_searches"]["scopes"]["selected"]["paths"] = None
+        elif change == "notebook_match":
+            wire["completed_searches"]["searches"][0]["matches"] = [
+                dict(path="!!!TwichUI/new-private.lua", line=1)
+            ]
+        else:
+            wire["completed_searches"]["base"] = "unapproved-other-commit"
     monkeypatch.setattr(
         codex_provider,
         "generate",

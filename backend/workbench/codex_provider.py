@@ -1183,6 +1183,7 @@ class Planner:
         self.response_evidence = None
         self.request_seconds = SECONDS  # Replaced only by the actual saved bug consent.
         self.source_manifest = None
+        self.source_base = None
         self.reference_manifest = None
         self.source_lines = {}
 
@@ -1193,6 +1194,7 @@ class Planner:
         match cannot silently extend this external disclosure.
         """
         self.source_manifest = {item["path"]: item["sha256"] for item in packet["files"]}
+        self.source_base = packet["base"]
         self.reference_manifest = {
             item["path"]: item["sha256"] for item in packet.get("api_references", [])
         }
@@ -1283,6 +1285,25 @@ class Planner:
                 for match in packet.get("inspection_result", {}).get("search_matches", [])
             ):
                 raise Hold("disclosure")
+            notebook = packet.get("completed_searches")
+            if notebook is not None:
+                if (
+                    not isinstance(notebook, dict)
+                    or notebook.get("base") != self.source_base
+                    or not isinstance(notebook.get("scopes"), dict)
+                    or any(
+                        not isinstance(scope, dict)
+                        or not isinstance(scope.get("paths"), list)
+                        or set(scope["paths"]) != set(self.source_manifest)
+                        for scope in notebook.get("scopes", {}).values()
+                    )
+                    or any(
+                        not isinstance(match, dict) or match.get("path") not in self.source_manifest
+                        for item in notebook.get("searches", [])
+                        for match in item.get("matches", [])
+                    )
+                ):
+                    raise Hold("disclosure")
         if expected_model is not None and model != expected_model:
             raise Hold("model_identity")
         try:
@@ -1296,17 +1317,23 @@ class Planner:
                 )
             )
             if bug_schema:
-                from workbench.codex_wire import schema as inspection_schema, NOTE
+                from workbench.codex_wire import schema as inspection_schema, NOTE, FLAT_NOTE
 
                 output_schema, tagged = inspection_schema(output_schema)
                 if tagged:
-                    instructions += " " + NOTE
+                    flat = schema is InvestigationResponse
+                    if flat:
+                        instructions = instructions.replace(
+                            "Return finding and exactly one draft: inspection, diagnosis, question, or limitation. ",
+                            "",
+                        )
+                    instructions += " " + (FLAT_NOTE if flat else NOTE)
                     if self.response_evidence:
                         import hashlib
 
                         self.response_evidence.record(
                             "codex-wire-schema",
-                            codec="tagged-inspection-v1",
+                            codec="flat-investigation-v2" if flat else "tagged-inspection-v1",
                             schema_sha256=hashlib.sha256(
                                 json.dumps(output_schema, sort_keys=True).encode()
                             ).hexdigest(),

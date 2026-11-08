@@ -265,6 +265,20 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             from workbench.bug_investigation_stage import InvestigationResponse
             actual_schema=ReviewResponse if schema.get('title')=='ReviewResponse' else InvestigationResponse if schema.get('title')=='InvestigationResponse' else bug_investigation.BugPlanningResponse
             answer=answer_for(packet,actual_schema)
+            if actual_schema is InvestigationResponse:
+                draft=answer['draft']
+                value=dict(finding=answer['finding'],action='inspect',reads=[],searches=[],
+                           diagnosis=None,question=None,limitation=None)
+                if 'inspection' in draft:
+                    for item in draft['inspection']:
+                        value['searches' if 'query' in item else 'reads'].append(item)
+                else:
+                    field=next(iter(draft))
+                    value['action']='diagnose' if field=='diagnosis' else field
+                    # Preserve deliberately conflicting fixture outcomes too;
+                    # format conversion must never turn invalid input valid.
+                    value.update(draft)
+                answer=value
             # Exercise the actual provider-only tagged wire, including both
             # literal searches and source line reads, before common validation.
             for item in (answer.get('draft') or {}).get('inspection', []):
@@ -384,7 +398,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     assert [row['phase'] for row in rows][:len(prefix)] == prefix
     assert len(rows[1]['schema_sha256']) == 64 and rows[1]['corrective'] is False
     if case_provider=='codex':
-        assert rows[2]['codec']=='tagged-inspection-v1' and len(rows[2]['schema_sha256'])==64
+        assert rows[2]['codec']=='flat-investigation-v2' and len(rows[2]['schema_sha256'])==64
     assert rows[-1]['phase'] == 'validation-rejected'
     issue = rows[-1]['errors'][0]
     assert issue['path'] == ['finding'] and issue['expected']['max_length'] == 450

@@ -78,6 +78,29 @@ def private_json(path, bound=65536, lines=False):
     )
 
 
+def provider_evidence(identifier):
+    """Find the original evidence owner after a checked history cutover."""
+    direct = EVIDENCE / (identifier + ".jsonl")
+    if direct.exists():
+        return direct
+    inputs = private_json(ROOT.parent / "ops/inputs.json", 1 << 20)
+    candidates = []
+    for name in inputs["evidence_roots"]:
+        root = Path(name)
+        if (
+            root.parent == ROOT.parent.parent
+            and re.fullmatch(r"everyday-outcome-[a-f0-9]{7,40}", root.name)
+            and root.resolve() == root
+            and root.stat().st_uid == os.getuid()
+            and not root.stat().st_mode & 0o077
+        ):
+            p = root / "artifacts/codex-evidence" / (identifier + ".jsonl")
+            if p.exists():
+                candidates.append(p)
+    require(len(candidates) == 1, "Provider evidence is missing or ambiguous across saved releases")
+    return candidates[0]
+
+
 def historical_proof(binding):
     """Audited immutable deployed code, not inference from absence of a write."""
     require(binding == HISTORICAL_BINDING, "Historical incident changed")
@@ -120,7 +143,7 @@ def state(connection, identity):
         a["source"] == "workbench"
         and a["backend"] == "codex"
         and a["purpose"] == "planning"
-        and a["outcome"] == "interrupted_unknown"
+        and a["outcome"] in {"interrupted_unknown", "incomplete_output", "failed"}
         and a["finished_at"]
         and a["usage"] in (None, "null"),
         "Not an uncertain read-only investigation",
@@ -171,9 +194,36 @@ def state(connection, identity):
         isinstance(receipt, str) and str(UUID(receipt)) == receipt,
         "Provider recovery identity unavailable",
     )
-    p = evidence_root / (receipt + ".jsonl")
+    p = (
+        evidence_root / (receipt + ".jsonl")
+        if identity == HISTORICAL
+        else provider_evidence(receipt)
+    )
     events = private_json(p, lines=True)
     phases = {e.get("phase") for e in events}
+    terminals = [
+        e
+        for e in events
+        if e.get("phase") == "lifecycle-terminal"
+        and e.get("status") in {"completed", "failed", "interrupted"}
+    ]
+    terminal = terminals[-1] if terminals else None
+    identities = {
+        (e.get("thread_id"), e.get("turn_id"))
+        for e in events
+        if e.get("phase") in {"turn-started", "lifecycle-turn"}
+    }
+    require(
+        len(identities) == 1
+        and all((e.get("thread_id"), e.get("turn_id")) in identities for e in terminals)
+        and len({e["status"] for e in terminals}) <= 1,
+        "Turn lifecycle binding is ambiguous",
+    )
+    if a["outcome"] != "interrupted_unknown":
+        require(
+            terminal is not None and diag.get("provider_terminal_confirmed") is True,
+            "A partial or failed investigation needs its actual terminal receipt",
+        )
     if identity != HISTORICAL:
         require(
             any(
@@ -181,7 +231,7 @@ def state(connection, identity):
                 for e in events
             )
             and "connection-closed" in phases
-            and "status-retrieval" in phases,
+            and ("status-retrieval" in phases or terminal is not None),
             "Provider isolation or supported recovery is unverified",
         )
     require(
@@ -198,14 +248,25 @@ def state(connection, identity):
         authority_sha256=AUTHORITY,
         capability_proof=proof,
         provider_evidence_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),
+        provider_evidence_path=str(p),
         requests_started=count + 1,
         known_completed_requests=count,
         known_completed_values=known,
         unknown_final_requests=1,
-        final_outcome="unknown",
+        provider_terminal_confirmed=terminal is not None,
+        final_outcome=terminal["status"] if terminal else "unknown",
         final_usage=None,
         partial_output_reusable=False,
-        successful_cancellation=False,
+        successful_cancellation=bool(
+            terminal
+            and terminal["status"] == "interrupted"
+            and any(
+                e.get("phase") == "interrupt-result"
+                and e.get("acknowledged") is True
+                and e.get("status") == "interrupted"
+                for e in events
+            )
+        ),
         permits_fresh_task=True,
         old_task_fenced=True,
     )
@@ -270,7 +331,8 @@ def recover_one(engine):
     with engine.connect() as c:
         candidates = rows(
             c,
-            "SELECT id FROM model_attempts WHERE backend='codex' AND purpose='planning' AND outcome='interrupted_unknown' ORDER BY started_at",
+            "SELECT id FROM model_attempts WHERE backend='codex' AND purpose='planning' "
+            "AND outcome IN ('interrupted_unknown','incomplete_output','failed') AND (usage IS NULL OR usage='null') ORDER BY started_at",
         )
         for item in candidates:
             try:
@@ -307,7 +369,7 @@ def no_generation_accounting(connection, identity):
             and type(usage.get("requests_observed")) is int
             and usage["requests_observed"] == 0
             and usage.get("values") == zero
-            and all(type(value) is int for value in usage['values'].values())
+            and all(type(value) is int for value in usage["values"].values())
             and payload.get("diagnostics", {}).get("generation_state") == "not_started"
             and a["outcome"] != "interrupted_unknown",
             "No verified zero-dispatch accounting",

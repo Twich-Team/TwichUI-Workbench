@@ -576,7 +576,11 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     response_evidence.rejected(error, raw, phase='local-validation')
                 except OSError:
                     adapter_used.diagnostics['evidence_write_failed'] = 1
-            failure = ('planning_validation', str(error))
+            if bug and getattr(error,'path',None)==['action'] and str(error)=='Ambiguous investigation wire fields.':
+                validation_diagnostics=dict(validation_errors=1,validation_locations='action:invalid_outcome')
+                failure=('schema_validation','The provider returned conflicting or invalid investigation transport fields.')
+            else:
+                failure = ('planning_validation', str(error))
         except OSError:
             failure = ('planning_io', 'Workbench could not read the files it needs for planning.')
         finally:

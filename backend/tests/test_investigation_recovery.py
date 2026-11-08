@@ -182,3 +182,43 @@ def test_unknown_historical_usage_is_not_a_zero_dispatch(eligible):
     with pytest.raises(ValueError):
         recovery.no_generation_accounting(c, ATTEMPT)
     assert list(c.iterdump()) == before
+
+
+@pytest.mark.parametrize("fault", [None, "foreign_terminal", "missing_terminal"])
+def test_confirmed_interruption_with_unknown_usage_is_separate_from_lost_execution(eligible, fault):
+    c, journal, payload = eligible
+    payload["diagnostics"].update(generation_state="partial", provider_terminal_confirmed=True)
+    c.execute("UPDATE model_attempts SET outcome='incomplete_output' WHERE id=?", (ATTEMPT,))
+    c.execute(
+        "UPDATE planning_jobs SET payload=? WHERE id=?", (json.dumps(payload), "historical-job")
+    )
+    events = [
+        json.loads(line)
+        for line in journal.path.read_text().splitlines()
+        if json.loads(line)["phase"] != "status-retrieval"
+    ]
+    for e in events:
+        if e["phase"] == "interrupt-result":
+            e.update(acknowledged=True, status="interrupted")
+    if fault != "missing_terminal":
+        events.insert(
+            -1,
+            dict(
+                phase="lifecycle-terminal",
+                thread_id="thread",
+                turn_id="foreign" if fault == "foreign_terminal" else "turn",
+                status="interrupted",
+                usage=None,
+            ),
+        )
+    journal.path.write_text("".join(json.dumps(e) + "\n" for e in events))
+    before = list(c.iterdump())
+    if fault:
+        with pytest.raises(ValueError):
+            recovery.record(c, ATTEMPT)
+    else:
+        result = recovery.record(c, ATTEMPT)
+        assert result["final_outcome"] == "interrupted" and result["provider_terminal_confirmed"]
+        assert result["successful_cancellation"] and result["final_usage"] is None
+        assert not result["partial_output_reusable"]
+    assert list(c.iterdump()) == before

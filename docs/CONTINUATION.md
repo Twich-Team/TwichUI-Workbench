@@ -1,3 +1,57 @@
+# Latest verified state — November 8, 2026, 14:38 UTC
+
+Following the Project Working Philosophy: no real flight-path implementation or
+independently checked repair, and zero of four required supporting real-provider
+cases complete. No owner decision pending. Continue under standing authority.
+
+Installed b33097caede81d5d60aaf31dd05e8a5f5730d729, seal
+264ac4dcc22a3cda2f325dc6ad9e20466d2b26dbbd96b100bab8c97d687f9701.
+C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
+R=C/outcome-b33097c; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-b33097c.
+Real32 intake d4134933-9ec0-4694-9fef-a9366fc6cbaa, attempt
+253a3b31-2b21-412b-93f8-989819f5cd13 settled at13:49:54. Four Codex turns:
+three complete receipts (95192 known total tokens), fourth whitespace-guard
+interrupted with actual matching terminal notification and cancellation ack.
+Final usage unavailable; original incomplete_output/NULL usage remains unchanged.
+No plan, approval, implementation or switch. Latest history211 rows, logical SHA
+829d1788f94b150975bb09363acee925302531815feab8c7837fc671d89f99a0.
+Original79 and all predecessor stores remain. No live provider currently active.
+
+Standing read-only policy qualification verified actual tool-free isolated
+capabilities and fenced output. Unlike the two older unknown-terminal incidents,
+this terminal status is known interrupted; usage is still unknown. Proof:
+C/settled-readonly-partial32-proof/proof.json. R/attempt-32-accounting.json and
+C/outcome-ledger.json retain16Codex starts/13complete receipts/3missing usage,
+2unknown terminal outcomes/1confirmed interrupted;414167known total tokens.
+Qwen remains89starts; no accounting reset or old record mutation.
+
+Connected correction now verified: app-owned bounded completed-search notebook
+preserves positive/negative scoped facts across later reads; outgoing explicit
+reads remain pinned. Repeated already-visible searches hold rather than loop.
+Codex investigation uses flat seven-field wire, deterministically normalised to
+unchanged strict canonical validation; conflicting/partial/unauthorised output
+still rejects. Recovery distinguishes known terminal/missing usage and resolves
+private predecessor journals only through validated staged evidence roots.
+No CLI/auth/billing/source/write/network permission expansion.
+
+C/notebook-flat-full-tests.log:1606backend passed/6default opt-ins skipped;
+25frontend passed. C/notebook-flat-integrated-final.log:141focused passed.
+C/notebook-flat-native-v2.log:17.33s affected separate API/worker/normal-browser
+controlled rehearsal passed, two unrelated fixture repairs and fault denials.
+C/notebook-flat-check.log:static/contracts/build/schema passed. Duplicate suite
+launch safely interrupted; original passing suite is authoritative. Six default
+opt-ins include four native modes/delegated routing/historical guild; affected
+Codex mode freshly run, unchanged others retain predecessor evidence. None counts
+as real acceptance. Do not rerun these merely to prepare deployment.
+
+Next: commit/seal revision36, verify predecessor-journal lookup against unchanged
+211-row store, checked cutover, recreate exact old/standing recovery receipts,
+normal admission/history reads, fresh Codex bug task33. Append253a3b31 to priorIDs;
+evidence roots101. Then real checked repair, provider4, durable result/restart,
+next ordinary bug and broader agreed outcome. No old campaign caps. Preserve LAN,
+billing/disclosure, task approvals, independent checks and recovery safeguards.
+The lower handoff entries are historical; this block governs actual current state.
+
 # Latest: cached-read guard corrected; known non-dispatch accounted separately
 
 Installed0cb1432 passed1578backend/25frontend/static/native and checked203-row cutover.

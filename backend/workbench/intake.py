@@ -214,16 +214,18 @@ def view_in(connection, identity):
         if job['kind'] == 'planning' and job['status'] == 'failed':
             from workbench.investigation_recovery import accounting, path_for
             for attempt_id in connection.execute(select(model_attempts.c.id).where(
-                    model_attempts.c.job_id == job['id'], model_attempts.c.outcome == 'interrupted_unknown')).scalars():
+                    model_attempts.c.job_id == job['id'], model_attempts.c.outcome.in_(['interrupted_unknown','incomplete_output','failed']))).scalars():
                 try:
                     if not path_for(attempt_id).exists():
                         continue
-                    accounting(connection, attempt_id)
+                    disposition=accounting(connection, attempt_id)
                 except (ValueError,OSError,KeyError,TypeError):
                     continue
                 # Projection only: historical result/accounting remain immutable.
-                job['message'] = ('This read-only investigation was quarantined. Final provider outcome and usage remain unknown. '
-                                  'Its output cannot be used. Start a fresh task with fresh planning consent.')
+                job['message'] = ('This read-only investigation was quarantined. '+
+                    ('Final provider outcome and usage remain unknown. ' if disposition['final_outcome']=='unknown' else
+                     'The provider confirmed its final state; final usage remains unavailable. ')+
+                    'Its output cannot be used. Start a fresh task with fresh planning consent.')
                 job['payload']['diagnostics'] = {**job['payload'].get('diagnostics',{}), 'read_only_quarantined':1}
     planned = [dict(t) for t in connection.execute(select(backlog_items).where(backlog_items.c.intake_id == identity)).mappings()]
     for item in planned:

@@ -1,3 +1,9 @@
+Latest November8 14:38UTC: real32 terminal interrupted confirmed, final usage
+unknown, no implementation; zero required real provider cases complete. Connected
+notebook/flat-wire/terminal-recovery correction verified1606backend/25frontend,
+141focused and normal-browser controlled rehearsal17.33s; installation next.
+See docs/CONTINUATION.md for current bindings; lower entries remain historical.
+
 # Current November8 — standing recovery exercised; shared context defect proven
 
 Installedfb392be implements the independent standing read-only recovery decision;

@@ -1,3 +1,9 @@
+Latest November8 14:38UTC: real32 terminal interrupted confirmed, final usage
+unknown, no implementation; zero required real provider cases complete. Connected
+notebook/flat-wire/terminal-recovery correction verified1606backend/25frontend,
+141focused and normal-browser controlled rehearsal17.33s; installation next.
+See docs/CONTINUATION.md for current bindings; lower entries remain historical.
+
 ## November8 — cached-read distinction and zero-generation accounting verified
 
 Real31 failed before any model request: outgoing-visibility guard incorrectly pinned

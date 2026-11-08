@@ -273,6 +273,7 @@ class Evidence:
                      'finish_reason', 'prompt_tokens', 'completion_tokens', 'total_tokens',
                      'checkpoints', 'before_call', 'call', 'observe', 'other_reads', 'setup',
                      'at','results','return_value','client_field','captured_argument','number'}
+        self.keys.update({'action','reads','searches','diagnosis'})
         self.enums, self.patterns = set(), set()
         def collect(node):
             if isinstance(node, dict):
