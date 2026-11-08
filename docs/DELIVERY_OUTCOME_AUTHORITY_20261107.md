@@ -58,3 +58,8 @@ the owner accepts that included allowance may have been consumed without a recei
 No paid charges, uncertain writes/publication/consequential effects are covered.
 Implement and verify recovery in the app, repair lifecycle defects, then continue
 the complete outcome without another engineering prompt. No campaign caps return.
+
+Owner later approved OWNER_CODEX_SUPPORT_DISCLOSURE_20261108.md: three exact read-only
+test-support files supplement the original nine-file Codex flight-path permission.
+Its bound request remains immutable historical evidence; no repeated permission needed.
+Other disclosure/write/billing/network/publication safeguards remain unchanged.

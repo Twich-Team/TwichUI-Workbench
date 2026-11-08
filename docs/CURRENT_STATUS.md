@@ -1,15 +1,13 @@
-# Current status — real transport corrected; source operation bounds being verified
+# Current status — fixture context repaired; no completed real bug repair yet
 
-Following the Project Working Philosophy: no real addon implementation/checked repair
-and zero of four required supporting real-provider cases complete. Installed7c7a806;
-latest219history rows preserved. Real34 completed all8Codex turns with final receipts,
-using flat diagnosis/planning and retained source. It then hit the8-turn inspection
-limit, without a plan or implementation; no new execution uncertainty.
+Following the Project Working Philosophy: installed13de1f7 preserves224history rows.
+Real35 completed seven Codex turns with receipts, then identified fixture/client
+source missing from its permitted context. No implementation or independent real
+behavioral pass; zero of four real supporting provider cases complete.
 
-Fresh tasks now bind16shared turns; old8-turn approvals remain8. Larger Codex source
-pages and a window-count correction preserve exact source/byte/disclosure limits.
-Focused/static/controlled browser checks pass; all four true confined
-separate-process rehearsals and full1614backend/25frontend suites passed. Next is
-checked installation and a fresh real run.
-No owner decision pending. Full repair/provider checks/restart/next ordinary bug and
-broader scope remain unfinished. See [handoff](CONTINUATION.md) for exact evidence.
+Owner approved the three exact read-only support files. Generic literal-dependency
+discovery now supplies that context without developer registration or widening
+repair permissions. 56focused checks and all four real-confined controlled browser
+modes passed; the full suite is progressing before installation and a fresh real run.
+No owner decision pending. Real repair/provider checks/result restart/next ordinary
+bug and broader product capabilities remain unfinished. See [handoff](CONTINUATION.md).

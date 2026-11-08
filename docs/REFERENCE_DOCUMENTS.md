@@ -31,3 +31,8 @@ The later independently stated OWNER_READONLY_RECOVERY_20261108.md is the standi
 A8/A9 recovery policy. It replaces repeated exceptions for qualifying read-only
 investigation uncertainty. The earlier specific receipt and proposal remain
 historical; the proposal is not blanket-approved. Preserve all other safeguards.
+
+Owner later approved OWNER_CODEX_SUPPORT_DISCLOSURE_20261108.md: three exact read-only
+test-support files supplement the original nine-file Codex flight-path permission.
+Its bound request remains immutable historical evidence; no repeated permission needed.
+Other disclosure/write/billing/network/publication safeguards remain unchanged.

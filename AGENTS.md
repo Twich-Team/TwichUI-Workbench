@@ -37,3 +37,6 @@ and may use the valid acceptance-only browser delegation. Resolve uncertain exte
 execution before replay. Choose bounded observable operations and verified retention;
 a timeout stops that operation, not the assigned outcome. Ask only at genuine
 product/access/spending/consequential boundaries after investigating alternatives.
+
+Use [approved Codex support disclosure](docs/OWNER_CODEX_SUPPORT_DISCLOSURE_20261108.md)
+with the original source permission and standing read-only recovery policy.

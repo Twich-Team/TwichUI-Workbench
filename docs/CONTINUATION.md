@@ -1,3 +1,52 @@
+# Latest actual state — November8 15:25UTC, support-source permission granted
+
+Installed13de1f7af9469770d9f5176fd64abe7ad4970538/treea6b4a7a4d68e6e3040288b42eb39dfdac336ae5a,
+seal e5490a20cd2a3e45251b95401ba9c89b13698c50e591a1616b4c9d29483b9434.
+R=C/outcome-13de1f7; S_parent/everyday-outcome-13de1f7. Checked219-row cutover,
+all36history reads/recovery dispositions/network/browser/isolation gates passed.
+Real35 intakea43f10e5-1db3-41ab-b0a2-af0c74ca9a28/model6930db05-8c16-4be5-9f4c-6c18cd55b61e,
+job87582239-66da-4390-ad24-ef8189726e83, seven Codex turns completed with receipts.
+It returned a limitation because NAV_FIXTURE and client environment definitions
+were outside the nine-file disclosure scope. Local inspection confirmed exact
+literal dependencies, not provider incapability. No implementation/approved plan.
+R/attempt-35-accounting.json preserves363809known tokens. GlobalCodex38starts/
+34completeusage/4missingfinalusage,2unknownterminal+2confirmedinterrupted,
+1365632known total. Qwen89starts unchanged. No live provider active; driver96915 ended.
+Latest224rows (limitation added a held proposal), fingerprint
+81ee162c70bf067b42e68d0128e6ef1dfe13bc799b1f4109da86a75aaaa00365.
+Do NOT assume223 or overwrite with219/original79. All stores/evidence retained.
+No real repair and zero required real provider cases complete; full scope unchanged.
+
+Owner approved the three precise support files in OWNER_CODEX_SUPPORT_DISCLOSURE_20261108.md,
+binding the immutable request SHA0e3f8d99d440df4f1c6c71abb72374d11b697992cb23abacfefb46934c684a59.
+Relevant excerpts/followups from tests/harness.lua, tests/nav_codec.lua,
+tests/fixtures/nav_fixture.lua at1caf530 are allowed for Codex flight-path bug,
+18850complete bytes, read-only. These supplement original nine; six writable/max3
+repair scope unchanged. No duplicate disclosure approval or owner attendance needed.
+
+Current correction discovers literal committed test dependencies generically,
+bounded3helpers/24KiB/12selectedfiles, skipping dynamic/traversal/comment/string
+imitations. Adds hash-bound prelude/context metadata, never executes helpers or
+makes them writable/repair-other_reads. Test with unrelated new helper proves no
+flight-report registration. C/support-context-actual-wire-proof/proof.json confirms
+exact approved12 paths/readonly additions, actual89368cached source chars retained
+under existing128k budget, all requested ranges visible, no model/live history write.
+No expected addon fix/reproducer injected. C/codex-flight-support-disclosure-manifest.json
+binds these12; original9manifest remains immutable.
+56focused/static checks pass. All4 REAL-CONFINED controlled API/worker/browser modes
+pass105.46s; owned user unit collected/cgroup absent, peak595.3M/swap0. Full suite
+C/support-context-full-tests.log currently running (exec96001). Finish before install.
+Installed13de final full1614/25 remains valid. Current extra code/tests not committed yet.
+
+Next revision39/task36, roots107, append6930db05 (33priorIDs). Generator derives
+from C/prepare-investigation-bounds-revision.py; codex_provider unchanged AST.
+Stage must validate owner-approved12manifest instead of original9. In case comparison
+allow ONLY three added readPaths and changed evidenceSha; writablePaths/other fields
+must equal predecessor. Bind exact owner-request SHA and later decision. Source proof,
+current224/original79 fingerprints, preflight, offline/native record, checked cutover,
+old18 +3standing receipts, all37history reads/admission, fresh normal real task.
+Continue whole outcome; no owner decision pending. Lower sections are historical.
+
 # Current handoff — November 8, 2026, 15:06 UTC
 
 Following the Project Working Philosophy: continue delivery under standing authority.

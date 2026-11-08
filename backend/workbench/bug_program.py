@@ -137,7 +137,7 @@ def schema(coverage, files):
         plan = result['$defs']['Plan']['properties']
         plan['writable_paths']['items'] = dict(type='string',enum=writable)
         plan['focused_test'] = dict(type='string',enum=tests)
-        plan['other_reads']['items'] = dict(type='string',enum=list(items))
+        plan['other_reads']['items'] = dict(type='string',enum=[p for p,f in items.items() if not f.get('support_dependency')])
     result['$defs']['Reproduction']['properties']['phases']['minItems'] = (
         3 if coverage.get('minimum_observations') == 3 else 1)
     return result

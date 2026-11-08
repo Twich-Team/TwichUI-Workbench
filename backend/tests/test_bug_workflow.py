@@ -94,7 +94,10 @@ class BugPlanner:
 
     def generate(self, packet, schema):
         assert schema is bug_evidence.BugPlanningResponse
-        assert not any(f['path'] in {'tests/harness.lua', 'tests/run.sh'} for f in packet['files'])
+        assert not any(f['path']=='tests/run.sh' for f in packet['files'])
+        for item in packet['files']:
+            if item['path']=='tests/harness.lua':
+                assert item['support_only'] and item['support_dependency']['read_only']
         self.calls.append(packet)
         return self.answer, 'controlled-bug-planner', 'demo'
 

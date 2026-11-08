@@ -214,7 +214,10 @@ def context(original, feedback, policy):
     if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1'}:
         from workbench.game_api_reference import collect
         references['api_references'] = collect(files)
-    return dict(base=base, files=files, declarations=declaration_index(files, inspected, terms), **references,
+    declarations = declaration_index(files, inspected, terms)
+    from workbench.source_support_context import add as add_support
+    add_support(files, inspected, base)
+    return dict(base=base, files=files, declarations=declarations, **references,
                 **({'plan_review':policy['bug_plan_review']} if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1'} else {}),
                 policy_sha256=digest(policy))
 

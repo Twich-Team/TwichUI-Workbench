@@ -1,3 +1,5 @@
+Latest Nov8 15:25UTC: installed13de1f7; real35 completed seven Codex turns then source-scope limitation, no repair/provider case complete. Owner approved three exact readonly support files; generic discovery passes56focused/4real-confinedbrowser/static checks, full suite progressing. Latest224rows, no uncertainty added or owner decision pending. See CONTINUATION.md and OWNER_CODEX_SUPPORT_DISCLOSURE_20261108.md. Lower entries historical.
+
 Latest Nov8 15:06UTC: real34 all8Codex turns completed with receipts; flat diagnosis/planning/source retention demonstrated, no real implementation/provider case complete. Fresh16-turn consent preserves historical8, source paging/window correction under verification. Latest219rows, installed7c7a806. See CONTINUATION.md; lower entries historical.
 
 Latest Nov8 14:49UTC: c7d1f24 installed; real33 diagnosis advanced then old planning wire whitespace, confirmed interrupted/unknown usage. No real repair/provider case complete. Flat planning and full bounded Codex source retention pass focused/native/actual-context checks; full suite running. See CONTINUATION.md. Historical entries below preserved.
