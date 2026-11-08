@@ -219,7 +219,7 @@ def test_invalid_connector_envelope_never_starts_a_provider_or_breaks_the_broker
 
 @pytest.mark.parametrize(
     "title,total,held",
-    [("ProgramResponse", 40000, False), ("ReviewResponse", 70000, True), ("ordinary", 40000, True)],
+    [("ProgramResponse", 40000, False), ("ReviewResponse", codex.BUG_OBSERVED+1, True), ("ordinary", 40000, True)],
 )
 def test_observed_guard_keeps_actual_usage_and_terminal_receipt(title, total, held):
     from types import MethodType
