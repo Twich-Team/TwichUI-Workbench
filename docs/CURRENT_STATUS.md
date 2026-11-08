@@ -1,12 +1,14 @@
-# Current status — corrected app installed; real Codex investigation active
+# Current status — installed app healthy; source-budget correction being verified
 
-Following the Project Working Philosophy: verifiedc778e42 is installed at both approved
-addresses. History display is fixed; all37saved task reads/listing and224-row cutover
-preservation passed, along with network/browser/isolation gates and full offline checks.
-Older failed installation was restored safely; its evidence and stores are retained.
+Following the Project Working Philosophy: c778e42 is installed at both approved
+addresses; history/previews, network/browser/isolation and preservation checks passed.
+Latest228history rows retained. Real36 completed five Codex turns, then hit a source-
+reading resource bound while inspecting the approved harness. No plan/implementation
+or independent behavioral pass; zero of four required real provider cases complete.
 
-Fresh real flight-path task36 is actively inspecting source with the twelve approved
-read-only files. No approved repair plan, addon implementation or independent behavioral
-pass yet; zero of four supporting real-provider cases demonstrated. No owner decision
-pending. Continue real repair, provider checks, restart persistence, next ordinary bug
-and the broader agreed outcome. [Handoff](CONTINUATION.md) binds active identities.
+The new inspection footprint fits all12authorized files plus API context, while
+outgoing request/disclosure limits stay unchanged. Targeted/static/affected confined
+browser checks pass; complete1620backend/25frontend suite passed before checked installation and a
+fresh purposeful task. No provider currently active or owner decision needed.
+Continue full repair/provider checks/result restart/next ordinary bug and broader
+scope. [Handoff](CONTINUATION.md) binds actual records; old active-task text superseded.

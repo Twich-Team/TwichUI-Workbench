@@ -1,4 +1,4 @@
-# LIVE CURRENT STATE — November8 16:02UTC
+# CURRENT VERIFIED STATE — November8 16:12UTC
 
 Following the Project Working Philosophy: continue; no owner decision needed.
 Verified installed candidate c778e4202cb73dee9c42339c10e6e355c5d597e1,
@@ -15,21 +15,41 @@ Original rollback stores and failed491stage retained. Original-app restoration b
 is HISTORICAL; new corrected app is installed now. Full1618backend/25frontend and
 actual224row37read replay pass; controlled true-confined browser3+affected1rerun pass.
 
-Fresh real task36 IS ACTIVE, normalbrowser driver exec28930. Intake
+Real task36 SETTLED, normalbrowser driver exec28930 finished held. Intake
 51a06cb9-0a42-4f3c-9fbd-286d3728055f, model7642490f-9715-49b5-ac1f-4e4e775612b9,
 jobc7311a02-2c8a-40d9-8e39-3f3f63687578. Codex-only, approved12sources, normal fresh
-bindings/delegated decisions; no old partial/approval reuse. Several source turns
-completed; still investigating, no plan/implementation/independent behavior result.
-DO NOT replay or cut over while active. Monitor S/artifacts/acceptance/bug-flight-paths.jsonl,
+bindings/delegated decisions; no old partial/approval reuse. All5source turns completed with usage; source-footprint128650 exceeded128000.
+No plan/approval/implementation or uncertainty. No provider activity remains.
+A status update incorrectly called it active after it had settled; actual SQL/journal
+state now governs. Do not replay unchanged work. Monitor S/artifacts/acceptance/bug-flight-paths.jsonl,
 R/bug-flight-paths-driver.txt and private codex journals; read-only task/usage SQL.
 Persist identities/accounting before parsing, settle any uncertainty per standing
-readonlypolicy before renewal. Old settled totals38Codexstarts/34completeusage/
-4missingfinalusage and1365632known tokens EXCLUDE current active task pending settlement.
+readonlypolicy before renewal. Settled totals43Codexstarts/39completeusage/4missingfinalusage and1629977known
+tokens now include real36; all historical outcomes/usage remain unchanged.
 Qwen89starts unchanged. All4required real provider cases still NOT demonstrated.
 
 Owner support permission already approved for exact three helpers at1caf530; generic
 discovery/context implemented and real integration now being exercised. No new source
-permission request required for these12. Source write scope still6files/max3repair.
+permission request required for these12. Source write scope still6files/max3repair. Current connected correction separates
+inspection working-set262144characters from outgoing Codex source128000characters
+and196608-byte request guard (all disclosure paths unchanged). Full12committed files
+plus APIcontext measured222917characters; old128000resource bound was too small.
+C/context-envelope-full-authorized-source-proof.json binds measurement without model
+call/solution injection. New tests prove >128k inspected context can validate while
+outgoing remains bounded/current requested ranges visible, and >262144 rejects.
+Clear source-limit/repeated-search hold messages replace misleading invalid-output
+fallback. 7targeted checks/static pass; two affected REAL-CONFINED program-browser
+modes pass52.94s, legacydata modes unchanged/reused. Full suite
+C/context-envelope-full-tests.log passed1620backend/25frontend; final code verified
+before next activation.
+No additional owner permission needed. Do not retry unchanged old reading bound.
+Next candidate revision41/task37, roots111, append7642490f (34priorIDs), preserve
+latest228/original79. Template C/prepare-evidence-preview-revision.py plus Rcurrent
+manual corrections: fresh-successful-preflight guard, precise firewall count,
+conditional stops, verified pinned APIcache. Preflight must handle currentactive4
+roles OR restoredoriginal2roles without assuming either; partial/unexpectedmix holds.
+Both common starts reuse exact latest228/history fingerprints; current app remains
+working while ordinary development continues. All runtime/provider checks preserved.
 When real plan arrives, independently inspect actual event/initial route/refresh
 observations, no assigned answer or computed learned-state replacement, then private
 review receipt bound to currentseal/intake/planbinding/expectationdigest, exact3criteria

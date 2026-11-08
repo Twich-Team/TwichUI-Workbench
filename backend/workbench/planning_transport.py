@@ -11,6 +11,8 @@ import urllib.request
 
 MAX_DEADLINE = 120
 SCENARIO_FAILURE_MESSAGES = {
+    "inspection_limit": "This investigation reached its reading or turn limit before a repair plan was ready. No changes started.",
+    "inspection_unchanged": "The model repeated source searches it had already received. Workbench stopped the investigation; no changes started.",
     "canceled": "The worker stopped before the local model finished planning. The model’s final usage is unknown.",
     "interrupted_unknown": "The worker stopped during planning. Model completion is unknown.",
     "incomplete_output": "The local model stopped before it returned a complete plan.",

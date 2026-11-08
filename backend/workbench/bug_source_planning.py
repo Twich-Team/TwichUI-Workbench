@@ -22,7 +22,7 @@ INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+
 
 
 def read_limit(packet):
-    return 128000 if packet.get('plan_review') == 'source-grounded-lua-v1' else READ_CHARS
+    return 262144 if packet.get('plan_review') == 'source-grounded-lua-v1' else READ_CHARS
 
 
 def window_limit(packet):
