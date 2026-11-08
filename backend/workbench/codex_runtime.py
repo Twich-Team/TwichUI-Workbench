@@ -15,7 +15,7 @@ EDIT_SCHEMA = {
 
 
 def repair_schema(paths):
-    return dict(type='object', properties=dict(edits=dict(
+    return dict(title='BugRepairResponse', type='object', properties=dict(edits=dict(
         type='array', minItems=1, maxItems=6, items=dict(
             type='object', properties={**EDIT_SCHEMA['properties'],
                 'path': dict(type='string', enum=paths)},

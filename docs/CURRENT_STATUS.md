@@ -16,11 +16,12 @@ receipts and waits for cancellation confirmation; it passed controlled child-pro
 and browser tests. Fresh consent gives Codex five minutes; older consent stays bound
 to its original limit. No new real request was made after the uncertain turn.
 
-One specific owner question is pending: authorize quarantining that lost read-only
-turn and a fresh improved investigation, while preserving unknown accounting. The
-standing no-uncertain-replay rule prevents assuming this exception. This is not an
-engineering renewal. Details: [timeout recovery](CODEX_TIMEOUT_RECOVERY_20261108.md).
-No source, billing, network, publication or addon-write permission was broadened.
+The owner has now approved permanently quarantining ONLY the lost second Codex
+turn. No decision is pending. Original unknown outcome/usage remain unchanged;
+partial output and old approvals will not be reused. A content-bound, acceptance-
+only receipt and accounting correction pass152 affected tests and actual195-row
+copy/admission proof. Final verification/deployment and fresh investigation are
+underway. See OWNER_CODEX_QUARANTINE_20261108.md.
 
 Addresses: http://127.0.0.1:9487 and https://10.0.0.9:9487, trusted home subnet only.
 The exact current candidate, evidence, accounting and next actions are in

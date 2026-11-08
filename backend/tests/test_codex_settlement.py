@@ -215,3 +215,27 @@ def test_invalid_connector_envelope_never_starts_a_provider_or_breaks_the_broker
     assert result["error"] == "protocol" and result["started"] is False
     assert result["partial"] is False and result["counted"] is None
     assert not (tmp_path / "evidence").exists() and not thread.is_alive()
+
+
+@pytest.mark.parametrize(
+    "title,total,held",
+    [("ProgramResponse", 40000, False), ("ReviewResponse", 70000, True), ("ordinary", 40000, True)],
+)
+def test_observed_guard_keeps_actual_usage_and_terminal_receipt(title, total, held):
+    from types import MethodType
+
+    events = completed()
+    events[1]["params"]["tokenUsage"]["total"] = dict(
+        inputTokens=total - 100, outputTokens=100, reasoningOutputTokens=0, totalTokens=total
+    )
+    rpc = Transcript(events=events)
+    rpc.settle_interrupt = MethodType(codex.Channel.settle_interrupt, rpc)
+    if held:
+        with pytest.raises(codex.Hold) as error:
+            codex.turn(rpc, "fixture-model", None, "task data", dict(title=title))
+        assert error.value.terminal and error.value.counted["total_tokens"] == total
+        assert error.value.reason == "accounting"
+    else:
+        result = codex.turn(rpc, "fixture-model", None, "task data", dict(title=title))
+        assert result["usage"]["total_tokens"] == total
+    assert [m for m, _ in rpc.calls].count("turn/start") == 1

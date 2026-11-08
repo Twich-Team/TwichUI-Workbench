@@ -43,3 +43,8 @@ No addon installation, external publication, push, PR or merge. Functional
 acceptance requires the actual real flight-path result and provider checks;
 fixtures alone, plans, diagnostics and installs are not completion. Preserve
 broader missing capabilities. Styling/audit remain subsequent phases.
+
+The November8 owner-approved [specific Codex quarantine](OWNER_CODEX_QUARANTINE_20261108.md)
+allows fresh work despite only model18bbf5d0's lost second turn. Preserve its unknown
+outcome/usage and original records, never reuse partial output or old approvals.
+This supersedes that specific hold; no general uncertainty/billing/disclosure waiver.

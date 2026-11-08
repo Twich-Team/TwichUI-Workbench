@@ -1,3 +1,12 @@
+# November8: owner quarantine approved; fresh investigation authorized
+
+No owner decision pending. Exact18bbf5d0 second-turn exception recorded immutably.
+Canonical private receipt preserves all historical SQLite records and unknown
+usage/outcome.152affected checks and actual195rowCOPY/normaladmission proof pass,
+no livewrite/providercall. Valid observed usage now survives threshold holds; bug
+postguard64k/regression32k, not provider/billing ceilings. Final verified candidate
+and fresh normal Codex-only flight journey next; no new real request yet.
+
 # November8 05:21UTC: recovery installed; historical external-state decision pending
 
 Installed910049d/seal0b6e5451..., full1529backend/25frontend/static pass. Installed

@@ -21,6 +21,7 @@ SECONDS = 120
 BUG_SECONDS = 300
 # This is a hold after observation, not a provider output-token limit.
 MAX_OBSERVED = 32_768
+BUG_OBSERVED = 65_536  # Post-observation guard for source-heavy bug turns, not a provider ceiling.
 BACKEND_HOST = 'chatgpt.com'
 RPC_PHASES = ('resolve', 'initialize', 'account/read', 'account/rateLimits/read', 'model/list', 'thread/start', 'turn/start')
 PERSONAL_SUBSCRIPTIONS = {'go', 'plus', 'pro', 'prolite', 'promax'}
@@ -343,7 +344,7 @@ def usage(values):
     fields = {'prompt_tokens': 'inputTokens', 'completion_tokens': 'outputTokens',
               'reasoning_tokens': 'reasoningOutputTokens', 'total_tokens': 'totalTokens'}
     observed = {key: values.get(field) for key, field in fields.items()}
-    if (any(type(n) is not int or not 0 <= n <= MAX_OBSERVED for n in observed.values())
+    if (any(type(n) is not int or not 0 <= n <= 2**31 for n in observed.values())
             or observed['total_tokens'] <= 0
             or observed['total_tokens'] < observed['prompt_tokens'] + observed['completion_tokens']):
         raise Hold('accounting', started=True)
@@ -352,6 +353,9 @@ def usage(values):
 
 def turn(rpc, model, effort, prompt, schema):
     record = getattr(rpc, 'evidence', lambda *args, **kwargs: None)
+    observed_limit = BUG_OBSERVED if schema.get('title') in {
+        'BugPlanningResponse', 'ProgramResponse', 'InvestigationResponse', 'ReviewResponse',
+        'BugRepairResponse'} else MAX_OBSERVED
     initialize(rpc)
     require_checks(account_checks(rpc.call('account/read', {'refreshToken': False})), 'account/read')
     check_allowance(rpc.call('account/rateLimits/read', {}))
@@ -426,6 +430,9 @@ def turn(rpc, model, effort, prompt, schema):
                     partial = partial or bool(output)
             if method == 'thread/tokenUsage/updated':
                 observed = usage(p['tokenUsage']['total'])
+                if any(value > observed_limit for value in observed.values()):
+                    # Keep valid observed usage even when an operational guard holds.
+                    raise Hold('accounting', started=True, counted=observed)
             if method == 'account/rateLimits/updated':
                 limits = p['rateLimits']
                 if limits.get('limitId') == 'codex':

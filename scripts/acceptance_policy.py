@@ -159,7 +159,14 @@ def closeout(connection, identity, execution, case):
                 'provider accounting incomplete')
         values = usage['values']
         if case['provider'] == 'codex':
-            require(0 < values['total_tokens'] <= 32768, 'Codex observed threshold exceeded')
+            bug = case['request']['kind'] == 'issue'
+            count = usage.get('requests_observed', 1) if purpose == 'planning' else 1
+            require(type(count) is int and 1 <= count <= (8 if bug else 1)
+                    and 0 < values['total_tokens'] <= (65536 if bug else 32768)*count,
+                    'Codex observed threshold exceeded')
+            if bug and purpose == 'planning':
+                require(usage.get('max_request_total_tokens', values['total_tokens']) <= 65536,
+                        'A Codex investigation turn exceeded its observed threshold')
         else:
             if purpose == 'planning':
                 require(1 <= usage.get('requests_observed', 1) <= (bug_investigation.INVESTIGATION_REQUESTS if case['request']['kind'] == 'issue' else 1),
@@ -220,7 +227,7 @@ def check_review(connection, request, case, preparation):
     require(outcome == 'completed' and model == case['model'] and usage['units'] == 'tokens',
             'planning usage or provider identity was not reported')
     local_cap = consent_cap(json.loads(row[2]).get('local_planning_receipt', {}))
-    key, cap = ('total_tokens', 32768*(bug_investigation.INVESTIGATION_REQUESTS if bug else 1)) if case['provider'] == 'codex' else ('completion_tokens', bug_investigation.INVESTIGATION_REQUESTS*local_cap if bug else 2600)
+    key, cap = ('total_tokens', 65536*bug_investigation.INVESTIGATION_REQUESTS if bug else 32768) if case['provider'] == 'codex' else ('completion_tokens', bug_investigation.INVESTIGATION_REQUESTS*local_cap if bug else 2600)
     if bug and case['provider'] == 'codex':
         require(1 <= usage.get('requests_observed', 1) <= bug_investigation.INVESTIGATION_REQUESTS,
                 'Codex inspection request accounting changed')
@@ -273,9 +280,11 @@ def campaign_admission(connection, request, case, policy):
     needs_bug = not outcome or any(c['choice'] == 'bug-flight-paths' for c in policy.get('cases', []))
     require(not needs_bug or intakes or case['choice'] == 'bug-flight-paths',
             'The campaign must start with the real bug journey')
-    same_case = []
+    same_case, bug_intakes = [], set()
     for identity, raw in intakes:
         original = json.loads(raw)
+        if original['kind'] == 'issue':
+            bug_intakes.add(identity)
         choice = ('bug-flight-paths' if original['kind'] == 'issue' else original.get('local_planning'))
         require(choice in {row[0] for row in ROUTES} | {'bug-flight-paths'},
                 'Unapproved campaign intake')
@@ -292,10 +301,16 @@ def campaign_admission(connection, request, case, policy):
         3 if case['choice'] == 'bug-flight-paths' else 2),
         'Campaign case allocation exhausted')
     before = [row for row in rows if row[1] != request.get('intake')]
-    local_settled = {}
+    local_settled, quarantined = {}, {}
     if outcome:
         from workbench.planning_reconciliation import accounting
         for row in before:
+            if row[2:5] == ('codex', 'planning', 'interrupted_unknown'):
+                try:
+                    from workbench.codex_quarantine import accounting as quarantined_accounting
+                    quarantined[row[0]] = quarantined_accounting(connection, row[0])
+                except (ValueError, OSError, KeyError, TypeError):
+                    pass  # Only the exact permanently quarantined historical turn is covered.
             if row[2] == 'local' and row[3] == 'planning' and row[4] in {'interrupted_unknown','incomplete_output'}:
                 try:
                     if row[4]=='incomplete_output':
@@ -306,11 +321,15 @@ def campaign_admission(connection, request, case, policy):
                 except (ValueError, KeyError, TypeError):
                     pass  # Missing/stale settlement retains the normal hold.
     require(all(row[0] in request['prior'] and row[5] and (row[4] in
-                {'completed','checked','failed','passed'} or row[0] in local_settled) for row in before),
+                {'completed','checked','failed','passed'} or row[0] in local_settled or row[0] in quarantined) for row in before),
             'Prior execution is unsettled or uncertain')
     local_tasks, codex_tasks = set(), set()
     qwen_requests = qwen_tokens = codex_turns = 0
     for identity, task, backend, purpose, row_outcome, finished, raw in rows:
+        if identity in quarantined:
+            codex_tasks.add(task)
+            codex_turns += quarantined[identity]['requests_started']
+            continue  # Unknown final usage stays unknown; no fabricated token or dollar bound.
         if identity in local_settled:
             reserved = local_settled[identity]
             local_tasks.add(task)
@@ -343,11 +362,13 @@ def campaign_admission(connection, request, case, policy):
                 qwen_tokens += value
         elif backend == 'codex':
             codex_tasks.add(task)
+            count = usage.get('requests_observed', 1) if purpose == 'planning' else 1
             require(purpose in {'planning','implementation'} and
+                    type(count) is int and 1 <= count <= (8 if task in bug_intakes else 1) and
                     type(usage.get('values', {}).get('total_tokens')) is int and
-                    0 < usage['values']['total_tokens'] <= 32768,
+                    0 < usage['values']['total_tokens'] <= (65536 if task in bug_intakes else 32768)*count,
                     'Codex observations unavailable')
-            codex_turns += 1
+            codex_turns += count
         else:
             raise ValueError('Unexpected campaign provider')
     if request['action'] == 'submit':

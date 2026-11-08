@@ -649,7 +649,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         if receipts and not unknown:
             diagnostics['usage'] = dict(source=getattr(adapter, 'usage_source', 'local llama.cpp investigation responses'), units='tokens',
                 values=summed, requests_observed=len(receipts), max_request_completion_tokens=max(
-                    r['values']['completion_tokens'] for r in receipts), status='complete')
+                    r['values']['completion_tokens'] for r in receipts), max_request_total_tokens=max(
+                    r['values']['total_tokens'] for r in receipts), status='complete')
             if current.get('generation_state') != 'partial':
                 diagnostics['generation_state'] = 'finished'
         elif receipts:

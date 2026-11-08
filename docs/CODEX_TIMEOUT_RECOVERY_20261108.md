@@ -1,3 +1,11 @@
+# Owner decision received
+
+The owner explicitly approved the exact historical exception. See
+[the immutable decision](OWNER_CODEX_QUARANTINE_20261108.md). The final outcome and
+usage remain unknown; the second turn is permanently quarantined, not declared
+cancelled. Fresh investigation is authorized with fresh bindings. No owner decision
+is pending. Historical pending-decision descriptions below remain dated evidence.
+
 # Current addendum — verified recovery build installed
 
 Recovery candidate910049d35a583393f9ee019fb71d005c6d65c007, seal

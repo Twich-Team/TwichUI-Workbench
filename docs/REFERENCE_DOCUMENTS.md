@@ -22,3 +22,7 @@ do not change them to synchronize current operating instructions.
 `CODEX_MODEL_REFERENCE.md` is referenced by the supplied documents but is not
 present in this checkout or the supplied attachment set. Do not invent its
 contents or model recommendations. This does not block ordinary delivery.
+
+Requirements A8/A9 owner-decision addenda: OWNER_SOURCE_DISCLOSURE_20261108.md and
+OWNER_CODEX_QUARANTINE_20261108.md. Apply these explicit subsequent owner decisions
+with DELIVERY_OUTCOME_AUTHORITY_20261107.md; root supplied files remain exact.

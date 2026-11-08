@@ -1,3 +1,39 @@
+# Owner quarantine approved — 2026-11-08T11:23:35.272971+00:00
+
+The owner explicitly approved permanent quarantine of only the uncertain SECOND
+Codex turn in model18bbf5d0-c5e2-4557-936b-126b24b4f1f4. No decision is pending.
+Exact decision: OWNER_CODEX_QUARANTINE_20261108.md (immutable SHA6ac363082930d623c1b4858625949006684a92b27a7e96b1265e1b41e0d30147).
+Historical model/job/intake records and unknown final usage/outcome remain unchanged.
+No partial output, successful cancellation claim or old approval is reused. Fresh
+flight investigation with normal delegated decisions and existing source/billing
+permissions is authorized. Standing authority/full outcome unchanged.
+
+New acceptance-only canonical receipt binds this exact historical triple SHA
+10603e4e65758a2e4efe36438ef1f744b025040d34e1a9bbe6c81fd057e94a2d.
+Read-only accounting never mutates SQLite; other unknown attempts still hold.
+152 affected tests pass. Actual195-row COPY proof C/quarantine-proof/proof.json
+passes normal acceptance admission, with original/live/copy hashes unchanged;
+no provider call/live write. No fresh real request yet. Installed remains910049d.
+
+Connected accounting correction: valid usage is retained before a threshold hold,
+and terminal cancellation drain retains it. Source-heavy bug turns have a65536
+post-observation guard; regression turns remain32768. Neither is a hard provider
+ceiling or billing guarantee. Bug aggregate accounting sums all actual turns and
+checks each turn. This follows the owner's independent operational-settings
+authority, not new spending. Shared8/1800s and freshCodex300s operation bounds,
+credits/account checks, source/write/approval/verification safeguards unchanged.
+
+Next: final tests/native/browser/static, seal and checked195-row cutover; create
+ONLY the bound quarantine receipt in new stage's private acceptance directory
+using python -m workbench.codex_quarantine DATABASE. Verify unchanged history and
+normal admission, then dispatch fresh Codex-only flight case (attempt29,revision31).
+Use predecessor910,27? prior list remains26IDs (no model turn in910), roots91.
+Do not add a nonexistent model attempt or reset ledger. Keep actual provider/
+flight implementation/independent checks at zero until demonstrated. Continue
+complete journey/provider4/restart/nextordinarybug and remaining product.
+
+Older pending-decision entries below are superseded by this explicit approval.
+
 # Current handoff — 2026-11-08 05:21 UTC
 
 Following the Project Working Philosophy: the full outcome remains unfinished.
