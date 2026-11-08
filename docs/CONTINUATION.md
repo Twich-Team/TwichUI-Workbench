@@ -1,3 +1,34 @@
+# Current installed revision27 / ACTIVE real26
+
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-a5929e6;
+R=C/outcome-a5929e6. Installed a5929e66257647e4532177a3893a0b6c15c1b56d,
+tree b52c98be262afcaf6fb4f2818679424f60940c48,
+seal796c27e31bbe84cc54b2c64bec7280d5760ddbbbbbe95f931014da5a3d02f913.
+All strict history/network/TLS/browser/5isolation/foreignconnectorpeer gates PASS
+R/deployment-27-verified.json. Original79/latest179 copied and checked, all27HTTP
+history entries read.4servicesactive/disabled; no live-addon change. R/offline-
+verification.json binds CURRENT full1484backend/25frontend/build/contracts/static,
+190focused, native program32.72sec619.1MiB two controlled repairs/concurrency/
+faults/restarts, actual179-copy/tokenizer/no-generation/oldreceipts proof.4default
+backendoptins skipped; program native freshly run, unchangedlegacy/routing/readiness/
+browser/visual/admin retain exact predecessor evidence. No real success inferred.
+
+REAL26 active intake d5ebff85-5688-4579-b0d0-77a4f3c69c61,
+model0771e2dd-537d-42cc-a049-ad3764758fe3,
+job06ddfb52-f70f-409c-ad3f-54c0d697598d. Driver execsession77164;
+R/active-attempt.json; normalbrowser S/artifacts/acceptance/bug-flight-paths.jsonl.
+First request actually critiques settled25draft, private journal verifies origin/
+unapproved/unexecuted. Model server91406 processing/n_predict6144 observed03:16:12Z.
+No replay whileactive/uncertain. Next generatedplan still needs fresh complete
+proposal/freshselfcheck/independentreview/normalplanrun/originalFAIL/candidatePASS/
+fullsuite/savedpatch. No developerflightreproducer/fix.0implementation/Codex/realfix/
+4providercases complete. No owner decision needed. Continue the real evaluation.
+
+Function-context/critique changes below are NOW INSTALLED; preserved historical
+paragraphs describe earlier uninstalled state. Ledger settled PRE26 totals78starts/
+77usage/76stop/1partial/1oldunknown,88569generated/763438prompt; add actualnewreceipts
+only onsettlement. No cap reset. Continue until complete agreed outcome.
+
 # Latest settled real25 / function-focused source revision in development
 
 Following the Project Working Philosophy, continue the complete outcome under

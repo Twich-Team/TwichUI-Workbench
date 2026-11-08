@@ -7010,3 +7010,17 @@ Changing to function-shaped context plus first-turn critique of settled unapprov
 draft.101focused pass; actual179-copy/tokenizer proof19835tokens/fullbootstrap/
 ownerclauses, no generation/livewrite and old receipts unchanged. New safety/native
 checks before install. Ledger78starts/88569generated/763438prompt; no cap reset.
+
+## November8 — revision27 installed and changed real26 started
+
+Candidate a5929e6/treeb52c98b/seal796c27e31bbe84cc54b2c64bec7280d5760ddbbbbbe95f931014da5a3d02f913.
+Full1484backend/25frontend and build/contracts/static pass;190focused/newnative
+32.72sec619.1MiB pass.4defaultoptins skipped, affectednative explicitlypassed and
+unchangedoptins/browser/visual/admin evidence retained with binding. Actual179-copy
+tokenizer firstcritique19835tokens/no-generation/oldreceipts unchanged proof.
+Checked deployment original79/latest179 and all27historyHTTPreads, network/TLS/
+browser/isolation/connectorpeer gates passed;4rolesactive/disabled. Real26 intake
+d5ebff85-5688-4579-b0d0-77a4f3c69c61/model0771e2dd-537d-42cc-a049-ad3764758fe3,
+firstrequest actuallycritiques old25draft, neverapproval/execute. Exactmodel91406
+processing/6144limit03:16:12Z. No independentrealfix/implementation/Codex/providerpass.
+Continue normaljourney; no ownerdecision, arbitrarycampaigncaps or checkpointstop.
