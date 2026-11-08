@@ -225,6 +225,7 @@ def view_in(connection, identity):
                 # Projection only: historical result/accounting remain immutable.
                 job['message'] = ('This read-only investigation was quarantined. '+
                     ('Final provider outcome and usage remain unknown. ' if disposition['final_outcome']=='unknown' else
+                     'Completed provider receipts and usage were recovered separately from the historical record. ' if disposition.get('final_usage') is not None else
                      'The provider confirmed its final state; final usage remains unavailable. ')+
                     'Its output cannot be used. Start a fresh task with fresh planning consent.')
                 job['payload']['diagnostics'] = {**job['payload'].get('diagnostics',{}), 'read_only_quarantined':1}

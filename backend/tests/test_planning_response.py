@@ -19,6 +19,22 @@ from workbench.planning_response import ResponseValidationError, strict_json
 MODEL = "controlled-model"
 
 
+def test_long_investigation_journal_keeps_terminal_diagnostics_with_same_byte_limit(tmp_path):
+    evidence = Evidence(tmp_path,str(uuid4()),BugPlanningResponse)
+    try:
+        for index in range(48):
+            evidence.record('source-followup',turn=index+1,evidence_id=str(uuid4()))
+        evidence.record('validated',generation_state='finished')
+        assert evidence.file.stat().st_size < MAX_EVIDENCE == 65536
+        rows=list(map(json.loads,evidence.file.read_text().splitlines()))
+        assert rows[-1]['phase']=='validated'
+        os.write(evidence.fd,b'x'*(MAX_EVIDENCE-evidence.file.stat().st_size))
+        with pytest.raises(OSError,match='limit'):
+            evidence.record('validated',generation_state='finished')
+    finally:
+        evidence.close()
+
+
 @pytest.mark.parametrize("wrapper", ["plain", "bom", "fence"])
 def test_only_unambiguous_formatting_is_normalized(wrapper):
     value = response()

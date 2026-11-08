@@ -351,7 +351,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         # Codex can retain all of the bounded inspected context in its larger
         # supported request envelope. Local Qwen keeps its smaller context.
         if program_mode and getattr(adapter, 'source_manifest', None) is not None:
-            kwargs['text_budget'] = 128000
+            kwargs['text_budget'] = read_limit(packet)
         kwargs['packing_context'] = packing_context
         result=next_wire(*args,**kwargs)
         added=packet.get('inspection_windows',[])[before:]

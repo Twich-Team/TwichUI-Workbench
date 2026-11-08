@@ -77,3 +77,17 @@ def test_shared_encoder_preserves_existing_protocol_bytes(seconds):
         legacy['request_seconds'] = seconds
     assert encode_request('actual-selection', None, prompt, schema, seconds) == json.dumps(
         legacy, ensure_ascii=True, allow_nan=False).encode()
+
+
+def test_larger_bounded_working_context_keeps_complementary_inspected_source_together():
+    from workbench.codex_provider import MAX_BUG_INPUT
+    packet,current,requested,wire = context()
+    # Previously repeated reads need both halves together, not alternating eviction.
+    extra = dict(path=packet['files'][0]['path'],line=1000,through_line=2799,
+                 text='\n'.join('local value%d = "committed context"' % n for n in range(1800)))
+    packet['inspection_windows'].append(extra)
+    retain(wire, packet, current, 262144, requested=[requested])
+    packed, _ = fit(wire,packet,current,[requested],encoder,MAX_BUG_INPUT)
+    assert packed['source_memory']['omitted_characters'] == 0
+    assert len(encoder(packed)) <= MAX_BUG_INPUT
+    assert requested_visibility(packed,[dict(extra,coverage='requested committed lines')])[0]['provided']

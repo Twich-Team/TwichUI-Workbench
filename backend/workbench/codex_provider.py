@@ -15,7 +15,7 @@ import time
 from workbench.planning_transport import PlanningUnavailable
 
 MAX_PACKET = 24_000
-MAX_BUG_INPUT = 196608  # Private committed investigation context, not an output allowance.
+MAX_BUG_INPUT = 393216  # Bounded complete envelope for the inspected source working set; not output allowance.
 MAX_WIRE = 2 << 20
 MAX_LINE = 256 << 10
 SECONDS = 120
@@ -1413,6 +1413,7 @@ class Planner:
                     accounting_state="complete",
                     usage=self.diagnostics["usage"],
                     actual_model=model,
+                    provider_receipt=self.diagnostics.get("provider_receipt"),
                     response_identity_available=False,
                 )
             changes = []

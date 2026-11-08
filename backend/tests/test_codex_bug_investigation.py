@@ -261,3 +261,33 @@ def test_packed_request_is_revalidated_before_dispatch(store, monkeypatch, mutat
     with pytest.raises(codex_provider.Hold) as held:
         adapter.generate(wire, BugPlanningResponse)
     assert held.value.reason == 'disclosure' and not held.value.started
+
+
+@pytest.mark.usefixtures('installed')
+def test_late_evidence_io_failure_keeps_finished_usage_and_does_not_crash_worker(
+    client, headers, store, monkeypatch,
+):
+    enable(store, monkeypatch)
+    from workbench.planning_response import Evidence
+    original = Evidence.record
+
+    def record(self, phase, **facts):
+        if phase == 'validated':
+            raise OSError('Controlled late private evidence failure')
+        return original(self, phase, **facts)
+
+    monkeypatch.setattr(Evidence, 'record', record)
+    monkeypatch.setattr(codex_provider, 'generate', lambda *a, **kw:(dict(
+        finding='Controlled settled investigation without an executable proposal.',
+        draft=dict(limitation='Controlled unsupported fixture; no repair was attempted.')),
+        dict(prompt_tokens=40,completion_tokens=10,total_tokens=50,reasoning_tokens=2)))
+    identity = client.post('/api/intake',headers=headers,
+        json={**report(),'local_planning':'codex-once'}).json()['id']
+    assert worker.tick(store)
+    item = client.get('/api/intake/'+identity).json()
+    assert item['status'] == 'failed' and not item['proposals'] and not item['decisions']
+    with store.connect() as c:
+        attempt = c.execute(select(model_attempts).where(model_attempts.c.task_id==identity)).mappings().one()
+    assert attempt['outcome'] == 'failed'
+    assert attempt['usage']['status'] == 'complete' and attempt['usage']['requests_observed'] == 1
+    assert attempt['usage']['values']['total_tokens'] == 50

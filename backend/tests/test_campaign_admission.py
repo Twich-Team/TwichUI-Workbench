@@ -30,6 +30,35 @@ def test_standing_authority_removes_old_delivery_caps_but_keeps_prior_reconcilia
         campaign_admission(connection, changed, dict(choice='bug-flight-paths', provider='local'), dict(outcome=OUTCOME))
 
 
+def test_standing_codex_accounting_uses_saved_operation_bound_not_old_campaign_observation_ceiling(store):
+    from test_planning_limits import current
+    value=request()
+    value['outcome']=value.pop('campaign')
+    value['outcome'].update(attempt=3,revision=20,prior_attempts=['attempt'])
+    value['prior']=['attempt']
+    add_intake(store,value,'earlier')
+    consent=dict(current(),investigation_version=10,max_local_requests=16,
+        max_codex_requests=16,max_total_model_requests=16,codex_request_deadline_seconds=300)
+    usage=dict(units='tokens',status='complete',requests_observed=16,
+        values=dict(prompt_tokens=1999900,completion_tokens=100,total_tokens=2000000))
+    with store.begin() as c:
+        c.execute(text('''INSERT INTO planning_jobs
+          (id,intake_id,kind,revision,status,attempts,payload,message,created_at,finished_at)
+          VALUES ('job','earlier','planning',1,'failed',1,:payload,'settled',:at,:at)'''),
+          dict(payload=json.dumps(dict(local_planning_receipt=consent)),at=value['opened']))
+        c.execute(text('''INSERT INTO model_attempts
+          (id,job_id,task_id,source,backend,purpose,routing_reason,started_at,finished_at,outcome,usage)
+          VALUES ('attempt','job','earlier','workbench','codex','planning','controlled',:at,:at,'failed',:usage)'''),
+          dict(at=value['opened'],usage=json.dumps(usage)))
+    with sqlite3.connect(store.url.database) as c:
+        campaign_admission(c,value,dict(choice='bug-flight-paths',provider='codex'),dict(outcome=OUTCOME))
+    usage['requests_observed']=17
+    with store.begin() as c:
+        c.execute(text('UPDATE model_attempts SET usage=:usage'),dict(usage=json.dumps(usage)))
+    with sqlite3.connect(store.url.database) as c, pytest.raises(ValueError,match='observations'):
+        campaign_admission(c,value,dict(choice='bug-flight-paths',provider='codex'),dict(outcome=OUTCOME))
+
+
 def check(store, value, *, choice="bug-flight-paths", limits=None):
     with sqlite3.connect(store.url.database) as connection:
         campaign_admission(connection, value, dict(choice=choice, provider="local"),

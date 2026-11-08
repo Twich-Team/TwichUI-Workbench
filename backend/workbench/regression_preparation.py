@@ -606,7 +606,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 failure = ('planning_validation', 'This installation cannot investigate this report.')
         else:
             contract = prepare(original['payload'], feedback, scenario_response)
-    if generation and (scenario_response is not None or (bug_result and basis)):
+    if generation and not failure and contract is not None and (scenario_response is not None or (bug_result and basis)):
         contract['scenario_grounding'] = dict(evidence_sha256=digest(packet['files']) if bug else packet['evidence_sha256'],
             policy_sha256=packet['policy_sha256'], basis=basis)
         if model_selection:

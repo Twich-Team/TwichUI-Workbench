@@ -13,7 +13,7 @@ from everyday_store import require_settled
 from workbench import bug_investigation, grounded_scenarios as ground, regression_preparation as prep
 from workbench import regression_evidence as behavior
 from workbench.real_execution import LIMITS
-from workbench.planning_limits import model_cap, consent_cap
+from workbench.planning_limits import model_cap, consent_cap, attempt_request_bound
 from workbench.schemas import IntakeInput, TaskBudget
 from workbench.visual_scope import digest
 
@@ -378,10 +378,12 @@ def campaign_admission(connection, request, case, policy):
         elif backend == 'codex':
             codex_tasks.add(task)
             count = usage.get('requests_observed', 1) if purpose == 'planning' else 1
+            bound = attempt_request_bound(connection, identity) if outcome and purpose == 'planning' else (8 if task in bug_intakes else 1)
             require(purpose in {'planning','implementation'} and
-                    type(count) is int and 1 <= count <= (8 if task in bug_intakes else 1) and
+                    type(count) is int and 1 <= count <= bound and
                     type(usage.get('values', {}).get('total_tokens')) is int and
-                    0 < usage['values']['total_tokens'] <= (65536 if task in bug_intakes else 32768)*count,
+                    0 < usage['values']['total_tokens'] and
+                    (outcome or usage['values']['total_tokens'] <= (65536 if task in bug_intakes else 32768)*count),
                     'Codex observations unavailable')
             codex_turns += count
         else:

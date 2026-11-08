@@ -1,3 +1,74 @@
+# CURRENT VERIFIED STATE — November8 17:09UTC
+
+Following the Project Working Philosophy: continue, no owner decision needed.
+Actually installed635bdd9 (full commit/tree/seal below), four everyday roles active,
+worker automatically restarted after local handler crash and is healthy/idle. Both
+approved addresses/history available. No provider active, driver98472 ended held.
+Latest236rows SHA01cad48432de17d72443ccd75dc546d6a66a5db57ced1d74c0968e7a3c6fa3bc.
+Never overwrite with232/original79; all original/recovery copies retained.
+
+Real38 SETTLED: all16Codex turns completed with terminal/usage/closed-producer receipts;
+last response was a limitation (omitted test fixture context), not a plan. Earlier
+source reads alternated tests430–486/487–559 and Journey1–146/181–303 because older
+needed source was evicted from128ktext/196608byte outgoing context. Exact packing
+correction really worked but maintained too small a working context; real requests
+201771/201846bytes packed and actually sent safely. No implementation/real check.
+Then main Evidence reached32events (24207bytes); payload-decoded aggregate written,
+validated event failed at countlimit. OSError handler left bug_result/basis set while
+contract None; regression_preparation.py610 raisedTypeError. Auto restart stamped
+historical model row interrupted_unknown/usageNULL. Do not misreport this as an
+uncertain provider turn: all16matched terminal receipts are recoverable independently.
+Original history remains unchanged, separate standing receipt validated/recorded at
+S/artifacts/acceptance/readonly-quarantine-9c4716cb-29cc-46f1-a50b-ad36606f358a.json.
+C/complete-receipt-real38-proof.json and R/attempt-38-accounting.json bind236unchanged,
+16complete/933255total (928401prompt/4854completion/2747reason), output NEVERreused.
+Ledger totals65Codexstarts/61completeusage/4missing/2886288known total. Two oldunknown
+and two knowninterrupted remain unchanged/isolated. Qwen89starts unchanged.
+
+Connected uncommitted correction now under verification: Codex source working buffer
+262144 (same inspected-source ceiling) and complete envelope393216bytes, retaining
+all inspected source rather than alternating eviction. No new external file access,
+output allowance, API spending or retry bound; task16sharedturns/1800s/300s retained.
+Exact-envelope packer stillprotects mandatory lines and revalidates frozen disclosure.
+Evidence96events under SAME65536bytes/16384event bound; late-evidence failure cannot
+attach contract data when failure/no contract. New generic completed receipt recovery
+matches parent full aggregate, deterministic child lineage, every content identity,
+usage, capability proof and terminal/closed producer; rejects missing/partial/conflict/
+symlink, preserves old DB/history, fences output. UI distinguishes recoveredcomplete
+usage from unknown. Provider-result nowretains supported private providerreceiptID.
+Acceptance_policy stillhad old8turn/65536token observation ceilings afterstanding
+caps removed. Now outcome admission uses actual saved task bound (16v10/8older) and
+actual positive token observations, never a claimed token hardceiling/dollar balance;
+historicalcampaign checks unchanged. New test admits16/highreportedusage butdenies17.
+No ongoing provider request/oldapproval reused. This is ordinaryrepair authority.
+
+C/whole-working-set-actual-replay/proof.json replays all16hashverifiedcomplete real38
+responses throughactualPlanner/sourcepath offline: inspectedtextomissions0 onEVERY
+request, max212223encodedbytes under393216, allrequestedwindowsvisible, no livecall/
+socket/historychange/plan/patch. This proves contextvisibility, NOT modelreasoning
+or real repair.107focused tests/staticfinal pass;8newcompletedreceiptfaulttests pass.
+Full C/working-set-recovery-full-tests.log exec43060 RUNNING (expected1640/6skip+25);
+ALL4true-confined controlled browser modes C/working-set-recovery-kernel-native.log
+exec33329 RUNNING, unitworkbench-outcome-working-set-recovery-process, no assetbuild
+concurrently. Firststaticrunfailedonlyruffnewteststyle, fixed/tested; logs kept.
+Finish/fix applicable verification before next activation. Current1628/25is installed
+baseline, not proof for new changes. Latestcheckpoint0da36aa; code currentlymodified.
+
+Next revision43/task39/roots115, parent635bdd9; append9c4716cb topriorIDs. Reuse
+prepare-encoded-request-revision.py and guarded parent extra scripts. Updated source
+comparison: MAX_BUG_INPUT changed393216, Planner.generate private receipt diagnostic,
+other top-level funcs ASTunchanged. CLI/auth/account/quota/cancel/sandbox/network/
+sourcefiles/writes/billing guards unchanged. Require verified latest236/original79,
+fresh successful guarded preflight, bind tests/seal/scripts, checkedcutover. Recreate
+original18 +4standing receipts (eb72,253a,58d0,new9c47); completed38prooflocates original
+635stage via trusted inputs.evidence_roots. Allnormalhistoryreads/fingerprint/admission
+must pass under new code. No freshownerexception needed. Then fresh real39 withfull
+workingcontext, no changed-scope/addon answer injected. Do not renew oldevictionloop.
+Inspect modelplan independently before separate delegated plan/run approvals; need
+originalFAIL/candidatePASS/fullLua checks/reviewablepatch. All4realprovidercases,
+resultrestart/nextordinarybug/cleanup/stableapp/fulloutcome remain unfinished.
+No progress/candidate/checkpoint substitutes for real result. Lower blocks historical.
+
 # CURRENT VERIFIED STATE — November8 16:53UTC
 
 Following the Project Working Philosophy: continue full delivery, no owner input needed.

@@ -174,7 +174,6 @@ def state(connection, identity):
     count = diag.get("investigation_requests", 0)
     from workbench.planning_limits import request_bound
     bound=request_bound(payload.get('local_planning_receipt',{}))
-    require(type(count) is int and 0 <= count < bound, "Investigation accounting unavailable")
     if identity == HISTORICAL:
         proof = historical_proof(binding)
         evidence_root = HISTORICAL_ROOT / "artifacts/codex-evidence"
@@ -191,6 +190,11 @@ def state(connection, identity):
             "Actual planning capabilities were not retained",
         )
         evidence_root = EVIDENCE
+        from workbench.completed_investigation_recovery import completed
+        recovered = completed(a, j, i, binding, payload, proof)
+        if recovered is not None:
+            return recovered
+    require(type(count) is int and 0 <= count < bound, "Investigation accounting unavailable")
     receipt = diag.get("provider_receipt")
     require(
         isinstance(receipt, str) and str(UUID(receipt)) == receipt,

@@ -52,3 +52,14 @@ def request_bound(consent):
     """Read the immutable claim bound; a new default never enlarges old consent."""
     consent_cap(consent)
     return 16 if consent.get('investigation_version') == 10 else 8
+
+
+def attempt_request_bound(connection, identity):
+    sql = '''SELECT j.payload FROM planning_jobs j JOIN model_attempts a ON a.job_id=j.id
+             WHERE a.id=?'''
+    cursor = (connection.exec_driver_sql(sql, (identity,)) if hasattr(connection, 'exec_driver_sql')
+              else connection.execute(sql, (identity,)))
+    row = cursor.fetchone()
+    if row is None:
+        raise ValueError('Saved task consent is unavailable')
+    return request_bound(json.loads(row[0]).get('local_planning_receipt', {}))

@@ -451,7 +451,7 @@ def test_bug_input_roundtrip_is_larger_without_widening_output_or_legacy_limit(
         thread.join(2)
     assert output == dict(answer="controlled") and usage["total_tokens"] == 50
     assert len(observed) == 1 and len(observed[0]["prompt"]) > 24000
-    assert codex.MAX_PACKET == 24000 and codex.MAX_BUG_INPUT == 196608
+    assert codex.MAX_PACKET == 24000 and codex.MAX_BUG_INPUT == 393216
     with pytest.raises(ValueError):
         codex.generate("fixture-model", None, "source" * 6000, {})
     with pytest.raises(ValueError):
