@@ -66,8 +66,45 @@ def validate_reviewed_policy(engine, reviewed):
     grounding = reviewed.get('scenario_grounding')
     if grounding:
         policy = configuration(engine)
-        if digest(policy) != grounding['policy_sha256'] or reviewed['category'] not in policy['allowed_classes']:
+        if ((digest(policy) != grounding['policy_sha256'] and not relocated_policy(engine,grounding['policy_sha256'],policy))
+                or reviewed['category'] not in policy['allowed_classes']):
             raise ValueError('Preparation policy differs from the reviewed source policy; request a fresh proposal before preparing or approving a run.')
+
+
+def relocated_policy(engine, previous_sha, current):
+    """Installation coordinates may move; reviewed permission semantics cannot.
+
+    Only exact retained private installation policies in configured evidence roots
+    can establish equivalence. Provider/model/source/approval bindings are checked
+    separately by their existing owners. No caller-supplied policy is accepted.
+    """
+    from workbench import everyday
+    coordinates={'database','database_identity','output_root'}
+    semantic={k:v for k,v in current.items() if k not in coordinates}
+    matches=[]
+    for value in dict.fromkeys(everyday.configuration(engine).evidence_roots):
+        stage=Path(value)
+        if not re.fullmatch(r'everyday-outcome-[a-f0-9]{7,40}',stage.name):
+            continue
+        path=stage/'ops/preparation.json'
+        try:
+            owned(stage)
+            info=owned(path).stat()
+            if info.st_mode&0o077 or not path.is_file() or info.st_size>8192:
+                continue
+            old=json.loads(path.read_text())
+            if digest(old)!=previous_sha:
+                continue
+            database=owned(stage/'artifacts/workbench.sqlite3')
+            stat=database.stat()
+            if (old.get('database')!=str(database) or old.get('database_identity')!=[stat.st_dev,stat.st_ino]
+                    or old.get('output_root')!=str(stage/'release/artifacts/runs/preparations')
+                    or {k:v for k,v in old.items() if k not in coordinates}!=semantic):
+                continue
+            matches.append(str(path))
+        except (OSError,ValueError,TypeError):
+            continue
+    return len(matches)==1
 
 
 def owned(path):
@@ -446,14 +483,17 @@ def process_one(engine, *, stop_event=None):
                             c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(message=str(error)))
                         return False
                 binding = linked['proposal_review']['binding']
-                root = Path(config['output_root']) / job['id']
+                round_id=payload.get('preparation_round_id')
+                if round_id is not None and str(UUID(round_id))!=round_id:
+                    raise ValueError('Invalid preparation round identity')
+                root = Path(config['output_root']) / (job['id']+'-round-'+round_id if round_id else job['id'])
                 if root.exists():
                     raise ValueError('Preparation output already exists without a journal claim; retained evidence requires inspection.')
                 claim = dict(root=str(root), owner=real_execution.owner_identity(), review_binding=binding,
                     policy_sha256=digest(config), identity=config['identity'])
                 payload['preparation_claim'] = claim
                 c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
-                    status='running', payload=payload, attempts=1, message='Preparing reviewed behavioral controls; no execution authority.'))
+                    status='running', payload=payload, attempts=job['attempts']+1, message='Preparing reviewed behavioral controls; no execution authority.'))
                 result = None
             except (ValueError, OSError, HTTPException) as error:
                 result = _hold(error)

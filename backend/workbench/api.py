@@ -160,7 +160,7 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
 
     @app.post('/api/intake/{identity}/retry', response_model=IntakeView, responses=errors)
     def planning_retry(identity: str, body: PlanningRetry):
-        intake.retry(app.state.engine, identity, body.job_id)
+        intake.retry(app.state.engine, identity, body.job_id, preparation=body)
         return intake.view(app.state.engine, identity)
 
     @app.post('/api/intake/{identity}/clarification', response_model=IntakeView, responses=errors)

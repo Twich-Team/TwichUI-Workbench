@@ -36,6 +36,28 @@ export function planningRecordMatches(attempt, candidate, reply) {
   return attempt.outcome==='failed'&&attempt.actual_model===candidate.model ||
     attempt.outcome==='incomplete_output'&&[null,candidate.model].includes(attempt.actual_model);
 }
+export function preparationReady(item, plan, scope) {
+  const receipt=item.decisions.find(d=>d.id===scope.id);
+  check(item.decisions.length<=1&&(!receipt||['pending','applied'].includes(receipt.status)),
+    'plan decision or independent preparation held');
+  const current=item.jobs.filter(j=>j.revision===plan.revision);
+  check(item.jobs.every(j=>j.revision<=plan.revision&&
+    (j.revision===plan.revision||j.kind==='planning'&&['failed','completed'].includes(j.status)&&j.finished_at))&&
+    !current.some(j=>j.status==='failed'),'current preparation failed or historical work is unsettled');
+  return receipt?.status==='applied'&&item.tasks.length>0&&current.length>0&&current.every(j=>j.status==='completed');
+}
+export function scopeConsentValid(item,plan,consentTime,now) {
+  const created=Date.parse(consentTime);
+  if(!Number.isFinite(created)||created>now) return false;
+  if(now-created<30*60000) return true;
+  // Planning consent expires for new proposals. A scope already approved by the
+  // owner remains bound to its exact inputs; the separate run offer has its own
+  // fresh expiry and is rechecked before dispatch. Do not invent a renewal gate.
+  const decision=item.decisions[0];
+  return item.decisions.length===1&&decision.status==='applied'&&decision.proposal_id===plan.id&&
+    decision.binding===plan.binding&&decision.scope_revision===plan.scope_revision&&
+    decision.payload?.action==='approve'&&!decision.payload.run_budget&&!decision.payload.execution_continuation;
+}
 export function reviewClarification(item, candidate, reply) {
   const phases=reply.renew_operation ? reply.processing_sequence-1 : reply.revision || 1;
   check(Number.isInteger(phases) && phases>=1 && candidate.request.kind === 'issue' &&
@@ -56,7 +78,7 @@ export function reviewClarification(item, candidate, reply) {
   return item;
 }
 
-export function reviewPlan(item, candidate, identity, revision, now, reply) {
+export function reviewPlan(item, candidate, identity, revision, now, reply, settledPreparations=[]) {
   const phases = reply ? (reply.renew_operation ? reply.processing_sequence : (reply.revision || 1)+1) : 1;
   check(item.id === identity && item.revision === phases && item.proposals.length === (reply ? priorProposals(reply).length+1 : 1) &&
     item.clarifications.length === (reply ? (reply.prior_clarifications||[]).length+1 : 0) && item.scope_history.length === 1, 'unexpected intake revision or history');
@@ -68,12 +90,11 @@ export function reviewPlan(item, candidate, identity, revision, now, reply) {
     exact(item.clarifications.slice(0,-1),reply.prior_clarifications || [],'prior answer history changed');
   }
   const consentTime = reply ? item.clarifications.at(-1).created_at : item.created_at;
-  check(Date.parse(consentTime) <= now && now - Date.parse(consentTime) < 30 * 60000,
-    'planning approval expired or time unavailable');
   check(item.human_scope.visual_requirement === 'nonvisual' &&
     item.human_scope.stage === 'implementation' && item.human_scope.origin === 'human',
     'human scope changed');
   const plan = item.proposals.find(plan => plan.revision === phases);
+  check(scopeConsentValid(item,plan,consentTime,now),'planning approval expired or time unavailable');
   check(uuid(plan.id) && hex(plan.binding) && plan.revision === item.revision &&
     plan.scope_revision === item.human_scope.revision && plan.basis === 'preparation' &&
     plan.model === candidate.model && !plan.research_only, 'plan identity or provider changed');
@@ -109,7 +130,8 @@ export function reviewPlan(item, candidate, identity, revision, now, reply) {
   check(planningActivity.length===phases && planningActivity.every(attempt=>
     planningRecordMatches(attempt,candidate,reply)) &&
     preparedActivity.every(a=>Boolean(plan.task_contract.bug_intent)&&item.tasks.length>0&&item.decisions.some(d=>d.status==='applied')&&
-      a.purpose==='check_preparation'&&a.backend===candidate.provider&&a.requested_model===candidate.model&&a.actual_model===candidate.model&&a.outcome==='completed'),
+      a.purpose==='check_preparation'&&a.backend===candidate.provider&&a.requested_model===candidate.model&&a.actual_model===candidate.model&&
+      (a.outcome==='completed'||a.outcome==='failed'&&settledPreparations.includes(a.id))),
     'planning or check preparation is uncertain or unexpected');
   const jobs = item.jobs.filter(job => job.kind === 'planning');
   check(jobs.length === phases && jobs.every(job => (job.status==='completed'||reply?.renew_operation&&job.status==='failed') && job.attempts === 1) &&
@@ -262,13 +284,14 @@ export async function runJourney(context, origin, policy, candidate, options) {
   try {
     const desired = candidate.reason ? 'both' : 'off';
     const reply = options.clarification;
-    const saved = reply ? await getPolicy() : await settings(desired, true);
-    if (reply) check(!candidate.reason && saved.revision === reply.policy_revision &&
+    const resume=options.resumeScope;
+    const saved = reply||resume ? await getPolicy() : await settings(desired, true);
+    if (reply||resume) check(!candidate.reason && saved.revision === (reply?.policy_revision??resume.policy_revision) &&
       saved.test_fallback === 'off' && saved.providers[candidate.provider].model === candidate.model,
     'clarification saved provider policy changed');
     await controlsReady('planning');
     const bug = candidate.request.kind === 'issue';
-    if (!reply) {
+    if (!reply&&!resume) {
     await page.goto(origin + '/intake/new?kind=' + candidate.request.kind);
     await page.getByLabel('Title', {exact:false}).fill(candidate.request.title);
     await page.getByLabel('Description', {exact:false}).fill(candidate.request.description);
@@ -291,7 +314,12 @@ export async function runJourney(context, origin, policy, candidate, options) {
       return work;
     };
     let requestId, identity;
-    if (reply) {
+    if (resume) {
+      check(uuid(resume.intake)&&uuid(resume.proposal)&&uuid(resume.approval)&&hex(resume.binding), 'resume scope identity missing');
+      identity=resume.intake;
+      await page.goto(origin+'/intake/'+identity);
+      requestId=(await json('/api/intake/'+identity)).original.request_id;
+    } else if (reply) {
       identity = reply.intake;
       const url = "/api/intake/" + identity;
       await page.goto(origin + "/intake/" + identity);
@@ -322,11 +350,24 @@ export async function runJourney(context, origin, policy, candidate, options) {
     }
     const url = '/api/intake/' + identity;
     const readItem = () => json(url);
-    const complete = await eventually(readItem, item => {
+    let complete,plan,scope;
+    if(resume) {
+      const expectedPlan={revision:resume.revision};
+      complete=await eventually(readItem,item=>preparationReady(item,expectedPlan,{id:resume.approval}),options.preparationMs??600000);
+      plan=reviewPlan(complete,candidate,identity,saved.revision,now(),reply,resume.settled_preparations||[]);
+      scope=complete.decisions.find(d=>d.id===resume.approval);
+      check(plan.id===resume.proposal&&plan.binding===resume.binding&&scope?.binding===plan.binding&&scope.proposal_id===plan.id&&scope.status==='applied',
+        'applied scope differs from resume binding');
+      check(typeof options.reviewResumedScope==='function','independent applied scope review is unavailable');
+      await options.reviewResumedScope({intake:identity,plan,scope});
+      await controlsReady('implementation');
+      record('resumed-applied-scope',{intake:identity,proposal:plan.id,approval:scope.id,binding:plan.binding});
+    } else {
+    complete = await eventually(readItem, item => {
       check(['queued','investigating','completed'].includes(item.status), 'planning held or uncertain');
       return item.status === 'completed';
     }, options.planningMs ?? 150000);
-    const plan = reviewPlan(complete, candidate, identity, saved.revision, now(), reply);
+    plan = reviewPlan(complete, candidate, identity, saved.revision, now(), reply);
     check(!complete.decisions.length && !complete.tasks.length && complete.original.request_id === requestId,
       'unexpected prior plan approval or task');
     if (bug) {
@@ -348,7 +389,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
     const review = bug ? intent||plan.task_contract.bug_evidence : plan.task_contract.behavioral_evidence;
     await page.getByRole('checkbox', {name:intent?'The repair scope and behavior criteria match my report.':bug ?
       'The reproduction and expected behavior match my report.' : 'The test examples match what I asked for.'}).check();
-    const scope = await act('plan', 'POST', url + '/decisions', button('Approve plan'), async body => {
+    scope = await act('plan', 'POST', url + '/decisions', button('Approve plan'), async body => {
       await capacity();
       const fresh = await readItem();
       exact(fresh, complete, 'plan changed after review');
@@ -360,12 +401,8 @@ export async function runJourney(context, origin, policy, candidate, options) {
       record('reviewed', {action:'plan', intake:identity, proposal:plan.id, planSha:digest(plan),
         provider:candidate.provider, checks:'exact scope, example, commands, source, budget and routing'});
     });
-    const prepared = await eventually(readItem, item => {
-      const receipt = item.decisions.find(d => d.id === scope.id);
-      check(item.decisions.length <= 1 && (!receipt || ['pending','applied'].includes(receipt.status)) &&
-        !item.jobs.some(job => job.status === 'failed'), 'plan decision or independent preparation held');
-      return receipt?.status === 'applied' && item.tasks.length > 0 && item.jobs.every(job => job.status === 'completed');
-    }, options.preparationMs ?? 600000);
+    }
+    const prepared = await eventually(readItem,item=>preparationReady(item,plan,scope), options.preparationMs ?? 600000);
     const tasks = prepared.tasks.filter(t => t.kind === 'task');
     check(tasks.length === 1 && tasks[0].id === 'intake-' + identity + '-' + plan.revision + '-implementation' && prepared.decisions[0].binding === plan.binding,
       'prepared task identity changed');
@@ -387,7 +424,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
         check(work.codex_available, 'connector changed after planning');
         exact(await json(runPath), view, 'certified offer changed after review');
         const current = await readItem();
-        exact(reviewPlan(current, candidate, identity, saved.revision, now(), reply), plan, 'plan changed before run');
+        exact(reviewPlan(current, candidate, identity, saved.revision, now(), reply,resume?.settled_preparations||[]), plan, 'plan changed before run');
         exact(current.tasks, prepared.tasks, 'task version changed before run');
         check(current.decisions.length === 1 && current.decisions[0].id === scope.id &&
           current.decisions[0].status === 'applied', 'reviewed approval changed');

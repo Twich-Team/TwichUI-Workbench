@@ -12,6 +12,8 @@ const release = dirname(dirname(fileURLToPath(import.meta.url)));
 const stage = dirname(release);
 const ops = join(stage, 'ops');
 const evidence = join(stage, 'artifacts', 'acceptance');
+process.env.WORKBENCH_EVERYDAY_CONFIG=join(ops,'everyday.json');
+process.env.WORKBENCH_PREPARATION_CONFIG=join(ops,'preparation.json');
 const origin = 'http://127.0.0.1:9487';
 const connector = '/run/twichui-workbench-codex/connector.sock';
 const sha = path => createHash('sha256').update(readFileSync(path)).digest('hex');
@@ -85,7 +87,7 @@ need(sha(helper) === helperSha, 'Administrator helper changed');
 const grant = JSON.parse(admin({op:'status'}));
 need(grant.expires * 1000 > (outcome ? now() : campaignOpened) + duration*minute, 'Administrator grant does not cover rollback window');
 const bug = candidate.request.kind === 'issue';
-let clarification;
+let clarification,resumeScope;
 if (bug) {
   const path=join(evidence,'bug-clarification.json');
   try {
@@ -98,6 +100,25 @@ if (bug) {
       now()-Date.parse(supplied.recorded_at)<30*minute,'Clarification authority changed or expired');
     clarification=supplied.reply;
   } catch (error) { if (error.code!=='ENOENT') throw error; }
+}
+if(bug) {
+  const path=join(evidence,'bug-resume-scope.json');
+  try {
+    const info=lstatSync(path);
+    need(realpathSync(path)===path&&info.isFile()&&info.uid===process.getuid()&&!(info.mode&0o077)&&info.size<=4096,'Applied scope continuation is not private');
+    const value=read(path);
+    need(value.version===1&&value.approval_reference===approvalReference&&value.seal===seal&&
+      Date.parse(value.recorded_at)<=now()&&now()-Date.parse(value.recorded_at)<30*minute&&
+      /^bug-flight-paths\.[a-z0-9-]+\.jsonl$/.test(value.previous_receipt),'Applied scope continuation binding changed');
+    const previous=join(evidence,value.previous_receipt),state=lstatSync(previous);
+    need(realpathSync(previous)===previous&&state.isFile()&&state.uid===process.getuid()&&!(state.mode&0o077)&&state.size<=65536&&sha(previous)===value.previous_receipt_sha256,'Previous scope receipt changed');
+    const rows=readFileSync(previous,'utf8').trim().split('\n').map(JSON.parse);
+    need(rows[0].seal===(value.previous_seal||seal)&&rows.at(-1).event==='held'&&
+      rows.filter(r=>r.event==='dispatch'&&r.action==='plan').length===1&&
+      rows.some(r=>r.event==='response'&&r.action==='plan'&&r.status===200&&r.id===value.scope.approval)&&
+      !rows.some(r=>r.event==='dispatch'&&r.action==='run'),'Previous scope decision is missing or execution was dispatched');
+    resumeScope=value.scope;
+  } catch(error) { if(error.code!=='ENOENT') throw error; }
 }
 const timing = caseTiming(bug);
 const blockDeadline = Math.min(cutoff, now() + timing.caseMinutes*minute);
@@ -258,7 +279,7 @@ try {
     args:['--disable-dev-shm-usage','--disable-background-networking','--no-proxy-server']});
   const context = await browser.newContext({serviceWorkers:'block'});
   await runJourney(context, origin, policy, candidate, {
-    clarification,
+    clarification,resumeScope,
     blockDeadline, now, preparationMs:timing.preparationMinutes*minute,
     reviewMs:timing.reviewMinutes*minute, minimumRunMs:timing.runMinutes*minute,
     // The app's bug investigation shares twenty minutes across source reads and
@@ -280,6 +301,11 @@ try {
         need(now() < end, 'Independent bug plan review did not settle within the approved window');
         await wait(500);
       }
+    },
+    async reviewResumedScope({intake,plan,scope}) {
+      need(scope.id===resumeScope.approval&&plan.id===resumeScope.proposal&&plan.binding===resumeScope.binding,'Resumed scope changed');
+      reviewedSha=readBugReview(intake,plan);
+      record('independent-applied-scope-review',{intake,proposal:plan.id,approval:scope.id,reviewSha:reviewedSha});
     },
     async reviewPreparedBug(data) {
       record('awaiting-independent-check-review',{intake:data.intake,offer:data.offer.offer.id,oracle:data.offer.offer.prepared_behavior.oracle_sha256});

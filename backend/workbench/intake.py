@@ -393,13 +393,20 @@ def attach(engine, identity, body):
             data=data, created_at=now()))
 
 
-def retry(engine, identity, job_id):
+def retry(engine, identity, job_id, *, preparation=None):
     with write_transaction(engine) as connection:
         job = require(connection, planning_jobs, str(job_id))
         row = require(connection, intakes, identity)
         if job['intake_id'] != identity:
             raise HTTPException(404, 'Job not found for this request.')
         if job['kind'] == 'behavioral_preparation':
+            if preparation and preparation.renew_check_construction:
+                from workbench.bug_preparation_retry import request_in
+                try:
+                    request_in(connection,job,preparation)
+                except (ValueError,OSError):
+                    raise HTTPException(409,'Check renewal requires current scope, unchanged policy, retained source and settled provider evidence.') from None
+                return
             raise HTTPException(409, 'Preparation retains one durable claim. Inspect its outcome or recovery hold; retry cannot launch duplicate preparation.')
         if row['payload'].get('local_planning') and job['kind'] == 'planning':
             raise HTTPException(409, 'This approval covers one planning request. Review the saved outcome or start a new task.')

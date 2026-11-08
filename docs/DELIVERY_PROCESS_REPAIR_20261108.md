@@ -123,3 +123,41 @@ of actual completed output reaches typed scope/content validation with zero mode
 calls or task-state mutations. This is supporting evidence, not an application
 acceptance result. Fresh normal bindings are still required. Actual20requests and
 1350009known tokens retained; no new uncertainty or owner decision.
+
+## Real approved scope and missing persistence-test capability
+
+Real phase6completed2Codexturns145050tokens, produced the seven-criterion scope and
+normal browser approval0a4e1e71-fab5-425b-8ac6-e2596776b237 applied. The app advanced
+to check construction without repair authority. Nine completed Codex turns690669
+tokens established that ReloadUI only toggled a flag and available fresh-client
+helpers could not reload Travel with retained saved data under the safe phase
+interface. The model correctly refused to substitute GUID switching for persistence.
+No addon implementation or independent original behavioral failure occurred.
+All terminal identities/usage are proved privately; task31requests2185728known tokens.
+
+A bounded app-owned restart_session primitive now serializes only named current
+SavedVariables, recreates frozen bootstrap/globals/listeners/caches, restores data
+and optional player GUID before addon chunks load, and updates client aliases.
+Generic unrelated counter controls prove persistence, character separation, cached
+database locals and unrelated fields; denial tests preserve sandbox/instruction
+limits. Provider planning and independent self-review see the actual runtime API.
+The development session supplied no flight-path addon repair or reproducer.
+
+Normal Rebuild checks records a fresh idempotent command and evidence root after
+terminal receipt/accounting proof, retains prior failures/usage, and preserves
+exact approved behavior/source/provider. No implementation grant or offer can
+already exist. A private predecessor policy can prove relocation of installation
+coordinates only; all permission semantics remain exact and source/approval/run
+bindings remain separately verified. New offers/oracles need independent checking
+and a fresh separate browser run decision. Old planning consent is not reused
+for new planning; an already-applied exact scope can continue while fresh run-offer
+expiry remains enforced. The browser resumes applied scope rather than replaying
+approval, and treats old failed planning distinctly from current preparation.
+
+Complete1762backend/25frontend passed; final79/68/36focused/operator records cover
+final strictness changes; all6confined separate-process browser modes passed171.67s,
+including closure after scope, visible local Rebuild checks, fresh session and
+continuation with one scope decision. Relevant browser11passed plus2explicit
+opt-ins passed57.6s. These are controlled tests, not real-provider acceptance passes.
+Current installed50 is retained until checked update. Real repair/cases0/4 and
+broader product requirements remain unfinished. Continue under standing authority.

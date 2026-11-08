@@ -68,6 +68,13 @@ class ProgramResponse(Data):
     draft: Planned | Inspect | Question | Limitation
 
 
+RUNTIME_INTERFACE = dict(version='isolated-client-session-v1',
+    name='restart_session',arguments='(saved_variable_names, optional_player_guid)',
+    behavior='Copy named current-client plain SavedVariables ending DB through bounded serialization; rerun the exact frozen committed bootstrap in fresh globals; restore saved data and optional player GUID before addon chunks load; update client and its selected alias. No addon runtime locals, caches, listeners or game-input functions survive.',
+    limits=dict(restarts=6,saved_variables=8,nodes=20000,depth=12,bytes=1048576),
+    restrictions='No source/file/code argument, expected records, arbitrary loading or external effects. This is an app-provided test helper, not an addon API. Recreate necessary game inputs and re-enable navigation normally after reload; measure actual addon behavior. Offline simulation only.')
+
+
 INSTRUCTIONS = (
     'Use the report and all recorded owner replies as the requested behavior. '
     'Questions are for genuine missing user facts or product choices, not asking the owner to interpret API documentation. '
@@ -109,6 +116,13 @@ INSTRUCTIONS = (
     'Do not infer an existing cache or listener from desired behavior; inspect the actual implementation. '
     'The observations must distinguish original from corrected behavior and cover the user report, not merely confirm a stub changed. '
     'Use client or the exact selected bootstrap local name, such as c; both refer to the same actual client. '
+    'Workbench provides restart_session({"AddonDB"}, player_guid) for client bootstraps. It serializes only the named '
+    'current client SavedVariables (names ending DB), reruns the exact frozen committed bootstrap in fresh globals, '
+    'restores saved data before addon startup, and updates client and its bootstrap alias. Optional player_guid is '
+    'a nonempty string, false for missing identity, or nil for the bootstrap default. Runtime locals, caches, listeners, '
+    'mock API functions and other client globals are NOT carried; recreate only necessary game inputs afterward. '
+    'Use actual saved data produced by addon behavior, never supplied expected records. At most six restarts, bounded '
+    'plain serializable data and no selectable file/code are allowed. This is offline simulated reload, not game proof. '
     'A correct unchanged baseline may use equal expected/incorrect values; it cannot prove an original failure. '
     'At least one later observation must actually fail on the original, and every candidate observation must pass. '
     'other_reads contains additional selected files only; required setup/writes/focused test reads are derived. '

@@ -252,16 +252,18 @@ export function IntakeDetail() {
     {Boolean(data.provider_activity?.length)&&<section className="soft-callout" aria-label="Task model activity">
       <h2>Model activity for this task</h2>
       <ul>{data.provider_activity?.map(attempt=><li key={attempt.id}>
-        <strong>{attempt.purpose==='capability_validation'?'Cancellation check':attempt.purpose==='implementation'?'Implementation':'Planning'}</strong>
+        <strong>{attempt.purpose==='capability_validation'?'Cancellation check':attempt.purpose==='implementation'?'Implementation':attempt.purpose==='check_preparation'?'Preparing checks':'Planning'}</strong>
         {' · '}{attempt.backend==='local'?'Local Qwen':attempt.backend==='codex'?'Codex':attempt.backend}
         {' · '}{providerOutcome(attempt.outcome)}
         <p>{attempt.routing_reason}</p>
         {(attempt.actual_model||attempt.requested_model)&&<p className="small-text">{attempt.actual_model?'Reported model':'Selected model'} {attempt.actual_model||attempt.requested_model}</p>}
       </li>)}</ul>
     </section>}
-    {activeJobs.length > 0 && <section className="panel"><h2>Why planning stopped</h2>
+    {activeJobs.length > 0 && <section className="panel"><h2>{activeJobs.some(j=>j.kind==='behavioral_preparation')?'Checks need attention':'Why planning stopped'}</h2>
       {activeJobs.map(job=><div key={job.id}><p>{job.message}</p>
-        {job.kind!=='behavioral_preparation' && !(data.original.local_planning&&job.kind==='planning') && !job.diagnostics.retained_failure && job.attempts<3
+        {job.kind==='behavioral_preparation'&&p?.task_contract?.bug_intent&&data.decisions.some(d=>d.status==='applied'&&d.proposal_id===p.id)
+          ? <><p>Rebuild checks uses the saved provider for a fresh bounded operation with the same approved scope. Unsettled earlier activity holds; implementation still needs separate run approval.</p><Button disabled={blocked} variant="secondary" onClick={()=>void act('retry',{job_id:job.id,command_id:crypto.randomUUID(),review_binding:p.binding,renew_check_construction:true}).catch(()=>{})}>Rebuild checks</Button></>
+          : job.kind!=='behavioral_preparation' && !(data.original.local_planning&&job.kind==='planning') && !job.diagnostics.retained_failure && job.attempts<3
           ? <Button disabled={blocked} variant="secondary" onClick={()=>void act('retry',{job_id:job.id}).catch(()=>{})}>Retry planning</Button>
           : <p>Your request and any saved decisions are here. You can review the details below or start a new request with updated information.</p>}</div>)}
     </section>}

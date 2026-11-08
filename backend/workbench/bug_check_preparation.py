@@ -6,6 +6,7 @@ Only an independently certified final recipe can become a separate run offer.
 """
 import copy
 import json
+import os
 import time
 from pathlib import Path
 from uuid import uuid4
@@ -15,8 +16,16 @@ from sqlalchemy import select
 from workbench import bug_evidence,bug_intent,bug_investigation,bug_source_planning
 from workbench import intake,real_recipes,task_execution
 from workbench.db import model_attempts,planning_jobs,write_transaction
-from workbench.real_workspace import Runtime,durable
+from workbench.real_workspace import Runtime,durable as durable_artifact
 from workbench.visual_scope import digest
+
+
+def durable(path,data):
+    """Construction diagnostics are private even outside a service UMask."""
+    durable_artifact(path,data)
+    if path.is_symlink() or path.stat().st_uid!=os.getuid():
+        raise ValueError('Owned private construction evidence required')
+    path.chmod(0o600)
 
 
 def validate_evidence(intent,evidence):
@@ -68,7 +77,10 @@ def construct(engine,ref,root,identity,stop_event=None,*,adapter=None):
     bug_evidence.validate_expectation_review(linked['proposal_review'],linked['approval']['payload'])
     bug_intent.validate_review(intent,linked['original'],reviewed['review_feedback'],packet)
     if packet['policy_sha256']!=digest(configuration(engine)):
-        raise ValueError('Preparation policy changed after scope approval')
+        from workbench.trusted_preparation import relocated_policy
+        if not relocated_policy(engine,packet['policy_sha256'],configuration(engine)):
+            raise ValueError('Preparation policy changed after scope approval')
+        packet['policy_sha256']=digest(configuration(engine))
     packet['plan_review']='source-grounded-lua-v1'
     operation=str(uuid4())
     claim=root/'check-construction-claim.json'
@@ -86,12 +98,14 @@ def construct(engine,ref,root,identity,stop_event=None,*,adapter=None):
     durable(claim,json.dumps(dict(id=operation,ref=ref,intent_digest=intent['review_digest'],
         capabilities=caps),sort_keys=True).encode())
     with write_transaction(engine) as c:
-        preparation=c.execute(select(planning_jobs).where(planning_jobs.c.id==root.name)).mappings().one()
-        if preparation['kind']!='behavioral_preparation' or preparation['payload']['ref']!=ref or preparation['status']!='running':
+        preparation=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==ref['intake_id'],
+            planning_jobs.c.kind=='behavioral_preparation',planning_jobs.c.revision==linked['proposal_review']['revision'])).mappings().one()
+        if (preparation['payload']['ref']!=ref or preparation['status']!='running'
+                or preparation['payload']['preparation_claim']['root']!=str(root)):
             raise ValueError('A current durable worker preparation claim is required')
-        c.execute(planning_jobs.update().where(planning_jobs.c.id==root.name).values(payload={**preparation['payload'],
+        c.execute(planning_jobs.update().where(planning_jobs.c.id==preparation['id']).values(payload={**preparation['payload'],
             'local_planning_receipt':job['payload']['local_planning_receipt'],'check_construction':dict(id=operation,capabilities=caps)}))
-        c.execute(model_attempts.insert().values(id=operation,job_id=root.name,task_id=ref['intake_id'],
+        c.execute(model_attempts.insert().values(id=operation,job_id=preparation['id'],task_id=ref['intake_id'],
             purpose='check_preparation',source='workbench',backend='codex' if route else 'local',
             requested_model=model,policy_revision=route['policy_revision'] if route else local_selection.policy_revision,
             requested_effort=route['effort'] if route else None,outcome='running',started_at=intake.now(),

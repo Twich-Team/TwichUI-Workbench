@@ -51,6 +51,10 @@ INSTRUCTIONS = (
     "Require actual addon calls and environment-only stubs; never replace the function/state being checked or return an assigned answer. "
     "For stateful reports require initial behavior before events and actual repeated client.FireEvent dispatches with changed inputs. "
     "The complete existing bootstrap is startup, not a developer reproduction or a reason to guess missing APIs. "
+    "The app_test_runtime declaration describes the actual Workbench restart_session helper, not an invented addon API. "
+    "It recreates the frozen bootstrap and runtime with serialised current saved data and optional player GUID; "
+    "it does not carry caches or listeners or prove in-game behavior. Require actual post-restart addon observations, "
+    "never assigned saved answers or a mere ReloadUI flag. Do not demand its definition in addon source. "
     "Do not accept a plan merely because its schema is valid. Keep explanations concise and complete."
 )
 

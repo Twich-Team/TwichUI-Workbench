@@ -604,6 +604,9 @@ class IntakePage(StrictModel):
 
 class PlanningRetry(StrictModel):
     job_id: UUID
+    command_id: UUID | None = None
+    review_binding: Annotated[str,Field(pattern=r'^[a-f0-9]{64}$')] | None = None
+    renew_check_construction: bool = False
 
 
 class ClarificationInput(StrictModel):

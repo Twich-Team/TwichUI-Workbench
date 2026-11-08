@@ -73,7 +73,9 @@ try {
     await context.close();
     context=await browser.newContext({serviceWorkers:'block'});
   }
-  await runJourney(context, origin, policy, candidate, {
+  const interruptScope=!fault&&Number(index)===1&&policy.reproduction_mode==='source-grounded-intent-v1';
+  let interrupted=false,approvedScope;
+  const options={
     clarification,
     blockDeadline:Date.now()+140000, minimumRunMs:40000, preparationMs:55000,
     planningReserveMs:1000, planningMs:7000, uiMs:7000, pollMs:100,
@@ -111,9 +113,41 @@ try {
     record(event,detail) {
       events.push(event);
       if(event==='response'&&detail.action==='submit') submitted=detail.id;
+      if(event==='response'&&detail.action==='plan'&&interruptScope&&!interrupted) {
+        interrupted=true;approvedScope=detail.id;throw new Error('controlled driver closure after scope');
+      }
       console.log(JSON.stringify({event,...detail}));
     },
-  });
+  };
+  if(interruptScope) {
+    await assert.rejects(runJourney(context,origin,policy,candidate,options));
+    assert(interrupted&&approvedScope&&submitted);
+    await context.close();context=await browser.newContext({serviceWorkers:'block'});
+    let item=await observer.request.get(origin+'/api/intake/'+submitted).then(r=>r.json());
+    if(candidate.provider==='local') {
+      const end=Date.now()+15000;
+      while(!item.jobs.some(j=>j.kind==='behavioral_preparation'&&j.status==='failed')) {
+        assert(Date.now()<end,'Controlled construction must settle before renewal');
+        await new Promise(resolve=>setTimeout(resolve,100));
+        item=await observer.request.get(origin+'/api/intake/'+submitted).then(r=>r.json());
+      }
+      await other.goto(origin+'/intake/'+submitted);
+      const response=await Promise.all([
+        other.waitForResponse(r=>r.url()===origin+'/api/intake/'+submitted+'/retry'&&r.request().method()==='POST'),
+        other.getByRole('button',{name:'Rebuild checks',exact:true}).click(),
+      ]).then(([r])=>r);
+      assert.equal(response.status(),200,await response.text());
+      item=await observer.request.get(origin+'/api/intake/'+submitted).then(r=>r.json());
+    }
+    const settledPreparations=item.provider_activity.filter(a=>a.purpose==='check_preparation'&&a.outcome==='failed').map(a=>a.id);
+    const selected=item.proposals[0];
+    const saved=await observer.request.get(origin+'/api/models').then(r=>r.json());
+    await runJourney(context,origin,policy,candidate,{...options,
+      resumeScope:{intake:submitted,approval:approvedScope,proposal:selected.id,binding:selected.binding,revision:selected.revision,policy_revision:saved.policy.revision,settled_preparations:settledPreparations},
+      async reviewResumedScope({scope,plan}) {assert.equal(scope.id,approvedScope);assert.equal(plan.id,selected.id);},
+    });
+    assert.equal(events.filter(e=>e==='resumed-applied-scope').length,1);
+  } else await runJourney(context,origin,policy,candidate,options);
   assert.equal(fault,false,'Malformed response must not become an approved task');
   assert.equal(events.at(-1),'checked');
 } catch(error) {

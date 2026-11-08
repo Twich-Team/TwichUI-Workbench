@@ -1,4 +1,5 @@
 """Read-only investigation and typed plan compilation for ordinary bug reports."""
+import copy
 import hashlib
 import re
 from collections import Counter
@@ -330,9 +331,12 @@ def report_coverage(original):
 
 def planning_request(packet, original, feedback):
     from workbench.bug_intent import Response as IntentResponse
+    from workbench.bug_program import RUNTIME_INTERFACE
     model=IntentResponse if packet.get('plan_review')=='source-grounded-intent-v1' else BugPlanningResponse
     return model, dict(
         purpose='investigate-addon-bug', base=packet['base'],
+        **({'app_test_runtime':copy.deepcopy(RUNTIME_INTERFACE)} if packet.get('plan_review') in
+           {'source-grounded-lua-v1','source-grounded-intent-v1'} else {}),
         **({'api_references':packet['api_references']} if 'api_references' in packet else {}),
         **({'declarations':packet.get('declarations',[])} if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'} else {}),
         files=[{k: v for k, v in item.items() if k not in ('git_blob', 'sha256')}

@@ -1,3 +1,118 @@
+## Verification complete for connected session/recovery update —22:55UTC
+
+Development has full1762backend/25frontend, final focused/operator checks, static/
+contracts/migrations, all6native modes171.67s, affected11browser and2explicitopt-ins
+57.6s passed. Native client journey tests actual visible Rebuild checks, settled
+failure history, one scope approval, session restart, real isolated Lua/candidate
+checks and ordinary second bug; simulated providers only. No styles/redesign.
+Installed50/5533336 unchanged; real31modelrequests2185728tokens known; approvedscope
+retained, prep9turns settledfailed due genuine missing session primitive. No new
+provider active, no implementation/real independent pass, supportingcases0/4.
+Next seal/deploy connected update51 using measured latest history, preserve existing
+scope/failed artifacts, normal browser Rebuild checks then bound scope continuation/
+independent prepared-check review and separate run approval. Do not rerun planning
+or reapprove scope. Use supported fresh command and normal app, no DB editing.
+No owner decision pending; verification/candidate are not completion.
+
+## Latest factual state — November8 22:51UTC (continue; no owner decision)
+
+Installed55333363833dff04b8ee3fa2e463cb2649a4af27/deployment50 remains healthy at both
+approved addresses. Development changes below are NOT installed. No provider active.
+Real41phase6 COMPLETED and produced usable scope9a3beb9f-7f7b-5794-b4b0-3a9ce7d30ae1,
+bindingdaf4614770e297ba77b248fdcbbcb3f1f5e2a276b068ec3078b91d10213ec7cf,
+intent review36f2e029eb327b678145e9ce559fa8d5106b466bf63bb25e4fd8e27085c367dd.
+Seven criteria cover visits/refresh, GUID persistence/reloads, unknown/reconciliation,
+saved-data preservation, real journey eligibility, listener lifecycle. Read8authorized
+files; write ONLY Travel.lua and tests/test_nav.lua. Normal browser scope approval
+0a4e1e71-fab5-425b-8ac6-e2596776b237 APPLIED22:16:40. No run approval or implementation.
+R=C/outcome-5533336; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-5533336.
+Driver20539endedheld after scope response because it counted historical failed
+planning jobs as current preparation failure. Do NOT reapprove scope/replay planning.
+
+App continued check construction: jobc25a1f90-5d92-4d12-8dd5-7fab12731c47,
+model632289f0-a201-4c18-be27-9bf498986aaf. Nine actual Codex turns COMPLETED with690669
+known tokens, no program/candidate/implementation. Model correctly found no supported
+fresh-client reload primitive: ReloadUI onlyflag/FreshAxis reloadsNav only/arbitrary
+loading denied. This is a real checker capability gap, not invalid model reasoning.
+Final limitation retained privately. Scope phase2turns145050known tokens. Exact
+independent settlement R/real41-scope-and-construction-settlement.json. Task31requests/
+2185728known tokens. Old interrupted/unknown receipts unchanged, partialoutputunusable.
+Supporting real provider cases0/4; no independent real addon repair yet.
+
+Development (uninstalled): bounded restart_session helper serializes named current
+SavedVariables endingDB and reruns frozen bootstrap in fresh globals, restores data
+and optional playerGUID BEFORE addon chunks load, resets caches/listeners/runtime,
+updates client/alias. <=6restarts/8variables/20000nodes/depth12/1MiB, no arbitrarypaths,
+functions/cycles/metatables or verdict access. Shared coroutine/instruction/OS limits
+remain. Generic controlled counter tests prove reload/character separation/unrelated
+fields/cachedDB-at-module-load and escape denials. Not a flight-path fix or game proof.
+Model and self-review receive explicit app_test_runtime declaration. No addon repair
+was written by development.
+
+Normal API/UI Rebuild checks now proposed: fresh UUID/idempotent command, exact existing
+scope binding, no prior offer/session, preserved linear old claim/result/usage history,
+all old provider calls must be independently known completed (local retained result or
+Codex terminal receipts). New owned evidence root/claim; same provider/scope; separate
+fresh certified run approval still required. No delivery retry cap. Old one-shot
+regression-recovery path remains separate. Same permission semantics across verified
+installation coordinate moves are supported only by exact prior private policy digest
+and unchanged semantic fields; DB identity/output paths may move, permissions may not.
+No approved source/behavior binding is rewritten. Browser continuation skips an already
+APPLIED exact scope, handles historical failures, and preserves new-planning consent
+expiry plus separate fresh run-offer expiry. Final run policy independently proves
+failed-but-settled construction; no old invalid checks accepted.
+
+Checks so far: full1762backend/25frontend passed, final focused79 plus36operator pass;
+static/contracts/migrations pass. Final all6native modes NOW running (exec92736,
+/tmp/wb-session-recovery-all-native.log), browser affected grep(exec1072,
+/tmp/wb-session-recovery-browser.log), final focused(exec90570). Native intent fixture
+now exercises driver closure after scope, visible Rebuild checks on local settled
+failure, continuation with one approval, fresh-client helper, real confined Lua,
+restart and next ordinary bug. Do not rebuild dev dist while browser checks run.
+
+NEXT: inspect final results/fix ordinary failures, save candidate/seal/deploy51 with
+latest exact history (measure; don't reuse259), existing scoped helper. Preserve old
+approved scope and failed construction. Use normal browser Rebuild checks ONCE after
+read-only terminal/source/policy admission; no scope/model-plan replay. Then resume
+existing browser run journey only after checks are certified and independently reviewed.
+New S/artifacts/acceptance/bug-resume-scope.json binds current seal, old scope receipt
+hash and explicit previous_seal, exact intake/proposal/binding/approval/revision6/
+policy_revision6/settled_preparations:[632289f0...]. Preserve old receipt under owned
+lookup filename; no run was dispatched. Copy/revalidate seven-criterion independent
+scope review with new seal (keep original), then review actual prepared program and
+all criteria before separate normal run click. Existing live driver accepts approved
+scope continuation, no new planning/scope action. Operator callPolicy now handles exact
+coordinate-relocated source policy and known failed Codex construction receipts.
+A small normal-browser Rebuild action can be coordinated separately; server verifies
+same scope/settled accounting itself. No DB hand-editing or addon fix preparation.
+Finish app-generated repair/original+candidate+fullsuite/durable result/restart/nextbug/
+all4real cases and full outcome. No campaign/renewal caps; no owner decision pending.
+Older entries below historical only.
+
+## Latest operating state — November8 22:15UTC
+
+Installed55333363833dff04b8ee3fa2e463cb2649a4af27/deployment50;
+treee01c62c40a3b5582e7495e592f3f0d96b2d15fdc;
+sealc6e574d23ff81b430c8125c6cdf9a3322d711842461898c36d325f10225c9d65.
+R=C/outcome-5533336; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-5533336.
+Final complete1740backend/25frontend, static/contracts/migrations,69source/memory and
+two actual-confined controlled-adapter browser modes pass. Bound prior browser/route/
+legacy-native evidence reused. Both addresses/source/history/all43reads/5isolation/
+model authentication/normal restoration verified. Original79/latest259history exact.
+Real41phase6running: job7c8d3989-92a2-4b21-a8cd-2026c7a784a9;
+attemptfe0ea35f-f8b6-4c1a-bc13-5129359b8df4; driver20539, R/phase6-driver-console.log.
+Normal browser command5f66819a-fa3c-448a-9fcc-11cc9a01d880 accepted22:14:50.
+Both actual public task prefilter and independent private receipt policy were exercised
+read-only BEFORE dispatch; R/phase6-admission-proof.json. Source/owner decision unchanged.
+Before this phase task20requests1350009known tokens; phase4interrupted/partialunusable,
+phase5completed/scope-locally-rejected. No historical accounting rewritten.
+Do not replay or interrupt healthy phase6 to prepare an update. Reconcile actual
+receipt/state first if it fails. No real addon implementation or independent pass;
+real supporting providercases0/4. Continue scopeapproval→app-ownedcheckconstruction→
+separate runapproval→repair/independentchecks→durable result/restart/nextbug/all4cases/fullscope.
+No owner decision pending. This installed correction is NOT product completion.
+Older entries below are historical and retain their evidence/lineage.
+
 # Current readiness — delivery-process correction under verification
 
 Following the Project Working Philosophy: A8 and the full product remain unfinished.

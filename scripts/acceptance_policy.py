@@ -138,10 +138,22 @@ def delivery_chain(connection,identity,revision=None,*,renewal=False):
     return result
 
 
-def check_bug_plan(plan, original, case, preparation, inspection_packet=None, feedback=""):
+def check_bug_plan(plan, original, case, preparation, inspection_packet=None, feedback="", connection=None):
     contract = plan['task_contract']
     evidence = contract.get('bug_intent') or contract['bug_evidence']
     packet = bug_investigation.context(original, '', preparation)
+    previous_policy=contract['scenario_grounding']['policy_sha256']
+    if previous_policy!=digest(preparation):
+        require(connection is not None,'Installation policy relocation proof is unavailable')
+        from workbench.db import engine_for
+        from workbench.trusted_preparation import relocated_policy
+        db=connection.execute('PRAGMA database_list').fetchone()[2]
+        engine=engine_for(db)
+        try:
+            require(relocated_policy(engine,previous_policy,preparation),'Reviewed policy semantics changed')
+        finally:
+            engine.dispose()
+        packet['policy_sha256']=previous_policy
     require(digest(packet['files']) == case['evidenceSha'] and packet['base'] == BASE
             and [f['path'] for f in packet['files']] == case['readPaths']
             and set(contract['writable_paths']) <= set(case['writablePaths']),
@@ -157,7 +169,7 @@ def check_bug_plan(plan, original, case, preparation, inspection_packet=None, fe
         bug_intent.validate_review(evidence,original,feedback,packet)
         rebuilt,content,question,limitation=bug_intent.resolve(dict(finding=plan['content']['value'],plan=reviewed),packet,original,feedback)
         require(not question and not limitation and rebuilt=={k:v for k,v in contract.items() if k!='scenario_grounding'}
-                and content==plan['content'] and contract['scenario_grounding']['policy_sha256']==digest(preparation),
+                and content==plan['content'] and contract['scenario_grounding']['policy_sha256']==packet['policy_sha256'],
                 'approved intent or behavior requirements changed')
         require(len(reviewed['criteria'])>=len(case['criteria']), 'owner behavior criteria are missing')
         return evidence
@@ -178,6 +190,26 @@ def check_bug_plan(plan, original, case, preparation, inspection_packet=None, fe
             and contract['scenario_grounding']['policy_sha256'] == digest(preparation),
             'reviewed bug plan, checked operations or preparation binding changed')
     return evidence
+
+
+def prepared_attempts(connection,identity,case):
+    """Rejected check content is not unknown execution or an accepted check."""
+    from workbench.provider_receipts import completed_turns
+    db=Path(connection.execute('PRAGMA database_list').fetchone()[2])
+    config=json.loads((db.parent.parent/'ops/everyday.json').read_text())
+    require(config['database']==str(db) and config['database_identity']==[db.stat().st_dev,db.stat().st_ino],
+            'Check accounting belongs to another installation')
+    rows=connection.execute('SELECT id,backend,requested_model,actual_model,outcome,usage,finished_at FROM model_attempts WHERE task_id=? AND purpose=\'check_preparation\'',(identity,)).fetchall()
+    for row in rows:
+        usage=json.loads(row[5]) if row[5] else None
+        require(row[1:4]==(case['provider'],case['model'],case['model']) and row[4] in {'completed','failed'}
+                and row[6] and isinstance(usage,dict) and usage.get('status')=='complete',
+                'Check construction attribution or accounting is unsettled')
+        if case['provider']=='codex':
+            completed_turns(row[0],usage,config['evidence_roots'])
+        else:
+            require(row[4]=='completed','Local rejected check construction needs independent settlement')
+    return rows
 
 
 def closeout(connection, identity, execution, case):
@@ -250,7 +282,7 @@ def check_review(connection, request, case, preparation):
     payload=latest['payload']
     if bug:
         actual=check_bug_plan(plan,original,case,preparation,
-            payload.get('bug_inspection_packet'),'\n'.join(dict.fromkeys(p['payload']['feedback'] for p in chain if p['payload'].get('feedback'))))
+            payload.get('bug_inspection_packet'),'\n'.join(dict.fromkeys(p['payload']['feedback'] for p in chain if p['payload'].get('feedback'))),connection)
     else:
         require(len(chain)==1,'supporting regression phase history changed')
         actual=plan['task_contract']['behavioral_evidence']
@@ -371,10 +403,19 @@ def campaign_admission(connection, request, case, policy):
         3 if case['choice'] == 'bug-flight-paths' else 2),
         'Campaign case allocation exhausted')
     before = [row for row in rows if row[1] != request.get('intake')]
-    local_settled, quarantined, nonstarted = {}, {}, {}
+    local_settled, quarantined, nonstarted, confirmed_interrupted = {}, {}, {}, {}
     if outcome:
         from workbench.planning_reconciliation import accounting
         for row in before:
+            if row[2:5]==('codex','planning','incomplete_output'):
+                try:
+                    from workbench.delivery_phase import observe
+                    db=Path(connection.execute('PRAGMA database_list').fetchone()[2])
+                    roots=json.loads((db.parent.parent/'ops/everyday.json').read_text())['evidence_roots']
+                    snapshot=observe(connection,row[1],roots)
+                    confirmed_interrupted[row[0]]=next(p for p in snapshot['phases'] if p['attempt']==row[0] and p['provider_state']=='interrupted')
+                except (ValueError,OSError,KeyError,TypeError,StopIteration):
+                    pass
             if row[2:4] == ('codex','planning') and row[5]:
                 try:
                     from workbench.investigation_recovery import no_generation_accounting
@@ -403,7 +444,7 @@ def campaign_admission(connection, request, case, policy):
                 except (ValueError, KeyError, TypeError):
                     pass  # Missing/stale settlement retains the normal hold.
     require(all(row[0] in request['prior'] and row[5] and (row[4] in
-                {'completed','checked','failed','passed'} or row[0] in local_settled or row[0] in quarantined or row[0] in nonstarted) for row in before),
+                {'completed','checked','failed','passed'} or row[0] in local_settled or row[0] in quarantined or row[0] in nonstarted or row[0] in confirmed_interrupted) for row in before),
             'Prior execution is unsettled or uncertain')
     local_tasks, codex_tasks = set(), set()
     qwen_requests = qwen_tokens = codex_turns = 0
@@ -526,8 +567,8 @@ def main():
                 require({a[0] for a in current}=={r['id'] for r in chain},'owned planning phase identities changed')
                 expected.update(r['id'] for r in chain)
                 if request['action']=='run':
-                    preparations=connection.execute("SELECT id,backend,requested_model,actual_model,outcome,usage,finished_at FROM model_attempts WHERE task_id=? AND purpose='check_preparation'",(request['intake'],)).fetchall()
-                    require(all(a[1:5]==(case['provider'],case['model'],case['model'],'completed') and a[5] and a[6] for a in preparations),'check preparation is uncertain or changed provider')
+                    preparations=prepared_attempts(connection,request['intake'],case)
+                    require(not request['proposal']['task_contract'].get('bug_intent') or any(a[4]=='completed' for a in preparations),'No completed certified check construction exists')
                     expected.update(a[0] for a in preparations)
                 if request['action']=='clarify':
                     check_clarification(connection,request,case)

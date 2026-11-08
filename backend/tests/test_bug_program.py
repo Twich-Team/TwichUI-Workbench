@@ -254,3 +254,97 @@ end
     evidence['review_digest']=review_digest(evidence['plan'],evidence['bootstrap_source'])
     result=run(tmp_path,evidence,"Example={Current=function()return 0 end}")
     assert result.returncode not in (0,1),result.stdout+result.stderr
+
+
+def session_evidence():
+    evidence=event_evidence()
+    repro=evidence['plan']['reproducer']
+    phases=[
+        ("return client.Example.Current()",0,0),
+        ("client.Input=1;client.FireEvent('USER_INPUT_CHANGED');return client.Example.Current()",1,1),
+        ("client.Input=2;client.FireEvent('USER_INPUT_CHANGED');return client.Example.Current()",2,2),
+        ("state.previous=client;restart_session({'ExampleDB'},'A');return client.Example.Current()",2,0),
+        ("return client~=state.previous and client.Input==0",True,False),
+        ("restart_session({'ExampleDB'},'B');return client.Example.Current()",0,2),
+        ("client.Input=7;client.FireEvent('USER_INPUT_CHANGED');return client.Example.Current()",7,2),
+        ("restart_session({'ExampleDB'},'A');return c.Example.Current()",2,0),
+        ("return client.ExampleDB.unrelated",'retained','changed'),
+    ]
+    repro['phases']=[dict(description='Observe actual behavior in a fresh isolated client.',code=code) for code,_,_ in phases]
+    repro['observations']=[dict(after_step=n+1,source='return',path=[1],expected=expected,incorrect=incorrect)
+                           for n,(_,expected,incorrect) in enumerate(phases)]
+    evidence['review_digest']=review_digest(evidence['plan'],evidence['bootstrap_source'])
+    return evidence
+
+
+def session_harness(tmp_path):
+    (tmp_path/'tests').mkdir()
+    (tmp_path/'tests/harness.lua').write_text('''function MakeClient()
+ local c=setmetatable({Input=0,handlers={}}, {__index=_G})
+ c.UnitGUID=function()return 'A' end
+ c.Register=function(e,fn)c.handlers[e]=fn end
+ c.FireEvent=function(e)if c.handlers[e] then c.handlers[e]() end end
+ return c
+end
+''')
+
+
+def test_bounded_session_restart_proves_saved_state_and_character_separation_without_retaining_runtime(tmp_path):
+    session_harness(tmp_path)
+    evidence=session_evidence()
+    source='''ExampleDB=ExampleDB or {unrelated='retained'}
+local identity=UnitGUID('player')
+local count=RESTORE
+Example={Current=function()return count end}
+Register('USER_INPUT_CHANGED',function()
+ count=Input
+ ExampleDB[identity]={count=count}
+end)
+'''
+    original=run(tmp_path,evidence,source.replace('RESTORE','0'))
+    candidate=run(tmp_path,evidence,source.replace('RESTORE',"(ExampleDB[identity] and ExampleDB[identity].count) or 0"))
+    assert original.returncode==1,original.stdout+original.stderr
+    assert candidate.returncode==0,candidate.stdout+candidate.stderr
+    assert 'WB_OBSERVATION bug-reproducer 4 incorrect' in original.stdout
+    assert 'WB_OBSERVATION bug-reproducer 9 expected' in candidate.stdout
+
+
+@pytest.mark.parametrize('code',[
+    "client.ExampleDB={secret=function()end};restart_session({'ExampleDB'});return 2",
+    "client.ExampleDB={};client.ExampleDB.self=client.ExampleDB;restart_session({'ExampleDB'});return 2",
+    "client.ExampleDB=setmetatable({},{__index={}});restart_session({'ExampleDB'});return 2",
+    "restart_session({'../../privateDB'});return 2",
+    "restart_session({'ExampleDB'},{});return 2",
+    "for i=1,7 do restart_session({'ExampleDB'}) end;return 2",
+    "restart_session({'ExampleDB'});return loadfile('/etc/passwd')()",
+    "restart_session({'ExampleDB'});return coroutine.wrap(function()while true do end end)()",
+])
+def test_session_restart_rejects_nonserializable_data_escapes_and_runaway_operations(tmp_path,code):
+    session_harness(tmp_path)
+    evidence=session_evidence()
+    evidence['plan']['reproducer']['phases'][3]['code']=code
+    evidence['review_digest']=review_digest(evidence['plan'],evidence['bootstrap_source'])
+    source="Example={Current=function()return Input end};Register('USER_INPUT_CHANGED',function()end)"
+    result=run(tmp_path,evidence,source)
+    assert result.returncode==2,result.stdout+result.stderr
+    assert 'WB_BEHAVIOR bug-reproducer PASS' not in result.stdout
+
+
+def test_saved_variables_restore_before_make_client_loads_modules_with_cached_database_locals(tmp_path):
+    session_harness(tmp_path)
+    path=tmp_path/'tests/harness.lua'
+    text=path.read_text().replace(' return c\n', " c._G=c\n local chunk=assert(loadfile(ROOT..'example.lua'));setfenv(chunk,c);chunk()\n return c\n")
+    path.write_text(text)
+    evidence=session_evidence()
+    bootstrap='dofile(TESTS.."harness.lua");local c=MakeClient();return c'
+    evidence['bootstrap_source']=bootstrap
+    evidence['review_digest']=review_digest(evidence['plan'],bootstrap)
+    source='''ExampleDB=ExampleDB or {unrelated='retained'}
+local saved=ExampleDB
+local identity=UnitGUID('player')
+local count=(saved[identity] and saved[identity].count) or 0
+Example={Current=function()return count end}
+Register('USER_INPUT_CHANGED',function()count=Input;saved[identity]={count=count}end)
+'''
+    result=run(tmp_path,evidence,source)
+    assert result.returncode==0,result.stdout+result.stderr

@@ -56,17 +56,17 @@ local function arguments(step, root)
   end
   return result
 end
-local function exercise()
+local function exercise(seed, only_fixture, shared_coroutines)
   local env = {assert=assert, error=error, type=type, pairs=pairs, ipairs=ipairs,
     rawget=rawget, rawset=rawset, pcall=pcall, xpcall=xpcall, select=select, unpack=unpack,
     tostring=tostring, tonumber=tonumber, next=next, rawequal=rawequal,
     setmetatable=setmetatable, getmetatable=getmetatable,
     math=copy(math), string=copy(string), table=copy(table), bit=copy(require('bit')),
-    coroutine=copy(coroutine), os={clock=os.clock, time=os.time, date=os.date, difftime=os.difftime},
+    coroutine=copy(shared_coroutines or coroutine), os={clock=os.clock, time=os.time, date=os.date, difftime=os.difftime},
     ROOT=ROOT, REPO=REPO, TESTS=TESTS, print=function() end}
   env._G = env
   local program_control
-  if scenario.phases and #scenario.phases > 0 then program_control = prepare_program_environment(env) end
+  if scenario.phases and #scenario.phases > 0 and not shared_coroutines then program_control = prepare_program_environment(env) end
   env.string.dump = nil
   env.getfenv = function(level)
     assert(level == 0, 'only fixture globals are available')
@@ -97,10 +97,30 @@ local function exercise()
     return chunk
   end
   local wrapped_makers = {}
+  local seeded, making_client = false, false
+  local function restore_client(client)
+    if not seed or seeded then return end
+    assert(type(client)=='table', 'invalid fresh client')
+    seeded = true
+    for name, data in pairs(seed.saved) do rawset(client, name, data) end
+    if seed.guid ~= nil then
+      local original = client.UnitGUID
+      client.UnitGUID = function(unit, ...)
+        if unit == 'player' then return seed.guid ~= false and seed.guid or nil end
+        if type(original) == 'function' then return original(unit, ...) end
+      end
+    end
+  end
   local function instrument_factory()
     local make = rawget(env, 'MakeClient')
     if type(make) ~= 'function' or wrapped_makers[make] then return end
-    local wrapped = function(...) return instrument_client_events(make(...)) end
+    local wrapped = function(...)
+      making_client = true
+      local client = instrument_client_events(make(...))
+      making_client = false
+      restore_client(client)
+      return client
+    end
     wrapped_makers[wrapped] = true
     env.MakeClient = wrapped
   end
@@ -112,6 +132,10 @@ local function exercise()
   env.setfenv = function(chunk, scope)
     assert(type(chunk) == 'function' and loaded[chunk] and type(scope) == 'table',
       'only isolated harness chunks can receive a fixture environment')
+    -- Existing MakeClient can load core modules before returning. Restore the
+    -- serialised globals before its first addon chunk, not after cached locals
+    -- have already captured a new empty SavedVariables table.
+    if making_client and rawget(scope,'_G')==scope and scope~=env then restore_client(scope) end
     return setfenv(chunk, scope)
   end
   env.require = function(name)
@@ -137,6 +161,11 @@ local function exercise()
     end
     activate_client_events(root)
   end
+  if only_fixture then
+    assert(scenario.fixture == 'client' and type(root) == 'table' and seeded, 'fresh client setup failed')
+    program_active = true
+    return env, root
+  end
   local function observe(item)
     if item.source == 'field' then return get(root, item.path) end
     local output = returned
@@ -155,7 +184,9 @@ local function exercise()
       assert(type(root) == 'function' or type(root) == 'table', 'expected a returned module')
     end
     program_active = true
-    return program_phases(env, root, scenario, program_control)
+    return program_phases(env, root, scenario, program_control, function(saved, guid, coroutines)
+      return exercise({saved=saved, guid=guid}, true, coroutines)
+    end)
   end
   local namespace, reproduced = {}, false
   for index, step in ipairs(scenario.steps) do

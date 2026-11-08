@@ -62,7 +62,7 @@ def three_observations(client_case):
 
 
 
-def program_answer(client_case):
+def program_answer(client_case,session=False):
     from test_bug_workflow import CLIENT_TEST
     value=copy.deepcopy(response(client_case))
     plan=value['plan']
@@ -75,6 +75,8 @@ def program_answer(client_case):
         phases += [dict(description='Observe the next event-driven notification.',
             code="state.actual=nil;client.FireEvent('WORKBENCH_FIXTURE_NAME','"+name+"');return state.actual",
             expected=name,incorrect='Unknown') for name in ('Lee','Pat')]
+        if session:
+            phases.append(dict(description='Recreate a fresh client without carrying the old runtime.',code="local old=client;restart_session({'FixtureDB'});return client~=old",expected=True,incorrect=False))
         setup=dict(kind='client-bootstrap',test_path=CLIENT_TEST,client='c',through_line=5)
     else:
         phases=[dict(description='Observe the actual exported name normalization.',
@@ -160,7 +162,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         request["lua_error"] = ""
         policy = json.loads(Path(os.environ["WORKBENCH_PREPARATION_CONFIG"]).read_text())
         packet = bug_investigation.context(request, "", policy)
-        answer = program_answer(client_case) if program_mode else three_observations(client_case)
+        answer = program_answer(client_case,session=intent_mode) if program_mode else three_observations(client_case)
         if program_mode:
             from workbench.bug_program import compile as compile_program
             answer,_=compile_program(answer,packet['files'],bug_investigation.report_coverage(request))
@@ -173,7 +175,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                           evidenceSha=digest(packet["files"]), writablePaths=answer["plan"]["writable_paths"],
                           reviewed=BugPlan.model_validate(answer["plan"]).model_dump(mode="json"),
                           client_case=client_case,intent=intent_plan,criteria=[c['description'] for c in intent_plan['criteria']],clarification=case_provider=="codex" and program_mode and not intent_mode and not client_case))
-    policy = dict(base=git(source, "rev-parse", "HEAD").strip(), limits=LIMITS, cases=cases,
+    policy = dict(base=git(source, "rev-parse", "HEAD").strip(), limits=LIMITS, cases=cases, reproduction_mode=reproduction_mode,
                   models=dict(local="pilot-qwen38-27b", codex="gpt-6.1-sol"),
                   budget=TaskBudget(activate_once=True, offer_id="00000000-0000-0000-0000-000000000000",
                                     offer_fingerprint="0"*64).model_dump(mode="json"),
@@ -196,7 +198,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
         fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
         case = cases[0] if fault else next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
-        answer = program_answer(case['client_case']) if program_mode else three_observations(case['client_case'])
+        answer = program_answer(case['client_case'],session=intent_mode) if program_mode else three_observations(case['client_case'])
         if investigating:
             finding='Controlled committed source diagnosis, no approval or execution.'
             if conflict:
@@ -218,6 +220,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         elif scoping:
             answer=dict(finding='The reported behavior needs a bounded source repair.',plan=case['intent'])
         elif preparing and not reviewing:
+            if intent_mode and case_provider=='local' and case['client_case']:
+                with store.connect() as connection:
+                    producer=connection.execute(select(planning_jobs.c.payload).where(planning_jobs.c.kind=='behavioral_preparation',planning_jobs.c.status=='running')).scalar_one()
+                if not producer.get('preparation_round_id'):
+                    return dict(finding='The controlled checker needs a renewed supported construction operation.',draft=dict(limitation='Controlled terminal check construction limitation.'))
             if not packet.get('sandbox_feedback') and not packet.get('self_review'):
                 answer['plan']['reproducer']['phases'][0]['code']='return state.nonexistent()'
         elif reviewing:

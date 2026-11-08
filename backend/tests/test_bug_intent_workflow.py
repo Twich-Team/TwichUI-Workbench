@@ -25,8 +25,9 @@ def scope():
 
 
 @pytest.mark.usefixtures('installed')
+@pytest.mark.parametrize('recover_construction',[False,True])
 def test_readable_scope_then_check_construction_with_real_original_feedback_and_separate_run_approval(
-    client,headers,store,monkeypatch,
+    client,headers,store,monkeypatch,recover_construction,
 ):
     enable_bugs(monkeypatch)
     config=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
@@ -36,11 +37,14 @@ def test_readable_scope_then_check_construction_with_real_original_feedback_and_
     # This is explicitly controlled telemetry, not sandbox or real-provider evidence.
     monkeypatch.setattr(bug_check_preparation,'Runtime',ControlledPreparer)
     calls=[]
+    fail_construction=recover_construction
     def generate(self,packet,schema,expected_model):
         calls.append(copy.deepcopy(packet))
         self.diagnostics=dict(actual_model=expected_model,generation_state='finished',accounting_state='complete',finish_reason='stop',
             request_completion_limit=6144,usage=dict(units='tokens',values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))
-        if schema is bug_intent.Response:
+        if packet.get('approved_intent') and fail_construction:
+            raw=dict(finding='The controlled fixture requires an updated safe runtime helper.',draft=dict(limitation='A settled controlled runtime-support gap.'))
+        elif schema is bug_intent.Response:
             raw=dict(finding='Normalization omits the requested conversion.',plan=scope())
         elif schema.__name__=='InvestigationResponse':
             raw=dict(finding='The committed function trims without converting case.',
@@ -70,8 +74,43 @@ def test_readable_scope_then_check_construction_with_real_original_feedback_and_
         expectation_review=proposal['task_contract']['bug_intent']['review_digest'])
     saved=client.post('/api/intake/'+item['id']+'/decisions',headers=headers,json=command)
     assert saved.status_code==200,saved.text
-    for _ in range(3):
+    if recover_construction:
+        from workbench.db import planning_jobs
+        assert worker.tick(store)  # Applied scope, without a run grant.
+        assert worker.tick(store)  # Decompose approved scope.
+        assert worker.tick(store)  # Settled construction limitation.
+        with store.connect() as c:
+            job=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==item['id'],planning_jobs.c.kind=='behavioral_preparation')).mappings().one()
+            assert job['status']=='failed'
+        retry=dict(job_id=job['id'],command_id=str(uuid4()),review_binding=proposal['binding'],renew_check_construction=True)
+        before=len(calls)
+        wrong=dict(retry,review_binding='0'*64)
+        assert client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=wrong).status_code==409
+        missing=dict(retry)
+        missing.pop('command_id')
+        assert client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=missing).status_code==409
+        with store.begin() as c:
+            old_attempt=c.execute(select(model_attempts).where(model_attempts.c.job_id==job['id'])).mappings().one()
+            c.execute(model_attempts.update().where(model_attempts.c.id==old_attempt['id']).values(usage=None))
+        assert client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=retry).status_code==409
+        with store.begin() as c:
+            c.execute(model_attempts.update().where(model_attempts.c.id==old_attempt['id']).values(usage=old_attempt['usage']))
+        saved=client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=retry)
+        assert saved.status_code==200,saved.text
+        assert client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=retry).status_code==200
+        assert len(calls)==before
+        conflicting=dict(retry,command_id=str(uuid4()))
+        assert client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=conflicting).status_code==409
+        fail_construction=False
         assert worker.tick(store)
+        with store.connect() as c:
+            renewed=c.execute(select(planning_jobs).where(planning_jobs.c.id==job['id'])).mappings().one()
+            assert renewed['attempts']==2 and renewed['status']=='completed',renewed['message']
+            assert len(renewed['payload']['check_preparation_history'])==1
+            assert renewed['payload']['check_preparation_history'][0]['output_reused'] is False
+    else:
+        for _ in range(3):
+            assert worker.tick(store)
     endpoint,offer=get_run_offer(client,item)
     assert offer['available'],offer
     frozen=offer['offer']['prepared_behavior']
@@ -83,8 +122,9 @@ def test_readable_scope_then_check_construction_with_real_original_feedback_and_
     with store.connect() as c:
         assert not c.execute(select(real_execution_grants)).first()
         attempts=c.execute(select(model_attempts).where(model_attempts.c.task_id==item['id'])).mappings().all()
-        assert sorted(a['purpose'] for a in attempts)==['check_preparation','planning']
-        assert all(a['outcome']=='completed' and a['usage']['status']=='complete' for a in attempts)
+        assert sorted(a['purpose'] for a in attempts)==['check_preparation']*(2 if recover_construction else 1)+['planning']
+        assert all(a['outcome'] in {'completed','failed'} and a['usage']['status']=='complete' for a in attempts)
+        assert sum(a['outcome']=='failed' for a in attempts)==int(recover_construction)
     # Tampering a prepared scope cannot be hidden by recomputing its model-owned digest.
     root=Path(settings['output_root'])
     evidence_file=next(root.rglob('prepared-bug-checks.json'))
