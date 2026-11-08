@@ -1294,8 +1294,13 @@ class Planner:
         from workbench.bug_plan_review import ReviewResponse
         from workbench.bug_investigation_stage import InvestigationResponse
 
-        bug_schema = schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse)
-        if schema is BugPlanningResponse:
+        from workbench.bug_intent import Response as IntentResponse
+
+        bug_schema = schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse)
+        if schema is IntentResponse:
+            from workbench.bug_intent import INSTRUCTIONS
+            instructions = INSTRUCTIONS
+        elif schema is BugPlanningResponse:
             if packet.get("coverage", {}).get("reproducer_format") == "lua-phases-v1":
                 from workbench.bug_program import INSTRUCTIONS
             else:
@@ -1417,7 +1422,7 @@ class Planner:
                     response_identity_available=False,
                 )
             changes = []
-            if schema is BugPlanningResponse:
+            if schema in (BugPlanningResponse,IntentResponse):
                 result, changes = normalize_bug(result)
             if self.response_evidence:
                 self.response_evidence.parsed(result, self.diagnostics, changes)

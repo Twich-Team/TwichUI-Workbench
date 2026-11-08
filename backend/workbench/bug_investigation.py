@@ -329,7 +329,9 @@ def report_coverage(original):
 
 
 def planning_request(packet, original, feedback):
-    return BugPlanningResponse, dict(
+    from workbench.bug_intent import Response as IntentResponse
+    model=IntentResponse if packet.get('plan_review')=='source-grounded-intent-v1' else BugPlanningResponse
+    return model, dict(
         purpose='investigate-addon-bug', base=packet['base'],
         **({'api_references':packet['api_references']} if 'api_references' in packet else {}),
         **({'declarations':packet.get('declarations',[])} if packet.get('plan_review') == 'source-grounded-lua-v1' else {}),
@@ -344,6 +346,9 @@ def planning_request(packet, original, feedback):
 
 
 def resolve(raw, packet, original, feedback):
+    if packet.get('plan_review')=='source-grounded-intent-v1':
+        from workbench.bug_intent import resolve
+        return resolve(raw,packet,original,feedback)
     from workbench.bug_wire import compile_setup
     from workbench.bug_program import compile as compile_program
     raw, _ = compile_program(raw, packet['files'], report_coverage(original))

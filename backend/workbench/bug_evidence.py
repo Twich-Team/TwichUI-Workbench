@@ -252,6 +252,15 @@ def committed_bootstrap(root, base, plan):
 def validate_expectation_review(review, payload):
     from workbench.regression_evidence import validate_expectation_review as validate_regression
 
+    intent=(review.get('task_contract') or {}).get('bug_intent')
+    if intent:
+        from workbench.bug_intent import Intent,review_digest as intent_digest
+        checked=Intent.model_validate(intent)
+        actual=intent_digest(checked.base,checked.report_binding,checked.source_binding,
+            checked.plan.model_dump(mode='json'))
+        if checked.review_digest!=actual or payload.get('expectation_review')!=actual:
+            raise HTTPException(422,'Confirm that the planned behavior and checks match your report before approving this scope.')
+        return
     evidence = (review.get('task_contract') or {}).get('bug_evidence')
     if not evidence:
         return validate_regression(review, payload)

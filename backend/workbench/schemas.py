@@ -2,6 +2,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from workbench.bug_evidence import BugEvidence
+from workbench.bug_intent import Intent as BugIntent
 from workbench.regression_evidence import BehavioralPreparation
 
 Choice = Literal["confirm", "change"]
@@ -464,6 +465,7 @@ class ScenarioGrounding(StrictModel):
 
 class RegressionTaskContract(StrictModel):
     scenario_grounding: ScenarioGrounding | None = Field(default=None, exclude_if=lambda value: value is None)
+    bug_intent: BugIntent | None = Field(default=None, exclude_if=lambda value: value is None)
     bug_evidence: BugEvidence | None = Field(default=None, exclude_if=lambda value: value is None)
     behavioral_evidence: BehavioralPreparation | None = Field(default=None, exclude_if=lambda value: value is None)
     verification_profile: VerificationProfileSelection | None = Field(default=None, exclude_if=lambda value: value is None)

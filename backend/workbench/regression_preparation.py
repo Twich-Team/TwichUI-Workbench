@@ -447,7 +447,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             from workbench.planning_limits import operation_request_bound
             from workbench.planning_response import create_evidence
             evidence_schema = schema
-            if bug and packet.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'} and (isinstance(adapter_used, LocalProvider) or getattr(adapter_used, 'source_investigation', False)):
+            if bug and packet.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1', 'source-grounded-intent-v1'} and (isinstance(adapter_used, LocalProvider) or getattr(adapter_used, 'source_investigation', False)):
                 from workbench.bug_investigation_stage import InvestigationResponse
                 evidence_schema = InvestigationResponse
             response_evidence = create_evidence(lease, evidence_schema, wire.get('coverage') if bug else None,

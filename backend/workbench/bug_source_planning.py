@@ -296,7 +296,7 @@ def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_bu
 def next_wire(packet, original, feedback, windows, finding, matches=None, *, programs=(), requested=(), text_budget=None, packing_context=None):
     _, wire = bug.planning_request(packet, original, feedback)
     from workbench.source_memory import retain, requested_visibility
-    if packet.get('plan_review')=='source-grounded-lua-v1':
+    if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'}:
         from workbench.source_interface import context
         priority,interface=context(packet,original,programs)
         windows=[*windows,*priority]
@@ -331,12 +331,15 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     if callable(getattr(adapter, 'bind_source', None)):
         adapter.bind_source(initial)
     schema, wire = bug.planning_request(packet, original, feedback)
+    intent_mode=initial.get('plan_review')=='source-grounded-intent-v1'
+    from workbench.bug_intent import Response as IntentResponse
+    response_model=IntentResponse if intent_mode else BugPlanningResponse
     review_required = initial.get('plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1'}
-    investigating = initial.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'}
+    investigating = intent_mode or initial.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'}
     diagnosis = None
     bootstrap_priority, bootstrap_fact = [], None
     pending, planning_wire, review_rounds = None, None, 0
-    if wire['coverage'].get('call_driven') and not review_required:
+    if wire['coverage'].get('call_driven') and not review_required and not intent_mode:
         wire['coverage']['require_inspection'] = True
     parent = adapter.response_evidence
     journals, receipts = [], []
@@ -344,7 +347,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     predecessor = None
     historical_pending = False
     packing_context = {}
-    program_mode = initial.get('plan_review') == 'source-grounded-lua-v1'
+    program_mode = initial.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'}
 
     def make_wire(*args,**kwargs):
         before=len(packet.get('inspection_windows',[]))
@@ -364,7 +367,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         from workbench.investigation_memory import seed
         packet, remembered, predecessor = seed(packet, original, parent.identifier, engine)
         if remembered:
-            if initial.get('plan_review') == 'source-grounded-lua-v1' and getattr(adapter, 'reuse_review_lessons', True):
+            if not intent_mode and initial.get('plan_review')=='source-grounded-lua-v1' and getattr(adapter, 'reuse_review_lessons', True):
                 from workbench.investigation_memory import review_lessons
                 lessons = review_lessons(predecessor, engine)
                 if lessons:
@@ -381,7 +384,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     read_chars = (source_characters(packet) if program_mode else
         sum(len(e['text']) for f in [*initial['files'],*initial.get('api_references',[])] for e in f['excerpts'])
         + sum(len(w['text']) for w in packet.get('inspection_windows', [])))
-    if program_mode:
+    if program_mode and not intent_mode:
         from workbench.source_bootstrap_context import complete
         bootstrap_priority, extra, added, bootstrap_fact = complete(packet, limit-read_chars, should_stop)
         read_chars = source_characters(packet)
@@ -393,6 +396,10 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                          'Current committed source and existing startup context; no diagnosis or approval reused.')
         if bootstrap_fact:
             wire['committed_bootstrap_context'] = bootstrap_fact
+    if intent_mode:
+        wire=make_wire(packet,original,feedback,packet.get('inspection_windows',[]),
+            'Retained committed source supports a repair scope; executable checks are a later preparation phase.')
+        wire['coverage']['scope_plan_format']='readable-intent-v1'
     if read_chars > limit:
         raise PlanningUnavailable('Initial source context exceeds the investigation read bound.', 'inspection_limit')
     if program_mode and lessons and lessons['predecessor'] == predecessor:
@@ -406,7 +413,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         if parent:
             parent.record('rejected-review-to-fresh-construction', predecessor=predecessor,
                 review_binding=lessons['review_binding'], approved=False, executed=False)
-    if program_mode and predecessor and engine is not None and not (lessons and lessons['predecessor'] == predecessor):
+    if program_mode and not intent_mode and predecessor and engine is not None and not (lessons and lessons['predecessor'] == predecessor):
         from workbench.investigation_memory import draft_for_critique
         prior=draft_for_critique(predecessor,engine,packet,original,feedback)
         if prior:
@@ -460,7 +467,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     try:
         for index in range(requests):
             schema = (bug_plan_review.ReviewResponse if pending is not None else
-                      stage.InvestigationResponse if investigating else BugPlanningResponse)
+                      stage.InvestigationResponse if investigating else response_model)
             if should_stop() or time.monotonic() >= adapter.ends_at:
                 raise PlanningUnavailable('The source investigation was stopped or timed out.', 'cancelled')
             if program_mode:
@@ -562,7 +569,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                             evidence.snapshot('investigation-diagnosis', raw)
                             evidence.record('source-diagnosis-completed', approved=False, executed=False)
                         investigating = False
-                        if program_mode and not (bootstrap_fact and bootstrap_fact.get('complete')):
+                        if program_mode and not intent_mode and not (bootstrap_fact and bootstrap_fact.get('complete')):
                             from workbench.source_bootstrap_context import complete
                             bootstrap_priority, extra, added, bootstrap_fact = complete(
                                 packet, limit-read_chars, should_stop, diagnosis['evidence_paths'])
@@ -594,7 +601,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 raw, setup_fact = compile_setup(raw, packet['files'])
                 if setup_fact and evidence:
                     evidence.record('explicit-setup-compiled', **setup_fact)
-                draft = BugPlanningResponse.model_validate(raw)
+                draft = response_model.model_validate(raw)
                 if wire['coverage'].get('require_inspection') and draft.inspection is None:
                     raise ResponseValidationError('Stateful investigation must inspect committed source before a plan.',
                         ['inspection'], 'a read-only committed source window', None)
@@ -670,7 +677,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             if diagnosis:
                 wire['investigation_diagnosis'] = dict(**diagnosis, untrusted=True, approved=False, executed=False)
             wire['inspection_result']['requested'] = [r.model_dump(mode='json') for r in draft.inspection]
-            if wire['coverage'].get('call_driven') and not packet.get('inspection_windows') and not review_required:
+            if wire['coverage'].get('call_driven') and not packet.get('inspection_windows') and not review_required and not intent_mode:
                 wire['coverage']['require_inspection'] = True
     finally:
         current = dict(adapter.diagnostics)

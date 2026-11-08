@@ -97,6 +97,9 @@ def normalize_bug(value, changes=()):
 
 
 def wire_schema(model, coverage=None, files=None):
+    from workbench.bug_intent import Response as IntentResponse, schema as intent_schema
+    if model is IntentResponse:
+        return intent_schema(files or [])
     if (model.__name__ == 'BugPlanningResponse' and isinstance(coverage, dict)
             and coverage.get('reproducer_format') == 'lua-phases-v1'):
         from workbench.bug_program import schema
