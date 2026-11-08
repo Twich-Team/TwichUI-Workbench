@@ -1,3 +1,70 @@
+# CURRENT VERIFIED STATE — November8 17:16UTC
+
+Following the Project Working Philosophy: keep full delivery going; no owner action.
+Installed6c4bae32df3b1369618fa5912432b1951e1129ef,
+tree8b8e3bae612c7463b21bee74c6bf3611e4630345,
+seal5564fae9e2029cd00e8f448c971c17760bce2df107f46a034ef48b13ac802015.
+C=~/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
+R=C/outcome-6c4bae3; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-6c4bae3.
+Fresh guarded preflight and deployment43 PASS: original79/latest236 checked copies,
+all40normalhistoryreads+listing unchanged, both loopback/approvedLAN listeners/TLS/
+firewall/browser boundaries/5isolation/connectorpeer gates. Four everyday roles active
+anddisabled pending functional acceptance. Normalmodel/auth/context/8765 unchanged;
+28GBheadroom/scratch0, no evidence pruned. No billing/disclosure/network scope change.
+R/offline-verification.json binds final1640backend/6defaultskip/25frontend PASS351.59s,
+all4affected REAL-CONFINED controlled API/worker/browser/provider/data/program modes
+PASS106.32s/585.6M/swap0, unit collected/cgroupabsent, static/contracts/build/schemaPASS,
+107focused/138retainedfocused, actual16completedresponse replay allsource0omissions
+max212223requestbytes, and actualcompleted-receipt recovery. Two unchanged historical
+readiness/delegated-browser default optins retained by bound lineage with consequences,
+not newpasses. No controlled checks count as real acceptance. Candidate sealedbefore
+activation; no stale/failed preflight advanced. Existing protections unchanged.
+
+Fresh real39 ACTIVE when SQL checked17:15: modelc791c42b-5dc5-4ddd-b5cb-0333c01b1084,
+intakeee246737-a0ca-4ce4-bc13-cd00570e298a,jobab14d96e-f3e4-4ff2-8e6e-f6738fe5f810.
+Normal fresh delegated browser submission200, driver exec49158. Observe actual task/
+privatejournals before assuming active. No addon implementation or real behavioral
+pass yet; zero of4required real supporting provider cases complete. No old plan/output
+orapproval reused; entire inspected source nowretained within393216-byte envelope.
+No more unchanged old128k/196k eviction-loop renewals. If provider stillfails, inspect
+actualvisibility and reasoning separately. Sourceworkingmax262144,16sharedturns,
+300sperturn/1800stotal, localQwen unchanged. Neweventsbudget96butsame65536privatebytes.
+
+Real38's16Codexturns allcompleted933255tokens. Its32event journal then lateIO/null
+contract handler crashed; originalDBinterrupted_unknown/NULL untouched. Generic
+completedreceiptrecovery matched allcontent/lineage/usage/capability/terminal/closed
+producer receipts, fresh task fencing. Receipt nowrecreated inINSTALLEDnewstage along
+with original18 andeb72/253a/58d0 standingreceipts. Normal browser/API explicitlysays
+completed receipts/usage recovered separately; no unknown→zeroconversion. All236rows
+unchanged afterdispositions/reads. Receipt lookup original635stage via trustedinputs.
+C/complete-receipt-real38-proof.json, Rparent/attempt-38-accounting.json andledger bind.
+Settled totals65Codexstarts/61completeusage/4missingfinalreceipts/2886288known tokens.
+Two historicalunknownterminal+two confirmedinterrupted stillhaveunknownfinalusage,
+remainisolatedandunchanged; Qwen89starts unchanged. Live39counts pending settlement.
+
+Meaningful new evidence: actualsource testscontain concrete fixturecoordinates/node
+IDs/routes, so no genericfixture-decodingtool added yet. Model'soldmissing-context
+claim follows observed eviction; fullworkingcontext correction should be evaluated
+onreal39beforemoremachinery. Do not developer-write addonfix/reproducer/expectedanswer.
+When plan arrives, independent review ofinitialrouteknowledge, flightmastereventlearning,
+laterrefresh/newpath (must unavailableafterfirstvisit, availableafterlater) throughactual
+addonbehavior. PrivateS/artifacts/acceptance/bug-plan-review.json onlyafterreadingplan
+andcommittedsource: decisionapprove/approvedtrue, approval_reference7f10158b0d3eb1ae5314eae423a73562b5ddd331,
+currentseal/intake/plan.binding/bug_evidence.review_digest,3distinct exactbrowsercriteria
+index/reason rows. Modelself-review isnotindependent. Normaldriverhandles separate
+plan/run decisions. Need originalFAIL/candidatePASS/fullLua suite/savedreviewablepatch.
+Then4realcases, resultrestart, nextordinarybug withoutregistration, cleanup/stableapp.
+
+Currentcodecheckpoint6c4bae3. Activeledgerupdated. Nextrevisionifneeded44/task40/roots117,
+parent6c4bae3; appendc791c42b ONLYaftersettlement. Latest236isPREtrial; measurelivehistory
+beforeanycopy; neveroverwritewitholdstore/original79. Templateprepare-whole-working-set-
+revision.py hasnewASTassertions MAX_BUG_INPUTconstantchange/PlannerreceiptID; adjust
+honestlyfornextdiff. Copyguardedextraoperations/post-install.sh; preserve four standing
+receiptIDs including9c47 +original18. Same12exactauthorizedsources/6writable/max3repair,
+no newpermissionsneeded forordinaryrepair. Requirements/fullscope remainunfinished;
+no campaignclock/allocation/revision/cumulative testing caps or checkpointstop.
+Lower blocks are historical; actualstatusabovegoverns.
+
 # CURRENT VERIFIED STATE — November8 17:09UTC
 
 Following the Project Working Philosophy: continue, no owner decision needed.
