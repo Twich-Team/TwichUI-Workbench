@@ -36,3 +36,7 @@ Owner later approved OWNER_CODEX_SUPPORT_DISCLOSURE_20261108.md: three exact rea
 test-support files supplement the original nine-file Codex flight-path permission.
 Its bound request remains immutable historical evidence; no repeated permission needed.
 Other disclosure/write/billing/network/publication safeguards remain unchanged.
+
+OWNER_FLIGHT_PATH_PERSISTENCE_20261108.md is the later behavior decision for the
+existing flight-path task: persistent per-character knowledge, unknown is not absence,
+reliable observation reconciliation and unrelated-data preservation. No extra authority.

@@ -1,3 +1,9 @@
+Latest owner update November8: persistence choice SUPPLIED in
+OWNER_FLIGHT_PATH_PERSISTENCE_20261108.md. Submit exact answer to existing41 via normal
+clarification; separate plan/run decisions and all other safeguards remain. No campaign
+allowance applies. Lower pending-answer statements are historical until next verified
+receipt; no reply was dispatched by the interrupted turn.
+
 # Current status — continuation fix installed; real repair awaits one product answer
 
 Following the Project Working Philosophy:0a66d5b is installed and verified at both
