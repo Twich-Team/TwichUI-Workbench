@@ -123,8 +123,19 @@ def settled_planning_chain(connection, identity, revision=None):
         job,rev,status,claims,payload,attempt,usage,outcome,finished,backend,actual,requested=row
         payload=json.loads(payload) if isinstance(payload,str) else payload
         usage=json.loads(usage) if isinstance(usage,str) else usage
+        # The existing single-turn regression connector records terminal outcome
+        # and token values without the multi-turn investigation's status tag.
+        # Accept that supported receipt only for the original non-investigation
+        # phase, with complete, internally consistent reported token values.
+        values=usage.get('values',{}) if isinstance(usage,dict) else {}
+        single_receipt=(rev==1 and not payload.get('local_planning_receipt',{}).get('investigation_version')
+            and isinstance(usage,dict) and 'status' not in usage
+            and all(type(values.get(k)) is int and values[k]>=0 for k in
+                ('prompt_tokens','completion_tokens','total_tokens'))
+            and values['total_tokens']>0
+            and values['prompt_tokens']+values['completion_tokens']==values['total_tokens'])
         if (status!='completed' or claims!=1 or outcome!='completed' or not finished
-                or not isinstance(usage,dict) or usage.get('status')!='complete'
+                or not isinstance(usage,dict) or not (usage.get('status')=='complete' or single_receipt)
                 or usage.get('units')!='tokens' or not actual or actual!=requested):
             raise ValueError('The investigation phase is unsettled or lacks complete accounting')
         records.append(dict(id=attempt,job_id=job,revision=rev,payload=payload,usage=usage,

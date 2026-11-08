@@ -78,6 +78,25 @@ Static/contracts/build/schema passed. Full backend/frontend suite exec19019 prog
 C/clarification-real41-offline-budget-proof.json rechecks actual live records READ ONLY:
 5used/11remaining of16, same12authorized sources/base, no provider call or history write.
 
+Checkpoint8ec3773 sealed as dormant stage (not activated), seal
+ d0cbf41e57e602c02c6fbd221aee8101be8f15c7a4056827816031fb8706e781.
+Full1675backend/6defaultskips and25frontend passed on that exact code; static passed,
+all4confined modes passed in separate1+3 runs. A mistakenly overlapping rebuild/native
+run was stopped and NOT counted; subsequent successful runs were after the build.
+Fresh preflight passed after supplying independently verified original79/latest250
+fingerprint inputs; initial missing-input failure preserved and no mutation followed it.
+
+Additional four-route delegated browser opt-in exposed a real acceptance-review
+compatibility error: existing single-turn regression receipts have completed outcome
+and token values but no multi-turn status tag. Connected correction now accepts that
+format only for original non-investigation phase, with exact nonnegative integer token
+components and consistent positive total; never absent accounting for bug follow-up.
+50planning-limit checks pass, including missing/unknown/malformed/failed/unfinished/
+wrong-model receipts. Full four-route +affected tests currently exec11951; fixture
+observations show first controlled Codex case checked and local case advancing, no live
+model. New correction is not in8ec; DO NOT activate8ec. Next final candidate must include
+it and repeat appropriate full/static verification before deployment. No new live call.
+
 Next deployment46 should preserve SAME real41 intake/task (not replay report or
 first five turns), use latest250 history, keep current model attempt out of prior-case
 list, and fresh bindings/seal. Read source/approval/browser policy before changing.

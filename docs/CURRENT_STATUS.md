@@ -18,3 +18,9 @@ passed; these do not substitute for real-provider/product acceptance. Historical
 unknown turns remain quarantined with unknown usage unchanged. Latest250 history
 rows preserved. See [handoff](CONTINUATION.md) for exact evidence and continuation.
 Standing authority remains active; checkpoints and superseded caps are not stops.
+
+Checkpoint8ec3773 full1675backend/25frontend and all4confined browser modes passed;
+dormant stage/preflight ready but not activated. Extra four-route opt-in found existing
+single-turn receipt format compatibility in the new independent accounting reviewer.
+Corrected locally;50receipt/accounting checks pass and affected four-route checks are
+progressing. Final correction must be verified/sealed before any deployment.
