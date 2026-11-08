@@ -17,7 +17,9 @@ from workbench.planning_transport import PlanningUnavailable
 MAX_PACKET = 24_000
 MAX_BUG_INPUT = 393216  # Bounded complete envelope for the inspected source working set; not output allowance.
 MAX_WIRE = 2 << 20
-MAX_LINE = 256 << 10
+# App-server notifications can echo the accepted prompt, with a second layer of
+# JSON escaping. This is a transport bound, never the model-output allowance.
+MAX_LINE = 2 * MAX_BUG_INPUT + 65536
 SECONDS = 120
 BUG_SECONDS = 300
 # This is a hold after observation, not a provider output-token limit.

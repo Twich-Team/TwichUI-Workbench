@@ -84,6 +84,45 @@ def test_rpc_phase_receipt_omits_server_error_text_and_parameters():
     assert 'secret' not in str(caught.value) and 'fixture private error' not in str(caught.value)
 
 
+@pytest.mark.parametrize('oversize',[False,True])
+def test_app_server_echo_accepts_bounded_bug_input_without_losing_lifecycle(oversize):
+    # Real failure: accepted 277192-byte input exceeded the former 262144-byte
+    # incoming-frame guard. Exercise the actual pipe reader and a doubly escaped
+    # prompt, rather than a fake transport that never enforces frame bounds.
+    prompt=json.dumps({'source':'\\"' * 70000})
+    assert 262144 < len(prompt.encode()) < codex.MAX_BUG_INPUT
+    event=dict(method='item/started',params=dict(item=dict(type='userMessage',content=prompt)))
+    raw=json.dumps(event).encode()+b'\n'
+    if oversize:
+        raw=json.dumps(dict(method='item/started',params={'text':'x'*codex.MAX_LINE})).encode()+b'\n'
+    read_fd,write_fd=os.pipe()
+    def send():
+        try:
+            view=memoryview(raw)
+            while view:
+                view=view[os.write(write_fd,view):]
+        except BrokenPipeError:
+            pass
+        finally:
+            os.close(write_fd)
+    thread=Thread(target=send,daemon=True)
+    thread.start()
+    channel=codex.Channel(read_fd,lambda _:None,lambda:False,time.monotonic()+5)
+    try:
+        if oversize:
+            with pytest.raises(codex.Hold) as caught:
+                channel.receive()
+            assert caught.value.metadata['protocol_guard']=='line_bytes'
+        else:
+            assert channel.receive()==event
+            assert channel.used < codex.MAX_WIRE
+        assert codex.MAX_PACKET==24000 and codex.MAX_WIRE==2<<20
+    finally:
+        channel.close()
+        os.close(read_fd)
+        thread.join(2)
+
+
 def allowance(used=10):
     window = {'usedPercent': used, 'resetsAt': int(time.time()) + 300}
     return {'ordinaryUsageAllowed': True, 'rateLimits': {

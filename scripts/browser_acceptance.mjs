@@ -130,8 +130,9 @@ export function reviewPlan(item, candidate, identity, revision, now, reply, sett
   check(planningActivity.length===phases && planningActivity.every(attempt=>
     planningRecordMatches(attempt,candidate,reply)) &&
     preparedActivity.every(a=>Boolean(plan.task_contract.bug_intent)&&item.tasks.length>0&&item.decisions.some(d=>d.status==='applied')&&
-      a.purpose==='check_preparation'&&a.backend===candidate.provider&&a.requested_model===candidate.model&&a.actual_model===candidate.model&&
-      (a.outcome==='completed'||a.outcome==='failed'&&settledPreparations.includes(a.id))),
+      a.purpose==='check_preparation'&&a.backend===candidate.provider&&a.requested_model===candidate.model&&
+      (a.actual_model===candidate.model||a.actual_model===null&&a.outcome==='interrupted_unknown'&&settledPreparations.includes(a.id))&&
+      (a.outcome==='completed'||['failed','interrupted_unknown'].includes(a.outcome)&&settledPreparations.includes(a.id))),
     'planning or check preparation is uncertain or unexpected');
   const jobs = item.jobs.filter(job => job.kind === 'planning');
   check(jobs.length === phases && jobs.every(job => (job.status==='completed'||reply?.renew_operation&&job.status==='failed') && job.attempts === 1) &&

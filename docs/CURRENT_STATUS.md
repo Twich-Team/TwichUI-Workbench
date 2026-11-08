@@ -1,3 +1,46 @@
+## Current verified state — November 8, 23:28 UTC
+
+Following the Project Working Philosophy: delivery continues under standing authority;
+no former campaign clock, attempt/revision cap or routine renewal applies.
+Installed deployment51/c7d6580 remains healthy at loopback9487 and HTTPS10.0.0.9:9487.
+Real flight-path41 has the unchanged seven-criterion scope approved normally;
+NO implementation, independent addon behavior pass or durable repair. Real supporting
+provider checks remain0/4. Character persistence is not yet proved by a real repair.
+
+Second check-construction3281b42e completed8Codex source-read turns/626485known tokens.
+Ninth request accepted277192input bytes but hit the incoming262144line-byte guard.
+Its lifecycle records confirmed interruption, acknowledged interrupt and closed
+connection; final usage remains NULL/unknown. Raw original attempt remains
+interrupted_unknown. No program candidate, offer, run approval or source edit.
+No owned model generation remains. Private immutable investigation:
+C/outcome-c7d6580/second-construction-interruption-investigation.json.
+Ledger retains completed prefix separately and adds1unknown-usage request.
+
+Development correction (not yet installed/sealed): incoming frame allowance accounts
+for bounded input and JSON escaping; unchanged24000model-output/2MiBtotal-wire limits.
+Failed-request terminal identity/guard metadata now survives into check receipts.
+Normal Rebuild checks can append a verified standing-policy disposition for a
+read-only, confirmed interrupted construction with unknown usage, preserve its
+original history, and start a different claim under the same exact approved scope.
+No partial output reused, no execution authority, no uncertain consequential replay.
+Acceptance independently verifies that recorded fence. Relevant completed source
+coordinates are re-read from the exact allowed committed blobs; no model diagnosis,
+check program, expected answer or authority is copied from the interrupted turn.
+Actual retained-evidence replay revalidated8windows/186599unique committed chars.
+
+Targeted protocol/lifecycle/recovery tests and real-process controlled-provider
+intent journeys pass; broader verification is running. Initial native invocation
+lacked delegated cgroup; corrected owned delegated user unit passed both adapters.
+Initial four-case browser rehearsal exposed eager installation-config lookup for
+cases without check-construction attempts; corrected lazy lookup is being verified.
+No real-provider trial was repeated to find these local errors.
+NEXT finish affected verification, record candidate/seal, checked deployment52 with
+fresh latest-history measurement, normal Rebuild checks command then applied-scope
+continuation. Do not replay planning/scope approval. Independently review generated
+checks before separate run approval; then real app repair/check/result/restart/next
+ordinary bug/all4real provider cases/full agreed outcome. No owner action pending.
+Older entries below are historical and do not override this state.
+
 ## Verification complete for connected session/recovery update —22:55UTC
 
 Development has full1762backend/25frontend, final focused/operator checks, static/

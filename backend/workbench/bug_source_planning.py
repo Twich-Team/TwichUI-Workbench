@@ -523,7 +523,12 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 diagnostics['stopped_request_generation_state'] = adapter.diagnostics.get('generation_state', 'not_started')
                 adapter.diagnostics.update(diagnostics)
                 if evidence:
-                    evidence.record('request-stopped', category=error.reason, generation_state=diagnostics['stopped_request_generation_state'])
+                    evidence.record('request-stopped', category=error.reason,
+                        generation_state=diagnostics['stopped_request_generation_state'],
+                        provider_receipt=diagnostics.get('provider_receipt'),
+                        provider_terminal_confirmed=diagnostics.get('provider_terminal_confirmed'),
+                        terminal_status=diagnostics.get('terminal_status'),
+                        protocol_guard=diagnostics.get('protocol_guard'))
                 if index:
                     # A later readiness refusal cannot re-enable pre-generation
                     # fallback after an earlier inspection generation.

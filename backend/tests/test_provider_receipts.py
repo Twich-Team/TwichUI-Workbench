@@ -115,3 +115,85 @@ def test_confirmed_interruption_preserves_usage_and_never_authorizes_partial_out
         assert proof['usage']==usage['values']
         assert proof['completed_prefix']['provider_outcome']=='completed'
         assert not proof['output_accepted'] and not proof['execution_authorized']
+
+
+@pytest.mark.parametrize('fault',[None,'missing_close','unknown_terminal','write_capability',
+    'changed_code','accepted_content','prepared_output','candidate','wrong_prefix','ambiguous','wrong_receipt'])
+def test_readonly_construction_recovery_preserves_unknown_usage_and_fences_output(tmp_path,fault):
+    from datetime import datetime,timedelta,timezone
+    from pathlib import Path
+    import shutil
+    from uuid import UUID,uuid5
+    from workbench.investigation_recovery import capabilities
+    from workbench.provider_receipts import interrupted_check_construction
+    identity,path,events,aggregate,diag,_=interrupted_receipts(tmp_path)
+    source=Path(__file__).resolve().parents[2]
+    caps=capabilities()
+    for name in [*caps['code'],'docs/OWNER_READONLY_RECOVERY_20261108.md']:
+        target=tmp_path/'release'/name
+        target.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(source/name,target)
+    events[1]['capabilities']=caps
+    events[2]['usage']=events[4]['usage']=None
+    now=datetime.now(timezone.utc)
+    begin=(now-timedelta(seconds=2)).isoformat()
+    finish=(now+timedelta(seconds=2)).isoformat()
+    events.insert(0,dict(phase='request',time=now.isoformat()))
+    write(path,events,True)
+    phase=str(uuid5(UUID(identity),'committed-source-turn-1'))
+    stopped=tmp_path/'release/artifacts/runs'/('planning-evidence-'+phase)/'events.jsonl'
+    write(stopped,[dict(phase='request-schema',time=begin),dict(phase='request-stopped',time=finish)],True)
+    root=tmp_path/'release/artifacts/runs/preparations'/str(uuid4())
+    claim=dict(id=identity,capabilities=dict(source_writes=False,execution_dispatch=False,external_action_tools=False))
+    result=dict(id=identity,content_accepted=False,candidate_count=0,usage=None,
+        known_usage=json.dumps(dict(prompt_tokens=30,completion_tokens=4,total_tokens=34)))
+    if fault=='missing_close':
+        events.pop()
+    if fault=='unknown_terminal':
+        events[3]['status']='unknown'
+    if fault=='write_capability':
+        events[2]['capabilities']={**caps,'source_writes':True}
+    if fault=='changed_code':
+        (tmp_path/'release/backend/workbench/codex_provider.py').write_text('changed')
+    if fault=='accepted_content':
+        result['content_accepted']=True
+    if fault=='prepared_output':
+        write(root/'prepared-bug-checks.json',{})
+    if fault=='candidate':
+        result['candidate_count']=1
+    if fault=='wrong_prefix':
+        result['known_usage']=json.dumps(dict(prompt_tokens=31,completion_tokens=4,total_tokens=35))
+    if fault=='ambiguous':
+        write(path.with_name(str(uuid4())+'.jsonl'),events,True)
+    if fault=='wrong_receipt':
+        result['diagnostics']=dict(provider_receipt=str(uuid4()))
+    write(root/'check-construction-claim.json',claim)
+    write(root/'check-construction-result.json',result)
+    write(path,events,True)
+    if fault:
+        with pytest.raises(ValueError):
+            interrupted_check_construction(identity,root,[tmp_path])
+    else:
+        proof=interrupted_check_construction(identity,root,[tmp_path])
+        assert proof['final_outcome']=='interrupted' and proof['final_usage'] is None
+        assert proof['unknown_usage_requests']==1 and not proof['output_reused']
+        assert proof['requires_fresh_claim'] and not proof['execution_authorized']
+        assert proof['completed_prefix']['usage']['total_tokens']==34
+        import sqlite3
+        from workbench.provider_receipts import recorded_check_quarantine
+        c=sqlite3.connect(':memory:')
+        c.execute('CREATE TABLE model_attempts(id,job_id,backend,purpose,outcome,usage,finished_at,execution_id)')
+        c.execute('CREATE TABLE planning_jobs(id,payload)')
+        c.execute('INSERT INTO model_attempts VALUES(?,?,?,?,?,?,?,?)',
+            (identity,'job','codex','check_preparation','interrupted_unknown',None,finish,None))
+        retained=dict(claim=dict(root=str(root)),construction=dict(id=identity),
+            output_reused=False,settlement=[dict(attempt=identity,read_only_quarantine=proof)])
+        payload=dict(check_preparation_history=[retained],preparation_claim=dict(root=str(root)+'-fresh'))
+        c.execute('INSERT INTO planning_jobs VALUES(?,?)',('job',json.dumps(payload)))
+        assert recorded_check_quarantine(c,identity,[tmp_path])['requests_started']==2
+        # A late/current claim cannot acquire authority through the old receipt.
+        payload['preparation_claim']['root']=str(root)
+        c.execute('UPDATE planning_jobs SET payload=?',(json.dumps(payload),))
+        with pytest.raises(ValueError):
+            recorded_check_quarantine(c,identity,[tmp_path])
+        assert c.execute('SELECT outcome,usage FROM model_attempts').fetchone()==('interrupted_unknown',None)

@@ -73,6 +73,9 @@ def construct(engine,ref,root,identity,stop_event=None,*,adapter=None):
         packet=copy.deepcopy(job['payload']['bug_inspection_packet'])
         route=provider_routes.run_selection(c,linked)
         local_selection=everyday.local_selection(c) if not route else None
+        preparation_payload=c.execute(select(planning_jobs.c.payload).where(
+            planning_jobs.c.intake_id==ref['intake_id'],planning_jobs.c.kind=='behavioral_preparation',
+            planning_jobs.c.revision==linked['proposal_review']['revision'])).scalar_one()
     # Revalidate exact source, owner feedback, policy and approval before constructing.
     bug_evidence.validate_expectation_review(linked['proposal_review'],linked['approval']['payload'])
     bug_intent.validate_review(intent,linked['original'],reviewed['review_feedback'],packet)
@@ -82,6 +85,8 @@ def construct(engine,ref,root,identity,stop_event=None,*,adapter=None):
             raise ValueError('Preparation policy changed after scope approval')
         packet['policy_sha256']=digest(configuration(engine))
     packet['plan_review']='source-grounded-lua-v1'
+    from workbench.investigation_memory import construction_source
+    packet,reused_source=construction_source(packet,preparation_payload.get('check_preparation_history',[]))
     operation=str(uuid4())
     claim=root/'check-construction-claim.json'
     if claim.exists():
@@ -92,6 +97,10 @@ def construct(engine,ref,root,identity,stop_event=None,*,adapter=None):
     adapter.request_seconds=300
     model=route['model'] if route else local_selection.model
     evidence=create_evidence(operation,bug_evidence.BugPlanningResponse,None,packet['files'])
+    if evidence and reused_source:
+        for offset in range(0,len(reused_source),16):
+            evidence.record('completed-construction-source-revalidated',windows=reused_source[offset:offset+16],
+                output_reused=False,approved=False,executed=False)
     adapter.response_evidence=evidence
     # Tool-free model + readonly sandbox, no implementation or consequential tool.
     caps=dict(source_writes=False,execution_dispatch=False,external_action_tools=False)
@@ -181,6 +190,10 @@ def construct(engine,ref,root,identity,stop_event=None,*,adapter=None):
                 finished_at=intake.now()))
         durable(root/'check-construction-result.json',json.dumps(dict(
             id=operation,content_accepted=failure is None,generation_state=facts.get('generation_state'),
-            usage=usage,known_usage=facts.get('known_usage'),candidate_count=len(attempts)),sort_keys=True).encode())
+            usage=usage,known_usage=facts.get('known_usage'),candidate_count=len(attempts),
+            execution_state=facts.get('terminal_status',facts.get('completion_state','unknown')),
+            diagnostics={key:facts.get(key) for key in ('provider_receipt','provider_terminal_confirmed',
+                'terminal_status','protocol_guard','wire_bytes','investigation_requests',
+                'stopped_request_category','stopped_request_generation_state')}),sort_keys=True).encode())
         if evidence:
             evidence.close()

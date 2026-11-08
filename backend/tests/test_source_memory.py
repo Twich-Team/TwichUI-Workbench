@@ -58,6 +58,43 @@ def test_memory_keeps_pagination_metadata_visible_alongside_merged_exact_lines()
     assert wire['files'][0]['excerpts'][0]['text']==page['text']
 
 
+@pytest.mark.parametrize('fault',[None,'source_changed','not_permitted','receipt_changed'])
+def test_check_renewal_reuses_only_revalidated_completed_source_coordinates(tmp_path,monkeypatch,fault):
+    import hashlib
+    from workbench import bug_source_planning
+    from workbench.investigation_memory import construction_source
+    identity='completed-prefix'
+    name='tests/example.lua'
+    raw=b'local observed = 1\nreturn observed\n'
+    sha=hashlib.sha256(raw).hexdigest()
+    folder=tmp_path/'runs'
+    root=folder/'preparations/old'
+    path=folder/('planning-evidence-'+identity)/'events.jsonl'
+    path.parent.mkdir(parents=True)
+    window=dict(path=name,line=1,through_line=2,sha256=sha)
+    path.write_text(json.dumps(dict(phase='source-read-result',windows=[window]))+'\n')
+    path.chmod(0o600)
+    history=[dict(claim=dict(root=str(root)),construction=dict(id='old'),settlement=[dict(
+        read_only_quarantine=dict(completed_prefix=dict(attempt='old',turns=[dict(
+            phase=identity,source_sha256=hashlib.sha256(path.read_bytes()).hexdigest())])))])]
+    packet=dict(base='committed',plan_review='source-grounded-lua-v1',
+        files=[dict(path=name,sha256=sha,excerpts=[])])
+    monkeypatch.setattr(bug_source_planning,'committed',lambda *args:(raw,dict(sha256='changed' if fault=='source_changed' else sha)))
+    monkeypatch.setattr(bug_source_planning,'verify_packet',lambda original,candidate: candidate)
+    if fault=='not_permitted':
+        packet['files'][0]['path']='tests/other.lua'
+    if fault=='receipt_changed':
+        path.write_text(path.read_text()+'\n')
+    if fault:
+        with pytest.raises(ValueError):
+            construction_source(packet,history)
+    else:
+        candidate,provenance=construction_source(packet,history)
+        assert candidate['inspection_windows'][0]['text']==raw.decode().strip()
+        assert 'inspection_windows' not in packet and provenance[0]['sha256']==sha
+        assert not any(k in candidate for k in ('diagnosis','plan','approval','expected'))
+
+
 @pytest.mark.parametrize('fault',['none','missing','bool','bad-count','overlong','transport','cancelled'])
 def test_exact_template_count_never_observes_source_or_starts_generation(fault):
     transport = LocalHTTP()

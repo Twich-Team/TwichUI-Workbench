@@ -48,8 +48,22 @@ def request_in(c,job,body):
     for attempt in attempts:
         usage=attempt['usage']
         require(attempt['source']=='workbench' and attempt['execution_id'] is None
-                and attempt['backend']==provider and attempt['requested_model']==model and attempt['actual_model']==model
-                and attempt['finished_at'] and attempt['outcome'] in {'completed','failed'}
+                and attempt['backend']==provider and attempt['requested_model']==model
+                and attempt['finished_at'],'Previous check activity is unsettled.')
+        if provider=='codex' and attempt['outcome']=='interrupted_unknown' and usage is None:
+            from workbench.provider_receipts import interrupted_check_construction
+            from workbench.codex_quarantine import local_generation_absent
+            records=[*payload.get('check_preparation_history',[]),dict(
+                claim=payload.get('preparation_claim'),construction=payload.get('check_construction'))]
+            matched=[item for item in records if item.get('construction',{}).get('id')==attempt['id']]
+            require(len(matched)==1 and local_generation_absent(),'Read-only construction is not isolated.')
+            try:
+                proof=interrupted_check_construction(attempt['id'],matched[0]['claim']['root'],roots)
+            except (ValueError,OSError,KeyError,TypeError):
+                raise HTTPException(409,'Standing read-only recovery evidence is unavailable; unknown usage remains held.') from None
+            proofs.append(dict(attempt=attempt['id'],read_only_quarantine=proof))
+            continue
+        require(attempt['actual_model']==model and attempt['outcome'] in {'completed','failed'}
                 and isinstance(usage,dict) and usage.get('status')=='complete','Previous check activity or its accounting is unsettled.')
         if provider=='codex':
             try:

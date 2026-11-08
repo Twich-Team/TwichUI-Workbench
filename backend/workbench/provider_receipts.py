@@ -133,3 +133,124 @@ def interrupted_turns(identity, usage, evidence_roots, diagnostics, capabilities
     return dict(attempt=identity,provider_outcome='interrupted',completed_prefix=proof,
                 final_receipt=receipt,terminal_sha256=source_sha,usage=aggregate,
                 output_accepted=False,execution_authorized=False)
+
+
+def interrupted_check_construction(identity, root, evidence_roots):
+    """Standing read-only policy: isolate a confirmed interruption with lost usage.
+
+    This never changes the original model-attempt row. The caller must fence the
+    failed preparation, check current scope/absence of implementation, and append
+    this proof to its durable history before starting a different claim directory.
+    Historical builds omitted the final receipt identifier; only an unambiguous
+    receipt inside the exact stopped request's private time interval can recover it.
+    """
+    from datetime import datetime
+    from workbench.investigation_recovery import AUTHORITY,capabilities
+    from workbench.visual_scope import digest
+    root=Path(root)
+    roots=list(dict.fromkeys(Path(p) for p in evidence_roots))
+    locations=[p for p in roots if root.parent==p/'release/artifacts/runs/preparations']
+    if len(locations)!=1 or str(UUID(identity))!=identity:
+        raise ValueError('Construction evidence location is unavailable')
+    stage=locations[0]
+    claim,claim_sha=_read(root/'check-construction-claim.json',bound=65536)
+    result,result_sha=_read(root/'check-construction-result.json',bound=65536)
+    safe=dict(source_writes=False,execution_dispatch=False,external_action_tools=False)
+    if (claim.get('id')!=identity or claim.get('capabilities')!=safe
+            or result.get('id')!=identity or result.get('content_accepted') is not False
+            or result.get('candidate_count')!=0 or result.get('usage') is not None
+            or (root/'prepared-bug-checks.json').exists()):
+        raise ValueError('Read-only construction isolation is unverified')
+    authority,authority_sha=_read_authority(stage)
+    if authority_sha!=AUTHORITY:
+        raise ValueError('Standing recovery authority changed')
+    known=json.loads(result.get('known_usage') or '{}')
+    prefix=[]
+    stopped=None
+    for index in range(16):
+        phase=identity if index==0 else str(uuid5(UUID(identity),'committed-source-turn-'+str(index)))
+        path=stage/'release/artifacts/runs'/('planning-evidence-'+phase)/'events.jsonl'
+        if not path.exists():
+            break
+        events,events_sha=_read(path,lines=True,bound=65536)
+        stop=[e for e in events if e.get('phase')=='request-stopped']
+        if stop:
+            starts=[e for e in events if e.get('phase')=='request-schema']
+            if stopped is not None or len(stop)!=1 or len(starts)!=1:
+                raise ValueError('Stopped request binding is ambiguous')
+            stopped=(index,starts[0],stop[0],events_sha)
+        else:
+            prefix.append(index)
+    if stopped is None or prefix!=list(range(stopped[0])) or not known:
+        raise ValueError('Completed prefix and stopped request are unavailable')
+    count,start,end,stopped_sha=stopped
+    proof=completed_turns(identity,dict(status='complete',units='tokens',requests_observed=count,values=known),roots)
+    begin,finish=(datetime.fromisoformat(e['time']) for e in (start,end))
+    if not begin.tzinfo or not finish.tzinfo or not begin<finish:
+        raise ValueError('Stopped request interval is invalid')
+    candidates=[]
+    for path in (stage/'artifacts/codex-evidence').glob('*.jsonl'):
+        if not begin.timestamp()-1<=path.stat().st_mtime<=finish.timestamp()+1:
+            continue
+        events,sha=_read(path,lines=True)
+        requests=[e for e in events if e.get('phase')=='request']
+        if len(requests)==1 and begin<=datetime.fromisoformat(requests[0]['time'])<=finish:
+            candidates.append((path,events,sha))
+    if len(candidates)!=1:
+        raise ValueError('Final provider receipt is missing or ambiguous')
+    path,events,sha=candidates[0]
+    receipt=path.stem
+    supplied=end.get('provider_receipt') or result.get('diagnostics',{}).get('provider_receipt')
+    if supplied is not None and supplied!=receipt:
+        raise ValueError('Retained final receipt differs')
+    identities={(e.get('thread_id'),e.get('turn_id')) for e in events
+                if e.get('phase') in {'turn-started','lifecycle-turn'}}
+    terminals=[e for e in events if e.get('phase')=='lifecycle-terminal']
+    held=[e for e in events if e.get('phase')=='turn-held']
+    isolation=[e.get('capabilities') for e in events if e.get('phase')=='isolation-verified']
+    actual=capabilities()
+    if (len(identities)!=1 or not all(all(v) for v in identities)
+            or len(terminals)!=1 or terminals[0].get('status')!='interrupted'
+            or (terminals[0].get('thread_id'),terminals[0].get('turn_id')) not in identities
+            or terminals[0].get('usage') is not None or len(held)!=1 or held[0].get('usage') is not None
+            or held[0].get('terminal_status')!='interrupted'
+            or not any(e.get('phase')=='interrupt-result' and e.get('acknowledged') is True
+                       and e.get('status')=='interrupted' for e in events)
+            or not any(e.get('phase')=='connection-closed' for e in events)
+            or len(isolation)!=1 or not isinstance(isolation[0],dict)
+            or {k:v for k,v in isolation[0].items() if k!='code'}!={k:v for k,v in actual.items() if k!='code'}):
+        raise ValueError('Final interruption, supported cancellation or actual isolation is unverified')
+    code=isolation[0].get('code',{})
+    if set(code)!=set(actual['code']) or any(hashlib.sha256((stage/'release'/p).read_bytes()).hexdigest()!=v for p,v in code.items()):
+        raise ValueError('Original confinement implementation changed')
+    return dict(kind='standing-read-only-check-quarantine-v1',attempt=identity,
+        authority_sha256=authority_sha,claim_sha256=claim_sha,result_sha256=result_sha,
+        stopped_request_sha256=stopped_sha,completed_prefix=proof,final_receipt=receipt,
+        terminal_sha256=sha,capabilities_sha256=digest(isolation[0]),
+        final_outcome='interrupted',final_usage=None,unknown_usage_requests=1,
+        output_reused=False,execution_authorized=False,requires_fresh_claim=True)
+
+
+def _read_authority(stage):
+    path=stage/'release/docs/OWNER_READONLY_RECOVERY_20261108.md'
+    if path.resolve()!=path or not path.is_file():
+        raise ValueError('Recovery authority unavailable')
+    return path.read_bytes(),hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def recorded_check_quarantine(connection, identity, evidence_roots):
+    """Independent acceptance reader; requires the application's committed fence."""
+    row=connection.execute("SELECT job_id,backend,purpose,outcome,usage,finished_at,execution_id FROM model_attempts WHERE id=?",(identity,)).fetchone()
+    if (not row or tuple(row[1:4])!=('codex','check_preparation','interrupted_unknown')
+            or row[4] not in (None,'null') or not row[5] or row[6] is not None):
+        raise ValueError('Not a quarantined read-only check operation')
+    job=connection.execute('SELECT payload FROM planning_jobs WHERE id=?',(row[0],)).fetchone()
+    payload=json.loads(job[0])
+    records=[item for item in payload.get('check_preparation_history',[])
+             if item.get('construction',{}).get('id')==identity and item.get('output_reused') is False]
+    if len(records)!=1 or records[0]['claim']['root']==payload.get('preparation_claim',{}).get('root'):
+        raise ValueError('The old construction claim is not fenced from fresh work')
+    proof=interrupted_check_construction(identity,records[0]['claim']['root'],evidence_roots)
+    if not any(p.get('attempt')==identity and p.get('read_only_quarantine')==proof for p in records[0].get('settlement',[])):
+        raise ValueError('The application has not recorded this exact disposition')
+    return dict(proof,requests_started=len(proof['completed_prefix']['turns'])+1)

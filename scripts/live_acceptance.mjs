@@ -14,6 +14,7 @@ const ops = join(stage, 'ops');
 const evidence = join(stage, 'artifacts', 'acceptance');
 process.env.WORKBENCH_EVERYDAY_CONFIG=join(ops,'everyday.json');
 process.env.WORKBENCH_PREPARATION_CONFIG=join(ops,'preparation.json');
+process.env.TMPDIR=join(stage,'scratch');
 const origin = 'http://127.0.0.1:9487';
 const connector = '/run/twichui-workbench-codex/connector.sock';
 const sha = path => createHash('sha256').update(readFileSync(path)).digest('hex');

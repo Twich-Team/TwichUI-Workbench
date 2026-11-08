@@ -194,14 +194,19 @@ def check_bug_plan(plan, original, case, preparation, inspection_packet=None, fe
 
 def prepared_attempts(connection,identity,case):
     """Rejected check content is not unknown execution or an accepted check."""
-    from workbench.provider_receipts import completed_turns
+    from workbench.provider_receipts import completed_turns,recorded_check_quarantine
+    rows=connection.execute('SELECT id,backend,requested_model,actual_model,outcome,usage,finished_at FROM model_attempts WHERE task_id=? AND purpose=\'check_preparation\'',(identity,)).fetchall()
+    if not rows:
+        return rows
     db=Path(connection.execute('PRAGMA database_list').fetchone()[2])
     config=json.loads((db.parent.parent/'ops/everyday.json').read_text())
     require(config['database']==str(db) and config['database_identity']==[db.stat().st_dev,db.stat().st_ino],
             'Check accounting belongs to another installation')
-    rows=connection.execute('SELECT id,backend,requested_model,actual_model,outcome,usage,finished_at FROM model_attempts WHERE task_id=? AND purpose=\'check_preparation\'',(identity,)).fetchall()
     for row in rows:
         usage=json.loads(row[5]) if row[5] else None
+        if row[1:4]==('codex',case['model'],None) and row[4]=='interrupted_unknown' and row[6] and usage is None:
+            recorded_check_quarantine(connection,row[0],config['evidence_roots'])
+            continue
         require(row[1:4]==(case['provider'],case['model'],case['model']) and row[4] in {'completed','failed'}
                 and row[6] and isinstance(usage,dict) and usage.get('status')=='complete',
                 'Check construction attribution or accounting is unsettled')
@@ -221,10 +226,20 @@ def closeout(connection, identity, execution, case):
     expected = ['implementation', *(['planning']*len(chain)), *(['check_preparation']*prepared_count)] + (['capability_validation'] if case['provider'] == 'local' else [])
     require(sorted(a['purpose'] for a in attempts) == sorted(expected), 'provider attempt count differs')
     interrupted={p['id'] for p in chain if p.get('provider_state')=='interrupted'}
+    quarantined={}
+    if case['provider']=='codex' and any(a['purpose']=='check_preparation' and a['outcome']=='interrupted_unknown' for a in attempts):
+        from workbench.provider_receipts import recorded_check_quarantine
+        db=Path(connection.execute('PRAGMA database_list').fetchone()[2])
+        roots=json.loads((db.parent.parent/'ops/everyday.json').read_text())['evidence_roots']
+        for a in attempts:
+            if a['purpose']=='check_preparation' and a['outcome']=='interrupted_unknown':
+                quarantined[a['id']]=recorded_check_quarantine(connection,a['id'],roots)
     require(all(a['finished_at'] and a['backend'] == case['provider'] and a['requested_model'] == case['model']
-                and (a['actual_model'] == case['model'] or a['id'] in interrupted and a['actual_model'] is None)
-                and a['usage'] for a in attempts), 'attempt attribution or usage missing')
+                and (a['actual_model'] == case['model'] or a['id'] in interrupted|quarantined.keys() and a['actual_model'] is None)
+                and (a['usage'] or a['id'] in quarantined) for a in attempts), 'attempt attribution or usage missing')
     for attempt in attempts:
+        if attempt['id'] in quarantined:
+            continue  # Explicit unknown usage survives closeout; no fabricated receipt.
         purpose,usage=attempt['purpose'],json.loads(attempt['usage'])
         if purpose == 'capability_validation':
             require(usage['passed'] is True and usage['wire_started'] is True
@@ -268,7 +283,7 @@ def closeout(connection, identity, execution, case):
                 and all(file['path'] in case['writablePaths'] for file in result['files'])
                 and any(file['path'].startswith('!!!TwichUI/nav/') for file in result['files']),
                 'bug repair did not establish an independently checked navigation patch')
-    return dict(attempts=[a['id'] for a in attempts], candidate=result['candidate_id'],
+    return dict(attempts=[a['id'] for a in attempts], unknown_usage_operations=list(quarantined),candidate=result['candidate_id'],
                 session=session['id'], restoration='settled by existing controller')
 
 
@@ -405,6 +420,12 @@ def campaign_admission(connection, request, case, policy):
     before = [row for row in rows if row[1] != request.get('intake')]
     local_settled, quarantined, nonstarted, confirmed_interrupted = {}, {}, {}, {}
     if outcome:
+        from workbench.provider_receipts import recorded_check_quarantine
+        for row in rows:
+            if row[2:5]==('codex','check_preparation','interrupted_unknown'):
+                db=Path(connection.execute('PRAGMA database_list').fetchone()[2])
+                roots=json.loads((db.parent.parent/'ops/everyday.json').read_text())['evidence_roots']
+                quarantined[row[0]]=recorded_check_quarantine(connection,row[0],roots)
         from workbench.planning_reconciliation import accounting
         for row in before:
             if row[2:5]==('codex','planning','incomplete_output'):

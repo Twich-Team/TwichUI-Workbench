@@ -28,6 +28,54 @@ def same_report(left, right):
             and title(left) == title(right))
 
 
+def construction_source(packet, history):
+    """Reuse checked source coordinates, never an interrupted model's output.
+
+    Only completed-prefix receipts recorded by the renewal gate may seed this
+    cache. Every byte is read anew from the currently permitted committed blobs.
+    """
+    from workbench import bug_source_planning as source
+    allowed={f['path']:f['sha256'] for f in packet['files']}
+    candidate=copy.deepcopy(packet)
+    seen={(w['path'],w['line'],w['through_line']) for w in candidate.get('inspection_windows',[])}
+    reused=[]
+    for item in history[-1:]:
+        for settlement in item.get('settlement',[]):
+            proof=settlement.get('read_only_quarantine',{}).get('completed_prefix')
+            if not proof or proof.get('attempt')!=item.get('construction',{}).get('id'):
+                continue
+            prior=Path(item['claim']['root']).parents[1]
+            for turn in proof['turns']:
+                path=prior/('planning-evidence-'+turn['phase'])/'events.jsonl'
+                events=read_journal(path)
+                import hashlib
+                if hashlib.sha256(path.read_bytes()).hexdigest()!=turn['source_sha256']:
+                    raise ValueError('Retained completed source receipt changed')
+                for event in events:
+                    if event.get('phase') not in {'source-read-result','source-function-context'}:
+                        continue
+                    for window in event.get('windows',[]):
+                        name,start,end,sha=(window[k] for k in ('path','line','through_line','sha256'))
+                        key=(name,start,end)
+                        if key in seen:
+                            continue
+                        if name not in allowed or allowed[name]!=sha or type(start) is not int or type(end) is not int or not 1<=start<=end<start+160:
+                            raise ValueError('Retained source range exceeds the current source permission')
+                        raw,metadata=source.committed(name,packet['base'])
+                        lines=raw.decode().splitlines()
+                        if metadata['sha256']!=sha or end>len(lines):
+                            raise ValueError('Retained committed source changed')
+                        fresh=dict(path=name,line=start,through_line=end,sha256=sha,
+                            text='\n'.join(lines[start-1:end]),coverage='revalidated completed construction read')
+                        candidate.setdefault('inspection_windows',[]).append(fresh)
+                        seen.add(key)
+                        reused.append({k:v for k,v in fresh.items() if k!='text'})
+                        if len(seen)>source.window_limit(packet) or source.source_characters(candidate)>source.read_limit(packet):
+                            raise ValueError('Retained source exceeds the current working-set bound')
+    source.verify_packet(packet,candidate)
+    return candidate,reused
+
+
 def read_journal(path):
     owned(path)
     descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
