@@ -1,3 +1,12 @@
+# November8 04:54UTC: verified installation; first real Codex turn complete
+
+Installed7ef79cb/seal4d458a0b..., 1502backend/25frontend/static,4native controlled bug
+modes andcontrolled4-routebrowser pass. Original79/latest191 preserved,29history HTTP
+reads, bothaddresses andallstrictprotections verified. RealCodex-only task nowactive
+(intaked6373031..., model18bbf5d0...): firstturn31352prompt/157completion, actualsource
+searches requested; secondactive. No realrepair/implementation/providercheckcompletion.
+Fulloutcome continues. Exacthandoff/usage/evidence inCONTINUATION andC/outcome-ledger.
+
 # November8: shared Codex bug path and bounded source context
 
 Owner authorized nine-file committed external flightcontext for Codex-only journey;

@@ -1,3 +1,41 @@
+# Installed revision29; real Codex-only flight investigation active
+
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-7ef79cb;
+R=C/outcome-7ef79cb, C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a.
+Source7ef79cb825ffacecd7c587e663436e9b0163c950/treeefbbc4d996ed595f1923639936b456cac169a252;
+seal4d458a0b7c318c3af6831c62ee2d2292731e0853fa89a2d73f583da6ea896777.
+1502backend/25frontend/fullbuild/static pass,6defaultoptinsskip accounted. All4 native
+bug modes freshly pass (Qwen/Codex x legacy/program), realconfinement/separateAPIworker/
+normalbrowser/two unrelated checkedrepairs/concurrency/faults/restarts. Freshcontrolled
+four-route browser optin passes119.03s. Selected2browser consent/layoutchecks pass,
+desktop/phone screenshots inspected. Historical guild-roster readiness unchanged/
+retained; standaloneeverydaybrowser fixture skip covered by fresh native journeys.
+R/offline-verification.json binds exactlogs/proofs/retainedlineage. Notrealacceptance.
+
+Checkedcutover preserves original79/latest191, exactlogicalhashunchanged; all29history
+list/detailsHTTP200. Allstrictservices/filters/internalisolation/peerdenial/TLS/LAN/
+browserboundaries/sealedassets pass R/deployment-29-verified.json. Fourrolesactive/
+disabledpendingfinalsuccess; modelnormal. Installationharness firstused predecessor
+assetname; fixed onlynewR/network.sh to exactsealednewasset and resumed remaininggates,
+no service/source/seal weakening. RemoteLAN evidence reused after unchangedfullgates.
+Stageparent initiallyused systempython/missingresearchenv; resumed fromprivate dormant
+pre-sealstate usingpinnedvenv/env. Diagnostics retained, no history overwritten.
+
+Real28freshCodex-only submitted04:53:34Z via normaldriverexec77449:
+intaked6373031-1a57-405c-adce-12a67368b414,
+model18bbf5d0-c5e2-4557-936b-126b24b4f1f4,
+job92a63483-394d-4ebf-80ef-9c45c4534b8f. R/active-attempt.json/ledger record.
+FirstACTUALCodexturn completed04:53:50 with31352prompt/157completion/19reasoning/
+31509total. It correctlyrecognized existingflightfiltering and requested literal
+source searches. No matches inapprovedninepaths (notproofoutsideabsence). Second
+turnactive; do not replay, cancelorproviderswitch silently. No plan/implementation/
+realbehaviorpass yet;0of4realprovider supportingcasescomplete. ExistingQwentotals
+unchanged89starts/86complete/120689gen/943421prompt plus3unknownbounds17/26/27.
+Codexsourcepermission recorded; includedallowance/accountisolation gatesunchanged.
+No ownerdecisionpending. Continue actualCodexjourney; independently inspectnewplan
+before review receipt, then normalplan/run/originalFAIL/candidatePASS/fullsuite/result;
+remainingQwen/provider4/restart/nextbug/fullproduct. No developeraddonanswer orpublish.
+
 # Current: Codex source permission recorded; shared bug path verified offline
 
 Owner disclosure permission is in OWNER_SOURCE_DISCLOSURE_20261108.md and authority;
