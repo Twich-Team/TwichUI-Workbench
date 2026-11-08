@@ -5,7 +5,7 @@ acceptance cases has passed. No implementation or Codex turn has started. The fu
 agreed product scope remains required; styling and the requirements audit follow
 the functional gate. No owner decision or missing access is currently needed.
 
-Installed application code is c98d42e48f33e9cd3d473949cbbaee7d9c882e4a. All four
+Installed application code is bcaf7381356dd0bdd194399016ec05a6e75c308f. All four
 everyday services are active, disabled pending completed acceptance. Loopback and
 home-LAN HTTPS remain protected. History preservation is proven, but completed-real-
 result restart recovery and the next ordinary bug journey are not yet demonstrated.
@@ -26,8 +26,9 @@ actual request65536 bytes/tokenizer bounds and all task/provider/scope/approval
 protections remain. Legacy bounds unchanged. Actual settled163-row COPY proof
 shows diagnosis/plan/review requests retain all129 startup lines within bounds,
 using metadata/tokenizer only, no generation or live-store write. This proves
-context delivery, not model reasoning or a real fix. Focused/native checks and
-checked deployment continue before the next real flight task.
+context delivery, not model reasoning or a real fix. 168 focused checks and the separate-process native browser rehearsal passed.
+Checked deployment preserved all23 histories and all protection gates. Fresh real
+flight task22 is investigating through the normal installed app; no result yet.
 
 Latest source/reference documents are exact supplied authoritative root copies.
 Standing autonomous-delivery authority supersedes old cumulative campaign caps;

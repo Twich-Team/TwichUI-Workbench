@@ -1,3 +1,27 @@
+# Installed revision23 / real flight task22 — latest override
+
+Installed bcaf7381356dd0bdd194399016ec05a6e75c308f, tree4028e2b7c359c9fdabeee8dc8b791e4f5c94a254,
+seal892c112b45f86f7115d9c7457fb683875e4e70c34e17baf8123a36d99e5ab707.
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-bcaf738
+R=C/outcome-bcaf738. R/deployment-23-verified.json: original79/forward163 verified
+cutover, all network/TLS/browser/isolation gates passed. All23history HTTPreads
+pass before task22. Restoration baseline original-index.html/firewall-before.txt
+copied unchanged from predecessor for supported rollback.4rolesactive/disabled.
+
+168focused/actual3request-context tokenizer/no-generation proof/native normalbrowser
+2controlledbugs32.05sec615.2MiB pass, bound retained c98 complete1429/25/build and
+unchanged browser/admin evidence. No full suites repeated for newmode-only context
+delta. R/offline-verification.json binds identities/evidence/reuse.
+
+REAL task22 submitted01:05:41Z: intakeb69d6d74-23d7-423e-acd5-fa8b27af64b2,
+modela574c740-ba99-4cf0-9d0f-c4755e6b5b5b, jobdfe91d7f-4bec-41f7-a7e8-d4d6b321d6b8.
+Driver execsession50539, R/bug-flight-paths-driver.txt and
+S/artifacts/acceptance/bug-flight-paths.jsonl. Provider running, source-memory-reused
+and source-bootstrap-context recorded before first request. Do not replay while
+active/uncertain. Ledger totals below are SETTLED pre22; add actual22 receipts later.
+No real checked repair/provider case yet. Continue through independent plan review
+and separate delegated run; exact receipt guidance below unchanged.
+
 # Current continuation override — November 8, 2026
 
 This section supersedes the historical snapshot below. Continue under the root
