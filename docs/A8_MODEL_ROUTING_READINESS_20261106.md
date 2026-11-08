@@ -1,37 +1,32 @@
-# Current readiness — November 8, 2026, 18:52 UTC
+# Current readiness — November 8, 2026, 19:10 UTC
 
-Following the Project Working Philosophy: A8 and the complete functional outcome
-remain unfinished. Older entries below and the saved history snapshot are historical.
-See CONTINUATION.md for exact installed identities and receipts.
+Following the Project Working Philosophy: A8 and the agreed product remain unfinished.
+Installed0a66d5b connects deliberate Qwen/Codex, saved selection, both explicit bounded
+pre-generation fallback directions and shared accounting/approval fences. Exact final
+1683backend/25frontend/static, all4confined controlled browser modes and a fresh
+four-route controlled delegated browser check pass. These are simulated provider
+results. Exact provenance/skips/lineage: CONTINUATION.md and R/offline-verification.
 
-- Implemented and controlled-tested: Qwen alone, signed-in Codex alone, both explicit
-  bounded pre-generation switches, saved routing, shared accounting and approval
-  fencing. Partial or uncertain generation cannot silently switch providers.
-- Installed:8fe20f8 with1664backend/25frontend and all four confined controlled browser
-  modes passed. Tested-call source context and same-report committed-source reuse are
-  installed; original history, recovery receipts and both approved addresses verified.
-- Real Codex evidence: real41 completed five turns with complete usage, reached a
-  source-grounded diagnosis and saved a genuine character-persistence clarification.
-  Repeated source-read/SetEnabled-disclosure obstruction did not recur. No addon
-  implementation or independent real behavior pass. Zero of four required supporting
-  real-provider cases passed; controlled passes do not satisfy these cases.
-- Current engineering: normal clarification continuation retains original receipt,
-  same provider, original source paths/hashes/base and remaining task-wide requests.
-  56focused checks and the affected Codex/program true-confined browser journey pass,
-  including reply, new-plan navigation, separate approvals, checked result, concurrent
-  polling and restart. Desktop/phone reply screens inspected. Full suites running.
-  These changes are local, not installed; the live task has not been continued.
-- Owner persistence-versus-session choice is pending. No new access, spending or
-  engineering renewal requested. The task is settled and no provider is running.
-- Billing and unknown historical execution remain honestly bounded: included sign-in
-  only, no API/credits/purchases/reload, accepted snapshots are not a per-turn billing
-  lock. Original uncertain outcomes and unknown usage remain immutable/quarantined;
-  standing recovery is implemented and applied, not merely a proposed note.
+Real41 completed5Codexturns with353455known tokens, source diagnosis and an actual
+persistence-versus-session product question; no addon implementation or independent
+real behavior pass, zero of four required real supporting provider cases passed.
+The prior missing public-call/source-read obstruction did not recur. Same-task reply
+now retains original provider/source and5used+11remaining requests. It requires the
+actual pending owner answer, normal UI reply and fresh independent plan/run decisions.
 
-Everyday regression and supported offline Lua bug workflows are connected, but the
-real repair, required provider cases, durable real result and ordinary next bug still
-need demonstration. Features/inspections/simulator work/PR/full original scope are
-unfinished. No live-game verification or live-addon installation is claimed.
+First cutover's stale JS filename check failed; restoration then corrected same-build
+retry verified both addresses, sealed assets, browser/LAN/isolation, original79/latest250
+and all43history reads. Historical unknowns remain isolated/unknown; standing recovery
+is implemented/applied. Transport/cancellation fault tests and subsequent completed
+real turns support correction, not a claim all future failures yield known terminal
+usage. Current task settled; no provider active and no new model call during this work.
+
+Included subscription only; no API/extra credits/purchases/reload. Accepted snapshot
+policy and ownerzero/reloadOff do not become a per-turn billing guarantee. Source12read/
+6write/max3repair, network and publication limits unchanged. Features/inspections/
+simulator/PR/general initial-product scope remain unfinished. Real checked repair,
+provider cases, durable real result and ordinary next bug still require demonstration.
+Styling and full requirements audit follow the functional gate.
 
 ---
 
