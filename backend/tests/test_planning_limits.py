@@ -121,3 +121,28 @@ def test_saved_request_count_cannot_expand_when_new_default_grows(version):
         changed[key]=8 if version==10 else 16
         with pytest.raises(ValueError):
             request_bound(changed)
+
+
+@pytest.mark.parametrize('fault',[None,'count','bool','total','maximum','units','missing_values'])
+def test_shared_codex_observation_check_uses_bound_and_actual_reported_values(monkeypatch,fault):
+    from workbench import planning_limits as limits
+    monkeypatch.setattr(limits,'attempt_request_bound',lambda *args:16)
+    usage=dict(units='tokens',requests_observed=16,max_request_total_tokens=100000,
+               values=dict(total_tokens=900000))
+    if fault=='count':
+        usage['requests_observed']=17
+    if fault=='bool':
+        usage['requests_observed']=True
+    if fault=='total':
+        usage['values']['total_tokens']=-1
+    if fault=='maximum':
+        usage['max_request_total_tokens']=999999
+    if fault=='units':
+        usage['units']='dollars'
+    if fault=='missing_values':
+        usage['values']=None
+    if fault:
+        with pytest.raises(ValueError):
+            limits.codex_observations(None,'current',usage,bug=True,planning=True)
+    else:
+        assert limits.codex_observations(None,'current',usage,bug=True,planning=True)==16

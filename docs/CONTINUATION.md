@@ -1,3 +1,62 @@
+# CURRENT VERIFIED STATE — November8 17:27UTC
+
+Following the Project Working Philosophy: continue outcome, no owner decision needed.
+Installed6c4bae3/tree8b8e3bae612c7463b21bee74c6bf3611e4630345/
+seal5564fae9e2029cd00e8f448c971c17760bce2df107f46a034ef48b13ac802015 remainshealthy,
+4everydayroles active/disabled, approvedloopback+LAN/network unchanged. No provider
+active; real39 driver49158 finishedheld. Model/auth/context/8765/recoverycopies intact.
+Latest240rows SHAa00cedc24bf15f344a92640edbe50f5b4c56d6475c5bac117d2077bdf71c41ed.
+Do notoverwritewith236/232/original79. Currentknownusageledgerfullyupdated.
+
+Real39:8Codexturns completed; ninth reached66618reportedtokens and connector'sold
+BUG_OBSERVED65536 post-observation guard interrupted it. Actuallifecycle-terminal
+interrupted+interruptacktrue+closedproducer, reportedfinalusage66618 retained. This
+is NOT a lostterminal/whitespacefailure. Readcontextcorrection worked: actualrequest
+213830bytes kept139544sourcecharacters withoutold128k/196k eviction. No plan/repair.
+C/outcome-6c4bae3/attempt-39-accounting.json binds9usageobservations/8completed,
+515954reportedtotal (513464prompt/2490completion/1321reason); DBincomplete_output/
+completeusage preserved. Newtypedstanding disposition recordedseparately at
+S/artifacts/acceptance/readonly-quarantine-c791c42b-5dc5-4ddd-b5cb-0333c01b1084.json,
+9starts/8completeprefix/knownfinalinterruptedusage/0unknownfinalrequests/outputunusable.
+No freshownerexception. Currentoldappcan'tprojectthisnewtype untilnextbuild; record
+validatedusingworkspacecode withROOT/EVIDENCE/RECEIPTS explicitlypointedtoinstalledS.
+Ledger74Codexstarts/69completedturns/70reportedusagereceipts/4missinghistoricalfinal,
+3402242known tokens. 2oldunknownterminal+3confirmedinterrupted (2missingfinalusage,
+new39reportedusageknown); noneofoldrecordsrewritten. Qwen89starts unchanged.
+No addonimplementation/independentrealrepair; zeroof4requiredrealprovidercases passed.
+
+Connected correction currentlymodified: BUG_OBSERVED262144post-observation sanity
+guard fitsactual393216byte requestenvelope; notbillinglimit/providerhardtokenceiling.
+Keepall2pre-turnaffirmativeincludedquota/creditguards, exactmodels/sources,24koutput,
+300srequest/1800stask/16sharedturns, cancellation/isolation and no API/paidcredits.
+Consolidatedcloseout/check_review/outcomeadmission Codexobservations inplanning_limits:
+usesactualsavedclaimcount, typedpositiveobservations andcurrentpost-observationguard.
+Historicalcampaign branch remainshistorical; no newcumulativecaps. No fielddrift8/
+65536atnextreviewstage. Knowninterrupted completeusage nowqualifies for standing
+read-onlydisposition with actualterminal/caps/fencing/usagecorrelation; subtractfinal
+observationsfromimmutableaggregate for8completedprefix, preserveboth separately,
+rejectconflicts/malformed/missingterminal. UI truthfulforcompletevsinterruptedusage.
+NativecontrolledCodex usage now70010perturn (pastold65k), closingtiny-fixturegap.
+125/153focusedchecks pass; staticfinalpass. Currentfulltestsexec84657,
+C/observed-usage-full-tests.log RUNNING (expected1656backend/6skip+25frontend);
+2affectedTRUE-CONFINEDCodexbrowsermodesexec73779 RUNNING,
+C/observed-usage-kernel-native.log (unitworkbench-outcome-observed-usage-process,
+600s/6GiB/128tasks/200%CPU). No concurrentassetbuild; checkfinishedbeforethese.
+Finish/fixchecks beforeactivation. Installed1640/25isbaseline, notnewcodeproof.
+
+Nextcandidate revision44/task40/roots117,parent6c4bae3; appendc791c42b onlyafterthis
+verifiedsettlement (alreadydone). Savecodecommit/tree/seal/verification. Template
+C/prepare-whole-working-set-revision.py (newcomparison needsBUG_OBSERVEDconstant
+change only, functions/PlannerASTunchanged). Exact12sources alreadyapproved; no new
+filedisclosure, sixwritable/max3repair intact. Copyguardedextraops/preflight/postinstall;
+postinstallrecreateoriginal18 +FIVEstanding receipts (eb72/253a/58d0/9c47/c791new).
+Requireoriginal79/latest240 fingerprints/copy/all41normalreads, freshsuccessful
+preflight BEFOREmutation, newcodehistory/admission valid, thennormalfreshreal40.
+Do notrenewoldguardunchanged, reuseoldpartialoutput, bypassindependentreview orstop
+atcheckpoint. Needcheckedrealrepair/provider4/restart/nextordinarybug/stableapp.
+Noownerattendance/campaigncaprenewalrequired. Existingbilling/disclosure/access/
+network/source/publication/recoveryprotectionspersist. Lowersections historical.
+
 # CURRENT VERIFIED STATE — November8 17:16UTC
 
 Following the Project Working Philosophy: keep full delivery going; no owner action.

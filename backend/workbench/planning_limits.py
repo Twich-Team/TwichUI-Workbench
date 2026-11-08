@@ -63,3 +63,20 @@ def attempt_request_bound(connection, identity):
     if row is None:
         raise ValueError('Saved task consent is unavailable')
     return request_bound(json.loads(row[0]).get('local_planning_receipt', {}))
+
+
+def codex_observations(connection, identity, usage, *, bug, planning):
+    """Validate reported observations, never promise a provider token/billing ceiling."""
+    from workbench.codex_provider import BUG_OBSERVED, MAX_OBSERVED
+    if not isinstance(usage, dict) or not isinstance(usage.get('values'), dict):
+        raise ValueError('Codex usage observations are unavailable')
+    bound = attempt_request_bound(connection, identity) if planning and bug else 1
+    count = usage.get('requests_observed', 1) if planning else 1
+    total = usage.get('values', {}).get('total_tokens')
+    limit = BUG_OBSERVED if bug else MAX_OBSERVED
+    maximum = usage.get('max_request_total_tokens', total)
+    if not (usage.get('units') == 'tokens' and type(count) is int and 1 <= count <= bound
+            and type(total) is int and 0 < total <= limit*count
+            and type(maximum) is int and 0 < maximum <= limit):
+        raise ValueError('Codex observations exceed the saved operation or current post-observation guard')
+    return count

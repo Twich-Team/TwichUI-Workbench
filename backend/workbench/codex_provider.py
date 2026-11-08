@@ -22,7 +22,7 @@ SECONDS = 120
 BUG_SECONDS = 300
 # This is a hold after observation, not a provider output-token limit.
 MAX_OBSERVED = 32_768
-BUG_OBSERVED = 65_536  # Post-observation guard for source-heavy bug turns, not a provider ceiling.
+BUG_OBSERVED = 262_144  # Post-observation sanity guard for the larger source context, never a billing/token ceiling.
 BACKEND_HOST = "chatgpt.com"
 RPC_PHASES = (
     "resolve",

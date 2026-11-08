@@ -291,7 +291,9 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             client_case=CLIENT_SOURCE in schema['properties']['edits']['items']['properties']['path']['enum']
             answer=dict(edits=[dict(path=CLIENT_SOURCE if client_case else PRODUCTION,
                 old=BAD_ALERT if client_case else BUGGY,new=GOOD_ALERT if client_case else CORRECT)])
-        return answer,dict(prompt_tokens=40,completion_tokens=10,total_tokens=50,reasoning_tokens=2)
+        # Source-heavy observations must cross the former65k threshold through
+        # the actual application, rather than rehearsing only tiny token counts.
+        return answer,dict(prompt_tokens=70000,completion_tokens=10,total_tokens=70010,reasoning_tokens=2)
 
     key = tmp_path / "controlled-local.key"
     key.write_text("CONTROLLED-NOT-A-LIVE-CREDENTIAL")

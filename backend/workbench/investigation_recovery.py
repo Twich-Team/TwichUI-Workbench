@@ -145,7 +145,7 @@ def state(connection, identity):
         and a["purpose"] == "planning"
         and a["outcome"] in {"interrupted_unknown", "incomplete_output", "failed"}
         and a["finished_at"]
-        and a["usage"] in (None, "null"),
+        and (a["usage"] in (None, "null") or a["outcome"] == "incomplete_output"),
         "Not an uncertain read-only investigation",
     )
     [j] = rows(connection, "SELECT * FROM planning_jobs WHERE id=?", (a["job_id"],))
@@ -194,7 +194,8 @@ def state(connection, identity):
         recovered = completed(a, j, i, binding, payload, proof)
         if recovered is not None:
             return recovered
-    require(type(count) is int and 0 <= count < bound, "Investigation accounting unavailable")
+    require(type(count) is int and 0 <= count <= bound and
+            (a['usage'] not in (None, 'null') or count < bound), "Investigation accounting unavailable")
     receipt = diag.get("provider_receipt")
     require(
         isinstance(receipt, str) and str(UUID(receipt)) == receipt,
@@ -214,6 +215,24 @@ def state(connection, identity):
         and e.get("status") in {"completed", "failed", "interrupted"}
     ]
     terminal = terminals[-1] if terminals else None
+    settled_usage = None
+    if a['usage'] not in (None, 'null'):
+        aggregate = strict_json(a['usage'])
+        settled_usage = terminal.get('usage') if terminal else None
+        require(terminal is not None and terminal.get('status') == 'interrupted' and isinstance(settled_usage, dict) and
+            set(settled_usage) == {'prompt_tokens','completion_tokens','total_tokens','reasoning_tokens'} and
+            all(type(v) is int and v >= 0 for v in settled_usage.values()) and
+            settled_usage['total_tokens'] >= settled_usage['prompt_tokens']+settled_usage['completion_tokens'] > 0 and
+            aggregate.get('status') == 'complete' and aggregate.get('units') == 'tokens' and
+            aggregate.get('requests_observed') == count and 1 <= count <= bound and
+            isinstance(aggregate.get('values'), dict) and set(aggregate['values']) == set(settled_usage) and
+            all(type(v) is int and v >= settled_usage[k] for k,v in aggregate['values'].items()) and
+            any(e.get('phase') == 'turn-held' and e.get('usage') == settled_usage for e in events),
+            'Settled interrupted usage is unavailable or inconsistent')
+        prefix = {k:v-settled_usage[k] for k,v in aggregate['values'].items()}
+        require(not known or known == prefix, 'Saved completed prefix disagrees with interrupted accounting')
+        known = prefix
+        count -= 1  # The saved aggregate includes the final interrupted request.
     identities = {
         (e.get("thread_id"), e.get("turn_id"))
         for e in events
@@ -258,10 +277,10 @@ def state(connection, identity):
         requests_started=count + 1,
         known_completed_requests=count,
         known_completed_values=known,
-        unknown_final_requests=1,
+        unknown_final_requests=0 if settled_usage is not None else 1,
         provider_terminal_confirmed=terminal is not None,
         final_outcome=terminal["status"] if terminal else "unknown",
-        final_usage=None,
+        final_usage=settled_usage,
         partial_output_reusable=False,
         successful_cancellation=bool(
             terminal
@@ -338,7 +357,7 @@ def recover_one(engine):
         candidates = rows(
             c,
             "SELECT id FROM model_attempts WHERE backend='codex' AND purpose='planning' "
-            "AND outcome IN ('interrupted_unknown','incomplete_output','failed') AND (usage IS NULL OR usage='null') ORDER BY started_at",
+            "AND outcome IN ('interrupted_unknown','incomplete_output','failed') AND (usage IS NULL OR usage='null' OR outcome='incomplete_output') ORDER BY started_at",
         )
         for item in candidates:
             try:

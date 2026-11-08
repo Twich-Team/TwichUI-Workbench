@@ -1,13 +1,12 @@
-# Current status — whole inspected context and receipt recovery installed
+# Current status — real context retained; accounting guard correction being verified
 
-Following the Project Working Philosophy: verified6c4bae3 runs at both approved
-addresses. Original79/latest236history preserved; all40savedtaskviews and scoped
-network/browser/isolation checks passed. Final1640backend/25frontend and all4confined
-controlled browser modes passed. Actual completed receipts from the prior worker
-crash were recovered separately; original history and olderunknowns remain unchanged.
+Following the Project Working Philosophy:6c4bae3 remainsinstalledandhealthy. Real39
+completed8Codexturns, then an obsolete65kpost-observation guard interruptedthe ninth.
+The terminalstate, acknowledgement andreportedusage areknown; partialoutputheld,
+history240rowsandolderunknowns preserved. No provideractive orownerdecisionneeded.
 
-Fresh real flight-path task39 is in Codex investigation using the complete inspected
-working set. No addon implementation or independently checked real repair yet; zero
-of four required realprovidercases passed. No owner action needed. Continue real
-repair, provider checks, durable-result restart/nextordinarybug and stableinstalledapp.
-See [handoff](CONTINUATION.md) for fresh state/evidence; checkpoints are not stop points.
+Contextretention nowworks inrealexecution. Sharedusagechecks andknowninterruption
+recovery arecorrectedlocally; focused/staticpass, complete suitesandaffectedconfined
+browsermodesrunningwithrealistic>65kcontrolledusage beforedeployment. Noaddon
+implementation/independentlycheckedrealrepair; zeroof4realprovidercasespassed.
+Continuewholeoutcome understandingauthority; [handoff](CONTINUATION.md) hasbindings.

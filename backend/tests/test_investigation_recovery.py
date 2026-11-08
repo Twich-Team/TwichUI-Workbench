@@ -222,3 +222,41 @@ def test_confirmed_interruption_with_unknown_usage_is_separate_from_lost_executi
         assert result["successful_cancellation"] and result["final_usage"] is None
         assert not result["partial_output_reusable"]
     assert list(c.iterdump()) == before
+
+
+@pytest.mark.parametrize('fault',[None,'missing_terminal','usage_mismatch','aggregate_short','prefix_mismatch'])
+def test_confirmed_interruption_with_reported_usage_preserves_partial_output_hold(eligible,fault):
+    c,journal,payload=eligible
+    prefix=dict(prompt_tokens=20,completion_tokens=4,reasoning_tokens=1,total_tokens=24)
+    final=dict(prompt_tokens=100,completion_tokens=5,reasoning_tokens=2,total_tokens=105)
+    aggregate=dict(status='complete',units='tokens',requests_observed=2,
+                   values={k:prefix[k]+final[k] for k in final})
+    payload['diagnostics'].update(generation_state='partial',provider_terminal_confirmed=True,
+        investigation_requests=2,known_usage=json.dumps(prefix))
+    if fault=='prefix_mismatch':
+        payload['diagnostics']['known_usage']=json.dumps(dict(prefix,total_tokens=25))
+    if fault=='aggregate_short':
+        aggregate['values']['total_tokens']=1
+    c.execute("UPDATE model_attempts SET outcome='incomplete_output',usage=? WHERE id=?",(json.dumps(aggregate),ATTEMPT))
+    c.execute('UPDATE planning_jobs SET payload=? WHERE id=?',(json.dumps(payload),'historical-job'))
+    events=list(map(json.loads,journal.path.read_text().splitlines()))
+    for e in events:
+        if e['phase']=='turn-held':
+            e['usage']=dict(final,total_tokens=106) if fault=='usage_mismatch' else final
+        if e['phase']=='interrupt-result':
+            e.update(acknowledged=True,status='interrupted')
+    if fault!='missing_terminal':
+        events.insert(-1,dict(phase='lifecycle-terminal',thread_id='thread',
+            turn_id='turn',status='interrupted',usage=final))
+    journal.path.write_text(''.join(json.dumps(e)+'\n' for e in events))
+    before=list(c.iterdump())
+    if fault:
+        with pytest.raises(ValueError):
+            recovery.record(c,ATTEMPT)
+    else:
+        result=recovery.record(c,ATTEMPT)
+        assert result['requests_started']==2 and result['known_completed_requests']==1
+        assert result['known_completed_values']==prefix and result['final_usage']==final
+        assert result['unknown_final_requests']==0 and result['final_outcome']=='interrupted'
+        assert result['successful_cancellation'] and not result['partial_output_reusable']
+    assert list(c.iterdump())==before

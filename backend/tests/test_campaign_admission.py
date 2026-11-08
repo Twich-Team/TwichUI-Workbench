@@ -39,7 +39,7 @@ def test_standing_codex_accounting_uses_saved_operation_bound_not_old_campaign_o
     add_intake(store,value,'earlier')
     consent=dict(current(),investigation_version=10,max_local_requests=16,
         max_codex_requests=16,max_total_model_requests=16,codex_request_deadline_seconds=300)
-    usage=dict(units='tokens',status='complete',requests_observed=16,
+    usage=dict(units='tokens',status='complete',requests_observed=16,max_request_total_tokens=150000,
         values=dict(prompt_tokens=1999900,completion_tokens=100,total_tokens=2000000))
     with store.begin() as c:
         c.execute(text('''INSERT INTO planning_jobs

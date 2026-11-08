@@ -265,6 +265,24 @@ def test_single_turn_with_exact_model_and_usage(secondary_is_null):
     assert methods[:methods.index('turn/start')].count('account/rateLimits/read') == 2
 
 
+@pytest.mark.parametrize('tokens',[66618,150000,codex.BUG_OBSERVED,codex.BUG_OBSERVED+1])
+def test_larger_context_uses_current_post_observation_guard_without_a_billing_guarantee(tokens):
+    events=completed()
+    values=events[1]['params']['tokenUsage']['total']
+    values.update(inputTokens=tokens-4,totalTokens=tokens)
+    rpc=Transcript(events=events)
+    if tokens<=codex.BUG_OBSERVED:
+        result=codex.turn(rpc,'fixture-model',None,'committed context',dict(title='InvestigationResponse'))
+        assert result['usage']['total_tokens']==tokens and not rpc.interrupted
+    else:
+        with pytest.raises(codex.Hold) as held:
+            codex.turn(rpc,'fixture-model',None,'committed context',dict(title='InvestigationResponse'))
+        assert held.value.reason=='accounting' and held.value.counted['total_tokens']==tokens
+        assert len(rpc.interrupted)==1
+    assert len([m for m,_ in rpc.calls if m=='turn/start'])==1
+    assert len([m for m,_ in rpc.calls if m=='account/rateLimits/read'])==2
+
+
 @pytest.mark.parametrize('denied_read', [1, 2])
 @pytest.mark.parametrize('ordinary,reason', [(False, 'capacity'), (None, 'accounting'), ('timeout', 'timeout')])
 def test_null_secondary_requires_both_allowance_reads_to_affirm_usage(denied_read, ordinary, reason):

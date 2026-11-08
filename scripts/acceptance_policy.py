@@ -13,7 +13,7 @@ from everyday_store import require_settled
 from workbench import bug_investigation, grounded_scenarios as ground, regression_preparation as prep
 from workbench import regression_evidence as behavior
 from workbench.real_execution import LIMITS
-from workbench.planning_limits import model_cap, consent_cap, attempt_request_bound
+from workbench.planning_limits import model_cap, consent_cap, codex_observations
 from workbench.schemas import IntakeInput, TaskBudget
 from workbench.visual_scope import digest
 
@@ -160,13 +160,8 @@ def closeout(connection, identity, execution, case):
         values = usage['values']
         if case['provider'] == 'codex':
             bug = case['request']['kind'] == 'issue'
-            count = usage.get('requests_observed', 1) if purpose == 'planning' else 1
-            require(type(count) is int and 1 <= count <= (8 if bug else 1)
-                    and 0 < values['total_tokens'] <= (65536 if bug else 32768)*count,
-                    'Codex observed threshold exceeded')
-            if bug and purpose == 'planning':
-                require(usage.get('max_request_total_tokens', values['total_tokens']) <= 65536,
-                        'A Codex investigation turn exceeded its observed threshold')
+            by_purpose_id = next(a['id'] for a in attempts if a['purpose'] == purpose)
+            codex_observations(connection, by_purpose_id, usage, bug=bug, planning=purpose=='planning')
         else:
             if purpose == 'planning':
                 require(1 <= usage.get('requests_observed', 1) <= (bug_investigation.INVESTIGATION_REQUESTS if case['request']['kind'] == 'issue' else 1),
@@ -221,23 +216,23 @@ def check_review(connection, request, case, preparation):
     expected = (dict(from_provider=before, to_provider=case['provider'], reason=case['reason'],
                      **{before + '_generation_started': False}) if case['reason'] else None)
     require(row[:2] == ('completed', 1) and switched == expected, 'switch evidence or planning claim changed')
-    [usage, outcome, model] = connection.execute('''SELECT usage, outcome, actual_model FROM model_attempts
+    [planning_identity, usage, outcome, model] = connection.execute('''SELECT id, usage, outcome, actual_model FROM model_attempts
         WHERE task_id=? AND purpose='planning' ''', (request['intake'],)).fetchone()
     usage = json.loads(usage)
     require(outcome == 'completed' and model == case['model'] and usage['units'] == 'tokens',
             'planning usage or provider identity was not reported')
     local_cap = consent_cap(json.loads(row[2]).get('local_planning_receipt', {}))
-    key, cap = ('total_tokens', 65536*bug_investigation.INVESTIGATION_REQUESTS if bug else 32768) if case['provider'] == 'codex' else ('completion_tokens', bug_investigation.INVESTIGATION_REQUESTS*local_cap if bug else 2600)
-    if bug and case['provider'] == 'codex':
-        require(1 <= usage.get('requests_observed', 1) <= bug_investigation.INVESTIGATION_REQUESTS,
-                'Codex inspection request accounting changed')
+    key, cap = 'completion_tokens', bug_investigation.INVESTIGATION_REQUESTS*local_cap if bug else 2600
+    if case['provider'] == 'codex':
+        codex_observations(connection,planning_identity,usage,bug=bug,planning=True)
     if bug and case['provider'] == 'local':
         require(1 <= usage.get('requests_observed', 1) <= bug_investigation.INVESTIGATION_REQUESTS
                 and usage.get('max_request_completion_tokens', usage['values'][key]) <= local_cap,
                 'local inspection request accounting changed')
     elif case['provider'] == 'local':
         require(usage.get('requests_observed', 1) == 1, 'supporting planning request count changed')
-    require(0 < usage['values'][key] <= cap, 'planning usage exceeds the approved bound')
+    if case['provider'] == 'local':
+        require(0 < usage['values'][key] <= cap, 'planning usage exceeds the approved bound')
     if request['action'] == 'run':
         offer = request['offer']['offer']
         [selected] = connection.execute('SELECT snapshot FROM task_run_offers WHERE id=? AND fingerprint=?',
@@ -378,13 +373,15 @@ def campaign_admission(connection, request, case, policy):
         elif backend == 'codex':
             codex_tasks.add(task)
             count = usage.get('requests_observed', 1) if purpose == 'planning' else 1
-            bound = attempt_request_bound(connection, identity) if outcome and purpose == 'planning' else (8 if task in bug_intakes else 1)
-            require(purpose in {'planning','implementation'} and
-                    type(count) is int and 1 <= count <= bound and
-                    type(usage.get('values', {}).get('total_tokens')) is int and
-                    0 < usage['values']['total_tokens'] and
-                    (outcome or usage['values']['total_tokens'] <= (65536 if task in bug_intakes else 32768)*count),
-                    'Codex observations unavailable')
+            if outcome:
+                require(purpose in {'planning','implementation'}, 'Unexpected Codex operation')
+                count=codex_observations(connection,identity,usage,bug=task in bug_intakes,planning=purpose=='planning')
+            else:
+                require(purpose in {'planning','implementation'} and type(count) is int and
+                        1 <= count <= (8 if task in bug_intakes else 1) and
+                        type(usage.get('values', {}).get('total_tokens')) is int and
+                        0 < usage['values']['total_tokens'] <= (65536 if task in bug_intakes else 32768)*count,
+                        'Codex observations unavailable')
             codex_turns += count
         else:
             raise ValueError('Unexpected campaign provider')
