@@ -27,6 +27,15 @@ const proposalIdentities = item => item.proposals.map(p=>({id:p.id,binding:p.bin
   .sort((a,b)=>a.revision-b.revision);
 const priorProposals = reply => [...(reply.prior_proposals || []),
   {id:reply.question,binding:reply.question_binding,revision:reply.revision || 1}];
+export function planningRecordMatches(attempt, candidate, reply) {
+  // Public records cannot establish terminal settlement. This is only a browser
+  // prefilter; beforeAction must independently validate private provider receipts.
+  if (attempt.purpose!=='planning'||attempt.backend!==candidate.provider||attempt.requested_model!==candidate.model) return false;
+  if (attempt.outcome==='completed') return attempt.actual_model===candidate.model;
+  if (!reply?.renew_operation||!reply.settled_attempts?.includes(attempt.id)) return false;
+  return attempt.outcome==='failed'&&attempt.actual_model===candidate.model ||
+    attempt.outcome==='incomplete_output'&&[null,candidate.model].includes(attempt.actual_model);
+}
 export function reviewClarification(item, candidate, reply) {
   const phases=reply.renew_operation ? reply.processing_sequence-1 : reply.revision || 1;
   check(Number.isInteger(phases) && phases>=1 && candidate.request.kind === 'issue' &&
@@ -41,8 +50,7 @@ export function reviewClarification(item, candidate, reply) {
   exact(item.clarifications,reply.prior_clarifications || [],'clarification answer history changed');
   originalRequest(item.original,candidate.request);
   check(item.provider_activity?.length===phases && item.provider_activity.every(a=>
-    a.purpose==='planning' && a.backend===candidate.provider && a.actual_model===candidate.model &&
-    a.requested_model===candidate.model && (a.outcome==='completed'||reply.renew_operation&&reply.settled_attempts?.includes(a.id)&&a.outcome==='failed')) && item.jobs.length===phases &&
+    planningRecordMatches(a,candidate,reply)) && item.jobs.length===phases &&
     item.jobs.every(j=>(j.status==='completed'||reply.renew_operation&&j.status==='failed')&&j.attempts===1),
     'clarification investigation is unsettled or provider changed');
   return item;
@@ -99,8 +107,7 @@ export function reviewPlan(item, candidate, identity, revision, now, reply) {
   const planningActivity=(item.provider_activity||[]).filter(a=>a.purpose==='planning');
   const preparedActivity=(item.provider_activity||[]).filter(a=>a.purpose!=='planning');
   check(planningActivity.length===phases && planningActivity.every(attempt=>
-    attempt.backend===candidate.provider && attempt.requested_model===candidate.model && attempt.actual_model===candidate.model &&
-    (attempt.outcome==='completed'||reply?.renew_operation&&reply.settled_attempts?.includes(attempt.id)&&attempt.outcome==='failed')) &&
+    planningRecordMatches(attempt,candidate,reply)) &&
     preparedActivity.every(a=>Boolean(plan.task_contract.bug_intent)&&item.tasks.length>0&&item.decisions.some(d=>d.status==='applied')&&
       a.purpose==='check_preparation'&&a.backend===candidate.provider&&a.requested_model===candidate.model&&a.actual_model===candidate.model&&a.outcome==='completed'),
     'planning or check preparation is uncertain or unexpected');

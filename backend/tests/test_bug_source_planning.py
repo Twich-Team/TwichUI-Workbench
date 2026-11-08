@@ -575,7 +575,8 @@ def test_file_only_scope_is_corrected_before_any_plan_approval(client,headers,st
 
 
 @pytest.mark.usefixtures('installed')
-def test_codex_larger_pages_keep_exact_source_and_many_small_windows_stay_bounded(monkeypatch):
+@pytest.mark.parametrize('mode',['source-grounded-lua-v1','source-grounded-intent-v1'])
+def test_codex_larger_pages_keep_exact_source_and_many_small_windows_stay_bounded(monkeypatch,mode):
     from workbench.bug_evidence import InvestigationRead
     from workbench.bug_source_planning import inspect, verify_packet
     root = enable_bugs(monkeypatch)
@@ -585,7 +586,7 @@ def test_codex_larger_pages_keep_exact_source_and_many_small_windows_stay_bounde
     git(root,'add','.')
     git(root,'-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Paged fixture')
     initial=dict(base=git(root,'rev-parse','HEAD').strip(),files=[],policy_sha256='controlled',
-                 plan_review='source-grounded-lua-v1')
+                 plan_review=mode)
     packet=copy.deepcopy(initial)
     windows,_,size=inspect(packet,[InvestigationRead(path=path,start=1,end=150)],
                            page_lines=160,result_budget=16000)
@@ -596,12 +597,15 @@ def test_codex_larger_pages_keep_exact_source_and_many_small_windows_stay_bounde
     for line in range(1,90):
         inspect(packet,[InvestigationRead(path=path,start=line,end=line)])
     assert len(packet['inspection_windows'])==90 and verify_packet(initial,packet)==packet
+    packet['inspection_windows']=[copy.deepcopy(windows[0]) for _ in range(20)]
+    assert sum(len(w['text']) for w in packet['inspection_windows'])>45000
+    assert verify_packet(initial,packet)==packet
     bad=copy.deepcopy(packet)
     bad['inspection_windows'][0]['text']='forged'
     with pytest.raises(ValueError,match='evidence|disagree'):
         verify_packet(initial,bad)
     bad=copy.deepcopy(packet)
-    bad['inspection_windows']*=3
+    bad['inspection_windows']*=13
     with pytest.raises(ValueError,match='bound'):
         verify_packet(initial,bad)
 

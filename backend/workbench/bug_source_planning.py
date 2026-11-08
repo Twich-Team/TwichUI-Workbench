@@ -21,12 +21,17 @@ WIRE_TEXT = 24000
 INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/[A-Za-z0-9_./-]+)\.lua')
 
 
+def program_context(packet):
+    """One source-accounting policy for executable-check and intent workflows."""
+    return packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'}
+
+
 def read_limit(packet):
-    return 262144 if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'} else READ_CHARS
+    return 262144 if program_context(packet) else READ_CHARS
 
 
 def window_limit(packet):
-    return 256 if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'} else REQUESTS*3
+    return 256 if program_context(packet) else REQUESTS*3
 
 
 def source_characters(packet):
@@ -197,7 +202,7 @@ def verify_packet(initial, supplied):
             raise ValueError('An inspected committed dependency changed.')
     windows = supplied.get('inspection_windows', [])
     if len(windows) > window_limit(supplied) or (source_characters(supplied) > read_limit(supplied)
-            if supplied.get('plan_review') == 'source-grounded-lua-v1' else sum(len(w['text']) for w in windows) > READ_CHARS):
+            if program_context(supplied) else sum(len(w['text']) for w in windows) > READ_CHARS):
         raise ValueError('The committed inspection evidence exceeds its operation bound.')
     for index, window in enumerate(windows):
         raw, item = committed(window['path'], initial['base'])
@@ -296,7 +301,7 @@ def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_bu
 def next_wire(packet, original, feedback, windows, finding, matches=None, *, programs=(), requested=(), text_budget=None, packing_context=None):
     _, wire = bug.planning_request(packet, original, feedback)
     from workbench.source_memory import retain, requested_visibility
-    if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'}:
+    if program_context(packet):
         from workbench.source_interface import context
         priority,interface=context(packet,original,programs)
         windows=[*windows,*priority]
@@ -305,7 +310,7 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
     if packing_context is not None:
         packing_context.clear()
         packing_context.update(windows=list(windows),requested=list(requested))
-    retain(wire, packet, windows, (text_budget if text_budget is not None else 36000 if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'} else WIRE_TEXT)
+    retain(wire, packet, windows, (text_budget if text_budget is not None else 36000 if program_context(packet) else WIRE_TEXT)
            -sum(len(m['text']) for m in (matches or [])), requested=requested)
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
@@ -347,7 +352,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     predecessor = None
     historical_pending = False
     packing_context = {}
-    program_mode = initial.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'}
+    program_mode = program_context(initial)
 
     def make_wire(*args,**kwargs):
         before=len(packet.get('inspection_windows',[]))

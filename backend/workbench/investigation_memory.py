@@ -142,7 +142,7 @@ def seed(packet, original, current_attempt, engine):
                     used.extend(returned)
                 initial_chars = sum(len(e['text']) for f in [*packet['files'], *packet.get('api_references', [])]
                                     for e in f['excerpts'])
-                footprint=(source.source_characters(candidate) if packet.get('plan_review') == 'source-grounded-lua-v1'
+                footprint=(source.source_characters(candidate) if source.program_context(packet)
                            else initial_chars+sum(len(w['text']) for w in used))
                 if footprint > source.read_limit(packet):
                     raise ValueError('Source memory exceeds read bound')

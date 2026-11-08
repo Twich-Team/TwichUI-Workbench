@@ -109,3 +109,17 @@ Focused transport, guard, receipt, accounting and denial tests pass; complete su
 and corrected native browser verification are recorded in the next deployment record.
 Existing full frontend/browser evidence remains applicable: no product UI/layout or
 browser security behavior changed in this correction. No new owner decision needed.
+
+## Completed scope rejected by split source-accounting policy
+
+Real phase5 proves the scope model/transport completed correctly. The final source
+validator excluded intent mode from its unique-character branch even though reading,
+packing and working-set admission already included it. Exact retained committed
+window identities reproduce the old rejection:52971returned characters;70354unique
+characters including initial context;262144existing working-set bound. A centralized
+program_context decision now governs read/window/footprint/retention and memory checks.
+Source hashes, path authority and all physical bounds remain enforced. Offline replay
+of actual completed output reaches typed scope/content validation with zero model
+calls or task-state mutations. This is supporting evidence, not an application
+acceptance result. Fresh normal bindings are still required. Actual20requests and
+1350009known tokens retained; no new uncertainty or owner decision.
