@@ -137,3 +137,18 @@ def test_flat_plan_does_not_allow_invented_setup_or_missing_plan():
                  plan=None, question=None,limitation=None)
     with pytest.raises(ResponseValidationError):
         normalize(value)
+
+
+def test_intent_schema_retains_large_context_classification_and_semantics():
+    from workbench.bug_intent import schema as intent_schema,Response
+    original=intent_schema([])
+    assert original['title']=='BugIntentResponse'
+    wire,changed=schema(original)
+    assert changed and wire['title']=='BugIntentResponse'
+    assert wire['properties']['question']['anyOf'][0]['maxLength']==800
+    value=dict(finding='A genuine owner question.',action='question',reads=[],searches=[],
+               plan=None,question='A'*700,limitation=None)
+    mapped,_=normalize(value)
+    assert Response.model_validate(mapped).question==value['question']
+    with pytest.raises(ResponseValidationError):
+        normalize(dict(value,plan={}))

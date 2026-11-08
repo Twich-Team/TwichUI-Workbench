@@ -284,9 +284,9 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             from workbench.bug_plan_review import ReviewResponse
             from workbench.bug_investigation_stage import InvestigationResponse
             from workbench.bug_intent import Response as IntentResponse
-            actual_schema=IntentResponse if schema.get('title')=='Response' else ReviewResponse if schema.get('title')=='ReviewResponse' else InvestigationResponse if schema.get('title')=='InvestigationResponse' else bug_investigation.BugPlanningResponse
+            actual_schema=IntentResponse if schema.get('title')=='BugIntentResponse' else ReviewResponse if schema.get('title')=='ReviewResponse' else InvestigationResponse if schema.get('title')=='InvestigationResponse' else bug_investigation.BugPlanningResponse
             answer=answer_for(packet,actual_schema)
-            if actual_schema not in (ReviewResponse,IntentResponse):
+            if actual_schema is not ReviewResponse:
                 draft=answer['draft']
                 value=dict(finding=answer['finding'],action='inspect',reads=[],searches=[],
                            question=None,limitation=None)

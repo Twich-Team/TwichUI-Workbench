@@ -76,3 +76,60 @@ def completed_turns(identity,usage,evidence_roots):
         raise ValueError('Task accounting differs from provider terminal receipts')
     return dict(attempt=identity,provider_outcome='completed',turns=records,usage=summed,
                 output_accepted=False,execution_authorized=False)
+
+
+def interrupted_turns(identity, usage, evidence_roots, diagnostics, capabilities):
+    """Prove a completed prefix and confirmed interruption, never accept its output.
+
+    Unlike read-only quarantine this resolves no unknown state. A matching terminal
+    identity, reported usage, acknowledged interrupt, verified confinement and closed
+    producer are all required. Historical outcomes and attribution remain unchanged.
+    """
+    receipt=diagnostics.get('provider_receipt')
+    if (str(UUID(identity))!=identity or not isinstance(receipt,str) or str(UUID(receipt))!=receipt
+            or diagnostics.get('provider_terminal_confirmed') is not True
+            or diagnostics.get('terminal_status')!='interrupted'
+            or usage.get('status')!='complete' or usage.get('units')!='tokens'
+            or capabilities.get('kind')!='tool-free-codex-investigation-v1'
+            or not all(capabilities.get(k) is False for k in
+                       ('source_writes','execution_dispatch','external_action_tools','owner_config_mounted'))
+            or capabilities.get('empty_work_directory') is not True
+            or capabilities.get('shell_disabled') is not True
+            or capabilities.get('sandbox')!='readOnly' or capabilities.get('approval_policy')!='never'):
+        raise ValueError('Known read-only interruption is not established')
+    matches=[Path(root)/'artifacts/codex-evidence'/(receipt+'.jsonl')
+             for root in dict.fromkeys(evidence_roots)
+             if (Path(root)/'artifacts/codex-evidence'/(receipt+'.jsonl')).is_file()]
+    if len(matches)!=1:
+        raise ValueError('Interrupted receipt location is missing or ambiguous')
+    events,source_sha=_read(matches[0],lines=True)
+    terminals=[e for e in events if e.get('phase')=='lifecycle-terminal']
+    held=[e for e in events if e.get('phase')=='turn-held']
+    identities={(e.get('thread_id'),e.get('turn_id')) for e in events
+                if e.get('phase') in {'turn-started','lifecycle-turn'}}
+    if (len(terminals)!=1 or terminals[0].get('status')!='interrupted'
+            or len(identities)!=1 or not all(all(x) for x in identities)
+            or (terminals[0].get('thread_id'),terminals[0].get('turn_id')) not in identities
+            or len(held)!=1 or held[0].get('terminal_status')!='interrupted'
+            or not any(e.get('phase')=='interrupt-result' and e.get('acknowledged') is True
+                       and e.get('status')=='interrupted' for e in events)
+            or not any(e.get('phase')=='connection-closed' for e in events)
+            or not any(e.get('phase')=='isolation-verified' and e.get('capabilities')==capabilities for e in events)):
+        raise ValueError('Interrupted lifecycle or isolation is unverified')
+    values=terminals[0].get('usage')
+    aggregate=usage.get('values')
+    count=usage.get('requests_observed')
+    if (not isinstance(values,dict) or held[0].get('usage')!=values
+            or not isinstance(aggregate,dict) or set(values)!=set(aggregate)
+            or type(count) is not int or not 1<=count<=256
+            or diagnostics.get('investigation_requests')!=count
+            or any(type(v) is not int or v<0 or type(aggregate[k]) is not int or aggregate[k]<v for k,v in values.items())
+            or values.get('prompt_tokens',-1)+values.get('completion_tokens',-1)!=values.get('total_tokens')):
+        raise ValueError('Interrupted accounting does not match the terminal receipt')
+    prefix={k:aggregate[k]-v for k,v in values.items()}
+    proof=completed_turns(identity,dict(usage,requests_observed=count-1,values=prefix),evidence_roots) if count>1 else None
+    if count==1 and any(prefix.values()):
+        raise ValueError('Unattributed interrupted accounting')
+    return dict(attempt=identity,provider_outcome='interrupted',completed_prefix=proof,
+                final_receipt=receipt,terminal_sha256=source_sha,usage=aggregate,
+                output_accepted=False,execution_authorized=False)

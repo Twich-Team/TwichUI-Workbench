@@ -59,3 +59,59 @@ def test_unknown_or_conflicting_execution_is_never_completed_by_content(tmp_path
         path.symlink_to(target)
     with pytest.raises(ValueError):
         completed_turns(identity,usage,[tmp_path])
+
+
+def interrupted_receipts(tmp_path):
+    identity,_,_,usage=receipts(tmp_path)
+    receipt=str(uuid4())
+    values=dict(prompt_tokens=48000,completion_tokens=858,total_tokens=48858)
+    caps=dict(kind='tool-free-codex-investigation-v1',source_writes=False,
+              execution_dispatch=False,external_action_tools=False,shell_disabled=True,
+              empty_work_directory=True,owner_config_mounted=False,sandbox='readOnly',approval_policy='never')
+    events=[dict(phase='turn-started',thread_id='thread2',turn_id='turn2'),
+            dict(phase='isolation-verified',capabilities=caps),
+            dict(phase='lifecycle-terminal',thread_id='thread2',turn_id='turn2',status='interrupted',usage=values),
+            dict(phase='interrupt-result',acknowledged=True,status='interrupted'),
+            dict(phase='turn-held',terminal_status='interrupted',usage=values),
+            dict(phase='connection-closed')]
+    path=tmp_path/'artifacts/codex-evidence'/(receipt+'.jsonl')
+    write(path,events,True)
+    aggregate=dict(usage,requests_observed=2,values={k:usage['values'][k]+v for k,v in values.items()})
+    diag=dict(provider_receipt=receipt,provider_terminal_confirmed=True,
+              terminal_status='interrupted',investigation_requests=2)
+    return identity,path,events,aggregate,diag,caps
+
+
+@pytest.mark.parametrize('fault',[None,'missing_terminal','unknown','missing_close','wrong_identity',
+                                  'missing_ack','wrong_usage','wrong_prefix','write_capability','changed_isolation'])
+def test_confirmed_interruption_preserves_usage_and_never_authorizes_partial_output(tmp_path,fault):
+    from workbench.provider_receipts import interrupted_turns
+    identity,path,events,usage,diag,caps=interrupted_receipts(tmp_path)
+    if fault=='missing_terminal':
+        events.pop(2)
+    if fault=='unknown':
+        diag['provider_terminal_confirmed']=False
+    if fault=='missing_close':
+        events.pop()
+    if fault=='wrong_identity':
+        events[2]['turn_id']='another'
+    if fault=='missing_ack':
+        events.pop(3)
+    if fault=='wrong_usage':
+        usage['values']['total_tokens']+=1
+    if fault=='wrong_prefix':
+        usage['values']['prompt_tokens']+=1
+    if fault=='write_capability':
+        caps['source_writes']=True
+    if fault=='changed_isolation':
+        events[1]['capabilities']={**caps,'shell_disabled':False}
+    write(path,events,True)
+    if fault:
+        with pytest.raises((ValueError,KeyError)):
+            interrupted_turns(identity,usage,[tmp_path],diag,caps)
+    else:
+        proof=interrupted_turns(identity,usage,[tmp_path],diag,caps)
+        assert proof['provider_outcome']=='interrupted'
+        assert proof['usage']==usage['values']
+        assert proof['completed_prefix']['provider_outcome']=='completed'
+        assert not proof['output_accepted'] and not proof['execution_authorized']

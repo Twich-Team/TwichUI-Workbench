@@ -41,6 +41,7 @@ class Plan(Data):
 
 
 class Response(Data):
+    model_config = {**Data.model_config, 'title': 'BugIntentResponse'}
     finding: Text
     plan: Plan | None = None
     inspection: Annotated[list[InvestigationRead | InvestigationSearch], Field(min_length=1,max_length=3)] | None = None

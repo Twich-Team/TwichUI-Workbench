@@ -186,7 +186,7 @@ try {
   function readBugReview(intake, plan) {
     const info = lstatSync(reviewPath);
     need(realpathSync(reviewPath) === reviewPath && info.isFile() && info.uid === process.getuid() &&
-      !(info.mode & 0o077) && info.size <= 4096, 'Bug plan review is not private');
+      !(info.mode & 0o077) && info.size <= 32768, 'Bug plan review is not private');
     const receipt = read(reviewPath);
     need(receipt.decision === 'approve' && receipt.approved === true,
       'Independent review did not explicitly approve this plan');

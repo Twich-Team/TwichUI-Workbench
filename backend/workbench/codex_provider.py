@@ -815,6 +815,7 @@ def turn(rpc, model, effort, prompt, schema):
         if schema.get("title")
         in {
             "BugPlanningResponse",
+            "BugIntentResponse",
             "ProgramResponse",
             "InvestigationResponse",
             "ReviewResponse",

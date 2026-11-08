@@ -62,7 +62,7 @@ def schema(value):
                 }
             },
         ), True
-    if result.get("title") in {"ProgramResponse", "BugPlanningResponse"}:
+    if result.get("title") in {"ProgramResponse", "BugPlanningResponse", "BugIntentResponse"}:
         # Keep plan construction off the polymorphic draft/inspection grammar.
         # The complete provider choice still passes the original local compiler.
         program = result.get("title") == "ProgramResponse"
@@ -78,8 +78,8 @@ def schema(value):
             reads=dict(type="array", items={"$ref": "#/$defs/InvestigationRead"}, maxItems=3),
             searches=dict(type="array", items={"$ref": "#/$defs/InvestigationSearch"}, maxItems=3),
             plan=dict(anyOf=[plan, dict(type="null")]) if allowed else dict(type="null"),
-            question=dict(anyOf=[dict(type="string", minLength=1, maxLength=450), dict(type="null")]),
-            limitation=dict(anyOf=[dict(type="string", minLength=1, maxLength=450), dict(type="null")]),
+            question=copy.deepcopy(result['properties']['question']) if not program else dict(anyOf=[dict(type="string", minLength=1, maxLength=450), dict(type="null")]),
+            limitation=copy.deepcopy(result['properties']['limitation']) if not program else dict(anyOf=[dict(type="string", minLength=1, maxLength=450), dict(type="null")]),
         )
         result["properties"] = props
         result["required"] = list(props)

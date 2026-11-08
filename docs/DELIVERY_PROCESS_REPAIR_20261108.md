@@ -73,3 +73,39 @@ A remaining local diagnostic-prefix assertion was corrected without changing exe
 Actual desktop/phone scope screens were inspected. Private evidence and unchanged real
 store proof: C/delivery-process-offline-proof. Complete final verification is ongoing;
 installedFCC and the real41 result remain unchanged. This is not product completion.
+
+## Real41 scope integration correction, 21:43–21:58UTC
+
+Installed4b944ba/deployment48 preserved history, both addresses and isolation. Real
+phase4 performed two actual Codex turns: diagnosis completed; the scope turn was
+interrupted by the application after tokenUsage/updated reported49552tokens.
+The new scope schema was titled `Response`, absent from the explicit larger-source
+classification. The existing small-task32768 post-observation guard interrupted it.
+This is a demonstrated orchestration/configuration cause, not missing source,
+unknown billing eligibility, malformed content or a proven model limitation.
+The partial scope is diagnostic evidence only and cannot be approved or executed.
+Final identity, acknowledged interruption, known usage and closed producer are
+verified separately. Its actual-model DB field remains NULL; requested model is
+retained, never rewritten as independently observed. Task18requests1252043tokens
+remain accounted. Earlier unknown incidents remain unknown.
+
+Correction: uniquely title scope schemas `BugIntentResponse`, preserve that title
+through strict flat transport, retain800-character question constraints, and apply
+the already-established larger-source post-observation guard. This remains a local
+observation guard, NOT a hard token ceiling or subscription-only billing guarantee.
+Provider receipt validation separately proves a completed prefix and a confirmed
+interrupted final turn; it requires actual read-only confinement, matched turn
+identity, terminal receipt, usage, interruption acknowledgment and closed connection.
+Renewal discards partial output and uses fresh approval bindings. Unknown, missing,
+conflicting or consequential receipts hold. No historical outcome is changed.
+The acceptance tool now follows that same proved distinction and retains missing
+actual-model attribution honestly. It does not treat confirmed interruption as a
+real-provider acceptance pass. Real task still has no implementation; cases0/4.
+
+The initial native verification invocation lacked the delegated cgroup environment;
+that launch failure was diagnosed and corrected, not presented as an app failure.
+The controlled Codex fixture also required the explicit new schema title/flat wire.
+Focused transport, guard, receipt, accounting and denial tests pass; complete suites
+and corrected native browser verification are recorded in the next deployment record.
+Existing full frontend/browser evidence remains applicable: no product UI/layout or
+browser security behavior changed in this correction. No new owner decision needed.

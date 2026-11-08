@@ -1,3 +1,28 @@
+## Latest verified state — November8 21:53UTC (supersedes operating state below)
+
+Installed4b944ba29a7d58490a73f001a285582854b1d6bb, deployment48, seal
+627931bceec287c593c906963859803cdc0493019c7538d462f25342cbfa58d1.
+Both approved addresses/history/model authentication/isolation verified after cutover.
+Full1718backend/25frontend; six native controlled process modes; controlled four-route;
+108browser/default plus2opt-ins passed. These are NOT real-provider acceptance passes.
+NO real addon implementation/check or supporting provider case complete (0/4).
+
+Real41phase4 completed diagnosis then the scope turn was definitively interrupted by
+Workbench's small-task post-observation guard: generic schema title Response missed
+the larger-context allowlist. Input48694tokens already exceeded32768; not a billing
+failure or evidence of malformed model output. Partial scope remains unusable. Final
+turn identity/interruption acknowledgment/usage/closed connection independently checked.
+Phase4two requests97947tokens; task18requests1252043known tokens; old unknowns unchanged.
+No current provider activity. Exact proof C/outcome-4b944ba/phase4-settlement.json.
+New code names BugIntentResponse, uses established larger-source guard/flat transport,
+and verifies settled interrupted read-only receipt separately from completed generation.
+Fresh renewal preserves actual-model unknown, all usage and old output rejection;
+no unknown/consequential replay. Focused checks pass, full/static/native checks running.
+Operator first-renewal correction is tested; runtime seal was never silently modified.
+Next: finish relevant verification, checkpoint/seal/deploy connected correction, renew
+normal scope workflow with fresh operation5 and approvals, continue real checked repair.
+No owner engineering decision pending. Older state below retained as historical.
+
 # Current status — delivery-process redesign underway; no real repair yet
 
 Following the Project Working Philosophy: installedFCC remains healthy at approved

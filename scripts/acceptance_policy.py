@@ -108,10 +108,10 @@ def build_bug_case(bug_input):
                 readPaths=paths, writablePaths=writable)
 
 
-def delivery_chain(connection,identity,revision=None):
+def delivery_chain(connection,identity,revision=None,*,renewal=False):
     """Keep historical local rejection separate from independently proved completion."""
     renewed=connection.execute("SELECT 1 FROM planning_jobs WHERE intake_id=? AND json_extract(payload,'$.bug_followup.budget_version')=4",(identity,)).fetchone()
-    if not renewed:
+    if not renewed and not renewal:
         return settled_planning_chain(connection,identity,revision)
     from workbench.delivery_phase import observe,renewable
     db=Path(connection.execute('PRAGMA database_list').fetchone()[2])
@@ -132,7 +132,8 @@ def delivery_chain(connection,identity,revision=None):
         payload=json.loads(connection.execute('SELECT payload FROM planning_jobs WHERE id=?',(phase['job'],)).fetchone()[0])
         result.append(dict(id=phase['attempt'],job_id=phase['job'],revision=phase['sequence'],payload=payload,
             usage=phase['usage'],outcome=phase['database_outcome'],finished_at=phase['local_finished'],
-            backend=phase['backend'],actual_model=phase['actual_model'],requested_model=phase['requested_model']))
+            backend=phase['backend'],actual_model=phase['actual_model'],requested_model=phase['requested_model'],
+            provider_state=phase['provider_state']))
     require(revision is None or result[-1]['revision']==revision,'current processing sequence changed')
     return result
 
@@ -187,8 +188,10 @@ def closeout(connection, identity, execution, case):
     prepared_count=sum(a['purpose']=='check_preparation' for a in attempts)
     expected = ['implementation', *(['planning']*len(chain)), *(['check_preparation']*prepared_count)] + (['capability_validation'] if case['provider'] == 'local' else [])
     require(sorted(a['purpose'] for a in attempts) == sorted(expected), 'provider attempt count differs')
+    interrupted={p['id'] for p in chain if p.get('provider_state')=='interrupted'}
     require(all(a['finished_at'] and a['backend'] == case['provider'] and a['requested_model'] == case['model']
-                and a['actual_model'] == case['model'] and a['usage'] for a in attempts), 'attempt attribution or usage missing')
+                and (a['actual_model'] == case['model'] or a['id'] in interrupted and a['actual_model'] is None)
+                and a['usage'] for a in attempts), 'attempt attribution or usage missing')
     for attempt in attempts:
         purpose,usage=attempt['purpose'],json.loads(attempt['usage'])
         if purpose == 'capability_validation':
@@ -263,7 +266,8 @@ def check_review(connection, request, case, preparation):
     require(switched==expected,'switch evidence or planning claim changed')
     for phase in chain:
         usage=phase['usage']
-        require(phase['backend']==case['provider'] and phase['actual_model']==case['model'],
+        require(phase['backend']==case['provider'] and phase['requested_model']==case['model']
+                and (phase['actual_model']==case['model'] or phase.get('provider_state')=='interrupted' and phase['actual_model'] is None),
                 'planning usage or provider identity was not reported')
         if case['provider']=='codex':
             codex_observations(connection,phase['id'],usage,bug=bug,planning=True)
@@ -309,12 +313,13 @@ def check_clarification(connection, request, case):
     original=json.loads(row[2])
     require({k:v for k,v in original.items() if k!='request_id' and v is not None}==
         {k:v for k,v in case['request'].items() if v is not None},'clarification original request changed')
-    chain=delivery_chain(connection,request['intake'],reply.get('processing_sequence',revision+1)-1 if reply.get('renew_operation') else revision)
+    chain=delivery_chain(connection,request['intake'],reply.get('processing_sequence',revision+1)-1 if reply.get('renew_operation') else revision,renewal=reply.get('renew_operation') is True)
     phase=chain[-1]
     from workbench.planning_limits import continuation_budget
     if not reply.get('renew_operation'):
         continuation_budget(dict(payload=chain[0]['payload']),phase,chain)
-    require(phase['backend']==case['provider'] and phase['actual_model']==case['model'],
+    require(phase['backend']==case['provider'] and phase['requested_model']==case['model']
+        and phase['actual_model'] in {None,case['model']},
         'clarification provider changed')
     questions=connection.execute('SELECT id,revision FROM proposals WHERE intake_id=?',
         (request['intake'],)).fetchall()
@@ -517,7 +522,7 @@ def main():
             else:
                 current = [a for a in new_attempts if a[1:] == (request['intake'], 'planning')]
                 revision=request['clarification'].get('revision',1) if request['action']=='clarify' else request['proposal']['revision']
-                chain=delivery_chain(connection,request['intake'],request['clarification']['processing_sequence']-1 if request['action']=='clarify' and request['clarification'].get('renew_operation') else revision)
+                chain=delivery_chain(connection,request['intake'],request['clarification']['processing_sequence']-1 if request['action']=='clarify' and request['clarification'].get('renew_operation') else revision,renewal=request['action']=='clarify' and request['clarification'].get('renew_operation') is True)
                 require({a[0] for a in current}=={r['id'] for r in chain},'owned planning phase identities changed')
                 expected.update(r['id'] for r in chain)
                 if request['action']=='run':

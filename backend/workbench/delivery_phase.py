@@ -6,7 +6,7 @@ that content valid, authorize execution or resolve consequential uncertainty.
 """
 import json
 
-from workbench.provider_receipts import completed_turns
+from workbench.provider_receipts import completed_turns,interrupted_turns
 from workbench.visual_scope import digest
 
 
@@ -39,12 +39,14 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
             provider_state='active'
         elif attempt and terminal and isinstance(usage,dict) and usage.get('status')=='complete':
             if backend=='codex':
-                terminal_proof=completed_turns(attempt,usage,evidence_roots)
+                terminal_proof=(interrupted_turns(attempt,usage,evidence_roots,facts,caps)
+                    if outcome=='incomplete_output' and facts.get('terminal_status')=='interrupted'
+                    else completed_turns(attempt,usage,evidence_roots))
                 provider_state=terminal_proof['provider_outcome']
             elif (outcome=='completed' or facts.get('generation_state')=='finished' and
                     facts.get('accounting_state')=='complete'):
                 provider_state='completed'
-        if provider_state=='completed':
+        if provider_state in {'completed','interrupted'}:
             values=usage.get('values',{})
             if (usage.get('units')!='tokens' or not isinstance(values,dict)
                     or any(type(values.get(k)) is not int or values[k]<0
@@ -55,7 +57,9 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
                     raise ValueError('Completed phase accounting is malformed')
                 totals[key]=totals.get(key,0)+value
         count=usage.get('requests_observed',1) if isinstance(usage,dict) else None
-        if provider_state=='completed' and (type(count) is not int or count<1 or actual!=requested or not actual):
+        if provider_state in {'completed','interrupted'} and (type(count) is not int or count<1
+                or provider_state=='completed' and (actual!=requested or not actual)
+                or actual is not None and actual!=requested):
             raise ValueError('Completed operation attribution or request count is unavailable')
         phases.append(dict(job=job,sequence=sequence,local_status=local,local_finished=finished,
             attempt=attempt,backend=backend,requested_model=requested,actual_model=actual,
@@ -74,4 +78,4 @@ def renewable(snapshot):
     """A local rejection is renewable only after every old generation is settled."""
     return bool(snapshot['phases']) and all(
         p['local_status'] in {'completed','failed'} and p['local_finished'] and
-        p['provider_state']=='completed' and p['read_only'] and not p['execution_authorized'] for p in snapshot['phases'])
+        p['provider_state'] in {'completed','interrupted'} and p['read_only'] and not p['execution_authorized'] for p in snapshot['phases'])

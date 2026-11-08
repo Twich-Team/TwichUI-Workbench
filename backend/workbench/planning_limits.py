@@ -226,8 +226,9 @@ def renewed_budget(connection, initial, *, exclude_job=None):
         raise ValueError('Previous generation is active, uncertain, consequential or lacks terminal evidence')
     phases=snapshot['phases']
     provider=phases[0]['backend']
-    model=phases[0]['actual_model']
-    if any(p['backend']!=provider or p['actual_model']!=model for p in phases):
+    model=phases[0]['requested_model']
+    if any(p['backend']!=provider or p['requested_model']!=model
+            or p['actual_model'] is not None and p['actual_model']!=model for p in phases):
         raise ValueError('Renewal cannot silently switch the investigation provider')
     packet=initial['payload'].get('bug_inspection_packet')
     if not isinstance(packet,dict) or not packet.get('files') or not packet.get('base'):
