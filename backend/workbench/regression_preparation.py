@@ -414,6 +414,9 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 lease = str(uuid4())
                 job['payload'].pop('diagnostics', None)
                 job['payload']['scenario_generation_claim'] = owner_identity()
+                if isinstance(adapter_used, codex_provider.Planner):
+                    from workbench.investigation_recovery import capabilities
+                    job['payload']['recovery_capabilities'] = capabilities()
                 job.update(status='running', lease=lease, attempts=job['attempts']+1, message=('Investigating the bug and preparing a repair plan.' if bug else 'Preparing grounded behavioral examples for independent review.'))
                 c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
                     status='running', lease=lease, payload=job['payload'], attempts=job['attempts'], message=job['message']))

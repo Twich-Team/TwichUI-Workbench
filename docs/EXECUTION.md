@@ -23,8 +23,11 @@ completion/usage/field diagnostics; do not leak credentials or sensitive source
 in reference reports. Reject malformed, ambiguous, unauthorized and out-of-scope
 output. Never invent missing plan content or weaken independent behavior checks.
 A settled invalid output may be renewed after investigation/improvement, with
-fresh task bindings. Uncertain external execution must be reconciled before
-another request. Reuse successful saved results instead of duplicating work.
+fresh task bindings. Apply [standing read-only recovery](OWNER_READONLY_RECOVERY_20261108.md)
+to qualifying uncertain investigations: verify capabilities, isolation, fencing and
+supported recovery, retain immutable unknown accounting, quarantine and use fresh
+bindings. No repeated owner exception is required. Uncertain consequential execution
+still holds. Reuse successful saved results instead of duplicating work.
 
 ## Protections
 

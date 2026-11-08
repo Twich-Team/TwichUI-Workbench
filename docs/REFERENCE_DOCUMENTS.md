@@ -26,3 +26,8 @@ contents or model recommendations. This does not block ordinary delivery.
 Requirements A8/A9 owner-decision addenda: OWNER_SOURCE_DISCLOSURE_20261108.md and
 OWNER_CODEX_QUARANTINE_20261108.md. Apply these explicit subsequent owner decisions
 with DELIVERY_OUTCOME_AUTHORITY_20261107.md; root supplied files remain exact.
+
+The later independently stated OWNER_READONLY_RECOVERY_20261108.md is the standing
+A8/A9 recovery policy. It replaces repeated exceptions for qualifying read-only
+investigation uncertainty. The earlier specific receipt and proposal remain
+historical; the proposal is not blanket-approved. Preserve all other safeguards.

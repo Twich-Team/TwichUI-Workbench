@@ -145,10 +145,12 @@ def handle(connection, binary, credential, runtime, evidence_root=None):
         with tempfile.TemporaryDirectory(prefix='codex-hosts-', dir=runtime) as directory:
             hosts = Path(directory) / 'hosts'
             hosts.write_text(mapping, encoding='ascii')
-            argv = codex.command(binary, credential, hosts=hosts)
+            sessions = journal.sessions() if journal is not None else None
+            argv = codex.command(binary, credential, hosts=hosts, sessions=sessions)
             with codex.app_server(argv, stop, deadline) as rpc:
                 if journal is not None:
                     rpc.evidence = journal.record
+                    rpc.persistent_sessions = True
                 try:
                     result = codex.turn(rpc, **request)
                 finally:
@@ -159,6 +161,7 @@ def handle(connection, binary, credential, runtime, evidence_root=None):
     except (KeyError, TypeError, ValueError, OSError):
         result = {'error': 'protocol', 'started': started}
     if journal is not None:
+        journal.record('connection-closed', status='local-producer-closed')
         result['provider_receipt'] = journal.identifier
         journal.close()
     try:

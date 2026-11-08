@@ -95,6 +95,9 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
     """One production worker iteration; injectable controlled adapters are internal only."""
     if stop_event is not None and stop_event.is_set():
         return False
+    from workbench.investigation_recovery import recover_one
+    if recover_one(engine):
+        return True
     return (
         process_one(engine, crash)
         or verification.process_one(engine)

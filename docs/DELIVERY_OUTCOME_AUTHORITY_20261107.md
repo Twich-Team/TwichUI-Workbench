@@ -48,3 +48,13 @@ The November8 owner-approved [specific Codex quarantine](OWNER_CODEX_QUARANTINE_
 allows fresh work despite only model18bbf5d0's lost second turn. Preserve its unknown
 outcome/usage and original records, never reuse partial output or old approvals.
 This supersedes that specific hold; no general uncertainty/billing/disclosure waiver.
+
+The later independent November8 [standing read-only recovery decision](OWNER_READONLY_RECOVERY_20261108.md)
+supersedes the requirement for another exception for each qualifying investigation.
+Verify actual tool-free capabilities, old-output fencing, late-result isolation,
+reasonable supported retrieval/cancellation and fresh valid task/access/disclosure/
+billing bindings. Quarantine the old output and preserve final usage/outcome unknown;
+the owner accepts that included allowance may have been consumed without a receipt.
+No paid charges, uncertain writes/publication/consequential effects are covered.
+Implement and verify recovery in the app, repair lifecycle defects, then continue
+the complete outcome without another engineering prompt. No campaign caps return.

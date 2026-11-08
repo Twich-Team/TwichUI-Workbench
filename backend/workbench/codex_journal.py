@@ -43,6 +43,7 @@ class Journal:
             "guard",
             "wire_bytes",
             "terminal_status",
+            "capabilities",
         }
         if set(values) - allowed or not re.fullmatch(r"[a-z-]{1,40}", phase):
             raise ValueError("Unsupported connector evidence")
@@ -90,3 +91,9 @@ class Journal:
 
     def close(self):
         os.close(self.fd)
+
+    def sessions(self):
+        """Private per-request persistent rollouts; credentials never stored here."""
+        path = self.path.parent / (self.identifier + '-sessions')
+        path.mkdir(mode=0o700)
+        return path

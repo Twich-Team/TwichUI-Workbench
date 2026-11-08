@@ -14,6 +14,10 @@ Standing owner authority supersedes old campaign clocks, allocations, revision
 ceilings, cumulative local-testing caps, routine renewal gates and narrow repair
 restrictions. Investigate, repair, test and continue ordinary connected work.
 Checkpoints/session interruptions do not require renewed engineering permission.
+Apply [standing read-only recovery](docs/OWNER_READONLY_RECOVERY_20261108.md):
+verify actual tool-free capabilities, old-task fencing, late-result isolation and
+supported recovery, then quarantine qualifying uncertainty without another owner
+exception. Preserve unknown outcome/usage; never cover uncertain consequential effects.
 
 React/TS/Vite → FastAPI → SQLAlchemy/SQLite, separate durable Python worker.
 Preserve Phase 1. One agent; no teams or recursive agents. Connected architecture,

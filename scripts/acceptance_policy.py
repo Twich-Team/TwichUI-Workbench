@@ -311,6 +311,12 @@ def campaign_admission(connection, request, case, policy):
                     quarantined[row[0]] = quarantined_accounting(connection, row[0])
                 except (ValueError, OSError, KeyError, TypeError):
                     pass  # Only the exact permanently quarantined historical turn is covered.
+                if row[0] not in quarantined:
+                    try:
+                        from workbench.investigation_recovery import accounting as recovered_accounting
+                        quarantined[row[0]] = recovered_accounting(connection,row[0])
+                    except (ValueError,OSError,KeyError,TypeError):
+                        pass  # Standing policy requires a verified immutable read-only disposition.
             if row[2] == 'local' and row[3] == 'planning' and row[4] in {'interrupted_unknown','incomplete_output'}:
                 try:
                     if row[4]=='incomplete_output':

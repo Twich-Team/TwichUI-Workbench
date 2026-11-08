@@ -81,17 +81,35 @@ thread-read-offline-diagnostic.json, thread-resume-offline-diagnostic.json). No 
 model/source/login/refresh. These prove missing ephemeral local state, not remote
 cancellation, account denial or absent subscription. Local producer is closed.
 
-One owner question is already PENDING at checkpoint c276228 about the precise
-READONLY_PLANNING_QUARANTINE_PROPOSAL_20261108.md, immutable SHA
-8d8ff34b74df417ddca58f97668cae63ba2181f5d6dbe206472ef734c655f2af.
-Options were guarded planning policy / only this new turn / keep renewal held.
-No answer yet. Do not silently extend the18bb exception or treat silence as approval.
-Generic policy is not implemented/active; eb72 original unknown still holds admission.
-The proposal allows only tool-free planning, no plan/run/implementation effects,
-closed local producer and supported recovery attempts, preserved unknown accounting,
-verified correction, fresh same-provider task decisions and all other safeguards.
-It excludes uncertain implementation and post-generation fallback. This is an actual
-uncertain-external-state policy boundary, not an engineering/time/campaign renewal.
+The owner has now independently authorized the standing policy in
+OWNER_READONLY_RECOVERY_20261108.md, SHA
+15a89f2d817fb9804b2f2bde99803f87a0760d042e90426bbe1096d2a2bdefbf.
+The earlier question is answered; no renewed exception is needed for qualifying
+read-only investigations. The earlier proposal is not blanket-approved. Verify
+actual capabilities, old-output fencing, late-result isolation, supported recovery,
+and fresh valid task/access/disclosure/billing bindings. Preserve unknown final
+usage/outcome and no partial reuse. Uncertain consequential writes/actions still hold.
+
+Current eb72 qualifies: actual deployed isolation/connector/lease-fencing code was
+audited and content-bound, no proposal/approval/execution existed, local producer
+closed, supported identity retrieval attempted. C/standing-recovery-history-proof
+contains immutable private receipt and read-only proof: all199 rows unchanged.
+Historical diagnostic files remain unchanged; private0600 verified copies support
+the receipt. No partial output or old task approval is reused.
+
+Connected recovery code is under verification, not installed yet: code-owned
+capability snapshots before dispatch, matching actual connector isolation receipt,
+closed-connection/status-retrieval proof, failed-job fence, immutable disposition;
+automatic worker recovery and acceptance admission. Browser projection explains
+quarantine without rewriting original records. Lifecycle identities/status persist
+before content parsing, including lost startup reply; supported bounded same-turn
+status retrieval follows missing cancellation acknowledgement. Private per-request
+rollout mount preserves sessions only, not owner home/config/auth cache. A no-model,
+network-disabled CLI probe creates a persistent thread but no rollout before a turn;
+restart-read therefore found no rollout. Do not claim real generated-turn restart
+recovery from that probe. Actual generated rollout retention still needs live proof.
+136 targeted tests pass including real-pipe lifecycle faults and quarantine denials;
+complete suites and native checks underway. Continue installation then real task.
 
 Ledger C/outcome-ledger.json updated through deployment32. Codex4turns started,
 2complete/2unknown final receipts; known62704prompt/306completion/54reasoning/63010total.
@@ -105,14 +123,12 @@ There are no campaign clock/allocation/revision/testing renewal caps. Existing r
 owner documents are exact; do not edit them. Current authority and A8/A9 addenda:
 DELIVERY_OUTCOME_AUTHORITY_20261107.md and REFERENCE_DOCUMENTS.md. One agent only.
 
-On the actual pending decision: record exactly what was authorized; implement/test
-only that receipt class or specific exception without changing historical SQLite
-rows. A generic approval requires immutable per-attempt binding, explicit proof of
-all proposed conditions, no partial use, no numerical/billing/disclosure expansion.
-Record/verify candidate before checked deployment. Keep missing decisions held.
+Implement/verify/deploy the standing recovery correction, then create only verified
+per-attempt receipts. Do not request another covered quarantine exception. Preserve
+historical SQLite records and exact old18 receipt. No actual pending owner decision.
 
 Then fresh same-provider Codex flight task via normal delegated browser, new consent/
-plan/run bindings. Prepared future attempt30/revision32 is not started;27prior IDs,
+plan/run bindings. Prepared future attempt30; revision33 next is not started;27prior IDs,
 93evidence roots. Recreate old18 exact receipt if needed, never overwrite199rows.
 Do not repeat unchanged formatting failures; use fresh retained guard/terminal evidence.
 If needed replace provider formatting with supported app-owned read-only tool path,
