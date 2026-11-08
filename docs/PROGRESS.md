@@ -1,3 +1,20 @@
+## November8 — owner exception applied, new real failure diagnosed, correction installed
+
+Only18bbf5d0 second turn permanently quarantined per exact owner decision; original
+unknown accounting/history unchanged. Fresh real29 completed its first Codex search
+turn; second produced read prefix then whitespace/unclosed JSON and unknown terminal
+usage. No addon implementation or real provider case completed. Supported local
+recovery has no rollout. One policy question remains pending for this newer case.
+
+Correction cbcf8d0 installed after1553backend/25frontend/static/141focused and fresh
+separate-process native/browser19.62s verification. Final test-only assertion delta
+covered by fresh native; full production identical to tested c276228. Tagged read/
+search mapping, whitespace watchdog, independent interrupt reserve, exact diagnostics.
+All199 history rows match;31tasks readable; LAN/TLS/browser/isolation gates pass,
+model/auth unchanged, scratch empty. No further provider request. Existing unknown
+still correctly blocks admission; generic quarantine not enabled. Full scope remains.
+Exact bound records: C/outcome-cbcf8d0/offline-verification.json and deployment32.
+
 # November8: actual whitespace failure captured; cancellation reserve corrected
 
 Fresh29 firstCodexturn31501tokens completed, second emitted18893bytes with long

@@ -1,3 +1,22 @@
+# Current November8 — installed correction, real acceptance unfinished
+
+Installed cbcf8d0 passed controlled separate-process Codex bug/read-search/native
+journeys, 1553backend/25frontend/static checks and installed protection/history gates.
+All four choices and both eligible pre-generation directions have controlled evidence
+retained through the bound verification lineage. No real flight-path repair or any
+of the four required real supporting provider cases has completed. A8 is not complete.
+
+The owner approved only old18bbf5d0 second-turn quarantine, preserving unknown usage.
+Fresh Codex investigation completed one source-search turn, then a new whitespace
+formatter failure left eb72eb02 second turn without terminal/usage acknowledgement.
+Supported local thread recovery found no rollout; remote outcome remains unknown.
+Installed correction adds explicit-tag read/search mapping, whitespace watchdog,
+independent interrupt read reserve and exact diagnostics; no partial output accepted.
+New generation is held on the already-presented guarded planning-quarantine decision;
+no generic policy is active. Original history/accounting and all safeguards remain.
+See CONTINUATION.md and CURRENT_STATUS.md for current evidence and exact candidate.
+Earlier dated entries below are historical and do not describe current completion.
+
 # Current November7 continuation —20:15 UTC
 
 Installed5442405 passes offline/installed history/network/isolation gates. Fresh
