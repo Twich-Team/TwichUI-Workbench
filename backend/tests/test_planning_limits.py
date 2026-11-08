@@ -146,3 +146,30 @@ def test_shared_codex_observation_check_uses_bound_and_actual_reported_values(mo
             limits.codex_observations(None,'current',usage,bug=True,planning=True)
     else:
         assert limits.codex_observations(None,'current',usage,bug=True,planning=True)==16
+
+
+@pytest.mark.parametrize('fault',[None,'used_bool','remaining_bool','reset','total','exhausted','negative'])
+def test_followup_cannot_reset_or_expand_the_original_request_bound(fault):
+    from workbench.planning_limits import operation_request_bound
+    consent=dict(current(),investigation_version=10,max_local_requests=16,
+        max_codex_requests=16,max_total_model_requests=16,codex_request_deadline_seconds=300)
+    followup=dict(budget_version=2,consumed_requests=5,remaining_requests=11,max_total_requests=16)
+    if fault=='used_bool':
+        followup['consumed_requests']=True
+    if fault=='remaining_bool':
+        followup['remaining_requests']=True
+    if fault=='reset':
+        followup['remaining_requests']=16
+    if fault=='total':
+        followup['max_total_requests']=32
+    if fault=='exhausted':
+        followup.update(consumed_requests=16,remaining_requests=0)
+    if fault=='negative':
+        followup.update(consumed_requests=-1,remaining_requests=17)
+    payload=dict(local_planning_receipt=consent,bug_followup=followup)
+    if fault:
+        with pytest.raises(ValueError):
+            operation_request_bound(payload)
+    else:
+        assert operation_request_bound(payload)==11
+        assert operation_request_bound(dict(local_planning_receipt=consent))==16

@@ -167,7 +167,7 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
           onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-with-local-fallback':'codex-once'})}/><span>Allow one switch to local Qwen if Codex is unavailable or reaches its included allowance reserve before generation</span></label>
       </>}
     </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
-    {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. Local Qwen can use up to eight requests within thirty minutes to inspect source, propose a plan and correct a rejected proposal. Each request has its own five-minute timeout. It cannot edit files or publish. If a real-world detail is missing, Workbench may ask for one reply and separate permission for a follow-up with the same provider.</p>}
+    {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. The selected provider shares up to sixteen requests across the investigation and its follow-up to inspect source, propose a plan and correct a rejected proposal. Each phase has a thirty-minute timeout; each request has a five-minute timeout. It cannot edit files or publish. If a real-world detail is missing, Workbench may ask for one reply and separate permission for a follow-up with the same provider.</p>}
     <p className="detail-copy">Choose “Does not change the interface” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. {bugWork?'Permission expires after 45 minutes; the investigation runs for at most 30 minutes.':'Permission expires after 30 minutes.'} Fallback applies only to planning before generation starts. Failed, partial or uncertain generation stops for review. Review the plan and approve the run separately. The run keeps the provider that made the plan.</p>
   </div>}
 </fieldset>
@@ -229,7 +229,7 @@ export function IntakeDetail() {
           expectation={data.original.regression_tests?.acceptance[Number(exampleNumber)-1] || 'Add the missing example'}
           busy={blocked} send={sendAnswer}/>
         <details><summary>Advanced example format</summary><p>{clarification}</p>
-          <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/>{bugInvestigation&&<p>Sending this reply allows one more read-only investigation with the same provider. Any reply and relevant source excerpts may be sent to that provider. A repair still requires approval.</p>}<Button disabled={blocked || !clarificationInput.trim()}>{bugInvestigation?'Send reply and allow follow-up':'Send information'}</Button></form>
+          <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/>{bugInvestigation&&<p>Sending this reply continues the read-only investigation with the same provider, using the task’s remaining request allowance. Any reply and relevant source excerpts may be sent to that provider. A repair still requires approval.</p>}<Button disabled={blocked || !clarificationInput.trim()}>{bugInvestigation?'Send reply and allow follow-up':'Send information'}</Button></form>
         </details>
       </> : <>
         <p className="question-text">{suggestedFiles.length?'Workbench needs to know which existing test covers the behavior you described. Choose a file only if it fits your request.':clarification}</p>
@@ -240,7 +240,7 @@ export function IntakeDetail() {
           </select>
           <Button disabled={blocked || !suggestedFiles.includes(pickedFile)}>Use this test</Button>
         </form>}
-        <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/>{bugInvestigation&&<p>Sending this reply allows one more read-only investigation with the same provider. Any reply and relevant source excerpts may be sent to that provider. A repair still requires approval.</p>}<Button disabled={blocked || !clarificationInput.trim()}>{bugInvestigation?'Send reply and allow follow-up':'Send information'}</Button></form>
+        <form onSubmit={e=>{e.preventDefault();sendAnswer(clarificationInput);}}><label htmlFor="clarification">Your answer</label><textarea id="clarification" required maxLength={1600} value={clarificationInput} onChange={e=>setClarification(e.target.value)}/>{bugInvestigation&&<p>Sending this reply continues the read-only investigation with the same provider, using the task’s remaining request allowance. Any reply and relevant source excerpts may be sent to that provider. A repair still requires approval.</p>}<Button disabled={blocked || !clarificationInput.trim()}>{bugInvestigation?'Send reply and allow follow-up':'Send information'}</Button></form>
       </>}
     </section>}
     {waiting&&<p role="status" className="soft-callout">{waiting.message}</p>}

@@ -348,7 +348,13 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 raise ValueError('Human scope or proposal changed before scenario generation; review the current request.')
             def inspect_source(policy):
                 if bug:
-                    return bug_investigation.context(original['payload'], feedback, policy)
+                    continuation=job['payload'].get('bug_followup',{})
+                    packet=bug_investigation.context(original['payload'], '' if continuation else feedback, policy)
+                    frozen=continuation.get('source_scope')
+                    if frozen and (packet['base']!=frozen['base'] or
+                            {f['path']:f['sha256'] for f in packet['files']}!=frozen['files']):
+                        raise ValueError('The continuation source scope changed; no new source was transmitted.')
+                    return packet
                 base_contract = prepare(original['payload'], feedback)
                 if not base_contract['resolved_base']:
                     raise ValueError('Workbench could not verify the configured source checkout for planning.')
@@ -438,7 +444,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             if bug and getattr(adapter_used, 'source_investigation', False):
                 adapter_used.request_seconds = job['payload'].get('local_planning_receipt', {}).get(
                     'codex_request_deadline_seconds', codex_provider.SECONDS)
-            from workbench.planning_limits import request_bound
+            from workbench.planning_limits import operation_request_bound
             from workbench.planning_response import create_evidence
             evidence_schema = schema
             if bug and packet.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'} and (isinstance(adapter_used, LocalProvider) or getattr(adapter_used, 'source_investigation', False)):
@@ -453,8 +459,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     from workbench.bug_source_planning import generate as investigate
                     raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
                         feedback, provider_stopped, model_selection.model, engine=engine,
-                        max_requests=request_bound(
-                            job['payload'].get('local_planning_receipt',{})))
+                        max_requests=operation_request_bound(job['payload']))
                     inspection_packet = packet
                 elif codex_route or not model_selection:
                     raw, model, basis = adapter_used.generate(wire, schema)
@@ -504,7 +509,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         from workbench.bug_source_planning import generate as investigate
                         raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
                             feedback, provider_stopped, target, engine=engine,
-                            max_requests=request_bound(job['payload'].get('local_planning_receipt',{})))
+                            max_requests=operation_request_bound(job['payload']))
                         inspection_packet = packet
                     else:
                         raw, model, basis = adapter_used.generate(wire, schema)
@@ -515,7 +520,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         from workbench.bug_source_planning import generate as investigate
                         raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
                             feedback, provider_stopped, target, engine=engine,
-                            max_requests=request_bound(job['payload'].get('local_planning_receipt',{})))
+                            max_requests=operation_request_bound(job['payload']))
                         inspection_packet = packet
                     else:
                         raw, model, basis = adapter_used.generate(wire, schema, expected_model=target)

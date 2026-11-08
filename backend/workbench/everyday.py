@@ -280,6 +280,15 @@ def check_planning(c, original, job=None):
                 or followup['binding'] != binding or followup['route'] != approved(c, original)
                 or data.get('scenario_generation_claim')):
             raise ValueError('The follow-up no longer matches the approved investigation.')
+        if followup.get('budget_version')==2:
+            from workbench.planning_limits import followup_budget
+            initial=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==original['id'],
+                planning_jobs.c.kind=='planning',planning_jobs.c.revision==1,
+                planning_jobs.c.status=='completed')).mappings().first()
+            if not initial:
+                raise ValueError('The original investigation is unavailable')
+            if any(followup.get(k)!=v for k,v in followup_budget(c,initial).items()):
+                raise ValueError('The continuation source or consumed accounting changed')
         expected = followup
     elif claimed:
         raise ValueError('The approved planning operation has already been claimed. Start a new task with updated details.')

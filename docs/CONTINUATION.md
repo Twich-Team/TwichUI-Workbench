@@ -1,64 +1,88 @@
-# Continuation — verified November 8, 2026, 18:05 UTC
+# Continuation — verified November 8, 2026, 18:52 UTC
 
-Following the Project Working Philosophy: own and continue the full outcome. No owner
-renewal or campaign cap applies. Read the exact three authoritative root documents,
-AGENTS.md and the linked standing source/billing/recovery decisions. Historical
-handoff snapshots are preserved unchanged in [history](history/continuation-through-20261108-1739.md);
-they are not active status or additional approval gates.
+Following the Project Working Philosophy: standing autonomous delivery continues;
+no campaign clock, attempt/revision allocation or renewal gate applies. Historical
+records and all independent access, billing, disclosure, recovery and verification
+protections remain. Root owner-supplied documents are authoritative and unchanged.
+Earlier handoff preserved in history/continuation-through-20261108-1805.md.
 
-## Actual installed app
+## Current actual state
 
-Commit37d88f28057c4658a900a084efba323355c3b168;
-treeeb24b3d2a7b52f6e2c811a979253a179e48d5e32;
-seal28f5316bbfe2aa044ce4342bd5981619d94f867d9bf937a09d0124fa9f0600fe.
+Installed commit8fe20f8ce714366ee236b51c83e8fa4753baad5c,
+tree36a5b0b211b64666f1c0519bce37cec2244b2048,
+sealbce012b31fa9924768d58b40f5b9062d0714022e3fcd304ab1bcee19e6b90b71.
 C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
-R=C/outcome-37d88f2;
-S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-37d88f2.
-R/deployment-44-verified.json and post-install-output.log bind successful installation,
-original79/latest240-row copies, all41normalhistory reads/listing, original18 plus
-five standing recovery receipts, TLS/LAN/browser/firewall/5isolation/connectorpeer gates.
-Four workbench-everyday-{api,worker,codex,lan} services active/disabled until functional
-acceptance. Approved http://127.0.0.1:9487 and https://10.0.0.9:9487, trusted10.0.0.0/24,
-no client cert/passphrase, public/internal-service exposure forbidden. Model3300469,
-auth/context/8765 unchanged. Headroom28112248832bytes/scratch0; original stores/archives
-and unique evidence retained.1GiB evidence value is a retention trigger, not a delivery
-cap (actual everyday.housekeep/require_room verified). Existing scoped admin grant
-expiresNov13, helperSHA1fd4a561188560242d5cb5df9bd583d8c922cfa4282e4bd1e46b8dca04bc3afb.
+R=C/outcome-8fe20f8;
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-8fe20f8.
+Deployment45 verified original79/latest245-row history cutover, all42 normal intake
+reads, original18 plus five standing recovery receipts, approved TLS/LAN/browser,
+firewall, five isolation checks and connector peer rejection. All four actual
+workbench-everyday-{api,worker,codex,lan} units active (checked18:38UTC).
+Addresses http://127.0.0.1:9487 and https://10.0.0.9:9487; trusted10.0.0.0/24,
+no client certificate/passphrase, no public/internal-model-service exposure.
 
-## Current work — no provider active
+Real41 intake2efd507a-2812-4ab1-bfbe-cb40eccfde14,
+modelb3b60cc8-0359-4800-bc83-36abd22298c5,
+joba2661f73-965a-4645-8577-00510f379dd7 is SETTLED waiting_for_information.
+Five completed Codex turns;353455known tokens (351237prompt+2218completion).
+Actual source reuse produced first-turn diagnosis, eliminating repeated ten reads
+and unnecessary SetEnabled-definition disclosure question. No addon implementation
+or independent real behavior pass; zero of four required real-provider cases passed.
+Latest history250rows/schema0012/28tables SHA
+2425601e00d0d4ce730b738a584dbd002435f82100129e6d1f6ce47d4d7b4bad.
+R/attempt-41-accounting.json and outcome-ledger retain accounting. Codex89starts,
+84completed turns/85reported receipts/4historical missing-final receipts,
+4349777known tokens. Qwen89starts unchanged. No active provider operation.
 
-Real40 intakecb69da85-c88d-4ecd-be63-bd1fceced841/model566f0b0f-aece-4c12-9b1b-d9f779984430/
-job554581c8-d998-41a4-93ad-dd773bc2be64 settled after10COMPLETED Codexturns with
-594080known tokens. App saved a question/proposal, no addon implementation. Driver83945
-finishedheld. Question asks to disclose Switches.lua for SetEnabled, but local verification
-finds that definition in Core.lua; selected test_nav.lua154/155 already shows/asserts
-R:SetEnabled("navigation",true). No extra private disclosure is necessary solely to
-repeat that existing call. No source permission was expanded or request secretly answered.
-Latest245rows SHA6ac27a234b84df770c1afbd90c8366b957e414be0c7b6618c59fdf343297a845;
-original stores/240-row cutover preserved. R/attempt-40-accounting.json and ledgerupdated.
-Codex84starts/79completed/80reportedreceipts/4missinghistoricalfinal,3996322known tokens;
-Qwen89starts unchanged. No real checked repair and zeroof4real supporting casespassed.
+One genuine product question was asked asynchronously: save learned flight paths
+per character across reloads, refreshing on every flight-master visit (recommended),
+or forget them each session until another visit? NO ANSWER RECEIVED as of18:52UTC.
+Do not assume the recommendation accepted or send dependent live work. Continue
+independent local engineering; do not ask duplicate permission.
 
-Connected local changes (currentlyuncommitted): source_interface now supplies bounded
-exact call examples from selected committed tests, including receiver declarations,
-distributed across files; ignores comments/strings/nested/private file/process APIs.
-Guidance distinguishes an existing exact test call from inventing a method/signature;
-independent behavior/authority checks unchanged. completed_packet cache re-reads only
-same-report/current-base/current-selected-path Gitfacts from completed accounted jobs;
-never old questions/diagnoses/plans/approvals. Freshpolicy/sourcepermission retained,
-changed/uncertain/out-of-scope cache rejected. This saves repeating ten source turns.
-C/public-call-actual-context-proof-v2/proof.json confirms actualfirstwire218591bytes,
-144436sourcechars/0omissions, exacttestcall154 andR/c declarations, onlysame12files,
-sourcecache re-readfromreal40, no prioroutcome/modelcall/socket/historywrite/patch.
-Initialproofcaught example-list crowding (wrongfile filled16); corrected fair selection,
-failedlogretained.111focused checks and static/contracts/build/schemaPASS.
-Full C/public-call-cache-full-tests.log exec4019 RUNNING (expected1664/6skip+25);
-ALL4true-confined controlled browser modes C/public-call-cache-kernel-native.log
-exec16483 RUNNING (unitworkbench-outcome-public-call-cache-process). No assetbuild
-concurrently. Finish/fix appropriate checks before activation. Existing installed
-37verification below remainsvalidforinstalledcode, notfornewcontextlogic.
-No owner action needed. If the tested-call alternative still requires trulynewprivate
-source after real evaluation, investigate actualnecessity and ask exactpermissiononce.
+## Installed evidence versus work in progress
+
+Installed8fe complete suite1664backend passed/6default skips and25frontend passed
+(C/public-call-cache-full-tests.log); static/contracts/build/schema passed.
+All four true-confined controlled browser modes passed107.20seconds (local/Codex,
+data/program), concurrent activity and restart checks; native unit collected,
+579MiB peak/swap0. Actual-context offline proof218591bytes/144436sourcechars,
+zero omissions, exact12authorized source files and public test calls/declarations,
+no provider call/history write. These are controlled/offline passes, not four real
+provider acceptance passes. R/offline-verification.json binds exact logs and seal.
+Two historical readiness/delegated-driver opt-ins retain prior lineage, not new passes.
+
+Uncommitted connected clarification-continuation changes currently preserve the
+initial receipt, subtract used requests (real41:5used/11remaining of16), freeze source
+selection to original committed paths/hashes/base, retain same provider/no fallback,
+and disclose remaining allowance in the reply form. No schema/table change.
+First focused run83passed/1failed found a binding mismatch; canonical feedback/command
+binding corrected. Final56focused checks pass, including normal reply-to-plan and
+no-second-call denials for changed parent usage, remaining budget or source scope.
+Shared settled_planning_chain independently keeps both phase receipts and total count;
+acceptance policy now reviews the exact proposal revision/owner feedback and never
+collapses two planning usages into one dictionary entry. Private clarification receipt
+is candidate/seal/approval bound, same-task, single-reply; normal browser form, fresh
+command and separate later plan/run decisions retained. No answer receipt created.
+
+Affected Codex/program true-confined separate API/worker/browser journey passed
+20.37seconds (unit21.190s/523.2MiB/swap0), two ordinary controlled bugs/restarts/concurrent
+polling. New first bug exercises genuine question then same-task reply, plan and checked
+implementation. Two failed controlled rehearsals preserved: driver tried old question's
+disabled approval and then raced nonblocking visibility. The existing explicit Open
+current proposal UI navigation is now awaited. Application gates were not weakened.
+C/clarification-kernel-native-v{1,2,3}-*.log preserve evidence; finalv3 passed.
+Desktop/phone screenshots inspected and saved C/clarification-{desktop,phone}.png.
+Static/contracts/build/schema passed. Full backend/frontend suite exec19019 progressing
+(C/clarification-chain-full-tests-v1.log); finish/fix before sealing/deployment.
+C/clarification-real41-offline-budget-proof.json rechecks actual live records READ ONLY:
+5used/11remaining of16, same12authorized sources/base, no provider call or history write.
+
+Next deployment46 should preserve SAME real41 intake/task (not replay report or
+first five turns), use latest250 history, keep current model attempt out of prior-case
+list, and fresh bindings/seal. Read source/approval/browser policy before changing.
+
+## Retained implementation and recovery reference (earlier status is historical)
 
 ## What changed and what was verified
 

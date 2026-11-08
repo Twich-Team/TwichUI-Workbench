@@ -163,7 +163,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                           provider=case_provider, reason=None, model="pilot-qwen38-27b" if case_provider=="local" else "gpt-6.1-sol",
                           evidenceSha=digest(packet["files"]), writablePaths=answer["plan"]["writable_paths"],
                           reviewed=BugPlan.model_validate(answer["plan"]).model_dump(mode="json"),
-                          client_case=client_case))
+                          client_case=client_case,clarification=case_provider=="codex" and program_mode and not client_case))
     policy = dict(base=git(source, "rev-parse", "HEAD").strip(), limits=LIMITS, cases=cases,
                   models=dict(local="pilot-qwen38-27b", codex="gpt-6.1-sol"),
                   budget=TaskBudget(activate_once=True, offer_id="00000000-0000-0000-0000-000000000000",
@@ -191,6 +191,8 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 answer=dict(finding=finding, draft=dict(question='A question.',limitation='Conflicting outcome.'))
             elif fault:
                 answer=dict(finding='PRIVATE_REJECTED_CONTENT'*30,draft=dict(question='A specific question.'))
+            elif case.get('clarification') and not packet.get('owner_reply'):
+                answer=dict(finding=finding,draft=dict(question='Should normalization happen each time?'))
             elif ((case['client_case'] and len([w for w in packet.get('source_memory', {}).get('read_windows', [])
                     if w['path'] == CLIENT_SOURCE]) < 2) or (not case['client_case'] and
                     not packet.get('inspection_result', {}).get('search_matches'))):
@@ -380,7 +382,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     assert actors[0] != actors[1] != os.getpid()
     expected = [('fixture-fault', 'diagnosis'), ('fixture-conflict', 'diagnosis')]
     for case in cases:
-        expected += [(case['choice'], 'diagnosis')]*(3 if case['client_case'] else 2)
+        expected += [(case['choice'], 'diagnosis')]*((3 if case['client_case'] else 2)+int(case.get('clarification',False)))
         expected += [(case['choice'], 'planning')]*2
         expected.append((case['choice'], 'self-review'))
         if program_mode:

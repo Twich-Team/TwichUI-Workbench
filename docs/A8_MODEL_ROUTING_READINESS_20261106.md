@@ -1,33 +1,37 @@
-# Current readiness — November 8, 2026, 18:05 UTC
+# Current readiness — November 8, 2026, 18:52 UTC
 
-Following the Project Working Philosophy: A8 and the agreed functional outcome remain
-unfinished. This update supersedes the status statements below; older receipts remain
-historical evidence. Current bindings are in CONTINUATION.md and CURRENT_STATUS.md.
+Following the Project Working Philosophy: A8 and the complete functional outcome
+remain unfinished. Older entries below and the saved history snapshot are historical.
+See CONTINUATION.md for exact installed identities and receipts.
 
-- Implemented: Qwen alone, signed-in Codex alone, explicit bounded pre-generation
-  fallback in both directions, saved selections, shared accounting/bounds and approval
-  fencing. Generation/partial/uncertain outcomes do not trigger blind switching.
-- Controlled evidence: provider/worker/browser checks cover both data and program
-  workflows, including realistic usage, cancellation, duplicate protection and recovery.
-  New tested-call/source-cache guidance has focused/static/actual-request offline proof;
-  complete suites/confined browser checks are running. These are not real-provider passes.
-- Real evidence: signed-in Codex has completed genuine scoped investigation turns;
-  real40 completed10with receipts and saved a clarification. Context retention and
-  corrected observation guards now work in real execution. No addon implementation,
-  independently checked real repair or any of the4required supporting cases has passed.
-- Everyday app: installed37d88f2 preserves history and both approved addresses. Eligible
-  existing Lua regression/bug workflows are connected, but the real bug journey still
-  needs an acceptable plan, authorized repair, original/candidate checks and result.
-  General features/inspections/simulator/PR/full initial-product claims remain unproved.
-- Billing remains signed-in included allowance only; no API/extra credits/purchases/
-  reload. Owner-reported zero credits/reloadOff and accepted snapshot policy are not a
-  permanent account lock or per-turn included-only guarantee. Usage is observed tokens,
-  never invented dollar billing. Unknown historical outcomes/usage stay separately held.
+- Implemented and controlled-tested: Qwen alone, signed-in Codex alone, both explicit
+  bounded pre-generation switches, saved routing, shared accounting and approval
+  fencing. Partial or uncertain generation cannot silently switch providers.
+- Installed:8fe20f8 with1664backend/25frontend and all four confined controlled browser
+  modes passed. Tested-call source context and same-report committed-source reuse are
+  installed; original history, recovery receipts and both approved addresses verified.
+- Real Codex evidence: real41 completed five turns with complete usage, reached a
+  source-grounded diagnosis and saved a genuine character-persistence clarification.
+  Repeated source-read/SetEnabled-disclosure obstruction did not recur. No addon
+  implementation or independent real behavior pass. Zero of four required supporting
+  real-provider cases passed; controlled passes do not satisfy these cases.
+- Current engineering: normal clarification continuation retains original receipt,
+  same provider, original source paths/hashes/base and remaining task-wide requests.
+  56focused checks and the affected Codex/program true-confined browser journey pass,
+  including reply, new-plan navigation, separate approvals, checked result, concurrent
+  polling and restart. Desktop/phone reply screens inspected. Full suites running.
+  These changes are local, not installed; the live task has not been continued.
+- Owner persistence-versus-session choice is pending. No new access, spending or
+  engineering renewal requested. The task is settled and no provider is running.
+- Billing and unknown historical execution remain honestly bounded: included sign-in
+  only, no API/credits/purchases/reload, accepted snapshots are not a per-turn billing
+  lock. Original uncertain outcomes and unknown usage remain immutable/quarantined;
+  standing recovery is implemented and applied, not merely a proposed note.
 
-No owner access decision is currently required: the latest request for Switches.lua
-was investigated locally. Its actual method definition is elsewhere, and the existing
-permitted tests already establish the exact call form. No additional file was disclosed;
-the app context correction is being evaluated before asking for unnecessary permission.
+Everyday regression and supported offline Lua bug workflows are connected, but the
+real repair, required provider cases, durable real result and ordinary next bug still
+need demonstration. Features/inspections/simulator work/PR/full original scope are
+unfinished. No live-game verification or live-addon installation is claimed.
 
 ---
 

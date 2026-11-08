@@ -445,12 +445,16 @@ def clarify(engine, identity, body):
                 raise HTTPException(409, 'The investigation already used its one follow-up.')
             grounding = initial['payload'].get('task_contract', {}).get('scenario_grounding', {})
             try:
+                from workbench.planning_limits import followup_budget
+                continuation=followup_budget(connection,initial)
+                next_input['local_planning_receipt']=initial['payload']['local_planning_receipt']
                 route = provider_routes.approved(connection, row)
                 next_input['bug_followup'] = dict(
-                    binding=digest(dict(original=row['payload'], revision=row['revision'], **next_input)),
+                    binding=digest(dict(original=row['payload'], revision=row['revision'],
+                        feedback=body.text, clarification_id=str(body.command_id))),
                     expires_at=everyday.planning_receipt(row['payload'], now())['expires_at'],
                     route=route, provider=grounding.get('basis'),
-                    fallback_reason=grounding.get('fallback_reason'))
+                    fallback_reason=grounding.get('fallback_reason'),**continuation)
             except ValueError as error:
                 raise HTTPException(409, str(error)) from None
         elif body.continue_investigation:

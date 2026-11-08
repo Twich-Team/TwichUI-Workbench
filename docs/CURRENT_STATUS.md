@@ -1,16 +1,20 @@
-# Current status — real Codex transport stable; tested-call context being verified
+# Current status — Codex reaches a real product question; repair not yet implemented
 
-Following the Project Working Philosophy:37d88f2 remains installed and healthy at
-both approved addresses. Real40 completed ten Codex turns and saved a clarification,
-not a repair. No addon implementation/independent real behavior pass; zero of four
-required provider cases passed. Latest245rows and all previous evidence preserved;
-no provider active, historical unknowns unchanged, no owner decision needed.
+Following the Project Working Philosophy: verified8fe20f8 is installed, all four
+services active at both approved addresses. Real41 completed five Codex turns with
+complete accounting and saved a persistence-versus-session clarification. Source
+reuse and committed public-call context removed the previous repeated-read/source
+scope obstruction. No addon implementation or real independent behavior pass;
+zero of four required real-provider cases passed. No provider currently running.
 
-The clarification unnecessarily sought a method definition outside disclosure scope.
-An exact working call form is already in selected committed tests. Generic context
-now surfaces tested calls and receiver declarations, and re-reads verified prior source
-facts without carrying forward old model outcomes or approvals. Actual outgoing-request
-proof keeps only the12approvedfiles, retains allsource and leaves history unchanged.
-Focused/static checks pass; complete suites and all4confined controlled browser modes
-are running before installation and fresh real evaluation. Continue the full outcome.
-See [handoff](CONTINUATION.md); checkpoints and old campaign limits are not stop points.
+The owner persistence choice is pending; do not infer an answer. Meanwhile local
+work fixes normal clarification continuation to retain original source disclosure,
+provider and remaining task-wide allowance. 56focused checks and the affected confined Codex/program browser journey pass,
+including a reply, new plan, separate approvals, checked result and restart. The
+driver now awaits the existing new-proposal navigation control. Full suites are
+running; local continuation changes are not installed yet.
+Installed full1664backend/25frontend and all four confined controlled browser modes
+passed; these do not substitute for real-provider/product acceptance. Historical
+unknown turns remain quarantined with unknown usage unchanged. Latest250 history
+rows preserved. See [handoff](CONTINUATION.md) for exact evidence and continuation.
+Standing authority remains active; checkpoints and superseded caps are not stops.

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {dirname, join} from 'node:path';
 import {chromium} from '@playwright/test';
 import {runJourney, checkedProgress} from '../scripts/browser_acceptance.mjs';
 
@@ -10,7 +11,7 @@ const fault = conflict || index === 'fault';
 const candidate = fault ? {...policy.cases[0],request:{...policy.cases[0].request,
   title:policy.cases[0].request.title+(conflict?' · controlled conflicting outcomes':' · controlled malformed response')}} : policy.cases[Number(index)];
 const browser = await chromium.launch({args:['--disable-dev-shm-usage','--disable-background-networking']});
-const context = await browser.newContext({serviceWorkers:'block'});
+let context = await browser.newContext({serviceWorkers:'block'});
 const observer = await browser.newContext({serviceWorkers:'block'});
 let polling=false, statusReads=0, observerRead=Promise.resolve();
 const poller=setInterval(()=>{
@@ -27,7 +28,34 @@ let submitted;
 const events = [];
 try {
   const other = await observer.newPage();
+  let clarification;
+  if (candidate.clarification && !fault) {
+    const preparationEvents=[];
+    await assert.rejects(runJourney(context, origin, policy, candidate, {
+      blockDeadline:Date.now()+140000,minimumRunMs:40000,preparationMs:55000,
+      planningReserveMs:1000,planningMs:7000,uiMs:7000,pollMs:100,
+      async controlsReady(){}, async beforeAction(action){assert.equal(action,'submit');},
+      record(event,detail){preparationEvents.push({event,...detail});},
+    }));
+    const identity=preparationEvents.find(e=>e.event==='response'&&e.action==='submit').id;
+    const item=await observer.request.get(origin+'/api/intake/'+identity).then(r=>r.json());
+    assert.equal(item.status,'waiting_for_information');
+    assert.equal(item.provider_activity.length,1);
+    assert.equal(item.provider_activity[0].outcome,'completed');
+    await other.goto(origin+'/intake/'+identity);
+    await other.getByLabel('Your answer',{exact:true}).waitFor();
+    await other.screenshot({path:join(dirname(path),'clarification-desktop.png'),fullPage:true});
+    await other.setViewportSize({width:390,height:844});
+    await other.screenshot({path:join(dirname(path),'clarification-phone.png'),fullPage:true});
+    await other.setViewportSize({width:1280,height:720});
+    const saved=await observer.request.get(origin+'/api/models').then(r=>r.json());
+    clarification={intake:identity,question:item.proposals[0].id,question_binding:item.proposals[0].binding,
+      policy_revision:saved.policy.revision,answer:'Normalize it each time.'};
+    await context.close();
+    context=await browser.newContext({serviceWorkers:'block'});
+  }
   await runJourney(context, origin, policy, candidate, {
+    clarification,
     blockDeadline:Date.now()+140000, minimumRunMs:40000, preparationMs:55000,
     planningReserveMs:1000, planningMs:7000, uiMs:7000, pollMs:100,
     async controlsReady() {},

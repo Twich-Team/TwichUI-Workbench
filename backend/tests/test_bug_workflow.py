@@ -8,7 +8,7 @@ import pytest
 from sqlalchemy import select
 
 from workbench import bug_evidence, intake, real_execution, worker
-from workbench.db import engine_for, model_attempts, real_execution_grants, real_publications
+from workbench.db import engine_for, model_attempts, planning_jobs, real_execution_grants, real_publications
 from test_everyday import installed, save_codex_policy, write_policy  # noqa: F401 - pytest fixture
 from test_verification_profiles import BUGGY, CORRECT, PRODUCTION, TEST, git
 
@@ -294,9 +294,81 @@ def test_followup_requires_explicit_bound_consent_and_one_settled_route(
     reply['continue_investigation'] = True
     assert client.post(url, headers=headers, json=reply).status_code == 200
     assert client.post(url, headers=headers, json=reply).status_code == 200
+    with store.connect() as c:
+        jobs=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==item['id'])
+                       .order_by(planning_jobs.c.revision)).mappings().all()
+        assert len(jobs)==2
+        original, continuation=(job['payload'] for job in jobs)
+        assert continuation['local_planning_receipt']==original['local_planning_receipt']
+        followup=continuation['bug_followup']
+        assert (followup['consumed_requests'],followup['remaining_requests'],
+                followup['max_total_requests'])==(1,15,16)
+        assert followup['source_scope']==dict(base=original['bug_inspection_packet']['base'],
+            files={f['path']:f['sha256'] for f in original['bug_inspection_packet']['files']})
     assert worker.tick(store)
     assert len(planner.calls) == 2
+    assert [f['path'] for f in planner.calls[0]['files']]==[
+        f['path'] for f in planner.calls[1]['files']]
     assert not worker.tick(store)
     result = intake.view(store, item['id'])
     assert result['status'] == 'failed'
     assert client.post(url, headers=headers, json={**reply, 'command_id': str(uuid4())}).status_code == 409
+
+
+@pytest.mark.usefixtures('installed')
+@pytest.mark.parametrize('fault',[None,'parent_usage','remaining_budget','source_scope'])
+def test_clarification_to_real_plan_preserves_accounting_and_read_scope(
+    client,headers,store,monkeypatch,fault,
+):
+    from workbench import bug_investigation
+    from workbench.planning_provider import LocalProvider
+    from workbench.planning_limits import settled_planning_chain
+    enable_bugs(monkeypatch)
+    item=client.post('/api/intake',headers=headers,json=report()).json()
+    planner=BugPlanner(dict(finding='The committed code can reproduce the report.',plan=None,
+        question='Should the name be normalized every time?',limitation=None))
+    def generate(self,packet,schema,expected_model):
+        result,_,_=planner.generate(packet,schema)
+        self.diagnostics=dict(generation_state='finished',accounting_state='complete',
+            usage=dict(units='tokens',values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))
+        return result,expected_model,'local'
+    monkeypatch.setattr(LocalProvider,'generate',generate)
+    assert worker.tick(store)
+    item=client.get('/api/intake/'+item['id']).json()
+    reply=dict(command_id=str(uuid4()),revision=1,text='Normalize it each time.',continue_investigation=True)
+    assert client.post('/api/intake/'+item['id']+'/clarification',headers=headers,json=reply).status_code==200
+    planner.answer=response()
+    if fault in ('parent_usage','remaining_budget'):
+        with store.begin() as c:
+            if fault=='parent_usage':
+                parent=c.execute(select(model_attempts).where(model_attempts.c.task_id==item['id'])).mappings().one()
+                usage={**parent['usage'],'requests_observed':2}
+                c.execute(model_attempts.update().where(model_attempts.c.id==parent['id']).values(usage=usage))
+            else:
+                job=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==item['id'],
+                    planning_jobs.c.revision==2)).mappings().one()
+                payload={**job['payload'],'bug_followup':{**job['payload']['bug_followup'],'remaining_requests':16}}
+                c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload=payload))
+    if fault=='source_scope':
+        original=bug_investigation.context
+        def changed(*args,**kwargs):
+            packet=original(*args,**kwargs)
+            packet['files'][0]['sha256']='0'*64
+            return packet
+        monkeypatch.setattr(bug_investigation,'context',changed)
+    assert worker.tick(store)
+    result=client.get('/api/intake/'+item['id']).json()
+    if fault:
+        assert result['status']=='failed'
+        assert len(planner.calls)==1
+        assert not result['tasks'] and not result['decisions']
+    else:
+        assert result['status']=='completed',result['jobs']
+        assert result['revision']==2 and len(result['proposals'])==2
+        assert next(p for p in result['proposals'] if p['revision']==2)['task_contract']['review_feedback']==reply['text']
+        assert len(planner.calls)==2
+        with store.connect() as c:
+            chain=settled_planning_chain(c,item['id'],2)
+            assert len(chain)==2 and sum(r['usage'].get('requests_observed',1) for r in chain)==2
+            assert chain[1]['payload']['bug_followup']['remaining_requests']==15
+    assert not worker.tick(store)

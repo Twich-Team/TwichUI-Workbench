@@ -23,16 +23,42 @@ function originalRequest(value, expected) {
   exact(submitted, expected, 'intake request changed');
 }
 
-export function reviewPlan(item, candidate, identity, revision, now) {
-  check(item.id === identity && item.revision === 1 && item.proposals.length === 1 &&
-    !item.clarifications.length && item.scope_history.length === 1, 'unexpected intake revision or history');
+export function reviewClarification(item, candidate, reply) {
+  check(candidate.request.kind === 'issue' && uuid(reply.intake) && hex(reply.question_binding) &&
+    uuid(reply.question) && typeof reply.answer === 'string' && reply.answer.trim().length > 0 &&
+    reply.answer.length <= 1600, 'clarification binding or answer unavailable');
+  check(item.id === reply.intake && item.status === 'waiting_for_information' && item.revision === 1 &&
+    item.proposals.length === 1 && item.proposals[0].id === reply.question &&
+    item.proposals[0].binding === reply.question_binding && item.proposals[0].revision === 1 &&
+    item.proposals[0].task_contract.scope_missing.length > 0 &&
+    !item.clarifications.length && !item.tasks.length && !item.decisions.length,
+  'clarification task changed or already continued');
   originalRequest(item.original, candidate.request);
-  check(Date.parse(item.created_at) <= now && now - Date.parse(item.created_at) < 30 * 60000,
+  check(item.provider_activity?.length === 1 && item.provider_activity[0].purpose === 'planning' &&
+    item.provider_activity[0].backend === candidate.provider &&
+    item.provider_activity[0].actual_model === candidate.model &&
+    item.provider_activity[0].requested_model === candidate.model &&
+    item.provider_activity[0].outcome === 'completed' && item.jobs.length === 1 &&
+    item.jobs[0].status === 'completed' && item.jobs[0].attempts === 1,
+  'clarification investigation is unsettled or provider changed');
+  return item;
+}
+
+export function reviewPlan(item, candidate, identity, revision, now, reply) {
+  const phases = reply ? 2 : 1;
+  check(item.id === identity && item.revision === phases && item.proposals.length === phases &&
+    item.clarifications.length === phases-1 && item.scope_history.length === 1, 'unexpected intake revision or history');
+  originalRequest(item.original, candidate.request);
+  if (reply) check(item.id === reply.intake && item.proposals.find(p => p.revision === 1)?.id === reply.question &&
+    item.proposals.find(p => p.revision === 1)?.binding === reply.question_binding && item.clarifications[0].text === reply.answer &&
+    item.clarifications[0].revision === 2, 'clarification history or answer changed');
+  const consentTime = reply ? item.clarifications[0].created_at : item.created_at;
+  check(Date.parse(consentTime) <= now && now - Date.parse(consentTime) < 30 * 60000,
     'planning approval expired or time unavailable');
   check(item.human_scope.visual_requirement === 'nonvisual' &&
     item.human_scope.stage === 'implementation' && item.human_scope.origin === 'human',
     'human scope changed');
-  const [plan] = item.proposals;
+  const plan = item.proposals.find(plan => plan.revision === phases);
   check(uuid(plan.id) && hex(plan.binding) && plan.revision === item.revision &&
     plan.scope_revision === item.human_scope.revision && plan.basis === 'preparation' &&
     plan.model === candidate.model && !plan.research_only, 'plan identity or provider changed');
@@ -63,12 +89,13 @@ export function reviewPlan(item, candidate, identity, revision, now) {
   exact(ground, {evidence_sha256: bug ? ground.evidence_sha256 : candidate.evidenceSha, policy_sha256: ground.policy_sha256,
     basis: candidate.provider, ...(candidate.reason ? {fallback_reason: candidate.reason} : {}),
     model_selection: {policy_revision: revision, model: candidate.model}}, 'grounding or provider route changed');
-  const [attempt] = item.provider_activity || [];
-  check(item.provider_activity?.length === 1 && attempt.purpose === 'planning' &&
-    attempt.backend === candidate.provider && attempt.requested_model === candidate.model &&
-    attempt.actual_model === candidate.model && attempt.outcome === 'completed', 'planning attempt is uncertain or unexpected');
-  const [job] = item.jobs.filter(job => job.kind === 'planning');
-  check(job?.status === 'completed' && job.attempts === 1, 'duplicate or unsettled planning');
+  check(item.provider_activity?.length === phases && item.provider_activity.every(attempt =>
+    attempt.purpose === 'planning' && attempt.backend === candidate.provider &&
+    attempt.requested_model === candidate.model && attempt.actual_model === candidate.model &&
+    attempt.outcome === 'completed'), 'planning attempt is uncertain or unexpected');
+  const jobs = item.jobs.filter(job => job.kind === 'planning');
+  check(jobs.length === phases && jobs.every(job => job.status === 'completed' && job.attempts === 1) &&
+    new Set(jobs.map(job => job.revision)).size === phases, 'duplicate or unsettled planning');
   return plan;
 }
 
@@ -213,9 +240,14 @@ export async function runJourney(context, origin, policy, candidate, options) {
   };
   try {
     const desired = candidate.reason ? 'both' : 'off';
-    const saved = await settings(desired, true);
+    const reply = options.clarification;
+    const saved = reply ? await getPolicy() : await settings(desired, true);
+    if (reply) check(!candidate.reason && saved.revision === reply.policy_revision &&
+      saved.test_fallback === 'off' && saved.providers[candidate.provider].model === candidate.model,
+    'clarification saved provider policy changed');
     await controlsReady('planning');
     const bug = candidate.request.kind === 'issue';
+    if (!reply) {
     await page.goto(origin + '/intake/new?kind=' + candidate.request.kind);
     await page.getByLabel('Title', {exact:false}).fill(candidate.request.title);
     await page.getByLabel('Description', {exact:false}).fill(candidate.request.description);
@@ -230,13 +262,30 @@ export async function runJourney(context, origin, policy, candidate, options) {
     await page.getByRole('checkbox', {name:local ? (bug ? /Allow local Qwen to investigate/ : /Allow one local Qwen request/) : (bug ? /Allow signed-in Codex to investigate/ : /Allow one signed-in Codex turn/)}).check();
     if (candidate.reason) await page.getByRole('checkbox', {name:local ?
       /Allow one switch to signed-in Codex/ : /Allow one switch to local Qwen/}).check();
+    }
     const capacity = async () => {
       exact(await getPolicy(), saved, 'saved provider policy changed');
       const work = await json('/api/local-work');
       check(work.ready && work.enabled && work.headroom_bytes >= 72 * 1048576, 'storage or worker not ready');
       return work;
     };
-    let requestId;
+    let requestId, identity;
+    if (reply) {
+      identity = reply.intake;
+      const url = "/api/intake/" + identity;
+      await page.goto(origin + "/intake/" + identity);
+      const current = reviewClarification(await json(url), candidate, reply);
+      requestId = current.original.request_id;
+      await page.getByLabel("Your answer", {exact:true}).fill(reply.answer);
+      await act("clarify", "POST", url + "/clarification", button("Send reply and allow follow-up"), async body => {
+        exact(await json(url), current, "clarification changed before reply");
+        exact(without(body, "command_id"), {revision:1, text:reply.answer, continue_investigation:true},
+          "clarification command differs from owner answer");
+        check(uuid(body.command_id), "clarification command identity missing");
+        await capacity();
+        await beforeAction("clarify", {intake:identity, clarification:reply});
+      });
+    } else {
     const opened = await act('submit', 'POST', '/api/intake', button('Submit request'), async body => {
       originalRequest(body, candidate.request);
       const work = await capacity();
@@ -247,15 +296,16 @@ export async function runJourney(context, origin, policy, candidate, options) {
       requestId = body.request_id;
     });
     check(uuid(opened.id) && opened.original.request_id === requestId, 'intake response does not match submitted case');
-    const identity = opened.id;
-    const url = '/api/intake/' + identity;
+    identity = opened.id;
     await page.waitForURL(origin + '/intake/' + identity + '?received=1', {timeout:uiMs});
+    }
+    const url = '/api/intake/' + identity;
     const readItem = () => json(url);
     const complete = await eventually(readItem, item => {
       check(['queued','investigating','completed'].includes(item.status), 'planning held or uncertain');
       return item.status === 'completed';
     }, options.planningMs ?? 150000);
-    const plan = reviewPlan(complete, candidate, identity, saved.revision, now());
+    const plan = reviewPlan(complete, candidate, identity, saved.revision, now(), reply);
     check(!complete.decisions.length && !complete.tasks.length && complete.original.request_id === requestId,
       'unexpected prior plan approval or task');
     if (bug) {
@@ -266,6 +316,11 @@ export async function runJourney(context, origin, policy, candidate, options) {
     }
     await controlsReady('implementation'); // Restore any controlled outage before approving work.
     if (candidate.reason) await page.reload();
+    // The app preserves the previously viewed revision and offers an explicit
+    // navigation control when a clarification produces a newer plan.
+    if (reply) {
+      await button('Open current proposal').click();
+    }
     await page.getByText('Add a note or request changes', {exact:true}).click();
     await page.getByLabel('Note', {exact:false}).fill(policy.note);
     const review = bug ? plan.task_contract.bug_evidence : plan.task_contract.behavioral_evidence;
@@ -309,7 +364,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
         check(work.codex_available, 'connector changed after planning');
         exact(await json(runPath), view, 'certified offer changed after review');
         const current = await readItem();
-        exact(reviewPlan(current, candidate, identity, saved.revision, now()), plan, 'plan changed before run');
+        exact(reviewPlan(current, candidate, identity, saved.revision, now(), reply), plan, 'plan changed before run');
         exact(current.tasks, prepared.tasks, 'task version changed before run');
         check(current.decisions.length === 1 && current.decisions[0].id === scope.id &&
           current.decisions[0].status === 'applied', 'reviewed approval changed');

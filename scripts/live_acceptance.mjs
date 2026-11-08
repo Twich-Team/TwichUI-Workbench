@@ -85,6 +85,20 @@ need(sha(helper) === helperSha, 'Administrator helper changed');
 const grant = JSON.parse(admin({op:'status'}));
 need(grant.expires * 1000 > (outcome ? now() : campaignOpened) + duration*minute, 'Administrator grant does not cover rollback window');
 const bug = candidate.request.kind === 'issue';
+let clarification;
+if (bug) {
+  const path=join(evidence,'bug-clarification.json');
+  try {
+    const file=lstatSync(path);
+    need(file.isFile() && realpathSync(path)===path && file.uid===process.getuid() &&
+      !(file.mode & 0o077) && file.size<4096,'Clarification receipt is not private');
+    const supplied=read(path);
+    need(supplied.version===1 && supplied.approval_reference===approvalReference &&
+      supplied.seal===seal && Date.parse(supplied.recorded_at)<=now() &&
+      now()-Date.parse(supplied.recorded_at)<30*minute,'Clarification authority changed or expired');
+    clarification=supplied.reply;
+  } catch (error) { if (error.code!=='ENOENT') throw error; }
+}
 const timing = caseTiming(bug);
 const blockDeadline = Math.min(cutoff, now() + timing.caseMinutes*minute);
 const receipt = join(evidence, choice + '.jsonl');
@@ -212,6 +226,7 @@ try {
     args:['--disable-dev-shm-usage','--disable-background-networking','--no-proxy-server']});
   const context = await browser.newContext({serviceWorkers:'block'});
   await runJourney(context, origin, policy, candidate, {
+    clarification,
     blockDeadline, now, preparationMs:timing.preparationMinutes*minute,
     reviewMs:timing.reviewMinutes*minute, minimumRunMs:timing.runMinutes*minute,
     // The app's bug investigation shares twenty minutes across source reads and
@@ -239,7 +254,7 @@ try {
       for (const role of ['api','lan','worker','codex']) installed(role,
         action === 'submit' && role === 'codex' && candidate.reason === 'unavailable' ? 'inactive' : 'active');
       // The approved controller checks effective cgroups and LAN TLS separately.
-      if (bug && action !== 'submit')
+      if (bug && !['submit','clarify'].includes(action))
         need(reviewedSha === readBugReview(data.intake, data.proposal), 'Independent bug plan review changed');
       callPolicy('admit', action, data);
     },
