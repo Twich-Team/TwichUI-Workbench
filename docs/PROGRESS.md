@@ -1,3 +1,12 @@
+# November8 05:08UTC: Codex timeout defect isolated; no repair yet
+
+FirstrealCodexturn completed31509total; secondpartialturn120stimeout lackedterminal
+receipt/identity becauseconnector immediatelykilled childafterinterrupt. Unknownfinal
+usagepreserved, no fallback/replay/implementation. Recoveryjournal/ackdrain/v9timeout
+fix passes159affected/13privacy+realpipe/nativeCodex/static checks offline. No newer
+buildinstalledyet. CODEX_TIMEOUT_RECOVERY_20261108.md defines exact historicalboundary;
+standingengineeringcontinues withoutcampaignrenewal. Broaderoutcomeunfinished.
+
 # November8 04:54UTC: verified installation; first real Codex turn complete
 
 Installed7ef79cb/seal4d458a0b..., 1502backend/25frontend/static,4native controlled bug

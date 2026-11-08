@@ -26,15 +26,25 @@ def enable(store, monkeypatch):
     )
 
 
+@pytest.mark.parametrize("consent_version", [8, 9])
 @pytest.mark.usefixtures("installed")
 def test_codex_uses_same_investigation_plan_and_review_before_normal_approval(
-    client, headers, store, monkeypatch
+    client, headers, store, monkeypatch, consent_version
 ):
     enable(store, monkeypatch)
     calls = []
 
     def generate(model, effort, prompt, schema, stop, **kwargs):
-        assert kwargs == {"input_limit": codex_provider.MAX_BUG_INPUT} and not stop()
+        assert (
+            kwargs
+            == {
+                "input_limit": codex_provider.MAX_BUG_INPUT,
+                "request_seconds": codex_provider.BUG_SECONDS
+                if consent_version == 9
+                else codex_provider.SECONDS,
+            }
+            and not stop()
+        )
         packet = json.loads(prompt.split("\nUntrusted task data:\n", 1)[1])
         calls.append(packet)
         phase = packet["investigation_progress"]["phase"]
@@ -63,6 +73,28 @@ def test_codex_uses_same_investigation_plan_and_review_before_normal_approval(
     identity = client.post(
         "/api/intake", headers=headers, json={**report(), "local_planning": "codex-once"}
     ).json()["id"]
+    if consent_version == 8:
+        from workbench.db import write_transaction
+
+        with write_transaction(store) as connection:
+            row = (
+                connection.execute(
+                    select(planning_jobs).where(planning_jobs.c.intake_id == identity)
+                )
+                .mappings()
+                .one()
+            )
+            payload = dict(row["payload"])
+            payload["local_planning_receipt"] = {
+                **payload["local_planning_receipt"],
+                "investigation_version": 8,
+                "codex_request_deadline_seconds": 120,
+            }
+            connection.execute(
+                planning_jobs.update()
+                .where(planning_jobs.c.id == row["id"])
+                .values(payload=payload)
+            )
     assert worker.tick(store)
     item = client.get("/api/intake/" + identity).json()
     assert (

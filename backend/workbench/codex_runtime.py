@@ -96,7 +96,7 @@ class CodexRuntime(Runtime):
             edit, counted = codex_provider.generate(
                 self.codex_selection['model'], self.codex_selection['effort'],
                 prompt, schema, stop=lambda: not permitted(),
-                **({'input_limit':codex_provider.MAX_BUG_INPUT} if bug else {}))
+                **({'input_limit':codex_provider.MAX_BUG_INPUT, 'request_seconds':codex_provider.BUG_SECONDS} if bug else {}))
         except codex_provider.Hold as error:
             self.provider_failure = error
             raise

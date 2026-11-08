@@ -45,7 +45,7 @@ def state(connection, identity):
     consent=payload.get('local_planning_receipt',{})
     require(diag.get('generation_state')=='partial' and diag.get('accounting_state')=='complete'
         and diag.get('finish_reason')=='length' and type(count) is int and 1<=count<=8
-        and consent.get('investigation_version') in (4,5,6,7,8) and consent.get('max_local_requests')==8,
+        and consent.get('investigation_version') in (4,5,6,7,8,9) and consent.get('max_local_requests')==8,
         'Partial output needs exact completed accounting and original local consent')
     claim=payload.get('scenario_generation_claim')
     require(isinstance(claim,dict) and type(claim.get('pid')) is int and claim['pid']>0

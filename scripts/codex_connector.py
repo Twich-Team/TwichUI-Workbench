@@ -105,7 +105,7 @@ def allowed_cgroup(group, uid):
     return bool(child and re.fullmatch(r'workbench-real-codex-task-lease-[A-Za-z0-9-]+\.service', child[0]))
 
 
-def handle(connection, binary, credential, runtime):
+def handle(connection, binary, credential, runtime, evidence_root=None):
     connection.settimeout(3)
     pid, uid, _ = struct.unpack('3i', connection.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
     if uid != os.getuid():
@@ -117,28 +117,36 @@ def handle(connection, binary, credential, runtime):
     if not allowed_cgroup(group, uid):
         return
     started = False
+    journal = None
     try:
         with connection.makefile('rb') as stream:
             raw = stream.readline(codex.MAX_BUG_INPUT + 2)
         if not raw.endswith(b'\n') or len(raw) > codex.MAX_BUG_INPUT + 1:
             raise codex.Hold('protocol')
         request = json.loads(raw)
+        request_seconds = request.pop('request_seconds', codex.SECONDS)
         if (set(request) != {'model','effort','prompt','schema'}
+                or type(request_seconds) is not int or request_seconds not in (codex.SECONDS,codex.BUG_SECONDS)
                 or not isinstance(request['model'], str) or not 1 <= len(request['model']) <= 160
                 or request['effort'] is not None and not isinstance(request['effort'], str)
                 or not isinstance(request['prompt'], str) or not isinstance(request['schema'], dict)):
             raise codex.Hold('protocol')
+        if evidence_root is not None:
+            from workbench.codex_journal import Journal
+            journal = Journal(evidence_root, raw)
 
         def stop():
             return bool(select.select([connection], [], [], 0)[0])
 
-        deadline = time.monotonic() + codex.SECONDS
+        deadline = time.monotonic() + request_seconds
         mapping = resolve_backend(stop, deadline)
         with tempfile.TemporaryDirectory(prefix='codex-hosts-', dir=runtime) as directory:
             hosts = Path(directory) / 'hosts'
             hosts.write_text(mapping, encoding='ascii')
             argv = codex.command(binary, credential, hosts=hosts)
             with codex.app_server(argv, stop, deadline) as rpc:
+                if journal is not None:
+                    rpc.evidence = journal.record
                 try:
                     result = codex.turn(rpc, **request)
                 finally:
@@ -148,6 +156,9 @@ def handle(connection, binary, credential, runtime):
                       partial=error.partial, counted=error.counted, **error.metadata)
     except (KeyError, TypeError, ValueError, OSError):
         result = {'error': 'protocol', 'started': started}
+    if journal is not None:
+        result['provider_receipt'] = journal.identifier
+        journal.close()
     try:
         connection.sendall(json.dumps(result, ensure_ascii=True, allow_nan=False).encode() + b'\n')
     except OSError:
@@ -172,7 +183,8 @@ def main():
             connection, _ = listener.accept()
             with connection:
                 check_account_review(args.account_review)
-                handle(connection, args.binary, args.sign_in_file, args.socket.parent)
+                handle(connection, args.binary, args.sign_in_file, args.socket.parent,
+                       args.account_review.parent.parent / 'artifacts' / 'codex-evidence')
 
 
 if __name__ == '__main__':

@@ -1,3 +1,25 @@
+# Current: real Codex run held on lost terminal receipt; recovery correction offline
+
+No realflightimplementation/checkedrepair or0of4realprovider casescomplete. Installed
+7ef79cb remains healthy; original79/latest191 cutoververified and29oldhistoryreads pass.
+Newintake d6373031/model18bbf5d0 adds a failed history entry; NEVER forward191 over the
+new current store. Driver77449 finishedheld. FirstREALCodexturn31509total completed,
+then second120s timedoutwithpartialoutput/unknownterminal/finalusage. IsolatedCLI gone;
+that is NOT remote terminal proof. No implementation/approval/fallback/replay.
+R=C/outcome-7ef79cb/attempt-28-accounting.json; ledger2Codexstarts/1complete/1unknown.
+Exact analysis and scoped genuine decision: CODEX_TIMEOUT_RECOVERY_20261108.md.
+No old output/receipt may be silently declared settled or reused.
+
+New uninstalled correction retains private per-request identities/output/usage and
+reads an interrupt acknowledgement for up to10s before killing the existing child;
+no acknowledgement remainsunknown. Freshv9Codex300s request within1800s/eightturns;
+oldv8executionretains120, localQwenunchanged. No billing/auth/disclosure/network/
+publication expansion.159integrated/13receiptprivacy/realpipechild/nativeCodex19.99s/
+staticbuildpass; finalfullsuite pending before any futuredeployment. No extra livecall.
+This correction cannot reconstruct the old ephemeral identity. Keep actualfullscope/
+standingauthority, continue independent eligiblework; ask onlythe exacthistorical
+quarantine/restart exception. No engineering/campaignrenewal is needed.
+
 # Installed revision29; real Codex-only flight investigation active
 
 S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-7ef79cb;

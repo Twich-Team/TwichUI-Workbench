@@ -234,8 +234,8 @@ def planning_receipt(original, created_at):
     from workbench.bug_investigation import INVESTIGATION_SECONDS, INVESTIGATION_REQUESTS, INVESTIGATION_REQUEST_SECONDS, requested
     return dict(binding=digest(original), expires_at=(
         datetime.fromisoformat(created_at) + timedelta(minutes=45 if requested(original) else PLANNING_MINUTES)).isoformat(),
-        **(dict(investigation_version=8, max_local_requests=INVESTIGATION_REQUESTS, max_codex_requests=INVESTIGATION_REQUESTS,
-                max_total_model_requests=INVESTIGATION_REQUESTS, codex_request_deadline_seconds=120,
+        **(dict(investigation_version=9, max_local_requests=INVESTIGATION_REQUESTS, max_codex_requests=INVESTIGATION_REQUESTS,
+                max_total_model_requests=INVESTIGATION_REQUESTS, codex_request_deadline_seconds=300,
                 max_local_completion_tokens=6144,
                 local_request_deadline_seconds=INVESTIGATION_REQUEST_SECONDS,
                 planning_deadline_seconds=INVESTIGATION_SECONDS) if requested(original) else {}))
@@ -248,8 +248,22 @@ def check_planning(c, original, job=None):
     from workbench.provider_routes import CHOICES
     expected = planning_receipt(original['payload'], original['created_at'])
     operation_seconds = expected.get('planning_deadline_seconds', 120)
+    def matches_saved_operation(payload):
+        received = payload.get('local_planning_receipt', {})
+        bound = dict(expected)
+        if bound.get('investigation_version') == 9 and received.get('investigation_version') == 8:
+            # A still-valid queued v8 operation retains its shorter timeout.
+            # Never rebind an old approval to the new five-minute operation.
+            bound.update(investigation_version=8, codex_request_deadline_seconds=120)
+        if 'investigation_version' in bound:
+            from workbench.planning_limits import consent_cap
+            try:
+                consent_cap(received)
+            except ValueError:
+                return False
+        return all(received.get(k) == v for k, v in bound.items())
     if (original['payload'].get('local_planning') not in CHOICES
-            or not any(all(job.get('local_planning_receipt', {}).get(k) == v for k, v in expected.items()) for job in jobs)):
+            or not any(matches_saved_operation(payload) for payload in jobs)):
         raise ValueError('A current saved planning approval is required. Open a new task to give that permission.')
     claimed = sum(bool(payload.get('scenario_generation_claim')) for payload in jobs)
     followup = job['payload'].get('bug_followup') if job else None

@@ -90,3 +90,19 @@ def test_shared_codex_investigation_consent_preserves_local_and_global_bounds(fa
     else:
         with pytest.raises(ValueError):
             consent_cap(value)
+
+
+@pytest.mark.parametrize("version,seconds", [(8, 120), (9, 300), (9, 120), (8, 300), (9, True)])
+def test_codex_timeout_change_requires_its_actual_saved_consent(version, seconds):
+    value = {
+        **current(),
+        "investigation_version": version,
+        "max_codex_requests": 8,
+        "max_total_model_requests": 8,
+        "codex_request_deadline_seconds": seconds,
+    }
+    if (version, seconds) in [(8, 120), (9, 300)]:
+        assert consent_cap(value) == 6144
+    else:
+        with pytest.raises(ValueError):
+            consent_cap(value)

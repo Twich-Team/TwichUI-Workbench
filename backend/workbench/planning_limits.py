@@ -10,7 +10,7 @@ def consent_cap(consent):
     version = consent.get('investigation_version')
     if version is not None and type(version) is not int:
         raise ValueError('Malformed local operation consent')
-    if version in (7, 8):
+    if version in (7, 8, 9):
         if (not all(type(consent.get(k)) is int for k in ('max_local_completion_tokens',
                 'max_local_requests','planning_deadline_seconds','local_request_deadline_seconds'))
                 or consent.get('max_local_completion_tokens') != PROGRAM_COMPLETION
@@ -18,10 +18,10 @@ def consent_cap(consent):
                 or consent.get('planning_deadline_seconds') != 1800
                 or consent.get('local_request_deadline_seconds') != 300):
             raise ValueError('The saved local operation bounds changed')
-        if version == 8 and (not all(type(consent.get(k)) is int for k in (
+        if version in (8, 9) and (not all(type(consent.get(k)) is int for k in (
                 'max_codex_requests','max_total_model_requests','codex_request_deadline_seconds'))
                 or consent['max_codex_requests'] != 8 or consent['max_total_model_requests'] != 8
-                or consent['codex_request_deadline_seconds'] != 120):
+                or consent['codex_request_deadline_seconds'] != (300 if version == 9 else 120)):
             raise ValueError('The saved shared investigation bounds changed')
         return PROGRAM_COMPLETION
     if version is None or version in (1, 2, 3, 4, 5, 6):

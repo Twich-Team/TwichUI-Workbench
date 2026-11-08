@@ -432,6 +432,9 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 original['status'] = 'investigating'
             claimed_generation = True
             initial_source_packet = packet
+            if bug and getattr(adapter_used, 'source_investigation', False):
+                adapter_used.request_seconds = job['payload'].get('local_planning_receipt', {}).get(
+                    'codex_request_deadline_seconds', codex_provider.SECONDS)
             from workbench.planning_response import create_evidence
             evidence_schema = schema
             if bug and packet.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'} and (isinstance(adapter_used, LocalProvider) or getattr(adapter_used, 'source_investigation', False)):
@@ -487,6 +490,9 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 model_selection = model_selection.model_copy(update={'model': target})
                 if codex_route:
                     adapter_used = codex_provider.Planner(codex_route, provider_stopped)
+                    if bug:
+                        adapter_used.request_seconds = job['payload'].get('local_planning_receipt', {}).get(
+                            'codex_request_deadline_seconds', codex_provider.SECONDS)
                     adapter_used.response_evidence = response_evidence
                     if bug:
                         from workbench.bug_source_planning import generate as investigate

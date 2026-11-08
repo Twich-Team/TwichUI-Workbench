@@ -1,3 +1,20 @@
+# Current status: real Codex integration demonstrated; bug repair held
+
+No flightimplementation/checkedrepair or0of4realprovider casescomplete. Installed
+7ef79cb passed1502backend/25frontend/fullbuild/4controllednative/controlledrouting,
+history/TLS/LAN/browser/isolation gates. It remains installed; modelnormal.
+
+Real Codex firstturn completed and investigated relevant source. Secondturn timedout
+withpartialoutput; connector failedtoawait interrupt acknowledgement/retainidentity.
+Finalusage/terminal state UNKNOWN, no replay/fallback/approvedplan. Worker/connector
+have no active model child; historicalprovideruncertainty remains. No addonchanged.
+
+Offline connectedfix159integrated/13privacy+realpipe/nativeCodexchecks pass, fresh
+v9timeoutswhilepreservingv8. Fullfinalsuite pending beforedeploy. Exactgenuine decision
+in CODEX_TIMEOUT_RECOVERY_20261108.md: permit quarantiningthisone lostread-onlyturn
+andfreshimprovedinvestigation, orkeepliveheld. Ordinaryengineeringauthoritycontinues.
+Fullproduct/Qwen/provider/recovery/nextbugrequirements remain. Handoff CONTINUATION.
+
 # Current status: installed7ef79cb; real Codex investigation started
 
 No realflightrepair/implementation/independentbehaviorpass or0of4provider casescomplete.

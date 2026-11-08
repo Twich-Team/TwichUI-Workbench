@@ -460,8 +460,9 @@ def test_bug_input_roundtrip_is_larger_without_widening_output_or_legacy_limit(
         )
 
 
+@pytest.mark.parametrize('seconds', [None,120,300,301,True])
 def test_connector_accepts_bounded_bug_context_only_from_allowed_peer_without_starting_real_cli(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, seconds
 ):
     from contextlib import contextmanager
     from types import SimpleNamespace
@@ -490,16 +491,25 @@ def test_connector_accepts_bounded_bug_context_only_from_allowed_peer_without_st
     with left, right:
         thread = Thread(
             target=connector.handle,
-            args=(right, "/fixture/cli", "/fixture/auth", tmp_path),
+            args=(right, "/fixture/cli", "/fixture/auth", tmp_path, tmp_path / "evidence"),
             daemon=True,
         )
         thread.start()
         left.sendall(
             json.dumps(
-                dict(model="fixture-model", effort=None, prompt="source" * 6000, schema={})
+                dict(model="fixture-model", effort=None, prompt="source" * 6000, schema={},
+                     **({"request_seconds":seconds} if seconds is not None else {}))
             ).encode()
             + b"\n"
         )
         result = json.loads(left.makefile("rb").readline())
         thread.join(2)
-    assert result["output"] == dict(ok=True) and len(seen) == 1 and len(seen[0]["prompt"]) > 24000
+    if seconds is True or seconds == 301:
+        assert result['error']=='protocol' and not result['started'] and not seen
+        assert not (tmp_path/'evidence').exists()
+    else:
+        assert result["output"] == dict(ok=True) and len(seen) == 1 and len(seen[0]["prompt"]) > 24000
+        receipt=tmp_path/'evidence'/(result['provider_receipt']+'.jsonl')
+        assert receipt.stat().st_mode&0o777==0o600
+        assert 'source'*10 not in receipt.read_text()
+        assert 'request_sha256' in receipt.read_text()
