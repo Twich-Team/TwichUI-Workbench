@@ -1,3 +1,24 @@
+# Latest installed revision24 / active real23
+
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-81b713e
+R=C/outcome-81b713e. Installed81b713e991145fdc55ab3042f83b0f0b6d654d22,
+tree766291883a7a64c574d02fb1e390e77edc692c28,
+sealbae78a57e72b263501b34a30b4b77f3e89de90ac3766c6bcf2ba7e0da09e275c.
+R/deployment-24-verified.json all strict gates, original79/forward167/all24HTTP
+historyreads verified.4rolesactive/disabled. R/offline-verification.json binds
+190focused/native32.17sec630MiB/actual4response replay/copyfeedback proofs and
+precise retained unaffected complete/frontend/browser/admin evidence.
+
+Real23 submitted01:26:22Z, intakec0fd95f6-b79b-4964-ad01-96a50f6dc585,
+modele1ce0787-883a-4f33-aaa9-ba0fa5d6d4a6, job09c092e5-923d-4fc5-aa05-5438f72d5f27.
+Driver execsession81659, R/active-attempt.json. Provider active; do not replay.
+Monitor real journal/driver, review actual plan when ready and continue.67/66
+request/usage totals below are SETTLED pre23; add only actualnewreceipts.
+No checkedrealrepair/provider cases, no owner decision needed.
+
+The correction described below IS NOW INSTALLED. Remaining below paths/identity
+bcaf describe preserved predecessor; currentS/R above supersede them.
+
 # Continue the complete useful outcome — November8,2026
 
 Read root PROJECT_WORKING_PHILOSOPHY.md, requirements and standing owner direction,

@@ -5,7 +5,7 @@ cases complete. No implementation or Codex turn has started. Full agreed product
 scope remains required. Styling and audit follow the functional gate. No owner
 decision or unavailable access is currently needed.
 
-Installed bcaf7381356dd0bdd194399016ec05a6e75c308f preserves all24history entries,
+Installed81b713e991145fdc55ab3042f83b0f0b6d654d22 preserves all24history entries,
 approved loopback/home-LAN HTTPS, browser and internal-service protections. Four
 everyday services active/disabled pending completed acceptance. Completed-real-
 result restart recovery and the next ordinary bug journey are not demonstrated.
@@ -18,7 +18,7 @@ by a raw-context guard:67382bytes versus65536, ahead of the existing HTTP-body
 fitter.4actual finished responses/complete usage7036generated/64259prompt; provider
 idle twice, no partial/uncertain activity, plan approval or repair.
 
-Connected uninstalled repair separates private prepared-context bound98304 from
+Connected installed repair separates private prepared-context bound98304 from
 unchanged actual HTTP65536/tokenizer limits, preserves exact stopped-request
 diagnostics and reuses bounded hashed rejected self-review DATA only after settled
 execution and current-source validation. No old plan, approval or expected answer
@@ -26,7 +26,9 @@ is reused. Program instructions now include existing addon-write/plain-scope rul
 Local replay of all4actual outputs reaches a65080-byte fifth request with original
 report, feedback and129startup lines intact; zero live calls. Actual167-row COPY
 proves4rejected issues reach a fresh request without live writes/generation.
-Focused and realistic native browser checks verify the correction before deployment.
+190focused and realistic native browser checks passed; checked deployment gates
+and all24history HTTPreads passed. Fresh real23 is running with bounded prior
+rejection feedback and current source, no result yet.
 
 Earlier bcaf correction supplied full startup before generation, counted unique
 source lines and protected startup through retention/fitting. That removed real21
