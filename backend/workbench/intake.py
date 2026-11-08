@@ -16,6 +16,7 @@ from workbench.service import now
 from workbench.planning_provider import configured_mode
 from workbench.planning_transport import scenario_failure_message
 from workbench.schemas import IntakeInput
+from workbench.evidence_preview import references as evidence_previews
 from workbench.visual_scope import (digest as digest, human_scope, scope_history, proposal_review as proposal_view, artifact_rows,
                                     approval_needs_scope_review,
                                     validate_review, task_needs_scope_review, RESEARCH_EXCLUSION)
@@ -251,7 +252,7 @@ def view_in(connection, identity):
             scope_review_required=approval_needs_scope_review(connection, d)) for d in connection.execute(select(proposal_decisions).where(
             proposal_decisions.c.intake_id == identity).order_by(proposal_decisions.c.created_at.desc())).mappings()],
         result=results[-1]['payload'].get('result') if results and not retained else None,
-        evidence=next((j['payload']['evidence'] for j in reversed(jobs) if j['kind']=='planning' and 'evidence' in j['payload']), []), tasks=[{k:v for k,v in t.items() if k not in {'intake_id','created_at'}} for t in planned], priority=priority(row, sum(len(t['dependencies']) for t in planned)))
+        evidence=evidence_previews(next((j['payload']['evidence'] for j in reversed(jobs) if j['kind']=='planning' and 'evidence' in j['payload']), [])), tasks=[{k:v for k,v in t.items() if k not in {'intake_id','created_at'}} for t in planned], priority=priority(row, sum(len(t['dependencies']) for t in planned)))
 
 
 def listing(engine, page):

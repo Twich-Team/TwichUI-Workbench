@@ -1,3 +1,55 @@
+# CURRENT — rollback completed; do not assume everyday services are installed
+
+November8 15:46UTC: candidate491ae5b staged/sealed then activation failed. I advanced
+cutover despite a failed preflight; this was an execution error, preserved in
+C/outcome-491ae5b/activation-failure-and-restoration.json. NO trial/model call or task36
+dispatch occurred. Both old13de and new491 GET/api/intake failed because the completed
+real35limitation wrote a source preview >2400characters. Raw source/usage/history
+were not invalid; this was display serialization. Failed preflight/postgate logs kept.
+
+Approved rollback verified ORIGINAL everyday-system-20261106 review-api/review-worker
+active, loopback127.0.0.1:9487 only, original79rowstore unchanged. LANrule/listener and
+Codexsocket/everyday4units removed; model PID3300469/auth/context normal verified;
+8765 preserved. Latest224rows remain at BOTH13de and491 stores with identical SHA
+81ee162c70bf067b42e68d0128e6ef1dfe13bc799b1f4109da86a75aaaa00365 and retained copies.
+C/outcome-491ae5b/restored.txt and rollback-output.log bind successful restoration.
+Do NOT treat new491 as installed/accepted or copy79 over latest224.
+
+Uncommitted connected fix: evidence_preview.py bounds UI previews explicitly at2400,
+retains raw record/hash/revision/bindings, applied on new writes and historic reads.
+2regression tests pass; verified disposable copy of ACTUAL224rowstore listing and
+all37detail GETs pass with unchanged history (C/evidence-preview-real-history-proof.json).
+Full suite C/evidence-preview-full-tests.log passed1618backend/25frontend; static check passed.
+True confined browser modes3passed,1timedout because concurrent frontend build
+removed dist/index.html. Build finished; ONLY affectedlocal-v2 rerun passed33.88s
+(C/evidence-preview-native-stable-assets.log,exec28887). No live call involved.
+Coordinate builds before browser checks; do not rerun other completed modes.
+
+C/install-preflight-gate.py is a new Rich-run operational guard, NOT root execution.
+Missing/failed/stale/changed script/history/symlink receipts deny before mutations;
+private fault proof saved. New installer MUST check it before root changes and
+preflight MUST record only at its successful end. An operational5minfreshness bound
+is not a campaign clock or owner-renewal gate. Hash-bind helper in install record.
+Next packaging must start from RESTORED ORIGINAL services, not assume predecessor
+4everydayunits active. Use latest224from491 as forward history. Conditional stop of
+absent everyday roles, source original79/reviewservices/firewall baseline fresh gates.
+New candidate revision40/fresh task36 (task36 NEVER started), roots109; same33priorIDs
+including6930db05, no new model IDs after35. Newstage can use sealed491 deps/cache,
+not its broken API. Reuse exact pinned642declarations eac30af cache verified hashes;
+external reference checkout independently advanced clean HEAD9dc84f0, preserve it.
+
+Operational network checker also corrected: unrelated numeric traffic counters
+contained9487; old substring count falsely held. R491/verify-firewall-rule-count.py
+strips traffic counters, matches numeric port boundaries, denies extra single/set/
+multiport rules; optional expected0 verifies restored absence. Keep rules unchanged.
+Use these precise checker scripts in newpreflight/install/rollback, do not recopy
+old rawsubstring check. Priorcheckerprooffiles and all failedlogs preserved.
+
+No real addon repair/provider case complete; full delivery remains active. Owner
+support-file permission is approved, not pending. Continue verification/seal/checked
+installation/real bug36 with12approvedreadonlyfiles, independent review/checks and
+provider4/restart/next bug. No owner renewal needed. Lower blocks are historical.
+
 # Latest actual state — November8 15:25UTC, support-source permission granted
 
 Installed13de1f7af9469770d9f5176fd64abe7ad4970538/treea6b4a7a4d68e6e3040288b42eb39dfdac336ae5a,

@@ -703,12 +703,14 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 identity = str(uuid5(UUID(original['id']), ('lua-bug-investigation-' if bug else 'lua-test-preparation-') + str(job['revision'])))
                 c.execute(proposals.insert().values(id=identity, intake_id=original['id'], revision=job['revision'],
                     scope_revision=scope['revision'], content=content, model=model or MODEL, basis='preparation', created_at=intake.now()))
+                from workbench.evidence_preview import excerpt as evidence_excerpt
                 references = []
                 if bug and packet:
                     for index, item in enumerate(packet['files']):
                         references.append(dict(kind='addon', id=f'bug-source-{index+1}', label=item['path'],
                             sha256=item['sha256'], source_revision=packet['base'],
-                            excerpt='\n\n'.join(f"From line {part['line']}:\n{part['text']}" for part in item['excerpts'])))
+                            excerpt=evidence_excerpt(
+                                '\n\n'.join(f"From line {part['line']}:\n{part['text']}" for part in item['excerpts']))))
                 payload = {**job['payload'], **({'bug_inspection_packet': inspection_packet} if inspection_packet else {}), **({'scenario_generation': dict(model=model, basis=basis, evidence_sha256=(digest(packet['files']) if bug else packet['evidence_sha256']) if packet else None, policy_sha256=packet['policy_sha256'] if packet else None, diagnostics=getattr(adapter_used, 'diagnostics', {}))} if generation else {}), 'prepared_proposal_id': identity, 'task_contract': contract,
                     'basis': 'preparation', 'evidence': references, 'result': dict(summary=content['summary'],
                         clarification=('' if limitation else ' '.join(clarification)[:800]),
