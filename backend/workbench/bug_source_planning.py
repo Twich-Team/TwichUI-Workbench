@@ -291,7 +291,7 @@ def inspect(packet, requests, *, disclosure_paths=None):
 
 def next_wire(packet, original, feedback, windows, finding, matches=None, *, programs=()):
     _, wire = bug.planning_request(packet, original, feedback)
-    from workbench.source_memory import retain
+    from workbench.source_memory import retain, requested_visibility
     if packet.get('plan_review')=='source-grounded-lua-v1':
         from workbench.source_interface import context
         priority,interface=context(packet,original,programs)
@@ -305,6 +305,7 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
              'a repeated range advances past a contiguous previously returned prefix when unread lines remain. '
              'requested_start_line preserves the request and cached_prefix_through_line identifies that exact prior prefix. '
              'omitted ranges do not establish absence. No addon change or behavioral result has been produced.')
+    wire['inspection_result']['visible_requested_windows'] = requested_visibility(wire, windows)
     if matches is not None:
         wire['inspection_result']['search_matches'] = matches
         wire['inspection_result']['search_limit'] = 'At most twelve literal matches; not an exhaustive absence proof.'

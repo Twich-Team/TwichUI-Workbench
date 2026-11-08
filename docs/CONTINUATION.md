@@ -1,4 +1,4 @@
-# Current handoff — November 8, 2026, 12:20 UTC
+# Current handoff — November 8, 2026, real30 settled; requested-source correction
 
 Following the Project Working Philosophy: delivery is unfinished. No real flight-path
 implementation or independently checked repair; zero of the four required real
@@ -11,46 +11,66 @@ receipts. They are historical, not competing current instructions.
 
 ## Installed correction and evidence
 
-Installed candidate cbcf8d089db79c35af0911ad1b3904f05748ac00, tree
-f171f739d36bae222612766bffe038ff9f6fd2ae, seal
-4e6c46ed4adb9d45c5d9db3b206c226dc50e9c763e3340efe3078f051858ba79.
+Installed candidate fb392be13c7b743cd6ddc2660dd8f7221e67e3ec, tree
+9f60b1b2131987d7bf887560b02a596421322bb8, seal
+399147e8180bbc7252ae1267f488d8c9445527ec2e3b016fe566341ee0018b44.
 C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a
-R=C/outcome-cbcf8d0
-S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-cbcf8d0
-Predecessor S_parent/everyday-outcome-52c54af and all recovery stores retained.
-R/offline-verification.json and deployment-32-verified.json bind exact verification,
+R=C/outcome-fb392be
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-fb392be
+Predecessor S_parent/everyday-outcome-cbcf8d0 and all recovery stores retained.
+R/offline-verification.json and deployment-33-verified.json bind exact verification,
 seal, install, history, isolation, effective filters, TLS and browser boundaries.
 
-Production at c276228 passed 1553 backend tests (6 default opt-ins skipped), 25
-frontend tests, contracts/types/build/ruff/schema checks; 141 focused cases pass.
-Final cbcf8d0 differs ONLY in an opt-in test assertion for the new wire-schema
-receipt. Fresh final native test passed19.62s: separate API/worker/normal browser,
-two unrelated controlled checked repairs, tagged source reads/searches, concurrency,
-faults and restarts. Other unchanged native modes/routing/historical readiness and
-broader browser/visual/admin checks retain predecessor-bound lineage. The fresh
-native covers the affected path; neither it nor older simulation proves real use.
+The standing recovery build passed1573backend/25frontend/static plus23final policy/
+lifecycle cases (3new test cases beyond initial full collection). Affected Codex
+native separate API/worker/browser passed17.64s. Other unchanged opt-ins retain bound
+lineage. All31 pre-run history reads and exact199-row cutover fingerprint passed;
+automatic standing quarantine became visible in normal browser history, and normal
+fresh admission passed. Original79 and every older store preserved. After real30,
+latest history203rows: measure current fingerprint before next cutover; NEVER replace
+it with199/195/191/79. Both original unknown Codex records remain immutable.
 
-Corrected Codex path: explicit tagged read/search provider wire; deterministic
-normalization of completed output into unchanged strict local schemas; strict JSON;
-1024 outside-string whitespace watchdog; independent2MiB/10second same-turn interrupt
-read reserve; exact guard/wire-byte/terminal-status diagnostics. No partial output
-completion or acceptance. Tagged wire is a corrective hypothesis, not proof that
-provider anyOf constraints were unsupported. Input/scope/review/billing checks stay.
+Four everyday roles active/disabled pending functional acceptance. No current provider
+activity after settled real30; driver8818 finished held. Normal local model PID3300469,
+auth/key/config and network protections unchanged; scratch remains owned/bounded.
 
-Original79 and latest199 rows copied and independently compared. Current logical
-SHA c5bdff43566933d1d71e0d6c0f2d5c90b12e914e460f6b0f5bfa9d26b896c72a,
-schema0012/28tables. All31 intake list/detail HTTP reads pass. Recreating ONLY the
-original owner-approved quarantine receipt left the entire fingerprint unchanged.
-R/installed-history-read-proof.json proves the newer unknown still holds normal
-admission. Initial read-only verifier used wrong plural URL (404); corrected to
-actual /api/intake, with no mutation. Never forward older195/191/79 over current199.
+Real30intake e6823d64-5e8c-443b-9015-7eec02a009f1,
+model45fc281a-c473-4a12-a050-62fb2d565a18,
+job20b31c53-5905-4f9d-bdb4-47d22f229f73. All8real Codex turns COMPLETED with final
+usage/terminal receipts. They used the tagged wire successfully; source searches/
+reads and a diagnosis completed, but no plan/approval/implementation. Final local
+inspection_limit at diagnosis on eighth turn, not new external uncertainty.
+R/attempt-30-accounting.json and C/outcome-ledger.json preserve all usage. Aggregate
+Codex12starts/10complete/2olderunknown; known316893prompt/2082completion/662reasoning/
+318975total (reasoning included). Qwen unchanged. No completed case replayed.
 
-Four everyday roles are active/disabled, pending full functional acceptance.
-No owned Codex child/model request or temporary proof unit remains; no driver was
-started in this candidate. Model twichui-llm PID3300469/config/auth unchanged;
-scratch empty, physical headroom above4GiB recovery reserve (about28GiB spare).
+Actual private generated rollouts exposed the SHARED next obstruction: source-memory
+ranking put inferred negative-rank bodies above explicit current reads. In turn3's
+actual outgoing prompt, requested Travel.lua30–48 had0of19lines,76–135had0of60, and
+191–219had14of29. Model repeatedly asked for omitted bodies. This is demonstrated
+app context loss, not evidence of provider incapability. C/requested-source-actual-
+wire-proof.json binds actual rollout hash/line counts and verifies all three exact
+ranges survive the correction at the SAME36000-character outgoing source budget.
+No model/expected-fix injection in proof; actual committed source only.
 
-## Real observations and the genuine pending boundary
+Uninstalled connected correction: explicit current read windows outrank inferred
+context; namespace/test bootstrap remain preserved when within budget. New outgoing-
+text guard rejects a missing requested line before another provider request.
+82affected checks and native17.73s pass; full/static verification currently running.
+Do not renew unchanged request; finish verified source correction then new normal
+Codex task at futureattempt31/revision34, include real30 ID in prior list, preserve203.
+The obsolete source/formatter failures are independently classified, not generic
+planning failure. Existing bounds8shared turns/1800s remain operation controls.
+
+Lifecycle fix now has REAL evidence: all8turns persisted identity/terminal/usage before
+content validation, and8private rollouts survive their CLI exit. Supported pinned-CLI
+thread/resume plus thread/turns/list on a private COPY, networking DISABLED, restored
+the exact completed turn with statuscompleted. Originals hash-verified unchanged;
+no new model/source/login/refresh. C/standing-generated-rollout-restart-proof/proof.json.
+The earlier no-model probe had no rollout before a turn and does not contradict this.
+This is connector recovery proof, NOT completed-app-result restart acceptance.
+
+## Preserved incidents and standing recovery disposition
 
 Owner explicitly permanently quarantined ONLY SECOND turn of model
 18bbf5d0-c5e2-4557-936b-126b24b4f1f4. Exact immutable owner addendum:
@@ -97,25 +117,14 @@ contains immutable private receipt and read-only proof: all199 rows unchanged.
 Historical diagnostic files remain unchanged; private0600 verified copies support
 the receipt. No partial output or old task approval is reused.
 
-Connected recovery code is under verification, not installed yet: code-owned
-capability snapshots before dispatch, matching actual connector isolation receipt,
-closed-connection/status-retrieval proof, failed-job fence, immutable disposition;
-automatic worker recovery and acceptance admission. Browser projection explains
-quarantine without rewriting original records. Lifecycle identities/status persist
-before content parsing, including lost startup reply; supported bounded same-turn
-status retrieval follows missing cancellation acknowledgement. Private per-request
-rollout mount preserves sessions only, not owner home/config/auth cache. A no-model,
-network-disabled CLI probe creates a persistent thread but no rollout before a turn;
-restart-read therefore found no rollout. Do not claim real generated-turn restart
-recovery from that probe. Actual generated rollout retention still needs live proof.
-136 targeted tests pass including real-pipe lifecycle faults and quarantine denials;
-complete suites and native checks underway. Continue installation then real task.
-
-Ledger C/outcome-ledger.json updated through deployment32. Codex4turns started,
-2complete/2unknown final receipts; known62704prompt/306completion/54reasoning/63010total.
-Only18bb owner-authorized. Qwen89starts/86completeusage,120689generated/943421prompt;
-3older missing final receipts remain separately recorded with their existing local
-settlement bounds, not actual usage. No counts reset. Preserve all original receipts.
+Standing recovery is installed and active, not merely a note. Code-owned capability
+snapshots, matching actual isolation evidence, closed connection/status-retrieval
+proof and failed-job fencing bind immutable per-attempt receipts. Worker recovery
+and normal admission enforce them; history projection explains disposition without
+rewriting original result/usage. Permanent old18 exact receipt also remains.
+No pending owner policy question. Earlier proposed policy was not blanket-approved.
+No uncertain implementation or consequential effects covered. Fresh binding and all
+source/billing/network/publication safeguards remain.
 
 ## Continue under standing authority
 
@@ -123,13 +132,13 @@ There are no campaign clock/allocation/revision/testing renewal caps. Existing r
 owner documents are exact; do not edit them. Current authority and A8/A9 addenda:
 DELIVERY_OUTCOME_AUTHORITY_20261107.md and REFERENCE_DOCUMENTS.md. One agent only.
 
-Implement/verify/deploy the standing recovery correction, then create only verified
+Preserve installed standing recovery and create only verified
 per-attempt receipts. Do not request another covered quarantine exception. Preserve
 historical SQLite records and exact old18 receipt. No actual pending owner decision.
 
 Then fresh same-provider Codex flight task via normal delegated browser, new consent/
-plan/run bindings. Prepared future attempt30; revision33 next is not started;27prior IDs,
-93evidence roots. Recreate old18 exact receipt if needed, never overwrite199rows.
+plan/run bindings. Next future attempt31/revision34 is not started; append45fc281a to prior IDs;
+next stage will have97evidence roots. Recreate old18 exact receipt if needed, never overwrite203rows.
 Do not repeat unchanged formatting failures; use fresh retained guard/terminal evidence.
 If needed replace provider formatting with supported app-owned read-only tool path,
 within approved source boundaries. Real evidence, not presumed model incapability.

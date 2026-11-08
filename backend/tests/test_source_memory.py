@@ -139,3 +139,28 @@ def test_namespace_prelude_survives_function_pressure_and_new_current_reads():
     retain(wire,packet,[function],250)
     visible='\n'.join(e['text'] for e in wire['files'][0]['excerpts'])
     assert header in visible and wire['source_memory']['retained_characters']<=250
+
+
+def test_explicit_requested_body_survives_higher_scoring_inferred_context():
+    from workbench.source_memory import requested_visibility
+    path='!!!TwichUI/Example.lua'
+    prelude=dict(line=1,text='local Module = {}',coverage='module prelude')
+    packet=dict(base='fixed',plan_review='source-grounded-lua-v1',
+                files=[dict(path=path,excerpts=[prelude])],inspection_windows=[])
+    requested=dict(path=path,line=20,through_line=22,text='function Module.Read()\nreturn 42\nend',
+                   coverage='requested committed lines')
+    inferred=dict(path=path,line=40,text='local unused = 1\n'*100,context_rank=-200)
+    wire=copy.deepcopy(packet)
+    retain(wire,packet,[requested,inferred],budget=100)
+    assert requested_visibility(wire,[requested])==[dict(path=path,line=20,through_line=22,provided=True)]
+    assert any('local Module = {}' in e['text'] for e in wire['files'][0]['excerpts'])
+    assert wire['source_memory']['retained_characters']<=100
+
+
+def test_outgoing_visibility_guard_holds_instead_of_repeatedly_claiming_an_omitted_read():
+    from workbench.source_memory import requested_visibility
+    request=dict(path='!!!TwichUI/Example.lua',line=30,through_line=31,
+                 text='local value = 1\nreturn value',coverage='requested committed lines')
+    with pytest.raises(PlanningUnavailable) as held:
+        requested_visibility(dict(files=[dict(path=request['path'],excerpts=[])]),[request])
+    assert held.value.reason=='context_budget'

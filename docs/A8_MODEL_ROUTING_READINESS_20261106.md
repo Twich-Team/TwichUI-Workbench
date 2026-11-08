@@ -1,3 +1,20 @@
+# Current November8 — standing recovery exercised; shared context defect proven
+
+Installedfb392be implements the independent standing read-only recovery decision;
+normal admission/history recognise both permanent quarantines without rewriting
+unknown usage. Fresh real30 completed8Codex turns with all terminal/usage receipts,
+source searches/reads and diagnosis, but no approved plan or implementation. A8 and
+all four real supporting cases remain unfinished. Private generated rollouts survive
+CLI exit; network-disabled resume/read on a verified COPY restoredcompleted status.
+This is connector recovery proof, not completed-result restart acceptance.
+
+The real outgoing prompts prove requested source was displaced by inferred context.
+A correction pins current reads and verifies actual outgoing text, at unchanged
+36kcontext budget. Actual-wire offline proof/82focused/native pass; full/static checks
+underway before installation and renewed normal task. No unchanged live retry,
+no new external uncertainty, no pending owner policy decision or campaign caps.
+See current handoff for exact records. Earlier entries below are historical.
+
 # Current November8 — installed correction, real acceptance unfinished
 
 Installed cbcf8d0 passed controlled separate-process Codex bug/read-search/native

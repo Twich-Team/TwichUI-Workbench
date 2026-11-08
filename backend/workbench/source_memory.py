@@ -22,7 +22,12 @@ def retain(wire, packet, current, budget=24000):
     for excerpt in packet.get('inspection_windows', []):
         add(excerpt['path'], excerpt, 2)
     for excerpt in current:
-        add(excerpt['path'], excerpt, -10000 if excerpt.get('coverage') == 'complete committed test bootstrap' else excerpt.get('context_rank',0))
+        # Explicit completed reads must survive inferred function/dependency
+        # context. Otherwise the provider asks again for code we read locally
+        # but repeatedly evict before the next stateless request.
+        requested = excerpt.get('coverage') in {'requested committed lines','partial requested committed lines'}
+        add(excerpt['path'], excerpt, -20000 if requested else
+            -10000 if excerpt.get('coverage') == 'complete committed test bootstrap' else excerpt.get('context_rank',0))
     chosen, used = {}, 0
     for key in sorted(lines, key=lambda key:(priority[key], key[0], key[1])):
         size = len(lines[key])+1
@@ -60,3 +65,21 @@ def retain(wire, packet, current, budget=24000):
         wire['source_memory']['recent_read_windows']=[{key:w[key] for key in keys if key in w}
             for w in packet.get('inspection_windows',[])[-3:]]
     return wire
+
+
+def requested_visibility(wire, windows):
+    """Verify actual outgoing text, rather than equating a disk read with disclosure."""
+    visible = {(f['path'], e['line']+offset):text for f in wire['files']
+               for e in f['excerpts'] for offset,text in enumerate(e['text'].splitlines())}
+    facts = []
+    for window in windows:
+        if window.get('coverage') not in {'requested committed lines','partial requested committed lines'}:
+            continue
+        provided = all(visible.get((window['path'],window['line']+offset)) == text
+                       for offset,text in enumerate(window['text'].splitlines()))
+        if not provided:
+            from workbench.planning_transport import PlanningUnavailable
+            raise PlanningUnavailable('Requested source could not be retained in the outgoing context.', 'context_budget')
+        facts.append(dict(path=window['path'],line=window['line'],
+                          through_line=window['through_line'],provided=True))
+    return facts

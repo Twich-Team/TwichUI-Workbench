@@ -1,3 +1,20 @@
+## November8 — standing recovery installed and exercised; actual context eviction identified
+
+Owner's independent standing recovery policy applied without treating the proposal
+as blanket-approved. Installedfb392be/33 verified1573backend/25frontend/static/native
+and normal admission/history. New real30 completed8Codex turns with full receipts,
+source diagnosis but no plan/implementation.12totalCodex starts/10complete/2older
+unknown unchanged; known318975tokens.8private generated rollouts survived CLI exit;
+supported network-disabled resume/read of an owned COPY restoredcompleted status,
+originals unchanged/no model call. No app-result restart acceptance claimed.
+
+Actual prompt proves requested ranges were evicted by inferred-context priorities.
+Offline actual-wire proof reproduces missing bodies and verifies correction at same
+36kcontext budget;82focused/native17.73s pass, full/static underway. Pin explicit
+reads and check actual outgoing text before dispatch. No unchanged live renewal.
+Latest203rows preserved; no real checked repair/provider case complete. No owner
+question or campaign cap. Exact receipts: C/outcome-fb392be and current handoff.
+
 ## November8 — owner exception applied, new real failure diagnosed, correction installed
 
 Only18bbf5d0 second turn permanently quarantined per exact owner decision; original
