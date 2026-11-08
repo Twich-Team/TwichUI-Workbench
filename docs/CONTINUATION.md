@@ -1,3 +1,56 @@
+# CURRENT VERIFIED STATE — November8 16:53UTC
+
+Following the Project Working Philosophy: continue full delivery, no owner input needed.
+Installed635bdd958e93af8a38cd5deda42f450c1f697581,
+tree0a77600ada65227763ec8a1e41855f0f2cf900eb,
+seal27aee6508388e091935c1afeca4c1c30dc57f854e56ff9b10d248d8cad5a1712.
+C=~/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
+R=C/outcome-635bdd9; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-635bdd9.
+R/deployment-42-verified.json binds checked232-row cutover/original79 preserved,
+all39normalhistory reads+listing unchanged, recovery dispositions, both listeners,
+TLS/LAN/firewall/browser/5isolation/connectorpeer gates. Four everyday roles active,
+disabled until functional acceptance. Model/auth/context/8765 preserved. Capacity
+headroom28112248832bytes/scratch0; no evidence removed. Existing network scope intact.
+
+Exact request-packing code full1628backend/25frontend PASS,6defaultoptins skipped.
+Both affected Codex data/program modes true-confined separate-process/browser PASS
+39.55s; owned userunit collected/cgroupabsent/569.9Mpeak/swap0. Local and historical
+readiness/driver opt-ins retained per explicit bound R/offline-verification.json;
+no controlled test counts as real-provider pass. Static/contracts/build/schema pass.
+Actual complete six real37responses hash-verified/replayed offline; seventh201713bytes
+packed195479 under196608 without losing requested source, live232fingerprint unchanged.
+No provider call/plan/patch in offlineproof. Failedfirstcontrolled terminal schema
+log preserved; v2 corrects only offline stopping reply. Encoder exact legacy bytes
+and post-packing disclosure denial verified. Isolation comparison honestly records
+changed generate/newencoder and Plannerpacking/extractedvalidate_source; all original
+CLI/auth/account/quota/cancel/network/isolation safeguards unchanged.
+
+Fresh real38 ACTIVE when last read16:53: model9c4716cb-29cc-46f1-a50b-ad36606f358a,
+intake1f27a185-dbef-424a-87ad-b99bbbd1a117,job6396af0b-df7a-49af-af92-ba6a9ce169be.
+Normal delegated browser driver exec98472; observe before assuming stillactive:
+S/artifacts/acceptance/bug-flight-paths.jsonl, R/bug-flight-paths-driver.txt,
+private S/artifacts/codex-evidence/*.jsonl (phase field, not event), normal task API/SQL.
+No approved plan/implementation or independent real check yet. Zero of4required
+real provider cases passed. Do not replay uncertain work or switch after generation.
+Persist settlement/usage and nextlatestfingerprint when settled; prior232 is pretrial.
+Known settled totals include real37:49Codexstarts/45completeusage/4missingfinalreceipts,
+1953033known tokens. Two historical unknownterminal and two confirmedinterrupted
+remain quarantined/isolated with unknown finalusage; don't infer zero/cancellation.
+Qwen89starts unchanged. Standingpolicy applied and preserved; no repeated exception.
+
+When plan appears, independently inspect app-generated actual initial eligibility,
+flightmastereventlearning/laterrefresh observations before bounded private review
+receipt (previous handoff describes exactfields). Never supply addon fix/reproducer.
+Driver uses separate valid plan/run approvals. Need originalFAIL/candidatePASS/fullLua
+suite/reviewablepatch, four real cases, result restart/nextordinarybug/cleanup/stable
+installedapp. Scope/billing/disclosure/network/publication safeguards stay. Twelve
+exact committed sources already approved, six writable/max3repair; no ownerattendance
+or campaign renewal needed. Next engineering if needed revision43/task39/roots115,
+parent635bdd9; append9c4716cb ONLY after settlement. Reuse guarded preflight/install/
+preciseportchecker/pinnedcache, original79/latestmeasuredhistory. Never advance if
+preflight fails; current receipt binds scripts/candidate/history,5min operationalfreshness.
+Lower records are historical. Read current actual state before resuming.
+
 # CURRENT VERIFIED STATE — November8 16:46UTC
 
 Following the Project Working Philosophy: keep delivering; no owner decision needed.
