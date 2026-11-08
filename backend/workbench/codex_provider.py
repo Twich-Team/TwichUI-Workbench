@@ -44,7 +44,8 @@ CHECK_STATES = {'observed', 'absent', 'null', 'ambiguous', 'contrary'}
 
 class Hold(PlanningUnavailable):
     def __init__(self, reason, *, started=False, terminal=False, partial=False, counted=None, phase=None, rpc_code=None,
-                 check=None, state=None, provider_receipt=None):
+                 check=None, state=None, provider_receipt=None, guard=None, wire_bytes=None,
+                 terminal_status=None, protocol_guard=None):
         self.started = started
         self.terminal = terminal
         self.partial = partial
@@ -54,6 +55,14 @@ class Hold(PlanningUnavailable):
             diagnostics['rpc_code'] = rpc_code
         if isinstance(provider_receipt, str) and re.fullmatch(r'[a-f0-9-]{36}', provider_receipt):
             diagnostics['provider_receipt'] = provider_receipt
+        guard = guard if guard is not None else protocol_guard
+        if guard in {'eof','wire_bytes','line_bytes','json_frame','output_bytes','duplicate_output',
+                     'whitespace','internal_retry','event_binding','server_request','item_kind'}:
+            diagnostics['protocol_guard'] = guard
+        if type(wire_bytes) is int and 0 <= wire_bytes <= 2*MAX_WIRE+65536:
+            diagnostics['wire_bytes'] = wire_bytes
+        if terminal_status in {'completed','failed','interrupted'}:
+            diagnostics['terminal_status'] = terminal_status
         message = {
             'authentication': 'Codex sign-in needs attention.',
             'capacity': 'The included Codex allowance has reached the Workbench reserve.',
@@ -65,6 +74,7 @@ class Hold(PlanningUnavailable):
             'canceled': 'The Codex operation was stopped.',
             'timeout': 'The Codex operation reached its time limit.',
             'protocol': 'Codex returned an unexpected or incomplete response.',
+            'format': 'Codex returned formatting without meaningful output progress.',
             'failed': 'Codex finished without a usable result.',
         }[reason]
         if isinstance(check, str) and check in CHECK_LABELS and isinstance(state, str) and state in CHECK_STATES:
@@ -102,6 +112,7 @@ class Channel:
         self.fd, self.write, self.stop, self.deadline = read_fd, write, stop, deadline
         self.buffer, self.used, self.seq, self.started = b'', 0, 0, False
         self.events = []
+        self.eof = False
         self.selector = selectors.DefaultSelector()
         self.selector.register(read_fd, selectors.EVENT_READ)
 
@@ -120,18 +131,22 @@ class Channel:
             chunk = os.read(self.fd, 65536)
             self.used += len(chunk)
             self.buffer += chunk
-            if not chunk or self.used > MAX_WIRE or len(self.buffer.split(b'\n', 1)[0]) > MAX_LINE:
-                raise Hold('protocol', started=self.started)
+            if not chunk:
+                self.eof = True
+                raise Hold('protocol', started=self.started, guard='eof', wire_bytes=self.used)
+            if self.used > MAX_WIRE or len(self.buffer.split(b'\n', 1)[0]) > MAX_LINE:
+                raise Hold('protocol', started=self.started,
+                           guard='wire_bytes' if self.used > MAX_WIRE else 'line_bytes', wire_bytes=self.used)
         line, self.buffer = self.buffer.split(b'\n', 1)
         if len(line) > MAX_LINE:
-            raise Hold('protocol', started=self.started)
+            raise Hold('protocol', started=self.started, guard='line_bytes', wire_bytes=self.used)
         try:
             event = json.loads(line)
             if not isinstance(event, dict):
                 raise ValueError
             return event
         except ValueError:
-            raise Hold('protocol', started=self.started) from None
+            raise Hold('protocol', started=self.started, guard='json_frame', wire_bytes=self.used) from None
 
     def call(self, method, params):
         self.seq += 1
@@ -160,12 +175,20 @@ class Channel:
 
     def settle_interrupt(self, thread, turn_id):
         """Read only the existing turn's cancellation, never start another turn."""
-        original_stop, original_deadline = self.stop, self.deadline
+        original_stop, original_deadline, original_used = self.stop, self.deadline, getattr(self, 'used', 0)
         self.stop, self.deadline = lambda: False, time.monotonic() + 10
+        self.used = 0  # A separate bounded read reserve for the SAME turn's cancellation.
         observed, status = None, None
         try:
             while True:
-                event = self.events.pop(0) if self.events else self.receive()
+                try:
+                    event = self.events.pop(0) if self.events else self.receive()
+                except Hold as error:
+                    if (error.metadata.get('protocol_guard') in {'json_frame','line_bytes'}
+                            and not getattr(self,'eof',False) and self.used <= MAX_WIRE
+                            and time.monotonic() < self.deadline):
+                        continue  # Discard only invalid framing within the independent read reserve.
+                    raise
                 method, params = event.get('method'), event.get('params') or {}
                 if params.get('threadId', thread) != thread or params.get('turnId', turn_id) != turn_id:
                     raise Hold('protocol', started=True)
@@ -181,6 +204,7 @@ class Channel:
             pass
         finally:
             self.stop, self.deadline = original_stop, original_deadline
+            self.used += original_used
         return status, observed
 
 
@@ -395,6 +419,9 @@ def turn(rpc, model, effort, prompt, schema):
     turn_id = response['turn']['id']
     record('turn-started', thread_id=thread, turn_id=turn_id)
     output = observed = None
+    in_string = escaped = False
+    whitespace = 0
+    status = None
     output_prefix, output_bytes = '', 0
     import hashlib
     output_digest = hashlib.sha256()
@@ -406,7 +433,7 @@ def turn(rpc, model, effort, prompt, schema):
             if 'id' in event or method in {'model/rerouted', 'model/verification', 'account/updated'}:
                 raise Hold('protocol', started=True)
             if method == 'error' and p.get('willRetry') is True:
-                raise Hold('protocol', started=True)
+                raise Hold('protocol', started=True, guard='internal_retry')
             if p.get('threadId', thread) != thread or p.get('turnId', turn_id) != turn_id:
                 raise Hold('protocol', started=True)
             if method == 'item/agentMessage/delta' and isinstance(p.get('delta'), str) and p['delta']:
@@ -418,6 +445,22 @@ def turn(rpc, model, effort, prompt, schema):
                 if output_bytes == len(chunk):
                     record('first-output', partial=True, output_bytes=output_bytes,
                            output_sha256=output_digest.hexdigest(), output_excerpt=output_prefix)
+                for char in p['delta']:
+                    if in_string:
+                        if escaped:
+                            escaped = False
+                        elif char == '\\':
+                            escaped = True
+                        elif char == '"':
+                            in_string = False
+                    elif char == '"':
+                        in_string, whitespace = True, 0
+                    elif char.isspace():
+                        whitespace += 1
+                        if whitespace > 1024:
+                            raise Hold('format', started=True, guard='whitespace')
+                    else:
+                        whitespace = 0
             if method in {'item/started', 'item/completed'}:
                 item = p['item']
                 kind = item.get('type')
@@ -455,7 +498,8 @@ def turn(rpc, model, effort, prompt, schema):
                        output_bytes=len((output or '').encode()),
                        output_sha256=hashlib.sha256((output or '').encode()).hexdigest(),
                        output_excerpt=(output or '')[:8192])
-                parsed = json.loads(output or '')
+                from workbench.planning_response import strict_json
+                parsed = strict_json(output or '')
                 if not isinstance(parsed, dict):
                     raise Hold('protocol', started=True)
                 return {'output': parsed, 'usage': observed}
@@ -474,10 +518,13 @@ def turn(rpc, model, effort, prompt, schema):
                    reason=error.reason if isinstance(error, Hold) else 'protocol')
         record('turn-held', partial=partial, usage=observed, output_bytes=output_bytes,
                output_sha256=output_digest.hexdigest(), output_excerpt=output_prefix,
-               status='terminal' if terminal else 'uncertain')
+                   status='terminal' if terminal else 'uncertain',
+                   guard=error.metadata.get('protocol_guard') if isinstance(error, Hold) else 'output_json',
+                   wire_bytes=getattr(rpc,'used',None), terminal_status=status if terminal else None)
         raise Hold(error.reason if isinstance(error, Hold) else 'protocol', started=True,
                    terminal=terminal, partial=partial, counted=observed,
-                   **(error.metadata if isinstance(error, Hold) else {})) from None
+                   terminal_status=status if terminal else None,
+                   **({key:value for key,value in error.metadata.items() if key != 'terminal_status'} if isinstance(error, Hold) else {})) from None
 
 
 def connector_path():
@@ -539,7 +586,8 @@ def generate(model, effort, prompt, schema, stop=lambda: False, *, input_limit=M
                    terminal=result.get('terminal') is True, partial=result.get('partial') is True,
                    counted=result.get('counted'), phase=result.get('phase'), rpc_code=result.get('rpc_code'),
                    check=result.get('check'), state=result.get('state'),
-                   provider_receipt=result.get('provider_receipt'))
+                   provider_receipt=result.get('provider_receipt'), guard=result.get('protocol_guard'),
+                   wire_bytes=result.get('wire_bytes'), terminal_status=result.get('terminal_status'))
     class Output(dict):
         pass
     output = Output(result['output'])
@@ -649,15 +697,27 @@ class Planner:
             raise Hold('model_identity')
         try:
             from workbench.planning_response import wire_schema
+            output_schema = required_output(wire_schema(schema, packet.get('coverage') if bug_schema else None,
+                                                        packet.get('files') if bug_schema else None))
+            if bug_schema:
+                from workbench.codex_wire import schema as inspection_schema, NOTE
+                output_schema, tagged = inspection_schema(output_schema)
+                if tagged:
+                    instructions += ' ' + NOTE
+                    if self.response_evidence:
+                        import hashlib
+                        self.response_evidence.record('codex-wire-schema', codec='tagged-inspection-v1',
+                            schema_sha256=hashlib.sha256(json.dumps(output_schema,sort_keys=True).encode()).hexdigest())
             result, counted = generate(model, self.selection['effort'],
                 instructions + '\nUntrusted task data:\n' + json.dumps(packet, ensure_ascii=True),
-                required_output(wire_schema(schema, packet.get('coverage') if bug_schema else None,
-                                            packet.get('files') if bug_schema else None)), self.stopped,
+                output_schema, self.stopped,
                 **({'input_limit':MAX_BUG_INPUT, 'request_seconds':self.request_seconds} if bug_schema else {}))
         except Hold as error:
             self.diagnostics = dict(generation_state=(
                 'not_started' if not error.started else 'uncertain' if not error.terminal else
-                'partial' if error.partial else 'finished'), partial_output=error.partial, **error.metadata)
+                'finished' if error.metadata.get('terminal_status') == 'completed' else
+                'partial' if error.partial else 'finished'), partial_output=error.partial,
+                provider_terminal_confirmed=error.terminal, **error.metadata)
             if error.counted is not None:
                 self.diagnostics['usage'] = usage_record(error.counted)
             raise

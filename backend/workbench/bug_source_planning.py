@@ -488,6 +488,11 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             if not response_added:
                 raise PlanningUnavailable('Source investigation usage is unavailable.', 'accounting')
             try:
+                if getattr(adapter, 'source_investigation', False):
+                    from workbench.codex_wire import normalize as normalize_inspection
+                    raw, changes = normalize_inspection(raw)
+                    if changes and evidence:
+                        evidence.record('inspection-wire-normalized', changes=changes)
                 if pending is not None:
                     review = bug_plan_review.ReviewResponse.model_validate(raw)
                     if review.review_binding != bug.digest(pending):

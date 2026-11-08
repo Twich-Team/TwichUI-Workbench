@@ -239,3 +239,74 @@ def test_observed_guard_keeps_actual_usage_and_terminal_receipt(title, total, he
         result = codex.turn(rpc, "fixture-model", None, "task data", dict(title=title))
         assert result["usage"]["total_tokens"] == total
     assert [m for m, _ in rpc.calls].count("turn/start") == 1
+
+
+def test_cancellation_has_a_separate_byte_reserve_after_generation_wire_exhaustion():
+    read_fd, write_fd = os.pipe()
+    channel = codex.Channel(read_fd, lambda _: None, lambda: True, time.monotonic() - 1)
+    channel.used = codex.MAX_WIRE + 1
+    try:
+        os.write(
+            write_fd,
+            b"{invalid stale frame}\n"
+            + (
+                json.dumps(
+                    dict(
+                        method="turn/completed",
+                        params=dict(
+                            threadId="thread",
+                            turnId="turn",
+                            turn=dict(id="turn", status="interrupted"),
+                        ),
+                    )
+                )
+                + "\n"
+            ).encode(),
+        )
+        status, counted = channel.settle_interrupt("thread", "turn")
+        assert status == "interrupted" and counted is None and channel.used > codex.MAX_WIRE
+        assert channel.stop() and channel.deadline < time.monotonic()
+    finally:
+        channel.close()
+        os.close(read_fd)
+        os.close(write_fd)
+
+
+@pytest.mark.parametrize("inside", [True, False])
+def test_whitespace_guard_does_not_accept_partial_or_reject_lua_string_spacing(inside):
+    from types import MethodType
+
+    text = '{"code":"' + " " * 1100 + '"}' if inside else '{"inspection":[{}' + " " * 1100
+    events = [dict(method="item/agentMessage/delta", params=dict(delta=text))]
+    if inside:
+        events.extend(
+            [
+                dict(
+                    method="item/completed",
+                    params=dict(item=dict(type="agentMessage", phase="final_answer", text=text)),
+                ),
+                completed()[1],
+                completed()[2],
+            ]
+        )
+    else:
+        events.extend(
+            [
+                completed()[1],
+                dict(
+                    method="turn/completed", params=dict(turn=dict(id="turn", status="interrupted"))
+                ),
+            ]
+        )
+    rpc = Transcript(events=events)
+    rpc.settle_interrupt = MethodType(codex.Channel.settle_interrupt, rpc)
+    if inside:
+        result = codex.turn(rpc, "fixture-model", None, "task", {})
+        assert result["output"]["code"] == " " * 1100
+    else:
+        with pytest.raises(codex.Hold) as held:
+            codex.turn(rpc, "fixture-model", None, "task", {})
+        assert held.value.reason == "format" and held.value.terminal and held.value.partial
+        assert held.value.metadata["protocol_guard"] == "whitespace"
+        assert held.value.metadata["terminal_status"] == "interrupted"
+        assert held.value.counted["total_tokens"] == 24

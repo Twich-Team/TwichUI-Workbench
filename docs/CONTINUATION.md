@@ -1,3 +1,53 @@
+# Current: fresh Codex run held; whitespace formatter evidence retained
+
+Installed52c54aff49132f53fed1d330cdbf9a2290d9a271, seal
+e7ec1eeb31dd9632933fcdac5360256ff50ce4bd58fd47f744566510dd96396e.
+R=C/outcome-52c54af, S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-52c54af.
+Full1543backend/25frontend/static/native20.01sec/installedprotection and195history
+copy/30historyHTTPgates passed before fresh real29. Original18bbf5d0 ownerexception
+implemented as separate content-bound private receipt, no SQLite/history overwrite.
+
+Real29intake9961b8d4-5167-470d-85ff-9be02f8daff1,
+modeleb72eb02-c968-4c57-b51a-5106bf7e6236,
+job0a325ef8-c7ca-495c-b4e7-9fc790c8fef5. Driver1232finishedheld11:33:53Z.
+Firstturncompleted31501total(31352prompt/149completion/35reasoning). Second produced
+18893agentbytes: meaningful3-source-read prefix followed by extensive whitespace
+without closing JSON. Genericprotocolhold, preciseguardunknown. Do NOT assert
+byteguard as historicalfact. Code inspection proves cancellation reused depleted
+wire budget, a defect now corrected. No plan/implementation/realcheck/4providercases.
+Old18bbf5d0 quarantine does NOT authorize eb72eb02's unknown second turn.
+
+Newprivate receipt3799d6b5-52de-423b-b442-e96d51877dd7 retains exactthread
+01a1baed-5a0e-7360-8674-ad7633de81b9 andturn01a1baed-5b7d-7060-9a53-14a956cb9c05.
+No terminalack/finalusage. Originalproviderrow interrupted_unknown unchanged. Local
+CLIgone. Supportednetwork-disabled exactowned-thread read/turns-list returnthread
+notloaded; resume returnsno rollout found. R/thread-read-offline-diagnostic.json and
+thread-resume-offline-diagnostic.json. These prove unavailablelocalephemeralstate,
+NOT remotecancel/accountdenial. No newmodel/source/login/refresh in diagnostics.
+R/attempt-29-accounting.json preserves firstknownusage/secondunknown. Ledger4Codex
+starts/2complete/2unknown,63010known total tokens, onlyold18covered; Qwenunchanged.
+
+Connecteduninstalledfix: independent2MiB/10s cancellationreadreserve, exactguard/
+byte/terminalstatusdiagnostics,1024outside-string-whitespace watchdog (Lua strings
+preserved), strictJSONdecoder, explicit-tag inspectionwire anddeterministic complete-
+reply normalization to unchanged local schemas. No partialbody completion/acceptance.
+141affectedtests/staticpass; native/fullverification next. Taggedwiretargets actual
+observedread/searchformatter ambiguity, notprovenunsupportedJSONschema. No live retry.
+
+A single future-policy decision is proposed in
+READONLY_PLANNING_QUARANTINE_PROPOSAL_20261108.md SHA
+8d8ff34b74df417ddca58f97668cae63ba2181f5d6dbe206472ef734c655f2af.
+Not authorized. It covers currenteb72secondturn andfuture narrowly bounded tool-free
+planning quarantine duringthisdelivery only, with originalunknownrecords, no tools/
+approvals/implementation, closedlocalproducer, supportedrecoveryattempts, corrective
+purpose, freshsame-providerbindings, strictincludedusage/source/network safeguards.
+DoesNOTcoveruncertainimplementationorpost-generationfallback. Existingq18reader
+remains exactone-caseonly. Need actualownerdecision before newgeneration, notanother
+engineeringallowance. Continue independentengineeringverification/deployment.
+Fullscope remainsrealflightfix/provider4/restart/nextbug/broaderproduct. Noaddonchange.
+
+Older active/pending states below are superseded by this observed failure.
+
 # Owner quarantine approved — 2026-11-08T11:23:35.272971+00:00
 
 The owner explicitly approved permanent quarantine of only the uncertain SECOND

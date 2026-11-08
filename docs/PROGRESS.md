@@ -1,3 +1,13 @@
+# November8: actual whitespace failure captured; cancellation reserve corrected
+
+Fresh29 firstCodexturn31501tokens completed, second emitted18893bytes with long
+whitespace afterthree read requests. Genericprotocolhold; preciseguardnotretained.
+Retainedidentitylocalread/resume findsno rollout; providerterminal/finalusageunknown.
+No implementation/realchecks/4providercases. Existing18bbexceptionnotexpanded.
+Independentcancelreadreserve/preciseguards/whitespacewatchdog/taggedinspectionwire
+implemented;141focused/static pass, broader/native checks next. One explicitbounded
+planningquarantinepolicy proposed, unapproved. No newlivecalls; engineeringcontinues.
+
 # November8: owner quarantine approved; fresh investigation authorized
 
 No owner decision pending. Exact18bbf5d0 second-turn exception recorded immutably.

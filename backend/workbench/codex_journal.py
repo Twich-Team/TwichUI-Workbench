@@ -40,6 +40,9 @@ class Journal:
             "output_excerpt",
             "reason",
             "acknowledged",
+            "guard",
+            "wire_bytes",
+            "terminal_status",
         }
         if set(values) - allowed or not re.fullmatch(r"[a-z-]{1,40}", phase):
             raise ValueError("Unsupported connector evidence")

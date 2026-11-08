@@ -265,6 +265,13 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             from workbench.bug_investigation_stage import InvestigationResponse
             actual_schema=ReviewResponse if schema.get('title')=='ReviewResponse' else InvestigationResponse if schema.get('title')=='InvestigationResponse' else bug_investigation.BugPlanningResponse
             answer=answer_for(packet,actual_schema)
+            # Exercise the actual provider-only tagged wire, including both
+            # literal searches and source line reads, before common validation.
+            for item in (answer.get('draft') or {}).get('inspection', []):
+                if 'query' in item:
+                    item.update(kind='search', path=None, start=None, end=None)
+                else:
+                    item.update(kind='read', query=None)
         else:
             client_case=CLIENT_SOURCE in schema['properties']['edits']['items']['properties']['path']['enum']
             answer=dict(edits=[dict(path=CLIENT_SOURCE if client_case else PRODUCTION,
