@@ -371,7 +371,18 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             wire['committed_bootstrap_context'] = bootstrap_fact
     if read_chars > limit:
         raise PlanningUnavailable('Initial source context exceeds the investigation read bound.', 'inspection_limit')
-    if program_mode and predecessor and engine is not None:
+    if program_mode and lessons and lessons['predecessor'] == predecessor:
+        # Source and the settled complete rejected self-check were revalidated.
+        # Keep objections, not a rejected answer to copy or another diagnosis loop.
+        investigating = False
+        wire['self_review'] = dict(approved=False, executed=False,
+            review_binding=lessons['review_binding'], issues=lessons['issues'],
+            note='Completed rejected self-check DATA only. Build a fresh complete proposal from the owner report and current committed source; no old program is supplied.')
+        wire['fresh_proposal_required'] = 'Resolve the retained objections with actual observations. Inspect genuinely missing source; do not repeat the rejected behavior.'
+        if parent:
+            parent.record('rejected-review-to-fresh-construction', predecessor=predecessor,
+                review_binding=lessons['review_binding'], approved=False, executed=False)
+    if program_mode and predecessor and engine is not None and not (lessons and lessons['predecessor'] == predecessor):
         from workbench.investigation_memory import draft_for_critique
         prior=draft_for_critique(predecessor,engine,packet,original,feedback)
         if prior:
@@ -395,6 +406,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     original_stop = adapter.stop_event
     rejected = set()
     review_rejected = set()
+    rejected_behaviors = ({lessons['rejected_behavior_sha256']} if lessons and
+                          lessons.get('rejected_behavior_sha256') else set())
 
     class Stop:
         def is_set(self):
@@ -482,6 +495,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                         evidence.record('plan-self-check',binding=review.review_binding,ready=review.ready,
                             categories=[issue.category for issue in review.issues],independent_verification=False,
                             approved=False,executed=False)
+                    if not review.ready and program_mode:
+                        rejected_behaviors.add(bug_plan_review.behavior_binding(pending))
                     if historical_pending:
                         if not review.ready:
                             review_rejected.add(review.review_binding)
@@ -561,7 +576,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 raise
             if draft.inspection is None:
                 if review_required and draft.plan is not None:
-                    if bug.digest(raw) in review_rejected:
+                    if bug.digest(raw) in review_rejected or (program_mode and bug_plan_review.behavior_binding(raw) in rejected_behaviors):
                         raise PlanningUnavailable('The proposed plan did not change after its rejected self-check.',
                                                   'review_unchanged')
                     if index+1 == REQUESTS:

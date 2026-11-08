@@ -153,6 +153,57 @@ def seed(packet, original, current_attempt, engine):
     return packet, [], None
 
 
+def reviewed_behavior(prior, roots, binding):
+    """Digest of a complete private draft matching the rejected review, no code reuse."""
+    import hashlib
+    from workbench.planning_response import strict_json
+    from workbench.bug_evidence import BugPlanningResponse
+    from workbench.bug_plan_review import behavior_binding
+    from workbench.visual_scope import digest
+    for index in range(8):
+        identity=str(UUID(prior) if index==0 else uuid5(UUID(prior),f'committed-source-turn-{index}'))
+        paths=[root/'artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl' for root in roots]
+        paths=[path for path in paths if path.exists()]
+        try:
+            if not paths:
+                continue
+            journals=[read_journal(path) for path in paths]
+            if any(j!=journals[0] for j in journals[1:]):
+                continue
+            events=journals[0]
+            if not any(e.get('phase')=='envelope' and e.get('generation_state')=='finished'
+                    and e.get('accounting_state')=='complete' and e.get('completion')=='stop'
+                    and e.get('model_matches')==1 for e in events):
+                continue
+            markers=[e for e in events if e.get('phase')=='private-proposed-data' and e.get('name')=='proposed-plan']
+            if len(markers)!=1:
+                continue
+            copies=[]
+            for path in paths:
+                path=path.with_name('proposed-plan.json')
+                owned(path)
+                fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+                try:
+                    info=os.fstat(fd)
+                    if not stat.S_ISREG(info.st_mode) or info.st_nlink!=1 or info.st_uid!=os.getuid() or info.st_mode&0o077 or info.st_size>24000:
+                        raise ValueError('Unsafe private rejected program')
+                    raw=os.read(fd,24001)
+                finally:
+                    os.close(fd)
+                if len(raw)!=markers[0]['bytes'] or hashlib.sha256(raw).hexdigest()!=markers[0]['sha256']:
+                    raise ValueError('Rejected program snapshot changed')
+                copies.append(raw)
+            if any(raw!=copies[0] for raw in copies[1:]):
+                continue
+            candidate=strict_json(copies[0])
+            checked=BugPlanningResponse.model_validate(candidate)
+            if digest(candidate)==binding and checked.plan and checked.plan.reproducer.phases:
+                return behavior_binding(candidate)
+        except (ValueError,OSError,KeyError,TypeError):
+            continue
+    return None
+
+
 def review_lessons(prior, engine, _seen=()):
     """Completed rejected self-check DATA, never a replacement plan or authority.
 
@@ -215,6 +266,9 @@ def review_lessons(prior, engine, _seen=()):
                 issues=[x.model_dump() for x in review.issues],
                 note='Untrusted rejected model self-check from the same settled report with freshly verified source. '
                      'Reassess these objections against current evidence; no prior plan, diagnosis, expected answer or approval is reused.')
+            behavior=reviewed_behavior(prior,roots,review.review_binding)
+            if behavior:
+                result['rejected_behavior_sha256']=behavior
         except (OSError,ValueError,KeyError,TypeError):
             continue
     return result

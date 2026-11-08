@@ -77,6 +77,8 @@ INSTRUCTIONS = (
     'Do not invent a similarly named method when its actual definition is missing; inspect it. '
     'Cover every requested_behavior_clause, including the requested action and initial user behavior. '
     'Do not replace the requested workflow with a narrower source hypothesis or a different event. '
+    'When self_review or prior_rejected_plan_feedback lists objections, resolve them in a fresh complete proposal. '
+    'Changing read lists or wording while preserving rejected observations is not a correction. '
     'Use app-owned inspection for missing code; never ask the owner to find a file. '
     'Select an exact supplied committed client bootstrap or a source that returns a module. '
     'The app loads that setup in an isolated Lua5.1 environment. In each phase, client is the actual returned '

@@ -53,8 +53,12 @@ def test_historical_review_cannot_return_old_plan_even_when_ready(
     client, headers, store, monkeypatch, ready
 ):
     old_failed(client, headers, store, monkeypatch)
+    from workbench import investigation_memory
+
+    monkeypatch.setattr(investigation_memory, "review_lessons", lambda *a: None)
     fresh = copy.deepcopy(program_answer(False))
     fresh["finding"] += " A complete fresh source-bound proposal."
+    fresh["plan"]["reproducer"]["phases"][0]["code"] = "return subject(string.upper('alice'))"
     calls = scripted(monkeypatch, [review(ready), fresh, review()])
     item, attempt = run(client, headers, store)
     assert item["status"] == "completed" and len(item["proposals"]) == 1
@@ -117,3 +121,103 @@ def test_ineligible_historical_draft_is_never_reused(client, headers, store, mon
                 )
             )
     assert draft_for_critique(prior, store, packet, report(), "") is None
+
+
+@pytest.mark.usefixtures("installed")
+def test_retained_complete_critique_starts_fresh_construction_without_rejected_code(
+    client, headers, store, monkeypatch
+):
+    old_failed(client, headers, store, monkeypatch)
+    fresh = copy.deepcopy(program_answer(False))
+    fresh["plan"]["reproducer"]["phases"][0]["code"] = "return subject(string.upper('alice'))"
+    calls = scripted(monkeypatch, [fresh, review()])
+    item, attempt = run(client, headers, store)
+    assert item["status"] == "completed" and len(calls) == 2
+    assert calls[0]["investigation_progress"]["phase"] == "plan_construction"
+    assert calls[0]["fresh_proposal_required"]
+    assert "previous_candidate" not in calls[0]["self_review"]
+    assert "candidate_plan" not in calls[0]
+    assert not item["decisions"] and not item["tasks"]
+    assert attempt["usage"]["requests_observed"] == 2
+
+
+@pytest.mark.usefixtures("installed")
+def test_read_list_or_wording_changes_do_not_repeat_rejected_behavioral_review(
+    client, headers, store, monkeypatch
+):
+    enable(monkeypatch)
+    from test_bug_investigation_stage import diagnosis
+
+    changed = copy.deepcopy(program_answer(False))
+    changed["finding"] += " More surrounding words."
+    changed["plan"]["scope"] += " A reworded description."
+    changed["plan"]["reproducer"]["description"] += " Changed prose."
+    changed["plan"]["reproducer"]["phases"][0]["description"] += " Changed prose."
+    changed["plan"]["other_reads"] = [PRODUCTION]
+    calls = scripted(monkeypatch, [diagnosis(), program_answer(False), review(False), changed])
+    item, attempt = run(client, headers, store)
+    assert item["status"] == "failed" and len(calls) == 4 and not item["proposals"]
+    assert attempt["usage"]["requests_observed"] == 4
+    assert "previous_candidate" not in calls[3]["self_review"]
+
+
+def test_behavior_binding_keeps_program_setup_and_expectations_but_ignores_prose_reads():
+    from workbench.bug_plan_review import behavior_binding, feedback, ReviewResponse
+    from workbench.bug_program import compile as compile_program
+    from workbench.visual_scope import digest
+    from test_bug_program import wire, SOURCE, TEST
+
+    value, _ = compile_program(
+        wire(), [dict(path=SOURCE, top_level_returns_value=True), dict(path=TEST)], {}
+    )
+    key = behavior_binding(value)
+    changed = copy.deepcopy(value)
+    changed["plan"]["scope"] = "A different summary."
+    changed["plan"]["read_paths"].append("!!!TwichUI/unrelated.lua")
+    changed["plan"]["reproducer"]["description"] = "More prose."
+    assert behavior_binding(changed) == key
+    changed["plan"]["reproducer"]["phases"][0]["code"] = "return subject('other')"
+    assert behavior_binding(changed) != key
+    changed = copy.deepcopy(value)
+    changed["plan"]["reproducer"]["observations"][0]["expected"] = "other"
+    assert behavior_binding(changed) != key
+    review = ReviewResponse(
+        review_binding=digest(value),
+        ready=False,
+        issues=[
+            dict(
+                category="observation",
+                explanation="The observation does not use the actual result.",
+            )
+        ],
+    )
+    result = feedback(dict(coverage=dict(reproducer_format="lua-phases-v1")), value, review)
+    assert (
+        "previous_candidate" not in result["self_review"]
+        and result["self_review"]["rejected_behavior_sha256"] == key
+    )
+    assert (
+        value
+        == compile_program(
+            wire(), [dict(path=SOURCE, top_level_returns_value=True), dict(path=TEST)], {}
+        )[0]
+    )
+
+
+@pytest.mark.usefixtures("installed")
+def test_verified_previous_rejection_blocks_same_behavior_before_another_review(
+    client, headers, store, monkeypatch
+):
+    old = old_failed(client, headers, store, monkeypatch)
+    from workbench.investigation_memory import review_lessons
+
+    lesson = review_lessons(old["id"], store)
+    assert lesson["rejected_behavior_sha256"]
+    unchanged = copy.deepcopy(program_answer(False))
+    unchanged["plan"]["other_reads"] = [PRODUCTION]
+    unchanged["finding"] += " New prose without a behavioral correction."
+    calls = scripted(monkeypatch, [unchanged])
+    item, attempt = run(client, headers, store)
+    assert item["status"] == "failed" and not item["proposals"] and len(calls) == 1
+    assert attempt["usage"]["requests_observed"] == 1
+    assert "previous_candidate" not in calls[0]["self_review"]

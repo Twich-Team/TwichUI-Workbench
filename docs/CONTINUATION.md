@@ -1,3 +1,55 @@
+# Latest real26 settled / no-copy revision verified, pending deployment
+
+Installed remains a5929e6,4rolesactive/disabled, protectedloopback/LAN restored.
+No provider active. C/outcome-a5929e6/attempt-26-accounting.json:
+model0771e2dd-537d-42cc-a049-ad3764758fe3,3finished stop receipts10496generated/
+59946prompt. First critique correctly rejected constant/query-recompute/no-repeat/
+activejourney scope mismatch. Fresh plan COPIED EXACT rejected phase code and
+expectations, adding onlyreadpaths. Third critique rejected it again. Fourth
+request canceled via normal app local-provider-disable (taskqwenonce/no fallback),
+no partial output reused. Initial helper worker stop correctly denied unsettled
+work; no bypass. After app cancellation, helperstop/canonical settlement succeeded.
+Exacttask101937idle twice6144bound; finalreceipt unavailable, keep unknownusage+
+6144max separate fromactual. Oldproducer stopped, original model active; settings
+restored exactly through normal API except monotonic policyrevision4. Strictnetwork
+R/network-after-anti-repeat.txt checked. Canonical R/stopped-local-reconciliation.json.
+
+Latest185rows/schema0012/28tables SHA c6014ad727475d1a6e79932273d763fe022ac7c985b4eb2a6d01c7fcfc9a15d2,
+28historyentries. Preserve179/175/original79/recovery copies; never forwardoldstore.
+Ledger82starts/80completeusage/79stop/1partial/2oldunknown,99065generated/823384prompt.
+Unknown17max2600 and26max6144 separate, notactualusage ormoney. No externalactivity
+uncertain; unknown historical usage preserved.0realfix/0implementation/Codex/provider
+cases complete. No owner action needed. Continue full outcome, no campaign reset.
+
+UNINSTALLED corrective code: program feedback omits rejected candidatebody. Retain
+verified objections/source/ownerreport only. Exact behavioral hash ignores prose/
+read-list changes but includes program/setup/observations/expectations; rejects
+unchanged behavior before another self-check, including across settled renewals.
+Same-report/current-source/settled completed review with matched private draft hash
+can directly guide fresh construction, without repeating diagnosis/critique. No
+oldplan/approval/output replay. Independent review/planrun/nativechecks unchanged.
+
+C/no-copy-proof.json: actual185rowCOPY+real localtokenizer no generation/livewrite;
+first schemaBugPlanningResponse,19725tokens,76326HTTPbytes,fullbootstrap/sourceAPI/
+3ownerclauses, no previous_candidate/candidate_plan. Latest review's rejectedbehavior
+hash verified against complete private draft. Local deterministic replay of actual
+second26response stopped review_unchanged BEFORE another review. Historicalusage
+only/simulated replay, notnewprovider consumption. Old17/20/26canonicalreceipts read
+and preserved.172integratedfocused pass C/no-copy-integrated.log;37newreviewfocused
+pass. Native program C/no-copy-native.log32.58sec615.5MiB two unrelated repairs with
+actual separateAPIworker/browser/faults/concurrency/restarts AND semantic selfreview
+rejection then freshbody/no oldcandidate path. Build/contracts/static pass
+C/no-copy-check.log. Last frozenfull1484backend/25frontend is a592, retained for
+unchangedcode; fresh targeted/newnative covers this delta. Do not claim newfullrun.
+
+Next revision28/controller27: previousa592, forward185/original79, roots85,
+append0771e2dd to23priorIDs=24. Save sourcecheckpoint/tests/inventory/seal before
+activation; sourceproof/privatecredentials/network/history gates. Freshreal27starts
+proposal construction from verified objections, without rejected code. Evaluate
+real behavior promptly; no developer flightfixture/fix. Then remaining4providercases/
+installedcompletedresultrestart/next ordinarybug/cleanup. Styling/audit afterfunctional
+gate. Full requirements unchanged. Below is history, not active work.
+
 # Current installed revision27 / ACTIVE real26
 
 S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-a5929e6;

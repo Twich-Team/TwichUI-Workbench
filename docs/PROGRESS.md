@@ -7024,3 +7024,20 @@ d5ebff85-5688-4579-b0d0-77a4f3c69c61/model0771e2dd-537d-42cc-a049-ad3764758fe3,
 firstrequest actuallycritiques old25draft, neverapproval/execute. Exactmodel91406
 processing/6144limit03:16:12Z. No independentrealfix/implementation/Codex/providerpass.
 Continue normaljourney; no ownerdecision, arbitrarycampaigncaps or checkpointstop.
+
+## November8 — stop semantic-copy loop; preserve exact settlement
+
+Real26 firstcritique correctly rejected4actualflaws; newproposal copied all3phase
+programs/expectations andchangedonlyreadpaths, so whole-plan hashmissedduplicate.
+Thirdcritique rejected again. Fourthcanceledthroughnormalmodelsettings control
+(taskQwenonly/no fallback); helper correctlydenied activeworker stop, no bypass.
+After app cancellation, helperstop/canonical exact101937idle6144settlement succeeded.
+Threecomplete10496generated/59946prompt; fourthfinalreceiptunknown retained with
+6144max only. Allproviderchoicevalues restored/revision4, originalmodel/network
+verified,185rows/28entries preserved. No implementation orrealprovidercasepassed.
+Newfeedback omits oldprogram, behavioral digest ignores read/prosechanges; matched
+completed rejectedreview directlyguides freshconstruction.172focused/37reviewtests,
+actual185copy/tokenizer19725/no-generation/local replay rejectsbeforere-review,
+newnative32.58sec615.5MiB2controlledrepairs withsemantic-rejection/freshconstruction/
+concurrency/restarts/staticbuild pass. Preserve full1484/25a592baseline forunchanged
+code. Nextverifieddeployment/real27, notcheckpointstop orownerpermissionrequest.

@@ -200,7 +200,9 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                     cause='The inspected implementation produces the wrong name for the reported operation.',
                     evidence_paths=[CLIENT_SOURCE if case['client_case'] else PRODUCTION])))
         elif reviewing:
-            answer=dict(review_binding=packet['review_binding'],ready=True,issues=[])
+            rejected = program_mode and 'BOGUS_INPUT' in packet['candidate_plan']['plan']['reproducer']['phases'][0]['code']
+            answer=dict(review_binding=packet['review_binding'],ready=not rejected,
+                issues=[dict(category='observation',explanation='The input was changed but the expected actual name was not; construct the correct observation from the reported operation.')] if rejected else [])
         elif conflict:
             answer['question'] = 'A controlled extra question conflicts with the plan.'
         elif fault:
@@ -214,7 +216,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             answer = dict(finding='Read the remaining committed source in the same bounded range.',
                 plan=None,question=None,limitation=None,
                 inspection=[dict(path=CLIENT_SOURCE,start=1,end=9999)])
-        elif not packet.get('validation_feedback'):
+        elif not packet.get('validation_feedback') and not packet.get('self_review'):
             # Exercise the actual cross-process correction path: a completed
             # single-plan candidate omitted its load and cannot be approved.
             if program_mode:
@@ -226,6 +228,12 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                         step.update(op='table', path=['unused'])
         elif not fault and not program_mode:
             answer = wire_from_data(answer)
+        if program_mode and not reviewing and not investigating and not fault:
+            if packet.get('self_review'):
+                assert 'previous_candidate' not in packet['self_review']
+            elif packet.get('validation_feedback'):
+                phase=answer['plan']['reproducer']['phases'][0]
+                phase['code']=phase['code'].replace("'Sam'", "'BOGUS_INPUT'").replace('ALICE', 'BOGUS_INPUT')
         class Transport:
             seconds = 120
             def models(self, _): return expected_model
@@ -325,6 +333,8 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         expected += [(case['choice'], 'diagnosis')]*(3 if case['client_case'] else 2)
         expected += [(case['choice'], 'planning')]*2
         expected.append((case['choice'], 'self-review'))
+        if program_mode:
+            expected += [(case['choice'], 'planning'),(case['choice'], 'self-review')]
         expected.append((case['choice'], 'implementation'))
     assert [calls.get(timeout=2) for _ in expected] == expected
     with store.connect() as c:
