@@ -6914,3 +6914,24 @@ diagnostics unchanged; unknown usage remains unavailable, prefix+bound reserved.
 30focused and actual151-row COPY proof/admission-before-hold/after-pass/all20HTTP
 reads pass; no live DB write or generation. Continue frozen verification/install/
 installed CLI/fresh19 under standing authority, no owner renewal needed.
+
+
+## November8 — source-context delivery correction after real task21
+
+Real21 settled before diagnosis: duplicate cached/read characters exhausted45000
+at49702,2finished receipts2413generated/27415prompt; no plan/repair. New Lua-phase
+architecture remains real-unproven. Context correction counts unique pinned lines,
+prioritizes complete startup before generation and through final request fitting.
+Actual163-row COPY/tokenizer-only proof preserves129startup lines for diagnosis/
+plan/review within65536bytes and22000prompt bound, no generation/livewrite. Failure
+logs retained. No full suite rerun solely for status; focused/native delta checks
+and checked deployment continue, no owner stop. Full product/A8 scope unchanged.
+
+Final delta:168focused checks and separate API/worker/native/normal-browser
+Lua-mode rehearsal pass32.05sec615.2MiB, two unrelated checked controlled repairs
+plus faults/concurrency/restarts. Initial rehearsal passed both journeys but stale
+scripted read-count assertion failed; fixture now requests actual missing source
+independently of startup metadata. No acceptance protection weakened. All original
+failure logs retained. Ruff/diff checks pass. Retain bound c98 complete1429backend/
+25frontend/build and unchanged browser/admin evidence; this source-only delta has
+fresh focused/native/actual-context checks. Proceed checked revision23 and real22.

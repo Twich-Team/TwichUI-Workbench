@@ -48,3 +48,31 @@ def test_insufficient_read_budget_does_not_claim_or_add_complete_startup(store,m
     before=copy.deepcopy(packet)
     priority,windows,chars,facts=complete(packet,0,lambda:False)
     assert not facts['complete'] and priority==[] and windows==[] and chars==0 and packet==before
+
+
+def test_unique_context_budget_does_not_charge_overlapping_source_twice():
+    p=dict(plan_review='source-grounded-lua-v1',files=[dict(path='tests/test_example.lua',
+        excerpts=[dict(line=1,text='one\ntwo')])],inspection_windows=[dict(path='tests/test_example.lua',
+        line=2,text='two\nthree')])
+    assert bug_source_planning.source_characters(p)==len('one\ntwo\nthree\n')
+    assert bug_source_planning.read_limit(p)==60000
+    p['inspection_windows'].append(dict(path='tests/test_example.lua',line=1,text='one\ntwo'))
+    assert bug_source_planning.source_characters(p)==len('one\ntwo\nthree\n')
+    p['inspection_windows'][-1]['text']='changed'
+    with pytest.raises(ValueError):
+        bug_source_planning.source_characters(p)
+
+
+def test_legacy_investigation_keeps_its_existing_source_bound():
+    assert bug_source_planning.read_limit(dict(plan_review='source-grounded-v2'))==45000
+
+
+def test_complete_startup_precedes_other_current_reads_under_retention_bound():
+    from workbench.source_memory import retain
+    packet=dict(base='fixed',files=[dict(path='aaa.lua',excerpts=[]),dict(path='tests/test_example.lua',excerpts=[])])
+    wire=copy.deepcopy(packet)
+    startup=dict(path='tests/test_example.lua',line=1,text='setup\n'*129,coverage='complete committed test bootstrap')
+    other=dict(path='aaa.lua',line=1,text='other\n'*1000)
+    retain(wire,packet,[other,startup],1000)
+    assert wire['files'][1]['excerpts'][0]['text'].splitlines()==['setup']*129
+    assert wire['source_memory']['retained_characters']<=1000

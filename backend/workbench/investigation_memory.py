@@ -113,7 +113,7 @@ def seed(packet, original, current_attempt, engine):
                                          and event.get('accounting_state') == 'complete'
                                          and event.get('completion') == 'stop'
                                          and event.get('model_matches') == 1)
-                        if event.get('phase') == 'source-memory-reused' or (
+                        if event.get('phase') in {'source-memory-reused','source-bootstrap-context'} or (
                                 completed and event.get('phase') == 'source-read-result'):
                             windows.extend(event.get('windows', []))
                 candidate = copy.deepcopy(packet)
@@ -136,7 +136,9 @@ def seed(packet, original, current_attempt, engine):
                     used.extend(returned)
                 initial_chars = sum(len(e['text']) for f in [*packet['files'], *packet.get('api_references', [])]
                                     for e in f['excerpts'])
-                if initial_chars + sum(len(w['text']) for w in used) > source.READ_CHARS:
+                footprint=(source.source_characters(candidate) if packet.get('plan_review') == 'source-grounded-lua-v1'
+                           else initial_chars+sum(len(w['text']) for w in used))
+                if footprint > source.read_limit(packet):
                     raise ValueError('Source memory exceeds read bound')
                 source.verify_packet(packet, candidate)
                 if used:

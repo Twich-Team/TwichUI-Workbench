@@ -303,7 +303,12 @@ class LocalProvider:
             context['context_note'] = (context.get('context_note', '') +
                 ' Some source windows were shortened to the request bound; inspect missing lines when needed.')
             for _ in range(512):
-                options = [(item, part) for item in context.get('files', []) for part in item.get('excerpts', [])]
+                bootstrap = context.get('committed_bootstrap_context') or {}
+                def protected_prefix(item, part):
+                    return (bootstrap.get('complete') is True and item.get('path') == bootstrap.get('test_path')
+                            and part.get('line', 0) <= bootstrap.get('through_line', 0))
+                options = [(item, part) for item in context.get('files', []) for part in item.get('excerpts', [])
+                           if not protected_prefix(item, part)]
                 if not options:
                     break
                 item, part = max(options, key=lambda pair:(

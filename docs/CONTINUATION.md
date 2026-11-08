@@ -1,3 +1,63 @@
+# Current continuation override — November 8, 2026
+
+This section supersedes the historical snapshot below. Continue under the root
+standing owner authority; no campaign renewal, attempt/revision/time cap or owner
+attendance for delegated acceptance. No subagents. No checked real repair and0/4
+real provider cases complete; full scope unchanged.
+
+C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a
+Installed S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-c98d42e
+R=C/outcome-c98d42e. Commit c98d42e48f33e9cd3d473949cbbaee7d9c882e4a,
+tree c12a03294be21d65046f59580a3bec4e1a911186,
+seal81114af006296b7a1a28d603d67c3084d05c8e248a5490e8b9cde8cc244e4ae9.
+Four everyday roles active/disabled, original review stopped. Existing network,
+TLS, helper, credential and model boundaries unchanged.
+
+Task21 model ae93bb1f-5e3e-4f2c-b5a4-aa2aa88d611c /intake
+5fc0598c-9d13-4e8a-848a-28dfc1109bec settled source inspection failure at49702
+old cumulative characters.2 complete stop/usage receipts2413generated/27415prompt,
+no diagnosis/approval/repair. Exact idle/model and immutable evidence R/attempt-21-
+accounting.json. No live request/driver. Latest163-row schema0012/28table history
+SHA66c10e0a5e1b4a712eceb2826b899b28f95fd7b6709aef6421dfd29e09c9b782;
+23 history entries. Preserve forward163, never older159/155 over it. Original79
+SHA4b889a9e8ea11f8683b5750934b73ab12a6293e58ccd72433a8c490a06202204.
+C/outcome-ledger.json:63starts,62usage receipts,61complete texts/1partial/1oldunknown;
+57205generated/454199prompt observed,old max2600separate.0implementation/Codex.
+
+Task20 canonical partial settlement WAS RUN on installed c98, journal receipt
+R/partial-reconciliation-verified.json. All7usage known, original incomplete_output/
+usageNull retained. Task17 canonical stopped receipt also copied/valid. Do not rerun
+these receipts, reuse partial text, or authorize post-generation provider switching.
+
+Latest uninstalled connected delta: unique committed line footprint60000(new Lua
+mode only), visible32000, full startup BEFORE first generation, protected highest
+priority through retain and serialized-body fit, declaration context, exact cache
+validation. Real163-row copy context/tokenizer proof C/source-footprint-context-proof
+.json passes all129startup lines/3request types; no generation/task/livewrite/external
+source. Original failed v1/v2 logs preserved; v3 passed. Focused logs source-context-
+final-focused.log/source-fitting-fixed.log; native source-context-native.log.
+Use c98 full1429backend/25frontend/build/242focused/2mode native and precisely bound
+prior unchanged browser/security evidence; rerun affected checks for this delta,
+not full cycles for every small correction. Stage/identity/tests/seal BEFORE activation.
+
+Next revision23/controller22. Template scripts R; previous installedc98, forward163/
+original79, evidence_roots75, add modelae93bb1f to18previous IDs=19. Keep mode
+source-grounded-lua-v1 already configured (no v2 substitution required). Source-proof
+config timestamp reconciliation R/config-metadata-reconciliation.json: auth metadata
+unchanged; owner config timestamps changed earlier, original contents unknown.
+Actual isolated login-status proved savedChatGPT auth with ownerconfig unmounted,
+no turn/refresh/newlogin. Never read/copy auth contents or restore owner config.
+
+After checked deployment evaluate REAL task22 promptly through normal delegated
+browser path; app must generate actual phase code/plan then patch. Review private
+plan independently before writing exact approval receipt; never developer-write
+flight repro/fix. Complete originalFAIL/candidatePASS/fulladdon suite/reviewable result,
+four named provider cases, completed-result restart/next ordinary bug, cleanup/
+model restoration and stable enablement. No owner renewal needed. Broader missing
+capabilities remain explicit. All safeguards/recovery details below still apply.
+
+## Historical snapshot before task21/install c98 — preserved, superseded above
+
 # Continue the simplified real bug journey — November8,2026
 
 Read root PROJECT_WORKING_PHILOSOPHY.md, requirements and standing owner direction,

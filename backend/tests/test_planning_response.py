@@ -653,3 +653,34 @@ def test_preparse_content_redacts_known_provider_credential_without_changing_par
         assert json.loads(snapshot)['credential_redacted'] and secret in text
     finally:
         journal.close()
+
+
+
+def test_serialized_input_fitting_preserves_complete_committed_startup(tmp_path):
+    from workbench.bug_investigation_stage import InvestigationResponse
+    prefix='-- complete committed startup line\n'*129
+    packet=dict(purpose='read-only-investigation',report=dict(title='A report',description='A report'),
+        coverage={},owner_reply='x'*22000,
+        api_references=[dict(path='pinned-api',excerpts=[dict(line=1,text='a'*16000)])],
+        committed_bootstrap_context=dict(test_path='tests/test_example.lua',through_line=129,complete=True),
+        files=[dict(path='tests/test_example.lua',excerpts=[dict(line=1,through_line=129,text=prefix,current_read=True)])]
+              +[dict(path='!!!TwichUI/part'+str(i)+'.lua',excerpts=[dict(line=1,text='local x = 1\n'*180,current_read=True)]) for i in range(8)])
+    assert len(json.dumps(packet,separators=(',',':')).encode())<65536
+    calls=[]
+    class Transport:
+        seconds=120
+        def models(self,_):return MODEL
+        def context_budget(self,_,body):return dict(prompt_tokens=12000,context_tokens=32768)
+        def read(self,request,limit):
+            calls.append(request.data)
+            body=json.loads(request.data)
+            context=json.loads(body['messages'][1]['content'])
+            chunks=context['files'][0]['excerpts']
+            assert chunks[0]['text']==prefix and chunks[0]['through_line']==129
+            assert len(request.data)<=65536
+            assert 'shortened' in context['context_note']
+            return json.dumps(dict(id='controlled-fit',model=MODEL,usage=dict(prompt_tokens=10,completion_tokens=5,total_tokens=15),
+                choices=[dict(finish_reason='stop',message=dict(content=json.dumps(dict(finding='A question.',draft=dict(question='A real-world detail.')))))])).encode()
+    provider=LocalProvider()
+    provider._infer(Transport(),'inert',InvestigationResponse,json.dumps(packet,separators=(',',':')),expected_model=MODEL)
+    assert len(calls)==1

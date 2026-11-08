@@ -21,6 +21,29 @@ WIRE_TEXT = 24000
 INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/[A-Za-z0-9_./-]+)\.lua')
 
 
+def read_limit(packet):
+    return 60000 if packet.get('plan_review') == 'source-grounded-lua-v1' else READ_CHARS
+
+
+def source_characters(packet):
+    """Unique exact source footprint; actual repeated prompt tokens stay accounted."""
+    lines = {}
+    for item in [*packet['files'], *packet.get('api_references', [])]:
+        for excerpt in item['excerpts']:
+            for offset, text in enumerate(excerpt['text'].splitlines()):
+                key = (item['path'], excerpt['line']+offset)
+                if key in lines and lines[key] != text:
+                    raise ValueError('Committed source footprint disagrees')
+                lines[key] = text
+    for excerpt in packet.get('inspection_windows', []):
+        for offset, text in enumerate(excerpt['text'].splitlines()):
+            key = (excerpt['path'], excerpt['line']+offset)
+            if key in lines and lines[key] != text:
+                raise ValueError('Committed source footprint disagrees')
+            lines[key] = text
+    return sum(len(text)+1 for text in lines.values())
+
+
 def correction(error, raw):
     """Only finished single-plan wording/reproducer errors may be corrected.
 
@@ -152,6 +175,7 @@ def verify_packet(initial, supplied):
             or supplied.get('base') != initial['base'] or supplied.get('policy_sha256') != initial['policy_sha256']
             or supplied.get('plan_review') != initial.get('plan_review')
             or supplied.get('api_references') != initial.get('api_references')
+            or supplied.get('declarations') != initial.get('declarations')
             or supplied.get('files', [])[:len(initial['files'])] != initial['files']
             or not len(initial['files']) <= len(supplied['files']) <= MAX_FILES
             or len({f['path'] for f in supplied['files']}) != len(supplied['files'])):
@@ -168,7 +192,8 @@ def verify_packet(initial, supplied):
         if expected != item:
             raise ValueError('An inspected committed dependency changed.')
     windows = supplied.get('inspection_windows', [])
-    if len(windows) > REQUESTS*3 or sum(len(w['text']) for w in windows) > READ_CHARS:
+    if len(windows) > REQUESTS*3 or (source_characters(supplied) > read_limit(supplied)
+            if supplied.get('plan_review') == 'source-grounded-lua-v1' else sum(len(w['text']) for w in windows) > READ_CHARS):
         raise ValueError('The committed inspection evidence exceeds its operation bound.')
     for index, window in enumerate(windows):
         raw, item = committed(window['path'], initial['base'])
@@ -261,7 +286,8 @@ def inspect(packet, requests):
 def next_wire(packet, original, feedback, windows, finding, matches=None):
     _, wire = bug.planning_request(packet, original, feedback)
     from workbench.source_memory import retain
-    retain(wire, packet, windows, WIRE_TEXT-sum(len(m['text']) for m in (matches or [])))
+    retain(wire, packet, windows, (32000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
+           -sum(len(m['text']) for m in (matches or [])))
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
              'a repeated range advances past a contiguous previously returned prefix when unread lines remain. '
@@ -295,9 +321,25 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             parent.record('source-memory-reused', predecessor=predecessor,
                 windows=[{key:value for key,value in window.items() if key != 'text'} for window in remembered],
                 approved=False, executed=False)
-    read_chars = (sum(len(e['text']) for f in [*initial['files'],*initial.get('api_references',[])] for e in f['excerpts'])
-                  + sum(len(w['text']) for w in packet.get('inspection_windows', [])))
-    if read_chars > READ_CHARS:
+    program_mode = initial.get('plan_review') == 'source-grounded-lua-v1'
+    limit = read_limit(packet)
+    search_chars = 0
+    read_chars = (source_characters(packet) if program_mode else
+        sum(len(e['text']) for f in [*initial['files'],*initial.get('api_references',[])] for e in f['excerpts'])
+        + sum(len(w['text']) for w in packet.get('inspection_windows', [])))
+    if program_mode:
+        from workbench.source_bootstrap_context import complete
+        bootstrap_priority, extra, added, bootstrap_fact = complete(packet, limit-read_chars, should_stop)
+        read_chars = source_characters(packet)
+        if extra and parent:
+            parent.record('source-bootstrap-context',characters=added,
+                windows=[{k:v for k,v in w.items() if k!='text'} for w in extra],approved=False,executed=False)
+        wire = next_wire(packet, original, feedback,
+                         [*packet.get('inspection_windows', []), *bootstrap_priority],
+                         'Current committed source and existing startup context; no diagnosis or approval reused.')
+        if bootstrap_fact:
+            wire['committed_bootstrap_context'] = bootstrap_fact
+    if read_chars > limit:
         raise PlanningUnavailable('Initial source context exceeds the investigation read bound.', 'inspection_limit')
     adapter.ends_at = adapter.ends_at or time.monotonic()+bug.INVESTIGATION_SECONDS
     evidence = parent
@@ -331,7 +373,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             wire['investigation_progress'] = dict(request_number=index+1,max_requests=REQUESTS,
                 requests_after_this=REQUESTS-index-1,last_request=index+1==REQUESTS,
                 remaining_seconds=max(0,int(adapter.ends_at-time.monotonic())),
-                source_characters_read=read_chars,source_characters_remaining=max(0,READ_CHARS-read_chars),
+                source_characters_read=read_chars,source_characters_remaining=max(0,limit-read_chars),
+                source_budget_basis='unique committed characters plus literal search results' if program_mode else 'returned source characters',
                 phase='plan_self_check' if pending is not None else
                       'source_diagnosis' if investigating else 'plan_construction',
                 note='Use retained exact source instead of requesting the same visible lines again. '
@@ -399,11 +442,11 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                             evidence.snapshot('investigation-diagnosis', raw)
                             evidence.record('source-diagnosis-completed', approved=False, executed=False)
                         investigating = False
-                        if initial.get('plan_review') == 'source-grounded-lua-v1':
+                        if program_mode and not (bootstrap_fact and bootstrap_fact.get('complete')):
                             from workbench.source_bootstrap_context import complete
                             bootstrap_priority, extra, added, bootstrap_fact = complete(
-                                packet, READ_CHARS-read_chars, should_stop, diagnosis['evidence_paths'])
-                            read_chars += added
+                                packet, limit-read_chars, should_stop, diagnosis['evidence_paths'])
+                            read_chars = source_characters(packet)+search_chars
                             if extra and evidence:
                                 evidence.record('source-read-result',characters=added,search_matches=0,
                                     purpose='complete-existing-test-bootstrap',
@@ -478,8 +521,12 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             if evidence:
                 evidence.record('source-read-result',characters=chars,search_matches=len(matches),
                     windows=[{key:value for key,value in window.items() if key!='text'} for window in windows])
-            read_chars += chars
-            if read_chars > READ_CHARS:
+            if program_mode:
+                search_chars += sum(len(m['text']) for m in matches)
+                read_chars = source_characters(packet)+search_chars
+            else:
+                read_chars += chars
+            if read_chars > limit:
                 raise PlanningUnavailable('The investigation reached its source-read bound.', 'inspection_limit')
             wire = next_wire(packet, original, feedback, [*windows, *bootstrap_priority], draft.finding, matches)
             if bootstrap_fact:

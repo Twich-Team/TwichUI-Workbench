@@ -189,8 +189,9 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 answer=dict(finding=finding, draft=dict(question='A question.',limitation='Conflicting outcome.'))
             elif fault:
                 answer=dict(finding='PRIVATE_REJECTED_CONTENT'*30,draft=dict(question='A specific question.'))
-            elif 'inspection_result' not in packet or (case['client_case'] and
-                    len(packet.get('source_memory', {}).get('read_windows', [])) == 1):
+            elif ((case['client_case'] and len([w for w in packet.get('source_memory', {}).get('read_windows', [])
+                    if w['path'] == CLIENT_SOURCE]) < 2) or (not case['client_case'] and
+                    not packet.get('inspection_result', {}).get('search_matches'))):
                 read = (dict(path=CLIENT_SOURCE,start=1,end=9999) if case['client_case']
                         else dict(query='return'))
                 answer=dict(finding=finding,draft=dict(inspection=[read]))

@@ -19,7 +19,7 @@ def retain(wire, packet, current, budget=24000):
     for excerpt in packet.get('inspection_windows', []):
         add(excerpt['path'], excerpt, 2)
     for excerpt in current:
-        add(excerpt['path'], excerpt, 0)
+        add(excerpt['path'], excerpt, -1 if excerpt.get('coverage') == 'complete committed test bootstrap' else 0)
     chosen, used = {}, 0
     for key in sorted(lines, key=lambda key:(priority[key], key[0], key[1])):
         size = len(lines[key])+1
@@ -32,12 +32,12 @@ def retain(wire, packet, current, budget=24000):
         while index < len(numbers):
             start = end = numbers[index]
             text = [chosen[(path,start)]]
-            current_read = priority[(path,start)] == 0
+            current_read = priority[(path,start)] <= 0
             index += 1
             while index < len(numbers) and numbers[index] == end+1:
                 end = numbers[index]
                 text.append(chosen[(path,end)])
-                current_read |= priority[(path,end)] == 0
+                current_read |= priority[(path,end)] <= 0
                 index += 1
             excerpts.append(dict(line=start,through_line=end,text='\n'.join(text),
                 coverage='retained exact committed lines',current_read=current_read))

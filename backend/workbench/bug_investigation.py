@@ -329,6 +329,7 @@ def planning_request(packet, original, feedback):
     return BugPlanningResponse, dict(
         purpose='investigate-addon-bug', base=packet['base'],
         **({'api_references':packet['api_references']} if 'api_references' in packet else {}),
+        **({'declarations':packet.get('declarations',[])} if packet.get('plan_review') == 'source-grounded-lua-v1' else {}),
         files=[{k: v for k, v in item.items() if k not in ('git_blob', 'sha256')}
                for item in packet['files']],
         report=dict(title=original['title'], description=original['description'],
