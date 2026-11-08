@@ -432,7 +432,12 @@ def clarify(engine, identity, body):
                         or bool(job['payload'].get('bug_followup')) != body.continue_investigation):
                     raise HTTPException(409, 'Clarification ID already used.')
                 return
-        if (row['status'] != 'waiting_for_information' or row['revision'] != body.revision
+        bug_continuation=(bug_investigation.requested(row['payload']) and row['status']=='failed'
+            and any(j['kind']=='planning' and j['revision']==row['revision'] and j['status']=='completed'
+                and j['payload'].get('task_contract',{}).get('scope_missing') for j in jobs)
+            and not connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
+            and not connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
+        if (row['status'] != 'waiting_for_information' and not bug_continuation or row['revision'] != body.revision
                 or retained_planning_failure(row, jobs)):
             raise HTTPException(409, 'The request changed. Refresh before answering.')
         next_input = {'feedback': body.text, 'clarification_id': str(body.command_id)}
@@ -441,12 +446,12 @@ def clarify(engine, identity, body):
                 raise HTTPException(422, 'Confirm the follow-up investigation before sending your answer.')
             initial = next((job for job in jobs if job['kind'] == 'planning' and job['revision'] == 1
                             and job['status'] == 'completed'), None)
-            if row['revision'] != 1 or not initial:
-                raise HTTPException(409, 'The investigation already used its one follow-up.')
+            if not initial:
+                raise HTTPException(409, 'The original settled investigation is unavailable.')
             grounding = initial['payload'].get('task_contract', {}).get('scenario_grounding', {})
             try:
                 from workbench.planning_limits import followup_budget
-                continuation=followup_budget(connection,initial)
+                continuation=followup_budget(connection,initial,row['revision'])
                 next_input['local_planning_receipt']=initial['payload']['local_planning_receipt']
                 route = provider_routes.approved(connection, row)
                 next_input['bug_followup'] = dict(

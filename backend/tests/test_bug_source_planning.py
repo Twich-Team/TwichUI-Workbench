@@ -604,3 +604,19 @@ def test_codex_larger_pages_keep_exact_source_and_many_small_windows_stay_bounde
     bad['inspection_windows']*=3
     with pytest.raises(ValueError,match='bound'):
         verify_packet(initial,bad)
+
+
+@pytest.mark.usefixtures('installed')
+def test_all_saved_owner_behavior_clauses_reach_planning_and_self_review(store,monkeypatch):
+    from workbench import bug_investigation,bug_source_planning,trusted_preparation,bug_plan_review
+    enable_bugs(monkeypatch)
+    original=report()
+    packet=bug_investigation.context(original,'',trusted_preparation.configuration(store))
+    packet['plan_review']='source-grounded-lua-v1'
+    feedback=' '.join('Keep owner requirement number '+str(i)+'.' for i in range(15))
+    wire=bug_source_planning.next_wire(packet,original,feedback,[],'Completed source facts.')
+    assert 'Keep owner requirement number 14.' in wire['requested_behavior_clauses']
+    assert wire['owner_reply']==feedback
+    reviewed=bug_plan_review.request(wire,response())
+    assert reviewed['requested_behavior_clauses']==wire['requested_behavior_clauses']
+    assert reviewed['owner_reply']==feedback

@@ -305,7 +305,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
         # requirements to review, never interpreted operating instructions.
         notes = list(c.execute(select(planning_jobs.c.payload).where(
             planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning',
-            planning_jobs.c.revision <= job['revision']).order_by(planning_jobs.c.revision.desc()).limit(9)).scalars())
+            planning_jobs.c.revision <= job['revision']).order_by(planning_jobs.c.revision.desc())).scalars())
     feedback = '\n'.join(dict.fromkeys(p['feedback'] for p in reversed(notes) if p.get('feedback')))
     adapter_used, failure, question, packet, model, basis = None, None, None, None, None, None
     model_selection = None
@@ -542,8 +542,6 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             if bug:
                 from workbench.bug_source_planning import verify_packet
                 verify_packet(initial_source_packet, packet)
-                if job['payload'].get('bug_followup') and isinstance(raw, dict) and raw.get('question'):
-                    raw = {**raw, 'limitation': raw['question'], 'question': None}
                 bug_result = bug_investigation.resolve(raw, packet, original['payload'], feedback)
             else:
                 parsed = grounded_scenarios.resolve_response(raw, schema, wire, packet)
@@ -633,10 +631,6 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             contract['scope_missing'] = list(dict.fromkeys([*contract['scope_missing'], *contract['behavioral_evidence']['holds']]))
         else:
             failure = ('planning_validation', contract['behavioral_evidence']['holds'][0])
-    if contract and len(notes) > 8:
-        requirement = 'More than eight preparation revisions need an explicit consolidated request; older requirements must not be silently dropped.'
-        contract['scope_missing'].append(requirement)
-        contract['execution_blockers'].append(requirement)
     message = 'Reusable Lua regression-test scope prepared. No model, run offer or execution permission created.'
     if generation and contract:
         message = ('Behavioral planning needs more information; no examples are ready for approval.'

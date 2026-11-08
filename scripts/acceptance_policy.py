@@ -259,20 +259,22 @@ def check_clarification(connection, request, case):
         'bound bug clarification is unavailable')
     row=connection.execute('SELECT status,revision,payload FROM intakes WHERE id=?',
         (request['intake'],)).fetchone()
-    require(row is not None and tuple(row[:2])==('waiting_for_information',1),
+    revision=reply.get('revision',1)
+    require(row is not None and row[0] in {'waiting_for_information','failed'} and row[1]==revision,
         'clarification task changed or already continued')
     original=json.loads(row[2])
     require({k:v for k,v in original.items() if k!='request_id' and v is not None}==
         {k:v for k,v in case['request'].items() if v is not None},'clarification original request changed')
-    chain=settled_planning_chain(connection,request['intake'],1)
-    phase=chain[0]
+    chain=settled_planning_chain(connection,request['intake'],revision)
+    phase=chain[-1]
     from workbench.planning_limits import continuation_budget
-    continuation_budget(dict(payload=phase['payload']),phase)
+    continuation_budget(dict(payload=chain[0]['payload']),phase,chain)
     require(phase['backend']==case['provider'] and phase['actual_model']==case['model'],
         'clarification provider changed')
     questions=connection.execute('SELECT id,revision FROM proposals WHERE intake_id=?',
         (request['intake'],)).fetchall()
-    require([tuple(q) for q in questions]==[(reply['question'],1)] and
+    expected=[(p['id'],p['revision']) for p in reply.get('prior_proposals',[])]+[(reply['question'],revision)]
+    require(sorted(tuple(q) for q in questions)==sorted(expected) and
         not connection.execute('SELECT 1 FROM proposal_decisions WHERE intake_id=?',
             (request['intake'],)).fetchone(),'clarification question changed or was approved')
 
@@ -469,7 +471,7 @@ def main():
                 result = dict(settled=True)
             else:
                 current = [a for a in new_attempts if a[1:] == (request['intake'], 'planning')]
-                revision=1 if request['action']=='clarify' else request['proposal']['revision']
+                revision=request['clarification'].get('revision',1) if request['action']=='clarify' else request['proposal']['revision']
                 chain=settled_planning_chain(connection,request['intake'],revision)
                 require({a[0] for a in current}=={r['id'] for r in chain},'owned planning phase identities changed')
                 expected.update(r['id'] for r in chain)

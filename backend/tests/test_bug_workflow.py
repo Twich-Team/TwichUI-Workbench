@@ -311,12 +311,12 @@ def test_followup_requires_explicit_bound_consent_and_one_settled_route(
         f['path'] for f in planner.calls[1]['files']]
     assert not worker.tick(store)
     result = intake.view(store, item['id'])
-    assert result['status'] == 'failed'
+    assert result['status'] == 'waiting_for_information'
     assert client.post(url, headers=headers, json={**reply, 'command_id': str(uuid4())}).status_code == 409
 
 
 @pytest.mark.usefixtures('installed')
-@pytest.mark.parametrize('fault',[None,'parent_usage','remaining_budget','source_scope'])
+@pytest.mark.parametrize('fault',[None,'parent_usage','remaining_budget','source_scope','second_reply','settled_limitation'])
 def test_clarification_to_real_plan_preserves_accounting_and_read_scope(
     client,headers,store,monkeypatch,fault,
 ):
@@ -337,6 +337,17 @@ def test_clarification_to_real_plan_preserves_accounting_and_read_scope(
     item=client.get('/api/intake/'+item['id']).json()
     reply=dict(command_id=str(uuid4()),revision=1,text='Normalize it each time.',continue_investigation=True)
     assert client.post('/api/intake/'+item['id']+'/clarification',headers=headers,json=reply).status_code==200
+    if fault in ('second_reply','settled_limitation'):
+        assert worker.tick(store)
+        current=client.get('/api/intake/'+item['id']).json()
+        assert current['status']=='waiting_for_information' and current['revision']==2
+        if fault=='settled_limitation':
+            from workbench.db import intakes
+            with store.begin() as c:
+                c.execute(intakes.update().where(intakes.c.id==item['id']).values(status='failed'))
+        reply=dict(command_id=str(uuid4()),revision=2,text='Technical context: the existing API can be checked offline.',continue_investigation=True)
+        assert client.post('/api/intake/'+item['id']+'/clarification',headers=headers,json=reply).status_code==200
+        assert client.post('/api/intake/'+item['id']+'/clarification',headers=headers,json=reply).status_code==200
     planner.answer=response()
     if fault in ('parent_usage','remaining_budget'):
         with store.begin() as c:
@@ -358,17 +369,22 @@ def test_clarification_to_real_plan_preserves_accounting_and_read_scope(
         monkeypatch.setattr(bug_investigation,'context',changed)
     assert worker.tick(store)
     result=client.get('/api/intake/'+item['id']).json()
-    if fault:
+    if fault in ('parent_usage','remaining_budget','source_scope'):
         assert result['status']=='failed'
         assert len(planner.calls)==1
         assert not result['tasks'] and not result['decisions']
     else:
         assert result['status']=='completed',result['jobs']
-        assert result['revision']==2 and len(result['proposals'])==2
-        assert next(p for p in result['proposals'] if p['revision']==2)['task_contract']['review_feedback']==reply['text']
-        assert len(planner.calls)==2
+        phases=3 if fault in ('second_reply','settled_limitation') else 2
+        assert result['revision']==phases and len(result['proposals'])==phases
+        assert reply['text'] in next(p for p in result['proposals'] if p['revision']==phases)['task_contract']['review_feedback']
+        assert len(planner.calls)==phases
         with store.connect() as c:
-            chain=settled_planning_chain(c,item['id'],2)
-            assert len(chain)==2 and sum(r['usage'].get('requests_observed',1) for r in chain)==2
-            assert chain[1]['payload']['bug_followup']['remaining_requests']==15
+            chain=settled_planning_chain(c,item['id'],phases)
+            assert len(chain)==phases and sum(r['usage'].get('requests_observed',1) for r in chain)==phases
+            assert chain[-1]['payload']['bug_followup']['remaining_requests']==17-phases
+            if phases==3:
+                assert chain[-1]['payload']['bug_followup']['budget_version']==3
+                assert len(chain[-1]['payload']['bug_followup']['prior_attempts'])==2
+                assert 'Normalize it each time.' in next(p for p in result['proposals'] if p['revision']==3)['task_contract']['review_feedback']
     assert not worker.tick(store)

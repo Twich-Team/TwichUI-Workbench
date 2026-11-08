@@ -23,36 +23,43 @@ function originalRequest(value, expected) {
   exact(submitted, expected, 'intake request changed');
 }
 
+const proposalIdentities = item => item.proposals.map(p=>({id:p.id,binding:p.binding,revision:p.revision}))
+  .sort((a,b)=>a.revision-b.revision);
+const priorProposals = reply => [...(reply.prior_proposals || []),
+  {id:reply.question,binding:reply.question_binding,revision:reply.revision || 1}];
 export function reviewClarification(item, candidate, reply) {
-  check(candidate.request.kind === 'issue' && uuid(reply.intake) && hex(reply.question_binding) &&
-    uuid(reply.question) && typeof reply.answer === 'string' && reply.answer.trim().length > 0 &&
-    reply.answer.length <= 1600, 'clarification binding or answer unavailable');
-  check(item.id === reply.intake && item.status === 'waiting_for_information' && item.revision === 1 &&
-    item.proposals.length === 1 && item.proposals[0].id === reply.question &&
-    item.proposals[0].binding === reply.question_binding && item.proposals[0].revision === 1 &&
-    item.proposals[0].task_contract.scope_missing.length > 0 &&
-    !item.clarifications.length && !item.tasks.length && !item.decisions.length,
-  'clarification task changed or already continued');
-  originalRequest(item.original, candidate.request);
-  check(item.provider_activity?.length === 1 && item.provider_activity[0].purpose === 'planning' &&
-    item.provider_activity[0].backend === candidate.provider &&
-    item.provider_activity[0].actual_model === candidate.model &&
-    item.provider_activity[0].requested_model === candidate.model &&
-    item.provider_activity[0].outcome === 'completed' && item.jobs.length === 1 &&
-    item.jobs[0].status === 'completed' && item.jobs[0].attempts === 1,
-  'clarification investigation is unsettled or provider changed');
+  const phases=reply.revision || 1;
+  check(Number.isInteger(phases) && phases>=1 && candidate.request.kind === 'issue' &&
+    uuid(reply.intake) && hex(reply.question_binding) && uuid(reply.question) &&
+    typeof reply.answer === 'string' && reply.answer.trim().length>0 && reply.answer.length<=1600,
+    'clarification binding or answer unavailable');
+  check(item.id===reply.intake && ['waiting_for_information','failed'].includes(item.status) &&
+    item.revision===phases && item.proposals.length===phases &&
+    item.proposals.find(p=>p.revision===phases)?.task_contract.scope_missing.length>0 &&
+    !item.tasks.length && !item.decisions.length,'clarification task changed or already continued');
+  exact(proposalIdentities(item),priorProposals(reply),'clarification proposal history changed');
+  exact(item.clarifications,reply.prior_clarifications || [],'clarification answer history changed');
+  originalRequest(item.original,candidate.request);
+  check(item.provider_activity?.length===phases && item.provider_activity.every(a=>
+    a.purpose==='planning' && a.backend===candidate.provider && a.actual_model===candidate.model &&
+    a.requested_model===candidate.model && a.outcome==='completed') && item.jobs.length===phases &&
+    item.jobs.every(j=>j.status==='completed'&&j.attempts===1),
+    'clarification investigation is unsettled or provider changed');
   return item;
 }
 
 export function reviewPlan(item, candidate, identity, revision, now, reply) {
-  const phases = reply ? 2 : 1;
+  const phases = reply ? (reply.revision || 1)+1 : 1;
   check(item.id === identity && item.revision === phases && item.proposals.length === phases &&
     item.clarifications.length === phases-1 && item.scope_history.length === 1, 'unexpected intake revision or history');
   originalRequest(item.original, candidate.request);
-  if (reply) check(item.id === reply.intake && item.proposals.find(p => p.revision === 1)?.id === reply.question &&
-    item.proposals.find(p => p.revision === 1)?.binding === reply.question_binding && item.clarifications[0].text === reply.answer &&
-    item.clarifications[0].revision === 2, 'clarification history or answer changed');
-  const consentTime = reply ? item.clarifications[0].created_at : item.created_at;
+  if (reply) {
+    check(item.id===reply.intake && item.clarifications.at(-1).text===reply.answer &&
+      item.clarifications.at(-1).revision===phases,'clarification history or answer changed');
+    exact(proposalIdentities(item).slice(0,-1),priorProposals(reply),'prior proposal history changed');
+    exact(item.clarifications.slice(0,-1),reply.prior_clarifications || [],'prior answer history changed');
+  }
+  const consentTime = reply ? item.clarifications.at(-1).created_at : item.created_at;
   check(Date.parse(consentTime) <= now && now - Date.parse(consentTime) < 30 * 60000,
     'planning approval expired or time unavailable');
   check(item.human_scope.visual_requirement === 'nonvisual' &&
@@ -279,7 +286,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
       await page.getByLabel("Your answer", {exact:true}).fill(reply.answer);
       await act("clarify", "POST", url + "/clarification", button("Send reply and allow follow-up"), async body => {
         exact(await json(url), current, "clarification changed before reply");
-        exact(without(body, "command_id"), {revision:1, text:reply.answer, continue_investigation:true},
+        exact(without(body, "command_id"), {revision:reply.revision || 1, text:reply.answer, continue_investigation:true},
           "clarification command differs from owner answer");
         check(uuid(body.command_id), "clarification command identity missing");
         await capacity();

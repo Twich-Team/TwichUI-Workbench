@@ -276,18 +276,18 @@ def check_planning(c, original, job=None):
         data = job['payload']
         binding = digest(dict(original=original['payload'], revision=original['revision'],
                               feedback=data['feedback'], clarification_id=data['clarification_id']))
-        if (original['revision'] != 1 or job['revision'] != 2 or claimed > 1
+        if (job['revision'] != original['revision']+1 or claimed > original['revision']
                 or followup['binding'] != binding or followup['route'] != approved(c, original)
                 or data.get('scenario_generation_claim')):
             raise ValueError('The follow-up no longer matches the approved investigation.')
-        if followup.get('budget_version')==2:
+        if followup.get('budget_version') in (2,3):
             from workbench.planning_limits import followup_budget
             initial=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==original['id'],
                 planning_jobs.c.kind=='planning',planning_jobs.c.revision==1,
                 planning_jobs.c.status=='completed')).mappings().first()
             if not initial:
                 raise ValueError('The original investigation is unavailable')
-            if any(followup.get(k)!=v for k,v in followup_budget(c,initial).items()):
+            if any(followup.get(k)!=v for k,v in followup_budget(c,initial,original['revision']).items()):
                 raise ValueError('The continuation source or consumed accounting changed')
         expected = followup
     elif claimed:

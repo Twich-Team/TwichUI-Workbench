@@ -68,7 +68,10 @@ def attempt_request_bound(connection, identity):
 def operation_request_bound(payload):
     bound=request_bound(payload.get('local_planning_receipt',{}))
     followup=payload.get('bug_followup',{})
-    if followup.get('budget_version')==2:
+    version=followup.get('budget_version')
+    if version is not None and (type(version) is not int or version not in (2,3)):
+        raise ValueError('The continuation accounting version is unavailable')
+    if version in (2,3):
         used,remaining=followup.get('consumed_requests'),followup.get('remaining_requests')
         if (type(used) is not int or type(remaining) is not int or not 1<=used<bound or
                 used+remaining!=bound or remaining<=0 or followup.get('max_total_requests')!=bound):
@@ -77,19 +80,13 @@ def operation_request_bound(payload):
     return bound
 
 
-def followup_budget(connection, initial):
-    """Fresh reply consumes the original task allowance, with its original source scope."""
-    from sqlalchemy import select
-    from workbench.db import model_attempts
-    attempts=connection.execute(select(model_attempts).where(
-        model_attempts.c.job_id==initial['id'],model_attempts.c.purpose=='planning')).mappings().all()
-    if len(attempts)!=1:
-        raise ValueError('The original investigation accounting is unavailable')
-    parent=attempts[0]
-    return continuation_budget(initial,parent)
+def followup_budget(connection, initial, revision=1):
+    """Continue settled phases without resetting their operation safety bound."""
+    phases=settled_planning_chain(connection,initial['intake_id'],revision)
+    return continuation_budget(initial,phases[-1],phases)
 
 
-def continuation_budget(initial,parent):
+def continuation_budget(initial,parent,phases=None):
     """Pure validation shared by the worker and independent persisted-result review."""
     from workbench.visual_scope import digest
     usage=parent['usage']
@@ -97,15 +94,23 @@ def continuation_budget(initial,parent):
     if (parent['outcome']!='completed' or not parent['finished_at'] or not isinstance(usage,dict)
             or usage.get('status')!='complete' or usage.get('units')!='tokens'):
         raise ValueError('The original investigation is not settled with complete accounting')
-    used=usage.get('requests_observed',1)
-    if type(used) is not int or not 1<=used<bound:
+    phases=phases or [parent]
+    counts=[phase['usage'].get('requests_observed',1) for phase in phases]
+    if any(type(count) is not int or count<1 for count in counts):
+        raise ValueError('The previous investigation request accounting is unavailable')
+    used=sum(counts)
+    if not 1<=used<bound:
         raise ValueError('The task has no remaining investigation requests')
     packet=initial['payload'].get('bug_inspection_packet')
     if not isinstance(packet,dict) or not packet.get('files') or not packet.get('base'):
         raise ValueError('The original source disclosure scope is unavailable')
-    return dict(budget_version=2,parent_attempt=parent['id'],parent_usage_sha256=digest(usage),
+    result=dict(budget_version=2 if len(phases)==1 else 3,parent_attempt=parent['id'],parent_usage_sha256=digest(usage),
         consumed_requests=used,remaining_requests=bound-used,max_total_requests=bound,
         source_scope=dict(base=packet['base'],files={f['path']:f['sha256'] for f in packet['files']}))
+    if len(phases)>1:
+        result['prior_attempts']=[dict(id=p['id'],usage_sha256=digest(p['usage']),
+            requests=p['usage'].get('requests_observed',1)) for p in phases]
+    return result
 
 
 def settled_planning_chain(connection, identity, revision=None):
@@ -128,25 +133,28 @@ def settled_planning_chain(connection, identity, revision=None):
         # Accept that supported receipt only for the original non-investigation
         # phase, with complete, internally consistent reported token values.
         values=usage.get('values',{}) if isinstance(usage,dict) else {}
+        values=values if isinstance(values,dict) else {}
         single_receipt=(rev==1 and not payload.get('local_planning_receipt',{}).get('investigation_version')
             and isinstance(usage,dict) and 'status' not in usage
             and all(type(values.get(k)) is int and values[k]>=0 for k in
                 ('prompt_tokens','completion_tokens','total_tokens'))
             and values['total_tokens']>0
             and values['prompt_tokens']+values['completion_tokens']==values['total_tokens'])
-        if (status!='completed' or claims!=1 or outcome!='completed' or not finished
+        valid_values=(all(type(values.get(k)) is int and values[k]>=0 for k in
+            ('prompt_tokens','completion_tokens','total_tokens')) and values['total_tokens']>0
+            and values['prompt_tokens']+values['completion_tokens']==values['total_tokens'])
+        if (not valid_values or status!='completed' or claims!=1 or outcome!='completed' or not finished
                 or not isinstance(usage,dict) or not (usage.get('status')=='complete' or single_receipt)
                 or usage.get('units')!='tokens' or not actual or actual!=requested):
             raise ValueError('The investigation phase is unsettled or lacks complete accounting')
         records.append(dict(id=attempt,job_id=job,revision=rev,payload=payload,usage=usage,
             outcome=outcome,finished_at=finished,backend=backend,actual_model=actual,requested_model=requested))
-    if ([r['revision'] for r in records] not in ([1],[1,2])
+    if (not records or [r['revision'] for r in records]!=list(range(1,len(records)+1))
             or revision is not None and records[-1]['revision']!=revision):
         raise ValueError('The investigation phase history changed')
     first=records[0]
-    if len(records)==2:
-        second=records[1]
-        expected=continuation_budget(dict(payload=first['payload']),first)
+    for index,second in enumerate(records[1:],1):
+        expected=continuation_budget(dict(payload=first['payload']),records[index-1],records[:index])
         received=second['payload'].get('bug_followup',{})
         if (any(received.get(k)!=v for k,v in expected.items())
                 or second['payload'].get('local_planning_receipt')!=first['payload'].get('local_planning_receipt')

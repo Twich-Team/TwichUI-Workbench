@@ -175,7 +175,7 @@ def test_followup_cannot_reset_or_expand_the_original_request_bound(fault):
         assert operation_request_bound(dict(local_planning_receipt=consent))==16
 
 
-@pytest.mark.parametrize('fault',[None,'unknown_status','missing_tokens','wrong_total','failed','unfinished','wrong_model','investigation'])
+@pytest.mark.parametrize('fault',[None,'unknown_status','missing_tokens','wrong_total','failed','unfinished','wrong_model','investigation','null_values'])
 def test_single_turn_terminal_receipt_compatibility_does_not_accept_uncertainty(fault):
     import json
     import sqlite3
@@ -185,6 +185,8 @@ def test_single_turn_terminal_receipt_compatibility_does_not_accept_uncertainty(
     payload=dict(local_planning_receipt={})
     if fault=='unknown_status':
         usage['status']='unknown'
+    if fault=='null_values':
+        usage['values']=None
     if fault=='missing_tokens':
         usage['values'].pop('total_tokens')
     if fault=='wrong_total':
@@ -207,3 +209,15 @@ def test_single_turn_terminal_receipt_compatibility_does_not_accept_uncertainty(
         else:
             chain=settled_planning_chain(c,'intake',1)
             assert len(chain)==1 and chain[0]['usage']==usage
+
+
+@pytest.mark.parametrize('version',[2,3])
+@pytest.mark.parametrize('fault',['float_version','bool_version','unknown_version'])
+def test_malformed_continuation_version_cannot_restore_the_full_operation_bound(version,fault):
+    from workbench.planning_limits import operation_request_bound
+    followup=dict(budget_version=float(version) if fault=='float_version' else True if fault=='bool_version' else 999,
+        consumed_requests=5,remaining_requests=11,max_total_requests=16)
+    consent=dict(current(),investigation_version=10,max_local_requests=16,
+        max_codex_requests=16,max_total_model_requests=16,codex_request_deadline_seconds=300)
+    with pytest.raises(ValueError):
+        operation_request_bound(dict(local_planning_receipt=consent,bug_followup=followup))

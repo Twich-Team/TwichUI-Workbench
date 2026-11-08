@@ -53,6 +53,25 @@ try {
       policy_revision:saved.policy.revision,answer:'Normalize it each time.'};
     await context.close();
     context=await browser.newContext({serviceWorkers:'block'});
+    const secondEvents=[];
+    await assert.rejects(runJourney(context,origin,policy,candidate,{
+      clarification,blockDeadline:Date.now()+140000,minimumRunMs:40000,preparationMs:55000,
+      planningReserveMs:1000,planningMs:7000,uiMs:7000,pollMs:100,
+      async controlsReady(){},async beforeAction(action){assert.equal(action,'clarify');},
+      record(event,detail){secondEvents.push({event,...detail});},
+    }));
+    const second=await observer.request.get(origin+'/api/intake/'+identity).then(r=>r.json());
+    assert.equal(second.status,'failed'); // Historical one-reply limitation, injected by controlled worker.
+    assert.equal(second.revision,2);
+    assert.equal(second.provider_activity.length,2);
+    assert.ok(second.provider_activity.every(a=>a.outcome==='completed'));
+    clarification={intake:identity,revision:2,question:second.proposals[0].id,
+      question_binding:second.proposals[0].binding,policy_revision:saved.policy.revision,
+      prior_proposals:second.proposals.filter(p=>p.revision<2).map(p=>({id:p.id,binding:p.binding,revision:p.revision})),
+      prior_clarifications:second.clarifications,
+      answer:'Technical context: the existing operation can be checked offline; no new owner behavior choice.'};
+    await context.close();
+    context=await browser.newContext({serviceWorkers:'block'});
   }
   await runJourney(context, origin, policy, candidate, {
     clarification,

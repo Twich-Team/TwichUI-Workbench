@@ -191,7 +191,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 answer=dict(finding=finding, draft=dict(question='A question.',limitation='Conflicting outcome.'))
             elif fault:
                 answer=dict(finding='PRIVATE_REJECTED_CONTENT'*30,draft=dict(question='A specific question.'))
-            elif case.get('clarification') and not packet.get('owner_reply'):
+            elif case.get('clarification') and 'Technical context:' not in packet.get('owner_reply',''):
                 answer=dict(finding=finding,draft=dict(question='Should normalization happen each time?'))
             elif ((case['client_case'] and len([w for w in packet.get('source_memory', {}).get('read_windows', [])
                     if w['path'] == CLIENT_SOURCE]) < 2) or (not case['client_case'] and
@@ -342,6 +342,10 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                     calls.put((case["choice"], "implementation"))
                 else:
                     worker.tick(store)
+                    if case_provider=='codex' and program_mode:
+                        with store.begin() as connection:
+                            connection.execute(intakes.update().where(intakes.c.revision==2,
+                                intakes.c.status=='waiting_for_information').values(status='failed'))
         except Exception:
             errors.put(traceback.format_exc(limit=12))
 
@@ -382,7 +386,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     assert actors[0] != actors[1] != os.getpid()
     expected = [('fixture-fault', 'diagnosis'), ('fixture-conflict', 'diagnosis')]
     for case in cases:
-        expected += [(case['choice'], 'diagnosis')]*((3 if case['client_case'] else 2)+int(case.get('clarification',False)))
+        expected += [(case['choice'], 'diagnosis')]*((3 if case['client_case'] else 2)+2*int(case.get('clarification',False)))
         expected += [(case['choice'], 'planning')]*2
         expected.append((case['choice'], 'self-review'))
         if program_mode:

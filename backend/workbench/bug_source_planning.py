@@ -301,7 +301,7 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
         priority,interface=context(packet,original,programs)
         windows=[*windows,*priority]
         wire['selected_source_interface']=interface
-        wire['requested_behavior_clauses']=[s.strip() for s in re.split(r'(?<=[.!?])\s+',original['description']) if s.strip()][:12]
+        wire['requested_behavior_clauses']=[s.strip() for s in re.split(r'(?<=[.!?])\s+',original['description']+'\n'+feedback) if s.strip()]
     if packing_context is not None:
         packing_context.clear()
         packing_context.update(windows=list(windows),requested=list(requested))
