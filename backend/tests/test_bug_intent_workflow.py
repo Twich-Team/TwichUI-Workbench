@@ -8,13 +8,12 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import select
 
-from workbench import bug_check_preparation,bug_intent,worker
-from workbench.db import model_attempts,real_execution_grants
+from workbench import bug_intent,worker
+from workbench.db import model_attempts,real_execution_grants,task_run_offers
 from workbench.planning_provider import LocalProvider
-from workbench.visual_scope import digest
-from test_bug_workflow import enable_bugs,report,response,get_run_offer
+from test_bug_workflow import enable_bugs,report,get_run_offer
 from test_everyday import installed,write_policy  # noqa: F401
-from test_verification_profiles import PRODUCTION,TEST
+from test_verification_profiles import PRODUCTION,TEST,CORRECT,BUGGY,GOOD_TEST
 from test_grounded_workflow import ControlledPreparer
 
 
@@ -25,116 +24,85 @@ def scope():
 
 
 @pytest.mark.usefixtures('installed')
-@pytest.mark.parametrize('recover_construction',[False,True])
-def test_readable_scope_then_check_construction_with_real_original_feedback_and_separate_run_approval(
-    client,headers,store,monkeypatch,recover_construction,
+def test_scope_and_sandbox_offer_allow_repair_before_new_tests_exist_but_do_not_grant_it(
+    client,headers,store,monkeypatch,
 ):
     enable_bugs(monkeypatch)
     config=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
     settings=json.loads(config.read_text())
     settings['bug_plan_review']='source-grounded-intent-v1'
     write_policy(config,settings)
-    # This is explicitly controlled telemetry, not sandbox or real-provider evidence.
-    monkeypatch.setattr(bug_check_preparation,'Runtime',ControlledPreparer)
     calls=[]
-    fail_construction=recover_construction
     def generate(self,packet,schema,expected_model):
         calls.append(copy.deepcopy(packet))
         self.diagnostics=dict(actual_model=expected_model,generation_state='finished',accounting_state='complete',finish_reason='stop',
             request_completion_limit=6144,usage=dict(units='tokens',values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))
-        if packet.get('approved_intent') and fail_construction:
-            raw=dict(finding='The controlled fixture requires an updated safe runtime helper.',draft=dict(limitation='A settled controlled runtime-support gap.'))
-        elif schema is bug_intent.Response:
+        if schema is bug_intent.Response:
             raw=dict(finding='Normalization omits the requested conversion.',plan=scope())
         elif schema.__name__=='InvestigationResponse':
             raw=dict(finding='The committed function trims without converting case.',
                 draft=dict(diagnosis=dict(cause='The conversion is absent.',evidence_paths=[PRODUCTION])))
-        elif schema.__name__=='ReviewResponse':
-            raw=dict(review_binding=packet['review_binding'],ready=True,issues=[])
         else:
-            raw=response()
-            raw['plan'].update({k:scope()[k] for k in ('scope','read_paths','writable_paths','focused_test')})
-            if not any('sandbox_feedback' in p for p in calls):
-                # An actual missing function fails Lua rather than reproducing a bug.
-                raw['plan']['reproducer'].update(phases=[dict(description='Invoke the inspected function.',
-                    code="return subject.Missing('ALICE')")],steps=[dict(op='load',source=PRODUCTION)],
-                    observations=[dict(after_step=1,source='return',path=[1],expected='alice',incorrect='ALICE')])
+            raise AssertionError('No model-generated checking artifact is required before permission to attempt a repair')
         return raw,expected_model,'local'
     monkeypatch.setattr(LocalProvider,'generate',generate)
     item=client.post('/api/intake',headers=headers,json=report()).json()
     assert worker.tick(store)
     item=client.get('/api/intake/'+item['id']).json()
-    assert item['status']=='completed',item['jobs']
     proposal=item['proposals'][0]
     assert proposal['task_contract']['bug_intent']['checks_prepared'] is False
-    assert not proposal['task_contract'].get('bug_evidence')
-    assert len(calls)==2
     command=dict(command_id=str(uuid4()),proposal_id=proposal['id'],binding=proposal['binding'],
-        scope_revision=proposal['scope_revision'],action='approve',note='Controlled scope review',
+        scope_revision=proposal['scope_revision'],action='approve',note='Controlled independent scope review',
         expectation_review=proposal['task_contract']['bug_intent']['review_digest'])
     saved=client.post('/api/intake/'+item['id']+'/decisions',headers=headers,json=command)
     assert saved.status_code==200,saved.text
-    if recover_construction:
-        from workbench.db import planning_jobs
-        assert worker.tick(store)  # Applied scope, without a run grant.
-        assert worker.tick(store)  # Decompose approved scope.
-        assert worker.tick(store)  # Settled construction limitation.
-        with store.connect() as c:
-            job=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==item['id'],planning_jobs.c.kind=='behavioral_preparation')).mappings().one()
-            assert job['status']=='failed'
-        retry=dict(job_id=job['id'],command_id=str(uuid4()),review_binding=proposal['binding'],renew_check_construction=True)
-        before=len(calls)
-        wrong=dict(retry,review_binding='0'*64)
-        assert client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=wrong).status_code==409
-        missing=dict(retry)
-        missing.pop('command_id')
-        assert client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=missing).status_code==409
-        with store.begin() as c:
-            old_attempt=c.execute(select(model_attempts).where(model_attempts.c.job_id==job['id'])).mappings().one()
-            c.execute(model_attempts.update().where(model_attempts.c.id==old_attempt['id']).values(usage=None))
-        assert client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=retry).status_code==409
-        with store.begin() as c:
-            c.execute(model_attempts.update().where(model_attempts.c.id==old_attempt['id']).values(usage=old_attempt['usage']))
-        saved=client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=retry)
-        assert saved.status_code==200,saved.text
-        assert client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=retry).status_code==200
-        assert len(calls)==before
-        conflicting=dict(retry,command_id=str(uuid4()))
-        assert client.post('/api/intake/'+item['id']+'/retry',headers=headers,json=conflicting).status_code==409
-        fail_construction=False
+    for _ in range(3):
         assert worker.tick(store)
-        with store.connect() as c:
-            renewed=c.execute(select(planning_jobs).where(planning_jobs.c.id==job['id'])).mappings().one()
-            assert renewed['attempts']==2 and renewed['status']=='completed',renewed['message']
-            assert len(renewed['payload']['check_preparation_history'])==1
-            assert renewed['payload']['check_preparation_history'][0]['output_reused'] is False
-    else:
-        for _ in range(3):
-            assert worker.tick(store)
     endpoint,offer=get_run_offer(client,item)
     assert offer['available'],offer
-    frozen=offer['offer']['prepared_behavior']
-    assert frozen['intent_digest']==proposal['task_contract']['bug_intent']['review_digest']
-    assert frozen['reproducer']['observations']
-    assert any(p.get('sandbox_feedback',{}).get('outcome')=='hold' for p in calls)
-    assert all(p.get('approved_intent') for p in calls[2:])
+    assert len(calls)==2
+    assert 'prepared_behavior' not in offer['offer']
+    assert offer['offer']['repair_cycle']['verification']=='not_run'
+    assert offer['offer']['repair_cycle']['criteria']==scope()['criteria']
     assert client.get('/api/intake/'+item['id']).json()['proposals'][0]==proposal
     with store.connect() as c:
         assert not c.execute(select(real_execution_grants)).first()
         attempts=c.execute(select(model_attempts).where(model_attempts.c.task_id==item['id'])).mappings().all()
-        assert sorted(a['purpose'] for a in attempts)==['check_preparation']*(2 if recover_construction else 1)+['planning']
-        assert all(a['outcome'] in {'completed','failed'} and a['usage']['status']=='complete' for a in attempts)
-        assert sum(a['outcome']=='failed' for a in attempts)==int(recover_construction)
-    # Tampering a prepared scope cannot be hidden by recomputing its model-owned digest.
-    root=Path(settings['output_root'])
-    evidence_file=next(root.rglob('prepared-bug-checks.json'))
-    prepared=json.loads(evidence_file.read_text())
-    assert prepared['intent_digest']==proposal['task_contract']['bug_intent']['review_digest']
-    changed=copy.deepcopy(prepared['evidence'])
-    changed['plan']['writable_paths']=[PRODUCTION]
-    changed['review_digest']=digest(changed)
-    with pytest.raises(ValueError):
-        bug_check_preparation.validate_evidence(proposal['task_contract']['bug_intent'],changed)
+        assert [a['purpose'] for a in attempts]==['planning']
+    # A separate current run decision is still required; scope approval alone
+    # has created zero implementation authority or model generation.
+    rejected=client.post(endpoint,headers=headers,json=dict(command_id=str(uuid4()),
+        scope_approval_id=command['command_id'],binding='0'*64,run_budget=offer['offer']['budget'],note='Stale controlled run'))
+    assert rejected.status_code==409
+    # Controlled component exercise: edits can be attempted before a new test
+    # exists, but a green old suite cannot qualify as a checked bug repair.
+    # This is actual Lua with simulated confinement, never real-provider proof.
+    from workbench import task_session
+    from workbench.real_workspace import durable
+    with store.connect() as c:
+        saved_offer=c.execute(select(task_run_offers).where(task_run_offers.c.id==offer['offer']['id'])).mappings().one()
+    prepared=Path(saved_offer['snapshot']['ready_preparation']['root'])
+    run=prepared.parent/'controlled-repair-cycle'
+    run.mkdir(mode=0o700)
+    for name in ('recipe.json','recipe-oracle.lua'):
+        durable(run/name,(prepared/name).read_bytes())
+    runtime=ControlledPreparer(run)
+    task_session.provision(runtime,dict(control_patches={}))
+    runtime._request_id,runtime._fence,runtime._context_sha=str(uuid4()),str(uuid4()),None
+    (runtime.workspace/PRODUCTION).write_text(CORRECT)
+    without_test=runtime.candidate_feedback(lambda:True)
+    assert without_test['status']=='fail' and without_test['original_test_differential']['status']=='fail'
+    target=runtime.workspace/TEST
+    target.write_text(target.read_text()+GOOD_TEST)
+    checked=runtime.candidate_feedback(lambda:True)
+    assert checked['status']=='pass' and checked['original_test_differential']['status']=='pass'
+    result=runtime.freeze_candidate(runtime._request_id,runtime._fence,lambda:True,
+        dict(correction_count=1,read_input_errors=0),dict(usage=dict(status='complete',units='tokens',values=dict(prompt_tokens=1,completion_tokens=1,total_tokens=2))))
+    assert result['verification']=='passed' and runtime.verify_frozen(result)
+    original_check=run/result['independent_check_evidence']/'original-with-new-tests.json'
+    original_check.write_text('{}')
+    assert not runtime.verify_frozen(result)
+    assert (Path(os.environ['WORKBENCH_RESEARCH_ROOT'])/PRODUCTION).read_text()==BUGGY
 
 
 @pytest.mark.usefixtures('installed')

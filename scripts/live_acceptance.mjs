@@ -326,12 +326,43 @@ try {
       // The approved controller checks effective cgroups and LAN TLS separately.
       if (bug && !['submit','clarify'].includes(action))
         need(reviewedSha === readBugReview(data.intake, data.proposal), 'Independent bug plan review changed');
-      if(action==='run'&&data.proposal.task_contract.bug_intent) need(preparedReviewSha===readPreparedReview(data),'Prepared check review changed');
+      if(action==='run'&&data.proposal.task_contract.bug_intent&&data.offer.offer.prepared_behavior) need(preparedReviewSha===readPreparedReview(data),'Prepared check review changed');
       callPolicy('admit', action, data);
     },
     async finish(data) {
       checkControls(false, false);
-      return callPolicy('closeout','finish',data);
+      const result=callPolicy('closeout','finish',data);
+      if(bug&&result.repair_cycle_verified) {
+        // Acceptance judges the generated tests after code/test development.
+        // This is evidence review, never permission for another model or edit.
+        record('awaiting-independent-result-review',{intake:data.intake,execution:data.execution,candidate:result.candidate});
+        const path=join(evidence,'bug-result-review.json');
+        const end=Math.min(blockDeadline,now()+10*minute);
+        for(;;) {
+          try {
+            const info=lstatSync(path),review=read(path);
+            const scopeReview=read(join(evidence,'bug-plan-review.json'));
+            need(realpathSync(path)===path&&info.isFile()&&info.uid===process.getuid()&&!(info.mode&0o077)&&info.size<16384,'Independent result review is not private');
+            need(review.approval_reference===approvalReference&&review.seal===seal&&review.intake===data.intake&&
+              review.execution===data.execution&&review.candidate===result.candidate&&review.approved===true&&
+              review.original_failure_verified===true&&review.candidate_checks_verified===true&&
+              Array.isArray(review.criteria)&&review.criteria.length>=candidate.criteria.length&&
+              review.criteria.every(row=>typeof row.requirement==='string'&&typeof row.evidence==='string'&&row.evidence.length>=20)&&
+              candidate.criteria.every(c=>review.criteria.some(row=>row.requirement===c)),
+              'Generated repair or behavioral evidence did not pass independent acceptance review');
+            need(Array.isArray(review.scope_criteria)&&review.scope_criteria.length===scopeReview.criteria.length&&
+              scopeReview.criteria.every(c=>review.scope_criteria.some(row=>row.id===c.id&&row.description===c.description&&
+                typeof row.evidence==='string'&&row.evidence.length>=20)),
+              'Independent result review does not cover every approved behavior criterion');
+            result.independent_result_review_sha256=sha(path);
+            record('independent-result-review',{candidate:result.candidate,reviewSha:result.independent_result_review_sha256});
+            break;
+          } catch(error) {if(error.code!=='ENOENT')throw error;}
+          need(now()<end,'Independent result review did not settle');
+          await wait(500);
+        }
+      }
+      return result;
     },
   });
 } catch {

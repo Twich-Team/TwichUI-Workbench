@@ -1,8 +1,9 @@
 """A reviewable repair scope, separate from executable checks and provider turns.
 
-Approval binds behavior and source/write boundaries. Test-program construction is
-an internal preparation responsibility; only a subsequently certified run offer
-can authorize source modification. This module never runs code or grants access.
+Approval binds behavior and source/write boundaries. A separate run decision can
+authorize an isolated repair and test-development cycle before behavioral evidence
+is complete. Independent original/candidate checking gates the checked result,
+not permission to attempt scoped edits. This module never runs code or grants access.
 """
 from typing import Annotated, Literal
 

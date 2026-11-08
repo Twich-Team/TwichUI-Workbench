@@ -1,3 +1,13 @@
+## Active owner direction — November 8, 2026
+
+The owner distinguishes permission to attempt an isolated scoped repair from evidence
+that the repair is correct. Do not require complete executable bug checks before the
+first edit. Preserve separate scope/run approvals and independent post-edit original/
+candidate checks. New scoped-repair-v1 implementation is under integrated verification;
+consult CONTINUATION and receipts for installed status. Prior descriptions of mandatory
+pre-edit bug-reproducer certification are historical for the older workflow. No old
+campaign limits or engineering renewals apply. All unrelated safeguards remain.
+
 # Execution under standing owner authority
 
 Read the authoritative root philosophy, requirements and

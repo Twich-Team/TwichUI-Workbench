@@ -13,7 +13,7 @@ from workbench.db import real_execution_grants, real_execution_requests, real_pu
 from workbench.real_workspace import durable
 
 
-def advance_local(engine, database, outcome, planner, *, example="  ALICE ", native=False, staged=False, bug_edit=None, codex_route=None):
+def advance_local(engine, database, outcome, planner, *, example="  ALICE ", native=False, staged=False, bug_edit=None, bug_test_edit=None, codex_route=None):
     from workbench import everyday
     from test_regression_evidence import ControlledPreparer
     from test_real_transport import final_response, scripted_http, tool_response
@@ -111,7 +111,7 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
                  [('read_file', dict(path=path)) for path in (test, *sources)])
         read = tool_response(reads)
         check = tool_response([('run_check', dict(name='candidate'))])
-        edit = tool_response([('replace_text', bug_edit)]) if bug_edit else scripted_edit
+        edit = tool_response([('replace_text', item) for item in [bug_edit,bug_test_edit] if item]) if bug_edit else scripted_edit
         tape.steps = [read, edit, check, final_response()]
         if outcome == 'fail':
             # Repeating a failed check requires a real edit. Finishing here

@@ -24,7 +24,7 @@ from test_bug_workflow import (
 )
 from test_everyday import installed  # noqa: F401
 from test_bug_wire import wire_from_data
-from test_verification_profiles import BUGGY, CORRECT, PRODUCTION, git
+from test_verification_profiles import BUGGY, CORRECT, PRODUCTION, TEST, GOOD_TEST, git
 
 ROOT = Path(__file__).resolve().parents[2]
 pytestmark = pytest.mark.skipif(os.environ.get("WB_PROCESS_REHEARSAL") != "1",
@@ -86,6 +86,21 @@ def program_answer(client_case,session=False):
     plan['reproducer']=dict(description='The existing operation must produce the requested name.',setup=setup,phases=phases)
     return value
 
+
+def regression_edit(client_case):
+    """Controlled coding output, never an acceptance addon implementation."""
+    if client_case:
+        from test_bug_workflow import CLIENT_TEST
+        old='assert(type("message")=="string")'
+        return dict(path=CLIENT_TEST,old=old,new=old+'''\nlocal observed
+c.Notify=function(_,name) observed=name end
+c.Deliver('Sam'); assert(observed=='Sam')
+c.FireEvent('WORKBENCH_FIXTURE_NAME','Lee'); assert(observed=='Lee')
+c.FireEvent('WORKBENCH_FIXTURE_NAME','Pat'); assert(observed=='Pat')
+''')
+    old='assert(normalize("alice") == "alice")'
+    return dict(path=TEST,old=old,new=old+'\n'+GOOD_TEST)
+
 @pytest.mark.parametrize('case_provider',['local','codex'])
 @pytest.mark.parametrize('reproduction_mode',['source-grounded-v2','source-grounded-lua-v1','source-grounded-intent-v1'])
 def test_two_bugs_with_two_browsers_and_separate_process_restarts(
@@ -135,6 +150,10 @@ frame:RegisterEvent('WORKBENCH_FIXTURE_NAME')
 frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
 """
     alert_source = BAD_ALERT + event_source + '-- bounded source paging fixture\n'*120
+    if reproduction_mode=='source-grounded-intent-v1':
+        # Normal test code uses the real fixture client's event registration;
+        # do not overwrite that API with an unrelated second frame registry.
+        alert_source=BAD_ALERT+event_source[event_source.index('local frame=CreateFrame()'):]+'-- bounded source paging fixture\n'*120
     (source / CLIENT_SOURCE).write_text(alert_source)
     git(source, 'add', '.')
     git(source, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid',
@@ -319,6 +338,8 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             client_case=CLIENT_SOURCE in schema['properties']['edits']['items']['properties']['path']['enum']
             answer=dict(edits=[dict(path=CLIENT_SOURCE if client_case else PRODUCTION,
                 old=BAD_ALERT if client_case else BUGGY,new=GOOD_ALERT if client_case else CORRECT)])
+            if intent_mode:
+                answer['edits'].append(regression_edit(client_case))
         # Source-heavy observations must cross the former65k threshold through
         # the actual application, rather than rehearsing only tiny token counts.
         return answer,dict(prompt_tokens=70000,completion_tokens=10,total_tokens=70010,reasoning_tokens=2)
@@ -364,6 +385,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                         bug_edit=dict(path=CLIENT_SOURCE if client_case else PRODUCTION,
                                       old=BAD_ALERT if client_case else BUGGY,
                                       new=GOOD_ALERT if client_case else CORRECT),
+                            bug_test_edit=regression_edit(client_case) if intent_mode else None,
                         codex_route=codex_route)
                     calls.put((case["choice"], "implementation"))
                 else:
@@ -422,8 +444,10 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         for case in cases:
             events=[r[1] for r in observed if r[0]==case['choice']]
             assert events.count('implementation')==1
-            assert events.count('self-review')>=1 and events.count('planning')>=3
+            assert events.count('self-review')==0 and events.count('planning')==1
             assert events[-1]=='implementation'
+        with store.connect() as c:
+            assert not c.execute(select(model_attempts.c.id).where(model_attempts.c.purpose=='check_preparation')).first()
     else:
         expected = [('fixture-fault', 'diagnosis'), ('fixture-conflict', 'diagnosis')]
         for case in cases:

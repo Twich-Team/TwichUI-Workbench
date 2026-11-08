@@ -150,9 +150,14 @@ export function reviewRun(view, task, plan, approval, candidate, policy) {
   const offer = view.offer;
   check(uuid(offer.id) && hex(offer.fingerprint), 'certified offer identity missing');
   const prepared=offer.prepared_behavior;
-  if(plan.task_contract.bug_intent) check(prepared&&prepared.intent_digest===plan.task_contract.bug_intent.review_digest&&hex(prepared.review_digest)&&hex(prepared.oracle_sha256)&&prepared.reproducer.observations.length>=1,'frozen behavioral checks missing');
-  else check(!prepared,'unexpected prepared behavior');
-  exact(offer, {...(prepared?{prepared_behavior:prepared}:{}),id: offer.id, fingerprint: offer.fingerprint, title: candidate.request.title,
+  const cycle=offer.repair_cycle;
+  if(plan.task_contract.bug_intent&&cycle) {
+    check(!prepared&&cycle.verification==='not_run'&&typeof cycle.notice==='string'&&cycle.notice.length>=40,'repair attempt misrepresents verification');
+    exact(cycle.criteria,plan.task_contract.bug_intent.plan.criteria,'repair behavior criteria changed');
+    exact(Object.keys(cycle).sort(),['criteria','notice','verification'],'unexpected repair attempt permission');
+  } else if(plan.task_contract.bug_intent) check(prepared&&prepared.intent_digest===plan.task_contract.bug_intent.review_digest&&hex(prepared.review_digest)&&hex(prepared.oracle_sha256)&&prepared.reproducer.observations.length>=1,'frozen behavioral checks missing');
+  else check(!prepared&&!cycle,'unexpected prepared behavior');
+  exact(offer, {...(prepared?{prepared_behavior:prepared}:{}),...(cycle?{repair_cycle:cycle}:{}),id: offer.id, fingerprint: offer.fingerprint, title: candidate.request.title,
     repository: 'Twich-Team/TwichUI', base_branch: 'main', base: policy.base,
     paths: plan.task_contract.writable_paths, checks: plan.task_contract.verification_commands,
     limits: plan.task_contract.bug_intent ? {...policy.limits,read_chars:262144} : policy.limits, budget: {...policy.budget, offer_id: offer.id, offer_fingerprint: offer.fingerprint}},
@@ -414,8 +419,8 @@ export async function runJourney(context, origin, policy, candidate, options) {
       return row.available;
     }, options.preparationMs ?? 600000);
     reviewRun(view, task, plan, prepared.decisions[0], candidate, policy);
-    if(plan.task_contract.bug_intent&&options.reviewPreparedBug) await options.reviewPreparedBug({intake:identity,task:task.id,proposal:plan,offer:view});
-    const panel = page.getByRole('region', {name:'Certified task run approval'});
+    if(plan.task_contract.bug_intent&&view.offer.prepared_behavior&&options.reviewPreparedBug) await options.reviewPreparedBug({intake:identity,task:task.id,proposal:plan,offer:view});
+    const panel = page.getByRole('region', {name:view.offer.repair_cycle?'Scoped repair run approval':'Certified task run approval'});
     await panel.getByText('Technical run details', {exact:true}).click();
     await panel.getByLabel('Run approval note').fill(policy.note);
     await panel.getByRole('checkbox', {name:'I reviewed what this run allows.'}).check();

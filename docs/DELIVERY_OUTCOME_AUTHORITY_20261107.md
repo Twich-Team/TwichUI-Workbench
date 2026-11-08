@@ -63,3 +63,16 @@ Owner later approved OWNER_CODEX_SUPPORT_DISCLOSURE_20261108.md: three exact rea
 test-support files supplement the original nine-file Codex flight-path permission.
 Its bound request remains immutable historical evidence; no repeated permission needed.
 Other disclosure/write/billing/network/publication safeguards remain unchanged.
+
+## Owner course correction — November 8, 2026: attempt authority versus verification
+
+The owner explicitly directed Workbench to let its coding agent inspect relevant
+source, edit an isolated copy, develop tests, run checks and revise the repair.
+Completing every executable checking artifact before the first code change is not
+a required permission gate. Preserve genuine scope/run approvals and independent
+verification. Readiness to attempt scoped edits must not be presented as correctness.
+The real flight-path task remains the proof; no manual addon solution, scope reduction
+or connector-only milestone can count as completion. Existing billing, disclosure,
+network, access, recovery, history and publication protections remain unchanged.
+This updates the execution method under standing autonomous engineering authority;
+it introduces no campaign cap or routine renewal. Preserve useful settled evidence.

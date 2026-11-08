@@ -278,12 +278,20 @@ def closeout(connection, identity, execution, case):
     require(grant and grant['revoked_at'] and result.get('candidate_id') and result.get('checks'),
             'execution fence or checked result missing')
     if case['request']['kind'] == 'issue':
-        require(result['manifest'].get('profile_certificate_sha256')
+        if result['manifest'].get('scope_ready_sha256'):
+            from workbench.real_workspace import Runtime
+            saved=connection.execute('SELECT snapshot FROM real_execution_grants WHERE id=?',(run['grant_id'],)).fetchone()
+            snapshot=json.loads(saved[0])
+            runtime=Runtime(snapshot['recovery']['root'])
+            require(runtime.recipe.get('repair_cycle')=='scoped-repair-v1' and runtime.verify_frozen(result),
+                    'Scoped repair is missing independent original-production regression evidence')
+        require((result['manifest'].get('profile_certificate_sha256') or result['manifest'].get('scope_ready_sha256'))
                 and any('WB_BEHAVIOR bug-reproducer PASS' in check.get('out', '') for check in result['checks'])
                 and all(file['path'] in case['writablePaths'] for file in result['files'])
                 and any(file['path'].startswith('!!!TwichUI/nav/') for file in result['files']),
                 'bug repair did not establish an independently checked navigation patch')
-    return dict(attempts=[a['id'] for a in attempts], unknown_usage_operations=list(quarantined),candidate=result['candidate_id'],
+    return dict(attempts=[a['id'] for a in attempts], unknown_usage_operations=list(quarantined),
+                repair_cycle_verified=bool(result['manifest'].get('scope_ready_sha256')),candidate=result['candidate_id'],
                 session=session['id'], restoration='settled by existing controller')
 
 
@@ -589,7 +597,9 @@ def main():
                 expected.update(r['id'] for r in chain)
                 if request['action']=='run':
                     preparations=prepared_attempts(connection,request['intake'],case)
-                    require(not request['proposal']['task_contract'].get('bug_intent') or any(a[4]=='completed' for a in preparations),'No completed certified check construction exists')
+                    require(not request['proposal']['task_contract'].get('bug_intent')
+                            or request['offer']['offer'].get('repair_cycle',{}).get('verification')=='not_run'
+                            or any(a[4]=='completed' for a in preparations),'No completed certified check construction exists')
                     expected.update(a[0] for a in preparations)
                 if request['action']=='clarify':
                     check_clarification(connection,request,case)

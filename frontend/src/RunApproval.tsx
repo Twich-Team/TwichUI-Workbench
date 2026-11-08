@@ -93,7 +93,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
   const buttonLabel=busy?'Saving approval…':draft?'Retry same task approval':
     !budget.activate_once?'Save approval · Execution unavailable':
     draftPR?'Approve run and draft pull request':shown.provider?.backend==='codex'?'Approve Codex run':'Approve local run';
-  return <section className="soft-callout run-approval" id="local-run-review" ref={offerRegion} tabIndex={-1} aria-label="Certified task run approval">
+  return <section className="soft-callout run-approval" id="local-run-review" ref={offerRegion} tabIndex={-1} aria-label={offer.repair_cycle?'Scoped repair run approval':'Certified task run approval'}>
     <h3>{testOnly?'Add test coverage in a separate copy':'Run the approved work in a separate copy'}</h3>
     {testOnly?<p>Your installed addon, addon code and existing checks stay as they are.</p>:
       <><ul>{scope?.content.scope.map((s,i)=><li key={i}>{s}</li>)}</ul>
@@ -103,7 +103,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
     {shown.local_only&&<p><strong>Provider</strong> {shown.provider?.backend==='codex'
       ? <>Codex · {shown.provider.model}{shown.provider.effort ? ' · '+shown.provider.effort : ''}. {shown.provider.fallback_reason==='local_unreachable' ? 'Qwen was unreachable before generation, so Codex prepared the plan. ' : ''}One signed-in turn sends the approved test and relevant committed source excerpts to OpenAI. Workbench checks the proposed change independently.</>
       : <>Local Qwen is the saved choice for this run. {shown.provider?.fallback_reason ? 'The approved switch occurred before Codex generated a plan. ' : ''}This approval allows one Qwen run.</>}</p>}
-    <RunLimits budget={budget} codex={shown.provider?.backend==='codex'} repair={Boolean(offer.prepared_behavior)}/>
+    <RunLimits budget={budget} codex={shown.provider?.backend==='codex'} repair={Boolean(offer.prepared_behavior||offer.repair_cycle)}/>
     {query.isError&&<p role="alert">The run offer could not be refreshed. Refresh before approving.</p>}
     {error&&<p role="alert">{error}{!stale&&draft?' You can retry the same decision.':''}</p>}
     {stale?<><p role="alert">This run offer changed or is no longer available. Review the current task before deciding.</p>
@@ -126,11 +126,12 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
       <summary>Technical run details</summary>
       <label>Run approval note <span>Optional</span><textarea maxLength={1600} value={draft?.note ?? note}
         disabled={busy||Boolean(draft)} onChange={e=>{setNote(e.target.value);setAccepted(false);}}/></label>
-      <p>{current.message}</p><ExactRunLimits budget={budget} codex={shown.provider?.backend==='codex'} repair={Boolean(offer.prepared_behavior)}/>
+      <p>{current.message}</p><ExactRunLimits budget={budget} codex={shown.provider?.backend==='codex'} repair={Boolean(offer.prepared_behavior||offer.repair_cycle)}/>
       <p>If the run starts, Workbench checks that it can cancel its own work and restores normal model access afterward.</p>
       <h4>Exact plan scope and exclusions</h4><ul>{[...(scope?.content.scope || []),...(scope?.content.exclusions || [])].map((s,i)=><li key={i}>{s}</li>)}</ul>
       <p>Repository {offer.repository} · Base {offer.base}</p>
       {offer.prepared_behavior&&<details><summary>Prepared behavioral checks</summary><p>These frozen checks reproduced a failure on the original. Every expected observation must pass on the repair. This is offline evidence, not in-game acceptance.</p><pre>{JSON.stringify(offer.prepared_behavior.reproducer,null,2)}</pre><p>Frozen check identity {offer.prepared_behavior.oracle_sha256}</p></details>}
+      {offer.repair_cycle&&<section aria-label="Repair attempt and verification"><p>{offer.repair_cycle.notice}</p><p>No addon changes have been verified yet.</p><ul>{offer.repair_cycle.criteria.map(c=><li key={c.id}>{c.description}</li>)}</ul></section>}
       <h4>Required checks</h4><ul>{offer.checks.map((c,i)=><li key={i}>{c.purpose} <code>{c.argv.join(' ')}</code> (from {c.cwd})</li>)}</ul>
       <pre>{JSON.stringify(offer.limits,null,2)}</pre><p>Offer fingerprint {offer.fingerprint}</p>
     </details>

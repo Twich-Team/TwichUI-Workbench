@@ -76,6 +76,15 @@ def validate(spec):
     if 'verification_profile' in spec:
         from workbench.verification_profiles import validate_recipe
         validate_recipe(spec)
+        if 'repair_cycle' in spec:
+            from workbench import bug_intent
+            from workbench.repair_cycle import enabled,oracle
+            intent=bug_intent.Intent.model_validate(spec.get('approved_intent'))
+            if (not enabled(spec) or spec['verification_profile']!='lua-offline-bugfix-v1'
+                    or spec['read_paths']!=intent.plan.read_paths or spec['contract']['paths']!=intent.plan.writable_paths
+                    or spec['focused_test']!=intent.plan.focused_test or spec['contract']['base']!=intent.base
+                    or spec['oracle_sha256']!=hashlib.sha256(oracle(spec['focused_test']).encode()).hexdigest()):
+                raise ValueError('Scoped repair recipe differs from the approved intent or fixed assertion runner')
     elif (
         not isinstance(controls, dict)
         or controls.get("original") != "fail"
@@ -114,7 +123,7 @@ def load(root):
     return spec
 
 
-def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity, prepared=None):
+def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity, prepared=None, repair_cycle=False):
     """Compile task data from the actual applied review, never a task registry.
 
     Oracle semantics and bounded read selection still require trusted preparation.
@@ -173,15 +182,23 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
     if intent:=reviewed.get('bug_intent'):
         from workbench import bug_check_preparation,bug_evidence
         bug_evidence.validate_expectation_review(linked['proposal_review'],linked['approval']['payload'])
-        if prepared is None:
+        if repair_cycle:
+            from workbench.repair_cycle import oracle as assertion_runner
+            plan=intent['plan']
+            if (prepared is not None or oracle!=assertion_runner(plan['focused_test'])
+                    or behavior_id!='bug-reproducer' or read_paths!=plan['read_paths']
+                    or focused_test!=plan['focused_test']):
+                raise ValueError('Scoped repair attempt differs from the approved behavior/source scope')
+        elif prepared is None:
             raise ValueError('Approved intent requires app-prepared executable checks before a recipe exists')
-        compiled=bug_check_preparation.validate_evidence(intent,prepared)
-        if (oracle!=compiled['oracle'] or behavior_id!=compiled['behavior_id']
-                or read_paths!=compiled['read_paths'] or focused_test!=compiled['focused_test']):
-            raise ValueError('Prepared oracle or source differs from approved intent')
-        if prepared['bootstrap_source']!=bug_evidence.committed_bootstrap(root,base,prepared['plan']):
-            raise ValueError('Prepared bootstrap differs from current committed source')
-        bug=prepared
+        else:
+            compiled=bug_check_preparation.validate_evidence(intent,prepared)
+            if (oracle!=compiled['oracle'] or behavior_id!=compiled['behavior_id']
+                    or read_paths!=compiled['read_paths'] or focused_test!=compiled['focused_test']):
+                raise ValueError('Prepared oracle or source differs from approved intent')
+            if prepared['bootstrap_source']!=bug_evidence.committed_bootstrap(root,base,prepared['plan']):
+                raise ValueError('Prepared bootstrap differs from current committed source')
+            bug=prepared
     contract = real_execution.contract()
     if reviewed.get('bug_intent'):
         contract['limits']={**contract['limits'],'read_chars':262144}
@@ -211,6 +228,9 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         # sections instead of assuming that the target is at the top of a file.
         spec['initial_reads'] = bug['windows']
     if reviewed.get('bug_intent'):
+        if repair_cycle:
+            spec['repair_cycle']='scoped-repair-v1'
+            spec['approved_intent']=reviewed['bug_intent']
         spec['source_context']=[]
         for path in read_paths:
             raw=regression_preparation.git(root,'show',base+':'+path).decode()

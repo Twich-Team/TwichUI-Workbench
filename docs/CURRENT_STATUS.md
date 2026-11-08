@@ -1,3 +1,59 @@
+## Owner-directed repair cycle implemented; integrated verification running —23:56UTC
+
+Following the Project Working Philosophy: owner's latest steer removes the unnecessary
+requirement to finish model-written executable checks before permission to attempt a
+protected repair. Separate plan/scope and run decisions remain. Correctness is checked
+after edits; no weakened verification, source/disclosure/network/billing/publication
+permission or new campaign cap. Exact decision appended to saved outcome authority.
+
+Installed52/33bda82 remains the running build. Task41 check-constructionf2eab557... has
+settledFAILED after14completed Codex turns/1210276known tokens. All14terminal receipts
+independently matched; no owned generation remains, no addon edit or run approval.
+Several app-generated checks exposed original failures, but no final package was
+accepted. Preserve all candidates/feedback; final receiptR/outcome-33bda82/
+final-check-construction-settlement.json. Original unknown3281... unchanged. Ledger
+retains all new known usage separately. Driver32025endedheld when ingress was briefly
+closed to request supported settling; admin refused stop while activity unsettled.
+No bypass: restored API/LAN/rule and allowed investigation to settle naturally.
+All4services nowactive, approved addresses unchanged. Real supportcases0/4.
+
+Development now implements scoped-repair-v1 via existing offer, grant, task-session,
+provider, protected tools and result owners. No new queue/schema/authority owner.
+Scope+clean base+existing baseline+real boundary checks create ready_preparation,
+explicitly verification:not_run; separate current Run approval permits code and test
+development together. No model check-construction call before edits. Native assertions
+in new test additions must fail on unchanged ORIGINAL production and pass with the
+repair, alongside focused/syntax/full suite. Independent sibling clone cannot receive
+implementation edits or model tools. Missing tests, old-suite-only success, unrelated
+fixture/crash, original pass, stale/tampered evidence and scope changes refuse checked
+completion. Existing tests remain additive; exact write/read/line/resource limits
+remain. New generic assertion runner contains no flight-path answer. Frozen results
+retain original-test differential proof and restart identity; acceptance independently
+reviews generated test/patch semantics after output, including all owner/approved
+criteria. A ready offer is not a bug-correctness certificate.
+
+Checks: actual-Lua controlled component rejects green old suite alone, accepts real
+new original-failing/candidate-passing assertions, rejects tampering;56focused pass,
+25frontend and static/contracts/migrations/ruff pass. Separate-process confined native
+intent journeys BOTH local/Codex simulated adapters pass58.17s, each ordinary module+
+client bug, normal browser scope/run, actual edits/new assertions/checks, restart and
+second ordinary bug. Former native failure was an obsolete assertion requiring extra
+planning/self-review, after journeys themselves succeeded; corrected to require their
+absence and zero check_preparation model attempts. FULL backend nowrunning(exec17068,
+/tmp/wb-repair-cycle-full.log). These are controlled providers, NOT real-provider passes.
+
+NEXT inspect complete suite/repair any failures, final affected checks and screenshots,
+save candidate/seal then deployment53 with fresh latest history. Newnormal 'Prepare
+repair attempt' on same appliedscope generates provider-free foundation; no planning/
+scope replay. Then normal fresh Run decision via valid acceptance delegation, actual
+Codex coding/test-feedback cycle. BrowserreviewRun handles repair_cycle:not_run and
+skips obsolete pre-edit check-package review; final live acceptance requires independent
+bug-result-review.json bound to real candidate, originalfailure, actualchecks,9owner
+requirements and7approvedcriteria (no model call/edit authority). Finish realrepair,
+restart/durableresult/ordinarynexttask/all4realproviderchecks/fullremainingoutcome.
+No owner action pending. Do not stop at checkpoint or another verified build.
+Older entries below historical; source changes here are NOT yet installed.
+
 ## Installed correction and active real continuation — November8 23:33UTC
 
 Deployment52/33bda82153f8ce106e8c945b387e78ebfcd4a0ea is installed;

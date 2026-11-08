@@ -174,10 +174,11 @@ def _reviewed_spec(c, ref, runtime):
     linked=task_execution.snapshot(c,**ref)
     reviewed=linked['proposal_review']['task_contract']
     prepared=(bug_check_preparation.load(runtime.root,reviewed)['evidence']
-              if reviewed.get('bug_intent') else None)
+              if reviewed.get('bug_intent') and not spec.get('repair_cycle') else None)
     actual = from_review(c, ref, oracle=runtime.oracle_source.read_text(),
                         behavior_id=spec['behavior']['id'], read_paths=spec['read_paths'],
-                        focused_test=spec['focused_test'], identity=spec['identity'],prepared=prepared)
+                        focused_test=spec['focused_test'], identity=spec['identity'],prepared=prepared,
+                        repair_cycle=bool(spec.get('repair_cycle')))
     if actual != spec:
         raise ValueError('Certified recipe differs from the current reviewed contract')
     return actual
@@ -190,14 +191,22 @@ def register_reviewed_offer(engine, ref, runtime, *, recovery_id=None):
     from workbench.trusted_preparation import validate_recovery_offer
 
     runtime = Runtime(runtime.root)  # Reconstruct canonical checks; caller methods cannot certify.
-    prepared = _certified_preparation(runtime)
+    if runtime.recipe.get('repair_cycle'):
+        from workbench.repair_cycle import readiness
+        if any(g['status']!='passed' for g in runtime.static_preflight()):
+            raise ValueError('Scoped repair readiness requires a clean isolated preparation')
+        prepared=dict(root=str(runtime.root),readiness=readiness(runtime))
+        preparation_key='ready_preparation'
+    else:
+        prepared = _certified_preparation(runtime)
+        preparation_key='certified_preparation'
     with write_transaction(engine) as c:
         spec = _reviewed_spec(c, ref, runtime)
         linked = task_snapshot(c, **ref)
         snapshot = dict(proposal_id=linked['task']['proposal_id'],
                         review_binding=linked['proposal_review']['binding'], specification=spec,
                         reviewed_task=dict(ref=ref, binding=digest(linked)),
-                        certified_preparation=prepared)
+                        **{preparation_key:prepared})
         fingerprint = digest(snapshot)
         old = c.execute(select(offers).where(offers.c.fingerprint == fingerprint)).mappings().first()
         validate_recovery_offer(c, linked, spec, runtime.root, recovery_id, old)
@@ -223,6 +232,11 @@ def certified_offer_current(c, row):
         linked = task_snapshot(c, **selected['ref'])
         if digest(linked) != selected['binding'] or linked['task']['proposal_id'] != row['proposal_id']:
             return False
+        if spec.get('repair_cycle'):
+            from workbench.repair_cycle import readiness
+            runtime=Runtime(saved['ready_preparation']['root'])
+            return (_reviewed_spec(c,selected['ref'],runtime)==spec
+                    and dict(root=str(runtime.root),readiness=readiness(runtime))==saved['ready_preparation'])
         runtime = Runtime(saved['certified_preparation']['root'])
         return (_reviewed_spec(c, selected['ref'], runtime) == spec
                 and _certified_preparation(runtime) == saved['certified_preparation'])
@@ -236,7 +250,7 @@ def preparation_inputs(c, selected):
             or offer(c, selected['proposal_id']) != selected):
         raise ValueError('Certified offer inputs changed')
     saved = selected['snapshot']
-    root = Path(saved['certified_preparation']['root'])
+    root = Path(saved.get('ready_preparation',saved.get('certified_preparation'))['root'])
     profile = saved['specification']['controls']
     return dict(recipe=saved['specification'], oracle=(root / 'recipe-oracle.lua').read_text(),
                 control_patches={name: (root / 'profile-evidence' / name / 'input.patch').read_text()
@@ -254,7 +268,8 @@ def validate_selection(c, proposal_id, budget, *, admitting=False):
     from workbench import everyday
     if everyday.enabled():
         review = selected['snapshot'].get('reviewed_task') or {}
-        if (budget.publication != 'hold' or not selected['snapshot'].get('certified_preparation')
+        if (budget.publication != 'hold' or not (selected['snapshot'].get('certified_preparation') or
+                selected['snapshot'].get('specification',{}).get('repair_cycle')=='scoped-repair-v1' and selected['snapshot'].get('ready_preparation'))
                 or not review or not review.get('ref')):
             raise HTTPException(409, 'This Workbench installation runs certified test coverage and keeps results local.')
         if admitting:
@@ -403,6 +418,10 @@ def offer_view(c, proposal, selected):
 def prepared_behavior_view(c,selected):
     """Show the exact frozen check separately from the already approved intent."""
     saved=selected['snapshot']
+    if saved.get('ready_preparation') and saved.get('specification',{}).get('repair_cycle'):
+        return dict(repair_cycle=dict(verification='not_run',
+            notice='This approves an isolated repair attempt with test development. Correctness requires new regression assertions to fail against original production, pass with the repair, and all independent checks to pass.',
+            criteria=saved['specification']['approved_intent']['plan']['criteria']))
     ref=saved.get('reviewed_task',{}).get('ref')
     if not ref or not saved.get('specification',{}).get('source_context'):
         return {}

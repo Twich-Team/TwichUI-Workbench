@@ -89,7 +89,12 @@ def provision(runtime, template):
     They are applied only to disposable sibling clones, never the model workspace.
     """
     runtime.prepare()
-    if (getattr(runtime, 'recipe', None) or {}).get('verification_profile'):
+    if (getattr(runtime,'recipe',None) or {}).get('repair_cycle'):
+        baseline=runtime.check(['bash','tests/run.sh'],runtime.workspace,timeout=600,private_loopback=True)
+        durable(runtime.root/'fresh-baseline-suite.json',json.dumps(baseline,sort_keys=True).encode())
+        if not suite_inventory(baseline,runtime.expected_suite()):
+            raise ValueError('Existing baseline failed; no repair attempt is ready')
+    elif (getattr(runtime, 'recipe', None) or {}).get('verification_profile'):
         from workbench.verification_profiles import prepare
         if 'scenario_preparation' in template:
             from workbench.regression_evidence import compile_plan, patches
@@ -211,7 +216,7 @@ def _legacy_controls(runtime, template):
 def preparation_template(c, linked, budget, engine):
     """Resolve the existing offer owner before loading any per-task template."""
     offered = budget['offer']
-    if offered['snapshot'].get('certified_preparation'):
+    if offered['snapshot'].get('certified_preparation') or offered['snapshot'].get('ready_preparation'):
         selected = offered['snapshot']['reviewed_task']['ref']
         continuation = linked['approval']['payload'].get('execution_continuation', {})
         scope_approval = continuation.get('scope_approval_id', linked['approval']['id'])

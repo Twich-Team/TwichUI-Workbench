@@ -157,10 +157,12 @@ class Runtime:
                        ['real_execution.py','real_workspace.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py']})
         if self.recipe:
             value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes()) for name in ['real_recipes.py','task_budget.py','verification_process.py']})
+            if self.recipe.get('repair_cycle'):
+                value['helper_sha256']['repair_cycle.py']=sha(Path(__file__).with_name('repair_cycle.py').read_bytes())
             if self.recipe.get('verification_profile'):
                 value['helper_sha256']['verification_profiles.py'] = sha(Path(__file__).with_name('verification_profiles.py').read_bytes())
                 certificate = self.root/'controls-passed.json'
-                value['profile_certificate_sha256'] = sha(certificate.read_bytes()) if certificate.is_file() else None
+                value['scope_ready_sha256' if self.recipe.get('repair_cycle') else 'profile_certificate_sha256'] = sha(certificate.read_bytes()) if certificate.is_file() else None
         return value
 
     def recovery_identity(self):
@@ -196,7 +198,8 @@ class Runtime:
         return [dict(name=name,status='passed' if valid else 'blocked') for name,valid in [
             ('exact clean base and isolated workspace',clean),('frozen oracle',oracle),
             ('complete confined baseline',suite_inventory(baseline,self.expected_suite())),
-            ('actual baseline cleanup/resources',safe),('independent control evidence',self.controls_valid())]]
+            ('actual baseline cleanup/resources',safe),
+            ('scope and sandbox readiness; correctness pending' if self.recipe and self.recipe.get('repair_cycle') else 'independent control evidence',self.controls_valid())]]
 
     def preflight(self):
         if self.recipe:
@@ -260,7 +263,7 @@ class Runtime:
         gate('complete confined baseline suite', suite_inventory(baseline, self.expected_suite()),
              'All test-file groups required; trusted verification uses private loopback, model tools deny sockets')
         # These are current runtime prerequisites, not user-supplied pass switches.
-        gate('reproduction and negative controls', (self.root/'controls-passed.json').is_file() and
+        gate('scope and sandbox readiness; correctness pending' if self.recipe and self.recipe.get('repair_cycle') else 'reproduction and negative controls', (self.root/'controls-passed.json').is_file() and
              self.controls_valid(), 'Fresh confined baseline/formatter-only/cleanup controls required')
         gate('fallback/publication denied', True, 'Fixed local adapter; no publishing or fallback import')
         # Fixed trusted project helper; works from CLI and worker without cwd/sys.path assumptions.
@@ -285,6 +288,10 @@ class Runtime:
         return gates
 
     def record_controls(self, boundary):
+        if self.recipe and self.recipe.get('repair_cycle'):
+            from workbench.repair_cycle import record_readiness
+            record_readiness(self,boundary)
+            return
         if self.recipe and self.recipe.get('verification_profile'):
             from workbench.verification_profiles import certify
             bundle = json.loads((self.root/'profile-evidence.json').read_text())
@@ -324,6 +331,10 @@ class Runtime:
     def controls_valid(self):
         # A marker alone is never sufficient. Bind the trusted oracle and all control results.
         try:
+            if self.recipe and self.recipe.get('repair_cycle'):
+                from workbench.repair_cycle import readiness
+                readiness(self)
+                return True
             record = json.loads((self.root/'controls-passed.json').read_text())
             if self.recipe and self.recipe.get('verification_profile'):
                 from workbench.verification_profiles import certify
@@ -475,7 +486,7 @@ class Runtime:
                         tree=current, patch_sha256=sha(patch.encode()),
                         oracle_sha256=sha(self.oracle_source.read_bytes()), completion_context_sha256=self._context_sha)
         if profiled:
-            manifest['profile_certificate_sha256'] = sha((self.root/'controls-passed.json').read_bytes())
+            manifest['scope_ready_sha256' if self.recipe.get('repair_cycle') else 'profile_certificate_sha256'] = sha((self.root/'controls-passed.json').read_bytes())
         durable(folder/'manifest.json', json.dumps(manifest, sort_keys=True).encode())
         durable(folder/'changes.patch', patch.encode())
         for path in changed:
@@ -511,10 +522,20 @@ class Runtime:
                 raise ToolDenied('profile_'+status, 'Candidate verification held: '+reason)
         if len(checks)==len(expected) and all(c['rc']==0 for c in checks) and not passed:
             raise ToolDenied('check_infrastructure', 'Complete-suite inventory mismatch')
+        original_evidence=None
+        if passed and self.recipe and self.recipe.get('repair_cycle'):
+            from workbench.repair_cycle import original_with_new_tests
+            original_evidence=original_with_new_tests(self,folder,permitted)
+            passed=original_evidence['status']=='pass'
         feedback = dict(status='pass' if passed else 'fail', check_round=index,
                         completed_checks=len(checks), required_checks=len(expected),
                         note='Trusted independent checks; failure permits bounded repair in this same attempt.')
-        if not passed:
+        if original_evidence is not None:
+            feedback['original_test_differential']=original_evidence
+        if not passed and original_evidence is not None:
+            feedback.update(failed_check_name='original-with-new-tests',
+                diagnostic=original_evidence.get('diagnostic',original_evidence['reason'])[-1500:])
+        elif not passed:
             feedback['failed_check'] = len(checks)
             labels = (['syntax-'+str(i+1) for i in range(len(self.paths))]+['focused','independent-oracle','complete-suite'] if self.recipe else ['syntax-data','syntax-recorder','syntax-tests','focused','independent-oracle','complete-suite'])
             feedback['failed_check_name'] = labels[len(checks)-1]
@@ -554,6 +575,12 @@ class Runtime:
             instruction = (self.recipe['instruction']+'\nInitial bounded reads: '+
                 json.dumps(self.recipe['initial_reads'],ensure_ascii=True)+
                 '\nOnly write '+', '.join(self.paths)+'. Use the supplied checks; normal failures may be repaired within this attempt.')
+            if self.recipe.get('repair_cycle'):
+                instruction+=(' Develop the repair and new native Lua assert regression checks together. '
+                    'A separate checking program is not required before editing this isolated copy. '
+                    'The new assertions must exercise actual behavior: they must fail on unchanged original production '
+                    'and pass with your repair. Do not assign expected outputs into addon state, inspect source-text patterns, '
+                    'detect verification runs, or disable existing assertions. Complete independent checks still gate the result.')
         linked = getattr(self, 'workflow_task', None)
         if linked:
             # Planning text is untrusted task data, never executable tool/config instructions.
@@ -613,7 +640,7 @@ class Runtime:
             manifest['workflow_task_binding'] = job.digest(linked)
             manifest['workflow_task'] = dict(intake_id=linked['intake_id'],task_id=linked['task']['id'])
         if self.recipe and self.recipe.get('verification_profile'):
-            manifest['profile_certificate_sha256'] = sha((self.root/'controls-passed.json').read_bytes())
+            manifest['scope_ready_sha256' if self.recipe.get('repair_cycle') else 'profile_certificate_sha256'] = sha((self.root/'controls-passed.json').read_bytes())
         if self._context_sha:
             manifest['completion_context_sha256'] = self._context_sha
         authorship = getattr(self, 'authoring_provenance', None)
@@ -634,6 +661,8 @@ class Runtime:
             from workbench.verification_profiles import evaluate_snapshot
             if evaluate_snapshot(self, dict(checks=checks), 'pass')[0] != 'certified':
                 raise ToolDenied('profile_hold', 'Final frozen behavioral evidence differs')
+        if self.recipe and self.recipe.get('repair_cycle') and reviewed['feedback'].get('original_test_differential',{}).get('status')!='pass':
+            raise ToolDenied('original_evidence_missing','Original-production regression evidence is required before a checked result')
         passed = all(c['status'] == 'pass' and c['rc'] == 0 for c in checks)
         passed = passed and suite_inventory(checks[-1], self.expected_suite())
         passed = (passed and permitted() and tree(self.workspace) == manifest['tree'] and
@@ -681,6 +710,10 @@ class Runtime:
                                for f in result['files'])
             profile_valid = ('profile_certificate_sha256' not in result['manifest'] or
                              result['manifest']['profile_certificate_sha256'] == sha((self.root/'controls-passed.json').read_bytes()))
+            if self.recipe and self.recipe.get('repair_cycle'):
+                profile_valid=profile_valid and result['manifest'].get('scope_ready_sha256')==sha((self.root/'controls-passed.json').read_bytes())
+                from workbench.repair_cycle import verify_result
+                profile_valid=profile_valid and self.controls_valid() and verify_result(self,result)
             return (hashes_valid and profile_valid and sha(manifest) == candidate and json.loads(manifest) == result['manifest'] and
                     sha((frozen/'changes.patch').read_bytes()) == result['manifest']['patch_sha256'] and
                     json.loads((frozen/'result.json').read_text()) == result)

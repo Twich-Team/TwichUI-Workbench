@@ -124,21 +124,8 @@ try {
     assert(interrupted&&approvedScope&&submitted);
     await context.close();context=await browser.newContext({serviceWorkers:'block'});
     let item=await observer.request.get(origin+'/api/intake/'+submitted).then(r=>r.json());
-    if(candidate.provider==='local') {
-      const end=Date.now()+15000;
-      while(!item.jobs.some(j=>j.kind==='behavioral_preparation'&&j.status==='failed')) {
-        assert(Date.now()<end,'Controlled construction must settle before renewal');
-        await new Promise(resolve=>setTimeout(resolve,100));
-        item=await observer.request.get(origin+'/api/intake/'+submitted).then(r=>r.json());
-      }
-      await other.goto(origin+'/intake/'+submitted);
-      const response=await Promise.all([
-        other.waitForResponse(r=>r.url()===origin+'/api/intake/'+submitted+'/retry'&&r.request().method()==='POST'),
-        other.getByRole('button',{name:'Rebuild checks',exact:true}).click(),
-      ]).then(([r])=>r);
-      assert.equal(response.status(),200,await response.text());
-      item=await observer.request.get(origin+'/api/intake/'+submitted).then(r=>r.json());
-    }
+    // Scope approval survives a closed browser. Preparing a safe repair offer
+    // requires baseline/confinement checks, never another model-written test plan.
     const settledPreparations=item.provider_activity.filter(a=>a.purpose==='check_preparation'&&a.outcome==='failed').map(a=>a.id);
     const selected=item.proposals[0];
     const saved=await observer.request.get(origin+'/api/models').then(r=>r.json());
