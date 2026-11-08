@@ -1,4 +1,4 @@
-# Continuation — verified November 8, 2026, 17:40 UTC
+# Continuation — verified November 8, 2026, 18:05 UTC
 
 Following the Project Working Philosophy: own and continue the full outcome. No owner
 renewal or campaign cap applies. Read the exact three authoritative root documents,
@@ -25,16 +25,40 @@ and unique evidence retained.1GiB evidence value is a retention trigger, not a d
 cap (actual everyday.housekeep/require_room verified). Existing scoped admin grant
 expiresNov13, helperSHA1fd4a561188560242d5cb5df9bd583d8c922cfa4282e4bd1e46b8dca04bc3afb.
 
-## Current real task — observe before assuming it is still running
+## Current work — no provider active
 
-Real40 intakecb69da85-c88d-4ecd-be63-bd1fceced841;
-model566f0b0f-aece-4c12-9b1b-d9f779984430;
-job554581c8-d998-41a4-93ad-dd773bc2be64. Normal browser driver exec83945;
-S/artifacts/acceptance/bug-flight-paths.jsonl, R/bug-flight-paths-driver.txt,
-S/artifacts/codex-evidence/*.jsonl (phase field), normal task API and read-only SQL.
-Fresh task/consent; no old partial output or approval reused. No addon implementation
-or independently checked real repair yet; zero of four supporting real-provider cases
-passed. Do not count controlled tests or an installed build as completion.
+Real40 intakecb69da85-c88d-4ecd-be63-bd1fceced841/model566f0b0f-aece-4c12-9b1b-d9f779984430/
+job554581c8-d998-41a4-93ad-dd773bc2be64 settled after10COMPLETED Codexturns with
+594080known tokens. App saved a question/proposal, no addon implementation. Driver83945
+finishedheld. Question asks to disclose Switches.lua for SetEnabled, but local verification
+finds that definition in Core.lua; selected test_nav.lua154/155 already shows/asserts
+R:SetEnabled("navigation",true). No extra private disclosure is necessary solely to
+repeat that existing call. No source permission was expanded or request secretly answered.
+Latest245rows SHA6ac27a234b84df770c1afbd90c8366b957e414be0c7b6618c59fdf343297a845;
+original stores/240-row cutover preserved. R/attempt-40-accounting.json and ledgerupdated.
+Codex84starts/79completed/80reportedreceipts/4missinghistoricalfinal,3996322known tokens;
+Qwen89starts unchanged. No real checked repair and zeroof4real supporting casespassed.
+
+Connected local changes (currentlyuncommitted): source_interface now supplies bounded
+exact call examples from selected committed tests, including receiver declarations,
+distributed across files; ignores comments/strings/nested/private file/process APIs.
+Guidance distinguishes an existing exact test call from inventing a method/signature;
+independent behavior/authority checks unchanged. completed_packet cache re-reads only
+same-report/current-base/current-selected-path Gitfacts from completed accounted jobs;
+never old questions/diagnoses/plans/approvals. Freshpolicy/sourcepermission retained,
+changed/uncertain/out-of-scope cache rejected. This saves repeating ten source turns.
+C/public-call-actual-context-proof-v2/proof.json confirms actualfirstwire218591bytes,
+144436sourcechars/0omissions, exacttestcall154 andR/c declarations, onlysame12files,
+sourcecache re-readfromreal40, no prioroutcome/modelcall/socket/historywrite/patch.
+Initialproofcaught example-list crowding (wrongfile filled16); corrected fair selection,
+failedlogretained.111focused checks and static/contracts/build/schemaPASS.
+Full C/public-call-cache-full-tests.log exec4019 RUNNING (expected1664/6skip+25);
+ALL4true-confined controlled browser modes C/public-call-cache-kernel-native.log
+exec16483 RUNNING (unitworkbench-outcome-public-call-cache-process). No assetbuild
+concurrently. Finish/fix appropriate checks before activation. Existing installed
+37verification below remainsvalidforinstalledcode, notfornewcontextlogic.
+No owner action needed. If the tested-call alternative still requires trulynewprivate
+source after real evaluation, investigate actualnecessity and ask exactpermissiononce.
 
 ## What changed and what was verified
 
@@ -65,10 +89,10 @@ never activated; its sealed stage and failure evidence remain.
 
 ## Settled accounting and recovery
 
-Before real40: latest240-row SHAa00cedc24bf15f344a92640edbe50f5b4c56d6475c5bac117d2077bdf71c41ed.
+Before real40 (historical cutover): latest240-row SHAa00cedc24bf15f344a92640edbe50f5b4c56d6475c5bac117d2077bdf71c41ed.
 Measure actual latest history after settlement; NEVER overwrite with240/236/original79.
 Ledger74Codexstarts/69completedturns/70reportedusagereceipts/4historicalmissingfinal;
-3402242known tokens. Qwen89starts unchanged. Real40 accounting pending.
+3402242known tokens. Qwen89starts unchanged. Real40 settled above; original records retained.
 Real38:16complete then local journal/handler crash; originalDBunknown/NULL unchanged,
 all16receipts independently matched and separately recovered,933255known tokens.
 Real39:8complete+1confirmedinterrupted/acknowledged, all9reportedusage observations
@@ -98,7 +122,8 @@ next ordinary supported bug submission without registration/setup, cleanup/model
 restoration and stable app. Keep wider unfinished requirements visible; styling then audit.
 
 If ordinary repair is needed, continue. Next deployment45/task41/roots119,parent37d88f2;
-append566f0b0f ONLY after verified settlement. Reuse prepare-observed-usage-final-revision.py,
+append566f0b0f after verified settlement (now completed). Latest245 not240.
+Provider module functions/constants/Planner methods AST unchanged for this correction. Reuse prepare-observed-usage-final-revision.py,
 guarded extra scripts/post-install.sh, precise firewall checker, verified pinned API
 cache; honestly update code AST comparison. Require fresh successful preflight BEFORE
 mutations; marker binds candidate/scripts/history and five-minute operational freshness.

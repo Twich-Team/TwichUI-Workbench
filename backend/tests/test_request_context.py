@@ -19,10 +19,11 @@ def context():
     requested = window(100, 'return module.run()', 'requested committed lines')
     declaration = window(99, 'function module.run()', 'committed enclosing declaration or registration')
     bootstrap = window(20, 'local client = createClient()', 'complete committed test bootstrap')
+    usage = window(80, 'controller:Begin("preview", true)', 'committed public usage example')
     older = window(400, '\n'.join('local s%d = "\\\\ quoted é"' % i for i in range(300)), 'prior read')
     packet = dict(base='committed', plan_review='source-grounded-lua-v1',
                   files=[dict(path=path, excerpts=[prelude])], inspection_windows=[older])
-    current = [requested, declaration, bootstrap]
+    current = [requested, declaration, bootstrap, usage]
     wire = dict(files=copy.deepcopy(packet['files']), report='unchanged owner report',
                 coverage=dict(write_paths=[path]), self_review=dict(decision='unapproved'))
     retain(wire, packet, current, 128000, requested=[requested])

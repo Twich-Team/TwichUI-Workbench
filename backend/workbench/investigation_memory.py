@@ -82,6 +82,9 @@ def seed(packet, original, current_attempt, engine):
     policy = configuration(engine)
     if digest(policy) != packet['policy_sha256']:
         raise ValueError('Source memory preparation policy changed')
+    reused = completed_packet(packet, original, current_attempt, engine)
+    if reused is not None:
+        return reused
     roots = [Path(root) for root in everyday.configuration(engine).evidence_roots]
     with engine.connect() as connection:
         query = (select(model_attempts, planning_jobs.c.payload.label('job_payload'),
@@ -151,6 +154,64 @@ def seed(packet, original, current_attempt, engine):
                 # Admission reconciles execution separately before any request.
                 continue
     return packet, [], None
+
+
+def completed_packet(packet, original, current_attempt, engine):
+    """Re-read committed source from a settled packet; copy no generated outcome."""
+    from workbench import bug_source_planning as source
+
+    with engine.connect() as connection:
+        records = connection.execute(select(
+            model_attempts.c.id, model_attempts.c.usage,
+            planning_jobs.c.payload.label('job_payload'), intakes.c.payload.label('original'))
+            .join(planning_jobs, planning_jobs.c.id==model_attempts.c.job_id)
+            .join(intakes, intakes.c.id==model_attempts.c.task_id)
+            .where(model_attempts.c.source=='workbench', model_attempts.c.purpose=='planning',
+                model_attempts.c.backend.in_(['local','codex']), model_attempts.c.outcome=='completed',
+                model_attempts.c.finished_at.is_not(None), planning_jobs.c.status=='completed')
+            .order_by(model_attempts.c.started_at.desc()).limit(16)).mappings().all()
+    allowed={f['path']:f['sha256'] for f in packet['files']}
+    for row in records:
+        if (row['id']==current_attempt or not same_report(row['original'],original) or
+                not isinstance(row['usage'],dict) or row['usage'].get('status')!='complete'):
+            continue
+        cached=row['job_payload'].get('bug_inspection_packet')
+        if not isinstance(cached,dict) or cached.get('base')!=packet['base']:
+            continue
+        try:
+            candidate=copy.deepcopy(packet)
+            windows=cached.get('inspection_windows',[])
+            if not isinstance(windows,list) or len(windows)>source.window_limit(packet):
+                continue
+            used,seen=[],set()
+            for window in windows:
+                key=window['path'],window['line'],window['through_line'],window['sha256']
+                if key in seen:
+                    continue
+                seen.add(key)
+                if (key[0] not in allowed or allowed[key[0]]!=key[3] or
+                        type(key[1]) is not int or type(key[2]) is not int):
+                    raise ValueError('Cached range exceeds current selected source')
+                raw,actual=source.committed(key[0],packet['base'])
+                if actual['sha256']!=key[3]:
+                    raise ValueError('Cached committed source changed')
+                lines=raw.decode().splitlines()
+                if not 1<=key[1]<=key[2]<key[1]+160 or key[2]>len(lines):
+                    raise ValueError('Cached committed range changed')
+                # Re-read exact blobs rather than replaying provider output or
+                # pagination state from the old task. Existing overlap is valid.
+                fresh=dict(path=key[0],sha256=key[3],line=key[1],through_line=key[2],
+                    text='\n'.join(lines[key[1]-1:key[2]]),coverage='revalidated committed source cache')
+                candidate.setdefault('inspection_windows',[]).append(fresh)
+                used.append(fresh)
+                if source.source_characters(candidate)>source.read_limit(packet):
+                    raise ValueError('Cached source exceeds current working set')
+            source.verify_packet(packet,candidate)
+            if used:
+                return candidate,used,str(UUID(row['id']))
+        except (ValueError,OSError,KeyError,TypeError):
+            continue  # Cache miss never grants source, model, plan or execution authority.
+    return None
 
 
 def reviewed_behavior(prior, roots, binding):

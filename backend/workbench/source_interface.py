@@ -15,6 +15,50 @@ HEADER=re.compile(r'\bfunction\s+('+NAME+r')\s*\(([^)]*)\)|('+NAME+r')\s*=\s*fun
 CALL=re.compile(r'\b('+NAME+r')\s*\(')
 IDENTIFIER=re.compile(r'\b[A-Za-z_]\w*\b')
 LOCAL=re.compile(r'^\s*local\s+([A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*)*)(?:\s*=|\s*$)')
+PUBLIC_CALL=re.compile(r'^\s*([A-Za-z_]\w*(?:[.:][A-Za-z_]\w*)+)\s*\(')
+
+
+@lru_cache(maxsize=64)
+def usage_examples(raw):
+    """Exact existing test calls, not inferred signatures or invented behavior."""
+    text=raw.decode()
+    masked=LITERALS.sub(lambda m:re.sub(r'[^\n]',' ',m[0]),text).splitlines()
+    lines=text.splitlines()
+    spans=function_ranges(raw)
+    declarations=surrounding(raw)
+    examples=[]
+    for index,line in enumerate(masked):
+        match=PUBLIC_CALL.match(line)
+        if not match or any(a<=index+1<=b for a,b in spans):
+            continue
+        end=index+1
+        balance=line[match.end()-1:].count('(')-line[match.end()-1:].count(')')
+        while balance>0 and end<len(lines) and end-index<8:
+            balance+=masked[end].count('(')-masked[end].count(')')
+            end+=1
+        if balance!=0:
+            continue
+        first=max(1,index)
+        last=min(len(lines),end+2)
+        excerpt='\n'.join(lines[first-1:last])
+        if len(excerpt)>1600:
+            continue
+        roots={re.split(r'[.:]',match[1])[0]}
+        receiver=[]
+        for _ in range(3):
+            for declaration in declarations:
+                if declaration['names'] & roots and declaration not in receiver:
+                    receiver.append(declaration)
+                    roots.update(declaration['references'])
+        if roots & {'io','os','debug','package','require','loadfile'}:
+            continue  # File/process APIs are not addon-interface examples.
+        context=[{k:d[k] for k in ('line','through_line','text')} for d in receiver
+                 if len(d['text'])<=1600][:6]
+        examples.append(dict(name=match[1],call_line=index+1,line=first,
+                             through_line=last,text=excerpt,receiver_context=context))
+        if len(examples)==16:
+            break
+    return examples
 
 
 @lru_cache(maxsize=64)
@@ -86,7 +130,16 @@ def context(packet, original, programs=()):
     from workbench.bug_evidence import InvestigationRead
     rows=[]
     module_rows=[]
+    examples=[]
+    example_groups=[]
+    example_chars=0
     for item in packet['files']:
+        if item['path'].startswith('tests/test_'):
+            raw,actual=source.committed(item['path'],packet['base'])
+            if actual['sha256']!=item['sha256']:
+                raise ValueError('Selected usage-example source changed')
+            example_groups.append([dict(**example,path=item['path'],sha256=item['sha256'])
+                                   for example in usage_examples(raw)])
         if not item['path'].startswith(('!!!TwichUI/','TwichUI_Settings/')):
             continue
         raw,actual=source.committed(item['path'],packet['base'])
@@ -94,6 +147,15 @@ def context(packet, original, programs=()):
             raise ValueError('Selected interface source changed')
         rows.extend(dict(**row,path=item['path'],sha256=item['sha256']) for row in definitions(raw))
         module_rows.extend(dict(**row,path=item['path'],sha256=item['sha256']) for row in surrounding(raw))
+    for index in range(16):
+        for group in example_groups:
+            if index>=len(group):
+                continue
+            example=group[index]
+            size=len(example['text'])+sum(len(row['text']) for row in example['receiver_context'])
+            if len(examples)<16 and example_chars+size<=8000:
+                examples.append(example)
+                example_chars+=size
     catalog={}
     omitted=0
     for row in rows:
@@ -159,6 +221,9 @@ def context(packet, original, programs=()):
                     dependencies.append(declaration)
                 refs.update(declaration['references'])
     specs=[]
+    specs.extend((row,-4000,'committed public usage example') for row in examples)
+    specs.extend((dict(**declaration,path=row['path'],sha256=row['sha256']),-4000,
+                  'committed public usage example') for row in examples for declaration in row['receiver_context'])
     used=0
     for declaration in dependencies:
         if used+len(declaration['text'])<=8000:
@@ -193,6 +258,12 @@ def context(packet, original, programs=()):
                 through_line=row['through_line'],text=row['text'],coverage=coverage,
                 context_rank=context_rank))
     return priority,dict(declarations=catalog,omitted_literal_declarations=omitted,
+        committed_usage_examples=[dict({k:v for k,v in row.items() if k not in {'text','receiver_context'}},
+            receiver_context=[{k:v for k,v in declaration.items() if k!='text'}
+                              for declaration in row['receiver_context']]) for row in examples],
         surrounding_context=[dict(path=r['path'],line=r['line'],through_line=r['through_line']) for r in dependencies],
         notice='Exact literal declarations from selected committed files, not runtime export proof. '
-               'Dynamic extensions and functions in other files may exist. Read the defining code before assuming an API.')
+               'Dynamic extensions and functions in other files may exist. '
+               'Committed usage examples show exact existing test call forms and surrounding source, not invented signatures '
+               'or proof that tests passed. Reusing that exact call does not require disclosing a separate definition. '
+               'Inspect definitions before inventing a different call or assuming behavior beyond the example; independent checks remain required.')

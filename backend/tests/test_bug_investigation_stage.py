@@ -127,6 +127,51 @@ def test_changed_report_does_not_reuse_prior_source(client, headers, store, monk
     assert result == packet and windows == [] and parent is None
 
 
+@pytest.mark.parametrize('change',[None,'text','scope','base','uncertain'])
+@pytest.mark.usefixtures('installed')
+def test_completed_packet_reuses_only_fresh_committed_reads(client,headers,store,monkeypatch,change):
+    import copy
+    from sqlalchemy import select
+    from workbench import bug_investigation
+    from workbench.db import planning_jobs,model_attempts
+    from workbench.investigation_memory import completed_packet
+    from workbench.trusted_preparation import configuration
+    from test_bug_workflow import report
+    enable(monkeypatch)
+    read=dict(finding='Inspect the existing implementation.',draft=dict(
+        inspection=[dict(path=PRODUCTION,start=1,end=1)]))
+    scripted(monkeypatch,[read,diagnosis(),dict(finding='A missing real-world fact remains.',
+        plan=None,question='A specific missing fact.',limitation=None)])
+    item,attempt=run(client,headers,store)
+    assert item['status']=='waiting_for_information' and attempt['outcome']=='completed'
+    with store.begin() as c:
+        job=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==item['id'])).mappings().one()
+        payload=copy.deepcopy(job['payload'])
+        cached=payload['bug_inspection_packet']
+        cached['policy_sha256']='historical-policy-not-authority'
+        cached['old_plan']='DO_NOT_COPY'
+        if change=='text':
+            cached['inspection_windows'][0]['text']='FORGED_CACHE_MUST_NOT_COPY'
+        if change=='scope':
+            cached['inspection_windows'][0]['path']='!!!TwichUI/unselected.lua'
+        if change=='base':
+            cached['base']='different'
+        c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload=payload))
+        if change=='uncertain':
+            c.execute(model_attempts.update().where(model_attempts.c.id==attempt['id']).values(outcome='interrupted_unknown',usage=None))
+    packet=bug_investigation.context(report(),'',configuration(store))
+    original=copy.deepcopy(packet)
+    result=completed_packet(packet,report(),'00000000-0000-0000-0000-000000000001',store)
+    assert packet==original
+    if change in {'scope','base','uncertain'}:
+        assert result is None
+    else:
+        fresh,windows,prior=result
+        assert prior==attempt['id'] and windows and fresh['policy_sha256']==packet['policy_sha256']
+        assert 'old_plan' not in fresh and 'FORGED_CACHE' not in json.dumps(fresh)
+        assert fresh['files']==packet['files']
+
+
 @pytest.mark.parametrize('change', ['symlink', 'hardlink', 'public', 'oversize'])
 def test_unsafe_source_journal_rejects_without_reading(tmp_path, change):
     from workbench.investigation_memory import read_journal

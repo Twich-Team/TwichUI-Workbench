@@ -1,7 +1,7 @@
 """Function-shaped source context, not guessed exports or executable diagnostics."""
 import copy
 import pytest
-from workbench.source_interface import definitions,context
+from workbench.source_interface import definitions,context,usage_examples
 from workbench.source_memory import retain
 from workbench import bug_source_planning as source
 
@@ -19,6 +19,67 @@ return M
     assert {r['name'] for r in rows}=={'M.Read','M.Inner','M.Visit'}
     assert 'M.Inner' in next(r for r in rows if r['name']=='M.Read')['calls']
     assert next(r for r in rows if r['name']=='M.Visit')['args']=='v'
+
+
+def test_usage_examples_preserve_exact_calls_not_fabricated_definitions():
+    raw=b'''error('SOURCE MUST NOT EXECUTE')
+-- Other:Forged(true)
+local note="Other:Quoted(true)"
+local function hidden() Other:Nested(true) end
+Controller:Activate("widget", true)
+assert(Controller.IsActive())
+local handle=io.open("MUST_NOT_OPEN", "w")
+handle:close()
+'''
+    [example]=usage_examples(raw)
+    assert example['name']=='Controller:Activate' and example['call_line']==5
+    assert 'Controller:Activate("widget", true)' in example['text']
+    assert 'assert(Controller.IsActive())' in example['text']
+    assert not {'args','definition','expected','approved'} & set(example)
+
+
+def test_selected_test_call_is_hash_checked_pinned_and_does_not_expand_source(monkeypatch):
+    path='tests/test_unrelated_widget.lua'
+    raw=b'local Widget = client.Widget\nWidget:Activate("preview", true)\nassert(Widget.IsActive())\n'
+    item=dict(path=path,sha256='fixed',excerpts=[])
+    packet=dict(base='fixed',plan_review='source-grounded-lua-v1',files=[item])
+    before=copy.deepcopy(packet['files'])
+    monkeypatch.setattr(source,'committed',lambda p,b:(raw,dict(sha256='fixed')))
+    def inspect(packet,requests):
+        result=[dict(path=path,sha256='fixed',line=r.start,through_line=r.end,
+            text='\n'.join(raw.decode().splitlines()[r.start-1:r.end])) for r in requests]
+        packet.setdefault('inspection_windows',[]).extend(result)
+        return result,[],sum(len(w['text']) for w in result)
+    monkeypatch.setattr(source,'inspect',inspect)
+    priority,interface=context(packet,dict(title='Widget bug',description='Its preview should respond.'))
+    assert packet['files']==before
+    [example]=interface['committed_usage_examples']
+    assert example['name']=='Widget:Activate' and example['path']==path
+    assert 'text' not in example and any(w['coverage']=='committed public usage example' for w in priority)
+    wire=dict(files=copy.deepcopy(packet['files']))
+    retain(wire,packet,priority,1000)
+    assert 'Widget:Activate("preview", true)' in wire['files'][0]['excerpts'][0]['text']
+    monkeypatch.setattr(source,'committed',lambda p,b:(raw,dict(sha256='changed')))
+    with pytest.raises(ValueError,match='usage-example source changed'):
+        context(packet,dict(title='Widget bug',description='Preview'))
+
+
+def test_usage_examples_are_distributed_across_selected_tests(monkeypatch):
+    raw={
+        'tests/test_many.lua':('local Many=client.Many\n'+'\n'.join(f'Many:Call{i}(true)' for i in range(24))).encode(),
+        'tests/test_other.lua':b'local Other=client.Other\nOther:Activate(true)\n',
+    }
+    packet=dict(base='fixed',files=[dict(path=p,sha256='fixed',excerpts=[]) for p in raw])
+    monkeypatch.setattr(source,'committed',lambda p,b:(raw[p],dict(sha256='fixed')))
+    def inspect(packet,requests):
+        result=[dict(path=r.path,sha256='fixed',line=r.start,through_line=r.end,
+            text='\n'.join(raw[r.path].decode().splitlines()[r.start-1:r.end])) for r in requests]
+        packet.setdefault('inspection_windows',[]).extend(result)
+        return result,[],sum(len(w['text']) for w in result)
+    monkeypatch.setattr(source,'inspect',inspect)
+    _,interface=context(packet,dict(title='Widget bug',description='Preview'))
+    examples=interface['committed_usage_examples']
+    assert len(examples)<=16 and any(e['name']=='Other:Activate' for e in examples)
 
 
 def test_relevant_function_and_caller_are_read_pinned_and_catalogued(monkeypatch):

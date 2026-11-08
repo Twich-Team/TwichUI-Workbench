@@ -12,7 +12,8 @@ def fit(wire, packet, current, requested, encode, limit, stop=lambda:False):
     protected = [*requested]
     protected += [dict(w, coverage='requested committed lines') for w in current
                   if w.get('coverage') in {'complete committed test bootstrap',
-                                          'committed enclosing declaration or registration'}]
+                                          'committed enclosing declaration or registration',
+                                          'committed public usage example'}]
     for item in packet['files']:
         protected += [dict(w, path=item['path'], coverage='requested committed lines')
                       for w in item.get('excerpts', [])
