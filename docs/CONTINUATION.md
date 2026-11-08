@@ -1,3 +1,49 @@
+# Latest state — November8 14:49UTC, real33 settled and shared planning correction
+
+Following the Project Working Philosophy: no real addon implementation/checked
+repair and zero of four real supporting provider cases complete. No owner action
+needed. Current installed c7d1f24/tree3479b708f433428c409f89a912bf2d251a29fc83,
+seal dc006aecf28af81fc02bc012aeaaa4338eb493258f98beeac388eeebedc46583.
+Checked cutover preserved211rows; real33 added four rows, latest215 with logical
+SHA e0120efd0d036d5d0d159a00aee03387a941088e802ae7a7bf7a28d75b1d095f.
+C=~/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-c7d1f24.
+Both listeners/TLS/LAN filters/browser protections/5isolation probes passed;
+normal Qwen/model authentication unchanged, no provider currently active.
+
+Real33 intake0330575a-9ae4-41b2-becf-08d68eaebcff, attempt58d047bf-63e7-42f3-ac8e-6372229d4035,
+jobdc35008f-5385-420a-943e-ef40d903c862. Search notebook and flat diagnosis worked:
+two completed source turns then diagnosis, no repeated searches. Planning reverted
+to the older polymorphic wire, read more source, then turn7 emitted whitespace.
+Actual terminal interrupted/cancellation ack retained, final usage unavailable;
+six complete receipts195393known tokens, original partial row unchanged. No plan
+or implementation. Standing recovery receipt qualifies verified tool-free/fenced
+actual capabilities. C/outcome-c7d1f24/attempt-33-accounting.json and
+standing-real33-interrupted.json preserve exact facts; no owner exception needed.
+TotalCodex23starts/19completeusage/4missingfinalusage;2unknownterminal/2confirmed
+interrupted;609560known total tokens. Qwen unchanged89starts. Do not reset accounting.
+
+Connected next correction flattens planning too, translating only complete explicit
+choices into original strict canonical fields. No missing plan content invented,
+conflicts/extra fields reject. Codex outgoing source can retain the existing bounded
+inspected cache (128k text maximum) within unchanged196608-byte request guard; local
+Qwen remains36k. C/flat-planning-actual-context-proof/proof.json: actual84304cached
+characters retained without omissions, all three current reads visible, controlled
+responses only, no model call/live history write. C/flat-planning-focused-final.log:
+106passed; C/flat-planning-native-v2.log:affected Codex normal API/worker/browser
+rehearsal passed17.82s including two unrelated checked fixture repairs and fault
+rejections. C/flat-planning-check.log static/contracts/build/schema pass. Complete
+suite C/flat-planning-full-tests.log running; confirm final pass before activation.
+The earlier native fixture caught canonical envelope conversion bug; corrected
+normalizer returns unchanged nullable planner alternatives, tested before retry.
+
+Next revision37/task34: preserve current215rows and original79, roots103, append
+58d047bf to priorIDs. Bind final full verification/seal before installation; standing
+recovery original18 + eb72 +253a +58d0 receipts, normal history/admission, fresh
+normal Codex task. Complete real checked repair, provider4, durable result/restart,
+next ordinary bug and full agreed scope. No old campaign caps or renewal gate.
+Lower records are historical, not claims of current completion.
+
 # Latest verified state — November 8, 2026, 14:38 UTC
 
 Following the Project Working Philosophy: no real flight-path implementation or

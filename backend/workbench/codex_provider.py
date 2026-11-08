@@ -1317,23 +1317,24 @@ class Planner:
                 )
             )
             if bug_schema:
-                from workbench.codex_wire import schema as inspection_schema, NOTE, FLAT_NOTE
+                from workbench.codex_wire import schema as inspection_schema, NOTE, FLAT_NOTE, PLAN_NOTE
 
                 output_schema, tagged = inspection_schema(output_schema)
                 if tagged:
-                    flat = schema is InvestigationResponse
+                    flat = "action" in output_schema.get("properties", {})
+                    investigation_flat = flat and schema is InvestigationResponse
                     if flat:
                         instructions = instructions.replace(
                             "Return finding and exactly one draft: inspection, diagnosis, question, or limitation. ",
                             "",
                         )
-                    instructions += " " + (FLAT_NOTE if flat else NOTE)
+                    instructions += " " + (FLAT_NOTE if investigation_flat else PLAN_NOTE if flat else NOTE)
                     if self.response_evidence:
                         import hashlib
 
                         self.response_evidence.record(
                             "codex-wire-schema",
-                            codec="flat-investigation-v2" if flat else "tagged-inspection-v1",
+                            codec="flat-investigation-v2" if investigation_flat else "flat-planning-v3" if flat else "tagged-inspection-v1",
                             schema_sha256=hashlib.sha256(
                                 json.dumps(output_schema, sort_keys=True).encode()
                             ).hexdigest(),

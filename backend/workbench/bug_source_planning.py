@@ -293,7 +293,7 @@ def inspect(packet, requests, *, disclosure_paths=None):
     return windows, matches, total
 
 
-def next_wire(packet, original, feedback, windows, finding, matches=None, *, programs=(), requested=()):
+def next_wire(packet, original, feedback, windows, finding, matches=None, *, programs=(), requested=(), text_budget=None):
     _, wire = bug.planning_request(packet, original, feedback)
     from workbench.source_memory import retain, requested_visibility
     if packet.get('plan_review')=='source-grounded-lua-v1':
@@ -302,7 +302,7 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
         windows=[*windows,*priority]
         wire['selected_source_interface']=interface
         wire['requested_behavior_clauses']=[s.strip() for s in re.split(r'(?<=[.!?])\s+',original['description']) if s.strip()][:12]
-    retain(wire, packet, windows, (36000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
+    retain(wire, packet, windows, (text_budget if text_budget is not None else 36000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
            -sum(len(m['text']) for m in (matches or [])), requested=requested)
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
@@ -337,9 +337,14 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     lessons = None
     predecessor = None
     historical_pending = False
+    program_mode = initial.get('plan_review') == 'source-grounded-lua-v1'
 
     def make_wire(*args,**kwargs):
         before=len(packet.get('inspection_windows',[]))
+        # Codex can retain all of the bounded inspected context in its larger
+        # supported request envelope. Local Qwen keeps its smaller context.
+        if program_mode and getattr(adapter, 'source_manifest', None) is not None:
+            kwargs['text_budget'] = 128000
         result=next_wire(*args,**kwargs)
         added=packet.get('inspection_windows',[])[before:]
         if parent:
@@ -363,7 +368,6 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     windows=[{key:window[key] for key in ('path','sha256','line','through_line')}
                              for window in remembered[offset:offset+16]],
                     approved=False, executed=False)
-    program_mode = initial.get('plan_review') == 'source-grounded-lua-v1'
     limit = read_limit(packet)
     search_chars = 0
     read_chars = (source_characters(packet) if program_mode else

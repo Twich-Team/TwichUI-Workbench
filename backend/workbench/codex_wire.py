@@ -9,6 +9,13 @@ NOTE = (
     "For read, query is null; for search, path/start/end are null. "
     "These tags change formatting only, never source permission, task scope or required content."
 )
+PLAN_NOTE = (
+    "Return complete compact JSON with finding, action, reads, searches, plan, question and limitation; never draft. "
+    "action is inspect, plan, question or limitation. For inspect supply at most three reads/searches combined "
+    "and null plan/question/limitation. For plan supply a complete plan, empty reads/searches and null question/limitation. "
+    "For question or limitation supply only that value; all other values null and collections empty. "
+    "Do not pad with whitespace, invent missing content or change scope. Local semantic validation still applies."
+)
 FLAT_NOTE = (
     "Return complete compact JSON using the flat transport fields, not draft. "
     "action is inspect, diagnose, question, or limitation. For inspect, supply reads and searches "
@@ -55,6 +62,29 @@ def schema(value):
                 }
             },
         ), True
+    if result.get("title") in {"ProgramResponse", "BugPlanningResponse"}:
+        # Keep plan construction off the polymorphic draft/inspection grammar.
+        # The complete provider choice still passes the original local compiler.
+        program = result.get("title") == "ProgramResponse"
+        allowed = not program or any(
+            v.get("$ref") == "#/$defs/Planned"
+            for v in result["properties"]["draft"]["anyOf"]
+        )
+        plan = ({"$ref": "#/$defs/Plan"} if program else
+                next(v for v in result["properties"]["plan"]["anyOf"] if v.get("type") != "null"))
+        props = dict(
+            finding=result["properties"]["finding"],
+            action=dict(type="string", enum=["inspect", "question", "limitation"] + (["plan"] if allowed else [])),
+            reads=dict(type="array", items={"$ref": "#/$defs/InvestigationRead"}, maxItems=3),
+            searches=dict(type="array", items={"$ref": "#/$defs/InvestigationSearch"}, maxItems=3),
+            plan=dict(anyOf=[plan, dict(type="null")]) if allowed else dict(type="null"),
+            question=dict(anyOf=[dict(type="string", minLength=1, maxLength=450), dict(type="null")]),
+            limitation=dict(anyOf=[dict(type="string", minLength=1, maxLength=450), dict(type="null")]),
+        )
+        result["properties"] = props
+        result["required"] = list(props)
+        result["additionalProperties"] = False
+        return result, True
     if not {"InvestigationRead", "InvestigationSearch"} <= set(definitions):
         return result, False
     read, search = (
@@ -97,7 +127,8 @@ def normalize(value):
     if not isinstance(value, dict):
         return value, []
     if "action" in value:
-        fields = {"finding", "action", "reads", "searches", "diagnosis", "question", "limitation"}
+        outcome_field = "plan" if "plan" in value else "diagnosis"
+        fields = {"finding", "action", "reads", "searches", outcome_field, "question", "limitation"}
         # Seven fields, with one explicit outcome. Empty collections are supplied
         # by the provider, never invented to complete a partial response.
         valid = (
@@ -108,15 +139,15 @@ def normalize(value):
         )
         action = value["action"]
         if valid and action == "inspect":
-            valid = all(value[k] is None for k in ("diagnosis", "question", "limitation"))
+            valid = all(value[k] is None for k in (outcome_field, "question", "limitation"))
             draft = dict(inspection=[*value["reads"], *value["searches"]])
-        elif valid and action in {"diagnose", "question", "limitation"}:
+        elif valid and action in ({"plan", "question", "limitation"} if outcome_field == "plan" else {"diagnose", "question", "limitation"}):
             field = "diagnosis" if action == "diagnose" else action
             valid = (
                 not value["reads"]
                 and not value["searches"]
                 and value[field] is not None
-                and all(value[k] is None for k in {"diagnosis", "question", "limitation"} - {field})
+                and all(value[k] is None for k in {outcome_field, "question", "limitation"} - {field})
             )
             draft = {field: value[field]}
         else:
@@ -128,6 +159,13 @@ def normalize(value):
                 "one explicit outcome with all unused fields null or empty",
                 value,
             )
+        if outcome_field == "plan":
+            # The application planner consumes its existing nullable alternatives;
+            # supplied empty collections/nulls are already checked above.
+            canonical = dict(finding=value["finding"], plan=None, question=None,
+                             limitation=None, inspection=None)
+            canonical.update(draft)
+            return canonical, ["flat-planning-" + action]
         return dict(finding=value["finding"], draft=draft), ["flat-investigation-" + action]
     target = value.get("draft", value)
     if not isinstance(target, dict) or not isinstance(target.get("inspection"), list):

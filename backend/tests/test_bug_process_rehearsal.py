@@ -265,10 +265,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             from workbench.bug_investigation_stage import InvestigationResponse
             actual_schema=ReviewResponse if schema.get('title')=='ReviewResponse' else InvestigationResponse if schema.get('title')=='InvestigationResponse' else bug_investigation.BugPlanningResponse
             answer=answer_for(packet,actual_schema)
-            if actual_schema is InvestigationResponse:
+            if actual_schema is not ReviewResponse:
                 draft=answer['draft']
                 value=dict(finding=answer['finding'],action='inspect',reads=[],searches=[],
-                           diagnosis=None,question=None,limitation=None)
+                           question=None,limitation=None)
+                value["diagnosis" if actual_schema is InvestigationResponse else "plan"]=None
                 if 'inspection' in draft:
                     for item in draft['inspection']:
                         value['searches' if 'query' in item else 'reads'].append(item)

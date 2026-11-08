@@ -104,3 +104,36 @@ def test_original_canonical_inspection_remains_semantically_identical():
     result, changes = normalize(value)
     assert result == value and not changes
     InvestigationResponse.model_validate(result)
+
+
+@pytest.mark.parametrize("program", [True, False])
+def test_flat_plan_inspection_preserves_complete_strict_choice(program):
+    from workbench.bug_program import ProgramResponse
+    from workbench.bug_evidence import BugPlanningResponse
+    original = (ProgramResponse if program else BugPlanningResponse).model_json_schema()
+    wire, changed = schema(original)
+    assert changed and "draft" not in wire["properties"]
+    assert set(wire["required"]) == set(wire["properties"])
+    assert "plan" in wire["properties"]["action"]["enum"]
+    value = dict(finding="Read the committed existing fixture first.", action="inspect",
+                 reads=[dict(path="tests/test_sample.lua", start=1, end=40)],
+                 searches=[], plan=None, question=None, limitation=None)
+    mapped, changes = normalize(value)
+    assert mapped["inspection"] == value["reads"]
+    assert changes == ["flat-planning-inspect"]
+    BugPlanningResponse.model_validate(mapped)
+    for bad in (dict(value, plan={}), {k:v for k,v in value.items() if k != "plan"},
+                dict(value, diagnosis=None), dict(value, action="diagnose")):
+        with pytest.raises(ResponseValidationError):
+            normalize(bad)
+
+
+def test_flat_plan_does_not_allow_invented_setup_or_missing_plan():
+    from workbench.bug_program import schema as program_schema
+    original = program_schema({}, [])
+    wire, _ = schema(original)
+    assert "plan" not in wire["properties"]["action"]["enum"]
+    value = dict(finding="A controlled complete proposal.",action="plan",reads=[],searches=[],
+                 plan=None, question=None,limitation=None)
+    with pytest.raises(ResponseValidationError):
+        normalize(value)

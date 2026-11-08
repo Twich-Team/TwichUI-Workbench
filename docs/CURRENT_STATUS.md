@@ -1,16 +1,14 @@
-# Current status — recovery and investigation correction verified
+# Current status — real diagnosis advanced; planning-format correction verified locally
 
-Following the Project Working Philosophy: no real addon repair or required real
-provider case is complete. Installed b33097c; latest history211 rows preserved.
-Real32 had three completed Codex turns and a fourth confirmed interrupted after
-whitespace output. Its final usage is unknown; no plan or implementation started.
-Standing read-only recovery applies without another owner exception.
+Following the Project Working Philosophy: no real checked repair and zero of four
+required real supporting provider cases completed. Installed c7d1f24, latest215rows.
+Fresh Codex run retained searches, completed diagnosis, then failed on whitespace
+in the older planning wire. Matching terminal interruption confirmed, usage unknown;
+no plan/implementation. Standing read-only recovery applies without owner renewal.
 
-The verified correction retains scoped search results across source reads, uses
-a flatter investigation wire with strict canonical checks, and preserves known
-terminal status separately from unavailable usage across installation history.
-1606backend/25frontend/141focused checks and affected separate-process browser
-rehearsal passed. These are controlled/offline evidence, not real task completion.
-Next is checked installation and fresh real investigation. Full repair/provider4/
-result restart/next ordinary task remain unfinished. No owner decision pending.
-See [handoff](CONTINUATION.md) for exact identities and evidence.
+Planning now uses the simpler flat format too, with unchanged strict validation.
+Codex retains its bounded inspected source without evicting needed prior bodies;
+actual-source controlled replay and normal separate-process browser checks pass.
+Complete suite is running before checked next installation and fresh real task.
+No owner decision pending. Real repair/provider4/restart/next task and broader scope
+remain unfinished; [handoff](CONTINUATION.md) binds exact evidence and accounting.
