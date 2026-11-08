@@ -6935,3 +6935,24 @@ independently of startup metadata. No acceptance protection weakened. All origin
 failure logs retained. Ruff/diff checks pass. Retain bound c98 complete1429backend/
 25frontend/build and unchanged browser/admin evidence; this source-only delta has
 fresh focused/native/actual-context checks. Proceed checked revision23 and real22.
+
+
+## November8 — real22 advanced, exact correction-context defect fixed
+
+Real22 source diagnosis passed. Two Lua drafts correctly rejected: scope then
+imaginarycache/observations already passing original/wrong reported action. API
+declarations were present; these were reasoning errors.4complete stop receipts
+7036generated/64259prompt; no plan approval/implementation/Codex/uncertainty.
+Correction5 never generated:67382raw bytes exceeded pre-fit65536 guard. Exact
+local replay of4saved outputs now reaches65080-byte body with report/feedback/
+129startup unchanged, zero live requests. Private prepared bound98304 is distinct
+from unchanged actual HTTP65536/tokenizer limits. Stop category/state retained.
+Prior rejected self-review can be reused as bounded/hash-bound untrusted negative
+feedback after source/settlement validation, without old plan/approval/answer.
+Actual167rowCOPY proves4issues reach new serialized request, no livewrite/generation.
+190focused plus stricter native normal-browser/separate worker2controlledfixes/
+faults/concurrency/restarts32.17sec630MiB pass. Native now exercises actualgenerate
+and only mocks provider_request; first dummy-key fixture failure preserved/fixed
+with a private controlled key. Existing protections remain. Current history167
+rows/24entries, original79 preserved. Continue verifiedrevision24/real23, no owner
+stop;0/4realprovidercases/no checkedflightrepair.

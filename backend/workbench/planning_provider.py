@@ -22,6 +22,7 @@ from workbench.bug_investigation_stage import InvestigationResponse
 ROOT = Path(__file__).resolve().parents[2]
 MAX_INPUT = 24000
 BUG_INPUT = 65536
+BUG_PREPARED_INPUT = 98304  # Private source + rejected-plan feedback; actual HTTP stays BUG_INPUT.
 MAX_OUTPUT = 24000
 
 
@@ -171,8 +172,15 @@ class LocalProvider:
         if (issubclass(schema, ScenarioResponse) or schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse)) and expected_model is None:
             raise PlanningUnavailable('Grounded local planning requires a saved model selection.', 'model_policy')
         encoded = json.dumps(packet, ensure_ascii=True, separators=(',', ':'))
-        if len(encoded.encode()) > (BUG_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse) else MAX_INPUT):
-            raise PlanningUnavailable('Planning context exceeds the input budget.')
+        prepared_limit = BUG_PREPARED_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse) else MAX_INPUT
+        self.diagnostics.update(prepared_input_bytes=len(encoded.encode()), prepared_input_limit=prepared_limit)
+        if len(encoded.encode()) > prepared_limit:
+            self.diagnostics['category'] = 'input_budget'
+            if self.response_evidence:
+                self.response_evidence.record('request-rejected', category='input_budget',
+                    generation_state='not_started', prepared_input_bytes=len(encoded.encode()),
+                    prepared_input_limit=prepared_limit)
+            raise PlanningUnavailable('Planning context exceeds the input budget.', 'input_budget')
         # Reuse pilot coordination protocol without importing pilot code or creating files.
         # Shared lifecycle lock prevents a maintenance cycle starting during this one request.
         key_path = os.environ.get('WORKBENCH_LOCAL_KEY')

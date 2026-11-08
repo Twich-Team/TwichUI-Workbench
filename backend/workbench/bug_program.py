@@ -95,7 +95,11 @@ INSTRUCTIONS = (
     'Bootstrap already loads its committed modules and startup; preserve it and change only needed fixture inputs. '
     'No io, process execution, network, debug, arbitrary loading or verdict access. Execution and memory/time are bounded. '
     'Keep the entire reproducer concise (under8200 serialized bytes). Do not include an addon implementation fix. '
-    'writable_paths must be inspected eligible files; describe the bounded repair in plain English. '
+    'writable_paths must include at least one inspected eligible addon source; tests alone cannot implement a bug repair. '
+    'scope describes the actual behavioral change in plain English, never just a filename or an instruction to describe it. '
+    'Do not infer an existing cache or listener from desired behavior; inspect the actual implementation. '
+    'The observations must distinguish original from corrected behavior and cover the user report, not merely confirm a stub changed. '
+    'Use client in phase code even if the committed bootstrap calls its local variable c; c is not a phase global. '
     'other_reads contains additional selected files only; required setup/writes/focused test reads are derived. '
     'If needed setup, arguments, return types or public access paths are missing, inspect before proposing code.'
 )

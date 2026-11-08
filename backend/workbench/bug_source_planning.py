@@ -312,10 +312,16 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         wire['coverage']['require_inspection'] = True
     parent = adapter.response_evidence
     journals, receipts = [], []
+    lessons = None
     if investigating and parent and engine is not None:
         from workbench.investigation_memory import seed
         packet, remembered, predecessor = seed(packet, original, parent.identifier, engine)
         if remembered:
+            if initial.get('plan_review') == 'source-grounded-lua-v1':
+                from workbench.investigation_memory import review_lessons
+                lessons = review_lessons(predecessor, engine)
+                if lessons:
+                    parent.record('rejected-plan-feedback-reused', **lessons, approved=False, executed=False)
             wire = next_wire(packet, original, feedback, remembered,
                              'Previously read source was checked against the current committed repository. No diagnosis or approval was reused.')
             parent.record('source-memory-reused', predecessor=predecessor,
@@ -394,11 +400,18 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     corrective=bool(wire.get('validation_feedback')),
                     request_number=index+1,requests_after_this=REQUESTS-index-1)
             response_added = False
+            if lessons:
+                wire['prior_rejected_plan_feedback'] = lessons
             try:
                 raw, model, basis = adapter.generate(wire, schema, expected_model=expected_model)
             except PlanningUnavailable as error:
                 diagnostics = dict(adapter.diagnostics)
                 response_added = observe_usage(diagnostics)
+                diagnostics['stopped_request_category'] = error.reason
+                diagnostics['stopped_request_generation_state'] = adapter.diagnostics.get('generation_state', 'not_started')
+                adapter.diagnostics.update(diagnostics)
+                if evidence:
+                    evidence.record('request-stopped', category=error.reason, generation_state=diagnostics['stopped_request_generation_state'])
                 if index:
                     # A later readiness refusal cannot re-enable pre-generation
                     # fallback after an earlier inspection generation.

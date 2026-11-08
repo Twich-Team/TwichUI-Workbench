@@ -684,3 +684,41 @@ def test_serialized_input_fitting_preserves_complete_committed_startup(tmp_path)
     provider=LocalProvider()
     provider._infer(Transport(),'inert',InvestigationResponse,json.dumps(packet,separators=(',',':')),expected_model=MODEL)
     assert len(calls)==1
+
+
+def test_private_corrective_context_is_fitted_before_http_bound(monkeypatch):
+    from workbench.bug_investigation_stage import InvestigationResponse
+    from workbench.planning_provider import BUG_INPUT, BUG_PREPARED_INPUT
+    packet=dict(coverage={},report=dict(title='An ordinary report',description='A repeated action needs refreshing.'),
+        prior_rejected_plan_feedback=dict(note='Untrusted rejection, no approval',issues=['reason '*1800]),
+        files=[dict(path='!!!TwichUI/Example.lua',excerpts=[dict(line=1,text='local value = 1\n'*3500)])])
+    prepared=len(json.dumps(packet,separators=(',',':')).encode())
+    assert BUG_INPUT<prepared<=BUG_PREPARED_INPUT
+    seen=[]
+    class Transport:
+        seconds=120
+        def models(self,_):return MODEL
+        def context_budget(self,_,body):return dict(prompt_tokens=12000,context_tokens=32768)
+        def read(self,request,limit):
+            body=json.loads(request.data)
+            actual=json.loads(body['messages'][1]['content'])
+            assert actual['report']==packet['report']
+            assert actual['prior_rejected_plan_feedback']==packet['prior_rejected_plan_feedback']
+            assert len(request.data)<=BUG_INPUT and limit==24000
+            seen.append(len(request.data))
+            return json.dumps(dict(id='controlled-fit-correction',model=MODEL,
+                usage=dict(prompt_tokens=10,completion_tokens=5,total_tokens=15),
+                choices=[dict(finish_reason='stop',message=dict(content=json.dumps(dict(
+                    finding='A controlled stop.',draft=dict(question='A real-world detail.')))))])).encode()
+    def request(self,schema,encoded,key,expected):
+        return self._infer(Transport(),'inert',schema,encoded,expected_model=expected)
+    monkeypatch.setenv('WORKBENCH_LOCAL_KEY','unused-control-key-no-file-read')
+    monkeypatch.setattr(LocalProvider,'_request',request)
+    provider=LocalProvider()
+    provider.generate(packet,InvestigationResponse,expected_model=MODEL)
+    assert len(seen)==1 and provider.diagnostics['prepared_input_bytes']==prepared
+    packet['prior_rejected_plan_feedback']['issues']=['x'*100000]
+    with pytest.raises(PlanningUnavailable) as failure:
+        provider.generate(packet,InvestigationResponse,expected_model=MODEL)
+    assert failure.value.reason=='input_budget' and len(seen)==1
+    assert provider.diagnostics['generation_state']=='not_started'

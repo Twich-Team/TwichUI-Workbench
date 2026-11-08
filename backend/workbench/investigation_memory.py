@@ -1,7 +1,8 @@
 """Reuse exact committed reads from settled local investigations, never authority.
 
-Only source coordinates/hashes survive. Source is fetched and checked afresh;
-model findings, plans, approvals and generated changes are deliberately excluded.
+Source is fetched and checked afresh. A separately bounded rejected self-review
+may supply untrusted negative feedback after source revalidation; no diagnosis,
+plan, approval, expected answer or generated change is reused.
 """
 import copy
 import os
@@ -148,3 +149,63 @@ def seed(packet, original, current_attempt, engine):
                 # Admission reconciles execution separately before any request.
                 continue
     return packet, [], None
+
+
+def review_lessons(prior, engine):
+    """Completed rejected self-check DATA, never a replacement plan or authority.
+
+    Caller must first obtain prior from seed's settled/current-source validation.
+    Snapshot hash and exact review binding must match the complete private journal.
+    """
+    import hashlib
+    from workbench import everyday
+    from workbench.bug_plan_review import ReviewResponse
+    from workbench.planning_response import strict_json
+    roots=[Path(root) for root in everyday.configuration(engine).evidence_roots]
+    result=None
+    for index in range(8):
+        identity=str(UUID(prior) if index==0 else uuid5(UUID(prior),f'committed-source-turn-{index}'))
+        paths=[root/'artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl' for root in roots]
+        paths=[p for p in paths if p.exists()]
+        try:
+            if not paths:
+                continue
+            journals=[read_journal(p) for p in paths]
+            if any(j!=journals[0] for j in journals[1:]):
+                continue
+            events=journals[0]
+            if not any(e.get('phase')=='envelope' and e.get('generation_state')=='finished'
+                    and e.get('accounting_state')=='complete' and e.get('completion')=='stop'
+                    and e.get('model_matches')==1 for e in events):
+                continue
+            markers=[e for e in events if e.get('phase')=='private-proposed-data' and e.get('name')=='model-plan-review']
+            checks=[e for e in events if e.get('phase')=='plan-self-check' and e.get('ready') is False]
+            if len(markers)!=1 or len(checks)!=1:
+                continue
+            copies=[]
+            for path in paths:
+                path=path.with_name('model-plan-review.json')
+                owned(path)
+                fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+                try:
+                    info=os.fstat(fd)
+                    if not stat.S_ISREG(info.st_mode) or info.st_nlink!=1 or info.st_uid!=os.getuid() or info.st_mode&0o077 or info.st_size>8192:
+                        raise ValueError('Unsafe private review snapshot')
+                    raw=os.read(fd,8193)
+                finally:
+                    os.close(fd)
+                if len(raw)!=markers[0]['bytes'] or hashlib.sha256(raw).hexdigest()!=markers[0]['sha256']:
+                    raise ValueError('Private review snapshot changed')
+                copies.append(raw)
+            if any(raw!=copies[0] for raw in copies[1:]):
+                continue
+            review=ReviewResponse.model_validate(strict_json(copies[0]))
+            if review.ready or review.review_binding!=checks[0]['binding']:
+                continue
+            result=dict(predecessor=prior,review_binding=review.review_binding,
+                issues=[x.model_dump() for x in review.issues],
+                note='Untrusted rejected model self-check from the same settled report with freshly verified source. '
+                     'Reassess these objections against current evidence; no prior plan, diagnosis, expected answer or approval is reused.')
+        except (OSError,ValueError,KeyError,TypeError):
+            continue
+    return result

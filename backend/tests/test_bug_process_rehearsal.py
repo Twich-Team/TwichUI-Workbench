@@ -171,14 +171,14 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     ctx = multiprocessing.get_context("fork")
     calls, errors = ctx.Queue(), ctx.Queue()
 
-    def scripted(self, packet, schema, expected_model):
+    def scripted(self, schema, encoded, key_path, expected_model):
+        packet = json.loads(encoded)
         from workbench.bug_plan_review import ReviewResponse
         from workbench.bug_investigation_stage import InvestigationResponse
         reviewing=schema is ReviewResponse
         investigating=schema is InvestigationResponse
         assert reviewing or investigating or schema is bug_investigation.BugPlanningResponse
-        assert 24000 < len(json.dumps(packet).encode()) <= 65536
-        self.diagnostics = dict(generation_state='not_started')
+        assert 24000 < len(json.dumps(packet).encode()) <= 98304
         conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
         fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
         case = cases[0] if fault else next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
@@ -243,7 +243,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         calls.put(('fixture-conflict' if conflict else 'fixture-fault' if fault else case["choice"], "self-review" if reviewing else "diagnosis" if investigating else "planning"))
         return value
 
-    monkeypatch.setattr(LocalProvider, "generate", scripted)
+    key = tmp_path / "controlled-local.key"
+    key.write_text("CONTROLLED-NOT-A-LIVE-CREDENTIAL")
+    key.chmod(0o600)
+    monkeypatch.setenv("WORKBENCH_LOCAL_KEY", str(key))
+    monkeypatch.setattr(LocalProvider, "_request", scripted)
     # No real connector is used. The real browser gate observes the explicitly
     # controlled availability that this fixture declared.
     monkeypatch.setattr(codex_provider, "connector_path", lambda: tmp_path / "controlled.sock")
