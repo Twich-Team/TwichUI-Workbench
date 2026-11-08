@@ -103,7 +103,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
     {shown.local_only&&<p><strong>Provider</strong> {shown.provider?.backend==='codex'
       ? <>Codex · {shown.provider.model}{shown.provider.effort ? ' · '+shown.provider.effort : ''}. {shown.provider.fallback_reason==='local_unreachable' ? 'Qwen was unreachable before generation, so Codex prepared the plan. ' : ''}One signed-in turn sends the approved test and relevant committed source excerpts to OpenAI. Workbench checks the proposed change independently.</>
       : <>Local Qwen is the saved choice for this run. {shown.provider?.fallback_reason ? 'The approved switch occurred before Codex generated a plan. ' : ''}This approval allows one Qwen run.</>}</p>}
-    <RunLimits budget={budget} codex={shown.provider?.backend==='codex'}/>
+    <RunLimits budget={budget} codex={shown.provider?.backend==='codex'} repair={Boolean(offer.prepared_behavior)}/>
     {query.isError&&<p role="alert">The run offer could not be refreshed. Refresh before approving.</p>}
     {error&&<p role="alert">{error}{!stale&&draft?' You can retry the same decision.':''}</p>}
     {stale?<><p role="alert">This run offer changed or is no longer available. Review the current task before deciding.</p>
@@ -126,7 +126,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
       <summary>Technical run details</summary>
       <label>Run approval note <span>Optional</span><textarea maxLength={1600} value={draft?.note ?? note}
         disabled={busy||Boolean(draft)} onChange={e=>{setNote(e.target.value);setAccepted(false);}}/></label>
-      <p>{current.message}</p><ExactRunLimits budget={budget} codex={shown.provider?.backend==='codex'}/>
+      <p>{current.message}</p><ExactRunLimits budget={budget} codex={shown.provider?.backend==='codex'} repair={Boolean(offer.prepared_behavior)}/>
       <p>If the run starts, Workbench checks that it can cancel its own work and restores normal model access afterward.</p>
       <h4>Exact plan scope and exclusions</h4><ul>{[...(scope?.content.scope || []),...(scope?.content.exclusions || [])].map((s,i)=><li key={i}>{s}</li>)}</ul>
       <p>Repository {offer.repository} · Base {offer.base}</p>

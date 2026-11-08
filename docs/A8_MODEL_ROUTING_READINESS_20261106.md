@@ -1,3 +1,39 @@
+# Current readiness — delivery-process correction under verification
+
+Following the Project Working Philosophy: A8 and the full product remain unfinished.
+InstalledFCC remains healthy; no real flight-path implementation or independent real
+behavior pass, and zero of the four real supporting provider cases passed. Real41's
+three phases/16known turns/1154096tokens remain recorded; no provider is active.
+Owner persistence,12read/6write/max3scope, billing, network and publication decisions
+are unchanged. Historical uncertainty remains isolated with unknown usage unchanged.
+
+Development now separates readable scope approval from internal executable-check
+construction with real sandbox feedback, followed by a separately certified run offer
+and app-owned repair/check feedback. All prior phase usage is retained; a fresh bounded
+operation does not recreate a cumulative campaign cap. Current real history was proved
+renewable at processing sequence4 on an unchanged255-row copy, without a model call.
+Both adapters completed two different controlled bug journeys in confined separate
+process/browser rehearsals, with actual Lua/full-suite checks and process restart.
+These are NOT real-provider passes. Code/current UI has full1718backend/25frontend and
+static verification; final6mode native/4route/browser checks are running before activation.
+Evidence: C/delivery-process-offline-proof, CONTINUATION.md and the next bound release record.
+
+Signed-in included subscription only. No API billing, extra credits, purchases/reload
+or upgrade. Ownerzero/reloadOff are snapshots, and the accepted allowance snapshot policy
+is not a per-turn included-only lock. Fallback remains explicit, bounded and permitted
+only before generation. Current Codex task is not switched. New coding turns remain
+within a separately approved operation and preserve all observed/unknown usage.
+
+Features, inspections, simulator work, PR delivery and broader product scope remain
+unfinished. The real checked repair, four real cases, actual-result restart and normal
+subsequent bug still require demonstration. Continue under standing authority; no new
+engineering decision is requested. Earlier entries below are historical, not active
+numerical delivery caps or current installation claims.
+
+---
+
+## Historical readiness record
+
 # Current readiness — November 8, 2026, 19:10 UTC
 
 Following the Project Working Philosophy: A8 and the agreed product remain unfinished.

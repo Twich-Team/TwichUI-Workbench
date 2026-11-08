@@ -14,7 +14,7 @@ scope approval from internal executable-check preparation and provider lifecycle
 local content acceptance. New types/receipts/phase ledger have focused verification
 and real read-only terminal-evidence proofs. Preparation, run offers, UI/driver, actual sandbox feedback and repair-context integration
 are implemented and controlled-tested. Two different bugs complete with each adapter
-in the separate-process confined browser rehearsal; no real-provider claim. Final
-verification is ongoing; NOT installed or real-task demonstrated.
+in the separate-process confined browser rehearsal; no real-provider claim. Complete1718backend/25frontend and static verification pass; final native/route/
+browser verification is ongoing; NOT installed or real-task demonstrated.
 See CONTINUATION.md and DELIVERY_PROCESS_REPAIR_20261108.md. No component pass, checkpoint,
 new build or generated plan completes the product. Standing authority continues.

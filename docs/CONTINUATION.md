@@ -95,8 +95,13 @@ bug repairs each with real confined Lua/full suite and restarted API/worker; the
 CONTROLLED providers, not required real-provider passes. Latest native log
 /tmp/wb-delivery-intent-native-final.log:2passed63.27s; unit collected/cgroup absent.
 Focused82+73+9 tests passed on successive relevant edits; static check passes.
-The final full run is currently /tmp/wb-delivery-sealed-full-test.log, exec session72795;
-inspect its result before claiming final verification. Earlier full runs were invalidated
+The frozen backend full run /tmp/wb-delivery-sealed-full-test.log passed1718/8default
+opt-in skips and25frontend. Final UI-only truthful Codex repair limits/legacy clarification
+compatibility then passed static/contracts/build and25frontend again. No backend helper
+changed after the successful full run. Current final6mode native session78658, four-route
+session50723, and full110frontend browser session14748 are running; inspect their actual
+logs before final verification. Logs /tmp/wb-delivery-all-native-final.log,
+/tmp/wb-delivery-four-route-final.log, /tmp/wb-delivery-e2e-final.log. Earlier full runs were invalidated
 by connected corrections; one control-input hash changed while code was edited, and a
 monitor read hit its bounded query timeout during concurrent rehearsal. Do not edit
 runtime helpers during the final full run or race frontend builds with browser tests.

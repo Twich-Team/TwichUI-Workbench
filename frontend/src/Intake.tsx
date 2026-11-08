@@ -195,7 +195,7 @@ export function IntakeDetail() {
   const p = data.proposals.find(p=>p.id===selected) || data.proposals[0];
 
   const sample = data.original.title === 'Synthetic feature · Admission rehearsal';
-  const renewable=data.status==='failed'&&data.original.kind==='issue'&&Boolean(data.original.local_planning)&&!data.tasks.length&&!data.decisions.length&&data.jobs.filter(j=>j.kind==='planning').every(j=>['completed','failed'].includes(j.status));
+  const renewable=data.status==='failed'&&data.original.kind==='issue'&&Boolean(data.original.local_planning)&&!data.tasks.length&&!data.decisions.length&&data.jobs.some(j=>j.kind==='planning'&&j.status==='failed')&&data.jobs.filter(j=>j.kind==='planning').every(j=>['completed','failed'].includes(j.status));
   const asking = renewable || data.status==='waiting_for_information' || (data.status==='failed' &&
     data.original.kind==='issue' && Boolean(data.original.local_planning) && !data.tasks.length &&
     !data.decisions.length && Boolean(data.proposals[0]?.task_contract?.scope_missing.length) &&
