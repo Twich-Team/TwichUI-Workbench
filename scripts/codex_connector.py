@@ -124,6 +124,8 @@ def handle(connection, binary, credential, runtime, evidence_root=None):
         if not raw.endswith(b'\n') or len(raw) > codex.MAX_BUG_INPUT + 1:
             raise codex.Hold('protocol')
         request = json.loads(raw)
+        if not isinstance(request, dict):
+            raise codex.Hold('protocol')
         request_seconds = request.pop('request_seconds', codex.SECONDS)
         if (set(request) != {'model','effort','prompt','schema'}
                 or type(request_seconds) is not int or request_seconds not in (codex.SECONDS,codex.BUG_SECONDS)

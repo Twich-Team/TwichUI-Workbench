@@ -185,3 +185,33 @@ def test_private_output_excerpt_redacts_credentials_and_bounds_unicode_bytes(tmp
     rows = [json.loads(line) for line in raw.splitlines()]
     assert len(json.dumps(rows[-1]["output_excerpt"]).encode()) <= 8200
     assert journal.path.stat().st_size < MAX_BYTES
+
+
+@pytest.mark.parametrize("raw", [b"null\n", b"[]\n", b"false\n", b'"invalid"\n'])
+def test_invalid_connector_envelope_never_starts_a_provider_or_breaks_the_broker(
+    tmp_path, monkeypatch, raw
+):
+    import socket
+    from threading import Thread
+    import codex_connector as connector
+
+    monkeypatch.setattr(connector, "allowed_cgroup", lambda *_: True)
+    monkeypatch.setattr(
+        connector,
+        "resolve_backend",
+        lambda *_: pytest.fail("Invalid envelope reached network resolution"),
+    )
+    left, right = socket.socketpair()
+    with left, right:
+        left.settimeout(2)
+        thread = Thread(
+            target=connector.handle,
+            args=(right, "/fixture/cli", "/fixture/auth", tmp_path, tmp_path / "evidence"),
+        )
+        thread.start()
+        left.sendall(raw)
+        result = json.loads(left.makefile("rb").readline())
+        thread.join(2)
+    assert result["error"] == "protocol" and result["started"] is False
+    assert result["partial"] is False and result["counted"] is None
+    assert not (tmp_path / "evidence").exists() and not thread.is_alive()
