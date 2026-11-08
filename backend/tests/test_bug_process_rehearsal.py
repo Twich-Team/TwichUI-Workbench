@@ -412,9 +412,14 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             intakes.c.payload['title'].as_string() == cases[1]['request']['title'],
             planning_jobs.c.kind == 'planning')).scalar_one()
     [page, next_page] = payload['bug_inspection_packet']['inspection_windows']
-    assert page['through_line'] == 80 and page['next_line'] == 81
+    if case_provider=='codex':
+        # The larger Codex page contains this complete committed fixture.
+        assert page['through_line']==len(alert_source.splitlines()) and page['next_line'] is None
+        assert next_page['line']==1 and next_page['cached_prefix_through_line'] is None
+    else:
+        assert page['through_line']==80 and page['next_line']==81
+        assert next_page['line']==81 and next_page['cached_prefix_through_line']==80
     assert page['requested_through_line'] == 9999 and page['coverage'] == 'partial requested committed lines'
-    assert next_page['line'] == 81 and next_page['cached_prefix_through_line'] == 80
     assert next_page['requested_start_line'] == 1 and next_page['next_line'] is None
     assert not git(source, "status", "--porcelain").strip()
     assert (source / PRODUCTION).read_text() == BUGGY

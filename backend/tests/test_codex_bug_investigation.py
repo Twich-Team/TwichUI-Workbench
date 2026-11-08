@@ -73,7 +73,7 @@ def test_context_failure_before_transport_records_no_generation_and_can_be_renew
     assert "source preparation" in item["jobs"][0]["message"]
 
 
-@pytest.mark.parametrize("consent_version", [8, 9])
+@pytest.mark.parametrize("consent_version", [8, 9, 10])
 @pytest.mark.usefixtures("installed")
 def test_codex_uses_same_investigation_plan_and_review_before_normal_approval(
     client, headers, store, monkeypatch, consent_version
@@ -87,13 +87,14 @@ def test_codex_uses_same_investigation_plan_and_review_before_normal_approval(
             == {
                 "input_limit": codex_provider.MAX_BUG_INPUT,
                 "request_seconds": codex_provider.BUG_SECONDS
-                if consent_version == 9
+                if consent_version >= 9
                 else codex_provider.SECONDS,
             }
             and not stop()
         )
         packet = json.loads(prompt.split("\nUntrusted task data:\n", 1)[1])
         calls.append(packet)
+        assert packet["investigation_progress"]["max_requests"] == (16 if consent_version==10 else 8)
         phase = packet["investigation_progress"]["phase"]
         assert "prior_rejected_plan_feedback" not in packet
         if phase == "source_diagnosis":
@@ -120,7 +121,7 @@ def test_codex_uses_same_investigation_plan_and_review_before_normal_approval(
     identity = client.post(
         "/api/intake", headers=headers, json={**report(), "local_planning": "codex-once"}
     ).json()["id"]
-    if consent_version == 8:
+    if consent_version != 10:
         from workbench.db import write_transaction
 
         with write_transaction(store) as connection:
@@ -134,8 +135,9 @@ def test_codex_uses_same_investigation_plan_and_review_before_normal_approval(
             payload = dict(row["payload"])
             payload["local_planning_receipt"] = {
                 **payload["local_planning_receipt"],
-                "investigation_version": 8,
-                "codex_request_deadline_seconds": 120,
+                "investigation_version": consent_version,
+                "max_local_requests":8,"max_codex_requests":8,"max_total_model_requests":8,
+                "codex_request_deadline_seconds":120 if consent_version==8 else 300,
             }
             connection.execute(
                 planning_jobs.update()
@@ -172,7 +174,7 @@ def test_codex_uses_same_investigation_plan_and_review_before_normal_approval(
     )
     assert (
         "Codex" in attempt["usage"]["source"]
-        and job["payload"]["local_planning_receipt"]["max_total_model_requests"] == 8
+        and job["payload"]["local_planning_receipt"]["max_total_model_requests"] == (16 if consent_version==10 else 8)
     )
 
 

@@ -89,14 +89,14 @@ def state(connection, identity):
     )
     receipt = payload.get("local_planning_receipt", {})
     require(
-        receipt.get("investigation_version") in (4, 5, 6, 7, 8, 9) and receipt.get("max_local_requests") == 8,
+        receipt.get("investigation_version") in (4, 5, 6, 7, 8, 9, 10) and receipt.get("max_local_requests") == (16 if receipt.get("investigation_version")==10 else 8),
         "The local investigation request bound is unavailable",
     )
     diag = payload.get("diagnostics", {})
     require(
         diag.get("generation_state") == "uncertain"
         and type(diag.get("investigation_requests")) is int
-        and 1 <= diag["investigation_requests"] < 8,
+        and 1 <= diag["investigation_requests"] < (16 if receipt.get("investigation_version")==10 else 8),
         "The completed local response prefix is unavailable",
     )
     known = json.loads(diag["known_usage"])

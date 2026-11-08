@@ -172,7 +172,9 @@ def state(connection, identity):
         "Known usage malformed",
     )
     count = diag.get("investigation_requests", 0)
-    require(type(count) is int and 0 <= count <= 8, "Investigation accounting unavailable")
+    from workbench.planning_limits import request_bound
+    bound=request_bound(payload.get('local_planning_receipt',{}))
+    require(type(count) is int and 0 <= count < bound, "Investigation accounting unavailable")
     if identity == HISTORICAL:
         proof = historical_proof(binding)
         evidence_root = HISTORICAL_ROOT / "artifacts/codex-evidence"

@@ -1,326 +1,121 @@
-# Latest state — November8 14:49UTC, real33 settled and shared planning correction
+# Current handoff — November 8, 2026, 15:06 UTC
 
-Following the Project Working Philosophy: no real addon implementation/checked
-repair and zero of four real supporting provider cases complete. No owner action
-needed. Current installed c7d1f24/tree3479b708f433428c409f89a912bf2d251a29fc83,
-seal dc006aecf28af81fc02bc012aeaaa4338eb493258f98beeac388eeebedc46583.
-Checked cutover preserved211rows; real33 added four rows, latest215 with logical
-SHA e0120efd0d036d5d0d159a00aee03387a941088e802ae7a7bf7a28d75b1d095f.
-C=~/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
-S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-c7d1f24.
-Both listeners/TLS/LAN filters/browser protections/5isolation probes passed;
-normal Qwen/model authentication unchanged, no provider currently active.
+Following the Project Working Philosophy: continue delivery under standing authority.
+No real flight-path implementation/independently checked repair; zero of four real
+supporting provider cases complete. No owner decision pending. Older handoff details
+remain in Git at7c7a806 and all immutable private receipts; do not rewrite history.
 
-Real33 intake0330575a-9ae4-41b2-becf-08d68eaebcff, attempt58d047bf-63e7-42f3-ac8e-6372229d4035,
-jobdc35008f-5385-420a-943e-ef40d903c862. Search notebook and flat diagnosis worked:
-two completed source turns then diagnosis, no repeated searches. Planning reverted
-to the older polymorphic wire, read more source, then turn7 emitted whitespace.
-Actual terminal interrupted/cancellation ack retained, final usage unavailable;
-six complete receipts195393known tokens, original partial row unchanged. No plan
-or implementation. Standing recovery receipt qualifies verified tool-free/fenced
-actual capabilities. C/outcome-c7d1f24/attempt-33-accounting.json and
-standing-real33-interrupted.json preserve exact facts; no owner exception needed.
-TotalCodex23starts/19completeusage/4missingfinalusage;2unknownterminal/2confirmed
-interrupted;609560known total tokens. Qwen unchanged89starts. Do not reset accounting.
+## Actual installed state
 
-Connected next correction flattens planning too, translating only complete explicit
-choices into original strict canonical fields. No missing plan content invented,
-conflicts/extra fields reject. Codex outgoing source can retain the existing bounded
-inspected cache (128k text maximum) within unchanged196608-byte request guard; local
-Qwen remains36k. C/flat-planning-actual-context-proof/proof.json: actual84304cached
-characters retained without omissions, all three current reads visible, controlled
-responses only, no model call/live history write. C/flat-planning-focused-final.log:
-106passed; C/flat-planning-native-v2.log:affected Codex normal API/worker/browser
-rehearsal passed17.82s including two unrelated checked fixture repairs and fault
-rejections. C/flat-planning-check.log static/contracts/build/schema pass. Complete
-suite C/flat-planning-full-tests.log running; confirm final pass before activation.
-The earlier native fixture caught canonical envelope conversion bug; corrected
-normalizer returns unchanged nullable planner alternatives, tested before retry.
-
-Next revision37/task34: preserve current215rows and original79, roots103, append
-58d047bf to priorIDs. Bind final full verification/seal before installation; standing
-recovery original18 + eb72 +253a +58d0 receipts, normal history/admission, fresh
-normal Codex task. Complete real checked repair, provider4, durable result/restart,
-next ordinary bug and full agreed scope. No old campaign caps or renewal gate.
-Lower records are historical, not claims of current completion.
-
-# Latest verified state — November 8, 2026, 14:38 UTC
-
-Following the Project Working Philosophy: no real flight-path implementation or
-independently checked repair, and zero of four required supporting real-provider
-cases complete. No owner decision pending. Continue under standing authority.
-
-Installed b33097caede81d5d60aaf31dd05e8a5f5730d729, seal
-264ac4dcc22a3cda2f325dc6ad9e20466d2b26dbbd96b100bab8c97d687f9701.
+Installed7c7a806fb3690135f0dd27c6c12dbfa132830380, tree
+d4fd8581b1a994db5ee45ee08fa16694cc13942e, seal
+690024c40800cbdb4cc0aeee5352518c60bb541817d53fb266289165ed57e7c7.
 C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
-R=C/outcome-b33097c; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-b33097c.
-Real32 intake d4134933-9ec0-4694-9fef-a9366fc6cbaa, attempt
-253a3b31-2b21-412b-93f8-989819f5cd13 settled at13:49:54. Four Codex turns:
-three complete receipts (95192 known total tokens), fourth whitespace-guard
-interrupted with actual matching terminal notification and cancellation ack.
-Final usage unavailable; original incomplete_output/NULL usage remains unchanged.
-No plan, approval, implementation or switch. Latest history211 rows, logical SHA
-829d1788f94b150975bb09363acee925302531815feab8c7837fc671d89f99a0.
-Original79 and all predecessor stores remain. No live provider currently active.
+R=C/outcome-7c7a806;
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-7c7a806.
+R/deployment-37-verified.json binds checked215-row cutover, original79 preservation,
+5isolation probes, both listeners/TLS/browser/effective LAN filters. All35 normal
+history reads passed; exact original18 and standing eb72/253a/58d0 recovery receipts
+were recreated without changing215rows. Four everyday services active/disabled until
+functional acceptance. Model PID3300469/context32768/auth/key/config unchanged.
+No provider active now; real34 driver38541 finished held. Latest history219rows:
+9a12b123554e36fac14399f4d7888e2ffa54dcf2215e63edaa48a2dcab81d755.
+NEVER overwrite with215/211/original79. All predecessor stores/recovery copies kept.
 
-Standing read-only policy qualification verified actual tool-free isolated
-capabilities and fenced output. Unlike the two older unknown-terminal incidents,
-this terminal status is known interrupted; usage is still unknown. Proof:
-C/settled-readonly-partial32-proof/proof.json. R/attempt-32-accounting.json and
-C/outcome-ledger.json retain16Codex starts/13complete receipts/3missing usage,
-2unknown terminal outcomes/1confirmed interrupted;414167known total tokens.
-Qwen remains89starts; no accounting reset or old record mutation.
+Approved addresses remain http://127.0.0.1:9487 and https://10.0.0.9:9487;
+trusted10.0.0.0/24 only, no client cert/passphrase, no public/internal-service LAN
+exposure. Reuse unchanged verified remote-LAN evidence, no routine owner attendance.
+Root-owned helper SHA1fd4a561188560242d5cb5df9bd583d8c922cfa4282e4bd1e46b8dca04bc3afb;
+existing grant/session78/boot563fe147-ff3a-479e-ac73-65783aee2249 expiresNov13.
+Use existing validated operations; never bypass a denial. Physical reserve4GiB,
+scratch≤1GiB and capacity checks; former evidence/campaign caps superseded.
 
-Connected correction now verified: app-owned bounded completed-search notebook
-preserves positive/negative scoped facts across later reads; outgoing explicit
-reads remain pinned. Repeated already-visible searches hold rather than loop.
-Codex investigation uses flat seven-field wire, deterministically normalised to
-unchanged strict canonical validation; conflicting/partial/unauthorised output
-still rejects. Recovery distinguishes known terminal/missing usage and resolves
-private predecessor journals only through validated staged evidence roots.
-No CLI/auth/billing/source/write/network permission expansion.
+## Real evidence and current correction
 
-C/notebook-flat-full-tests.log:1606backend passed/6default opt-ins skipped;
-25frontend passed. C/notebook-flat-integrated-final.log:141focused passed.
-C/notebook-flat-native-v2.log:17.33s affected separate API/worker/normal-browser
-controlled rehearsal passed, two unrelated fixture repairs and fault denials.
-C/notebook-flat-check.log:static/contracts/build/schema passed. Duplicate suite
-launch safely interrupted; original passing suite is authoritative. Six default
-opt-ins include four native modes/delegated routing/historical guild; affected
-Codex mode freshly run, unchanged others retain predecessor evidence. None counts
-as real acceptance. Do not rerun these merely to prepare deployment.
+Real34 intake8b3e5ddc-d651-4cd2-a37a-978c94998ac7,
+model6649b414-f1f7-4398-8d09-6d20de488f54. All8 Codex turns COMPLETED with final
+receipts. Flat investigation AND flat planning transport now work on real provider,
+all bounded inspected source retained (actual outgoing132k–~150kbytes within196608).
+No whitespace/uncertainty this run. It reached diagnosis and further fixture reads,
+then held on the old8-request operation bound. No plan/approval/implementation.
+R/attempt-34-accounting.json:392263known tokens. GlobalCodex31starts/27completeusage,
+4missing final usage;2historical unknownterminal +2confirmed interrupted;
+1001823known total tokens. Qwen unchanged89starts. C/outcome-ledger.json preserves
+all accounting and historical facts. Do not renew unchanged work.
 
-Next: commit/seal revision36, verify predecessor-journal lookup against unchanged
-211-row store, checked cutover, recreate exact old/standing recovery receipts,
-normal admission/history reads, fresh Codex bug task33. Append253a3b31 to priorIDs;
-evidence roots101. Then real checked repair, provider4, durable result/restart,
-next ordinary bug and broader agreed outcome. No old campaign caps. Preserve LAN,
-billing/disclosure, task approvals, independent checks and recovery safeguards.
-The lower handoff entries are historical; this block governs actual current state.
+Real33 (58d047bf) and real32 (253a3b31) have actual matching interrupted terminals/
+cancellation ack but final usage unavailable. Original rows/usage remain unchanged.
+Old eb72eb02 and18bbf5d0 still have unknown final outcome/usage; never infer cancellation.
+Standing OWNER_READONLY_RECOVERY_20261108.md SHA15a89f2d817fb9804b2f2bde99803f87a0760d042e90426bbe1096d2a2bdefbf
+is implemented in recovery/admission/normal app. Actual tool-free capabilities,
+fencing, closed producer and supported status/cancel evidence verified. Original18
+specific authority SHA6ac363082930d623c1b4858625949006684a92b27a7e96b1265e1b41e0d30147
+remains immutable. No repeated owner exception needed for qualifying read-only holds.
 
-# Latest: cached-read guard corrected; known non-dispatch accounted separately
+Next connected correction (currently uncommitted): fresh consentv10 binds16shared
+turns; v8/v9 retain their8turns and respective120/300s request deadlines. Source
+follow-ups on either pre-generation route use the actual saved bound. Shared1800s
+operation, local6144completion/3072reasoning, disclosure and billing safeguards stay.
+Codex pages160lines/16000characters (local80/6500 unchanged). Exact source verifier
+admits these and up to256small provenance windows; unique128k source-byte bound,
+hashes/scopes/outgoing196608-byte guard and meaningful approvals remain unchanged.
+The older64-window cap was already exceeded by legitimate automatic context; it
+could have rejected a valid eventual plan. New tests cover90small windows, tampering
+and excessive windows. No addon answer or expected fixture supplied by development.
 
-Installed0cb1432 passed1578backend/25frontend/static/native and checked203-row cutover.
-Latest history is now207 after one new FAILED LOCAL CLAIM. Original stores preserved.
-No real implementation or required provider case complete. No owner question pending.
+Verification: C/investigation-bounds-focused.log161passed/1stale assertion;
+focused-final.log70passed after updating expected remaining turns. Static/check pass.
+Controlled browser all modes: two local passed; Codex journeys finished but old
+80-line-page assertions failed; corrected expectations and both Codex rerun passed
+36.44s. TRUE kernel-confined rehearsal passed4cases/105.30s in owned delegated user unit
+workbench-outcome-recovery-bounds-process.service (600s watchdog/6GiB/128tasks/200%CPU),
+C/investigation-bounds-kernel-native.log; unit collected/cgroup absent, settlement
+record binds exit0/peak591.6M/swap0. Full applicable suite
+C/investigation-bounds-full-tests.log passed1614backend/6defaultskip/25frontend.
+Full/static/affected opt-ins are verified before deployment.
+Default full suite began on final production semantics; subsequent changes are only
+native opt-in assertion corrections, verified by affected rerun. Do not repeat suites
+merely to answer status. Previous installed full1609/25 remains valid for installed7c.
 
-Real31intake90e80b53-9ea2-4ab8-8cf3-39450dcb5af3,
-model8a477e53-0a61-4995-922e-d389d3d679b8,
-jobfd6021c6-c419-4c0f-b681-5317450a50f8 stopped in6seconds BEFORE ANY PROVIDER REQUEST.
-The visibility guard mistakenly treated all cached reads as freshly requested, causing
-initial context hold. No Codex journal/model turn/partial output/approval/implementation.
-Original NULL usage row unchanged. R/attempt-31-accounting.json binds full historical
-triple SHA97d63357fce5316c342837aea6d47d6edd440295fd280f98c2238ac61af5b18d,
-audited actual pre-loop source path and private evidence; independently proves0turns.
-Codex global totals remain12starts/10complete/2historical unknown, known318975tokens.
-This is known non-dispatch, NOT a quarantine or unknown-usage zero substitution.
+## Next actions
 
-Connected fix now passes full applicable suites (see C/context-nonstart-full-tests.log:1584backend/25frontend),
-200focused plus API no-generation case and native17.69s, build/static. Explicit
-requested=windows applies ONLY to the immediate read response; cached source remains
-honest bounded context. Planner starts in not_started state; finisher records verified
-zero-dispatch accounting separately. Admission recognises typed no-start records and
-one content-bound audited older claim without rewriting history. Unknown turns cannot
-become zero. Source preparation hold now explains local phase in the normal app.
-C/cached-context-actual-replay-v3/proof.json exercises actual84304-character cache,
-same36koutgoing budget, two controlled source-only responses, all current ranges
-visible, no model calls/live writes/plan/patch. C/requested-source-actual-wire-proof-v2
-.json retains actual prompt omission/correction proof. Do not repeat the old guard.
+Finish current verification. Fix ordinary failures and continue. Save commit/tree,
+seal and exact test provenance. Next revision38/task35; roots105; append6649b414 to
+prior list (32total). Template C/prepare-flat-planning-revision.py; new codex_provider
+module is UNCHANGED from7c7a806, so AST changed-method list should be empty. Stage,
+source proof, current219/original79 fingerprints, preflight, verification binding,
+checked cutover, original18 +three standing receipts, all normal history reads,
+normal admission. No owner renewal/new campaign needed. New fresh real task uses
+v10/bounds16, complete inspected context, flat transport, and delegated decisions.
 
-Next: seal final correction, checked207-row cutover, exact old/standing quarantine
-receipts, normal admission +33history reads; fresh normal task32,revision35,99roots,
-add8a477e53 to priorIDs (29total). Continue real checked repair/provider4/result restart/
-next ordinary bug and broader outcome. No old campaign caps or another owner exception.
-Older lower sections preserve historical observed states; latest block governs.
+Inspect app-generated plan/reproducer independently against initial route behavior,
+actual flight-master event learning and later-visit refresh. Reject assigned learned
+state/constants or stubbing the addon operation. TV.Flights is boolean node map/nil;
+Journey requires nonnilreq.flights and both endpoints (nil does NOT unlock all).
+Nav.Start exists. No developer-written addon fix/reproducer or replay of partial work.
+When acceptable, write private S/artifacts/acceptance/bug-plan-review.json bound to
+current seal/intake/plan.binding/bug_evidence.review_digest, approval_reference
+7f10158b0d3eb1ae5314eae423a73562b5ddd331, approved=true/decision=approve and three distinct
+criterion/index/reason rows exactly matching browser-policy criteria; driver then uses
+normal separate plan/run decisions. OriginalFAIL/candidatePASS/full addon suite and
+saved reviewable patch required. Model self-review is not independent checking.
 
-# Current handoff — November 8, 2026, real30 settled; requested-source correction
+Then four real supporting cases (codex-once,qwen-once,both pre-generation fallbacks),
+completed-result restart recovery, next ordinary eligible bug without registration,
+cleanup/model restoration and stable install. No repeat successful/uncertain work.
+Keep broader unfinished capabilities explicit; styling then requirements audit later.
 
-Following the Project Working Philosophy: delivery is unfinished. No real flight-path
-implementation or independently checked repair; zero of the four required real
-supporting provider cases have passed. Do not describe controlled successes as real
-acceptance. No addon modification, paid billing or publication occurred.
+## Authority and retained protections
 
-This replaces the accumulated active handoff. Earlier observations and complete
-historical entries remain in Git at cbcf8d0:docs/CONTINUATION.md and immutable private
-receipts. They are historical, not competing current instructions.
-
-## Installed correction and evidence
-
-Installed candidate 0cb1432b2fdee8f6701a85f5e92153b15858c4ae, tree
-35cf6825baac88ca94b7f370ca40c4eab7cb023d, seal
-32b53802daf5fb96b432827aeb3a4f07925757befdc0d5961bb2dce2183da097.
-C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a
-R=C/outcome-0cb1432
-S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-0cb1432
-Predecessor S_parent/everyday-outcome-cbcf8d0 and all recovery stores retained.
-R/offline-verification.json and deployment-34-verified.json bind exact verification,
-seal, install, history, isolation, effective filters, TLS and browser boundaries.
-
-The standing recovery build passed1573backend/25frontend/static plus23final policy/
-lifecycle cases (3new test cases beyond initial full collection). Affected Codex
-native separate API/worker/browser passed17.64s. Other unchanged opt-ins retain bound
-lineage. All31 pre-run history reads and exact199-row cutover fingerprint passed;
-automatic standing quarantine became visible in normal browser history, and normal
-fresh admission passed. Original79 and every older store preserved. After real30,
-latest history203rows: measure current fingerprint before next cutover; NEVER replace
-it with199/195/191/79. Both original unknown Codex records remain immutable.
-
-Four everyday roles active/disabled pending functional acceptance. No current provider
-activity after settled real30; driver8818 finished held. Normal local model PID3300469,
-auth/key/config and network protections unchanged; scratch remains owned/bounded.
-
-Real30intake e6823d64-5e8c-443b-9015-7eec02a009f1,
-model45fc281a-c473-4a12-a050-62fb2d565a18,
-job20b31c53-5905-4f9d-bdb4-47d22f229f73. All8real Codex turns COMPLETED with final
-usage/terminal receipts. They used the tagged wire successfully; source searches/
-reads and a diagnosis completed, but no plan/approval/implementation. Final local
-inspection_limit at diagnosis on eighth turn, not new external uncertainty.
-C/outcome-fb392be/attempt-30-accounting.json and C/outcome-ledger.json preserve all usage. Aggregate
-Codex12starts/10complete/2olderunknown; known316893prompt/2082completion/662reasoning/
-318975total (reasoning included). Qwen unchanged. No completed case replayed.
-
-Actual private generated rollouts exposed the SHARED next obstruction: source-memory
-ranking put inferred negative-rank bodies above explicit current reads. In turn3's
-actual outgoing prompt, requested Travel.lua30–48 had0of19lines,76–135had0of60, and
-191–219had14of29. Model repeatedly asked for omitted bodies. This is demonstrated
-app context loss, not evidence of provider incapability. C/requested-source-actual-
-wire-proof.json binds actual rollout hash/line counts and verifies all three exact
-ranges survive the correction at the SAME36000-character outgoing source budget.
-No model/expected-fix injection in proof; actual committed source only.
-
-Uninstalled connected correction: explicit current read windows outrank inferred
-context; namespace/test bootstrap remain preserved when within budget. New outgoing-
-text guard rejects a missing requested line before another provider request.
-82affected checks and native17.73s pass; full/static verification currently running.
-Do not renew unchanged request; finish verified source correction then new normal
-Codex task at futureattempt32/revision35, include real30 ID in prior list, preserve203.
-The obsolete source/formatter failures are independently classified, not generic
-planning failure. Existing bounds8shared turns/1800s remain operation controls.
-
-Lifecycle fix now has REAL evidence: all8turns persisted identity/terminal/usage before
-content validation, and8private rollouts survive their CLI exit. Supported pinned-CLI
-thread/resume plus thread/turns/list on a private COPY, networking DISABLED, restored
-the exact completed turn with statuscompleted. Originals hash-verified unchanged;
-no new model/source/login/refresh. C/standing-generated-rollout-restart-proof/proof.json.
-The earlier no-model probe had no rollout before a turn and does not contradict this.
-This is connector recovery proof, NOT completed-app-result restart acceptance.
-
-## Preserved incidents and standing recovery disposition
-
-Owner explicitly permanently quarantined ONLY SECOND turn of model
-18bbf5d0-c5e2-4557-936b-126b24b4f1f4. Exact immutable owner addendum:
-OWNER_CODEX_QUARANTINE_20261108.md, SHA
-6ac363082930d623c1b4858625949006684a92b27a7e96b1265e1b41e0d30147.
-Canonical private receipt binds original intake/job/model SHA
-10603e4e65758a2e4efe36438ef1f744b025040d34e1a9bbe6c81fd057e94a2d.
-Original unknown outcome/usage/accounting unchanged, no partial output or approvals
-reused, no successful cancellation claimed. Module workbench.codex_quarantine and
-normal acceptance admission recognize only this exact exception. It is permanent.
-
-Fresh real29 ran in installed52c54af, normal browser, fresh task bindings:
-intake9961b8d4-5167-470d-85ff-9be02f8daff1,
-modeleb72eb02-c968-4c57-b51a-5106bf7e6236,
-job0a325ef8-c7ca-495c-b4e7-9fc790c8fef5. Driver finished held11:33:53Z.
-Firstturn completed31501total (31352prompt/149completion/35reasoning included).
-Second emitted meaningful3Travel.lua read requests then extensive whitespace with
-unclosed JSON;18893agent-output bytes. Generic protocol hold; exact triggering guard
-was not retained. Do not assert historical byte exhaustion as proven. Code inspection
-proved cancellation reused depleted capacity; the installed correction fixes that.
-No proposal, plan approval, implementation or provider switch began.
-
-Private original52 receipt3799d6b5-52de-423b-b442-e96d51877dd7 retains thread
-01a1baed-5a0e-7360-8674-ad7633de81b9/turn01a1baed-5b7d-7060-9a53-14a956cb9c05.
-No terminal acknowledgement/final usage. Supported, network-disabled same-owned-thread
-read/turns-list returned not loaded; resume returned no rollout found (R_previous/
-thread-read-offline-diagnostic.json, thread-resume-offline-diagnostic.json). No new
-model/source/login/refresh. These prove missing ephemeral local state, not remote
-cancellation, account denial or absent subscription. Local producer is closed.
-
-The owner has now independently authorized the standing policy in
-OWNER_READONLY_RECOVERY_20261108.md, SHA
-15a89f2d817fb9804b2f2bde99803f87a0760d042e90426bbe1096d2a2bdefbf.
-The earlier question is answered; no renewed exception is needed for qualifying
-read-only investigations. The earlier proposal is not blanket-approved. Verify
-actual capabilities, old-output fencing, late-result isolation, supported recovery,
-and fresh valid task/access/disclosure/billing bindings. Preserve unknown final
-usage/outcome and no partial reuse. Uncertain consequential writes/actions still hold.
-
-Current eb72 qualifies: actual deployed isolation/connector/lease-fencing code was
-audited and content-bound, no proposal/approval/execution existed, local producer
-closed, supported identity retrieval attempted. C/standing-recovery-history-proof
-contains immutable private receipt and read-only proof: all199 rows unchanged.
-Historical diagnostic files remain unchanged; private0600 verified copies support
-the receipt. No partial output or old task approval is reused.
-
-Standing recovery is installed and active, not merely a note. Code-owned capability
-snapshots, matching actual isolation evidence, closed connection/status-retrieval
-proof and failed-job fencing bind immutable per-attempt receipts. Worker recovery
-and normal admission enforce them; history projection explains disposition without
-rewriting original result/usage. Permanent old18 exact receipt also remains.
-No pending owner policy question. Earlier proposed policy was not blanket-approved.
-No uncertain implementation or consequential effects covered. Fresh binding and all
-source/billing/network/publication safeguards remain.
-
-## Continue under standing authority
-
-There are no campaign clock/allocation/revision/testing renewal caps. Existing root
-owner documents are exact; do not edit them. Current authority and A8/A9 addenda:
-DELIVERY_OUTCOME_AUTHORITY_20261107.md and REFERENCE_DOCUMENTS.md. One agent only.
-
-Preserve installed standing recovery and create only verified
-per-attempt receipts. Do not request another covered quarantine exception. Preserve
-historical SQLite records and exact old18 receipt. No actual pending owner decision.
-
-Then fresh same-provider Codex flight task via normal delegated browser, new consent/
-plan/run bindings. Next future attempt32/revision35 is not started; append45fc281a to prior IDs;
-next stage will have99evidence roots. Recreate old18 exact receipt if needed, never overwrite207rows.
-Do not repeat unchanged formatting failures; use fresh retained guard/terminal evidence.
-If needed replace provider formatting with supported app-owned read-only tool path,
-within approved source boundaries. Real evidence, not presumed model incapability.
-
-Independent review must distinguish initial eligibility, learning on actual
-flight-master visit, and refresh on later visit through actual addon behavior.
-No developer-written patch/reproducer/expected answer injection. TV.Flights is a
-boolean map ornil; Journey requires nonnil req.flights plus both endpoints. It does
-NOT treat nil as all-unlocked. NV.Start exists. Reject flags/constants/direct
-learned-state assignment/restubbing that already passes original. App-generated
-reproducer must fail original, pass candidate and full existing addon suite.
-Normal private source-grounded review receipt, fresh delegated plan/run decisions,
-reviewable patch and saved result remain required; no resulting live-addon install.
-Then four sealed supporting cases codex-once/qwen-once/codex-with-local-fallback/
-qwen-with-codex-fallback, only pre-generation switching. Retain successes. Demonstrate
-completed result after restart and next ordinary supported bug using fresh discovery,
-without registration/setup prompt. Stable cleanup/restoration and broader requirements
-remain; no styling/audit or full initial-product completion claim.
-
-## Protected operating facts
-
-Addresses http://127.0.0.1:9487/ and https://10.0.0.9:9487/, trusted10.0.0.0/24,
-enp4s0/gateway10.0.0.1, no public forwarding. Whole-subnet operator trust, no client
-certificate/passphrase. Same CA fingerprint
-06:E8:DE:82:AF:EA:0A:86:57:65:70:D1:02:4B:0D:DC:89:D3:8E:9C:9B:03:1F:95:F0:EE:CC:9D:32:E7:71:BD.
-Prior separate-device LAN proof reused only after fresh unchanged effective gates.
-Preserve8765/model8080loopback/auth/connectorUnix0700/exactworkercgroup, no internal LAN.
-
-Helper /usr/local/sbin/twichui-workbench-admin rootroot755,
-SHA1fd4a561188560242d5cb5df9bd583d8c922cfa4282e4bd1e46b8dca04bc3afb,
-session78/boot563fe147-ff3a-479e-ac73-65783aee2249/expires1794612571Nov13.
-Use fixed validated operations only; no privilege bypass/self-expansion. Unsafe
-gate: settle owned execution and use supported rollback preserving latest history,
-evidence and original79/review/model/firewall recovery. Ordinary engineering errors
-remain authorized work. Retention1GiB is soft housekeeping trigger, not old hard cap;
-keep practical reserve, original stores and unique evidence, no unrelated pruning.
-
-Signed-in included-only Codex, owner-reported0extra/reloadOff snapshots. Existing
-accepted snapshot/internal-retry limitation; no verified per-turn included-only lock.
-Two affirmative included checks, valid primary below90%, exact nullsecondary policy;
-validate supplied windows. No API/extra credits/purchases/reload/subscription changes.
-External Codex source permission: only report/relevant excerpts/follow-up reads from
-nine files at1caf530212bbc6eaf37e41d668902a391aa936c1, exactly listed in
-OWNER_SOURCE_DISCLOSURE_20261108.md. Do not ask again or widen to other private files.
-Qwen local investigation may follow relevant dependencies. Read and write scopes are
-separate; actual selected repair remains bounded and approval-bound. No publication,
-push/PR/merge or live-game-addon changes. PinnedCLI0.166.0/auth metadata unchanged;
-owner config timestamps are not runtime input (never mounted), original contents
-unknown. Never print/read auth cache. Preserve unrelated main checkout edits and
-worktree .venv/node_modules symlinks. No ordinary developer approval is needed to resume.
+Exact three root owner documents authoritative, do not edit their supplied bytes.
+No campaign clock/count/revision/cumulative test caps. Checkpoints are not stop points.
+Existing Codex disclosure only relevant committed excerpts/followups at1caf530 from
+Journey/Nav/Travel/Prefs/Data/Route plus tests/test_nav_journey.lua,test_nav_unlock.lua,
+test_nav.lua (exact9 in owner disclosure manifest). Local Qwen may inspect relevant
+project dependencies. Six writable acceptance files/max3proposed writes unchanged.
+No extra private Codex source without actual authority. Included signed-in usage only,
+no API/credits/purchases/reload. Owner0credits/reloadOff snapshots, accepted allowance
+snapshot/internal-retry limitation; two affirmative included reads/primary<90%reserve,
+explicitnullsecondary allowed. No per-turn included-only lock claim. No live addon
+installation, publication/push/PR/merge, paid spending or public exposure. Preserve
+original/unrelated source, stores, auth, recovery and unique evidence.

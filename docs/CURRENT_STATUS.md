@@ -1,14 +1,15 @@
-# Current status — real diagnosis advanced; planning-format correction verified locally
+# Current status — real transport corrected; source operation bounds being verified
 
-Following the Project Working Philosophy: no real checked repair and zero of four
-required real supporting provider cases completed. Installed c7d1f24, latest215rows.
-Fresh Codex run retained searches, completed diagnosis, then failed on whitespace
-in the older planning wire. Matching terminal interruption confirmed, usage unknown;
-no plan/implementation. Standing read-only recovery applies without owner renewal.
+Following the Project Working Philosophy: no real addon implementation/checked repair
+and zero of four required supporting real-provider cases complete. Installed7c7a806;
+latest219history rows preserved. Real34 completed all8Codex turns with final receipts,
+using flat diagnosis/planning and retained source. It then hit the8-turn inspection
+limit, without a plan or implementation; no new execution uncertainty.
 
-Planning now uses the simpler flat format too, with unchanged strict validation.
-Codex retains its bounded inspected source without evicting needed prior bodies;
-actual-source controlled replay and normal separate-process browser checks pass.
-Complete suite is running before checked next installation and fresh real task.
-No owner decision pending. Real repair/provider4/restart/next task and broader scope
-remain unfinished; [handoff](CONTINUATION.md) binds exact evidence and accounting.
+Fresh tasks now bind16shared turns; old8-turn approvals remain8. Larger Codex source
+pages and a window-count correction preserve exact source/byte/disclosure limits.
+Focused/static/controlled browser checks pass; all four true confined
+separate-process rehearsals and full1614backend/25frontend suites passed. Next is
+checked installation and a fresh real run.
+No owner decision pending. Full repair/provider checks/restart/next ordinary bug and
+broader scope remain unfinished. See [handoff](CONTINUATION.md) for exact evidence.

@@ -26,7 +26,7 @@ def read_limit(packet):
 
 
 def window_limit(packet):
-    return 64 if packet.get('plan_review') == 'source-grounded-lua-v1' else REQUESTS*3
+    return 256 if packet.get('plan_review') == 'source-grounded-lua-v1' else REQUESTS*3
 
 
 def source_characters(packet):
@@ -203,7 +203,7 @@ def verify_packet(initial, supplied):
         raw, item = committed(window['path'], initial['base'])
         lines = raw.decode().splitlines()
         start, end = window['line'], window['through_line']
-        if (not 1 <= start <= end < start+80 or end > len(lines)
+        if (not 1 <= start <= end < start+160 or end > len(lines)
                 or window['sha256'] != item['sha256'] or window['text'] != '\n'.join(lines[start-1:end])):
             raise ValueError('The inspected source evidence changed.')
         if 'requested_through_line' in window:
@@ -227,7 +227,7 @@ def verify_packet(initial, supplied):
     return supplied
 
 
-def inspect(packet, requests, *, disclosure_paths=None):
+def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_budget=6500):
     total = 0
     windows, matches = [], []
     for index, request in enumerate(requests):
@@ -235,7 +235,7 @@ def inspect(packet, requests, *, disclosure_paths=None):
             found = search(packet['base'], request.query, disclosure_paths) if disclosure_paths is not None else search(packet['base'], request.query)
             from workbench.investigation_notebook import record
             record(packet,request.query,found,disclosure_paths)
-            allowance = (6500-total)//max(1, len(requests)-index)
+            allowance = (result_budget-total)//max(1, len(requests)-index)
             for match in found:
                 if len(match['text']) > allowance:
                     break
@@ -256,15 +256,15 @@ def inspect(packet, requests, *, disclosure_paths=None):
                 ['inspection', index, 'end'], f'committed line range 1..{len(lines)}', request.end)
         first = unread_start([*packet.get('inspection_windows', []), *windows], request.path,
                              request.start, min(request.end, len(lines)))
-        end = min(request.end, first+79, len(lines))
-        allowance = (6500-total)//max(1, len(requests)-index)
+        end = min(request.end, first+page_lines-1, len(lines))
+        allowance = (result_budget-total)//max(1, len(requests)-index)
         selected_lines = []
         for line in lines[first-1:end]:
             candidate = '\n'.join([*selected_lines, line])
             if len(candidate) > allowance:
                 # A single whole line can use remaining room; never fabricate
                 # a complete line by silently cutting its contents.
-                if not selected_lines and len(candidate) <= 6500-total:
+                if not selected_lines and len(candidate) <= result_budget-total:
                     selected_lines.append(line)
                 break
             selected_lines.append(line)
@@ -286,9 +286,9 @@ def inspect(packet, requests, *, disclosure_paths=None):
             item['excerpts'] = [window]
             packet['files'].append(item)
         windows.append(dict(path=request.path, sha256=item['sha256'], **window))
-    if total > 6500:
+    if total > result_budget:
         raise ResponseValidationError('The source inspection result exceeds its bounded size.',
-            ['inspection'], 'at most 6500 source characters', total)
+            ['inspection'], f'at most {result_budget} source characters', total)
     packet.setdefault('inspection_windows', []).extend(windows)
     return windows, matches, total
 
@@ -319,8 +319,11 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
     return wire
 
 
-def generate(adapter, initial, original, feedback, should_stop, expected_model, *, engine=None):
+def generate(adapter, initial, original, feedback, should_stop, expected_model, *, engine=None, max_requests=None):
     """One claim/provider/deadline, distinct durable receipts and shared usage."""
+    requests = REQUESTS if max_requests is None else max_requests
+    if type(requests) is not int or not 1 <= requests <= REQUESTS:
+        raise ValueError("Invalid saved investigation request bound")
     packet = copy.deepcopy(initial)
     if callable(getattr(adapter, 'bind_source', None)):
         adapter.bind_source(initial)
@@ -443,15 +446,15 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             return True
         return False
     try:
-        for index in range(REQUESTS):
+        for index in range(requests):
             schema = (bug_plan_review.ReviewResponse if pending is not None else
                       stage.InvestigationResponse if investigating else BugPlanningResponse)
             if should_stop() or time.monotonic() >= adapter.ends_at:
                 raise PlanningUnavailable('The source investigation was stopped or timed out.', 'cancelled')
             if program_mode:
                 read_chars=source_characters(packet)+search_chars
-            wire['investigation_progress'] = dict(request_number=index+1,max_requests=REQUESTS,
-                requests_after_this=REQUESTS-index-1,last_request=index+1==REQUESTS,
+            wire['investigation_progress'] = dict(request_number=index+1,max_requests=requests,
+                requests_after_this=requests-index-1,last_request=index+1==requests,
                 remaining_seconds=max(0,int(adapter.ends_at-time.monotonic())),
                 source_characters_read=read_chars,source_characters_remaining=max(0,limit-read_chars),
                 source_budget_basis='unique committed characters plus literal search results' if program_mode else 'returned source characters',
@@ -472,7 +475,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     json.dumps(effective, sort_keys=True).encode()).hexdigest(),
                     require_inspection=bool(wire.get('coverage', {}).get('require_inspection')),
                     corrective=bool(wire.get('validation_feedback')),
-                    request_number=index+1,requests_after_this=REQUESTS-index-1)
+                    request_number=index+1,requests_after_this=requests-index-1)
             response_added = False
             if getattr(adapter, 'source_manifest', None) is not None:
                 wire['external_source_scope']=dict(paths=sorted(adapter.source_manifest),
@@ -536,7 +539,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     review_rejected.add(review.review_binding)
                     wire = bug_plan_review.feedback(planning_wire, pending, review)
                     pending = None
-                    if index+1 == REQUESTS:
+                    if index+1 == requests:
                         raise PlanningUnavailable('The plan needs revision after its model self-check.', 'review_limit')
                     continue
                 if investigating:
@@ -561,7 +564,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                             wire['committed_bootstrap_context'] = bootstrap_fact
                         wire['investigation_diagnosis'] = dict(
                             **diagnosis, untrusted=True, approved=False, executed=False)
-                        if index+1 == REQUESTS:
+                        if index+1 == requests:
                             raise PlanningUnavailable('Source diagnosis completed without a reviewed repair plan.', 'inspection_limit')
                         continue
                     if isinstance(investigated.draft, stage.Inspect):
@@ -592,7 +595,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     evidence.rejected(error, raw)
                 facts = correction(error, raw)
                 stamp = hashlib.sha256(json.dumps(dict(raw=raw, facts=facts), sort_keys=True).encode()).hexdigest()
-                if (facts and index+1 < REQUESTS and stamp not in rejected
+                if (facts and index+1 < requests and stamp not in rejected
                         and diagnostics.get('generation_state') == 'finished'
                         and diagnostics.get('accounting_state') == 'complete'
                         and (diagnostics.get('finish_reason') == 'stop' or
@@ -607,7 +610,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     if bug.digest(raw) in review_rejected or (program_mode and bug_plan_review.behavior_binding(raw) in rejected_behaviors):
                         raise PlanningUnavailable('The proposed plan did not change after its rejected self-check.',
                                                   'review_unchanged')
-                    if index+1 == REQUESTS:
+                    if index+1 == requests:
                         raise PlanningUnavailable('The plan needs its model self-check before review.', 'review_limit')
                     pending = raw
                     wire.pop('validation_feedback', None)  # Its constraints have now passed; journal retains the rejected draft.
@@ -633,9 +636,10 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 evidence.record('source-inspection', turn=index+1,
                     windows=[dict(query_sha256=hashlib.sha256(r.query.encode()).hexdigest()) if hasattr(r, 'query')
                              else dict(path=r.path, start=r.start, end=r.end) for r in draft.inspection])
-            if index+1 == REQUESTS:
+            if index+1 == requests:
                 raise PlanningUnavailable('The bounded investigation needs more source inspection.', 'inspection_limit')
-            windows, matches, chars = (inspect(packet, draft.inspection, disclosure_paths=adapter.source_manifest)
+            windows, matches, chars = (inspect(packet, draft.inspection, disclosure_paths=adapter.source_manifest,
+                          page_lines=160,result_budget=16000)
                 if getattr(adapter, 'source_manifest', None) is not None else inspect(packet, draft.inspection))
             if evidence:
                 evidence.record('source-read-result',characters=chars,search_matches=len(matches),

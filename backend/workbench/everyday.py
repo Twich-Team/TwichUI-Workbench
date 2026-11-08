@@ -234,7 +234,7 @@ def planning_receipt(original, created_at):
     from workbench.bug_investigation import INVESTIGATION_SECONDS, INVESTIGATION_REQUESTS, INVESTIGATION_REQUEST_SECONDS, requested
     return dict(binding=digest(original), expires_at=(
         datetime.fromisoformat(created_at) + timedelta(minutes=45 if requested(original) else PLANNING_MINUTES)).isoformat(),
-        **(dict(investigation_version=9, max_local_requests=INVESTIGATION_REQUESTS, max_codex_requests=INVESTIGATION_REQUESTS,
+        **(dict(investigation_version=10, max_local_requests=INVESTIGATION_REQUESTS, max_codex_requests=INVESTIGATION_REQUESTS,
                 max_total_model_requests=INVESTIGATION_REQUESTS, codex_request_deadline_seconds=300,
                 max_local_completion_tokens=6144,
                 local_request_deadline_seconds=INVESTIGATION_REQUEST_SECONDS,
@@ -251,10 +251,12 @@ def check_planning(c, original, job=None):
     def matches_saved_operation(payload):
         received = payload.get('local_planning_receipt', {})
         bound = dict(expected)
-        if bound.get('investigation_version') == 9 and received.get('investigation_version') == 8:
-            # A still-valid queued v8 operation retains its shorter timeout.
-            # Never rebind an old approval to the new five-minute operation.
-            bound.update(investigation_version=8, codex_request_deadline_seconds=120)
+        if bound.get('investigation_version') == 10 and received.get('investigation_version') in (8, 9):
+            # A still-valid queued operation retains its original count/deadline.
+            # A new default cannot enlarge an older saved approval.
+            bound.update(investigation_version=received['investigation_version'],
+                         max_local_requests=8,max_codex_requests=8,max_total_model_requests=8,
+                         codex_request_deadline_seconds=120 if received['investigation_version']==8 else 300)
         if 'investigation_version' in bound:
             from workbench.planning_limits import consent_cap
             try:

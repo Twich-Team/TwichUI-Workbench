@@ -106,3 +106,18 @@ def test_codex_timeout_change_requires_its_actual_saved_consent(version, seconds
     else:
         with pytest.raises(ValueError):
             consent_cap(value)
+
+
+@pytest.mark.parametrize("version", [8,9,10])
+def test_saved_request_count_cannot_expand_when_new_default_grows(version):
+    from workbench.planning_limits import request_bound
+    value=dict(current(),investigation_version=version,max_codex_requests=8,
+               max_total_model_requests=8,codex_request_deadline_seconds=120 if version==8 else 300)
+    if version==10:
+        value.update(max_local_requests=16,max_codex_requests=16,max_total_model_requests=16)
+    assert request_bound(value)==(16 if version==10 else 8)
+    for key in ('max_local_requests','max_codex_requests','max_total_model_requests'):
+        changed=copy.deepcopy(value)
+        changed[key]=8 if version==10 else 16
+        with pytest.raises(ValueError):
+            request_bound(changed)

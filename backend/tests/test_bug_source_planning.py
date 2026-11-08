@@ -154,21 +154,21 @@ def test_stateful_report_requires_real_committed_line_inspection_before_plan(
 
 
 @pytest.mark.usefixtures('installed')
-def test_corrective_requests_share_the_eight_request_operation_bound(
+def test_corrective_requests_share_the_saved_request_operation_bound(
     client, headers, store, monkeypatch,
 ):
     enable_bugs(monkeypatch)
-    values = [missing_load() for _ in range(8)]
+    values = [missing_load() for _ in range(16)]
     for i,value in enumerate(values):
         value['plan']['reproducer']['description'] += f' Candidate {i}.'
     calls = scripted(monkeypatch, values)
     identity = client.post('/api/intake', headers=headers, json=report()).json()['id']
     assert worker.tick(store)
     item = client.get('/api/intake/'+identity).json()
-    assert item['status'] == 'failed' and len(calls) == 8 and not item['proposals']
+    assert item['status'] == 'failed' and len(calls) == 16 and not item['proposals']
     with store.connect() as connection:
         usage = connection.execute(select(model_attempts.c.usage).where(model_attempts.c.task_id == identity)).scalar_one()
-    assert usage['requests_observed'] == 8 and usage['values']['completion_tokens'] == 80
+    assert usage['requests_observed'] == 16 and usage['values']['completion_tokens'] == 160
 
 
 @pytest.mark.usefixtures('installed')
@@ -287,7 +287,7 @@ def test_source_followup_has_one_claim_two_accounted_requests_and_private_receip
     assert item['jobs'][0]['attempts'] == 1
     assert calls[1]['inspection_result']['read_only'] is True
     assert [c['investigation_progress']['request_number'] for c in calls] == [1,2]
-    assert [c['investigation_progress']['requests_after_this'] for c in calls] == [7,6]
+    assert [c['investigation_progress']['requests_after_this'] for c in calls] == [15,14]
     assert all(c['investigation_progress']['remaining_seconds'] <= 1800 for c in calls)
     assert calls[1]['source_memory']['retained_characters'] > 0
     assert any(e['text'] for f in calls[1]['files'] if f['path'] == PRODUCTION for e in f['excerpts'])
@@ -572,3 +572,35 @@ def test_file_only_scope_is_corrected_before_any_plan_approval(client,headers,st
     facts=calls[1]['validation_feedback']
     assert facts['errors'][0]['path']==['plan','scope']
     assert facts['errors'][0]['rule']=='Describe the bounded repair in plain language, not only a file path'
+
+
+@pytest.mark.usefixtures('installed')
+def test_codex_larger_pages_keep_exact_source_and_many_small_windows_stay_bounded(monkeypatch):
+    from workbench.bug_evidence import InvestigationRead
+    from workbench.bug_source_planning import inspect, verify_packet
+    root = enable_bugs(monkeypatch)
+    path = '!!!TwichUI/paged.lua'
+    lines = [f'local value_{i} = {i}' for i in range(150)]
+    (root/path).write_text('\n'.join(lines)+'\n')
+    git(root,'add','.')
+    git(root,'-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Paged fixture')
+    initial=dict(base=git(root,'rev-parse','HEAD').strip(),files=[],policy_sha256='controlled',
+                 plan_review='source-grounded-lua-v1')
+    packet=copy.deepcopy(initial)
+    windows,_,size=inspect(packet,[InvestigationRead(path=path,start=1,end=150)],
+                           page_lines=160,result_budget=16000)
+    assert windows[0]['text']=='\n'.join(lines) and size<16000
+    assert windows[0]['next_line'] is None and verify_packet(initial,packet)==packet
+    # Many tiny real inspection/provenance windows must not exhaust a limit
+    # intended for larger source buffers. The unique-byte bound still applies.
+    for line in range(1,90):
+        inspect(packet,[InvestigationRead(path=path,start=line,end=line)])
+    assert len(packet['inspection_windows'])==90 and verify_packet(initial,packet)==packet
+    bad=copy.deepcopy(packet)
+    bad['inspection_windows'][0]['text']='forged'
+    with pytest.raises(ValueError,match='evidence|disagree'):
+        verify_packet(initial,bad)
+    bad=copy.deepcopy(packet)
+    bad['inspection_windows']*=3
+    with pytest.raises(ValueError,match='bound'):
+        verify_packet(initial,bad)

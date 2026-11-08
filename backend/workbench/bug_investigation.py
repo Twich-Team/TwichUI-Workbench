@@ -16,7 +16,7 @@ from workbench.planning_response import ResponseValidationError
 CATEGORY = 'lua-offline-bugfix'
 SOURCE_FILES = 6
 TEST_FILES = 3
-INVESTIGATION_REQUESTS = 8
+INVESTIGATION_REQUESTS = 16
 INVESTIGATION_SECONDS = 1800
 INVESTIGATION_REQUEST_SECONDS = 300
 SOURCE_PATH = re.compile(r'(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_!./-]+\.lua')

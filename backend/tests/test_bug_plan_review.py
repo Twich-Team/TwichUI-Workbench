@@ -114,21 +114,21 @@ def test_missing_mismatched_or_inconsistent_review_holds_without_plan(
 
 
 @pytest.mark.usefixtures("installed")
-def test_self_check_corrections_share_eight_request_limit_and_cannot_bypass_last_review(
+def test_self_check_corrections_share_saved_request_limit_and_cannot_bypass_last_review(
     client, headers, store, monkeypatch
 ):
     enable_review(monkeypatch)
     answers = []
-    for index in range(4):
+    for index in range(8):
         value = response()
         value["finding"] += f" Revision {index}."
         answers.extend([value, review(False)])
     calls = scripted(monkeypatch, answers)
     item, attempt = run(client, headers, store)
-    assert item["status"] == "failed" and not item["proposals"] and len(calls) == 8
+    assert item["status"] == "failed" and not item["proposals"] and len(calls) == 16
     assert (
-        attempt["usage"]["requests_observed"] == 8
-        and attempt["usage"]["values"]["completion_tokens"] == 80
+        attempt["usage"]["requests_observed"] == 16
+        and attempt["usage"]["values"]["completion_tokens"] == 160
     )
 
 
@@ -245,9 +245,9 @@ def test_new_bug_consent_binds_local_request_and_shared_operation_deadlines():
     from datetime import datetime,timezone
     from workbench.everyday import planning_receipt
     value=planning_receipt(report(),datetime.now(timezone.utc).isoformat())
-    assert value['investigation_version']==9
-    assert value['max_codex_requests']==8 and value['max_total_model_requests']==8
+    assert value['investigation_version']==10
+    assert value['max_codex_requests']==16 and value['max_total_model_requests']==16
     assert value['codex_request_deadline_seconds']==300
-    assert value['max_local_requests']==8
+    assert value['max_local_requests']==16
     assert value['local_request_deadline_seconds']==300
     assert value['planning_deadline_seconds']==1800
