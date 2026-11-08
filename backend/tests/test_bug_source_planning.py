@@ -24,7 +24,7 @@ def scripted(monkeypatch, answers):
             value = value(packet, schema)
         if isinstance(value, Exception):
             if not isinstance(value, LocalBeforeGeneration):
-                self.diagnostics['generation_state'] = 'uncertain'
+                self.diagnostics.update(generation_state='uncertain', request_completion_limit=2600)
             raise value
 
         class Transport:
@@ -287,7 +287,7 @@ def test_source_followup_has_one_claim_two_accounted_requests_and_private_receip
     assert calls[1]['inspection_result']['read_only'] is True
     assert [c['investigation_progress']['request_number'] for c in calls] == [1,2]
     assert [c['investigation_progress']['requests_after_this'] for c in calls] == [7,6]
-    assert all(c['investigation_progress']['remaining_seconds'] <= 1200 for c in calls)
+    assert all(c['investigation_progress']['remaining_seconds'] <= 1800 for c in calls)
     assert calls[1]['source_memory']['retained_characters'] > 0
     assert any(e['text'] for f in calls[1]['files'] if f['path'] == PRODUCTION for e in f['excerpts'])
     with store.connect() as connection:

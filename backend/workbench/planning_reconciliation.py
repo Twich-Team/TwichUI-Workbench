@@ -16,6 +16,7 @@ from workbench.db import engine_for, write_transaction
 from workbench.real_execution import alive
 from workbench.trusted_preparation import configuration, owned
 from workbench.visual_scope import digest
+from workbench.planning_limits import consent_cap, final_bound
 
 KIND = "stopped-local-planning-v1"
 MESSAGE = (
@@ -88,7 +89,7 @@ def state(connection, identity):
     )
     receipt = payload.get("local_planning_receipt", {})
     require(
-        receipt.get("investigation_version") in (4, 5, 6) and receipt.get("max_local_requests") == 8,
+        receipt.get("investigation_version") in (4, 5, 6, 7) and receipt.get("max_local_requests") == 8,
         "The local investigation request bound is unavailable",
     )
     diag = payload.get("diagnostics", {})
@@ -103,7 +104,7 @@ def state(connection, identity):
         set(known) == {"prompt_tokens", "completion_tokens", "total_tokens"}
         and all(type(value) is int and value >= 0 for value in known.values())
         and known["prompt_tokens"] + known["completion_tokens"] == known["total_tokens"]
-        and known["completion_tokens"] <= diag["investigation_requests"] * 2600,
+        and known["completion_tokens"] <= diag["investigation_requests"] * consent_cap(receipt),
         "The known response-prefix accounting is malformed",
     )
     binding = digest(
@@ -133,7 +134,7 @@ def accounting(connection, identity):
         and receipt.get("external_execution_stopped") is True
         and receipt.get("completion_receipt") == "unavailable"
         and receipt.get("snapshot")
-        == dict(task=receipt.get("server_task"), idle=True, completion_limit=2600)
+        == dict(task=receipt.get("server_task"), idle=True, completion_limit=final_bound(payload))
         and type(receipt.get("server_task")) is int
         and receipt["server_task"] >= 0
         and job["message"] == MESSAGE,
@@ -146,14 +147,15 @@ def accounting(connection, identity):
         completed_requests=payload["diagnostics"]["investigation_requests"],
         requests_started=payload["diagnostics"]["investigation_requests"] + 1,
         unavailable_usage_requests=1,
-        final_completion_upper_bound=2600,
-        completion_tokens_upper_bound=known["completion_tokens"] + 2600,
+        final_completion_upper_bound=final_bound(payload),
+        completion_tokens_upper_bound=known["completion_tokens"] + final_bound(payload),
     )
     require(digest(receipt.get("accounting")) == digest(expected), "Local interruption accounting changed")
     return expected
 
 
-def probe_local(model, server_task):
+def probe_local(model, server_task, completion_limit=2600):
+    require(completion_limit in (2600, 6144), "Unsupported local request bound")
     """Fixed authenticated metadata endpoints only. Never a generation request."""
     key = owned(os.environ.get("WORKBENCH_LOCAL_KEY") or "/nonexistent")
     require(
@@ -180,12 +182,12 @@ def probe_local(model, server_task):
         and type(slots[0].get("id_task")) is int
         and slots[0].get("id_task") == server_task
         and isinstance(slots[0].get("params"), dict)
-        and slots[0].get("params", {}).get("n_predict") == 2600
+        and slots[0].get("params", {}).get("n_predict") == completion_limit
         and "prompt" not in slots[0]
         and "generated" not in slots[0],
         "The exact local model request must be idle with its supported bound",
     )
-    return dict(task=server_task, idle=True, completion_limit=2600)
+    return dict(task=server_task, idle=True, completion_limit=completion_limit)
 
 
 def reconcile(engine, identity, server_task):
@@ -198,9 +200,11 @@ def reconcile(engine, identity, server_task):
     from workbench.planning_provider import local_slot
 
     with local_slot():
-        snapshot = probe_local(attempt["requested_model"], server_task)
+        limit = final_bound(payload)
+        snapshot = (probe_local(attempt["requested_model"], server_task) if limit == 2600 else
+                    probe_local(attempt["requested_model"], server_task, limit))
         require(
-            snapshot == dict(task=server_task, idle=True, completion_limit=2600),
+            snapshot == dict(task=server_task, idle=True, completion_limit=limit),
             "Local settlement probe changed",
         )
         receipt = dict(
@@ -225,8 +229,8 @@ def reconcile(engine, identity, server_task):
             completed_requests=payload["diagnostics"]["investigation_requests"],
             requests_started=payload["diagnostics"]["investigation_requests"] + 1,
             unavailable_usage_requests=1,
-            final_completion_upper_bound=2600,
-            completion_tokens_upper_bound=known["completion_tokens"] + 2600,
+            final_completion_upper_bound=final_bound(payload),
+            completion_tokens_upper_bound=known["completion_tokens"] + final_bound(payload),
         )
         changed = copy.deepcopy(payload)
         changed["local_interruption_settlement"] = receipt

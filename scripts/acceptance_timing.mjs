@@ -2,7 +2,7 @@
 export function caseTiming(bug) {
   const timing = Object.freeze({
     caseMinutes:bug ? 140 : 105,
-    planningMinutes:bug ? 21 : 2.5,
+    planningMinutes:bug ? 31 : 2.5,
     reviewMinutes:bug ? 10 : 0,
     preparationMinutes:38,
     runMinutes:60,

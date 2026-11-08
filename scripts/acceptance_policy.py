@@ -13,6 +13,7 @@ from everyday_store import require_settled
 from workbench import bug_investigation, grounded_scenarios as ground, regression_preparation as prep
 from workbench import regression_evidence as behavior
 from workbench.real_execution import LIMITS
+from workbench.planning_limits import model_cap, consent_cap
 from workbench.schemas import IntakeInput, TaskBudget
 from workbench.visual_scope import digest
 
@@ -163,7 +164,7 @@ def closeout(connection, identity, execution, case):
                 require(1 <= usage.get('requests_observed', 1) <= (bug_investigation.INVESTIGATION_REQUESTS if case['request']['kind'] == 'issue' else 1),
                         'planning request count exceeds its task consent')
             require(0 <= values['completion_tokens'] <= {
-                'planning': bug_investigation.INVESTIGATION_REQUESTS*2600 if case['request']['kind'] == 'issue' else 2600,
+                'planning': bug_investigation.INVESTIGATION_REQUESTS*model_cap(connection, next(a['id'] for a in attempts if a['purpose']=='planning')) if case['request']['kind'] == 'issue' else 2600,
                 'implementation': 24000, 'capability_validation': 60,
             }[purpose], 'Qwen completion token bound exceeded')
     [run] = connection.execute('SELECT * FROM real_execution_requests WHERE id=?', (execution,)).fetchall()
@@ -217,10 +218,11 @@ def check_review(connection, request, case, preparation):
     usage = json.loads(usage)
     require(outcome == 'completed' and model == case['model'] and usage['units'] == 'tokens',
             'planning usage or provider identity was not reported')
-    key, cap = ('total_tokens', 32768) if case['provider'] == 'codex' else ('completion_tokens', bug_investigation.INVESTIGATION_REQUESTS*2600 if bug else 2600)
+    local_cap = consent_cap(json.loads(row[2]).get('local_planning_receipt', {}))
+    key, cap = ('total_tokens', 32768) if case['provider'] == 'codex' else ('completion_tokens', bug_investigation.INVESTIGATION_REQUESTS*local_cap if bug else 2600)
     if bug and case['provider'] == 'local':
         require(1 <= usage.get('requests_observed', 1) <= bug_investigation.INVESTIGATION_REQUESTS
-                and usage.get('max_request_completion_tokens', usage['values'][key]) <= 2600,
+                and usage.get('max_request_completion_tokens', usage['values'][key]) <= local_cap,
                 'local inspection request accounting changed')
     elif case['provider'] == 'local':
         require(usage.get('requests_observed', 1) == 1, 'supporting planning request count changed')
@@ -327,8 +329,11 @@ def campaign_admission(connection, request, case, policy):
                         'Local usage incomplete')
                 value = usage.get('values', {}).get('completion_tokens')
                 count = usage.get('requests_observed', 1) if purpose == 'planning' else usage.get('requests_observed')
-                require(type(value) is int and 0 <= value <= ((bug_investigation.INVESTIGATION_REQUESTS*2600 if outcome else 2600) if purpose == 'planning' else 24000)
-                        and type(count) is int and count >= 1,
+                cap=model_cap(connection,identity) if purpose=='planning' else 24000
+                require(type(count) is int and count>=1 and type(value) is int and 0<=value<=
+                        (min(count,bug_investigation.INVESTIGATION_REQUESTS)*cap if purpose=='planning' and outcome else cap)
+                        and (purpose!='planning' or type(usage.get('max_request_completion_tokens',0)) is int
+                             and 0<=usage.get('max_request_completion_tokens',0)<=cap),
                         'Local request accounting unavailable')
                 qwen_requests += count
                 qwen_tokens += value

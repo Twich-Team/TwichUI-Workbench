@@ -735,11 +735,11 @@ def test_program_working_set_uses_exact_verified_context_capacity(count,allowed)
         def models(self,_):return MODEL
         def context_budget(self,_,body):
             calls.append('count')
-            assert body['max_tokens']==2600 and body['reasoning_budget_tokens']==1024
+            assert body['max_tokens']==6144 and body['reasoning_budget_tokens']==3072
             return dict(prompt_tokens=count,context_tokens=32768)
         def read(self,request,limit):
             calls.append('generate')
-            assert len(request.data)<=98304 and limit==24000
+            assert len(request.data)<=131072 and limit==65536
             return json.dumps(dict(id='controlled-full-source',model=MODEL,
                 usage=dict(prompt_tokens=10,completion_tokens=5,total_tokens=15),choices=[
                     dict(finish_reason='stop',message=dict(content=json.dumps(dict(

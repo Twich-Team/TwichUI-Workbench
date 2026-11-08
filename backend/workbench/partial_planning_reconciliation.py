@@ -17,6 +17,7 @@ from workbench.investigation_memory import read_journal
 from workbench.planning_reconciliation import require, rows, probe_local
 from workbench.trusted_preparation import configuration
 from workbench.visual_scope import digest
+from workbench.planning_limits import consent_cap, final_bound
 
 KIND='ended-local-planning-partial-text-v1'
 KEY='local_partial_planning_settlement'
@@ -44,7 +45,7 @@ def state(connection, identity):
     consent=payload.get('local_planning_receipt',{})
     require(diag.get('generation_state')=='partial' and diag.get('accounting_state')=='complete'
         and diag.get('finish_reason')=='length' and type(count) is int and 1<=count<=8
-        and consent.get('investigation_version') in (4,5,6) and consent.get('max_local_requests')==8,
+        and consent.get('investigation_version') in (4,5,6,7) and consent.get('max_local_requests')==8,
         'Partial output needs exact completed accounting and original local consent')
     claim=payload.get('scenario_generation_claim')
     require(isinstance(claim,dict) and type(claim.get('pid')) is int and claim['pid']>0
@@ -55,7 +56,7 @@ def state(connection, identity):
     return attempt,job,payload,binding
 
 
-def observations(engine, identity, count):
+def observations(engine, identity, count, cap=2600):
     roots=[Path(root) for root in everyday.configuration(engine).evidence_roots]
     totals=dict(prompt_tokens=0,completion_tokens=0,total_tokens=0)
     hashes, response_ids = [],set()
@@ -79,10 +80,13 @@ def observations(engine, identity, count):
         require(isinstance(response,str) and len(response)==64 and response not in response_ids,
                 'Repeated or missing provider response identity')
         response_ids.add(response)
+        limits=[e['completion_limit'] for e in events if e['phase']=='request-limits']
+        require(len(limits)<=1 and (not limits or type(limits[0]) is int and limits[0] in (2600,6144) and limits[0]<=cap), 'Request completion bound changed')
+        limit=limits[0] if limits else 2600
         usage=envelope.get('usage',{}).get('values',{})
         require(set(usage)==set(totals) and all(type(v) is int and v>=0 for v in usage.values())
             and usage['prompt_tokens']+usage['completion_tokens']==usage['total_tokens']
-            and usage['completion_tokens']<=2600,'Response usage is malformed or exceeds original bound')
+            and usage['completion_tokens']<=limit,'Response usage is malformed or exceeds original bound')
         for key in totals:
             totals[key]+=usage[key]
         hashes.append(hashlib.sha256(json.dumps(events,sort_keys=True).encode()).hexdigest())
@@ -97,7 +101,7 @@ def known_values(attempt, payload):
     require(isinstance(known,dict) and set(known)=={'prompt_tokens','completion_tokens','total_tokens'}
         and all(type(v) is int and v>=0 for v in known.values())
         and known['prompt_tokens']+known['completion_tokens']==known['total_tokens']
-        and known['completion_tokens']<=diag['investigation_requests']*2600,
+        and known['completion_tokens']<=diag['investigation_requests']*consent_cap(payload.get('local_planning_receipt',{})),
         'Complete retained token accounting is required')
     if stored is not None:
         require(stored.get('status')=='complete' and type(stored.get('requests_observed')) is int
@@ -116,7 +120,7 @@ def observed_accounting(count, totals):
 def expected(connection, engine, identity):
     attempt,job,payload,binding=state(connection,identity)
     count=payload['diagnostics']['investigation_requests']
-    totals,hashes=observations(engine,identity,count)
+    totals,hashes=observations(engine,identity,count,consent_cap(payload.get('local_planning_receipt',{})))
     require(digest(known_values(attempt,payload))==digest(totals),
             'Observed journal usage differs from retained accounting')
     accounting=observed_accounting(count,totals)
@@ -137,7 +141,7 @@ def accounting(connection, identity, engine=None):
         and receipt.get('external_execution_stopped') is True
         and receipt.get('output_complete') is False and receipt.get('no_approved_plan_or_execution') is True
         and type(receipt.get('server_task')) is int and receipt['server_task']>=0
-        and receipt.get('snapshot')==dict(task=receipt['server_task'],idle=True,completion_limit=2600)
+        and receipt.get('snapshot')==dict(task=receipt['server_task'],idle=True,completion_limit=final_bound(payload))
         and digest(receipt.get('accounting'))==digest(result) and job['message']==MESSAGE,
         'Missing or stale ended-planning receipt')
     return result
@@ -152,8 +156,10 @@ def reconcile(engine, identity, server_task):
     require(type(server_task) is int and server_task>=0,'Invalid server task')
     from workbench.planning_provider import local_slot
     with local_slot():
-        snapshot=probe_local(before[0]['requested_model'],server_task)
-        require(snapshot==dict(task=server_task,idle=True,completion_limit=2600),'Exact local activity must be idle')
+        limit=final_bound(before[2])
+        snapshot=(probe_local(before[0]['requested_model'],server_task) if limit==2600 else
+                  probe_local(before[0]['requested_model'],server_task,limit))
+        require(snapshot==dict(task=server_task,idle=True,completion_limit=limit),'Exact local activity must be idle')
         receipt=dict(kind=KIND,binding=before[3],attempt=identity,job=before[1]['id'],
             intake=before[0]['task_id'],model=before[0]['requested_model'],server_task=server_task,
             snapshot=snapshot,external_execution_stopped=True,output_complete=False,

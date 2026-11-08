@@ -233,8 +233,9 @@ def planning_receipt(original, created_at):
 
     from workbench.bug_investigation import INVESTIGATION_SECONDS, INVESTIGATION_REQUESTS, INVESTIGATION_REQUEST_SECONDS, requested
     return dict(binding=digest(original), expires_at=(
-        datetime.fromisoformat(created_at) + timedelta(minutes=PLANNING_MINUTES)).isoformat(),
-        **(dict(investigation_version=6, max_local_requests=INVESTIGATION_REQUESTS, max_codex_requests=1,
+        datetime.fromisoformat(created_at) + timedelta(minutes=45 if requested(original) else PLANNING_MINUTES)).isoformat(),
+        **(dict(investigation_version=7, max_local_requests=INVESTIGATION_REQUESTS, max_codex_requests=1,
+                max_local_completion_tokens=6144,
                 local_request_deadline_seconds=INVESTIGATION_REQUEST_SECONDS,
                 planning_deadline_seconds=INVESTIGATION_SECONDS) if requested(original) else {}))
 

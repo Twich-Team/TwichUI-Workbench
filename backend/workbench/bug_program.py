@@ -6,7 +6,7 @@ compiler only translates those selections into the existing bound BugPlan.
 import copy
 from typing import Annotated, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field
 
 from workbench.bug_evidence import Data, Short, InvestigationRead, InvestigationSearch
 from workbench.regression_evidence import Scalar, LuaPath, TestPath
@@ -31,11 +31,6 @@ class Checkpoint(Data):
     expected: Scalar
     incorrect: Scalar
 
-    @model_validator(mode='after')
-    def different(self):
-        if self.expected == self.incorrect:
-            raise ValueError('Incorrect result must differ from the expected scalar result')
-        return self
 
 
 class Reproduction(Data):
@@ -81,7 +76,7 @@ INSTRUCTIONS = (
     'Use app-owned inspection for missing code; never ask the owner to find a file. '
     'Select an exact supplied committed client bootstrap or a source that returns a module. '
     'The app loads that setup in an isolated Lua5.1 environment. In each phase, client is the actual returned '
-    'client (there is no extra c prefix), or subject is the returned module/function. state is a shared empty '
+    'client, also available under the selected bootstrap local variable name), or subject is the returned module/function. state is a shared empty '
     'table for fixture inputs between phases. Existing safe Lua math/string/table primitives are available. '
     'Write ordinary Lua in phase.code; return ONE actual observed scalar. expected and incorrect are supplied '
     'separately and are never exposed to the program. Source errors or an unexpected result hold, never prove a bug. '
@@ -99,7 +94,9 @@ INSTRUCTIONS = (
     'scope describes the actual behavioral change in plain English, never just a filename or an instruction to describe it. '
     'Do not infer an existing cache or listener from desired behavior; inspect the actual implementation. '
     'The observations must distinguish original from corrected behavior and cover the user report, not merely confirm a stub changed. '
-    'Use client in phase code even if the committed bootstrap calls its local variable c; c is not a phase global. '
+    'Use client or the exact selected bootstrap local name, such as c; both refer to the same actual client. '
+    'A correct unchanged baseline may use equal expected/incorrect values; it cannot prove an original failure. '
+    'At least one later observation must actually fail on the original, and every candidate observation must pass. '
     'other_reads contains additional selected files only; required setup/writes/focused test reads are derived. '
     'If needed setup, arguments, return types or public access paths are missing, inspect before proposing code.'
 )

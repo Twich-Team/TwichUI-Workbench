@@ -178,7 +178,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         reviewing=schema is ReviewResponse
         investigating=schema is InvestigationResponse
         assert reviewing or investigating or schema is bug_investigation.BugPlanningResponse
-        assert 24000 < len(json.dumps(packet).encode()) <= 98304
+        assert 24000 < len(json.dumps(packet).encode()) <= 196608
         conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
         fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
         case = cases[0] if fault else next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
@@ -232,7 +232,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             def context_budget(self, _, body):
                 return dict(prompt_tokens=8000, context_tokens=32768)  # Controlled, not a model call.
             def read(self, request, limit):
-                assert len(request.data) <= 65536 and limit == 24000
+                assert len(request.data) <= (131072 if program_mode else 65536) and limit == (65536 if program_mode else 24000)
                 outcome = answer if reviewing or investigating else dict(finding=answer['finding'], draft={key:answer[key]
                     for key in ('plan', 'question', 'limitation', 'inspection') if answer.get(key) is not None})
                 return json.dumps(dict(id='controlled-response', model=expected_model,
@@ -337,7 +337,8 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         job = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == failed)).scalar_one()
     evidence = tmp_path/'artifacts/runs'/('planning-evidence-'+job['diagnostics']['evidence_id'])/'events.jsonl'
     rows = [json.loads(row) for row in evidence.read_text().splitlines()]
-    assert [row['phase'] for row in rows][:4] == ['schema', 'request-schema', 'wire-received', 'envelope']
+    prefix=['schema','request-schema']+(['request-limits'] if program_mode else [])+['wire-received','envelope']
+    assert [row['phase'] for row in rows][:len(prefix)] == prefix
     assert len(rows[1]['schema_sha256']) == 64 and rows[1]['corrective'] is False
     assert rows[-1]['phase'] == 'validation-rejected'
     issue = rows[-1]['errors'][0]

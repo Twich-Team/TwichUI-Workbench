@@ -23,8 +23,8 @@ ROOT = Path(__file__).resolve().parents[2]
 MAX_INPUT = 24000
 BUG_INPUT = 65536
 BUG_PREPARED_INPUT = 98304
-PROGRAM_INPUT = 98304
-PROGRAM_PREPARED_INPUT = 131072
+PROGRAM_INPUT = 131072
+PROGRAM_PREPARED_INPUT = 196608
 MAX_OUTPUT = 24000
 
 
@@ -301,12 +301,17 @@ class LocalProvider:
                 dict(role='user', content=encoded)])
         if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse):
             # Installed Qwen template/server support bounded thinking and a
-            # separate reasoning channel. Total generation remains2600, not
-            # an additional token allowance. Never parse/log reasoning as a plan.
+            # separate reasoning channel. Legacy total is2600; the program
+            # profile below selects its own shared output/reasoning bound. Never log reasoning.
             body.update(reasoning_budget_tokens=1024, reasoning_format='deepseek',
                         chat_template_kwargs=dict(enable_thinking=True))
-        encoded_body = json.dumps(body, separators=(',', ':')).encode()
         program = context.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1'
+        from workbench.planning_limits import PROGRAM_COMPLETION, PROGRAM_REASONING
+        completion_limit = PROGRAM_COMPLETION if program else 2600
+        reasoning_limit = PROGRAM_REASONING if program else body['reasoning_budget_tokens']
+        if program:
+            body.update(max_tokens=completion_limit, reasoning_budget_tokens=reasoning_limit)
+        encoded_body = json.dumps(body, separators=(',', ':')).encode()
         request_limit = PROGRAM_INPUT if program else BUG_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse) else MAX_INPUT
         if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse) and len(encoded_body) > request_limit:
             # Fit source context to the actual serialized request, preserving
@@ -353,13 +358,16 @@ class LocalProvider:
                 counts = transport.context_budget(secret, body)
                 count, capacity = counts.get('prompt_tokens'), counts.get('context_tokens')
                 if (type(count) is not int or type(capacity) is not int or count < 1
-                        or capacity < 4096 or count > min(26000 if program else 22000, capacity-2600-1024)):
+                        or capacity < 4096 or count > min(26000 if program else 22000, capacity-completion_limit-(512 if program else 1024))):
                     raise PlanningUnavailable('Local context exceeds the verified planning bound; no generation started.',
                                               'context_budget')
                 self.diagnostics.update(context_prompt_tokens=count, context_capacity_tokens=capacity)
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
             encoded_body, {'Authorization': 'Bearer '+secret, 'Content-Type': 'application/json'})
-        self.diagnostics['generation_state'] = 'uncertain'
+        self.diagnostics.update(generation_state='uncertain', request_completion_limit=completion_limit)
+        if program and self.response_evidence:
+            self.response_evidence.record('request-limits', completion_limit=completion_limit,
+                reasoning_budget_requested=reasoning_limit, output_wire_limit=65536 if program else MAX_OUTPUT)
         observed = False
         def observe_response(data, complete=True):
             nonlocal observed
@@ -374,7 +382,7 @@ class LocalProvider:
                     raise PlanningUnavailable('Private response evidence could not be preserved.', 'diagnostic_io') from None
         if self.response_evidence and hasattr(transport, 'response_observer'):
             transport.response_observer = observe_response
-        raw = transport.read(request, MAX_OUTPUT)
+        raw = transport.read(request, 65536 if program else MAX_OUTPUT)
         self.diagnostics['output_bytes'] = len(raw)
         self.diagnostics['parse_phase'] = 'envelope'
         if not observed:
@@ -420,20 +428,20 @@ class LocalProvider:
                 raise PlanningUnavailable('Generation stopped before a complete proposal.', 'incomplete_output')
             if model != actual:
                 raise PlanningUnavailable('Returned model differs from observed configured identity.', 'model_identity')
-            if expected_model is not None and (not complete_usage or usage['completion_tokens'] > 2600):
+            if expected_model is not None and (not complete_usage or usage['completion_tokens'] > completion_limit):
                 raise PlanningUnavailable('Planning usage is missing, inconsistent or beyond its bound.', 'accounting')
             self.diagnostics['parse_phase'] = 'payload'
             message = choice.get('message')
             if not isinstance(message, dict):
                 raise planning_response.ResponseValidationError('Expected one response message', ['choices', 0, 'message'], 'assistant message object', message)
             if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse):
-                self.diagnostics.update(reasoning_budget_requested=1024,
+                self.diagnostics.update(reasoning_budget_requested=reasoning_limit,
                     reasoning_channel_present=isinstance(message.get('reasoning_content'), str)
                     and bool(message['reasoning_content']))
                 if self.response_evidence:
-                    self.response_evidence.record('reasoning-channel',requested_budget=1024,
+                    self.response_evidence.record('reasoning-channel',requested_budget=reasoning_limit,
                         present=self.diagnostics['reasoning_channel_present'],retained=False,
-                        total_completion_bound=2600)
+                        total_completion_bound=completion_limit)
             if message.get('tool_calls'):
                 raise planning_response.ResponseValidationError('Planning has no tool authority', ['choices', 0, 'message', 'tool_calls'], 'no tool calls', message['tool_calls'])
             value, changes = planning_response.payload(message.get('content'), bug=schema is BugPlanningResponse)

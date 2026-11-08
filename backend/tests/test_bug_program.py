@@ -195,3 +195,62 @@ def test_syntax_compilation_does_not_replace_missing_source_or_result():
         compile_program(value,[dict(path=SOURCE,top_level_returns_value=True)],{})
     with pytest.raises(ResponseValidationError):
         compile_program(wire(),[dict(path=SOURCE,top_level_returns_value=False)],{})
+
+
+@pytest.mark.parametrize('all_baselines',[False,True])
+def test_committed_alias_and_unchanged_baseline_do_not_forge_original_failure(tmp_path,all_baselines):
+    (tmp_path/'tests').mkdir()
+    (tmp_path/'tests/harness.lua').write_text("""function MakeClient()
+ local c=setmetatable({Input=0,handlers={}}, {__index=_G})
+ c.Register=function(e,fn)c.handlers[e]=fn end
+ c.FireEvent=function(e)if c.handlers[e] then c.handlers[e]() end end
+ return c
+end
+""")
+    evidence=event_evidence()
+    repro=evidence['plan']['reproducer']
+    for phase in repro['phases']:
+        phase['code']=phase['code'].replace('client.','c.')
+    repro['observations'][0]['incorrect']=0
+    if all_baselines:
+        for observation in repro['observations']:
+            observation['incorrect']=observation['expected']
+    evidence['review_digest']=review_digest(evidence['plan'],evidence['bootstrap_source'])
+    base="""local state=0
+Example={Current=function()return state end}
+Register('USER_INPUT_CHANGED',function() BODY end)
+"""
+    if all_baselines:
+        with pytest.raises(ValueError,match='one observation must distinguish'):
+            run(tmp_path,evidence,base.replace('BODY','if state==0 then state=Input end'))
+        return
+    original=run(tmp_path,evidence,base.replace('BODY','if state==0 then state=Input end'))
+    candidate=run(tmp_path,evidence,base.replace('BODY','state=Input'))
+    assert original.returncode==1,original.stdout+original.stderr
+    assert candidate.returncode==0,candidate.stdout+candidate.stderr
+
+
+def test_equal_initial_baseline_compiles_without_inventing_a_counterexample():
+    value=wire()
+    value['plan']['reproducer']['phases'][0].update(expected=0,incorrect=0,code='return subject()')
+    result,_=compile_program(value,[dict(path=SOURCE,top_level_returns_value=True),dict(path=TEST)],{})
+    assert result['plan']['reproducer']['observations'][0]['expected']==0
+    assert result['plan']['reproducer']['observations'][0]['incorrect']==0
+
+
+@pytest.mark.parametrize('code',["return c.os.execute('exit 0')","return c.debug.getregistry()",
+                                "return c._G.verdict('pass')",'while true do end'])
+def test_committed_client_alias_has_no_additional_authority(tmp_path,code):
+    (tmp_path/'tests').mkdir()
+    (tmp_path/'tests/harness.lua').write_text("""function MakeClient()
+ local c=setmetatable({Input=0,handlers={}}, {__index=_G})
+ c.Register=function(e,fn)c.handlers[e]=fn end
+ c.FireEvent=function(e)if c.handlers[e] then c.handlers[e]() end end
+ return c
+end
+""")
+    evidence=event_evidence()
+    evidence['plan']['reproducer']['phases'][0]['code']=code
+    evidence['review_digest']=review_digest(evidence['plan'],evidence['bootstrap_source'])
+    result=run(tmp_path,evidence,"Example={Current=function()return 0 end}")
+    assert result.returncode not in (0,1),result.stdout+result.stderr

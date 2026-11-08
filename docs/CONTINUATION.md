@@ -1,3 +1,55 @@
+# Latest settled24 / source-native reasoning revision pending
+
+No active provider/driver. Installed remains502c6f7, current175rows/schema0012/
+28tables SHA80edc066aacee71befc3c74556cf47ab5835eb20a88b362759d2068cce3c190e,
+26historyentries. R=C/outcome-502c6f7, R/attempt-24-accounting.json:4complete stop
+responses7142generated/96150prompt, exact75478idle/2600twice, no approval/repair.
+Source working-set correction worked: no rereads, diagnosis/plan constructed,
+self-review rejected realsemantic flaws. Final revised plan stopped on initial
+expected==incorrect; other bad calls remained unreviewed. Do not claim validplan.
+Totals74Qwen starts/73usage/72stoptexts/1partial/1oldunknown,75102generated/664106
+prompt, old17max2600separate.0implementation/Codex/checkedrealbug/provider cases.
+
+UNINSTALLED connected change: support exact committed client variable alias(c)
+as sameclient root, no new capabilities. Explicit unchanged baseline allowed,
+but at least1contrasting observation required; native original must actuallyFAIL,
+allcandidate observationsPASS. All-baseline plans reject; alias escape/verdict/
+loop tests deny. No developer flightreproducer/patch authored. ProgramQwen total
+6144completion includes requested3072reasoning (supportedinstalledbinary/server
+requestparameter; actuallargerpolicy notliveverified). MaxHTTP131072/private196608,
+wireoutput65536; sameactualcontext26000/32768 with6144output+512margin. Localonly,
+no Codex/source-disclosure/spending change. Freshconsent7:maxlocal8/maxcompletion
+6144/request300/whole1800/expiry45min. Driverplanning31min fits unchanged140case/
+150operation+cleanup10; no cumulativecampaigncaps. Oldconsent1–6 retains2600 via
+planning_limits.py; unknown/partial settleusesactualrequestbound, v7missingbound
+holds. Old17/20receipts preserved/readverified. Source/writescope unchanged.
+
+C/source-native-reasoning-proof.json:actual175rowCOPY/tokenizer/no generation/
+no livewrite, fullsource/oldcanonicalreceipts valid with newoutputreserve.
+C/recorded-baseline-review-replay-proof.json:4actual oldresponses replayedONLY
+LOCALLY, revisedbaseline preserved0/0 and reaches fifthMODELSELFREVIEW, not approval
+or execution; no expectedvalue invented. Initial failed proof accessed wrong
+wrapper key; v2fixed logpreserved. Installed-reasoning-control-support.json records
+binaryhelp/sourcehandler/hash, no model/thinkcontent.
+
+264integratedfocused/reasoning-integrated-final.log andcheck/build/contracts
+reasoning-check.log pass. Bothnative journeys completed; legacy mode passes in
+reasoning-native-both.log (newmode assertion only failed on addedrequest-limits
+event). Correctednewmode passes reasoning-native-program-v2.log33.60sec614.3MiB;
+legacy evidence remainsvalid (testassertiononlychange). Currentcaptype/accounting
+focusedlog reasoning-final-accounting.log. Retain lastfrozen1449backend/25frontend
+plus unaffectedbrowser/admin/opt-ins evidence through source502lineage. VM/approval/
+accounting changes have fresh targeted/native coverage; do not rerun complete
+suites merely for status. No realfix/providercompleted.
+
+Next checkpoint/verifiedrevision26/controller25: previous502, forward175/original79,
+evidence_roots81, append modelf048bc64 to21priorIDs=22. Rtemplatescopykeyhash/
+originalindex/firewallbaseline/configisolationproof. Newtiming/driver/policy hashes
+nowchange; bind exactsource/verification/inventory/seal beforeactivation. Personal
+Codexconfig notmounted; only observedtimestamps maydrift, authmetadata/pinnedCLI/
+actualisolatedcode remain gated. No ownerpermission needed. EvaluateREALtask25
+promptly aftercheckedcutover, independentreview/delegatedplanrun, allremaininggates.
+
 # Latest installed revision25 / active real24 — supersedes below identities
 
 S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-502c6f7

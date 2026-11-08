@@ -90,12 +90,13 @@ class Reproducer(Data):
     def validate_reproducer(self):
         if self.phases:
             if (len(self.observations) != len(self.phases)
-                    or any(o.after_step != i+1 or o.source != 'return' or o.path != [1]
-                           or o.expected == o.incorrect for i,o in enumerate(self.observations))
+                    or any(o.after_step != i+1 or o.source != 'return' or o.path != [1] for i,o in enumerate(self.observations))
                     or self.fixture == 'client' and (not self.bootstrap or self.steps)
                     or self.fixture == 'module' and (self.bootstrap or len(self.steps) != 1 or self.steps[0].op != 'load')
                     or len(self.model_dump_json().encode()) > 8200):
-                raise ValueError('Specify separately reviewed bounded Lua phases and distinct scalar results')
+                raise ValueError('Specify separately reviewed bounded Lua phases and explicit scalar results')
+            if not any(o.expected != o.incorrect for o in self.observations):
+                raise ValueError('At least one observation must distinguish an original failure')
             return self
         if self.event_coverage:
             raise ValueError('Event coverage requires reviewed Lua phases')

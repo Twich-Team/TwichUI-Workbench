@@ -55,7 +55,12 @@ local function program_phases(env, root, scenario, control)
     end
   end
   local scope = {state={}}
-  if scenario.fixture == 'client' then scope.client = root else scope.subject = root end
+  if scenario.fixture == 'client' then
+    scope.client = root
+    local alias = scenario.bootstrap and scenario.bootstrap.client
+    assert(type(alias) == 'string' and alias:match('^[%a_][%w_]*$'), 'invalid committed client alias')
+    if alias ~= 'state' and alias ~= 'subject' and alias ~= '_G' then scope[alias] = root end
+  else scope.subject = root end
   scope._G = scope
   setmetatable(scope, {__index=env})
   local reproduced, first_events = false, {}

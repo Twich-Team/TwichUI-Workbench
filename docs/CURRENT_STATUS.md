@@ -5,7 +5,7 @@ cases complete. No implementation or Codex turn has started. Full agreed product
 scope remains required. Styling and audit follow the functional gate. No owner
 decision or unavailable access is currently needed.
 
-Installed502c6f7ab8116ac908464fa3b4f2dd7220c37ca4 preserves all25history entries,
+Installed502c6f7ab8116ac908464fa3b4f2dd7220c37ca4 preserves all26history entries,
 approved loopback/home-LAN HTTPS, browser and internal-service protections. Four
 everyday services active/disabled pending completed acceptance. Completed-real-
 result restart recovery and the next ordinary bug journey are not demonstrated.
@@ -40,8 +40,18 @@ COPY/no-generation proof,239focused/96packing checks and both native browser mod
 pass. Complete final1449backend/25frontend/build/contracts checks passed. Default4backend
 opt-ins:both native modes freshly passed; unchanged regressionrouting/readiness
 retain bound prior evidence. Full source working-set revision passed checked installation and all25history
-HTTPreads. Fresh real24 is running through the normal app with full source and
-validated prior rejection feedback. No result yet; no owner decision needed.
+HTTPreads. Real24 settled with4complete responses7142generated/96150prompt; no approved plan
+or repair. Full source removed rereads; modelself-review rejected flawed behavior.
+Revised plan then hit the initial equal-baseline gate. Provider idle, all usage known.
+
+Uninstalled correction supports committed client aliases, natural unchanged
+baselines with at least1real contrasting failure, and a larger bounded local
+reasoning/output profile (6144total includes3072requestedreasoning). Freshconsent7
+binds8requests/1800seconds/300perrequest/45minexpiry. Actual modelcontext26000/32768
+with6144output+512margin; no API/Codex spending/disclosure changes.264focused and
+nativebrowser/aliasescape/accounting/oldreceipt/context/replay checks pass. New
+reasoning quality still live-unverified. Continue checkedrevision26/real25; no
+owner decision needed.
 
 Earlier bcaf correction supplied full startup before generation, counted unique
 source lines and protected startup through retention/fitting. That removed real21
@@ -49,8 +59,8 @@ source-budget block; real22 evidence confirms advancement into planning. Retain
 valid c98 full1429backend/25frontend/build and bound browser/admin evidence, with
 fresh affected focused/native checks rather than repeated full cycles per fix.
 
-Known totals70Qwen starts,69complete usage receipts,68complete stop texts,1length-
-stop partial text,1old cancelled missing receipt. Observed67960generated/567956
+Known totals74Qwen starts,73complete usage receipts,72complete stop texts,1length-
+stop partial text,1old cancelled missing receipt. Observed75102generated/664106
 prompt; old missing completion max2600reserved separately, never actual usage.
 No API/extra-credit billing, publication, public exposure, unauthorized disclosure
 or live-addon changes. Continue real flight task first,4provider cases, installed

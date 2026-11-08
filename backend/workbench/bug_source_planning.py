@@ -522,6 +522,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     if index+1 == REQUESTS:
                         raise PlanningUnavailable('The plan needs its model self-check before review.', 'review_limit')
                     pending = raw
+                    wire.pop('validation_feedback', None)  # Its constraints have now passed; journal retains the rejected draft.
                     if evidence:
                         evidence.snapshot('proposed-plan', raw)
                     planning_wire = copy.deepcopy(wire)

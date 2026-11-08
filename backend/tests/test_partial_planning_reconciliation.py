@@ -3,6 +3,7 @@
 from contextlib import nullcontext
 import copy
 import json
+from pathlib import Path
 
 import pytest
 from sqlalchemy import select
@@ -15,8 +16,15 @@ from test_bug_source_planning import inspection
 from test_everyday import installed  # noqa: F401
 
 
-def partial(client, headers, store, monkeypatch):
+def partial(client, headers, store, monkeypatch, program=False):
     enable_bugs(monkeypatch)
+    if program:
+        import os
+        from test_everyday import write_policy
+        config=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
+        value=json.loads(config.read_text())
+        value['bug_plan_review']='source-grounded-lua-v1'
+        write_policy(config,value)
     calls = []
 
     def generate(self, packet, schema, expected_model):
@@ -35,12 +43,13 @@ def partial(client, headers, store, monkeypatch):
                     dict(
                         id="controlled-partial-" + str(index),
                         model=expected_model,
-                        usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
+                        usage=dict(prompt_tokens=40, completion_tokens=6144 if program and index==2 else 10,
+                                   total_tokens=6184 if program and index==2 else 50),
                         choices=[
                             dict(
                                 finish_reason="stop" if index == 1 else "length",
                                 message=dict(
-                                    content=json.dumps(inspection())
+                                    content=json.dumps(dict(finding='Read current source.',draft=dict(inspection=inspection()['inspection'])) if program else inspection())
                                     if index == 1
                                     else '{"finding":'
                                 ),
@@ -72,7 +81,7 @@ def partial(client, headers, store, monkeypatch):
     )
     monkeypatch.setattr("workbench.planning_provider.local_slot", lambda: nullcontext())
     monkeypatch.setattr(
-        settle, "probe_local", lambda model, task: dict(task=task, idle=True, completion_limit=2600)
+        settle, "probe_local", lambda model, task, completion_limit=2600: dict(task=task, idle=True, completion_limit=completion_limit)
     )
     return dict(attempt), dict(job)
 
@@ -218,3 +227,17 @@ def test_concurrent_state_change_during_probe_prevents_settlement(
             select(planning_jobs.c.payload).where(planning_jobs.c.id == job["id"])
         ).scalar_one()
         assert settle.KEY not in payload
+
+
+@pytest.mark.usefixtures('installed')
+def test_program_partial_keeps_actual_larger_bound_and_does_not_approve(client,headers,store,monkeypatch):
+    original,job=partial(client,headers,store,monkeypatch,program=True)
+    result=settle.reconcile(store,original['id'],40232)
+    assert result['values']['completion_tokens']==6154
+    assert result['requests_started']==2 and result['partial_text_responses']==1
+    with store.connect() as c:
+        assert dict(c.execute(select(model_attempts).where(model_attempts.c.id==original['id'])).mappings().one())==original
+        assert settle.accounting(c,original['id'])==result
+        payload=c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.id==job['id'])).scalar_one()
+    assert payload[settle.KEY]['snapshot']['completion_limit']==6144
+    assert payload['local_planning_receipt']['max_local_completion_tokens']==6144
