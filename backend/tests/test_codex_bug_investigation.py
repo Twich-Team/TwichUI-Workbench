@@ -233,3 +233,31 @@ def test_codex_never_transmits_source_outside_initial_task_binding(store, monkey
     with pytest.raises(codex_provider.Hold) as held:
         adapter.generate(wire, BugPlanningResponse)
     assert held.value.reason == "disclosure" and not held.value.started
+
+
+@pytest.mark.usefixtures("installed")
+@pytest.mark.parametrize('mutation', ['path', 'text'])
+def test_packed_request_is_revalidated_before_dispatch(store, monkeypatch, mutation):
+    """Even an internal packing bug cannot expand the frozen source disclosure."""
+    enable(store, monkeypatch)
+    from workbench import bug_investigation as bug
+    from workbench.trusted_preparation import configuration
+    from workbench.bug_evidence import BugPlanningResponse
+    packet = bug.context(report(), '', configuration(store))
+    adapter = codex_provider.Planner(dict(model='controlled', effort=None), lambda:False)
+    adapter.bind_source(packet)
+    _, wire = bug.planning_request(packet, report(), '')
+
+    def pack(value, encode, limit):
+        assert isinstance(encode(value), bytes) and limit == codex_provider.MAX_BUG_INPUT
+        if mutation == 'path':
+            value['files'][0]['path'] = '!!!TwichUI/unapproved.lua'
+        else:
+            value['files'][0]['excerpts'][0]['text'] = 'UNAPPROVED_SOURCE'
+        return value, {}
+
+    adapter.request_packer = pack
+    monkeypatch.setattr(codex_provider, 'generate', lambda *a, **kw:pytest.fail('Disclosure escaped'))
+    with pytest.raises(codex_provider.Hold) as held:
+        adapter.generate(wire, BugPlanningResponse)
+    assert held.value.reason == 'disclosure' and not held.value.started

@@ -1,3 +1,53 @@
+# CURRENT VERIFIED STATE — November8 16:46UTC
+
+Following the Project Working Philosophy: keep delivering; no owner decision needed.
+Actually installed34669c86920f3c84268796dc873b0f44c71d0de1,
+tree0726ba25eb9e14a39f4ba0ea3b0ab466e81d485e,
+seale7254c520290f1a8ca6a892ece8b134679024cfedcaedd861d9e118ab350aabd.
+C=~/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
+R=C/outcome-34669c8; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-34669c8.
+Deployment41 verified228-row cutover/all38normalhistory reads and all prior scoped
+network/browser/isolation/history gates. Four actual workbench-everyday-{api,worker,
+codex,lan} services active; loopback and approved HTTPS available. No provider active.
+Real37 SETTLED: intake4c3ecd6e-2b39-451a-aba9-22fd0e2d468c/modeld4269678-69be-43a0-a804-e13224de604b,
+jobbe30e780-fabe-4caf-bab8-e37ea5284dd6. Six Codex turns completed with usage323056total
+(321828prompt/1228completion/434reason); seventh rejected locally before dispatch:
+complete encoded request exceeded196608bytes. No plan/proposal/approval/implementation.
+R/attempt-37-accounting.json and ledger updated:49Codexstarts/45completeusage/4missing,
+1953033known total; historical2unknownterminal+2confirmedinterrupted unchanged.
+Latest232rows SHA0a234677e02dc491f7f16453addd382608a2464cb3274b3250664455972a78e4.
+Never overwrite with228/224/original79. All original stores and receipts retained.
+No real checked repair; all four required real provider cases still undemonstrated.
+
+Connected correction currently uncommitted: exact nested request encoder shared by
+packing and dispatch, including instructions/schema/metadata/JSON escaping. Evict
+only optional source; preserve new requested ranges/module declarations/bootstrap,
+revalidate frozen disclosure after packing; impossible mandatory context holds.
+Existing196608byte/128000sourcebounds and billing/network/write/approvals unchanged.
+37focused tests/static pass. C/encoded-request-actual-replay-v2/proof.json replays six
+complete hash-verified real source replies offline through actual Planner/source path;
+seventh request fits, every requested range visible, live232rows unchanged, no model
+call/socket/plan/patch. First proof's controlled final reply used wrong nullable
+schema and failed locally; v2 only corrects that controlled end, preserves failedlog.
+Fullsuite C/encoded-request-full-tests.log and two affected true-confined Codex
+browser modes C/encoded-request-kernel-native.log running. Build already complete;
+do not race browser checks against frontend rebuild. Previous full1620/25 is installed
+baseline, not proof for new packing code. Finish/fix verification before activation.
+
+Next revision42/task38/roots113, parent34669c8; append d4269678 to prior IDs. Reuse
+prepare-context-envelope-revision.py with honest updated provider AST comparison:
+new encode_request/extracted generate plus Planner.validate_source/packing changes;
+CLIcommand/auth/account/quota/cancel/sandbox unchanged, exact protocol bytes tested.
+Preserve extra guarded preflight/install files from parent, conditional stop, precise
+firewall-port checker and verified pinned APIcache; fresh successful preflight receipt
+BEFORE any mutation. Latest232/original79 fingerprint/copy/allnormalreads + original18
+and three standing recovery receipts. Then fresh normal real bug, actual model plan,
+independent review/originalFAIL-candidatePASS/fulladdonchecks/result; no developer fix.
+Twelve exact sources already authorized; sixwritable/max3repair unchanged. Four real
+provider cases, result restart/nextordinarybug, cleanup/stableapp remain required.
+Standing authority supersedes oldcampaigncaps, no owner renewal. Lower records are
+historical; actual current state above governs.
+
 # CURRENT VERIFIED STATE — November8 16:12UTC
 
 Following the Project Working Philosophy: continue; no owner decision needed.

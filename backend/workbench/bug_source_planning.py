@@ -293,7 +293,7 @@ def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_bu
     return windows, matches, total
 
 
-def next_wire(packet, original, feedback, windows, finding, matches=None, *, programs=(), requested=(), text_budget=None):
+def next_wire(packet, original, feedback, windows, finding, matches=None, *, programs=(), requested=(), text_budget=None, packing_context=None):
     _, wire = bug.planning_request(packet, original, feedback)
     from workbench.source_memory import retain, requested_visibility
     if packet.get('plan_review')=='source-grounded-lua-v1':
@@ -302,6 +302,9 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
         windows=[*windows,*priority]
         wire['selected_source_interface']=interface
         wire['requested_behavior_clauses']=[s.strip() for s in re.split(r'(?<=[.!?])\s+',original['description']) if s.strip()][:12]
+    if packing_context is not None:
+        packing_context.clear()
+        packing_context.update(windows=list(windows),requested=list(requested))
     retain(wire, packet, windows, (text_budget if text_budget is not None else 36000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
            -sum(len(m['text']) for m in (matches or [])), requested=requested)
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
@@ -340,6 +343,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     lessons = None
     predecessor = None
     historical_pending = False
+    packing_context = {}
     program_mode = initial.get('plan_review') == 'source-grounded-lua-v1'
 
     def make_wire(*args,**kwargs):
@@ -348,6 +352,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         # supported request envelope. Local Qwen keeps its smaller context.
         if program_mode and getattr(adapter, 'source_manifest', None) is not None:
             kwargs['text_budget'] = 128000
+        kwargs['packing_context'] = packing_context
         result=next_wire(*args,**kwargs)
         added=packet.get('inspection_windows',[])[before:]
         if parent:
@@ -433,6 +438,13 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             return should_stop()
 
     adapter.stop_event = Stop()
+    original_packer = getattr(adapter, 'request_packer', None)
+    if getattr(adapter, 'source_investigation', False):
+        from workbench.request_context import fit
+        adapter.request_packer = lambda outgoing, encode, limit: fit(
+            outgoing, packet, packing_context.get('windows', []),
+            packing_context.get('requested', []), encode, limit, should_stop)
+
 
     def observe_usage(facts):
         usage = facts.get('usage')
@@ -686,5 +698,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         adapter.diagnostics = diagnostics
         adapter.response_evidence = parent
         adapter.stop_event = original_stop
+        if getattr(adapter, 'source_investigation', False):
+            adapter.request_packer = original_packer
         for journal in journals:
             journal.close()

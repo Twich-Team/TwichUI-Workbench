@@ -17,7 +17,7 @@ def retain(wire, packet, current, budget=24000, *, requested=()):
     for item in packet['files']:
         for excerpt in item['excerpts']:
             rank = 1 if excerpt.get('coverage') == 'module prelude' else 3
-            if packet.get('plan_review') == 'source-grounded-lua-v1' and excerpt.get('coverage') in {'module prelude', 'partial module prelude'}:
+            if packet.get('plan_review') == 'source-grounded-lua-v1' and excerpt.get('coverage') in {'module prelude', 'partial module prelude', 'committed test-support prelude'}:
                 rank = -5000
             add(item['path'], excerpt, rank)
     for excerpt in packet.get('inspection_windows', []):

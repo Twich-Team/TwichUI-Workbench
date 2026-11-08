@@ -1086,6 +1086,14 @@ def connector_path():
     return None
 
 
+def encode_request(model, effort, prompt, schema, request_seconds=SECONDS):
+    """One encoder for both complete-envelope measurement and socket dispatch."""
+    request = dict(model=model, effort=effort, prompt=prompt, schema=schema)
+    if request_seconds != SECONDS:
+        request["request_seconds"] = request_seconds
+    return json.dumps(request, ensure_ascii=True, allow_nan=False).encode()
+
+
 def generate(
     model,
     effort,
@@ -1103,10 +1111,7 @@ def generate(
         raise Hold("unavailable")
     if type(request_seconds) is not int or request_seconds not in (SECONDS, BUG_SECONDS):
         raise ValueError("Unsupported Codex operation timeout")
-    request = dict(model=model, effort=effort, prompt=prompt, schema=schema)
-    if request_seconds != SECONDS:
-        request["request_seconds"] = request_seconds
-    payload = json.dumps(request, ensure_ascii=True, allow_nan=False).encode()
+    payload = encode_request(model, effort, prompt, schema, request_seconds)
     if type(input_limit) is not int or input_limit not in (MAX_PACKET, MAX_BUG_INPUT):
         raise ValueError("Unsupported Codex input bound")
     if len(payload) > input_limit:
@@ -1182,6 +1187,7 @@ class Planner:
         self.ends_at = None
         self.response_evidence = None
         self.request_seconds = SECONDS  # Replaced only by the actual saved bug consent.
+        self.request_packer = None
         self.source_manifest = None
         self.source_base = None
         self.reference_manifest = None
@@ -1215,6 +1221,55 @@ class Planner:
             or self.ends_at is not None
             and time.monotonic() >= self.ends_at
         )
+
+    def validate_source(self, packet):
+        if self.source_manifest is None:
+            raise Hold("disclosure")
+        for key, allowed in [
+            ("files", self.source_manifest),
+            ("api_references", self.reference_manifest),
+        ]:
+            if any(
+                item.get("path") not in allowed
+                or ("sha256" in item and item["sha256"] != allowed[item["path"]])
+                for item in packet.get(key, [])
+            ):
+                raise Hold("disclosure")
+        for item in packet.get("files", []):
+            lines = self.source_lines[item["path"]]
+            for excerpt in item.get("excerpts", []):
+                start = excerpt["line"]
+                actual = excerpt["text"].splitlines()
+                if (
+                    type(start) is not int
+                    or start < 1
+                    or lines[start - 1 : start - 1 + len(actual)] != actual
+                ):
+                    raise Hold("disclosure")
+        if any(
+            match.get("path") not in self.source_manifest
+            for match in packet.get("inspection_result", {}).get("search_matches", [])
+        ):
+            raise Hold("disclosure")
+        notebook = packet.get("completed_searches")
+        if notebook is not None:
+            if (
+                not isinstance(notebook, dict)
+                or notebook.get("base") != self.source_base
+                or not isinstance(notebook.get("scopes"), dict)
+                or any(
+                    not isinstance(scope, dict)
+                    or not isinstance(scope.get("paths"), list)
+                    or set(scope["paths"]) != set(self.source_manifest)
+                    for scope in notebook.get("scopes", {}).values()
+                )
+                or any(
+                    not isinstance(match, dict) or match.get("path") not in self.source_manifest
+                    for item in notebook.get("searches", [])
+                    for match in item.get("matches", [])
+                )
+            ):
+                raise Hold("disclosure")
 
     def generate(self, packet, schema, *, expected_model=None):
         from workbench.grounded_scenarios import LoadedClientResponse
@@ -1257,53 +1312,7 @@ class Planner:
         model = self.selection["model"]
         self.diagnostics = dict(generation_state="not_started")
         if bug_schema:
-            if self.source_manifest is None:
-                raise Hold("disclosure")
-            for key, allowed in [
-                ("files", self.source_manifest),
-                ("api_references", self.reference_manifest),
-            ]:
-                if any(
-                    item.get("path") not in allowed
-                    or ("sha256" in item and item["sha256"] != allowed[item["path"]])
-                    for item in packet.get(key, [])
-                ):
-                    raise Hold("disclosure")
-            for item in packet.get("files", []):
-                lines = self.source_lines[item["path"]]
-                for excerpt in item.get("excerpts", []):
-                    start = excerpt["line"]
-                    actual = excerpt["text"].splitlines()
-                    if (
-                        type(start) is not int
-                        or start < 1
-                        or lines[start - 1 : start - 1 + len(actual)] != actual
-                    ):
-                        raise Hold("disclosure")
-            if any(
-                match.get("path") not in self.source_manifest
-                for match in packet.get("inspection_result", {}).get("search_matches", [])
-            ):
-                raise Hold("disclosure")
-            notebook = packet.get("completed_searches")
-            if notebook is not None:
-                if (
-                    not isinstance(notebook, dict)
-                    or notebook.get("base") != self.source_base
-                    or not isinstance(notebook.get("scopes"), dict)
-                    or any(
-                        not isinstance(scope, dict)
-                        or not isinstance(scope.get("paths"), list)
-                        or set(scope["paths"]) != set(self.source_manifest)
-                        for scope in notebook.get("scopes", {}).values()
-                    )
-                    or any(
-                        not isinstance(match, dict) or match.get("path") not in self.source_manifest
-                        for item in notebook.get("searches", [])
-                        for match in item.get("matches", [])
-                    )
-                ):
-                    raise Hold("disclosure")
+            self.validate_source(packet)
         if expected_model is not None and model != expected_model:
             raise Hold("model_identity")
         try:
@@ -1339,10 +1348,20 @@ class Planner:
                                 json.dumps(output_schema, sort_keys=True).encode()
                             ).hexdigest(),
                         )
+            prefix = instructions + "\nUntrusted task data:\n"
+            def encoded(outgoing):
+                return encode_request(model, self.selection["effort"],
+                    prefix + json.dumps(outgoing, ensure_ascii=True), output_schema,
+                    self.request_seconds if bug_schema else SECONDS)
+            if bug_schema and self.request_packer is not None:
+                packet, packing = self.request_packer(packet, encoded, MAX_BUG_INPUT)
+                self.validate_source(packet)
+                if self.response_evidence:
+                    self.response_evidence.record("codex-request-budget", **packing)
             result, counted = generate(
                 model,
                 self.selection["effort"],
-                instructions + "\nUntrusted task data:\n" + json.dumps(packet, ensure_ascii=True),
+                prefix + json.dumps(packet, ensure_ascii=True),
                 output_schema,
                 self.stopped,
                 **(

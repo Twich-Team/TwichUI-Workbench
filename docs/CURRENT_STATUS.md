@@ -1,14 +1,16 @@
-# Current status — installed app healthy; source-budget correction being verified
+# Current status — real investigation settled; complete-request packing corrected offline
 
-Following the Project Working Philosophy: c778e42 is installed at both approved
-addresses; history/previews, network/browser/isolation and preservation checks passed.
-Latest228history rows retained. Real36 completed five Codex turns, then hit a source-
-reading resource bound while inspecting the approved harness. No plan/implementation
-or independent behavioral pass; zero of four required real provider cases complete.
+Following the Project Working Philosophy: installed34669c8 is running at both approved
+addresses. Real37 completed six Codex turns, then the app rejected a seventh request
+locally because its full encoded envelope exceeded the byte limit. No addon plan,
+implementation or independent real behavioral pass; zero of four real provider cases
+passed. Latest232-row history preserved; no provider currently active.
 
-The new inspection footprint fits all12authorized files plus API context, while
-outgoing request/disclosure limits stay unchanged. Targeted/static/affected confined
-browser checks pass; complete1620backend/25frontend suite passed before checked installation and a
-fresh purposeful task. No provider currently active or owner decision needed.
-Continue full repair/provider checks/result restart/next ordinary bug and broader
-scope. [Handoff](CONTINUATION.md) binds actual records; old active-task text superseded.
+New packing measures the actual nested request, preserving newly requested source,
+module declarations, bootstrap and frozen disclosure. Focused/static checks pass;
+offline replay of the six completed real replies reaches the seventh request within
+the unchanged bound, without touching live history or a provider. Complete suites
+and affected confined browser checks are running before installation. No owner
+input needed. All historical unknown outcomes/usage remain unchanged and fenced.
+Continue real repair, required provider checks, restart/result preservation and next
+ordinary bug. See [handoff](CONTINUATION.md); no obsolete campaign renewal applies.
