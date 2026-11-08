@@ -1,3 +1,105 @@
+# Current handoff — 2026-11-08 05:21 UTC
+
+Following the Project Working Philosophy: the full outcome remains unfinished.
+No real flight-path implementation or independently checked repair; zero of four
+real supporting provider cases passed. No addon changes or publication occurred.
+
+## Installed and verified
+
+Candidate `910049d35a583393f9ee019fb71d005c6d65c007`, tree
+`383404c7538a3ca02f04f9856e04d680c30d5ed3`, seal
+`0b6e5451e32caf3ae0d28ab69e9d0e9c9d653e9ec1129dee85b795e4bdfd275f`.
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-910049d
+C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a
+R=C/outcome-910049d. Source checkpoint includes recovery correction536210a plus
+non-object connector-envelope denial. Unactivated536210a remains preserved.
+
+Exact final full suite:1529 backend passed/6 default opt-ins skipped;25 frontend
+passed; build/contracts/static passed. R/offline-verification.json binds all logs,
+17 protocol/privacy/real-child-pipe cases and159 affected checks. Current Codex
+native browser rehearsal at536210a passed19.99s: two unrelated checked repairs,
+separate API/worker, concurrent requests, invalid-output correction and restarts.
+Final910 adds only the malformed-envelope guard and four fresh denial cases.
+Other native modes, four-route controlled browser, unchanged broader browser/visual/
+admin evidence retained with exact lineage. No controlled case is real acceptance.
+
+R/deployment-30-verified.json passes all installed service/filter/5isolation probes/
+foreign connector peer/TLS/LAN/browser/sealed-asset gates. Original79 and latest195
+rows copied and independently compared; all30 history list/detail reads HTTP200.
+Current195 SHA242cf2a13eb0e25fe1cb7b9b05925173b9421acfc0f46171977383bc2085189f,
+schema0012/28tables; no mutations after read-only desktop/phone form checks. Both
+screenshots inspected; fresh bug consent shows actual five-minute Codex/Qwen turns
+within30minutes. Browser intercepted mutations; none occurred. Model/auth/key normal,
+scratch empty, model PID/config unchanged, no temporary proof unit or model child.
+Four everyday roles active/disabled pending functional acceptance, not enabled yet.
+Addresses unchanged: http://127.0.0.1:9487 and https://10.0.0.9:9487; trusted10.0.0.0/24,
+no client authentication, no new public/internal service exposure. Prior remote LAN
+proof reused only after unchanged effective gates. All older stores/recovery evidence
+preserved. NEVER overwrite current195 with prior191/185/original79.
+
+## Actual Codex result and the genuine pending decision
+
+Real28 at installed7ef79cb: intake d6373031-1a57-405c-adce-12a67368b414,
+model18bbf5d0-c5e2-4557-936b-126b24b4f1f4, job92a63483-394d-4ebf-80ef-9c45c4534b8f.
+Driver77449 finished held. First turn completed31509 total tokens (31352 prompt,
+157 completion,19 reasoning included in reported total). It identified existing
+flight filtering and requested focused searches. Second turn timed out at120s
+with some agent output. The connector sent interrupt then killed its ephemeral
+process without reading the terminal acknowledgement or retaining identities.
+Historical final output/usage/provider state UNKNOWN; process gone is not proof
+of provider completion/cancellation. No plan, approval, implementation or fallback.
+Original interrupted_unknown row and all diagnostics remain unchanged across cutover.
+Private R_previous=C/outcome-7ef79cb/attempt-28-accounting.json; ledger has2Codex starts,
+1complete and1unknown final receipt. Qwen totals remain89starts/86completeusage,
+120689generated/943421prompt; old17/26/27unknown final bounds remain separately recorded.
+
+A user-input question is PENDING, not answered: authorize permanently quarantining
+only this lost second read-only Codex turn, preserving unknown usage/output and
+allowing a fresh improved investigation. This is the owner's no-uncertain-replay
+boundary, not an engineering/campaign renewal. Full supporting explanation:
+CODEX_TIMEOUT_RECOVERY_20261108.md. Do not assume silence is approval. Acceptance
+admission correctly holds this old uncertain record; do not bypass it for other
+cases. No further real calls since the failed second turn.
+
+The new installed correction writes bounded private connector receipts before
+parsing, retaining request hash/thread/turn/terminal/usage/redacted output; no prompt,
+authentication RPC body, token/cache contents or reasoning.0700/0600,64KiB per receipt.
+Cancellation gets up to10seconds to read the SAME turn's terminal acknowledgement;
+missing receipt remains uncertain, never a new generation. Fresh v9 bug consent:
+Codex300s/turn,8shared turns/1800s; valid older v8 keeps120s. Qwen unchanged. Existing
+32768 observed-token guard remains post-completion, not an enforceable token/billing
+ceiling. Auth/isolation/account/disclosure/network/publication policy unchanged.
+This fix cannot reconstruct the already destroyed historical ephemeral identity.
+
+## Continue after the actual decision, without another engineering prompt
+
+If owner authorizes that precise exception, record it in authority/requirements
+addendum and implement a canonical, tightly bound abandonment receipt for ONLY
+18bbf5d0's second turn. Preserve original outcome/output/usage as unknown; no invented
+completion/accounting. Verify no owned producer remains; admission may recognize
+that explicit owner disposition, not relax other unknown attempts. Test this path,
+record/verify any candidate change, deploy through existing supported operations.
+Then renew fresh actual report through normal delegated browser decisions; no old
+plan/partial output/approval reuse. The prepared stage acceptance case is attempt29,
+revision30,26prior IDs including18bbf5d0, original79/latest195,89evidence roots.
+No driver started in910. Preserve the first successful source-inspection evidence.
+
+Explicit nine-file Codex source permission at1caf530 is saved in
+OWNER_SOURCE_DISCLOSURE_20261108.md and DELIVERY_OUTCOME_AUTHORITY_20261107.md; do not
+ask again. Signed-in included usage only under accepted snapshot policy; no API,
+extra credits/purchases/reload/subscription change. No new login/auth sharing.
+
+Complete actual investigated/reviewed/approved/checkable flight repair, four real
+provider cases, completed-result restart, next ordinary supported bug without
+registration, cleanup/stable app and remaining agreed requirements. Independent
+plan review must bind actual initial navigation/real flight-master visit/later
+visit refresh, not flags or assigned answers. No developer addon fix/reproducer.
+Broader product/in-game/Codex bug repair/PR scope remains unproved; styling/audit
+follow functional delivery. Standing autonomous authority and superseded campaign
+caps remain unchanged. Only the historical external-state exception needs the owner.
+
+Earlier entries below are historical, not an active model operation.
+
 # Current: real Codex run held on lost terminal receipt; recovery correction offline
 
 No realflightimplementation/checkedrepair or0of4realprovider casescomplete. Installed

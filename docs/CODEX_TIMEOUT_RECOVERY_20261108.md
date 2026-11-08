@@ -1,3 +1,14 @@
+# Current addendum — verified recovery build installed
+
+Recovery candidate910049d35a583393f9ee019fb71d005c6d65c007, seal
+0b6e5451e32caf3ae0d28ab69e9d0e9c9d653e9ec1129dee85b795e4bdfd275f,
+passed full1529backend/25frontend/static and installed protection/history checks.
+All30historyentries/current195rows survived restart.17focused protocol/privacy/
+real-child cases pass; native Codex browser proof and other retained lineage are
+bound in C/outcome-910049d/offline-verification.json. No model turn started in this
+build; the historical exception question below is still pending. The prior record
+below describes the failed7ef79cb run and the then-uninstalled correction accurately.
+
 # Real Codex flight investigation: timeout and recovery
 
 The installed candidate is7ef79cb825ffacecd7c587e663436e9b0163c950, seal

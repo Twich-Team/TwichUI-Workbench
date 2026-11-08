@@ -1,3 +1,15 @@
+# November8 05:21UTC: recovery installed; historical external-state decision pending
+
+Installed910049d/seal0b6e5451..., full1529backend/25frontend/static pass. Installed
+protection/history gates pass;195rows/all30historyentries preserved and readable after
+restart. Desktop/phone consent inspected with no mutation. Normal model/auth/key and
+empty scratch verified; no active model child or temporary proof unit. Two real Codex
+turns: first complete31509tokens, second partial/unknown terminal at old120s. No flight
+repair or0/4realprovider acceptance. Original unknown row preserved. Corrected private
+receipt/cancellation and freshv9timeouts verified offline and installed, no new livecall.
+The one historical quarantine/fresh-investigation question remains unanswered; keep
+live acceptance held, preserve accounting and full standing delivery authority.
+
 # November8 05:08UTC: Codex timeout defect isolated; no repair yet
 
 FirstrealCodexturn completed31509total; secondpartialturn120stimeout lackedterminal
