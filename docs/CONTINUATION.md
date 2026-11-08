@@ -1,29 +1,58 @@
-# Latest installed revision26 / ACTIVE real25
+# Latest settled real25 / function-focused source revision in development
 
-S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-3142999
-R=C/outcome-3142999. Installed31429994c099286a61277b7e3900dd8f32aaea4c,
-treea4103ce8ddc79c4b0d9ed5865d2b3bab0fb07e8b,
-seal(canonical value R/dormant-stage.json). All26historyHTTPreads and original79/
-forward175 checked, strict network/TLS/browser/5probes/connectorpeer gates pass
-R/deployment-26-verified.json.4rolesactive/disabled. R/offline-verification.json
-binds264focused+54accounting/build/nativelegacy success/newnative33.60sec614.3MiB/
-actual175-copy/oldreceipts/4recordedoutputs localreplay/supportingC++control proof
-and precise retained1449backend/25frontend/unaffectedbrowser/admin evidence.
+Following the Project Working Philosophy, continue the complete outcome under
+standing owner authority; no cumulative campaign caps or routine renewal gates.
+Installed31429994c099286a61277b7e3900dd8f32aaea4c remains running. S=/home/rich/
+TwichUI-Workbench/.local/m5-review/everyday-outcome-3142999; R=C/outcome-3142999,
+C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a.
 
-REAL25 running via normal delegatedbrowser: intake18392d91-f57a-4d5b-b13e-49a39a829ffc,
-model66c66de6-c4e9-4d65-901a-5f86089a5224, job9643b1af-33bc-48f6-bae3-8e95148cc2d6.
-Driver execsession68384, R/active-attempt.json. Savedconsent7 confirmed8requests/
-6144completion/300request/1800shared. Actualserver77890processing/6144n_predict,
-prompt23405 tokens/prefill2022 observed firstprobe. Reasoning3072isrequested,
-not independently observed; total6144hardserverparam verified. Newprofilequality
-still awaiting live output. Do not replay active/uncertain work. Monitor journals/
-normaldriver and follow actualplan toindependentreview/implementation. No owner
-decision needed.0realfix/0of4realprovidercases/0implementation/Codex.
+Real25 definitively settled: model66c66de6-c4e9-4d65-901a-5f86089a5224,
+intake18392d91-f57a-4d5b-b13e-49a39a829ffc. Four finished stop responses,
+13467generated/99332prompt; fifth self-review blocked locally before generation
+by context budget. Exact model task87687 idle twice/n_predict6144. No approval,
+implementation or uncertainty. R/attempt-25-accounting.json. Latest179rows/schema
+0012/28tables SHA f90d24c6eb8c1a36c42d73385ebdd1d3d78fa4ac68b02705c2220aa97538dae4,
+27history entries. Never forward175 over179. Ledger updated78requests/77complete
+usage/76stop/1partial/1oldunknown,88569generated/763438prompt. Missing old17final
+completion max2600 remains separate from actual usage. No checked realfix/0of4
+provider cases/no implementation or Codex turn. No owner action needed.
 
-Newsource-native interface/baseline/reasoning/consent/timing changes below ARE NOW
-INSTALLED. Model mustauthor actualflightrepro/fix; no developeranswer. Previous
-74Qwenstarts/73usage/72stop/1partial/1oldunknown;75102gen/664106prompt are SETTLED
-pre25 totals. Add actualnewreceipts later. No cumulativecampaigncap reinstated.
+Source reasoning and orchestration are distinct failures: retained draft still
+has a constant observation and does not establish the exact master-visit/refresh
+behavior; expanded flat source then prevented self-review. NV.Start DOES exist
+in committed Nav.lua787–807 (contrary to an earlier working hypothesis); the
+new literal interface and full-body context verify actual declarations, not
+invented absence or runtime export support. Source diagnosis is unapproved DATA.
+
+UNINSTALLED architecture change: source_interface.py uses compiler ranges and
+literal function declarations/call graph to supply compact unverified interface
+and complete relevant bodies,32k bounded source context/full existing bootstrap.
+Revalidates committed hashes/read bounds; no Lua execution or new disclosure.
+Original report clauses remain visible. A fully finished unapproved same-report
+same-source draft can be critiqued as the FIRST fresh model call; even a ready
+critique must lead to a complete fresh proposal and fresh self-check. All normal
+independent review/task plan/run/originalFAIL/candidatePASS/suite gates remain.
+No historical plan or approval directly reused; partial/unknown/success ineligible.
+
+C/function-context-focused.log:101passed. C/function-context-proof.json actual179
+COPY/real local tokenizer/no generation/live write: first request is ReviewResponse,
+19835tokens,72228HTTPbytes,63099preparedbytes,full bootstrap/TV.Flights/TV.Request,
+67literal declarations/all3owner clauses. Prior proof v1 incorrectly assumed
+NV.Start absent; failed before generation, v2 verifies actual signature. Older
+17/20 canonical receipts and live/copy store fingerprints unchanged. New critique
+safety tests and realistic native process verification in progress; do not deploy
+unverified source. Previous frozen1449backend/25frontend evidence supports unchanged
+code only. Build/affected/native checks required for new code before activation.
+
+Next revision27/controller26, previous314, forward179/original79, evidence_roots83;
+append model66c66de6 to22prior IDs=23. Bind newcommit/tests/inventory/seal before
+activation. Existing R templates/admin/network/history/recovery safeguards remain.
+Start real26 promptly after verified deployment, inspect actual draft independently;
+no developer flight fix/reproducer. Then4provider cases/completed-result restart/
+next ordinary bug/cleanup/stable enabled services. Styling/audit follow functional
+gate; full original product scope remains unfinished. Continue past checkpoints.
+
+Older snapshots below describe their historical states, not current activity.
 
 # Latest settled24 / source-native reasoning revision pending
 

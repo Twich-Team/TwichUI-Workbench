@@ -37,7 +37,8 @@ def scripted(monkeypatch, answers):
                 return dict(prompt_tokens=8000, context_tokens=32768)  # Controlled count, no provider.
 
             def read(self, request, limit):
-                assert len(request.data) <= 65536 and limit == 24000
+                program=packet.get('coverage',{}).get('reproducer_format')=='lua-phases-v1'
+                assert len(request.data) <= (131072 if program else 65536) and limit == (65536 if program else 24000)
                 system = json.loads(request.data)['messages'][0]['content']
                 from workbench.bug_plan_review import ReviewResponse
                 from workbench.bug_investigation_stage import InvestigationResponse
@@ -45,10 +46,10 @@ def scripted(monkeypatch, answers):
                     assert 'before constructing a repair plan' in system
                 elif schema is ReviewResponse:
                     assert 'model self-check' in system
-                else:
+                elif not program:
                     assert 'You may request app-owned read-only committed-source search or line inspection' in system
                 assert 'You have no tools' not in system
-                if schema not in (ReviewResponse, InvestigationResponse):
+                if not program and schema not in (ReviewResponse, InvestigationResponse):
                     assert 'a read-only inspection request, a plan, a useful question, or a limitation' in system
                     assert 'Missing code is not a real-world question or a limitation' in system
                     assert 'no shell, editing, approval, external-tool or publication authority' in system

@@ -1,0 +1,68 @@
+"""Function-shaped source context, not guessed exports or executable diagnostics."""
+import copy
+import pytest
+from workbench.source_interface import definitions,context
+from workbench.source_memory import retain
+from workbench import bug_source_planning as source
+
+
+def test_literal_interface_keeps_inline_calls_and_does_not_execute_source():
+    rows=definitions(b'''error('MUST NOT RUN')
+-- function M.Fake() end
+local note="function M.AlsoFake() end"
+local M={}
+function M.Read() return M.Inner() end
+function M.Inner(value) return value end
+M.Visit = function(v) return M.Read(v) end
+return M
+''')
+    assert {r['name'] for r in rows}=={'M.Read','M.Inner','M.Visit'}
+    assert 'M.Inner' in next(r for r in rows if r['name']=='M.Read')['calls']
+    assert next(r for r in rows if r['name']=='M.Visit')['args']=='v'
+
+
+def test_relevant_function_and_caller_are_read_pinned_and_catalogued(monkeypatch):
+    path='!!!TwichUI/Example.lua'
+    raw=b'''local M={}
+function M.Noise() return 0 end
+function M.Whisker() return M.Inner() end
+function M.Inner() return 1 end
+function M.Request() return M.Whisker() end
+function M.Begin() return M.Request() end
+return M
+'''
+    item=dict(path=path,sha256='fixed',excerpts=[dict(line=1,text='local M={}')])
+    packet=dict(base='fixed',plan_review='source-grounded-lua-v1',files=[item])
+    before=copy.deepcopy(item)
+    calls=[]
+    monkeypatch.setattr(source,'committed',lambda p,b:(raw,dict(sha256='fixed')))
+    def inspect(packet,requests):
+        windows=[]
+        for request in requests:
+            calls.append((request.start,request.end))
+            lines=raw.decode().splitlines()
+            w=dict(path=path,sha256='fixed',line=request.start,through_line=request.end,
+                   text='\n'.join(lines[request.start-1:request.end]))
+            windows.append(w)
+        packet.setdefault('inspection_windows',[]).extend(windows)
+        return windows,[],sum(len(w['text']) for w in windows)
+    monkeypatch.setattr(source,'inspect',inspect)
+    priority,catalog=context(packet,dict(title='Whisker bug',description='Whisker should update.'))
+    assert packet['files'][0]==before and calls
+    assert any('M.Whisker()@3-3' in x for x in catalog['declarations'][path])
+    assert 'not runtime export proof' in catalog['notice']
+    assert any(w['line']==3 for w in priority) and any(w['line']==5 for w in priority)
+    wire=dict(files=copy.deepcopy(packet['files']))
+    retain(wire,packet,priority,500)
+    text='\n'.join(w['text'] for w in wire['files'][0]['excerpts'])
+    assert 'function M.Whisker' in text and 'function M.Request' in text
+    before_calls=list(calls)
+    context(packet,dict(title='Whisker bug',description='Whisker should update.'))
+    assert calls==before_calls
+
+
+def test_changed_interface_hash_is_not_used(monkeypatch):
+    packet=dict(base='base',files=[dict(path='!!!TwichUI/Example.lua',sha256='old')])
+    monkeypatch.setattr(source,'committed',lambda *a:(b'return {}',dict(sha256='changed')))
+    with pytest.raises(ValueError,match='changed'):
+        context(packet,dict(title='A bug',description='An ordinary report.'))

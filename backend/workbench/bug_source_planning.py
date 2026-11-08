@@ -287,10 +287,16 @@ def inspect(packet, requests):
     return windows, matches, total
 
 
-def next_wire(packet, original, feedback, windows, finding, matches=None):
+def next_wire(packet, original, feedback, windows, finding, matches=None, *, programs=()):
     _, wire = bug.planning_request(packet, original, feedback)
     from workbench.source_memory import retain
-    retain(wire, packet, windows, (60000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
+    if packet.get('plan_review')=='source-grounded-lua-v1':
+        from workbench.source_interface import context
+        priority,interface=context(packet,original,programs)
+        windows=[*windows,*priority]
+        wire['selected_source_interface']=interface
+        wire['requested_behavior_clauses']=[s.strip() for s in re.split(r'(?<=[.!?])\s+',original['description']) if s.strip()][:12]
+    retain(wire, packet, windows, (32000 if packet.get('plan_review') == 'source-grounded-lua-v1' else WIRE_TEXT)
            -sum(len(m['text']) for m in (matches or [])))
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
@@ -317,6 +323,18 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     parent = adapter.response_evidence
     journals, receipts = [], []
     lessons = None
+    predecessor = None
+    historical_pending = False
+
+    def make_wire(*args,**kwargs):
+        before=len(packet.get('inspection_windows',[]))
+        result=next_wire(*args,**kwargs)
+        added=packet.get('inspection_windows',[])[before:]
+        if parent:
+            for offset in range(0,len(added),16):
+                parent.record('source-function-context',windows=[{k:w[k] for k in ('path','sha256','line','through_line')}
+                    for w in added[offset:offset+16]],approved=False,executed=False)
+        return result
     if investigating and parent and engine is not None:
         from workbench.investigation_memory import seed
         packet, remembered, predecessor = seed(packet, original, parent.identifier, engine)
@@ -326,7 +344,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 lessons = review_lessons(predecessor, engine)
                 if lessons:
                     parent.record('rejected-plan-feedback-reused', **lessons, approved=False, executed=False)
-            wire = next_wire(packet, original, feedback, remembered,
+            wire = make_wire(packet, original, feedback, remembered,
                              'Previously read source was checked against the current committed repository. No diagnosis or approval was reused.')
             for offset in range(0,len(remembered),16):
                 parent.record('source-memory-reused', predecessor=predecessor,
@@ -346,13 +364,30 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         if extra and parent:
             parent.record('source-bootstrap-context',characters=added,
                 windows=[{k:v for k,v in w.items() if k!='text'} for w in extra],approved=False,executed=False)
-        wire = next_wire(packet, original, feedback,
+        wire = make_wire(packet, original, feedback,
                          [*packet.get('inspection_windows', []), *bootstrap_priority],
                          'Current committed source and existing startup context; no diagnosis or approval reused.')
         if bootstrap_fact:
             wire['committed_bootstrap_context'] = bootstrap_fact
     if read_chars > limit:
         raise PlanningUnavailable('Initial source context exceeds the investigation read bound.', 'inspection_limit')
+    if program_mode and predecessor and engine is not None:
+        from workbench.investigation_memory import draft_for_critique
+        prior=draft_for_critique(predecessor,engine,packet,original,feedback)
+        if prior:
+            pending=prior['candidate']
+            investigating=False
+            historical_pending=True
+            focused=make_wire(packet,original,feedback,bootstrap_priority,
+                'Criticise a fully finished unapproved draft before creating a fresh proposal.',
+                programs=[p['code'] for p in pending['plan']['reproducer']['phases']])
+            focused['committed_bootstrap_context']=bootstrap_fact
+            planning_wire=copy.deepcopy(focused)
+            wire=bug_plan_review.request(focused,pending)
+            wire['historical_draft_notice']='Unapproved historical DATA only. Even a ready self-check cannot approve, execute or return this draft as the new plan. A fresh complete proposal is required.'
+            parent.record('prior-draft-for-critique',predecessor=prior['predecessor'],
+                candidate_sha256=prior['sha256'],approved=False,executed=False)
+
     adapter.ends_at = adapter.ends_at or time.monotonic()+bug.INVESTIGATION_SECONDS
     evidence = parent
     diagnostics = {}
@@ -382,6 +417,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                       stage.InvestigationResponse if investigating else BugPlanningResponse)
             if should_stop() or time.monotonic() >= adapter.ends_at:
                 raise PlanningUnavailable('The source investigation was stopped or timed out.', 'cancelled')
+            if program_mode:
+                read_chars=source_characters(packet)+search_chars
             wire['investigation_progress'] = dict(request_number=index+1,max_requests=REQUESTS,
                 requests_after_this=REQUESTS-index-1,last_request=index+1==REQUESTS,
                 remaining_seconds=max(0,int(adapter.ends_at-time.monotonic())),
@@ -445,6 +482,14 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                         evidence.record('plan-self-check',binding=review.review_binding,ready=review.ready,
                             categories=[issue.category for issue in review.issues],independent_verification=False,
                             approved=False,executed=False)
+                    if historical_pending:
+                        if not review.ready:
+                            review_rejected.add(review.review_binding)
+                        wire=bug_plan_review.feedback(planning_wire,pending,review)
+                        wire['fresh_proposal_required']='Create a complete fresh proposal against the current owner request and source. No historical plan or approval is reused.'
+                        historical_pending=False
+                        pending=None
+                        continue
                     if review.ready:
                         return pending, model, basis, packet
                     review_rejected.add(review.review_binding)
@@ -470,7 +515,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                                 evidence.record('source-read-result',characters=added,search_matches=0,
                                     purpose='complete-existing-test-bootstrap',
                                     windows=[{k:v for k,v in w.items() if k!='text'} for w in extra])
-                        wire = next_wire(packet, original, feedback, bootstrap_priority, investigated.finding)
+                        wire = make_wire(packet, original, feedback, bootstrap_priority, investigated.finding)
                         if bootstrap_fact:
                             wire['committed_bootstrap_context'] = bootstrap_fact
                         wire['investigation_diagnosis'] = dict(
@@ -526,7 +571,12 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     if evidence:
                         evidence.snapshot('proposed-plan', raw)
                     planning_wire = copy.deepcopy(wire)
-                    wire = bug_plan_review.request(wire, raw)
+                    if program_mode:
+                        focused=make_wire(packet,original,feedback,bootstrap_priority,'Read exact definitions used by the proposed program.',
+                            programs=[p['code'] for p in raw['plan']['reproducer']['phases']])
+                        focused['committed_bootstrap_context']=bootstrap_fact
+                        planning_wire.update({k:focused[k] for k in ('files','source_memory','selected_source_interface','requested_behavior_clauses')})
+                    wire = bug_plan_review.request(planning_wire, raw)
                     continue
                 return raw, model, basis, packet
             if should_stop():
@@ -548,7 +598,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 read_chars += chars
             if read_chars > limit:
                 raise PlanningUnavailable('The investigation reached its source-read bound.', 'inspection_limit')
-            wire = next_wire(packet, original, feedback, [*windows, *bootstrap_priority], draft.finding, matches)
+            wire = make_wire(packet, original, feedback, [*windows, *bootstrap_priority], draft.finding, matches)
             if bootstrap_fact:
                 wire['committed_bootstrap_context'] = bootstrap_fact
             if diagnosis:

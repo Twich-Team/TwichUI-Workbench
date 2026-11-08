@@ -32,6 +32,8 @@ INSTRUCTIONS = (
     "This is a model self-check, not independent verification or owner approval. No code executes. "
     "Return the exact review_binding. ready=true requires issues=[] and ALL checks below supported. "
     "Otherwise ready=false with1-4 concise concrete issues; do not invent code, fixes, values or permissions. "
+    "Check every requested_behavior_clause against the actual observations, including the exact requested action. "
+    "Do not substitute the source hypothesis for the owner request. Check declared method names/arguments in selected_source_interface; missing names need defining evidence, not invention. "
     "Check that the planned change is not behavior the original source already implements. "
     "Check the API input/return types, record structure and numeric-vs-string keys from inspected consumers/references. "
     "Check setup actually loads the relevant modules and call targets exist in its client/module namespace. "

@@ -2,7 +2,9 @@
 
 Source is fetched and checked afresh. A separately bounded rejected self-review
 may supply untrusted negative feedback after source revalidation; no diagnosis,
-plan, approval, expected answer or generated change is reused.
+plan authority, approval, expected answer or generated change is reused. A complete
+unapproved draft may be provided only as critique data, never directly returned
+as the new task plan.
 """
 import copy
 import os
@@ -114,7 +116,7 @@ def seed(packet, original, current_attempt, engine):
                                          and event.get('accounting_state') == 'complete'
                                          and event.get('completion') == 'stop'
                                          and event.get('model_matches') == 1)
-                        if event.get('phase') in {'source-memory-reused','source-bootstrap-context'} or (
+                        if event.get('phase') in {'source-memory-reused','source-bootstrap-context','source-function-context'} or (
                                 completed and event.get('phase') == 'source-read-result'):
                             windows.extend(event.get('windows', []))
                 candidate = copy.deepcopy(packet)
@@ -216,3 +218,70 @@ def review_lessons(prior, engine, _seen=()):
         except (OSError,ValueError,KeyError,TypeError):
             continue
     return result
+
+
+def draft_for_critique(prior, engine, packet, original, feedback):
+    """A fully finished unapproved draft may be criticised, never directly reused.
+
+    The caller already revalidated this same report's settled source through seed.
+    Partial/unknown execution and successful proposals do not qualify.
+    """
+    import hashlib
+    import json
+    from workbench import everyday,bug_investigation as bug
+    from workbench.bug_evidence import BugPlanningResponse
+    from workbench.bug_program import syntax
+    with engine.connect() as c:
+        attempt=c.execute(select(model_attempts).where(model_attempts.c.id==prior)).mappings().first()
+        if (not attempt or attempt['outcome']!='failed' or not attempt['finished_at']
+                or not isinstance(attempt['usage'],dict) or attempt['usage'].get('status')!='complete'):
+            return None
+    roots=[Path(root) for root in everyday.configuration(engine).evidence_roots]
+    for index in reversed(range(8)):
+        identity=str(UUID(prior) if index==0 else uuid5(UUID(prior),f'committed-source-turn-{index}'))
+        paths=[root/'artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl' for root in roots]
+        paths=[p for p in paths if p.exists()]
+        try:
+            if not paths:
+                continue
+            journals=[read_journal(p) for p in paths]
+            if any(j!=journals[0] for j in journals[1:]):
+                continue
+            events=journals[0]
+            if not any(e.get('phase')=='envelope' and e.get('generation_state')=='finished'
+                    and e.get('accounting_state')=='complete' and e.get('completion')=='stop'
+                    and e.get('model_matches')==1 for e in events):
+                continue
+            markers=[e for e in events if e.get('phase')=='private-proposed-data' and e.get('name')=='proposed-plan']
+            if len(markers)!=1:
+                continue
+            copies=[]
+            for path in paths:
+                path=path.with_name('proposed-plan.json')
+                owned(path)
+                fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+                try:
+                    info=os.fstat(fd)
+                    if not stat.S_ISREG(info.st_mode) or info.st_nlink!=1 or info.st_uid!=os.getuid() or info.st_mode&0o077 or info.st_size>24000:
+                        raise ValueError('Unsafe unapproved draft')
+                    raw=os.read(fd,24001)
+                finally:
+                    os.close(fd)
+                if len(raw)!=markers[0]['bytes'] or hashlib.sha256(raw).hexdigest()!=markers[0]['sha256']:
+                    raise ValueError('Unapproved draft changed')
+                copies.append(raw)
+            if any(raw!=copies[0] for raw in copies[1:]):
+                continue
+            from workbench.planning_response import strict_json
+            value=strict_json(copies[0])
+            checked=BugPlanningResponse.model_validate(value)
+            if not checked.plan or not checked.plan.reproducer.phases:
+                continue
+            for n,phase in enumerate(checked.plan.reproducer.phases):
+                syntax(phase.code,n)
+            bug.resolve(value,packet,original,feedback)  # Validate current source/policy, no fixture execution.
+            return dict(candidate=json.loads(json.dumps(value)),predecessor=prior,
+                        sha256=markers[0]['sha256'],text_complete=True,approved=False,executed=False)
+        except (ValueError,OSError,KeyError,TypeError):
+            continue
+    return None

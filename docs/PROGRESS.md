@@ -6996,3 +6996,17 @@ security/baseline checks pass. Actual175rowCOPY/tokenizer and4recordedresponses
 localreplay prove transition toreview without invented scalar/approval; old17/20
 receipts unchanged. Largerreasoningqualityawaitsrealapptrial. Preserve175latest/
 original79; nextrevision26/controller25 understandingauthority, no ownerstop.
+
+## November8 — real25 settled; change the context architecture
+
+Four complete Qwen responses,13467generated/99332prompt; fifth self-review stopped
+locally before generation on context budget.179rows/27history entries preserved;
+model87687idle twice. No plan/run approval, implementation or real acceptance pass.
+Retained draft has constant observation/missing requested action. NV.Start exists
+in committed Nav.lua787–807; earlier absence hypothesis was incorrect. New literal
+interface verifies names/signatures and full relevant bodies. Flat working-set
+expansion removed rereads but did not yield valid reasoning and overflowed review.
+Changing to function-shaped context plus first-turn critique of settled unapproved
+draft.101focused pass; actual179-copy/tokenizer proof19835tokens/fullbootstrap/
+ownerclauses, no generation/livewrite and old receipts unchanged. New safety/native
+checks before install. Ledger78starts/88569generated/763438prompt; no cap reset.
