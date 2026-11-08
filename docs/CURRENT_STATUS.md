@@ -5,7 +5,7 @@ cases complete. No implementation or Codex turn has started. Full agreed product
 scope remains required. Styling and audit follow the functional gate. No owner
 decision or unavailable access is currently needed.
 
-Installed81b713e991145fdc55ab3042f83b0f0b6d654d22 preserves all25history entries,
+Installed502c6f7ab8116ac908464fa3b4f2dd7220c37ca4 preserves all25history entries,
 approved loopback/home-LAN HTTPS, browser and internal-service protections. Four
 everyday services active/disabled pending completed acceptance. Completed-real-
 result restart recovery and the next ordinary bug journey are not demonstrated.
@@ -31,7 +31,7 @@ and all24history HTTPreads passed. Real23 settled after3finished responses3719ge
 repair. Prior feedback improved investigation, but source retention evicted known
 code and unique61010reached60000. Provider idle, all usage known.
 
-Uninstalled source-packing correction retains the measured whole working set in
+Installed source-packing correction retains the measured whole working set in
 25deduplicated windows: all inspected lines visible with real tokenizer counts
 23372–24927under26000/32768capacity. Newmode localinspection128000/64windows,
 retention60000characters, HTTP98304/privateprepared131072, per-request300seconds
@@ -39,8 +39,9 @@ and fresh consent6. Task8requests/1200seconds/2600output unchanged. Actual171-ro
 COPY/no-generation proof,239focused/96packing checks and both native browser modes
 pass. Complete final1449backend/25frontend/build/contracts checks passed. Default4backend
 opt-ins:both native modes freshly passed; unchanged regressionrouting/readiness
-retain bound prior evidence. Full source working-set revision ready for checked
-deployment and prompt real evaluation; no owner decision needed.
+retain bound prior evidence. Full source working-set revision passed checked installation and all25history
+HTTPreads. Fresh real24 is running through the normal app with full source and
+validated prior rejection feedback. No result yet; no owner decision needed.
 
 Earlier bcaf correction supplied full startup before generation, counted unique
 source lines and protected startup through retention/fitting. That removed real21

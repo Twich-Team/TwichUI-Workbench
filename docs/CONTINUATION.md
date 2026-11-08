@@ -1,3 +1,35 @@
+# Latest installed revision25 / active real24 — supersedes below identities
+
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-502c6f7
+R=C/outcome-502c6f7. Installed502c6f7ab8116ac908464fa3b4f2dd7220c37ca4,
+tree5536cb1935cecf966b6cd48d8d1eb5849aaa4ba7,
+seal6ec9058502e8bcc2072d8ab038dbcbf671e1dd996d57a4e0310dd0098060cd44.
+R/deployment-25-verified.json all strict network/TLS/browser/filter/5probes/peer/
+history gates; original79/forward171 preserved, all25HTTP list/details pass.
+4rolesactive/disabled. Final1449backend/25frontend/build/contracts/2native modes
+pass, precise reused unchanged browser/admin/opt-in evidence R/offline-verification
+.json. Complete inspected working set/no-answer/no-generation proof bound there.
+
+PersonalCodexconfig timestamps changed again; source proof now observes unused
+config timestamps without making them a gate. Same inode/uid/mode/size, auth
+metadata/pinnedbinary/isolationcode unchanged; config never mounted. No owner
+config/authfile changed. R/config-metadata-reconciliation.json/source-proof.py
+contains exact protected-runtime checks and lineage. Do not restore ownerconfig
+or repeatedly hold because unmountedpersonalconfig changes timestamps.
+
+REAL24 submitted01:48:45Z, intake727d0411-563a-436a-89bb-0cf4d28a6544,
+modelf048bc64-716c-426d-85af-be5ed3d286ed, joba5b8a387-3d6c-425d-a0d3-91b8cfd9dcc8.
+Driverexecsession3059, R/active-attempt.json, normalS/artifacts/acceptance/
+bug-flight-paths.jsonl and R/bug-flight-paths-driver.txt. Provider active, do not
+replay. All working-set changes described below ARE NOW INSTALLED, with fresh
+consent6/request300/shared1200/8requests/output2600. Model must author actual
+reproducer/fix. Independent review/normal delegated plan/run still required.
+
+C/outcome-ledger.json historical accounting retained.70Qwen starts/69usage/68stop
+texts/1partial/1oldunknown,67960generated/567956prompt are settled PRE24 totals;
+add actual24 receipts later. No checked realrepair/0of4provider cases; no owner
+decision needed. Continue until full agreed outcome, no checkpoint stop.
+
 # Current state after settled real23 — November8
 
 InstalledS=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-81b713e
