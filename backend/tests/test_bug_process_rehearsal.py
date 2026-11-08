@@ -380,9 +380,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         job = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == failed)).scalar_one()
     evidence = tmp_path/'artifacts/runs'/('planning-evidence-'+job['diagnostics']['evidence_id'])/'events.jsonl'
     rows = [json.loads(row) for row in evidence.read_text().splitlines()]
-    prefix=['schema','request-schema']+(['request-limits'] if program_mode else [])+['wire-received','envelope'] if case_provider=='local' else ['schema','request-schema','private-proposed-data','provider-result']
+    prefix=['schema','request-schema']+(['request-limits'] if program_mode else [])+['wire-received','envelope'] if case_provider=='local' else ['schema','request-schema','codex-wire-schema','private-proposed-data','provider-result']
     assert [row['phase'] for row in rows][:len(prefix)] == prefix
     assert len(rows[1]['schema_sha256']) == 64 and rows[1]['corrective'] is False
+    if case_provider=='codex':
+        assert rows[2]['codec']=='tagged-inspection-v1' and len(rows[2]['schema_sha256'])==64
     assert rows[-1]['phase'] == 'validation-rejected'
     issue = rows[-1]['errors'][0]
     assert issue['path'] == ['finding'] and issue['expected']['max_length'] == 450
