@@ -1,3 +1,31 @@
+## Installed correction and active real continuation — November8 23:33UTC
+
+Deployment52/33bda82153f8ce106e8c945b387e78ebfcd4a0ea is installed;
+treee211cbcd4a5296dd7d28eba8b8afcb4491aaf324;
+seal207077b501b7d6f26cc9baa0c1f9f14057d4a4ee46e77bbbfa915a4f6c89f91f.
+R=C/outcome-33bda82; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-33bda82.
+Installation/post-install all gates passed, original79/latest269rows preserved,
+all43history reads, normal Qwen/auth/restoration and loopback+LAN/protections verified.
+Native controlled intent modes2pass, four-case controlled browser opt-in1pass,
+frontend25pass, static/contracts/migrations/ruff pass. Complete backend initial1770
+passed/5failed/8defaultskips; all5were eager config-reader regression already fixed
+before sealing. Final affected213pass includes all5+new source/recovery/protocol
+checks. Preserve failed logs; no real acceptance inferred from controlled checks.
+
+Normal browser Rebuild checks command2c55ce22-5323-4080-863b-44ae1d8e7444 accepted23:32:08,
+retained two old histories and recorded exact read-only quarantine proof for3281...
+without changing original interrupted_unknown/NULLusage. Fresh rounde5db205c-8c29-
+414e-ad16-58c3a90b65ec, modelattemptf2eab557-cc96-45e6-a92f-ad40e355e645 RUNNING.
+First request273637bytes (>formerframebound), real Codex turn started. No replay of
+planning/scope approval. Driver exec32025 runs installed normal browser journey;
+R/applied-scope-driver.log; S/artifacts/acceptance/bug-flight-paths.jsonl.
+Existing applied scope0a4e1e71... unchanged; source12disclosure/writeTravel+test_nav
+unchanged. Fresh check program must be independently reviewed before separateRun.
+No source edit/independent real addon behavioralpass/result yet; real support0/4.
+No owner action pending. Continue monitoring healthy activity, review prepared
+checks when ready, then actual app repair/result/restart/nextbug/providerchecks.
+No campaign caps/renewal gate. Detailed prior investigation below is historical.
+
 ## Current verified state — November 8, 23:28 UTC
 
 Following the Project Working Philosophy: delivery continues under standing authority;
