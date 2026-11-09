@@ -92,3 +92,39 @@ def test_larger_bounded_working_context_keeps_complementary_inspected_source_tog
     assert packed['source_memory']['omitted_characters'] == 0
     assert len(encoder(packed)) <= MAX_BUG_INPUT
     assert requested_visibility(packed,[dict(extra,coverage='requested committed lines')])[0]['provided']
+
+
+@pytest.mark.parametrize('limit', [65536, 1800])
+def test_local_exact_packer_preserves_fresh_source_and_stops_impossible_request(limit):
+    from workbench.planning_provider import LocalProvider
+    from workbench.bug_investigation_stage import InvestigationResponse
+
+    packet, current, requested, wire = context()
+    packet['plan_review'] = 'source-grounded-intent-v1'
+    packet['inspection_windows'] *= 120
+    retain(wire, packet, current, 128000, requested=[requested])
+    # Full history remains in the packet; the model gets compact provenance.
+    assert wire['source_memory']['read_ranges'] == {packet['files'][0]['path']: [[400, 699]]}
+    original = copy.deepcopy((packet, wire))
+    calls = []
+    class Captured(Exception):
+        pass
+    class Transport:
+        seconds = 300
+        def models(self, _): return 'saved-local'
+        def context_budget(self, _, body): return dict(prompt_tokens=15000, context_tokens=32768)
+        def read(self, request, bound):
+            outgoing = json.loads(json.loads(request.data)['messages'][1]['content'])
+            assert len(request.data) <= 65536
+            assert outgoing['report'] == wire['report']
+            assert outgoing['coverage'] == wire['coverage']
+            assert requested_visibility(outgoing,[requested])[0]['provided']
+            calls.append(1)
+            raise Captured()
+    provider = LocalProvider()
+    provider.request_packer = lambda outgoing, encode, actual_limit: fit(
+        outgoing, packet, current, [requested], encode, min(actual_limit, limit))
+    with pytest.raises(Captured if limit == 65536 else PlanningUnavailable):
+        provider._infer(Transport(), 'inert', InvestigationResponse, json.dumps(wire), expected_model='saved-local')
+    assert calls == ([1] if limit == 65536 else [])
+    assert (packet, wire) == original

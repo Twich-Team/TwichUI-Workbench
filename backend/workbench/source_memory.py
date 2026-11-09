@@ -1,6 +1,23 @@
 """Keep exact committed lines across otherwise stateless model requests."""
 
 
+def ranges(windows):
+    """Lossless coordinate union; full ordered read receipts stay on disk."""
+    groups = {}
+    for window in windows:
+        groups.setdefault(window['path'], []).append((window['line'], window['through_line']))
+    result = {}
+    for path, values in sorted(groups.items()):
+        merged = []
+        for start, end in sorted(values):
+            if merged and start <= merged[-1][1]+1:
+                merged[-1][1] = max(merged[-1][1], end)
+            else:
+                merged.append([start, end])
+        result[path] = merged
+    return result
+
+
 def retain(wire, packet, current, budget=24000, *, requested=()):
     lines, priority = {}, {}
     by_path = {item['path']: item for item in wire['files']}
@@ -17,7 +34,7 @@ def retain(wire, packet, current, budget=24000, *, requested=()):
     for item in packet['files']:
         for excerpt in item['excerpts']:
             rank = 1 if excerpt.get('coverage') == 'module prelude' else 3
-            if packet.get('plan_review') == 'source-grounded-lua-v1' and excerpt.get('coverage') in {'module prelude', 'partial module prelude', 'committed test-support prelude'}:
+            if packet.get('plan_review') in {'source-grounded-lua-v1', 'source-grounded-intent-v1'} and excerpt.get('coverage') in {'module prelude', 'partial module prelude', 'committed test-support prelude'}:
                 rank = -5000
             add(item['path'], excerpt, rank)
     for excerpt in packet.get('inspection_windows', []):
@@ -54,7 +71,7 @@ def retain(wire, packet, current, budget=24000, *, requested=()):
     available = sum(len(text)+1 for text in lines.values())
     keys=('path','line','through_line','requested_start_line','requested_through_line',
           'file_lines','next_line','cached_prefix_through_line','coverage')
-    compact=packet.get('plan_review')=='source-grounded-lua-v1'
+    compact=packet.get('plan_review') in {'source-grounded-lua-v1', 'source-grounded-intent-v1'}
     wire['source_memory'] = dict(source_base=packet['base'],available_characters=available,
         retained_characters=used,omitted_characters=available-used,
         read_windows=[{key:window[key] for key in (keys[:3] if compact else keys) if key in window}
@@ -65,6 +82,10 @@ def retain(wire, packet, current, budget=24000, *, requested=()):
     if compact:
         wire['source_memory']['recent_read_windows']=[{key:w[key] for key in keys if key in w}
             for w in packet.get('inspection_windows',[])[-3:]]
+    if packet.get('plan_review') == 'source-grounded-intent-v1':
+        wire['source_memory'].pop('read_windows')
+        wire['source_memory']['read_ranges'] = ranges(packet.get('inspection_windows', []))
+        wire['source_memory']['range_format'] = 'Committed inclusive [first,last] ranges by path; overlapping or adjacent reads merged. Visibility still depends on actual excerpts.'
     return wire
 
 

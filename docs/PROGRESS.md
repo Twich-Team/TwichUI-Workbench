@@ -1,3 +1,14 @@
+## November9 — repeated local packing defect isolated before another live retry
+
+Installed66 real continuation completed18757tokens then definitively stopped the next
+request65597>65536 before generation. Cumulative real vendor prefix3responses56268.
+Shared exact request packing had only been wired to Codex. Local intent history kept
+large redundant coordinate records, and naive shortening could drop declarations.
+Correction wires local to exact packer, preserves mandatory source first, losslessly
+unions provenance ranges without inventing gap coverage. Full actual-state replay
+of5controlled inspection responses/6requests passes at64642..65535bytes, zero live
+calls/DB mutation. Historical records remain untouched. No plan/patch claimed.
+
 Latest Nov9 13:30UTC: styled delivery COMPLETE, installed62/d34cf17. Fresh REAL
 Qwen ordinary task passed independent checks/full167suite and persisted across
 full4service restart. All391rows plus accepted flight/fourpriorREALcases preserved.

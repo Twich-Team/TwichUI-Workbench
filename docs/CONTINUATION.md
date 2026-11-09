@@ -1,3 +1,29 @@
+## Vendor recovery — exact local request packing, November9 15:18UTC
+
+Installed66/a47ec77 remains settled, not active. Owner intake2dc5b8ba-2d22-4c2c-
+9f90-3bd58d29d5fd job5/08e441e1... completed ONE real Qwen response then
+stopped next request BEFORE generation (65597bytes >65536). Attempt0e287e32...
+usage18757tokens complete. Combined three complete real responses56268tokens;
+no vendor plan, addon decision, implementation or uncertain operation exists.
+Original historical failures and null usage remain unchanged.
+
+Root cause of recurrence: local adapter ignored the shared exact envelope packer;
+intent context kept redundant declaration/read coordinate metadata. Naive stripping
+could lose useful code without fitting the envelope. New connected correction uses
+the shared packer for local planning, losslessly unions coordinate ranges (no gaps
+invented), preserves requested code/declarations before optional source. Full ordered
+read receipts remain private/on disk. Actual wire65536/token22000/output2600 bounds
+unchanged. Corrected full real-state recovery with FIVE controlled replay responses
+and SIX assembled requests now passes (64642..65535bytes), zero live calls/database
+changes. This is controlled evidence, not a usable real-provider plan.
+
+Final affected suites/static/native checks underway, then seal/deploy and normal
+read-only continuation on SAME saved report. Need owner review for any actual addon
+plan/run; no fabricated approval. Maintenance admission hold STILL OWNED: restore
+with supported opsctl resume ONLY if hash matches maintenance-admission-hold.json.
+Private evidence vendor-planning-recovery-20261109; accepted six results/history,
+style/model defaults/fallbackOff/network/auth preserved. Continue, not checkpoint stop.
+
 ## Current vendor recovery — context deduplication verified, November9 15:02UTC
 
 Installed65/54e2881. Owner task remains2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd.

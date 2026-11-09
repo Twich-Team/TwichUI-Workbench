@@ -1,3 +1,15 @@
+# Vendor recovery: real response retained, packing correction verified locally
+
+Same saved owner report has three completed real Qwen inspection responses (56268
+observed tokens total); no repair plan or addon changes yet. Latest operation settled
+before its next generation because redundant source-history metadata overflowed the
+local request. Corrected exact envelope packing now passes a six-request controlled
+replay from actual saved state, retaining mandatory source and unchanged wire/token
+limits. Final integrated checks and checked deployment follow; no live retry unchanged.
+No owner addon plan/run approval has been supplied or fabricated. Maintenance admission
+hold is owned and must be restored after settlement. Accepted prior six results and
+styled interface remain preserved; older sections below describe their original dates.
+
 # Vendor-task recovery running
 
 Installed64/39e5c35 repairs the wrong planning route and transient model contention.

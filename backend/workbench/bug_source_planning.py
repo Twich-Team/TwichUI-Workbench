@@ -306,6 +306,10 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
         priority,interface=context(packet,original,programs)
         windows=[*windows,*priority]
         wire['selected_source_interface']=interface
+        if packet.get('plan_review') == 'source-grounded-intent-v1':
+            from workbench.source_memory import ranges
+            interface['surrounding_ranges'] = ranges(interface.pop('surrounding_context'))
+            interface['range_format'] = 'Inclusive [first,last] committed declaration ranges by path; not proof of runtime behavior or of visibility in excerpts.'
         wire['requested_behavior_clauses']=[s.strip() for s in re.split(r'(?<=[.!?])\s+',original['description']+'\n'+feedback) if s.strip()]
     if packing_context is not None:
         packing_context.clear()
@@ -459,7 +463,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
 
     adapter.stop_event = Stop()
     original_packer = getattr(adapter, 'request_packer', None)
-    if getattr(adapter, 'source_investigation', False):
+    if hasattr(adapter, 'request_packer'):
         from workbench.request_context import fit
         adapter.request_packer = lambda outgoing, encode, limit: fit(
             outgoing, packet, packing_context.get('windows', []),

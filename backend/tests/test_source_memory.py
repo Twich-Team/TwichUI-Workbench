@@ -10,6 +10,15 @@ from workbench.planning_provider import LocalProvider, BUG_INPUT, MAX_OUTPUT
 from workbench.bug_evidence import BugPlanningResponse
 
 
+def test_compact_ranges_preserve_every_coordinate_and_never_bridge_unknown_gaps():
+    from workbench.source_memory import ranges
+    windows = [dict(path=path,line=a,through_line=b) for path,a,b in [
+        ('a',10,20),('a',1,3),('a',2,5),('a',6,8),('a',10,20),('b',7,9)]]
+    assert ranges(windows) == {'a': [[1,8],[10,20]], 'b': [[7,9]]}
+    assert { (path,n) for path,rows in ranges(windows).items() for a,b in rows for n in range(a,b+1)} == {
+        (w['path'],n) for w in windows for n in range(w['line'],w['through_line']+1)}
+
+
 def window(path, start, text):
     return dict(path=path,line=start,through_line=start+len(text.splitlines())-1,text=text)
 

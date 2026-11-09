@@ -179,6 +179,7 @@ class LocalProvider:
         self.ends_at = ends_at
         self.diagnostics = {}
         self.response_evidence = None
+        self.request_packer = None
 
     def generate(self, packet, schema, *, expected_model=None):
         self.diagnostics = {'generation_state': 'not_started'}
@@ -330,7 +331,18 @@ class LocalProvider:
             body.update(max_tokens=completion_limit, reasoning_budget_tokens=reasoning_limit)
         encoded_body = json.dumps(body, separators=(',', ':')).encode()
         request_limit = PROGRAM_INPUT if program else BUG_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) else MAX_INPUT
-        if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) and len(encoded_body) > request_limit:
+        if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) and self.request_packer is not None:
+            def encode_context(outgoing):
+                envelope = dict(body)
+                envelope['messages'] = [body['messages'][0], dict(role='user', content=json.dumps(
+                    outgoing, ensure_ascii=True, separators=(',', ':')))]
+                return json.dumps(envelope, separators=(',', ':')).encode()
+            context, packing = self.request_packer(context, encode_context, request_limit)
+            body['messages'][1]['content'] = json.dumps(context, ensure_ascii=True, separators=(',', ':'))
+            encoded_body = encode_context(context)
+            if self.response_evidence:
+                self.response_evidence.record('request-context-packed', **packing)
+        elif schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) and len(encoded_body) > request_limit:
             # Fit source context to the actual serialized request, preserving
             # the report, schema and authority. Never imply a trimmed body is
             # complete; the investigator can request its missing lines.
