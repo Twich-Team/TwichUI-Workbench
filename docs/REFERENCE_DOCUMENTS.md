@@ -43,3 +43,7 @@ reliable observation reconciliation and unrelated-data preservation. No extra au
 
 [Everyday use](EVERYDAY_USE.md) describes the supported installed workflow; consult
 CURRENT_STATUS for actual acceptance and unfinished work. It is not new authority.
+
+Current status/continuation/A8 readiness were shortened after the accepted real
+flight-path result. Exact prior chronology and hashes are in docs/history/
+before-checked-flightpath-20261109-*; those are historical evidence, not active gates.
