@@ -1,4 +1,51 @@
-## Actual current continuation — November 9, 2026, 05:43 UTC
+## Actual current continuation — November 9, 2026, 06:00 UTC
+
+Installed **deployment59/2ecbce2b3bb8d067f285d57b824f49043bc174c6**;
+treea7ce5261008d67a936c21811db133fa4500125e5;
+seal27cbde42ed4e462b0c4de353e7a4093a0c589bd6460acfef548cebfdef39a926.
+C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
+R=C/outcome-2ecbce2; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-2ecbce2.
+All cutover/history/network/service/isolation/browser gates passed; original79 and
+forwarded355 exact rows preserved. Post-install historical quarantine dispositions
+are idempotent; normal reads/history unchanged. R/deployment-59-verified.json,
+offline-verification.json and prior-real-evidence-compatibility.json are authoritative.
+Full exact1887backend/8skips/713.87s and25frontend PASS; fresh static/contracts/types/
+Vite/migrations PASS. Prior4controlled routes and2native scoped-repair process modes
+reused after exact unchanged runtime paths; -B watcher correction production-subprocess
+tested32checks. Root owner documents remain exact;466tracked files verified.
+The earlier inode failure/archive remains preserved, not rewritten as a product failure.
+Managed test temp storage kept global/tmp inodes stable through the complete rerun.
+
+**FINAL REAL CASE ACTIVE; do not replay it.** Tool session20838 runs
+R/driver-case.sh qwen-with-codex-fallback. Receipt S/artifacts/acceptance/
+qwen-with-codex-fallback.jsonl. Intake7a9c75d1-03b8-4ee2-9860-bbf853b25fc7;
+planningfc3c2dbe-45dd-4273-ac7c-847d3752f104 completed05:57:59. Actual Qwen
+readiness refusal before generation → signed-in Codex; no Qwen generation.
+Worker normal network restored05:58:02; separate delegated plan approval
+8a7dffa5-4840-4b02-b3ab-83620f6a7d0d applied. Preparation job
+a3dafb71-283d-4b05-9759-320f7157f32e running real confined controls; live Lua
+process and bounded profile evidence advance. Driver watchdog105min; no campaign cap.
+No implementation/result claimed yet. Other3real cases and real accepted flight
+repair preserved by canonical validation and DIRECT ORIGINAL receipt pointers;
+no successful provider case rerun. Read-only observer initially listed Lease.__enter__
+instead of the actual one-line change in Lease.apply; exact diff checked and observer
+corrected. R/observer-method-name-correction.json and held log preserved; no model
+call or app guard relaxation resulted from that metadata error.
+
+Next: let current case progress. If checked, run R/settled-model.sh final-case-restored,
+then R/close-final-case.py using project interpreter/PYTHONPATH. It accounts actual
+known Codex turns once and keeps historical unknowns. DO NOT run close script on
+nonchecked/uncertain work. Then full installed restart/history equality, R/browser-
+observer/checked-results.mjs GET-only five-result and Models desktop/phone observer;
+VIEW screenshots, verify no temporary drop-in/units/leases, normal model auth/network,
+appropriate service enablement, update docs/ledger and local checkpoint. No owner
+action/access needed. No API billing/extra credits/publication/live-addon changes.
+Prepared rollback restores prior verified58 with its exact355 history; later settled
+new history retained separately, never discarded or merged. No rollback while
+external implementation uncertainty remains. Use .venv Python and set -e for scripts.
+The complete broader product is unfinished; do not call4provider checks the full app.
+
+## Prior continuation — November 9, 2026, 05:43 UTC
 
 Installed app STILL deployment58/1836b80, seald94858...; all4services normal active/
 disabled, original79 and latest355history preserved.3/4realcases passed; final

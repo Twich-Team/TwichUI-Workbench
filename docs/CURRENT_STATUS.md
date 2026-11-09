@@ -1,4 +1,4 @@
-# Current status — November 9, 2026, 05:43 UTC
+# Current status — November 9, 2026, 06:00 UTC
 
 **A real flight-path repair has completed through the installed application.**
 Real signed-in Codex investigated the report, proposed a reviewed scope, and edited
@@ -15,11 +15,11 @@ The patch remains local; the live addon, publication and PRs are untouched.
 
 ## Running build and access
 
-Installed candidate: `1836b807bd611fd47d27a1a87573411cdbdd59a1` (deployment58).
-Seal: `d948586be36a93dfbd9bff469997886eee19e688a691deff4dcf905eae3918e9`.
+Installed candidate: `2ecbce2b3bb8d067f285d57b824f49043bc174c6` (deployment59).
+Seal: `27cbde42ed4e462b0c4de353e7a4093a0c589bd6460acfef548cebfdef39a926`.
 Standalone release and development checkout remain separate.
 All four named services are active and disabled pending remaining acceptance.
-History: original79 and forwarded304 rows preserved; accepted result's320-row
+History: original79 and forwarded355 rows preserved; accepted result's320-row
 store was identical before and after restart. Original port8765 unchanged.
 
 Use `http://127.0.0.1:9487` or `https://10.0.0.9:9487` on trusted10.0.0.0/24.
@@ -34,7 +34,7 @@ confirmation was reused after unchanged boundary/CA checks; no new remote load c
 | Codex alone | **Passed** real planning, implementation, independent checks and restoration. Observed on deployment56; exact regression recipe and unchanged provider/execution code revalidated through58. No repeat call. |
 | Qwen alone | **Passed** real planning, approved execution, checked test patch and model/auth restoration at04:13 UTC. |
 | Codex first → Qwen | **Passed** real pre-generation switch, Qwen planning/implementation, independent checks and normal restoration at05:01 UTC. |
-| Qwen first → Codex | Implemented/controlled-tested; real case pending. Pre-generation connection failure only. |
+| Qwen first → Codex | Real case active on59: Qwen readiness refusal before generation, Codex plan completed, normal worker restored and delegated plan approval applied. Independent preparation running; implementation/result not yet demonstrated. |
 
 Only3/4 supporting real-provider cases passed. The real Codex bug repair is separate
 additional evidence. Saved settings, explicit consent, shared task accounting,
@@ -52,12 +52,14 @@ inventing fields absent from those declarations. This rejected the earlier fault
 patch, whose history and usage remain preserved. The accepted corrected patch uses
 GetAllTaxiNodes, not state invented on map listings.
 
-Installed application source verification:1869backend/8default opt-in skips,25frontend,
+Installed application source verification:1887backend/8default opt-in skips,25frontend,
 static/contracts/build/migrations; two actual confined separate-process controlled
 browser journeys, four controlled driver/provider routes, native frozen-control
 reuse and10installation-inventory checks. Full application verification observed
-onf9ff5ba is reused after exact runtime/source equality for58; its ops-only inventory
-change was separately tested. Operator-only policy has28focused checks; successful-case,
+on2ecbce2 is exact and complete. Prior controlled browser/provider routes and native
+process opt-ins are reused after exact unchanged application paths; the only additional
+production change passes -B explicitly to the independently tested watcher launch.
+Operator-only policy has28focused checks; successful-case,
 terminal-state, scope/accounting and provider guards remain. Installed helper grant
 unchanged. Historical unknown usage/outcomes remain unknown and isolated.
 
@@ -80,12 +82,12 @@ connector restored. Operator-only correction removes that counter in standing mo
 while retaining historical campaign validation, actual task IDs, settlement, usage
 and checked-case replay protections (28focused tests).
 
-Development checkpoint28df89f corrects stale Models/Settings descriptions of inactive
+Installed checkpoint28df89f corrections remove stale Models/Settings descriptions of inactive
 routing and test-only scope, preserving unknown account data and snapshot limitations.
-Focused39model tests/build checks pass; full suites and controlled browser checks
-are running. It is NOT installed and does not affect the active fallback case.
+Focused39model tests/build checks, complete suites and four controlled browser routes
+passed. The updated copy is now installed in59; no provider or approval guard changed.
 
-Next: finish both real fallback cases, verify final cleanup/restoration and leave
+Next: finish the active Qwen-to-Codex case, verify final cleanup/restoration and leave
 the working build.
 The subsequent ordinary Qwen regression task completed after the bug result.
 Two ordinary bug journeys/restart also pass with controlled providers and actual
@@ -96,9 +98,15 @@ Styling/full requirements audit follow the functional gate; neither is a substit
 Latest pre-install full verification hit /tmp file-entry exhaustion from orphaned
 controlled-test scratch. Closed synthetic clones were archived and independently
 restored before exact pruning; real tasks/history untouched. Capacity recovered.
-Test retention and per-checkout temporary storage are fixed and focused-tested;
-complete verification is being repeated before the final cutover/case. No active
-provider operation currently. No owner action currently needed. Continue under standing authority, without old
+Test retention and per-checkout temporary storage are fixed; complete1887/25 verification
+passed before cutover. Source466files and exact owner documents, history, network,
+model authentication, isolated execution and prior real evidence revalidation pass.
+The read-only compatibility observer first named the wrong method for the tested
+watcher change; its exact source diff was rechecked, the observer corrected, and the
+held diagnostic preserved. No application relaxation or new call resulted from that hold.
+Final case intake7a9c75d1... and planningfc3c2dbe...; evidence is under
+`outcome-2ecbce2` in the private delivery record. No owner action currently needed.
+Continue under standing authority, without old
 campaign caps or routine renewals. See [CONTINUATION](CONTINUATION.md) and
 [Everyday use](EVERYDAY_USE.md).
 

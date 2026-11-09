@@ -6,7 +6,7 @@ real-provider evidence; it does not mark the whole initial product complete.
 
 ## Implemented and installed
 
-Deployment57/18605b9 supports deliberate Qwen or signed-in Codex, and explicit
+Deployment59/2ecbce2 supports deliberate Qwen or signed-in Codex, and explicit
 bounded pre-generation switching in both directions, including fallback disabled.
 Saved settings and task consent are bound at claim/approval/execution. The app shows
 selected/reported provider and routing reason. Scope, approvals, independent checks,
@@ -29,7 +29,7 @@ in isolated copies; correctness checks gate the checked result, not the first ed
 | Codex alone | Passing | **Passed** complete regression journey on56, revalidated without replay for57; also accepted real Codex flight-path repair on57. |
 | Qwen alone | Passing | **Passed** real planning, separately approved execution, checked regression patch and model/auth restoration on57 at04:13 UTC. |
 | Codex first → Qwen | Passing | **Passed** real pre-generation unavailable switch, Qwen plan/implementation/checks/restoration on58 at05:01 UTC. |
-| Qwen first → Codex | Passing | Pending real case. Only connection failure before generation. |
+| Qwen first → Codex | Passing | Real case active on59: Qwen readiness refusal before generation, Codex planning completed, normal worker restored and separate delegated plan approval applied. Preparation running; no checked result yet. |
 
 The real flight-path result is candidatee2f1341..., execution143ecdc6...; original
 route failure, current-master learning, later refresh, conservative missing data,
