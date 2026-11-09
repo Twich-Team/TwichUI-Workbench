@@ -1,3 +1,29 @@
+## Installed78/2e59de7 — original saved vendor report continuation accepted
+
+All source/seal/history/network/browser/model/auth installation gates pass; all6prior
+real accepted results canonically revalidated without replay. Original report2dc5b8ba-
+2d22-4c2c-9f90-3bd58d29d5fd normal browser commandbde2ba2d-b7f5-466a-956e-5fb49f47514a
+accepted19:29:25UTC, jobb514720e-9254-4c9a-a36c-c219241c7269/revision16QUEUED. Inspect
+actual DB/provider evidence before replay. Driver session94370; private
+real-file-directory-renewal.jsonl and live-file-directory-renewal-binding.json.
+No vendorplan, addonapproval/implementation or new owner decision claimed.
+
+Generic complete460file directory is supplied FIRST in local intent source context;
+external path metadata still filtered by existing disclosure permission. Unrelated
+check-construction runtime and duplicate metadata removed only during cause/scope
+investigation, preserving actual source declarations and all authorization. Settings-
+only inspected repair scope eligible; test-only plans remain rejected. Truthful
+completed-accounted read-only stop message installed.226affected/native2actualconfined
+controlled browser journeys pass. Actual70state92937wire/25076prompt/32768context fits;
+postserializer confirms directory/UIpath discoverability, zero model generation in proof.
+
+All70COMPLETE incident responses1430529tokens preserved; originalNULLs unchanged.
+Provider VALUES restored rev16→17→18/fallbackOff; no uncertain activity at dispatch.
+Owned maintenance NEW-admission pause still requires hash-bound supported opsctl resume
+after owned work. Need usable real plan for genuine owner review, quiescent restart/
+history/results/model/network continuity. Standing owner authority/no obsolete campaign
+caps/engineering renewal; this checkpoint is not a stop. Prior entries historical.
+
 ## Current vendor recovery: settled original task; file navigation correction verified locally
 
 Installed77/d85a4e2 remains current until the next checked cutover. Original intake
