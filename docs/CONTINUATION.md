@@ -1,3 +1,52 @@
+## Real addon implementation is active through Workbench — Nov9 00:27UTC
+
+Installed54/7e468e865e5ef878b2b3d221d59a2a6e4b0945da;
+tree9b99e92481fe5acf523f3bdcf5cb007fcb5aa21b;
+seal49522bfdc57880f8be739ebbf7b7bfa6975a45f152d562a41ebd083098a7f2bd.
+R=C/outcome-7e468e8; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-7e468e8.
+All installation/post-install/source/history/protection checks pass, original79/latest271
+rows before Run. Saved readyoffer3595ee66-5e6d-4239-b853-77ef1da68559 preserved from
+S53, NOrepreparation/modelplanningcall. Full1790backend/25frontend plus final60affected,
+17focused/newguards,25frontend and2confinednative controlled journeys pass; prior
+4-case controlled browser opt-in valid. Actual baseline cache replay verified on
+original addon copy with0modelcalls/0edits/0extrasuites. Desktop/phone Run screenshots
+R/repair-desktop.png+repair-phone.png inspected: pending-correctness notice visible,
+20turnCodeX limits/billing snapshot, only Travel.lua+test_nav.lua writable, heldpublication.
+
+Fresh normal browser Run approval12bc67c4-87c8-4082-9892-0e15f4d38471 accepted00:21:45.
+Scope0a4e1e71... retained, no scope/planning replay. Executionbc44c35d-9b22-5762-9ae6-
+3ed7691f8db0; model/fence12e674b7-3389-41f8-bfa9-05d6f9949bc6. GrantID and observed
+state inR/real-implementation-started.json. Root S/release/artifacts/runs/
+task-lease-task-session-12bc67c4-87c8-4082-9892-0e15f4d38471-01/real-run.
+Actual bounded user unit workbench-real-codex-task-lease-task-session-12bc67c4-87c8-
+4082-9892-0e15f4d38471-01.service ACTIVE. Driver exec99192 runs normal installed
+scripts/live_acceptance.mjs viaR/driver-case.sh; receipts S/artifacts/acceptance/
+bug-flight-paths.jsonl, logsR/applied-scope-driver.log andbug-flight-paths-driver.txt.
+
+REAL CodeX turnc1aba2e6-1a0a-4b4e-b0fe-eb393f2838b4 completed00:22:32, terminal/usage
+and closed connection retained. Workbench applied model-generated Travel.lua edit
+59added/31removed, withinapproved90changedlines. No developer addon edit. NO testedit
+yet, no verified repair/result. Bothsyntax +existingfocusednav +genericassertionrunner
+pass; actualfullsuite running (00:26test_persist.lua, CPU253s, processadvancing).
+App will reject missingnewregression/original evidence even ifold suitegreen, return
+source-bound feedback and continue CodeX within fresh run. Do NOTinterrupt healthy
+checks, replay externalwork, modify modelworkspace, or count old tests as bugproof.
+Baseline reuse actualruntime/baseline-reuse.json matched S53readyroot and fresh
+boundary; no duplicatepre-edit4minute suite. Post-edit actual fullsuite still required.
+Potential later efficiency fix: missing-test metadata currently rejected AFTER fullsuite;
+move that cheap check earlier in future without gating permission for initial edits.
+
+Observe codex-feedback-*.json, working-checks/* and codex-evidence for nextiteration.
+When checked result exists, independently inspect actualgeneratedpatch/tests and
+original-test differential against all9ownerrequirements+7scopecriteria; create ONLY
+honest private S/artifacts/acceptance/bug-result-review.json bound toapprovalref7f10158...
+seal/intake/execution/candidate. It is an acceptance review, no model/edit authority.
+Driver awaits it aftercloseout. Sourcewrite/read/disclosure/billing/network/publication
+unchanged. Historical unknown usage staysunknown; overallcurrentusage unsettledwhile
+active. All4real supporting providercases still0/4. Complete actualrepair/durability/
+restart/ordinarynexttask/providerchecks/fulloutcome; noownerdecisionpending.
+No campaign caps/renewals. Olderentries belowhistorical, NOTcurrentinstalledstate.
+
 ## Real repair offer ready; source-bound feedback and baseline reuse verified —Nov9 00:16UTC
 
 Installed53/a1cb5ea59d3a6ea72565ef745318126781195783;
