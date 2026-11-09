@@ -1,3 +1,33 @@
+## Active vendor recovery — installed68/a4e44fe, November9 15:31UTC
+
+Same owner report2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd continues via normal browser
+read-only clarification, jobf969e66e-fa51-4664-91ad-c8581db35515,
+commandaaeb2890-f9c4-4195-a6a1-41252fefa335. Tool55497 observes real-tool-renewal.jsonl;
+configuration live-tool-renewal-binding.json, private vendor-planning-recovery-20261109.
+No addon plan/run decision or implementation exists. Do not replay healthy activity.
+
+67 exact packing WORKED in real Qwen:64358wire,27414source characters,
+COMPLETE18568tokens then requested nonexistent Vendors.lua/Trainers.lua in npcs.
+App treated missing committed paths as fatal; no uncertain activity. Four total
+completed real inspection responses74836observedtokens remain counted. Historical
+attempts/nulls unchanged. Source-read failure is distinct from original legacyroute
+and prior packing problems; no guessed addon cause was supplied by development.
+
+68 returns narrowly classified unavailable-blob read errors as bounded tool feedback,
+keeps valid sibling reads/usage, stops repeated unchanged missing reads. Unsafe paths,
+repository drift and missing external disclosure still hold.106affected tests/static,
+local separate-process injected missing-source/edit/check/restart/secondtask pass;
+Codex separate-process normal workflow passes and disclosure denial retained. Earlier
+native fixture incorrectly injected an undeclared Codex source; corrected local-only
+fault injection, no guard weakened. All installation/history/network/model/auth gates
+and six prior result canonical revalidations pass. Old broad suites/pinned source
+proofs retained with explicit focused delta. No extra real Codex call.
+
+Maintenance admission pause STILL OWNED; hash-bound opsctl resume on settlement.
+Need usable real Qwen plan/genuine question, settled four-service restart/history,
+model/auth and admissions restoration, final screenshots/status. Owner must genuinely
+review a future addon plan/run. No owner engineering renewal or superseded caps.
+
 ## Installed vendor recovery — November9 15:23UTC
 
 Installed67/d3b6f33 (full identity/seal in outcome-d3b6f33/dormant-stage.json).

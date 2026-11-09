@@ -1,3 +1,13 @@
+# Same saved vendor report: source-read recovery installed
+
+68/a4e44fe installed with history/network/auth gates passed and six accepted results
+revalidated. Four completed real Qwen inspection responses retained (74836tokens).
+Packing now works in the live path; a guessed missing-file read exposed a distinct
+fatal-tool-error defect. New app handles that error inside read-only investigation
+with precise feedback and unchanged disclosure/scope safeguards. Same report continuing
+through normal browser; no vendor plan/patch claimed. Follow CONTINUATION for current
+activity and the owned maintenance-admission restoration duty.
+
 # Installed correction; original saved report continuing with Qwen
 
 67/d3b6f33 installed after checked history copy, source/seal/network/auth verification.
