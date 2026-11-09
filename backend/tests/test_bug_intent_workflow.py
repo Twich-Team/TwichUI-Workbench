@@ -88,8 +88,27 @@ def test_scope_and_sandbox_offer_allow_repair_before_new_tests_exist_but_do_not_
         durable(run/name,(prepared/name).read_bytes())
     runtime=ControlledPreparer(run)
     task_session.provision(runtime,dict(control_patches={}))
+    # A verified baseline can be reused for the same unchanged source/recipe,
+    # while each new run still executes its own confinement boundary probe.
+    import shutil
+    from workbench.repair_cycle import reuse_baseline
+    cached=run.parent/'cache-stage/release/artifacts/runs/preparations/ready'
+    cached.mkdir(mode=0o700,parents=True)
+    for name in ('recipe.json','recipe-oracle.lua','workspace-location.json','base-manifest.json',
+                 'fresh-baseline-suite.json','boundary-proof.json','controls-passed.json'):
+        shutil.copy2(run/name,cached/name)
+    release=cached.parents[3]
+    framework=Path(__file__).resolve().parents[1]/'workbench'
+    for name in ('real_workspace.py','real_confine.py','real_sandbox.py','verification_process.py'):
+        target=release/'backend/workbench'/name
+        target.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copy2(framework/name,target)
+    assert reuse_baseline(runtime,str(cached))['status']=='pass'
+    (release/'backend/workbench/real_confine.py').write_text('changed checker')
+    assert reuse_baseline(runtime,str(cached)) is None
     runtime._request_id,runtime._fence,runtime._context_sha=str(uuid4()),str(uuid4()),None
     (runtime.workspace/PRODUCTION).write_text(CORRECT)
+    assert reuse_baseline(runtime,str(cached)) is None
     without_test=runtime.candidate_feedback(lambda:True)
     assert without_test['status']=='fail' and without_test['original_test_differential']['status']=='fail'
     target=runtime.workspace/TEST

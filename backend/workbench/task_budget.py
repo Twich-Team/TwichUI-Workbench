@@ -253,6 +253,7 @@ def preparation_inputs(c, selected):
     root = Path(saved.get('ready_preparation',saved.get('certified_preparation'))['root'])
     profile = saved['specification']['controls']
     return dict(recipe=saved['specification'], oracle=(root / 'recipe-oracle.lua').read_text(),
+                **(dict(baseline_source=str(root)) if saved.get('ready_preparation') else {}),
                 control_patches={name: (root / 'profile-evidence' / name / 'input.patch').read_text()
                                  for name in profile if name != 'original'})
 

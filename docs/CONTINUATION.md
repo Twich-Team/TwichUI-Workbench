@@ -1,3 +1,52 @@
+## Real repair offer ready; source-bound feedback and baseline reuse verified —Nov9 00:16UTC
+
+Installed53/a1cb5ea59d3a6ea72565ef745318126781195783;
+tree3b19f61ea2238d36ad0db229e76f4576fec31b8e;
+seal5de7864752ed1490f2e1f4c10708548ae16811eae2b1d4ebe265f55b12f6b755.
+R=C/outcome-a1cb5ea; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-a1cb5ea.
+Installation/postinstallation/protections/source/history all passed, original79/latest270
+rows before normal preparation. Complete1790backend/25frontend,56focused,37operator,
+2confined controlled intent/native modes and four-case controlled browser opt-in pass.
+No real supporting provider pass; no addon implementation yet.
+
+Normal 'Prepare repair attempt' commandf93ae51b-0b52-4955-a575-84afcbfb505a accepted
+00:04:11, same seven-criterion appliedscope and old history retained. Jobc25a1f90...
+COMPLETED after actual full addon baseline+fresh confinement, zero model requests.
+Fresh provider-free ready_preparation offer nowexists; run approval still absent.
+Its root is S/release/artifacts/runs/preparations/c25a1f90-5d92-4d12-8dd5-7fab12731c47-
+round-ffe20b56-2425-473a-83c9-a9989f62819c. Keep this useful result; do not reprepare.
+Oldf2eab557...14Codex turns fullysettled/known, prior3281...unknownusage unchanged.
+All4services active; originalnormalQwen/context/auth restored/unchanged; no model active.
+
+Connected final refinement (NOT installed yet): external Codex feedback now passes
+only fixed check classifications/counts and permitted source coordinates. Arbitrary
+suite stdout/tracebacks/unapproved source stay in exact bounded PRIVATE diagnostics;
+no raw test-output upload channel. Candidate source context still only approvedreads.
+A canonical ready offer may reuse its actual baseline observation for an exact fresh
+base/recipe/checker/interpreter snapshot; fresh execution boundary always runs and
+all POST-EDIT full/focused/original-test checks still rerun. Actual ready offer replay
+on a fresh original clone validated this with0providercalls/0sourceedits/0extrasuites;
+privateproof R/baseline-cache-replay/replay-result.json. This avoids another four-minute
+unchanged-base suite before first edit. UI now shows 'No addon changes verified yet'
+before consent and correctly describes multi-turn Codex repair. First read-only
+screenshot inspector found notice hidden in technical details; no browser decision
+was dispatched; this refinement makes the notice immediately visible.
+
+Final refinement checks60affected backend,25frontend, static/contracts/migrations and
+2actualconfined controlled native journeys passed56.50s. Reuse the complete1790backend
+and unaffected4-case browser evidence; no unrelated behavior changed. Need record/seal
+nextcandidate/deployment54, measured latesthistory includingreadyoffer, preserve old
+readyroot. DO NOTrebuild/replan/reapprove scope or spend another checking model call.
+Copy/revalidate existing independent scope review and bound applied-scope continuation
+into newseal; inspect actual desktop/phone Run panel, then fresh normal browser Run
+approval and real Codex code+test-feedback cycle. SamewriteTravel.lua+test_nav.lua,
+read8insideoriginal12file externaldisclosure, no publication/liveaddonchange. Final
+acceptance reviews actual patch/test semantics against9ownerrequirements+7scopecriteria
+via private bug-result-review.json after independently checked output; no pre-edit
+check-program prerequisite. Finish durable result/restart/ordinarynexttask/all4real
+provider checks/fulloutcome. No owner decision or routine renewal pending.
+Older entries below historical; checkpoints are not stop points.
+
 ## Owner-directed repair cycle implemented; integrated verification running —23:56UTC
 
 Following the Project Working Philosophy: owner's latest steer removes the unnecessary

@@ -12,6 +12,23 @@ from workbench.real_workspace import Runtime as Canonical
 from test_verification_profiles import setup,BUGGY,CORRECT,PRODUCTION,ControlledLuaRuntime,boundary
 
 
+def test_external_repair_feedback_cannot_upload_arbitrary_suite_output_or_unapproved_paths():
+    from workbench.codex_runtime import disclosed_feedback
+    allowed=['tests/test_allowed.lua']
+    private='PRIVATE_OUTSIDE_APPROVED_SOURCE_AND_ENVIRONMENT'
+    feedback=dict(status='fail',diagnostic=private,message=private,category=private,
+        failed_check_name='complete-suite',exit_code=1,check_round=2,
+        context_hint=dict(path='tests/unapproved.lua',start=1,end=10),
+        original_test_differential=dict(status='fail',reason=private,diagnostic=private),unexpected=private)
+    value=disclosed_feedback(feedback,allowed)
+    assert private not in json.dumps(value) and 'unapproved.lua' not in json.dumps(value)
+    assert value['failed_check_name']=='complete-suite' and value['original_failure_reproduced'] is False
+    feedback['context_hint']=dict(path=allowed[0],start=2,end=6)
+    assert disclosed_feedback(feedback,allowed)['context_hint']==feedback['context_hint']
+    assert feedback['diagnostic']==private  # Full private evidence is not destroyed.
+    assert disclosed_feedback(None,allowed) is None
+
+
 class Runtime(CodexRuntime,ControlledLuaRuntime):
     def preflight(self):
         return [dict(name='controlled-boundary',status='passed')]

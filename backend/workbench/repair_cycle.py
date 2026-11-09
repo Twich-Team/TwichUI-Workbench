@@ -163,3 +163,41 @@ def verify_result(runtime,result):
         return False
     return new_assertion_failure(original,focused,git(Path(runtime.source),'show',runtime.base+':'+focused),
         (frozen/focused).read_text())
+
+
+def reuse_baseline(runtime,source):
+    """Reuse a verified unchanged-base observation, never candidate correctness.
+
+    Source comes only from the canonical approved offer. A different recipe,
+    source tree, checker or changed interpreter falls back to a fresh baseline.
+    The new execution boundary is always probed afresh; post-edit checks rerun.
+    """
+    if not source:
+        return None
+    from workbench.real_workspace import Runtime,durable,sha,tree
+    from workbench.trusted_preparation import owned
+    root=owned(source)
+    previous=Runtime(root)
+    readiness(previous)
+    if (previous.recipe!=runtime.recipe or sha(previous.initial.read_bytes())!=sha(runtime.initial.read_bytes())
+            or tree(runtime.workspace)!=json.loads(runtime.initial.read_text())):
+        return None
+    release=root.parents[3]
+    current=Path(__file__).resolve().parents[2]
+    for name in ('real_workspace.py','real_confine.py','real_sandbox.py','verification_process.py'):
+        old=release/'backend/workbench'/name
+        if not old.is_file() or old.is_symlink() or old.read_bytes()!=(current/'backend/workbench'/name).read_bytes():
+            return None
+    baseline=root/'fresh-baseline-suite.json'
+    observed=baseline.stat().st_mtime_ns
+    for name in ('bash','lua5.1','python3'):
+        path=Path('/usr/bin')/name
+        info=path.stat()
+        if info.st_uid!=0 or info.st_mode&0o022 or max(info.st_mtime_ns,info.st_ctime_ns)>observed:
+            return None
+    value=json.loads(baseline.read_text())
+    durable(runtime.root/'baseline-reuse.json',json.dumps(dict(
+        source=str(root),baseline_sha256=sha(baseline.read_bytes()),
+        exact_recipe_and_base=True,checker_unchanged=True,interpreters_unchanged_since_observation=True,
+        candidate_verification_reused=False,new_boundary_probe_required=True),sort_keys=True).encode())
+    return value

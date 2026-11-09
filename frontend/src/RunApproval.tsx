@@ -101,9 +101,10 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
     <p className="permission-files"><strong>Files that may change</strong> {offer.paths.map((path,i)=><span key={path}>{i>0?', ':''}<code>{path}</code></span>)}</p>
     {scope?.content.acceptance.length ? <ul className="permission-outcomes" aria-label="What the run should check">{scope.content.acceptance.map((s,i)=><li key={i}>{s}</li>)}</ul> : null}
     {shown.local_only&&<p><strong>Provider</strong> {shown.provider?.backend==='codex'
-      ? <>Codex · {shown.provider.model}{shown.provider.effort ? ' · '+shown.provider.effort : ''}. {shown.provider.fallback_reason==='local_unreachable' ? 'Qwen was unreachable before generation, so Codex prepared the plan. ' : ''}One signed-in turn sends the approved test and relevant committed source excerpts to OpenAI. Workbench checks the proposed change independently.</>
+      ? <>Codex · {shown.provider.model}{shown.provider.effort ? ' · '+shown.provider.effort : ''}. {shown.provider.fallback_reason==='local_unreachable' ? 'Qwen was unreachable before generation, so Codex prepared the plan. ' : ''}{offer.repair_cycle||offer.prepared_behavior?'This signed-in repair run sends the approved source context and bounded check information to OpenAI.':'One signed-in turn sends the approved test and relevant committed source excerpts to OpenAI.'} Workbench checks the proposed change independently.</>
       : <>Local Qwen is the saved choice for this run. {shown.provider?.fallback_reason ? 'The approved switch occurred before Codex generated a plan. ' : ''}This approval allows one Qwen run.</>}</p>}
     <RunLimits budget={budget} codex={shown.provider?.backend==='codex'} repair={Boolean(offer.prepared_behavior||offer.repair_cycle)}/>
+    {offer.repair_cycle&&<p className="soft-callout">{offer.repair_cycle.notice} No addon changes have been verified yet.</p>}
     {query.isError&&<p role="alert">The run offer could not be refreshed. Refresh before approving.</p>}
     {error&&<p role="alert">{error}{!stale&&draft?' You can retry the same decision.':''}</p>}
     {stale?<><p role="alert">This run offer changed or is no longer available. Review the current task before deciding.</p>
@@ -131,7 +132,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
       <h4>Exact plan scope and exclusions</h4><ul>{[...(scope?.content.scope || []),...(scope?.content.exclusions || [])].map((s,i)=><li key={i}>{s}</li>)}</ul>
       <p>Repository {offer.repository} · Base {offer.base}</p>
       {offer.prepared_behavior&&<details><summary>Prepared behavioral checks</summary><p>These frozen checks reproduced a failure on the original. Every expected observation must pass on the repair. This is offline evidence, not in-game acceptance.</p><pre>{JSON.stringify(offer.prepared_behavior.reproducer,null,2)}</pre><p>Frozen check identity {offer.prepared_behavior.oracle_sha256}</p></details>}
-      {offer.repair_cycle&&<section aria-label="Repair attempt and verification"><p>{offer.repair_cycle.notice}</p><p>No addon changes have been verified yet.</p><ul>{offer.repair_cycle.criteria.map(c=><li key={c.id}>{c.description}</li>)}</ul></section>}
+      {offer.repair_cycle&&<section aria-label="Repair attempt and verification"><ul>{offer.repair_cycle.criteria.map(c=><li key={c.id}>{c.description}</li>)}</ul></section>}
       <h4>Required checks</h4><ul>{offer.checks.map((c,i)=><li key={i}>{c.purpose} <code>{c.argv.join(' ')}</code> (from {c.cwd})</li>)}</ul>
       <pre>{JSON.stringify(offer.limits,null,2)}</pre><p>Offer fingerprint {offer.fingerprint}</p>
     </details>

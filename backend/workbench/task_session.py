@@ -90,7 +90,10 @@ def provision(runtime, template):
     """
     runtime.prepare()
     if (getattr(runtime,'recipe',None) or {}).get('repair_cycle'):
-        baseline=runtime.check(['bash','tests/run.sh'],runtime.workspace,timeout=600,private_loopback=True)
+        from workbench.repair_cycle import reuse_baseline
+        baseline=reuse_baseline(runtime,template.get('baseline_source'))
+        if baseline is None:
+            baseline=runtime.check(['bash','tests/run.sh'],runtime.workspace,timeout=600,private_loopback=True)
         durable(runtime.root/'fresh-baseline-suite.json',json.dumps(baseline,sort_keys=True).encode())
         if not suite_inventory(baseline,runtime.expected_suite()):
             raise ValueError('Existing baseline failed; no repair attempt is ready')
