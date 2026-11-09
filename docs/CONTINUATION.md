@@ -1,3 +1,39 @@
+## First supporting real-provider case passed; corrected build staged — Nov9 02:53 UTC
+
+Codex-only supporting case PASSED through installed56, normal browser decisions,
+real planning+implementation, independent checks and restored controller. Intake
+423cb159-150e-4f09-a607-a7ea3b1c98b4 /executionaeb034c0-e770-50ed-9c07-27fd975222f6,
+candidate400995bd1da3cae8e13549c4985cc6826afd454721563c72ed89a73e02cf81b0.
+ReceiptR56/codex-once-closed.json; S56/artifacts/acceptance/codex-once.jsonl endschecked
+02:52:13. Preserve this success; do NOT rerun it. Two known completed turns,
+10031planning+7814implementation tokens, ledger143known turns. Original model/auth
+restored. Qwen-only andbothpre-generation fallback cases NOTyetdemonstrated (1/4).
+This is a regression-coverage case, not a corrected real flight-path repair.
+
+New sourcecheckpoint18605b975d085d2bea4d5ef4a766fbecae0df09e, treec6a442ac65f16956521900155a874bf52bb645d6,
+sealed b91611f78318694a0b99e5957bbbea797256105ae00bb1e54ed9a668063cbb74.
+R57=C/outcome-18605b9; S57=.../.local/m5-review/everyday-outcome-18605b9.
+Staged, NOTinstalled yet. Exactfinal native two-process browser repair/restart/
+nextfixturebug checks pass65.40s; 22final guard/assertion checks and staticpass.
+Final full suite running /tmp/wb-api-contract-sealed-candidate-test.log, tool98970.
+No source changes after18605b9. Preflight runningR57/preflight-output.txt, tool52539;
+currentexecution is nowsettled so installation mayproceed ONLY afterall gatespass.
+Do not stop at this checkpoint or ask for renewed engineering permission.
+
+Real flight-path acceptance remainsWITHDRAWN for documented API/mock mismatch.
+Its actual149line model patch and nativeCHECKED result are preserved, but no valid
+finished repair yet. New generic API-shaped oracle rejects its own mock-based
+regression at test_nav.lua575; no manual addon solution. After installing57, create
+fresh normal task/scope/run bindings for a corrective purpose; retain owner
+per-character/session persistence and current-master observation requirements.
+Use normal intake/clarification and delegated browser decisions, not DB mutation.
+The prior checked execution must not be blindly replayed or treated as failed
+provider activity. All actual requests settled; old quarantined unknowns isolated.
+Reuse the genuine Codex-only success with explicit old-stage provenance and code
+compatibility review after bug correction; never fabricate new calls or overwrite
+old sealed receipts. Complete other3cases, valid real bug result, restart/recovery,
+nextordinarysubmission and remainingfullproduct requirements. No owneraction needed.
+
 ## API-shaped verification implemented; real revision still pending — Nov9 02:42 UTC
 
 Development now supplies the same pinned public API declarations to both coding
