@@ -1,3 +1,21 @@
+## Development side work — November 9, 2026, 04:48 UTC
+
+Healthy real Codex→Qwen case still active (f211...); do not interrupt/replay it.
+Uninstalled checkpoint28df89f corrects stale model-settings text only: API overview
+in everyday mode explains actual task-bound saved choices and snapshot eligibility;
+no account polling, activation or new authority. Local capability fallback no longer
+claims obsolete2/2approaches exhausted. Models/Settings no longer say test-only or
+saved choices inactive in installed mode. Legacy fixture execution remains held.
+Focused39model tests and static/contracts/types/build/migrations pass. Full
+`/tmp/wb-models-honest-complete-test.log` running(tool93668); controlled4route/browser
+`/tmp/wb-models-honest-browser-routes.log` running(tool2631). No new release/stage yet.
+R58/retained-result-browser.json verified all3prior checked results through current
+normal API/UI; desktop/phone screenshots viewed. No new provider calls or restart.
+Current real preparation root is S58/release/artifacts/runs/preparations/
+81c97bc4-92dd-486e-91c3-85786e41eb06. Read frozen profile-evidence/check-*.json metadata
+for progress. First original4checks completed04:43:05; subsequent full controls active.
+Do not interpret ~4min full addon suites as model/provider hangs.
+
 ## Running continuation — November 9, 2026, 04:40 UTC
 
 Installed58 remains1836b80/seald94858...; normal network/services/history preserved.

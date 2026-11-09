@@ -1,4 +1,4 @@
-# Current status — November 9, 2026, 04:40 UTC
+# Current status — November 9, 2026, 04:48 UTC
 
 **A real flight-path repair has completed through the installed application.**
 Real signed-in Codex investigated the report, proposed a reviewed scope, and edited
@@ -31,7 +31,7 @@ confirmation was reused after unchanged boundary/CA checks; no new remote load c
 
 | Choice | Evidence |
 |---|---|
-| Codex alone | **Passed** real planning, implementation, independent checks and restoration. Observed on deployment56; exact regression recipe and unchanged provider/execution code revalidated for57. No repeat call. |
+| Codex alone | **Passed** real planning, implementation, independent checks and restoration. Observed on deployment56; exact regression recipe and unchanged provider/execution code revalidated through58. No repeat call. |
 | Qwen alone | **Passed** real planning, approved execution, checked test patch and model/auth restoration at04:13 UTC. |
 | Codex first → Qwen | Real plan completed via approved pre-generation fallback; separate plan approved; preparation running. Full case not yet passed. |
 | Qwen first → Codex | Implemented/controlled-tested; real case pending. Pre-generation connection failure only. |
@@ -52,9 +52,12 @@ inventing fields absent from those declarations. This rejected the earlier fault
 patch, whose history and usage remain preserved. The accepted corrected patch uses
 GetAllTaxiNodes, not state invented on map listings.
 
-Final installed executable checks:1833backend,25frontend, static/contracts/build/
-migrations and two actual confined separate-process controlled browser journeys.
-Operator-only reviewed-rejection policy has24focused checks; default successful-case,
+Installed application source verification:1869backend/8default opt-in skips,25frontend,
+static/contracts/build/migrations; two actual confined separate-process controlled
+browser journeys, four controlled driver/provider routes, native frozen-control
+reuse and10installation-inventory checks. Full application verification observed
+onf9ff5ba is reused after exact runtime/source equality for58; its ops-only inventory
+change was separately tested. Operator-only policy has28focused checks; successful-case,
 terminal-state, scope/accounting and provider guards remain. Installed helper grant
 unchanged. Historical unknown usage/outcomes remain unknown and isolated.
 
@@ -77,8 +80,13 @@ connector restored. Operator-only correction removes that counter in standing mo
 while retaining historical campaign validation, actual task IDs, settlement, usage
 and checked-case replay protections (28focused tests).
 
-Next: finish both real fallback cases, demonstrate a subsequent
-ordinary submission, verify final cleanup/restoration and leave the working build.
+Development checkpoint28df89f corrects stale Models/Settings descriptions of inactive
+routing and test-only scope, preserving unknown account data and snapshot limitations.
+Focused39model tests/build checks pass; full suites and controlled browser checks
+are running. It is NOT installed and does not affect the active fallback case.
+
+Next: finish both real fallback cases, verify final cleanup/restoration and leave
+the working build.
 The subsequent ordinary Qwen regression task completed after the bug result.
 Two ordinary bug journeys/restart also pass with controlled providers and actual
 confinement on development candidatef9ff5ba; this is not a second real-provider bug.
