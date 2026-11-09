@@ -3,6 +3,16 @@
 Current demonstration and acceptance status: [CURRENT_STATUS](CURRENT_STATUS.md).
 This guide describes the supported workflow, not completion of the full product.
 
+The independently accepted flight-path repair is the saved result at
+`/executions/143ecdc6-e05d-5997-9c45-aafb9a1a88a2` (candidate `e2f1341…`).
+It preserves per-character learned paths across a fresh saved-data load in the
+offline client. It has not been installed into the live game addon.
+An older attempt, execution `2efed208-b38a-5d09-bd85-4fe68ea9b702`, passed its
+then-current native checks but was subsequently rejected by the independent
+API-shaped review. Its historical native status is preserved; do not use that
+older patch. Surfacing this later review directly on the historical result page
+remains an application follow-up, rather than silently rewriting its history.
+
 Open `http://127.0.0.1:9487` on the server, or `https://10.0.0.9:9487` on the
 trusted home LAN. Each browser device must trust the existing Workbench server CA
 for HTTPS. This is server identification, not a client certificate or dashboard
