@@ -82,6 +82,30 @@ def test_usage_examples_are_distributed_across_selected_tests(monkeypatch):
     assert len(examples)<=16 and any(e['name']=='Other:Activate' for e in examples)
 
 
+def test_explicit_read_focus_keeps_real_callees_instead_of_unrelated_keyword_matches(monkeypatch):
+    focused='!!!TwichUI/Focused.lua'
+    shared='!!!TwichUI/Shared.lua'
+    noise='!!!TwichUI/Noise.lua'
+    test='tests/test_noise.lua'
+    raw={focused:b'local M={}\nfunction M.Target() return Shared.Value() end\nreturn M\n',
+         shared:b'local Shared={}\nfunction Shared.Value() return 42 end\nreturn Shared\n',
+         noise:b'local Noise={}\nfunction Noise.Read() return 0 end\nreturn Noise\n',
+         test:b'local Noise=client.Noise\nNoise:Read()\n'}
+    packet=dict(base='fixed',plan_review='source-grounded-intent-v1',
+        files=[dict(path=p,sha256='fixed',excerpts=[]) for p in raw])
+    monkeypatch.setattr(source,'committed',lambda p,b:(raw[p],dict(sha256='fixed')))
+    def inspect(packet,requests):
+        result=[dict(path=r.path,sha256='fixed',line=r.start,through_line=r.end,
+            text='\n'.join(raw[r.path].decode().splitlines()[r.start-1:r.end])) for r in requests]
+        packet.setdefault('inspection_windows',[]).extend(result)
+        return result,[],sum(len(w['text']) for w in result)
+    monkeypatch.setattr(source,'inspect',inspect)
+    priority,interface=context(packet,dict(title='Noise bug',description='Noise must refresh.'),focus_paths={focused})
+    assert {w['path'] for w in priority} == {focused,shared}
+    assert not interface['committed_usage_examples']
+    assert noise in interface['declarations']  # Navigation remains; unrelated bodies do not dominate.
+
+
 def test_relevant_function_and_caller_are_read_pinned_and_catalogued(monkeypatch):
     path='!!!TwichUI/Example.lua'
     raw=b'''local M={}

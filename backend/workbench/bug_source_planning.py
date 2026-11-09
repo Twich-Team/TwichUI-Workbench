@@ -307,7 +307,8 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
     from workbench.source_memory import retain, requested_visibility
     if program_context(packet):
         from workbench.source_interface import context
-        priority,interface=context(packet,original,programs)
+        focus = {w['path'] for w in requested} if packet.get('plan_review') == 'source-grounded-intent-v1' else None
+        priority,interface=context(packet,original,programs,focus_paths=focus)
         windows=[*windows,*priority]
         wire['selected_source_interface']=interface
         if packet.get('plan_review') == 'source-grounded-intent-v1':

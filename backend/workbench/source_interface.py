@@ -125,7 +125,7 @@ def surrounding(raw):
             state=bool(declaration and not alias),export=bool(exported and not declaration),registration=callback))
     return result
 
-def context(packet, original, programs=()):
+def context(packet, original, programs=(), *, focus_paths=None):
     from workbench import bug_source_planning as source,bug_investigation as bug
     from workbench.bug_evidence import InvestigationRead
     rows=[]
@@ -134,7 +134,7 @@ def context(packet, original, programs=()):
     example_groups=[]
     example_chars=0
     for item in packet['files']:
-        if item['path'].startswith('tests/test_'):
+        if item['path'].startswith('tests/test_') and (not focus_paths or item['path'] in focus_paths):
             raw,actual=source.committed(item['path'],packet['base'])
             if actual['sha256']!=item['sha256']:
                 raise ValueError('Selected usage-example source changed')
@@ -171,7 +171,7 @@ def context(packet, original, programs=()):
     terms=bug.words(original['title']+' '+original['description'])
     rank={}
     for index,row in enumerate(rows):
-        if bug.words(re.split(r'[.:]',row['name'])[-1])&terms:
+        if (row['path'] in focus_paths if focus_paths else bug.words(re.split(r'[.:]',row['name'])[-1])&terms):
             rank[index]=-100
     # Keep the cause's direct callers and nearby dependencies, not every old
     # line read while investigating unrelated UI/movement helpers.

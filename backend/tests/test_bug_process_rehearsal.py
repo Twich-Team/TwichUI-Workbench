@@ -377,6 +377,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     key.chmod(0o600)
     monkeypatch.setenv("WORKBENCH_LOCAL_KEY", str(key))
     monkeypatch.setattr(LocalProvider, "_request", scripted)
+    # Every transport below is controlled and never touches the live model.
+    # Its availability must not depend on an unrelated real generation lock.
+    from contextlib import nullcontext
+    from workbench import planning_provider
+    monkeypatch.setattr(planning_provider, 'local_slot', lambda **_: nullcontext())
     monkeypatch.setattr(codex_provider, "generate", controlled_codex)
     # No real connector is used. The real browser gate observes the explicitly
     # controlled availability that this fixture declared.

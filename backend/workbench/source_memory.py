@@ -18,10 +18,11 @@ def ranges(windows):
     return result
 
 
-def retain(wire, packet, current, budget=24000, *, requested=()):
+def retain(wire, packet, current, budget=24000, *, requested=(), focus_paths=None):
     lines, priority = {}, {}
     by_path = {item['path']: item for item in wire['files']}
     fresh = {(w['path'],w['line'],w['through_line']) for w in requested}
+    focus = {w['path'] for w in requested} if focus_paths is None else set(focus_paths)
 
     def add(path, excerpt, rank):
         for offset, text in enumerate(excerpt['text'].splitlines()):
@@ -35,17 +36,21 @@ def retain(wire, packet, current, budget=24000, *, requested=()):
         for excerpt in item['excerpts']:
             rank = 1 if excerpt.get('coverage') == 'module prelude' else 3
             if packet.get('plan_review') in {'source-grounded-lua-v1', 'source-grounded-intent-v1'} and excerpt.get('coverage') in {'module prelude', 'partial module prelude', 'committed test-support prelude'}:
-                rank = -5000
+                rank = -18000
+            elif item['path'] in focus:
+                rank = -15000
             add(item['path'], excerpt, rank)
     for excerpt in packet.get('inspection_windows', []):
-        add(excerpt['path'], excerpt, 2)
+        add(excerpt['path'], excerpt, -15000 if excerpt['path'] in focus else 2)
     for excerpt in current:
         # Explicit completed reads must survive inferred function/dependency
         # context. Otherwise the provider asks again for code we read locally
         # but repeatedly evict before the next stateless request.
         immediate = (excerpt['path'],excerpt['line'],excerpt.get('through_line')) in fresh
-        add(excerpt['path'], excerpt, -20000 if immediate else
-            -10000 if excerpt.get('coverage') == 'complete committed test bootstrap' else excerpt.get('context_rank',0))
+        mandatory = excerpt.get('coverage') in {'complete committed test bootstrap',
+            'committed enclosing declaration or registration', 'committed public usage example'}
+        add(excerpt['path'], excerpt, -20000 if immediate else -18000 if mandatory else
+            -15000 if excerpt['path'] in focus else excerpt.get('context_rank',0))
     chosen, used = {}, 0
     for key in sorted(lines, key=lambda key:(priority[key], key[0], key[1])):
         size = len(lines[key])+1

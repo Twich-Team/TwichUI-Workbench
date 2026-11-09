@@ -224,3 +224,21 @@ def test_cached_requested_windows_are_not_all_treated_as_newly_requested_output(
     retain(wire,packet,[old,new],budget=100,requested=[new])
     assert requested_visibility(wire,[new])[0]['provided']
     assert wire['source_memory']['omitted_characters']>0
+
+
+def test_followup_keeps_prior_body_of_requested_file_ahead_of_unrelated_inferred_code():
+    path='!!!TwichUI/Focused.lua'
+    other='!!!TwichUI/Unrelated.lua'
+    old=window(path,20,'\n'.join(f'local earlier{i} = {i}' for i in range(40)))
+    fresh=window(path,100,'local latest = true\nreturn latest')
+    fresh['coverage']='requested committed lines'
+    inferred=window(other,1,'local unrelated = true\n'*200)
+    inferred['context_rank']=-200
+    prelude=dict(line=1,text='local Focused = {}',coverage='module prelude')
+    packet=dict(base='fixed',plan_review='source-grounded-intent-v1',
+        files=[dict(path=path,excerpts=[prelude]),dict(path=other,excerpts=[])],inspection_windows=[old])
+    wire=copy.deepcopy(packet)
+    retain(wire,packet,[fresh,inferred],budget=2000,requested=[fresh])
+    visible='\n'.join(e['text'] for e in wire['files'][0]['excerpts'])
+    assert old['text'] in visible and fresh['text'] in visible and prelude['text'] in visible
+    assert wire['source_memory']['retained_characters']<=2000
