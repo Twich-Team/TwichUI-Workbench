@@ -1,3 +1,33 @@
+## CURRENT77/d85a4e2 — November9 18:45UTC, original vendor task continuation QUEUED
+
+77installed; all source/seal/history/network/browser/model/auth gates pass;6priorreal
+accepted results canonically revalidated without replay. Same intake2dc5b8ba-2d22-4c2c-
+9f90-3bd58d29d5fd browser commandc0283445-f31d-4a83-a2de-7d77949dea2d recorded;
+job31ab65d2-b675-4d36-b5bc-23e204fa79a3/revision15QUEUED. Observer1288/private
+real-preserved-search-renewal.jsonl, browser-observer/renew-preserved-search.mjs and
+live-preserved-search-renewal-binding.json. Inspect actual state before any replay.
+No vendorplan/addon approval or implementation claimed. CurrentsourceRootHEAD mayadd
+operator docs only; actual sealed appd85a4e2 is separate from development.
+
+Notebook overflow now retains selected source clues before redundant coordinates;
+SAME12Kbound.111affected+11boundary tests/native2confined workflows PASS. Actual60state
+81581wire/22173prompt/32768context PASS; POSTSERIALIZER asserts critical original-source
+match present, notebook11999bytes. Prior old13query proof missed15query overflow; paired
+actual packet demonstrates correction. No addonanswer/filetarget hardcoded in production.
+Preflight initiallyheld: my diagnostic import created one unsealed .pyc in prior76.
+Exactfile/sha/ownership recorded, copied/verified privately, removed onlythatfile; all
+sealed sources/links unchanged. CorrectedFULLpreflight passed, no guardweakened. Evidence
+preflight-held-diagnostic-cache.txt and diagnostic-import-cache-cleanup.json preserved.
+
+All60COMPLETE incidentresponses1175072tokens retained; originalNULLs/unknown unchanged.
+Latest5responses117010tokens settled at complete-content normal-settings stop; ALLprovider
+VALUES restored rev14→15→16 and modelidle/auth verified beforecutover. Maintenance NEW
+admissions STILL OWNED PAUSED; hash-bound supported opsctl resume after ownedwork. Need
+real usableplan/genuineproductquestion, ownerreview ifvalidplan, settled4service restart/
+history/results/model/network continuity and maintenance restoration. Preserve6priorresults,
+originalsource/history/credentials/billing/disclosure/privateLAN/independentchecks/publication
+boundaries. Standingauthority/no campaign caps/engineering renewal continues; not checkpointstop.
+
 ## CURRENT76/be93162 — November9 18:37UTC, original vendor task settled; critical notebook-budget fix verified
 
 Latest92b6b88f... settled5COMPLETE responses117010tokens after complete-content normal
