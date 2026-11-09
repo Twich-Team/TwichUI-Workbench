@@ -1,3 +1,27 @@
+## CURRENT74/7ec0e4c — November9 18:00UTC, original vendor task settled; search-text correction pending
+
+Latestattempt2b0556dc... settled4COMPLETE responses95261tokens after normal provider
+setting stop at complete-content boundary. No uncertainty/quarantine or addon decision.
+Total52COMPLETE incident responses986136tokens retained; originalNULLs unchanged. No
+usable vendor plan/implementation yet. ALL provider preference VALUES restored through
+normal browser (revision10→11→12 preserved); actual model idle/auth verified. Proof in
+settle-breadcrumb-context.jsonl/model-policy-restored-after-breadcrumb-stop.json.
+
+Body/context and pagination corrections passed real path without packing hold on4turns,
+but model still lacks exact fallback path. Retained literal-search notebook supplied
+coordinates only; new generic projection retains bounded EXACT matched lines for already
+selected files, no extra source files/disclosure or authority.124affected checks pass;
+real-tokenizer48state capture82560bytes22636tokens/32768context fits, zero generation.
+Current52state assembly PASSES (82156bytes22368tokens/32768context), native2confined
+API/worker/browser workflows PASS. Root notebook/test verified;74installed unchanged
+pending corrected candidate cutover. Do NOT claim task recovery yet.
+
+Continue verification/seal/install and same-report normal Qwen-only read-only workflow.
+A genuine valid plan needs owner review; no blanket addon approval. Maintenance NEW
+admissions STILL OWNED PAUSED, hash-bound opsctl resume after owned work. Preserve6prior
+accepted results/rejection/history/unknownusage/credentials/privateLAN/billing/disclosure/
+independent checks/publication protections. Standing autonomy/no campaign caps remains.
+
 ## CURRENT74/7ec0e4c — November9 17:51UTC, original vendor task continuation RUNNING
 
 74installed; exact source/seal/history/network/browser/model/auth gates PASS. All6prior

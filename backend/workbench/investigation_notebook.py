@@ -35,6 +35,7 @@ def wire(packet):
     import json
 
     scopes, searches = {}, []
+    selected={f['path'] for f in packet.get('files',[])}
     for item in packet.get("inspection_searches", []):
         identity = digest(item["paths"])[:16]
         scopes[identity] = dict(
@@ -43,6 +44,14 @@ def wire(packet):
             if item["paths"] is not None
             else "the bounded committed project Lua inventory",
         )
+        seen_paths=set()
+        matches=[]
+        for match in item['matches']:
+            visible={k:match[k] for k in ('path','line','truncated') if k in match}
+            if match['path'] in selected and match['path'] not in seen_paths:
+                visible['text']=match['text']
+                seen_paths.add(match['path'])
+            matches.append(visible)
         searches.append(
             dict(
                 query=item["query"],
@@ -50,10 +59,7 @@ def wire(packet):
                 match_count=len(item["matches"]),
                 complete_scan=item["complete_scan"],
                 match_limit=item["match_limit"],
-                matches=[
-                    {k: m[k] for k in ("path", "line", "truncated") if k in m}
-                    for m in item["matches"]
-                ],
+                matches=matches,
             )
         )
     result = dict(
@@ -66,6 +72,15 @@ def wire(packet):
         "A limited scan is not exhaustive. Reuse these results instead of repeating the same query. "
         "These facts grant no approval or implementation authority.",
     )
+    # Keep a bounded literal breadcrumb for each already-selected matching file.
+    # Coordinates alone lose what a stateless provider actually found. Never add
+    # source from a file outside the current selected/disclosure projection.
+    snippets=sorted((m for item in searches for m in item['matches'] if 'text' in m),
+                    key=lambda m:len(m['text']),reverse=True)
+    for match in snippets:
+        if len(json.dumps(result).encode())<=WIRE_BYTES:
+            break
+        match.pop('text')
     if len(json.dumps(result).encode()) > WIRE_BYTES:
         # Keep every query/scope/count/negative fact. Positive text can be read
         # from its exact committed coordinates without inventing absent content.

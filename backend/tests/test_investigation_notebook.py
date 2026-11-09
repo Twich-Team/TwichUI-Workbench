@@ -105,3 +105,44 @@ def test_repeating_only_completed_visible_searches_stops_without_an_unchanged_lo
     item = client.get("/api/intake/" + identity).json()
     assert item["status"] == "failed" and len(calls) == 2 and not item["proposals"]
     assert item["jobs"][0]["diagnostics"]["category"] == "inspection_unchanged"
+
+
+def test_selected_search_breadcrumb_keeps_exact_text_without_extra_file_disclosure():
+    packet = dict(base="fixed", files=[dict(path="!!!TwichUI/relevant.lua")])
+    notebook.record(
+        packet,
+        "label",
+        [
+            dict(path="!!!TwichUI/other.lua", line=1, text="UNSELECTED SOURCE"),
+            dict(path="!!!TwichUI/relevant.lua", line=72, text="local label = Format(id)"),
+            dict(path="!!!TwichUI/relevant.lua", line=80, text="another label"),
+        ],
+        None,
+    )
+    before = copy.deepcopy(packet)
+    matches = notebook.wire(packet)["searches"][0]["matches"]
+    assert matches[1]["text"] == "local label = Format(id)"
+    assert "text" not in matches[0] and "text" not in matches[2]
+    assert packet == before
+
+
+def test_breadcrumb_size_keeps_all_negative_facts_and_does_not_mutate_receipts():
+    import json
+
+    packet = dict(
+        base="fixed", files=[dict(path="!!!TwichUI/source" + str(i) + ".lua") for i in range(12)]
+    )
+    for n in range(24):
+        notebook.record(
+            packet,
+            "search-" + str(n),
+            [dict(path=f["path"], line=1, text="COMMITTED" * 32) for f in packet["files"]]
+            if n < 12
+            else [],
+            None,
+        )
+    before = copy.deepcopy(packet)
+    result = notebook.wire(packet)
+    assert len(json.dumps(result).encode()) <= notebook.WIRE_BYTES
+    assert len(result["searches"]) == 24 and result["searches"][-1]["match_count"] == 0
+    assert result["read_only"] and packet == before
