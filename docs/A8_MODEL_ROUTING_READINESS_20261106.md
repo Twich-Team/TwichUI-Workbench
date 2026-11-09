@@ -6,7 +6,7 @@ real-provider evidence; it does not mark the whole initial product complete.
 
 ## Implemented and installed
 
-Deployment60/b067449 supports deliberate Qwen or signed-in Codex, and explicit
+Deployment62/d34cf17 supports deliberate Qwen or signed-in Codex, and explicit
 bounded pre-generation switching in both directions, including fallback disabled.
 Saved settings and task consent are bound at claim/approval/execution. The app shows
 selected/reported provider and routing reason. Scope, approvals, independent checks,
@@ -21,6 +21,13 @@ commands. Qwen8080 and internal connector remain unexposed to the trusted LAN.
 Public API declarations now reach coding context; independent API-shaped native
 checks prevent return-field inventions. Code/test development proceeds together
 in isolated copies; correctness checks gate the checked result, not the first edit.
+
+The styled update preserves the actual integrations and all four observed REAL
+passes. All five prior results and a fresh ordinary Qwen coverage result survive
+the final391-row service restart. Fresh coverage completed on61, canonically
+revalidated on62; no new Codex calls or repeated provider cases. Exact current
+receipts: outcome-d34cf17/{prior-real-evidence-compatibility,fresh-styled-result-compatibility}.json.
+The saved eligible-work fallback is Off (policy revision8), unchanged.
 
 ## Evidence, not interface appearance
 

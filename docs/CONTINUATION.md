@@ -1,3 +1,57 @@
+## Current continuation — styled delivery complete, November 9, 2026, 13:30 UTC
+
+Read CURRENT_STATUS and root owner authority first. Installed62/d34cf17984e4054e6be09e3865b7eceedd0a2a6e
+is the verified styled app; docs-only closeout commits afterward do not change it.
+Tree7c2c2edab7075a7478dfa78b60c53f12da04e38d;
+seal38bc8b563184af722d3d64630c71b970b190883b047aa4a222e7fa2cc6ea4373.
+R=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-d34cf17
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-d34cf17
+V=/home/rich/.local/share/TwichUI-Workbench/styled-interface-20261109
+R/styled-delivery-closeout.json binds exact verification/restart/history/usage/views.
+All4services ACTIVE/ENABLED as Rich, same loopback/LAN9487, trusted10.0.0.0/24,
+TLS/CA/auth/internal isolation, original8765 untouched. No owner decision needed.
+
+Fresh ordinary Qwen styling journey COMPLETE (do not replay):
+intake784583e0-b2ec-40ea-b1c6-fc2a80af9d2c;
+execution4e9f05ae-d4b5-5df6-8242-d36640216e04;
+candidate103745ea1e292b2f55200239102155e9486fe859332d23233da35c9c48f7bff5.
+Real planning plus4implementation responses, separately reviewed normal browser
+plan/run approvals, independent oracle/focused/syntax/full167tests passed, only
+requested existing test changed. Planning3294tokens, implementation14213tokens;
+17507observed total,678generated,16829prompt. New usage separately recorded once
+in outcome-ledger.styled_interface_delivery; old cumulative fields historical.
+No new Codex call. Normal Qwen service/auth restored; no active operation/owned
+transient user unit/browser observer. No patch installed in live addon or published.
+
+391-row schema0012/28table logicalSHA:
+7ca68b9073f43328d0ec762fd031c43d0c9964a9a66dc00048fdfb066edf1cc1
+identical after cutover/full4service restart/all views; accepted-final.sqlite3
+independently copied/fingerprinted. Baseline60 and immediate prior61 retained;
+original/source/recovery evidence intact. All5prior real results canonically
+revalidated plus fresh6th result; four later-rejection files MUST accompany DB.
+Prior alias files were made private0600 after read-only validation found0644;
+contents/hash unchanged, failure log retained. Initial final-stage host-python
+import failed before activation; resumed owned staged work using its pinned venv,
+then sealed/verified. No model replay or weakened gate.
+
+Final preparation-state/provider/refresh/run-permission wording delta installed.
+No execution/checker/provider/budget change. R/offline-verification.json separates
+complete prior suites and focused final delta; all applicable checks passed.
+Actual desktop/phone screenshots atV/final-installed; nooverflow/pageerrors,
+skip-link solidfocus, same old flight result and later rejection visible. No new
+physical phone/Safari or in-game proof. Existing remote-LAN proof reused only
+under unchanged addresses/CA/effective filters. Closed snapshot9187 untouchedcopy.
+
+Interface assignment complete. Next is owner-requested requirements audit, not
+another redesign or replay of completed provider cases. Broader roadmap remains
+unfinished. Keep source-disclosure/billing/network/publication protections. No
+superseded campaign caps or routine renewals apply. .venv/node_modules are existing
+untracked local symlinks; preserve and never git add -A. No subagents.
+
+---
+The remaining entries below are historical checkpoints. Use the current section
+and bound receipts above; older active/in-progress text does not describe now.
+
 ## Installed styled application — November 9, 2026, 12:53 UTC
 
 Deployment61/e7469cdd25b411204784472dc353445206b1f33f is installed and running.

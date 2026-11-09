@@ -72,3 +72,16 @@ no dispatch, consent, budget, checker, scope or fallback semantics. Focused56bac
 32frontend and11affected browser checks pass; the complete prior suites remain
 applicable outside this presentation/state projection delta. Activation follows
 settlement and a fresh latest-history copy, then all-service restart verification.
+
+## Installed closeout
+
+Final62/d34cf17 is installed; all391history rows and all six successful results
+survive full service restart. Both addresses, staticassets, Host/Origin/CSRF denials,
+LANfilter, loopbackmodel/Unixconnector isolation and model401/200restoration pass.
+Normal fallbackOff/policy8 preserved. The final desktop and phone screenshots were
+actually inspected; browser views show no overflow/errors and visible keyboardfocus.
+Prior remote-LAN confirmation is reused with unchanged restrictions, not invented
+new physical-phone acceptance. Baseline60/61, latest verified recovery copy and
+unique evidence remain. No active provider task, publication or addoninstall.
+The styling assignment is complete; full broader requirements are not.
+Bound private receipt: outcome-d34cf17/styled-delivery-closeout.json.
