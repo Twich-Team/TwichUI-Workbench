@@ -1,4 +1,4 @@
-# Current status — November 9, 2026, 05:12 UTC
+# Current status — November 9, 2026, 05:43 UTC
 
 **A real flight-path repair has completed through the installed application.**
 Real signed-in Codex investigated the report, proposed a reviewed scope, and edited
@@ -93,7 +93,12 @@ confinement on development candidatef9ff5ba; this is not a second real-provider 
 Broader features, general inspections, simulator integration and authorized draft
 PR delivery remain unfinished. A8 and the full initial product are NOT complete.
 Styling/full requirements audit follow the functional gate; neither is a substitute.
-No owner action currently needed. Continue under standing authority, without old
+Latest pre-install full verification hit /tmp file-entry exhaustion from orphaned
+controlled-test scratch. Closed synthetic clones were archived and independently
+restored before exact pruning; real tasks/history untouched. Capacity recovered.
+Test retention and per-checkout temporary storage are fixed and focused-tested;
+complete verification is being repeated before the final cutover/case. No active
+provider operation currently. No owner action currently needed. Continue under standing authority, without old
 campaign caps or routine renewals. See [CONTINUATION](CONTINUATION.md) and
 [Everyday use](EVERYDAY_USE.md).
 

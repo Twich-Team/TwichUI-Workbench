@@ -28,7 +28,7 @@ in isolated copies; correctness checks gate the checked result, not the first ed
 |---|---|---|
 | Codex alone | Passing | **Passed** complete regression journey on56, revalidated without replay for57; also accepted real Codex flight-path repair on57. |
 | Qwen alone | Passing | **Passed** real planning, separately approved execution, checked regression patch and model/auth restoration on57 at04:13 UTC. |
-| Codex first → Qwen | Passing | Pending real case. Only unavailable/reserve before generation. |
+| Codex first → Qwen | Passing | **Passed** real pre-generation unavailable switch, Qwen plan/implementation/checks/restoration on58 at05:01 UTC. |
 | Qwen first → Codex | Passing | Pending real case. Only connection failure before generation. |
 
 The real flight-path result is candidatee2f1341..., execution143ecdc6...; original
@@ -36,7 +36,7 @@ route failure, current-master learning, later refresh, conservative missing data
 per-GUID isolation and saved restoration in a fresh Lua process passed independently.
 All167addon tests pass. Full app restart preserved320rows and the result/patch.
 Offline game simulation is not in-game acceptance; no live addon installation or PR.
-Only2/4 supporting provider cases are accepted, not4controlled passes counted asreal.
+Only3/4 supporting provider cases are accepted, not4controlled passes counted asreal.
 
 ## Billing and accounting
 
@@ -58,7 +58,7 @@ only after actual capabilities, recovery and late-result isolation are verified.
 
 ## Still unfinished
 
-Finish both real fallback journeys, durable closeout/cleanup and a
+Finish the Qwen-to-Codex real fallback journey, durable closeout/cleanup and a
 subsequent ordinary bug demonstration. A fresh ordinary Qwen regression task
 submitted after the flight-path result did complete through the normal browser;
 two distinct ordinary bug journeys, code/test revision and restart pass separately

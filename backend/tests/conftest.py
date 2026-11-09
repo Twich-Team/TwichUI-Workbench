@@ -1,4 +1,5 @@
 from pathlib import Path
+import tempfile
 import pytest
 from alembic import command
 from alembic.config import Config
@@ -8,6 +9,17 @@ from workbench.db import engine_for
 from workbench.seed import seed
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+@pytest.fixture(autouse=True)
+def managed_temporary_files(tmp_path, monkeypatch):
+    """Keep test clones/children inside pytest's retained run, not orphaned /tmp roots.
+
+    Explicit installation/sandbox scratch fixtures can still override this.
+    The environment also covers fresh Python subprocesses, not only this process.
+    """
+    monkeypatch.setattr(tempfile, 'tempdir', str(tmp_path))
+    monkeypatch.setenv('TMPDIR', str(tmp_path))
 
 
 @pytest.fixture

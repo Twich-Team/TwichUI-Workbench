@@ -1,11 +1,35 @@
 """Noninteractive project commands with existing host tool discovery."""
 import argparse
+import hashlib
+import os
+from pathlib import Path
 import subprocess
 import sys
 from project_env import ROOT, environment
 from evidence_retention import maintain
 
 RECOVERY = {'recover-preparation', 'run-preparation-recovery'}
+TEST_CACHE = Path.home() / '.cache'
+
+
+def test_environment():
+    env = environment()
+    if not env.get('TMPDIR'):
+        # Keep paths short enough for real AF_UNIX connector tests. This is a
+        # private per-checkout cache on the home filesystem, not global /tmp.
+        scratch = TEST_CACHE / ('wbt-' + hashlib.sha256(str(ROOT).encode()).hexdigest()[:8])
+        if TEST_CACHE.is_symlink() or scratch.is_symlink():
+            raise RuntimeError('Tests require a private owned temporary directory.')
+        scratch.mkdir(parents=True, exist_ok=True, mode=0o700)
+        info = scratch.lstat()
+        if (scratch.resolve() != scratch or not scratch.is_dir()
+                or info.st_uid != os.getuid() or info.st_mode & 0o077):
+            raise RuntimeError('Tests require a private owned temporary directory.')
+        env['TMPDIR'] = str(scratch)
+    info = os.statvfs(Path(env['TMPDIR']))
+    if info.f_files and info.f_favail < 65536:
+        raise RuntimeError('Test temporary storage is short of file entries. Preserve evidence and reclaim closed owned scratch before another run.')
+    return env
 
 
 def main():
@@ -72,7 +96,8 @@ def main():
         command += ["--built"]
     if args.review:
         command += ['--review']
-    result = subprocess.run(command, cwd=ROOT, env=environment(), check=False)
+    env = test_environment() if args.command in {'test', 'test-e2e', 'test-visual', 'verify'} else environment()
+    result = subprocess.run(command, cwd=ROOT, env=env, check=False)
     maintain()
     return result.returncode
 

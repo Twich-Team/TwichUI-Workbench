@@ -47,3 +47,10 @@ CURRENT_STATUS for actual acceptance and unfinished work. It is not new authorit
 Current status/continuation/A8 readiness were shortened after the accepted real
 flight-path result. Exact prior chronology and hashes are in docs/history/
 before-checked-flightpath-20261109-*; those are historical evidence, not active gates.
+
+Verified controlled-test scratch archive (November9): private lookup at
+`/home/rich/.local/share/TwichUI-Workbench/evidence-archives/fixture-scratch-inodes-20261109/lookup.json`.
+This preserves closed synthetic normalizer workspaces after independent restoration
+and exact original-path checks. It contains no actual addon result or history store.
+Current failure/resource evidence is bound in CONTINUATION; this is not a new
+provider acceptance or a replacement for the original installation archives.

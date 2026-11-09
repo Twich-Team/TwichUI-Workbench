@@ -1,3 +1,60 @@
+## Actual current continuation — November 9, 2026, 05:43 UTC
+
+Installed app STILL deployment58/1836b80, seald94858...; all4services normal active/
+disabled, original79 and latest355history preserved.3/4realcases passed; final
+Qwen→Codex NOT started. No active provider operations or owner action required.
+Do not replay accepted real flight repair/Codex-only/Qwen-only/Codex→Qwen.
+
+Unactivated candidatee07664924f5073c513b5acf325d3b48743c9e9ed:
+Rnext=C/outcome-e076649; Snext=.../everyday-outcome-e076649;
+treeac106aa46b0a7a6097d10fa83716e364dee33b8f;
+seala8339141c4aedd014b9bf7b7887663db2fe1d1d00ba40bda9edc5911cfb74b00.
+Staged and source-proof465files/owner docs/CLI/authmetadata pass; NOT installed.
+No offline-verification record/preflight-ok yet.32watcher/recovery/inventory tests
+pass including real production watcher with sanitized env; -B prevents cachewrites.
+The previous full1881/25 on28df passed; full rerun on watcher correction failed
+from global/tmp INODE EXHAUSTION (not bytes):1605pass,1git-init fail,276setup errors,
+8skips. Raw failure copied to Rnext/inode-exhaustion-full-verification.log.
+No provider calls or cutover followed that failure.
+
+Resource cause:12823orphaned /tmp/workbench-verify-* Runtime test clones consumed
+849766file entries outside pytest's retention. Normal installed task scratch was
+elsewhere and history/actual addon were unaffected. Verified automatic archive:
+/home/rich/.local/share/TwichUI-Workbench/evidence-archives/fixture-scratch-inodes-20261109/
+lookup.json and completed.json.3969older-than-hour private CLOSED synthetic
+Controlled base/Fixture/fixture@invalid normalizer workspaces,250030entries,
+113743756logicalbytes. Exact archive inventory, bytes/modes/mtimes/ownership,
+independent restore and original identity checked BEFORE pruning only matching
+originals. Original/recovery real task paths not selected. Readable same-user fd/cwd
+checked; four inaccessible privileged login/user-manager supervisors classified
+by exact comm/cgroup, recorded honestly, not bypassed. Archive + independent restore
+retained (~1.6GiB physical). /tmp now250033freeinodes/77%used. Unique prior failures,
+source, owner data, archives and all application histories untouched.
+Rnext/temporary-inode-recovery.json binds diagnostic/archive hashes.
+
+Permanent developer-test fix (not production behavior): conftest autouse scopes
+stdlib tempdir AND child TMPDIR to the retained per-test directory. wb test commands
+use private short /home/rich/.cache/wbt-669fb1b0 per-checkout storage by default
+(on home disk, avoids Unix socket length limits), preserve explicit TMPDIR, reject
+unsafe default links/permissions, check inode reserve before another run.81focused
+workflow tests pass;5storage gates +actual Unix connector tests90pass. No global/tmp
+inode growth observed during those. New testinfra code needs checkpoint/full suite.
+Then stage NEW exact candidate (application code identical to e076649, but include
+reproducible fixed test infrastructure), record full verification and fresh preflight.
+Use .venv interpreter for ALL app imports; set -e before scripts; logs on home disk.
+No more unrelated changes before the final real-provider case.
+
+Rnext contains adapted stage/install/network/rollback scripts forward from58/1836b80,
+next actual deployment revision59. Fresh355row fingerprint must remain exact until
+cutover. Its prepared read-only evidence observer validates nested prior aliases,
+and creates DIRECT ORIGINAL pointers (prevents chain growth), reuses4successful
+cases with no model calls. Allowed AST changes include model_policy overview/
+capabilities and real_lease watcher_command/Lease.__enter__; all provider/task/
+checker paths unchanged. After verified cutover, normal SEALED driver has campaign
+counter correction and canonical ROOT, so no external operator workaround needed.
+Run ONLY qwen-with-codex-fallback; final driver disables fallback after closeout.
+Keep all billing, disclosure, network, approval, publication and uncertainty guards.
+
 ## Latest continuation — November 9, 2026, 05:12 UTC
 
 **3/4 real provider cases PASSED.** Real Codex→Qwen case finished05:01:58.
