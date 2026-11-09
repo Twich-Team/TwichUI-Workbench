@@ -167,7 +167,7 @@ def test_unchanged_plan_after_rejected_self_check_stops_without_repeating_review
 
 
 @pytest.mark.usefixtures("installed")
-def test_policy_change_after_self_check_cannot_offer_or_start_more_requests(
+def test_policy_change_while_preparing_self_check_prevents_second_generation(
     client, headers, store, monkeypatch
 ):
     from workbench import model_policy
@@ -184,7 +184,32 @@ def test_policy_change_after_self_check_cannot_offer_or_start_more_requests(
     calls = scripted(monkeypatch, [response(), changed])
     item, attempt = run(client, headers, store)
     assert item["status"] == "failed" and not item["proposals"] and len(calls) == 2
-    assert attempt["usage"]["requests_observed"] == 2
+    # The callback changed policy before the controlled transport started its
+    # second generation. Prepared output is not a consumed provider request.
+    assert attempt["usage"]["requests_observed"] == 1
+
+
+@pytest.mark.usefixtures('installed')
+def test_policy_change_after_completed_self_check_preserves_both_receipts_and_stops(
+    client,headers,store,monkeypatch,
+):
+    from workbench import model_policy
+    from workbench.planning_provider import LocalProvider
+    from workbench.bug_plan_review import ReviewResponse
+    enable_review(monkeypatch)
+    original=LocalProvider._infer
+    def infer(self,transport,secret,schema,encoded,**kwargs):
+        result=original(self,transport,secret,schema,encoded,**kwargs)
+        if schema is ReviewResponse:
+            policy=model_policy.read(store)
+            policy.providers['local'].model='changed-local-model'
+            model_policy.save(store,policy,model_policy.CapabilityReport(executors=[]))
+        return result
+    monkeypatch.setattr(LocalProvider,'_infer',infer)
+    calls=scripted(monkeypatch,[response(),review(False)])
+    item,attempt=run(client,headers,store)
+    assert item['status']=='failed' and not item['proposals'] and len(calls)==2
+    assert attempt['usage']['requests_observed']==2
 
 
 def large_reference(_files):

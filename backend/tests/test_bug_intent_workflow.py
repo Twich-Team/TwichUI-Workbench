@@ -49,15 +49,15 @@ def test_followup_discovery_can_propose_new_existing_source_without_registration
     proposed['writable_paths'][0]=new_path
     calls=scripted(monkeypatch,[
         dict(finding='Inspect a relevant committed dependency before proposing it.',draft=dict(inspection=[dict(path=new_path,start=1,end=2)])),
-        dict(finding='A controlled diagnosis.',draft=dict(diagnosis=dict(cause='A controlled source finding.',evidence_paths=[new_path]))),
         dict(finding='A fresh scope for genuine review, no editing permission.',draft=dict(plan=proposed))])
     item=client.post('/api/intake',headers=headers,json=report()).json()
     assert worker.tick(store)
     item=client.get('/api/intake/'+item['id']).json()
     assert new_path not in {f['path'] for f in calls[0]['files']}
-    discovered=next(f for f in calls[2]['files'] if f['path']==new_path)
+    assert len(calls)==2
+    discovered=next(f for f in calls[1]['files'] if f['path']==new_path)
     assert discovered['support_only'] is True and discovered['repair_scope_candidate'] is True
-    wire_schema=bug_intent.schema(calls[2]['files'])
+    wire_schema=bug_intent.schema(calls[1]['files'])
     assert new_path in wire_schema['$defs']['Plan']['properties']['writable_paths']['items']['enum']
     assert len(item['proposals'])==1 and not item['decisions'] and not item['tasks']
     contract=item['proposals'][0]['task_contract']
@@ -79,9 +79,6 @@ def prepared_scope(client,headers,store,monkeypatch):
             request_completion_limit=6144,usage=dict(units='tokens',values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))
         if schema is bug_intent.Response:
             raw=dict(finding='Normalization omits the requested conversion.',plan=scope())
-        elif schema.__name__=='InvestigationResponse':
-            raw=dict(finding='The committed function trims without converting case.',
-                draft=dict(diagnosis=dict(cause='The conversion is absent.',evidence_paths=[PRODUCTION])))
         else:
             raise AssertionError('No model-generated checking artifact is required before permission to attempt a repair')
         return raw,expected_model,'local'
@@ -108,7 +105,7 @@ def test_scope_and_sandbox_offer_allow_repair_before_new_tests_exist_but_do_not_
 ):
     item,command,proposal,calls,endpoint,offer=prepared_scope(client,headers,store,monkeypatch)
     assert offer['available'],offer
-    assert len(calls)==2
+    assert len(calls)==1
     assert 'prepared_behavior' not in offer['offer']
     assert offer['offer']['repair_cycle']['verification']=='not_run'
     assert offer['offer']['repair_cycle']['criteria']==scope()['criteria']
@@ -189,7 +186,7 @@ def test_settled_local_rejection_renews_with_fresh_bindings_without_losing_a_pha
         self.diagnostics=dict(actual_model=expected_model,generation_state='finished',accounting_state='complete',finish_reason='stop',
             request_completion_limit=6144,usage=dict(units='tokens',values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))
         if len(calls)==1:
-            raw=dict(finding='A user fact is needed.',draft=dict(question='Which displayed name should be normalized?'))
+            raw=dict(finding='A user fact is needed.',question='Which displayed name should be normalized?')
         elif schema.__name__=='InvestigationResponse':
             raw=dict(finding='The function omits conversion.',draft=dict(diagnosis=dict(cause='Case conversion is missing.',evidence_paths=[PRODUCTION])))
         else:
@@ -227,3 +224,74 @@ def test_settled_local_rejection_renews_with_fresh_bindings_without_losing_a_pha
     command['command_id']=str(uuid4())
     assert client.post(url+'/clarification',headers=headers,json=command).status_code==409
     assert not intake.view(store,item['id'])['decisions']
+
+
+@pytest.mark.usefixtures('installed')
+def test_invalid_four_tool_reply_is_rejected_then_fresh_scoped_plan_keeps_unknowns_and_all_usage(
+    client,headers,store,monkeypatch,
+):
+    from test_bug_source_planning import scripted
+    enable_bugs(monkeypatch)
+    config=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
+    settings=json.loads(config.read_text())
+    settings['bug_plan_review']='source-grounded-intent-v1'
+    write_policy(config,settings)
+    invalid=dict(finding='Need source, not permission.',action='inspect',
+        reads=[dict(path=p,start=1,end=2) for p in (PRODUCTION,TEST)],
+        searches=[dict(query='return'),dict(query='local')],plan=None,question=None,limitation=None)
+    def valid_read(packet,schema):
+        assert schema is bug_intent.Response
+        assert packet['validation_feedback']['rejected']
+        assert not packet['validation_feedback']['approved']
+        return dict(finding='Observed source is available; the exact repair remains a hypothesis.',
+            inspection=[dict(path=PRODUCTION,start=1,end=2)])
+    def proposed(packet,schema):
+        assert schema is bug_intent.Response and 'investigation_diagnosis' not in packet
+        assert packet['investigation_working_notes']['notes']
+        assert 'investigation_tool_progress' in packet
+        candidate=scope()
+        candidate['risks']=['The suspected conversion defect must be checked against the original and revised behavior in the isolated workspace.']
+        return dict(finding='The inspected function establishes the normalization boundary; conversion is a leading explanation, not a proven runtime diagnosis.',plan=candidate)
+    calls=scripted(monkeypatch,[invalid,valid_read,proposed])
+    item=client.post('/api/intake',headers=headers,json=report()).json()
+    assert worker.tick(store)
+    result=client.get('/api/intake/'+item['id']).json()
+    assert len(calls)==3 and result['status']=='completed' and len(result['proposals'])==1
+    assert not result['decisions'] and not result['tasks']
+    contract=result['proposals'][0]['task_contract']
+    assert not contract['execution_authorized'] and not contract['publication_authorized']
+    assert contract['bug_intent']['plan']['risks']
+    with store.connect() as connection:
+        attempt=connection.execute(select(model_attempts).where(model_attempts.c.task_id==item['id'])).mappings().one()
+        assert attempt['usage']['requests_observed']==3
+        assert attempt['usage']['values']['total_tokens']==150
+        assert not connection.execute(select(real_execution_grants)).first()
+
+
+@pytest.mark.usefixtures('installed')
+def test_repeated_cached_reads_prompt_scoped_search_instead_of_a_diagnosis_renewal_gate(
+    client,headers,store,monkeypatch,
+):
+    from test_bug_source_planning import scripted
+    enable_bugs(monkeypatch)
+    config=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
+    settings=json.loads(config.read_text())
+    settings['bug_plan_review']='source-grounded-intent-v1'
+    write_policy(config,settings)
+    read=dict(finding='The same exact source is being reconsidered; cause is still uncertain.',
+        inspection=[dict(path=PRODUCTION,start=1,end=1)])
+    def change_strategy(packet,schema):
+        progress=packet['investigation_tool_progress']
+        assert progress['new_source_characters']==0 and progress['no_new_information_streak']==2
+        assert 'Do not repeat them unchanged' in progress['next_strategy']
+        return dict(finding='Search the existing tests in a bounded scope rather than reread the same line.',
+            inspection=[dict(query='return',path='tests')])
+    def proposed(packet,schema):
+        assert packet['investigation_tool_progress']['new_searches']==1
+        assert any(v['paths']==['tests'] for v in packet['completed_searches']['scopes'].values())
+        return dict(finding='The observed source and existing tests support a bounded repair attempt with explicit uncertainty.',plan=scope())
+    calls=scripted(monkeypatch,[read,read,change_strategy,proposed])
+    item=client.post('/api/intake',headers=headers,json=report()).json()
+    assert worker.tick(store)
+    result=client.get('/api/intake/'+item['id']).json()
+    assert len(calls)==4 and len(result['proposals'])==1 and not result['decisions'] and not result['tasks']

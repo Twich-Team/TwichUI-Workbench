@@ -189,7 +189,7 @@ def test_provider_records_rejection_and_model_identity_without_raw_error(tmp_pat
     key = tmp_path / "key"
     key.write_text("synthetic")
     monkeypatch.setenv("WORKBENCH_LOCAL_KEY", str(key))
-    monkeypatch.setattr(module, "local_slot", nullcontext)
+    monkeypatch.setattr(module, "local_slot", lambda **_: nullcontext())
 
     class Fake:
         def open(self, request, **_):

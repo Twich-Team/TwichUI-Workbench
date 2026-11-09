@@ -34,7 +34,8 @@ def test_scope_is_bound_to_all_owner_requirements_without_execution_or_test_prog
     assert contract['bug_intent']['checks_prepared'] is False
     assert not contract['execution_authorized'] and not contract['publication_authorized']
     assert 'bug_evidence' not in contract
-    assert 'Prepare and check executable behavioral tests.' in content['stages']
+    assert 'Review and authorize the isolated repair and test-development offer separately.' in content['stages']
+    assert 'not yet been independently demonstrated' in content['uncertainty'][0]
     saved=contract['bug_intent']
     assert bug_intent.validate_review(saved,original,feedback,source()).review_digest==saved['review_digest']
     with pytest.raises(ValueError):

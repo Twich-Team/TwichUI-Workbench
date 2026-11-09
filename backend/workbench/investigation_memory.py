@@ -1,8 +1,9 @@
 """Reuse exact committed reads from settled local investigations, never authority.
 
 Source is fetched and checked afresh. A separately bounded rejected self-review
-may supply untrusted negative feedback after source revalidation; no diagnosis,
-plan authority, approval, expected answer or generated change is reused. A complete
+may supply untrusted negative feedback after source revalidation. Bounded findings
+from the same report remain attributed model DATA, not established facts. No plan
+authority, approval, expected answer or generated change is reused. A complete
 unapproved draft may be provided only as critique data, never directly returned
 as the new task plan.
 """

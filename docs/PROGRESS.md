@@ -1,3 +1,48 @@
+## Unified investigation-to-scope correction verified; installed79 remains until checked cutover
+
+Read/apply complete owner steering in OWNER_INVESTIGATION_PLAN_STEERING_20261109.md
+(source text preserved, newline normalization recorded privately). Original vendor intake
+2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd STILL has no usable plan or addonchanges.
+Latestbc9640c4/4a8cb5c7 settled20:05:53UTC:3COMPLETE83425tokens; total77COMPLETE
+1625388tokens. No uncertainty. Thirdreply2reads+2searches violated semantic3combined
+limit although flat wire allowed that combination. Complete evidence/accounting saved.
+Provider18/fallbackOff unchanged; no vendor source toCodex or addon approvals.
+
+Whole-path diagnosis: mandatory separate suspected-cause stage withheld plan as an
+available outcome; it did not formally require proven diagnosis but encouraged repeated
+localization before scope. Navigation/search and byte/token packing defects compounded
+this. Only last finding survived a turn; renewed operations retained code but no working
+findings. Repetition lacked explicit novelty/changed-strategy feedback. Model capability
+has not been established as the cause. Prior directory and token corrections retained.
+
+Coherent new design: ONE strict intent response supports reads/search/usable scope/
+genuine question/limitation from start. Concrete inspected source and bounded writes,
+existing focused test/behavior criteria still bind fresh owner scope/run decisions.
+Hypotheses/unknowns may remain; independent original/candidate checks gate checkedresult.
+App retains4bounded attributed findings as unverified same-report data (other-report
+cache notes filtered); optional committed file/folder search scopes intersect external
+permission, empty scope never broadens. Actual unique-source/new-query progress and
+unread related-path suggestions guide strategy changes after repeated reads. Invalid
+read-only replies remain rejected; precise sanitized feedback permits a fresh corrected
+reply without selecting an outcome or inventing content. Unchanged invalid reply stops;
+all usage stays accounted. No addon solution/path hardcoded in production.
+
+560applicablebackend/32frontend/2confined separate-process controlled browser journeys
+PASS.6nativeopt-ins skipped in broad run;2current intent modes explicitly pass,
+4older pre-edit modes remain historical/deselected. Static/contracts/TS/build/Ruff/
+migrations pass; current-state77wire/tokenizer proof fits and dynamically discovers
+unread related UI path. Final exact-candidate capture/seal/deployment follows. Earlier
+failed test logs retained: stale diagnosis/page/mock/accounting assertions corrected;
+new policy-change timing tests distinguish prepared output from completed receipts.
+No new real generation yet for this design; no usable original-task plan claimed.
+
+Next: checked cutover preserving6priorrealresults, same-task normalbrowser Qwen-only
+continuation, source-grounded usable plan for OWNER review, then quiescent restart/
+history/results/model/network continuity. Owned maintenance NEW admissions STILL PAUSED:
+hash-bound supported opsctl resume after ownedwork. Standing autonomous authority;
+no oldcampaigncaps/renewals/checkpointstop. Preserve history/source/credentials/billing/
+disclosure/privateLAN/independentchecks/publication/recovery safeguards.
+
 ## Installed79/071009a — original vendor report continuing after exact packing reproduction
 
 All source/seal/history/network/browser/model/auth gates pass;6priorrealacceptedresults

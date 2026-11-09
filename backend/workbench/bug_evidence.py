@@ -163,11 +163,14 @@ class InvestigationRead(ReadWindow):
 
 class InvestigationSearch(Data):
     query: Annotated[StrictStr, Field(min_length=3, max_length=80)]
+    path: Annotated[str,Field(max_length=240,pattern=r'^(?:!!!TwichUI|TwichUI_Settings|tests)(?:/[A-Za-z0-9_!-][A-Za-z0-9_.!-]*)*$')] | None = None
 
     @model_validator(mode='after')
     def literal(self):
         if len(self.query.strip()) < 3 or '\n' in self.query or '\r' in self.query:
             raise ValueError('Use one bounded literal source search')
+        if self.path and ({p.lower() for p in self.path.split('/')} & {'lib','libs','vendor'} or '..' in self.path.split('/')):
+            raise ValueError('Search only eligible committed project source')
         return self
 
 

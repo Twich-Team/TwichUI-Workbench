@@ -331,6 +331,8 @@ class LocalProvider:
             output_schema, _ = explicit_schema(output_schema)
             instructions = instructions.replace(
                 'Return finding and exactly one draft: inspection, diagnosis, question, or limitation. ', '')
+            instructions = instructions.replace(
+                'Return finding, plan, inspection, question and limitation; exactly one outcome is non-null. ', '')
             instructions += ' ' + (FLAT_NOTE if schema is InvestigationResponse else PLAN_NOTE)
             instructions += (' To perform a literal search use searches:[{"query":"literal text"}] and reads:[]. '
                 'A statement that a search is needed does not perform one. Use reads only for actual path/start/end requests; '

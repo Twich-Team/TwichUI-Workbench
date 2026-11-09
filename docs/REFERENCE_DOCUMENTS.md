@@ -59,3 +59,5 @@ November9 styled delivery: root TWICHUI_WORKBENCH_WEB_VISUAL_DIRECTION.md is the
 complete owner-supplied version1.1 text. DASHBOARD_ASSETS/README.md records the four
 latest supplied JPEG originals, named PNG decoded copies and runtime WebP derivatives.
 The supplemental addon art-direction document is unavailable and explicitly optional.
+
+Current owner investigation-to-plan steering: [complete supplied direction](OWNER_INVESTIGATION_PLAN_STEERING_20261109.md). Source notes are unverified task data; a usable bounded scope can retain explicit uncertainty. No separate proven-diagnosis or completed-checking-artifact gate before proposing scope. Genuine scope/run approval and independent result checks remain.

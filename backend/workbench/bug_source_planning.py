@@ -136,6 +136,8 @@ def committed(path, base):
 
 
 def search(base, query, paths=None):
+    if paths is not None and not paths:
+        return []
     root, actual, _ = source.repository()
     if actual != base:
         raise ValueError('The committed project changed during search.')
@@ -151,6 +153,7 @@ def search(base, query, paths=None):
         path = raw_path.decode()
         if (mode not in {'100644', '100755'} or kind != 'blob' or int(size) > 131072
                 or not INSPECT_PATH.fullmatch(path) or any(p.startswith('.') for p in path.split('/'))
+                or paths is not None and not any(path==p or path.startswith(p+'/') for p in paths)
                 or {'lib', 'libs', 'vendor'} & {p.lower() for p in path.split('/')}):
             continue
         raw = source.blob(root, oid)
@@ -163,6 +166,20 @@ def search(base, query, paths=None):
                 if len(result) == 12:
                     return result
     return result
+
+
+def search_scope(request,disclosure_paths=None):
+    if disclosure_paths is not None and not disclosure_paths:
+        raise PlanningUnavailable('No source search disclosure is permitted.','disclosure')
+    path=getattr(request,'path',None)
+    if path is None:
+        return disclosure_paths
+    if disclosure_paths is None:
+        return {path}
+    selected={p for p in disclosure_paths if p==path or p.startswith(path+'/')}
+    if not selected:
+        raise PlanningUnavailable('This scoped search needs additional source disclosure permission.','disclosure')
+    return selected
 
 
 def unread_start(windows, path, start, end):
@@ -199,7 +216,7 @@ def page_start(windows, path, start, end):
     return start
 
 def verify_packet(initial, supplied):
-    if (set(supplied) - set(initial) - {'inspection_windows','inspection_searches','inspection_focus'}
+    if (set(supplied) - set(initial) - {'inspection_windows','inspection_searches','inspection_focus','investigation_notes'}
             or supplied.get('base') != initial['base'] or supplied.get('policy_sha256') != initial['policy_sha256']
             or supplied.get('plan_review') != initial.get('plan_review')
             or supplied.get('api_references') != initial.get('api_references')
@@ -208,6 +225,8 @@ def verify_packet(initial, supplied):
             or not len(initial['files']) <= len(supplied['files']) <= MAX_FILES
             or len({f['path'] for f in supplied['files']}) != len(supplied['files'])):
         raise ValueError('The inspected source binding changed.')
+    from workbench.investigation_strategy import validate as validate_notes
+    validate_notes(supplied)
     focus=supplied.get('inspection_focus',[])
     if (not isinstance(focus,list) or len(focus)>3 or any(not isinstance(p,str) for p in focus) or len(focus)!=len(set(focus))
             or any(not isinstance(p,str) or p not in {f['path'] for f in supplied['files']}
@@ -271,9 +290,10 @@ def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_bu
     windows, matches = [], []
     for index, request in enumerate(requests):
         if hasattr(request, 'query'):
-            found = search(packet['base'], request.query, disclosure_paths) if disclosure_paths is not None else search(packet['base'], request.query)
+            scope=search_scope(request,disclosure_paths)
+            found = search(packet['base'], request.query, scope) if scope is not None else search(packet['base'], request.query)
             from workbench.investigation_notebook import record
-            record(packet,request.query,found,disclosure_paths)
+            record(packet,request.query,found,scope)
             allowance = (result_budget-total)//max(1, len(requests)-index)
             for match in found:
                 if len(match['text']) > allowance:
@@ -384,7 +404,9 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     from workbench.bug_intent import Response as IntentResponse
     response_model=IntentResponse if intent_mode else BugPlanningResponse
     review_required = initial.get('plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1'}
-    investigating = intent_mode or initial.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'}
+    # Readable scope planning can inspect and then propose bounded work while
+    # retaining uncertainty. A separate diagnosis is not a permission gate.
+    investigating = not intent_mode and initial.get('plan_review') in {'source-grounded-v2', 'source-grounded-lua-v1'}
     diagnosis = None
     bootstrap_priority, bootstrap_fact = [], None
     pending, planning_wire, review_rounds = None, None, 0
@@ -408,7 +430,9 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         result=next_wire(*args,**kwargs)
         if intent_mode:
             from workbench.source_directory import directory
+            from workbench.investigation_strategy import context as strategy_context
             result['source_directory']=directory(packet['base'],getattr(adapter,'source_manifest',None))
+            result['investigation_working_notes']=strategy_context(packet,result['source_directory'],original)
         added=packet.get('inspection_windows',[])[before:]
         if parent:
             for offset in range(0,len(added),16):
@@ -497,6 +521,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     original_stop = adapter.stop_event
     rejected = set()
     unavailable_reads = set()
+    unchanged_streak=0
     review_rejected = set()
     rejected_behaviors = ({lessons['rejected_behavior_sha256']} if lessons and
                           lessons.get('rejected_behavior_sha256') else set())
@@ -681,7 +706,11 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             except (ValidationError, ResponseValidationError) as error:
                 if evidence:
                     evidence.rejected(error, raw)
-                facts = correction(error, raw)
+                if intent_mode and not getattr(adapter,'approved_intent',None):
+                    from workbench.investigation_strategy import correction as intent_correction
+                    facts=intent_correction(error)
+                else:
+                    facts = correction(error, raw)
                 stamp = hashlib.sha256(json.dumps(dict(raw=raw, facts=facts), sort_keys=True).encode()).hexdigest()
                 if (facts and index+1 < requests and stamp not in rejected
                         and diagnostics.get('generation_state') == 'finished'
@@ -726,11 +755,14 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     wire = bug_plan_review.request(planning_wire, raw)
                     continue
                 return raw, model, basis, packet
+            if intent_mode:
+                from workbench.investigation_strategy import remember
+                remember(packet,draft.finding,evidence.identifier if evidence else None,original)
             if should_stop():
                 raise PlanningUnavailable('The investigation binding changed before source inspection.', 'cancelled')
             if wire.get('completed_searches') and all(hasattr(r,'query') for r in draft.inspection):
-                known={entry['query'].casefold() for entry in wire['completed_searches']['searches']}
-                if all(r.query.casefold() in known for r in draft.inspection):
+                known={(entry['query'].casefold(),bug.digest(entry['paths'])) for entry in packet.get('inspection_searches',[])}
+                if not intent_mode and all((r.query.casefold(),bug.digest(sorted(search_scope(r,getattr(adapter,'source_manifest',None))) if search_scope(r,getattr(adapter,'source_manifest',None)) is not None else None)) in known for r in draft.inspection):
                     raise PlanningUnavailable('The provider repeated completed searches already present in its request.',
                                               'inspection_unchanged')
             if evidence:
@@ -740,6 +772,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             if index+1 == requests:
                 raise PlanningUnavailable('The bounded investigation needs more source inspection.', 'inspection_limit')
             read_errors = []
+            before_chars=source_characters(packet)
+            before_searches=len(packet.get('inspection_searches',[]))
             windows, matches, chars = (inspect(packet, draft.inspection, disclosure_paths=getattr(adapter,'source_manifest',None),
                           page_lines=160,result_budget=16000, errors=read_errors)
                 if getattr(adapter, 'source_manifest', None) is not None or intent_mode else inspect(packet, draft.inspection, errors=read_errors))
@@ -764,6 +798,17 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 raise PlanningUnavailable('The investigation reached its source-read bound.', 'inspection_limit')
             wire = make_wire(packet, original, feedback, [*windows, *bootstrap_priority], draft.finding, matches,
                              requested=windows)
+            if intent_mode:
+                gained=max(0,source_characters(packet)-before_chars)
+                new_searches=len(packet.get('inspection_searches',[]))-before_searches
+                unchanged_streak=0 if gained or new_searches else unchanged_streak+1
+                wire['investigation_tool_progress']=dict(new_source_characters=gained,new_searches=new_searches,
+                    no_new_information_streak=unchanged_streak,
+                    next_strategy=('Use the returned source. If it supports a specific scope, propose it with explicit uncertainties.'
+                        if not unchanged_streak else
+                        'These operations added no new source or search evidence. Do not repeat them unchanged. '
+                        'Use a scoped search in another relevant layer or inspect an unread related path from the working notes; '
+                        'a bounded reviewable plan may retain uncertainty, but must cite inspected source and concrete behavioral checks.'))
             if bootstrap_fact:
                 wire['committed_bootstrap_context'] = bootstrap_fact
             if diagnosis:

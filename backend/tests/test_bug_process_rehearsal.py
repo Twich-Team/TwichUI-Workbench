@@ -232,12 +232,12 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             discovered={parent+'/'+name for parent,names in navigation['directories'].items() for name in names}
             assert (CLIENT_SOURCE if case['client_case'] else PRODUCTION) in discovered
         answer = program_answer(case['client_case'],session=intent_mode) if program_mode else three_observations(case['client_case'])
-        if investigating:
+        if investigating or scoping:
             finding='Controlled committed source diagnosis, no approval or execution.'
             if conflict:
                 answer=dict(finding=finding, draft=dict(question='A question.',limitation='Conflicting outcome.'))
             elif fault:
-                answer=dict(finding='PRIVATE_REJECTED_CONTENT'*30,draft=dict(question='A specific question.'))
+                answer=dict(finding='PRIVATE_REJECTED_CONTENT'*(50 if scoping else 30),draft=dict(question='A specific question.'))
             elif case.get('clarification') and 'Technical context:' not in packet.get('owner_reply',''):
                 answer=dict(finding=finding,draft=dict(question='Should normalization happen each time?'))
             elif case_provider == 'local' and case['client_case'] and packet.get('investigation_progress', {}).get('request_number') == 1:
@@ -251,12 +251,12 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 read = (dict(path=CLIENT_SOURCE,start=1,end=9999) if case['client_case']
                         else dict(query='return'))
                 answer=dict(finding=finding,draft=dict(inspection=[read]))
+            elif scoping:
+                answer=dict(finding='Observed source establishes the affected boundary; the repair hypothesis remains to be checked in the isolated cycle.',plan=case['intent'])
             else:
                 answer=dict(finding=finding,draft=dict(diagnosis=dict(
                     cause='The inspected implementation produces the wrong name for the reported operation.',
                     evidence_paths=[CLIENT_SOURCE if case['client_case'] else PRODUCTION])))
-        elif scoping:
-            answer=dict(finding='The reported behavior needs a bounded source repair.',plan=case['intent'])
         elif preparing and not reviewing:
             if intent_mode and case_provider=='local' and case['client_case']:
                 with store.connect() as connection:
@@ -300,6 +300,8 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             elif packet.get('validation_feedback'):
                 phase=answer['plan']['reproducer']['phases'][0]
                 phase['code']=phase['code'].replace("'Sam'", "'BOGUS_INPUT'").replace('ALICE', 'BOGUS_INPUT')
+        if scoping and 'draft' in answer:
+            answer=dict(finding=answer['finding'],**answer['draft'])
         outcome = answer if reviewing or investigating else dict(finding=answer['finding'], draft={key:answer[key]
             for key in ('plan', 'question', 'limitation', 'inspection') if answer.get(key) is not None})
         calls.put(('fixture-conflict' if conflict else 'fixture-fault' if fault else case["choice"], "self-review" if reviewing else "diagnosis" if investigating else "planning"))
@@ -492,11 +494,13 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 observed.append(calls.get(timeout=.2))
             except Empty:
                 break
-        assert observed[:2]==[('fixture-fault','diagnosis'),('fixture-conflict','diagnosis')]
+        assert observed[:2]==[('fixture-fault','planning'),('fixture-fault','planning')]
+        assert [phase for case,phase in observed if case=='fixture-conflict']==['planning','planning']
         for case in cases:
             events=[r[1] for r in observed if r[0]==case['choice']]
             assert events.count('implementation')==1
-            assert events.count('self-review')==0 and events.count('planning')==1
+            assert events.count('self-review')==0 and events.count('planning')>=2
+            assert 'diagnosis' not in events
             assert events[-1]=='implementation'
         with store.connect() as c:
             assert not c.execute(select(model_attempts.c.id).where(model_attempts.c.purpose=='check_preparation')).first()
@@ -516,7 +520,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         failed = next(row.id for row in failures if row.payload['title'].endswith(' · controlled malformed response'))
         attempt = c.execute(select(model_attempts).where(model_attempts.c.task_id == failed)).mappings().one()
         assert attempt['outcome'] == 'failed' and attempt['finished_at']
-        assert attempt['usage']['values']['completion_tokens'] == 10
+        assert attempt['usage']['values']['completion_tokens'] == (20 if intent_mode else 10)
         job = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == failed)).scalar_one()
     evidence = tmp_path/'artifacts/runs'/('planning-evidence-'+job['diagnostics']['evidence_id'])/'events.jsonl'
     rows = [json.loads(row) for row in evidence.read_text().splitlines()]
@@ -524,10 +528,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     assert [row['phase'] for row in rows][:len(prefix)] == prefix
     assert len(rows[1]['schema_sha256']) == 64 and rows[1]['corrective'] is False
     if case_provider=='codex':
-        assert rows[2]['codec']=='flat-investigation-v2' and len(rows[2]['schema_sha256'])==64
-    assert rows[-1]['phase'] == 'validation-rejected'
-    issue = rows[-1]['errors'][0]
-    assert issue['path'] == ['finding'] and issue['expected']['max_length'] == 450
+        assert rows[2]['codec']==('flat-planning-v3' if intent_mode else 'flat-investigation-v2') and len(rows[2]['schema_sha256'])==64
+    rejected=[row for row in rows if row['phase']=='validation-rejected']
+    assert rejected
+    issue = rejected[-1]['errors'][0]
+    assert issue['path'] == ['finding'] and issue['expected']['max_length'] == (800 if intent_mode else 450)
     assert issue['observed']['type'] == 'str'
     assert 'PRIVATE_REJECTED_CONTENT' not in evidence.read_text()
     assert 'CONTROLLED_NATIVE_REASONING_NOT_A_MODEL' not in evidence.read_text()
