@@ -1,4 +1,4 @@
-# Current status — November 9, 2026, 06:24 UTC
+# Current status — November 9, 2026, 07:00 UTC
 
 **A real flight-path repair has completed through the installed application.**
 Real signed-in Codex investigated the report, proposed a reviewed scope, and edited
@@ -15,8 +15,8 @@ The patch remains local; the live addon, publication and PRs are untouched.
 
 ## Running build and access
 
-Installed candidate: `2ecbce2b3bb8d067f285d57b824f49043bc174c6` (deployment59).
-Seal: `27cbde42ed4e462b0c4de353e7a4093a0c589bd6460acfef548cebfdef39a926`.
+Installed candidate: `b06744976343fd4b6e4a1a306866118ab972921a` (deployment60).
+Seal: `599271d22c75b02b75f2176b07df1d6eb5aa011252525d535b81b78382497e67`.
 Standalone release and development checkout remain separate.
 All four named services are active and enabled after acceptance.
 History: original79 and forwarded355 rows preserved; final372-row store was
@@ -54,13 +54,15 @@ inventing fields absent from those declarations. This rejected the earlier fault
 patch, whose history and usage remain preserved. The accepted corrected patch uses
 GetAllTaxiNodes, not state invented on map listings.
 
-Installed application source verification:1887backend/8default opt-in skips,25frontend,
+Installed application source verification:1892backend/8default opt-in skips,28frontend,
 static/contracts/build/migrations; two actual confined separate-process controlled
 browser journeys, four controlled driver/provider routes, native frozen-control
 reuse and10installation-inventory checks. Full application verification observed
-on2ecbce2 is exact and complete. Prior controlled browser/provider routes and native
-process opt-ins are reused after exact unchanged application paths; the only additional
-production change passes -B explicitly to the independently tested watcher launch.
+onb067449 is exact and complete. Prior controlled browser/provider routes and native
+process opt-ins are reused after unchanged dispatch/provider/checker paths. Later
+review projection and a stronger publication hold pass focused68backend/3frontend,
+actual historical-data and separate-process browser checks. The independently tested
+watcher launch retains its explicit -B correction.
 Operator-only policy has28focused checks; successful-case,
 terminal-state, scope/accounting and provider guards remain. Installed helper grant
 unchanged. Historical unknown usage/outcomes remain unknown and isolated.
@@ -104,8 +106,8 @@ Styling/full requirements audit follow the functional gate; neither is a substit
 Latest pre-install full verification hit /tmp file-entry exhaustion from orphaned
 controlled-test scratch. Closed synthetic clones were archived and independently
 restored before exact pruning; real tasks/history untouched. Capacity recovered.
-Test retention and per-checkout temporary storage are fixed; complete1887/25 verification
-passed before cutover. Source466files and exact owner documents, history, network,
+Test retention and per-checkout temporary storage are fixed; complete1892/28 verification
+passed before cutover. Source468files and exact owner documents, history, network,
 model authentication, isolated execution and prior real evidence revalidation pass.
 The read-only compatibility observer first named the wrong method for the tested
 watcher change; its exact source diff was rechecked, the observer corrected, and the
@@ -116,12 +118,15 @@ Its one-response planning usage format differs from multi-turn bug accounting;
 the operator reconciliation was corrected against the retained validated response,
 without repeating a model call. Evidence is under `outcome-2ecbce2`, especially
 `functional-evidence-closeout.json`, in the private delivery record.
-No provider operation is active. Connected application work now implements the
+No provider operation is active. Connected application work has installed the
 independent later rejection of the earlier native-checked flight patch in its
 historical result view without erasing the original outcome or usage. Shared proof
 validation, read-only projection and a stronger publication hold pass focused checks
-and an actual historical-data rehearsal; this correction is NOT installed yet.
-Complete verification and a separate-process browser check precede any update. The accepted
+and an actual historical-data rehearsal, complete suites and a separate-process
+browser check. The installed warning and all five successful results survive full
+restart. Four exact rejection artifacts are preserved alongside the history.
+No provider calls were needed for this update. Latest closeout evidence is under
+`outcome-b067449/functional-evidence-closeout.json`. The accepted
 replacement is linked in Everyday use. Broader requirements remain unfinished.
 No owner action currently needed.
 Continue under standing authority, without old

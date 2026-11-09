@@ -1,4 +1,61 @@
-## Active connected repair — November 9, 2026, 06:40 UTC
+## Actual current continuation — November 9, 2026, 07:00 UTC
+
+**Installed60/b06744976343fd4b6e4a1a306866118ab972921a verified and left running.**
+Treea34d04ac2bb77ac51f91e8dc604681cd5f8ce633;
+seal599271d22c75b02b75f2176b07df1d6eb5aa011252525d535b81b78382497e67.
+C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
+R=C/outcome-b067449; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-b067449.
+All4real provider cases and accepted real flight-path repair remain PASSED; no replay.
+No active provider operation. Latest Codex known completed turns148; historical unknowns
+unchanged. Five canonical recipes/results revalidated against unchanged dispatch,
+provider and checker code; source observations stay on their original builds.
+
+Later-review correction fully implemented, tested and INSTALLED. Shared proof validator
+preserves existing operator renewal semantics and adds bounded/no-follow/UUID guards;
+normal detail/list views expose a later rejection or unavailable review separately
+from native history. Publication holds on either; no new run approval or DB mutation.
+Actual old rejection shown on desktop/phone in RUNNING app after full restart; accepted
+replacement unaffected. Four hash-identical private rejection files preserved with
+new active DB; future checked updates MUST carry them, not just SQLite bytes.
+R/rejected-evidence-copy.json, rejected-evidence-manifest.json and copy-operation-
+offline-proof.json (positive/idempotent/tamper denial). Original S57 files untouched.
+Normal accounting-only evidence roots are never used as authority.
+
+Exact candidate complete1892backend/8skips/786.23s +28frontend PASS, static/contracts/
+types/build/migrations PASS. Focused68backend/3newfrontend +18finalrejection tests pass.
+Separate-process GET-only real-history preview (no worker/provider calls) passed,
+closed its9187listener, and left copied372history unchanged. Prior4controlled routes
+and2native confined ordinary-bug journeys reused after unchanged execution paths;
+no live Qwen bug, second real-provider bug, in-game, simulator or PR proof invented.
+Code source468tracked files/root docs/CLI/nonsecret authmetadata verified beforecutover.
+
+Post-install FULL4service restart and normal API/browser/network reads preserve
+372rows SHA3c1524b3f4a7fc7cff23381030944cdb87ae5e7286dad7ac4488ed6a8692ae5f.
+S/artifacts/cutover/accepted-final.sqlite3 independently copied/fingerprinted; all5
+successful results + later rejected old result visible. Actual desktop/phone screens
+VIEWED. A Models phone screenshot initially used desktop viewport; corrected via
+GET-only Models/form observation, first image retained, no model/task replay.
+FallbackOff; normal Qwen auth401/200/keymatch; all4named services ACTIVE/ENABLED.
+TLS/subnet/browser/kernel filters and exact sealed assets verified at both addresses;
+prior remote-LAN evidence reused under unchanged CA/boundary, not a new owner load.
+No temporary worker drop-in or running Workbench user unit. Final practical capacity
+R/capacity-final.json. Original79, prior372, all historical source/results/recovery/
+quarantine and unique failures retained. Rollback prepared to verified59 with372rows;
+no rollback needed after successful60 checks. Helper hash/grant/scope unchanged.
+
+Read R/functional-evidence-closeout.json and CURRENT_STATUS for concise claims.
+Useful supported offline Lua repair/coverage workflow is installed; broader initial
+product NOT declared complete. Features/general inspections/external simulator and
+authorized PR delivery remain unfinished. A7 start/pause behavior has an open initial
+proposal in root requirements; do not invent immediate-cancel semantics. No owner
+decision/access required for the completed current proof. Full product scope and
+standing autonomous work remain; do not restore old clocks/caps/renewal gates.
+The owner planned styling in a NEW session after functional gate, then requirements
+audit; neither phase was silently started. Preserve exact root owner documents.
+One agent, .venv interpreter for app imports, set -e, private logs, no API billing/
+extra credits/purchases/publication/live-addon changes. Do not repeat successful cases.
+
+## Prior connected repair — November 9, 2026, 06:40 UTC
 
 The functional closeout immediately below remains valid: installed59/2ecbce2,
 all4real cases pass, accepted bug/result history372 restart-durable, all4services

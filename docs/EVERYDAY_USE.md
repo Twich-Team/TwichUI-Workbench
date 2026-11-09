@@ -10,8 +10,9 @@ offline client. It has not been installed into the live game addon.
 An older attempt, execution `2efed208-b38a-5d09-bd85-4fe68ea9b702`, passed its
 then-current native checks but was subsequently rejected by the independent
 API-shaped review. Its historical native status is preserved; do not use that
-older patch. Surfacing this later review directly on the historical result page
-remains an application follow-up, rather than silently rewriting its history.
+older patch. Its historical result and run listing now show the later rejection;
+the original native check outcomes and usage remain recorded. A rejected or
+unavailable later review holds publication and grants no new run permission.
 
 Open `http://127.0.0.1:9487` on the server, or `https://10.0.0.9:9487` on the
 trusted home LAN. Each browser device must trust the existing Workbench server CA

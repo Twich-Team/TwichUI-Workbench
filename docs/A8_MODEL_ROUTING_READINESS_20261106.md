@@ -6,7 +6,7 @@ real-provider evidence; it does not mark the whole initial product complete.
 
 ## Implemented and installed
 
-Deployment59/2ecbce2 supports deliberate Qwen or signed-in Codex, and explicit
+Deployment60/b067449 supports deliberate Qwen or signed-in Codex, and explicit
 bounded pre-generation switching in both directions, including fallback disabled.
 Saved settings and task consent are bound at claim/approval/execution. The app shows
 selected/reported provider and routing reason. Scope, approvals, independent checks,
@@ -39,7 +39,10 @@ Offline game simulation is not in-game acceptance; no live addon installation or
 All4/4 supporting provider cases are accepted as real-provider results. The final
 372-row store and all five results survive a full service restart; normal model
 authentication/network restored, fallback Off and four named services enabled.
-Evidence: private `outcome-2ecbce2/functional-evidence-closeout.json`. The last case
+Evidence: private `outcome-b067449/functional-evidence-closeout.json`; all five
+original observed provider results canonically revalidated without replay for60.
+The later independent rejection of the older patch is visible without modifying
+its native history/usage. No new provider calls for this update. The last case
 used2knowncompleted Codex turns; historical uncertain outcomes/usage unchanged.
 No Qwen bug repair or in-game acceptance is inferred from regression-provider cases.
 
