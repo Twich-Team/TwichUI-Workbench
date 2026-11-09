@@ -88,19 +88,21 @@ test('saved ordinary bug starts investigation without recreating the task or app
  const path=new URL(page.url()).pathname;const item=await page.request.get('/api'+path).then(r=>r.json());
  // Isolated API responses exercise the browser only; real transaction/decoder coverage is in backend tests.
  const binding='9'.repeat(64);let writes=0;let posted:any;
- let current={...item,status:'waiting_for_information',jobs:[],planning_start_binding:binding};
+ const oldFailure={id:'old-non-dispatch',kind:'planning',revision:1,status:'failed',attempts:2,message:'Old failure retained.',model:null,created_at:item.created_at,finished_at:item.created_at,diagnostics:{category:'unavailable'}};
+ let current={...item,status:'waiting_for_information',jobs:[oldFailure],planning_start_binding:binding};
  await page.route('**/api'+path,route=>route.fulfill({json:current}));
  await page.route('**/api'+path+'/investigation',async route=>{
   writes++;posted=route.request().postDataJSON();
   expect(posted.binding).toBe(binding);expect(posted.provider).toBe('qwen-once');
   expect(Object.keys(posted).sort()).toEqual(['binding','command_id','provider']);
-  current={...current,status:'queued',planning_start_binding:undefined};
+  current={...current,status:'queued',jobs:[oldFailure,{...oldFailure,id:'fresh-permission',revision:2,status:'queued',attempts:0,message:'Queued.',finished_at:null}],planning_start_binding:undefined};
   await route.fulfill({json:current});
  });
  await page.reload();await expect(page.getByText('Ready for read-only investigation',{exact:true})).toBeVisible();
  const panel=page.getByRole('region',{name:'Start saved bug investigation'});await expect(panel.getByRole('button',{name:'Start investigation',exact:true})).toBeDisabled();
  await panel.getByLabel('Allow this read-only investigation').check();await panel.getByRole('button',{name:'Start investigation',exact:true}).dblclick();
  await expect(page.getByText('Waiting to start',{exact:true})).toBeVisible();expect(writes).toBe(1);expect(posted.command_id).toMatch(/^[a-f0-9-]{36}$/);
+ await expect(page.getByRole('heading',{name:'Why planning stopped',exact:true})).toHaveCount(0);
  await page.reload();await expect(page.getByRole('button',{name:'Start investigation',exact:true})).toHaveCount(0);
  expect(new URL(page.url()).pathname).toBe(path);expect(item.decisions).toHaveLength(0);
  await page.setViewportSize({width:390,height:844});await overflow(page);await capture(page,info,'saved-report-investigation-recorded',{keepInCompact:true});
