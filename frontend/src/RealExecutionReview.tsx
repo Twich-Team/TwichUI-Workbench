@@ -36,6 +36,9 @@ function checkName(command: string[] | undefined, i: number) {
 
 export function RealExecutionReview(){
   const {identity=''}=useParams();
+  return <ExecutionResult identity={identity}/>;
+}
+export function ExecutionResult({identity,embedded=false}:{identity:string;embedded?:boolean}){
   const query=useQuery({queryKey:['real-execution',identity],
     queryFn:()=>request<View>('/api/real-executions/'+encodeURIComponent(identity)),refetchInterval:3000});
   if(query.isPending)return <section className="panel" aria-busy="true">Opening the run result…</section>;
@@ -45,9 +48,9 @@ export function RealExecutionReview(){
   const active=['pending','running','checking','cancel_requested'].includes(row.status);
   const testOnly=Boolean(result?.files?.length&&result.files.every(file=>file.path.startsWith('tests/')&&(!file.old_path||file.old_path.startsWith('tests/'))));
   const workflow=row.workflow_task;
-  return <div className="intake-page result-page">
-    <Link className="back-link" to={workflow?'/intake/'+encodeURIComponent(workflow.intake_id):'/executions'}>{workflow?'Back to the task':'All run results'}</Link>
-    <div className="page-heading"><div><img className="heading-art" src="/art/workshop/history.png" alt=""/><p className="eyebrow">RUN RESULT</p><h1>{row.title}</h1></div></div>
+  return <div className={embedded?"inline-result":"intake-page result-page"}>
+    {!embedded&&<Link className="back-link" to={workflow?'/intake/'+encodeURIComponent(workflow.intake_id):'/executions'}>{workflow?'Back to the task':'All run results'}</Link>}
+    {!embedded&&<div className="page-heading"><div><img className="heading-art" src="/art/workshop/history.png" alt=""/><p className="eyebrow">RUN RESULT</p><h1>{row.title}</h1></div></div>}
     <section className="panel candidate-review real-execution-review" aria-label="Run result and checks">
       {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded result.</p>}
       {row.current_task===false&&<p className="soft-callout">This result belongs to an earlier plan. The current task still needs its own review and checks.</p>}
@@ -56,8 +59,8 @@ export function RealExecutionReview(){
         {row.behavior_reproduced&&<p>The reviewed check reproduced the bug in the original code and passed with this patch.</p>}
         {Boolean(row.behavior_checked?.length) && <><h3>Behavior checked</h3><ul>{row.behavior_checked?.map((behavior,i)=><li key={i}>{behavior}</li>)}</ul></>}
         <p>{row.publication_requested?'The checked copy is saved locally. See the separate draft delivery status below.':'Saved locally. This run did not install or publish the result.'}</p></>
-        :<p>{row.later_review?.reason||row.message}</p>}
-      {row.later_review&&<p className="soft-callout">The original check results and usage are retained below. This review does not authorize another run or publication.</p>}
+        :<p>{row.later_review?'A later check found a problem with this patch. Review that finding before relying on these changes.':row.message}</p>}
+      {row.later_review&&<><p className="soft-callout">The original check results and usage are retained below. This review does not authorize another run or publication.</p><details><summary>Why the later review stopped this result</summary><p>{row.later_review.reason}</p></details></>}
       {row.recovery_pending?<p>Workbench is waiting to confirm cleanup. It will keep the evidence and will not run the work again.</p>
         :!checked&&!active&&<p>Review the saved reason and any check results below. Another attempt needs fresh permission.</p>}
       {result?.inference_ran===false && !active && !checked && !result.authorship && <p>No model implementation ran.</p>}

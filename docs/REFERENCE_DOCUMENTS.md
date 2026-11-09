@@ -54,3 +54,8 @@ This preserves closed synthetic normalizer workspaces after independent restorat
 and exact original-path checks. It contains no actual addon result or history store.
 Current failure/resource evidence is bound in CONTINUATION; this is not a new
 provider acceptance or a replacement for the original installation archives.
+
+November9 styled delivery: root TWICHUI_WORKBENCH_WEB_VISUAL_DIRECTION.md is the
+complete owner-supplied version1.1 text. DASHBOARD_ASSETS/README.md records the four
+latest supplied JPEG originals, named PNG decoded copies and runtime WebP derivatives.
+The supplemental addon art-direction document is unavailable and explicitly optional.

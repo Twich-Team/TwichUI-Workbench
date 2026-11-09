@@ -1,3 +1,15 @@
+## Active visual delivery — November 9, 2026
+
+The accepted functional gate is demonstrated; receipts in CONTINUATION remain
+historical evidence, not permission to replay completed cases. Current owner
+assignment authorizes the selected frameless visual direction, four main routes,
+ordinary task entry and clearer decisions/results. Implement, browser-check,
+verify, preserve latest history/rejection evidence, install, and demonstrate a
+fresh supported journey. Broader future capabilities remain discoverable and
+honestly unavailable; they are not prerequisites for this styling assignment.
+No new engineering approval or campaign cap applies. Preserve actual safeguards.
+The earlier functional plan below records its original sequence.
+
 # Current delivery plan
 
 Under the [standing owner direction](../STANDING_OWNER_DIRECTION_AUTONOMOUS_DELIVERY.md),

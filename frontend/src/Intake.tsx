@@ -21,7 +21,7 @@ type Proposal = components['schemas']['ProposalView'];
 type Decision = components['schemas']['ProposalDecisionInput'];
 type Artifact = components['schemas']['ArtifactInput'];
 const scopeLabels: Record<string,string> = {visual:'Changes the in-game interface',nonvisual:'Does not change the interface',unclassified:'Not sure'};
-function ScopeOptions() { return <><option value="unclassified">Not sure</option><option value="visual">Changes the in-game interface</option><option value="nonvisual">Does not change the interface</option></>; }
+function ScopeOptions() { return <><option value="unclassified">Not sure</option><option value="visual">Changes its appearance</option><option value="nonvisual">Behavior or data only</option></>; }
 // Translate known sample sentences only; revised plan content stays visible verbatim.
 const sampleWording = (text:string) => ({
   'Normalize a synthetic record label':'Remove spaces around a sample label',
@@ -51,25 +51,32 @@ export function IntakeList() {
   </div>;
 }
 
+type WorkChoice='bug'|'coverage'|'feature'|'inspection'|'simulation'|'data'|'other';
+const workChoices=[['bug','Fix an addon issue · Available'],['coverage','Add test coverage · Available'],['feature','Build a feature · Save for later'],['inspection','Inspect the addon · Save for later'],['simulation','Run a simulation · Save for later'],['data','Update addon data · Save for later'],['other','Other work · Save for later']] as const;
 export function IntakeForm() {
-  const [params] = useSearchParams();
-  const [kind, setKind] = useState<'feature' | 'issue'>(params.get('kind') === 'issue' ? 'issue' : 'feature');
-  const [description, setDescription] = useState<Pick<Input,'title'|'description'>>();
-  return <IntakeFormBody key={kind} kind={kind} description={description} chooseKind={(next, input)=>{
-    setDescription({title:input.title,description:input.description});
-    setKind(next);
+  const [params]=useSearchParams();
+  const [work,setWork]=useState<WorkChoice>(()=>{
+    if(params.has('kind'))return params.get('kind')==='feature'?'feature':'bug';
+    const saved=readStored<WorkChoice>('intake-work-kind');
+    return workChoices.some(([value])=>value===saved)?saved!:'bug';
+  });
+  const kind=work==='bug'?'issue':'feature';
+  const [description,setDescription]=useState<Pick<Input,'title'|'description'>>();
+  return <IntakeFormBody key={kind} kind={kind} work={work} description={description} chooseWork={(next,input)=>{
+    setDescription({title:input.title,description:input.description});setWork(next);
+    try{localStorage.setItem('intake-work-kind',JSON.stringify(next));}catch{/* Keep selection in memory. */}
   }} unified={!params.has('kind')}/>;
 }
-function IntakeFormBody({kind, description, chooseKind, unified}: {
-  kind:'feature'|'issue'; description?:Pick<Input,'title'|'description'>;
-  chooseKind:(kind:'feature'|'issue',input:Input)=>void; unified:boolean;
+function IntakeFormBody({kind,work,description,chooseWork,unified}:{
+ kind:'feature'|'issue';work:WorkChoice;description?:Pick<Input,'title'|'description'>;
+ chooseWork:(work:WorkChoice,input:Input)=>void;unified:boolean;
 }) {
   const navigate = useNavigate();
   const key = `intake-draft:${kind}`;
   const [body,setBody] = useState<Input>(() => {
     const saved = readStored<Input>(key);
     if (saved && !description) return {...saved,visual_requirement:saved.visual_requirement??'unclassified'};
-    return {visual_requirement:'unclassified',request_id:crypto.randomUUID(),kind,title:'',description:'',lua_error:'',...description};
+    return {visual_requirement:'unclassified',request_id:crypto.randomUUID(),kind,title:'',description:'',lua_error:'',...(work==='coverage'?{regression_tests:{acceptance:[],test_paths:[]}}:{}),...(unified&&work!=='bug'&&work!=='coverage'?{requested_work:work}:{}),...description};
   });
   const [sent,setSent] = useState(false);
   const [busy,setBusy] = useState(false);
@@ -79,6 +86,16 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   const [regressionPaths,setRegressionPaths] = useState(body.regression_tests?.test_paths?.join('\n')||'');
   const regression=body.regression_tests;
   const example=regression?.text_example;
+  const chosen:WorkChoice=regression?'coverage':kind==='issue'?'bug':body.requested_work||work;
+  const future=chosen!=='bug'&&chosen!=='coverage'&&!body.supported_task;
+  useEffect(()=>{if(!sent&&!busy){try{localStorage.setItem(key,JSON.stringify(body));}catch{/* Keep the draft in memory. */}}},[body,key,sent,busy]);
+  function changeWork(next:WorkChoice){
+    chooseWork(next,body);
+    if((next==='bug')===(kind==='issue'))setBody({...body,requested_work:next==='bug'||next==='coverage'?null:next,
+      supported_task:null,local_planning:null,lua_error:next==='bug'?body.lua_error:'',
+      regression_tests:next==='coverage'?{acceptance:regressionAcceptance.split('\n').filter(s=>s.trim()),test_paths:[]}:null});
+  }
+
   const localWork=useQuery({queryKey:['local-work'],queryFn:()=>request<components['schemas']['LocalWorkStatus']>('/api/local-work'),refetchInterval:5000});
   const bugWork=kind==='issue'&&Boolean(localWork.data?.bug_investigation)&&!body.supported_task;
   const supported=useQuery({queryKey:['supported-tasks'],queryFn:()=>request<{items:{id:string;title:string;purpose:string}[]}>('/api/supported-tasks')});
@@ -89,34 +106,26 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
       return;
     }
     try {
-      localStorage.setItem(key, JSON.stringify(body)); setSent(true); setBusy(true);
-      const saved = await mutate<Intake>('/api/intake',body);
-      localStorage.removeItem(key); void navigate(`/intake/${saved.id}?received=1`);
+      const submitted:Input={...body,title:body.title.trim()?body.title:body.description.trim().split('\n')[0].slice(0,160),...((body.requested_work||(future&&(unified||localWork.data?.enabled)))?{requested_work:chosen as Input['requested_work']}:{} )};
+      setBody(submitted);localStorage.setItem(key, JSON.stringify(submitted)); setSent(true); setBusy(true);
+      const saved = await mutate<Intake>('/api/intake',submitted);
+      localStorage.removeItem(key);localStorage.removeItem('intake-work-kind'); void navigate(`/intake/${saved.id}?received=1`);
     } catch (e) {setError((e as Error).message);} finally {setBusy(false);}
   }
-  return <div className="intake-page task-create"><Link to="/intake" className="back-link"><ArrowLeft size={15}/>Submitted tasks</Link><div className="page-heading"><div><img className="heading-art" src={`/art/workshop/${kind==='issue'?'issues':'feature-requests'}.png`} alt=""/><h1>{unified?'Create a task':kind==='issue'?'Report an issue':'Request a feature'}</h1><p>{kind==='issue'?'Tell us what happened and what you expected. A report starts an investigation.':'Describe what you want to improve, inspect or test. You’ll see a plan before any changes are approved.'}</p></div></div>
+  return <div className="intake-page task-create"><Link to="/backlog" className="back-link"><ArrowLeft size={15}/>All tasks</Link><div className="page-heading"><div><img className="heading-art" src={`/art/workshop/${kind==='issue'?'issues':'feature-requests'}.png`} alt=""/><h1>{unified?'Create a task':kind==='issue'?'Report an issue':'Request a feature'}</h1><p>{kind==='issue'?'Tell us what happened and what you expected. A report starts an investigation.':'Describe what you want to improve, inspect or test. You’ll see a plan before any changes are approved.'}</p></div></div>
   <form className="panel intake-form" onSubmit={event=>void submit(event)}><fieldset disabled={sent || busy}>
-  <label htmlFor="request-title">Title <span>Required</span></label>
-  <input id="request-title" required maxLength={160} value={body.title} onChange={e=>setBody({...body,title:e.target.value})}/>
-  <label htmlFor="request-description">Description <span>Required</span></label>
-  <textarea id="request-description" required maxLength={6000} rows={4} value={body.description} onChange={e=>setBody({...body,description:e.target.value})}/>
-  <p className="small-text">Tell Workbench what you want to happen. For a bug, say what happens today and what you expected.</p>
-  {localWork.data?.enabled&&<div className="soft-callout">
-    <p><strong>Available for local execution</strong> Add coverage to an existing TwichUI Lua test for a concrete example. Workbench saves the checked result here.</p>
-    {localWork.data.bug_investigation
-      ? <p>Workbench can also investigate an addon bug and prepare a local repair when it can reproduce the problem offline. Describe what happened and what you expected.</p>
-      : <p>Bug fixes need a separate workflow.</p>}
-    <p>Features, inspections, simulator work and publishing are outside this workflow.</p>
-    <p role="status">{localWork.data.message}</p>
-    {localWork.data.headroom_bytes!=null&&<p className="small-text">{Math.max(0,Math.floor(localWork.data.headroom_bytes/1048576))} MiB available for saved evidence. Workbench needs {localWork.data.reserve_bytes/1048576} MiB free before starting.</p>}
-  </div>}
+  <label htmlFor="request-description">What would you like Workbench to do?</label>
+  <textarea id="request-description" aria-label="Description" required maxLength={6000} rows={5} placeholder="What happened, what you expected, and what you did just before it happened…" value={body.description} onChange={e=>setBody({...body,description:e.target.value})}/>
+  <label htmlFor="request-title">Title <span>Optional · A short name for this task</span></label>
+  <input id="request-title" maxLength={160} value={body.title} onChange={e=>setBody({...body,title:e.target.value})} placeholder="Leave blank to use the first line of your description"/>
+  {unified&&<><label htmlFor="request-kind">Type of work</label><select id="request-kind" value={chosen} onChange={e=>changeWork(e.target.value as WorkChoice)}>{workChoices.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></>}
+  {future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)&&<div className="soft-callout"><strong>Saved for later, without starting work.</strong><p>This kind of task is part of the product plan, but cannot run in this release. You can keep your description in the backlog. No model request or execution approval will be created.</p></div>}
+  {localWork.data?.enabled&&!future&&<p className="task-support-note">Available now: supported offline Lua bugs and existing-test coverage. Work happens in a protected copy; the installed addon is not changed.</p>}
   <details className="request-options" open={!unified || kind==='issue' || Boolean(localWork.data?.enabled || regression || body.supported_task) || undefined}>
   <summary>Task options</summary>
-  {unified && <><label htmlFor="request-kind">What should Workbench do?</label>
-  <select id="request-kind" value={kind} onChange={e=>chooseKind(e.target.value as 'feature'|'issue',body)}><option value="feature">Plan, inspect or test</option><option value="issue">Investigate a bug</option></select></>}
   {kind==='feature' && <>
     <label className="check-label"><input type="checkbox" checked={Boolean(regression)} onChange={e=>setBody({
-      ...body,supported_task:null,local_planning:null,regression_tests:e.target.checked?{
+      ...body,requested_work:e.target.checked?null:'feature',supported_task:null,local_planning:null,regression_tests:e.target.checked?{
         acceptance:regressionAcceptance.split('\n').filter(s=>s.trim()),
         test_paths:regressionPaths.split(/[\s,]+/).filter(Boolean),
       }:null,
@@ -148,7 +157,7 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
   </>}
   {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,supported_task:item?.id||null,local_planning:null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Use my description</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Use a ready-made task with a fixed plan. Your comments stay with the request. The fixed scope sets what can run.</p></>}
   {kind==='issue' && <><label className="check-label"><input type="checkbox" checked={lua} onChange={e=>{setLua(e.target.checked);if(!e.target.checked)setBody({...body,lua_error:''});}}/>Add a Lua error <span>Optional</span></label>{lua && <><label htmlFor="lua-error">Lua error <span>Plain text · never executed</span></label><textarea className="code-input" id="lua-error" maxLength={6000} rows={6} value={body.lua_error || ''} onChange={e=>setBody({...body,lua_error:e.target.value})}/></>}</>}</details>
-  <label htmlFor="request-interface">Does this request change the interface?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.</p>
+  <label htmlFor="request-interface">Does this change how the addon looks?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.</p>
   {localWork.data?.enabled&&(regression||bugWork)&&<div role="group" aria-label="Planning provider">
     <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('qwen-')||false} disabled={body.visual_requirement!=='nonvisual'}
       onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>{bugWork?'Allow local Qwen to investigate this report':'Allow one local Qwen request to plan this task'}</span></label>
@@ -168,10 +177,10 @@ function IntakeFormBody({kind, description, chooseKind, unified}: {
       </>}
     </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
     {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. Each operation permits up to sixteen requests to inspect source and prepare a scope. Earlier operations and usage remain recorded; this is not a subscription allowance. Each phase has a thirty-minute timeout; each request has a five-minute timeout. It cannot edit files or publish. If a real-world detail is missing, Workbench may ask for information and separate permission to continue with the same provider.</p>}
-    <p className="detail-copy">Choose “Does not change the interface” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. {bugWork?'Permission expires after 45 minutes; the investigation runs for at most 30 minutes.':'Permission expires after 30 minutes.'} Fallback applies only to planning before generation starts. Failed, partial or uncertain generation stops for review. Review the plan and approve the run separately. The run keeps the provider that made the plan.</p>
+    <p className="detail-copy">Choose “Behavior or data only” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. {bugWork?'Permission expires after 45 minutes; the investigation runs for at most 30 minutes.':'Permission expires after 30 minutes.'} Fallback applies only to planning before generation starts. Failed, partial or uncertain generation stops for review. Review the plan and approve the run separately. The run keeps the provider that made the plan.</p>
   </div>}
 </fieldset>
-  <p className="detail-copy">{localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':(bugWork?'Your report will be saved. Model investigation needs your permission.':'Your request will be saved. Model planning requires the test coverage option and your permission.')):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.title.trim() || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
+  <p className="detail-copy">{future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)?'Your idea will be saved in the backlog. No work will start.':localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':(bugWork?'Your report will be saved. Model investigation needs your permission.':'Your request will be saved. Model planning requires the test coverage option and your permission.')):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)?'Save for later':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
 }
 
 export function IntakeDetail() {
@@ -187,7 +196,7 @@ export function IntakeDetail() {
   useEffect(()=>{if(!selected && query.data?.proposals[0]) setSelected(query.data.proposals[0].id);},[selected,query.data]);
   async function act(suffix:string, body:unknown, method='POST') {
     setError('');setBusy(true);
-    try { await mutate(`/api/intake/${identity}/${suffix}`,body,method); const refreshed = await query.refetch(); if(['scope','research-revision'].includes(suffix) && refreshed.data?.proposals[0]) setSelected(refreshed.data.proposals[0].id); void client.invalidateQueries({queryKey:['backlog']}); }
+    try { await mutate(`/api/intake/${identity}/${suffix}`,body,method); const refreshed = await query.refetch(); if(['scope','research-revision'].includes(suffix) && refreshed.data?.proposals[0]) setSelected(refreshed.data.proposals[0].id); void client.invalidateQueries({queryKey:['backlog']}); void client.invalidateQueries({queryKey:['workspace']}); }
     catch(e){setError((e as Error).message);throw e;} finally {setBusy(false);}
   }
   if(!query.data) return <div className="panel" role="status">{query.isPending?'Opening request…':<>Request unavailable. <Button onClick={()=>void query.refetch()}>Try again</Button></>}</div>;
@@ -216,7 +225,7 @@ export function IntakeDetail() {
   const receipt = data.decisions.find(d => d.proposal_id===data.proposals[0]?.id && !d.payload.execution_continuation);
   const currentTasks = data.tasks.filter(t => t.kind==='task' && (t.proposal_id===data.proposals[0]?.id || (!t.proposal_id && !p)) && !t.scope_review_required);
   return <div className="intake-page task-detail">
-    <Link className="back-link" to="/intake"><ArrowLeft size={15}/>Submitted tasks</Link>
+    <Link className="back-link" to="/backlog"><ArrowLeft size={15}/>All tasks</Link>
     {params.has('received') && data.status==='queued' && <p className="soft-callout" role="status">Request received and saved. You can leave this page and come back for the next step.</p>}
     <div className="page-heading detail-heading"><div><p className="eyebrow">{sample?'Sample task':data.original.kind==='issue'?'Bug investigation':data.original.regression_tests?'Test coverage':'Task request'}</p>
       <h1>{sample?'Sample plan: tidy a label':data.original.title}</h1>{!asking && <p className="original-text task-request-copy">{data.original.regression_tests
@@ -224,7 +233,8 @@ export function IntakeDetail() {
         : data.original.description}</p>}</div>
       <Button variant="ghost" onClick={()=>void query.refetch()}><RefreshCw size={15}/>Refresh</Button>
     </div>
-    <TaskJourney item={data}/>
+    {data.status==='unavailable'?<section className="panel"><h2>Saved for later</h2><p>Your request is in the backlog. This kind of work is not executable yet. No model request, repair or publication has been authorized.</p></section>:<TaskJourney item={data}/>}
+
     {query.isError && <p role="alert" className="form-error">Refresh failed. Showing the last saved record. Refresh before making a decision.</p>}
     {error && <p className="form-error" role="alert">{error}</p>}
     {asking && clarification && <section className="panel question-panel" aria-labelledby="task-question">
@@ -249,7 +259,7 @@ export function IntakeDetail() {
       </>}
     </section>}
     {waiting&&<p role="status" className="soft-callout">{waiting.message}</p>}
-    {Boolean(data.provider_activity?.length)&&<section className="soft-callout" aria-label="Task model activity">
+    {Boolean(data.provider_activity?.length)&&<details className="soft-callout" aria-label="Task model activity"><summary>Provider activity and earlier attempts</summary>
       <h2>Model activity for this task</h2>
       <ul>{data.provider_activity?.map(attempt=><li key={attempt.id}>
         <strong>{attempt.purpose==='capability_validation'?'Cancellation check':attempt.purpose==='implementation'?'Implementation':attempt.purpose==='check_preparation'?'Preparing checks':'Planning'}</strong>
@@ -258,7 +268,7 @@ export function IntakeDetail() {
         <p>{attempt.routing_reason}</p>
         {(attempt.actual_model||attempt.requested_model)&&<p className="small-text">{attempt.actual_model?'Reported model':'Selected model'} {attempt.actual_model||attempt.requested_model}</p>}
       </li>)}</ul>
-    </section>}
+    </details>}
     {activeJobs.length > 0 && <section className="panel"><h2>{activeJobs.some(j=>j.kind==='behavioral_preparation')?'Repair preparation needs attention':'Why planning stopped'}</h2>
       {activeJobs.map(job=><div key={job.id}><p>{job.message}</p>
         {job.kind==='behavioral_preparation'&&p?.task_contract?.bug_intent&&data.decisions.some(d=>d.status==='applied'&&d.proposal_id===p.id)
@@ -329,7 +339,7 @@ function ScopeControl({data,proposal,act,busy}: {data:Intake;proposal:Proposal;a
   return <div className="human-scope">
     <details open={scope.origin==='legacy'}><summary>Change what this plan may cover</summary>
     <p><strong>In-game changes</strong> {scopeLabels[scope.visual_requirement]}</p>
-    {scope.origin==='legacy' && <p>Confirm what may change before approving this older request.</p>}<form className="scope-form" onSubmit={e=>{e.preventDefault();void act('scope',{command_id:command,proposal_id:proposal.id,binding:proposal.binding,visual_requirement:visual,stage,note}).catch(()=>{});}}><label htmlFor="review-interface">Does this request change the interface?</label><select id="review-interface" disabled={!current || busy} value={visual} onChange={e=>setVisual(e.target.value as ScopeInput['visual_requirement'])}><ScopeOptions/></select><label htmlFor="review-stage">What may Workbench plan?</label><select id="review-stage" disabled={!current || busy} value={stage} onChange={e=>setStage(e.target.value as ScopeInput['stage'])}><option value="implementation">Plan possible changes</option><option value="research">Research only</option></select><label htmlFor="scope-note">Why are you changing the scope?</label><textarea id="scope-note" required maxLength={1600} rows={2} disabled={!current || busy} value={note} onChange={e=>setNote(e.target.value)}/><p className="small-text">Creates a new proposal for review. Previous decisions and attachments stay in history; attach references to the new revision before approval.</p><Button disabled={!current || busy || !note.trim()}>Save and review the updated plan</Button></form></details>
+    {scope.origin==='legacy' && <p>Confirm what may change before approving this older request.</p>}<form className="scope-form" onSubmit={e=>{e.preventDefault();void act('scope',{command_id:command,proposal_id:proposal.id,binding:proposal.binding,visual_requirement:visual,stage,note}).catch(()=>{});}}><label htmlFor="review-interface">Does this change how the addon looks?</label><select id="review-interface" disabled={!current || busy} value={visual} onChange={e=>setVisual(e.target.value as ScopeInput['visual_requirement'])}><ScopeOptions/></select><label htmlFor="review-stage">What may Workbench plan?</label><select id="review-stage" disabled={!current || busy} value={stage} onChange={e=>setStage(e.target.value as ScopeInput['stage'])}><option value="implementation">Plan possible changes</option><option value="research">Research only</option></select><label htmlFor="scope-note">Why are you changing the scope?</label><textarea id="scope-note" required maxLength={1600} rows={2} disabled={!current || busy} value={note} onChange={e=>setNote(e.target.value)}/><p className="small-text">Creates a new proposal for review. Previous decisions and attachments stay in history; attach references to the new revision before approval.</p><Button disabled={!current || busy || !note.trim()}>Save and review the updated plan</Button></form></details>
     <details><summary>Human scope history</summary>{data.scope_history.map(s=><p key={s.revision}>Revision {s.revision}: {scopeLabels[s.visual_requirement]} · {s.stage} · {s.note}</p>)}</details></div>;
 }
 

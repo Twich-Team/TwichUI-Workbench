@@ -6,13 +6,16 @@ test.beforeEach(()=>fixture('reset'));
 test('display preferences persist, preserve dirty edits, reject conflicts and use exact ownership',async ({page},info)=>{
   await page.goto('/settings');
   await expect(page.getByRole('heading',{name:'Settings',exact:true})).toBeVisible();
+  await page.getByText('Display and monitoring preferences',{exact:true}).click();
   await expect(page.getByText('Saved. Preferences apply immediately.',{exact:true})).toBeVisible();
   await page.getByLabel('Default chart time range').selectOption('24');
   await page.getByLabel('Display refresh',{exact:true}).selectOption('15');
-  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Work',exact:true}).click();
+  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Dashboard',exact:true}).click();
   await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Settings',exact:true}).click();
+  await page.getByText('Display and monitoring preferences',{exact:true}).click();
   await expect(page.getByLabel('Default chart time range')).toHaveValue('24');
   await page.reload();
+  await page.getByText('Display and monitoring preferences',{exact:true}).click();
   await expect(page.getByLabel('Display refresh',{exact:true})).toHaveValue('15');
   await page.getByRole('button',{name:'Save display preferences'}).click();
   await expect(page.getByText('Display preferences saved and applied.')).toBeVisible();

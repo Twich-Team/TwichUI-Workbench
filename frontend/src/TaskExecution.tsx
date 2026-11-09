@@ -3,6 +3,7 @@ import {useQuery} from '@tanstack/react-query';
 import {Link} from 'react-router-dom';
 import {mutate} from './api';
 import {Button} from './components/ui/button';
+import {ExecutionResult} from './RealExecutionReview';
 import {RunApproval} from './RunApproval';
 import {runStage, executionProgress} from './taskProgress';
 import {executionQuery} from './TaskOverview';
@@ -48,6 +49,7 @@ export function TaskExecution({intakeId,taskId,separateApproval,showWaiting=fals
       {data.runs.length===10&&<p>Showing up to 10 recent runs. <Link to="/executions">All run results</Link></p>}
       {data.runs.length>1&&<details><summary>Earlier runs ({data.runs.length-1})</summary><ul>{data.runs.slice(1).map(run=><li key={run.id}><Link to={'/executions/'+encodeURIComponent(run.id)}>{runStage[run.status]||'Recorded run'}</Link><p>{run.message}</p></li>)}</ul></details>}
     </section>}
+    {latest?.candidate_id&&!data.session?.can_stop&&<ExecutionResult identity={latest.id} embedded/>}
     {separateApproval&&!reviewRun&&<details><summary>Permission for this run</summary><RunApproval intakeId={intakeId} taskId={taskId}/></details>}
   </>;
 }

@@ -19,9 +19,20 @@ trusted home LAN. Each browser device must trust the existing Workbench server C
 for HTTPS. This is server identification, not a client certificate or dashboard
 password. Any device on the trusted subnet has operator access.
 
+## Everyday navigation
+
+The styled interface uses Dashboard, Backlog, Results and Settings. Dashboard
+shows actual work, questions/approvals and recent outcomes. Search and status
+filters in Backlog retain completed and failed requests. Results leads to saved
+patches and checks. Older sample/imported records remain in advanced history.
+Settings links model configuration; opening it does not change saved choices.
+Features, inspections, simulator and data work can be saved for later; their
+labels explain that no model or execution starts. Check CURRENT_STATUS for the
+actual installed candidate; this guide alone is not installation evidence.
+
 ## Report the next supported bug
 
-1. Choose **Create a task**, then **Investigate a bug**.
+1. Choose **Create a task**. **Fix an addon issue** is the default work type.
 2. Describe what happens, what you expected, and what triggers it. Include a Lua
    error if there is one. You do not need to name files or register a new task type.
 3. Choose the provider policy and review its consent. Local Qwen keeps the source

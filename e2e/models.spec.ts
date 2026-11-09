@@ -40,7 +40,7 @@ test('saved policy stays inactive, drafts and conflicts survive overview/back na
   await page.getByRole('link',{name:'Continue editing'}).click();
   await expect(page.getByLabel('Preferred model · Claude')).toHaveValue('explicit-unverified-model');
   await page.getByRole('link',{name:'Settings',exact:true}).click();
-  await page.getByRole('link',{name:'Models',exact:true}).click();
+  await page.getByRole('link',{name:'Provider availability and activity',exact:true}).click();
   await page.getByRole('link',{name:'Continue editing'}).click();
   await routing(page);
   await expect(page.getByRole('combobox',{name:'Preferred backend',exact:true})).toHaveValue('claude');

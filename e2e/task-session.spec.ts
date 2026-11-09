@@ -4,8 +4,8 @@ import {artifactPath} from './output';
 function fixture(action:string){return execFileSync('.venv/bin/python',['scripts/fixture_ctl.py',action],{env:{...process.env,PYTHONPATH:'backend'},stdio:'pipe',encoding:'utf8'}).trim();}
 for(const width of [1440,390])test(`NON-MODEL site session preparation, stop and recovery at ${width}`,async({page})=>{
   fixture('reset');fixture('task-pr-setup');await page.setViewportSize({width,height:1000});
-  await page.goto('/intake/new?kind=feature');await expect(page.getByText('Local Workbench · Task-specific permissions',{exact:true})).toBeVisible();await expect(page.getByText('Local examples or read-only observations · Nothing is published here',{exact:true})).toHaveCount(0);await page.getByLabel('Supported task').selectOption({label:'NON-MODEL supported task'});
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');await page.getByRole('button',{name:'Submit request',exact:true}).click();
+  await page.goto('/intake/new?kind=feature');await expect(page.getByRole('heading',{name:'Request a feature',exact:true})).toBeVisible();await expect(page.getByText('Local examples or read-only observations · Nothing is published here',{exact:true})).toHaveCount(0);await page.getByLabel('Supported task').selectOption({label:'NON-MODEL supported task'});
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();fixture('task-pr-step');await page.reload();
   await page.getByText('Optional permission for this ready-made task to run and open a draft pull request',{exact:true}).click();
   await page.getByLabel('Also allow this task to run and open one draft pull request').check();await page.getByRole('button',{name:'Approve plan and allow this run',exact:true}).click();
@@ -31,11 +31,11 @@ for(const width of [1440,390])test(`NON-MODEL site session preparation, stop and
 for(const width of [1440,390])test(`reviewed certified offer browser approval reaches controlled preparation at ${width}`,async({page})=>{
   fixture('reset');fixture('reviewed-offer-setup');await page.setViewportSize({width,height:1000});
   await page.goto('/intake/new?kind=feature');
-  await page.getByLabel('Title Required').fill('CONTROLLED regression coverage for case normalization');
-  await page.getByLabel('Description Required').fill('In tests/test_normalize.lua cover trimming surrounding spaces and lowercasing names.');
+  await page.getByLabel('Title Optional').fill('CONTROLLED regression coverage for case normalization');
+  await page.getByLabel('Description', {exact:true}).fill('In tests/test_normalize.lua cover trimming surrounding spaces and lowercasing names.');
   await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Names with surrounding spaces and capitals normalize to lowercase.');
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('reviewed-offer-plan');await page.reload();

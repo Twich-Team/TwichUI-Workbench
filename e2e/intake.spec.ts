@@ -7,8 +7,8 @@ type Intake = components['schemas']['IntakeView'];
 async function snapshot(page:Page):Promise<Intake> { return page.request.get('/api/intake/'+page.url().split('/intake/')[1].split('?')[0]).then(r=>r.json()); }
 async function submit(page:Page,kind='feature',title='Guide navigation',description='Keep existing keyboard controls and remember the selected guide step after reload.',lua='') {
   await page.goto(`/intake/new?kind=${kind}`);
-  await page.getByLabel('Title Required').fill(title);
-  await page.getByLabel('Description Required').fill(description);
+  await page.getByLabel('Title Optional').fill(title);
+  await page.getByLabel('Description', {exact:true}).fill(description);
   if(lua) {await page.getByLabel('Add a Lua error').check();await page.getByLabel('Lua error Plain text').fill(lua);}
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
@@ -155,7 +155,7 @@ test('unavailable planning, response-loss intake retry, empty/loading/error stat
   await page.route('**/api/intake?page=*',async route=>{await held;await route.continue();});
   await page.reload();await expect(page.getByText('Opening your tasks…')).toBeVisible();await capture(page,info,'m3-loading-phone');hold!();await expect(page.getByText('No requests yet.')).toBeVisible();await page.unrouteAll({behavior:'wait'});
   await page.route('**/api/intake',async route=>{if(route.request().method()==='POST'){await route.fetch();await route.abort();}else await route.continue();});
-  await page.goto('/intake/new?kind=issue');await page.getByLabel('Title Required').fill('A retained report');await page.getByLabel('Description Required').fill('Repeated behavior with original input that must survive a lost response.');
+  await page.goto('/intake/new?kind=issue');await page.getByLabel('Title Optional').fill('A retained report');await page.getByLabel('Description', {exact:true}).fill('Repeated behavior with original input that must survive a lost response.');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();await expect(page.getByRole('alert')).toBeVisible();
   await page.unroute('**/api/intake');await page.reload();await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
@@ -170,9 +170,10 @@ test('required forms, optional Lua input and enlarged text fit desktop and phone
   for(const width of [1440,390]) {
     await page.setViewportSize({width,height:width===390?844:1000});
     await page.goto('/intake/new?kind=issue');
+    await page.getByLabel('Description',{exact:true}).fill('');
     await expect(page.getByRole('button',{name:'Submit request',exact:true})).toBeDisabled();
-    await page.getByLabel('Title Required').fill('Guide navigation '.repeat(9));
-    await page.getByLabel('Description Required').fill('After reloading a guide, the selected step should stay in place. '.repeat(25));
+    await page.getByLabel('Title Optional').fill('Guide navigation '.repeat(9));
+    await page.getByLabel('Description', {exact:true}).fill('After reloading a guide, the selected step should stay in place. '.repeat(25));
     await page.getByLabel('Add a Lua error').check();
     await page.getByLabel('Lua error Plain text').fill('Interface/Guide.lua:42: literal synthetic error\n'+ 'UnbrokenEvidence'.repeat(30));
     await expect(page.getByRole('button',{name:'Submit request',exact:true})).toBeEnabled();
@@ -212,17 +213,17 @@ test('representative synthetic proposal leads with experience and produces conci
   await page.getByRole('link',{name:'Open in Backlog',exact:true}).click();
   for(const task of example.decomposition.tasks)await expect(page.getByRole('link',{name:new RegExp(task.title)})).toBeVisible();
   for(const width of [1440,390]){await page.setViewportSize({width,height:width===390?844:1000});await overflow(page);await capture(page,info,`closeout-backlog-${width}`);}
-  await page.goto('/');await expect(page.getByRole('link',{name:new RegExp(example.request.title)})).toBeVisible();await capture(page,info,'closeout-work-390');
+  await page.goto('/?source=fixture');await expect(page.getByRole('link',{name:new RegExp(example.request.title)})).toBeVisible();await capture(page,info,'closeout-work-390');
 });
 
 for(const width of [1440,390]) {
   test(`WB-16 · human scope, contradictory planner, blockers and stale approval at ${width}px`,async({page,context},info)=>{
     await page.setViewportSize({width,height:width===390?844:1000});
     await page.goto('/intake/new?kind=feature');
-    const scope=page.getByLabel('Does this request change the interface?');
+    const scope=page.getByLabel('Does this change how the addon looks?');
     await expect(scope).toHaveValue('unclassified');
-    await page.getByLabel('Title Required').fill('Synthetic scope authority review');
-    await page.getByLabel('Description Required').fill('A human requests an interface change; the synthetic planner will contradict that requirement.');
+    await page.getByLabel('Title Optional').fill('Synthetic scope authority review');
+    await page.getByLabel('Description', {exact:true}).fill('A human requests an interface change; the synthetic planner will contradict that requirement.');
     await scope.selectOption('visual');
     await overflow(page);await capture(page,info,`wb16-intake-scope-${width}`);
     await page.getByRole('button',{name:'Submit request',exact:true}).click();
@@ -243,7 +244,7 @@ for(const width of [1440,390]) {
     await other.setViewportSize({width,height:width===390?844:1000});
     await other.goto(page.url());
     await other.getByText('Change what this plan may cover',{exact:true}).click();
-    await other.getByLabel('Does this request change the interface?').selectOption('unclassified');
+    await other.getByLabel('Does this change how the addon looks?').selectOption('unclassified');
     await other.getByLabel('Why are you changing the scope?').fill('Human scope remains uncertain. Keep both reference requirements.');
     await overflow(other);await capture(other,info,`wb16-review-control-${width}`);
     await other.getByRole('button',{name:'Save and review the updated plan'}).click();

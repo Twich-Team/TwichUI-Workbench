@@ -1,5 +1,17 @@
 # Shared design system and provenance
 
+## Active November9 styled-interface assignment
+
+The owner now authorizes the full saved frameless WoW-inspired styling and everyday
+interface delivery. This supersedes older statements below that prohibit broad
+redesign or require the old Work/History/Models navigation. Use Dashboard, Backlog,
+Results, Settings; preserve deep links and working execution/approval safeguards.
+Use the supplied leather materials and reference in `DASHBOARD_ASSETS/README.md`.
+No ornate perimeter frame; crafted headers, functional panel edges, raised controls,
+warm ivory reading text. Current state must come from authoritative records, never
+an LLM summary or a decorative spinner. Future capabilities stay discoverable with
+honest availability. Styling does not authorize new cancellation semantics.
+
 Use the root requirements and standing owner direction for current priorities
 and engineering authority. The dated milestone statements below are historical;
 they do not reimpose old campaign or routine engineering approval restrictions.

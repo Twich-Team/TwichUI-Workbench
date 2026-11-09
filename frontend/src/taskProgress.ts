@@ -32,6 +32,8 @@ export function intakeProgress(item: Intake): Progress {
   const proposal = item.proposals[0];
   const research = proposal?.research_only || proposal?.content.delivery === 'research';
   switch (item.status) {
+    case 'unavailable':
+      return {step:0,title:'Saved for later',next:'This kind of work is not executable yet. No model or repair has started.',group:'attention'};
     case 'queued':
       return {step: 0, title: 'Waiting to start', next: item.jobs.find(job=>job.status==='queued'&&job.message.startsWith('Waiting for '))?.message||'Your request is saved. Planning is next.', group: 'current'};
     case 'investigating':

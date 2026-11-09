@@ -1,3 +1,37 @@
+## Styled-interface delivery in progress — November 9, 2026
+
+Current owner assignment authorizes the selected frameless visual direction and
+installation/demonstration under standing authority. Installed baseline60/b067449
+is still running unchanged; its accepted flight-path result and all four REAL
+provider cases were verified before development. No new provider call or cutover.
+Development adds four main routes, real-state dashboard/backlog/results, natural
+shared entry including honestly unavailable future work, inline patch/checks and
+model settings clarity. Exact supplied visual direction is saved at repository
+root; original JPEGs, decoded named PNGs and efficient WebPs have provenance.
+Private evidence and verified372-row baseline copy:
+/home/rich/.local/share/TwichUI-Workbench/styled-interface-20261109.
+Browser desktop/phone inspection done; new focused interactions/18backend and
+32frontend tests pass. Complete backend1909/8opt-in skips and32frontend pass;
+55focused state/boundary/scope checks cover the final expired-permission attention
+projection after that full run. Final static/contracts/build/migrations pass.
+All112default browser cases now pass across full run plus resolved affected cases;
+both opt-ins pass separately. A single final114-case run with opt-ins is running.
+12visual comparisons pass after deliberate updates and actual image inspection. Four controlled provider browser routes and two actual
+confined separate-process bug journeys pass on styled code (scripted providers,
+not new real-model evidence). Final aggregate browser regression is
+in progress; retain its outcome and verify candidate bindings before activation.
+Read-only snapshot preview9187 (owned session52291) denies all mutations and has
+no worker. Shut it down before final cleanup; production9487 unaffected. A native
+test first lacked delegated cgroup configuration; corrected via owned bounded
+user unit workbench-styled-native-20261109, completed69.69s with2passes; no grant
+change/provider calls. Preserve original failed log and unique evidence.
+Next: finish browser/static/visual verification, seal candidate, preserve current
+history plus4later-rejection files, checked deployment via existing admin helper,
+new representative Qwen-only task through normal styled browser decisions (do not
+replay successful flight/four provider cases), restart/history/network/model
+restoration and installed screenshots. No owner action needed. No old campaign
+caps or routine renewals. Broader future features remain unfinished/discoverable.
+
 ## Actual current continuation — November 9, 2026, 07:00 UTC
 
 **Installed60/b06744976343fd4b6e4a1a306866118ab972921a verified and left running.**

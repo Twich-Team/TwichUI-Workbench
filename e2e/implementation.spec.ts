@@ -8,9 +8,9 @@ test.beforeEach(()=>fixture('reset'));
 
 async function prepare(page:Page) {
   await page.goto('/intake/new?kind=feature');
-  await page.getByLabel('Title Required').fill(definition.request.title);
-  await page.getByLabel('Description Required').fill(definition.request.description);
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Title Optional').fill(definition.request.title);
+  await page.getByLabel('Description', {exact:true}).fill(definition.request.description);
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('planning');

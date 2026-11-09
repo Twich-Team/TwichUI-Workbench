@@ -6,7 +6,7 @@ for(const {width,hold} of [{width:1440,hold:false},{width:390,hold:false},{width
   fixture('reset');fixture('task-pr-setup');await page.setViewportSize({width,height:1000});
   await page.goto('/intake/new?kind=feature');
   await page.getByLabel('Supported task').selectOption({label:'NON-MODEL supported task'});
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('task-pr-step');await page.reload();

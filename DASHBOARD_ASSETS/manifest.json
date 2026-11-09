@@ -1,0 +1,58 @@
+[
+  {
+    "role": "BACKGROUND_LEATHER",
+    "source": "DASHBOARD_ASSETS/supplied-originals/1-Pasted-Image-1.jpg",
+    "source_sha256": "7dee8ef740a181987d4fe18c96cafd713788fd720dca8d14e5f43a246564afc3",
+    "pixels": [
+      1254,
+      1254
+    ],
+    "png": "DASHBOARD_ASSETS/BACKGROUND_LEATHER.png",
+    "png_role": "Lossless decoded copy of supplied JPEG, not a recovered original PNG",
+    "web": "frontend/public/art/dashboard/background_leather.webp",
+    "web_bytes": 6692,
+    "derivative": "512px source mirrored to1024px matching-edge tile; no AI-generated content",
+    "web_sha256": "1fa60a01fb9ece03c48fc6602c2c4a88917f1dd0ab50a339c609c7e62fbe3fa7"
+  },
+  {
+    "role": "HEADER_LEATHER",
+    "source": "DASHBOARD_ASSETS/supplied-originals/2-Pasted-Image-2.jpg",
+    "source_sha256": "23b85630f1451b4cab5617a4b93020e7e5f2aff04ba1abaa90e1be81e66b16e7",
+    "pixels": [
+      1254,
+      1254
+    ],
+    "png": "DASHBOARD_ASSETS/HEADER_LEATHER.png",
+    "png_role": "Lossless decoded copy of supplied JPEG, not a recovered original PNG",
+    "web": "frontend/public/art/dashboard/header_leather.webp",
+    "web_bytes": 29706,
+    "derivative": "512px source mirrored to1024px matching-edge tile; no AI-generated content",
+    "web_sha256": "62f194d83face9f284ce6f285d31faf0c22bdd1cd4d85e5cc7da80bfb5a91597"
+  },
+  {
+    "role": "PANEL_INTERIOR_LEATHER",
+    "source": "DASHBOARD_ASSETS/supplied-originals/3-Pasted-Image-3.jpg",
+    "source_sha256": "af0e83a745715b111281ace079754555d35118b67fb1b1cdecc4b6087e4071f1",
+    "pixels": [
+      1254,
+      1254
+    ],
+    "png": "DASHBOARD_ASSETS/PANEL_INTERIOR_LEATHER.png",
+    "png_role": "Lossless decoded copy of supplied JPEG, not a recovered original PNG",
+    "web": "frontend/public/art/dashboard/panel_interior_leather.webp",
+    "web_bytes": 8344,
+    "derivative": "512px source mirrored to1024px matching-edge tile; no AI-generated content",
+    "web_sha256": "8ae264b979fb22dabdf0acb788466956a7d78d4c6185474d1cd37824f694caeb"
+  },
+  {
+    "role": "DASHBOARD_MOCKUP_VISUAL_DIRECTION_CLEAN",
+    "source": "DASHBOARD_ASSETS/supplied-originals/4-Pasted-Image-4.jpg",
+    "source_sha256": "3551a3ba1614f58aa3cee334e8345e136dbeac028b69b5332822ac478ea9883c",
+    "pixels": [
+      1280,
+      640
+    ],
+    "png": "DASHBOARD_MOCKUP_VISUAL_DIRECTION_CLEAN.png",
+    "png_role": "Lossless decoded copy of supplied JPEG, not a recovered original PNG"
+  }
+]

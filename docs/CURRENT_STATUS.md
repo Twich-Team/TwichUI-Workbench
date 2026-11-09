@@ -1,3 +1,10 @@
+# Styling delivery in progress — November 9, 2026
+
+The accepted app remains installed at60/b067449. Styled development is under
+browser/regression verification; no styled cutover or new real-model trial yet.
+CONTINUATION links current evidence and next steps. The verified functional
+status below remains the baseline, not a claim that styling is installed.
+
 # Current status — November 9, 2026, 07:00 UTC
 
 **A real flight-path repair has completed through the installed application.**

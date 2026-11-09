@@ -5,11 +5,11 @@ test.beforeEach(()=>fixture('reset'));
 
 test('ordinary regression request prepares a bound contract without a registered recipe or run',async({page},info)=>{
   await page.goto('/intake/new?kind=feature');
-  await page.getByLabel('Title Required').fill('Regression coverage for invalid profile names');
-  await page.getByLabel('Description Required').fill('In tests/test_profiles.lua cover rejecting invalid names while preserving the selected profile.');
+  await page.getByLabel('Title Optional').fill('Regression coverage for invalid profile names');
+  await page.getByLabel('Description', {exact:true}).fill('In tests/test_profiles.lua cover rejecting invalid names while preserving the selected profile.');
   await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Invalid names are rejected.\nThe selected profile stays unchanged.');
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('regression-planning');
@@ -45,11 +45,11 @@ test('ordinary regression request prepares a bound contract without a registered
 test('missing target is explained and clarified without granting permissions',async({page},info)=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto('/intake/new?kind=feature');
-  await page.getByLabel('Title Required').fill('Regression coverage for truncated sharing payloads');
-  await page.getByLabel('Description Required').fill('Exercise rejection of a truncated settings payload.');
+  await page.getByLabel('Title Optional').fill('Regression coverage for truncated sharing payloads');
+  await page.getByLabel('Description', {exact:true}).fill('Exercise rejection of a truncated settings payload.');
   await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('A truncated payload does not apply any settings.');
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('regression-planning');
@@ -72,11 +72,11 @@ test('missing target is explained and clarified without granting permissions',as
 for(const width of [1440,390])test(`generated behavioral examples need independent review before a certified offer at ${width}`,async({page})=>{
   fixture('reviewed-offer-setup');await page.setViewportSize({width,height:1000});
   await page.goto('/intake/new?kind=feature');
-  await page.getByLabel('Title Required').fill('CONTROLLED regression request with generated behavioral checks');
-  await page.getByLabel('Description Required').fill('In tests/test_normalize.lua cover trimming surrounding spaces and lowercasing names.');
+  await page.getByLabel('Title Optional').fill('CONTROLLED regression request with generated behavioral checks');
+  await page.getByLabel('Description', {exact:true}).fill('In tests/test_normalize.lua cover trimming surrounding spaces and lowercasing names.');
   await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Names with surrounding spaces and capitals normalize to lowercase.');
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('reviewed-offer-scenario-plan');await page.reload();
@@ -121,11 +121,11 @@ for(const width of [1440,390])test(`generated behavioral examples need independe
 test('generated expectation mismatch stays a specific browser hold after review',async({page})=>{
   fixture('reviewed-offer-setup');await page.setViewportSize({width:390,height:1000});
   await page.goto('/intake/new?kind=feature');
-  await page.getByLabel('Title Required').fill('CONTROLLED wrong expectation must hold');
-  await page.getByLabel('Description Required').fill('In tests/test_normalize.lua cover trimming spaces and lowercasing names.');
+  await page.getByLabel('Title Optional').fill('CONTROLLED wrong expectation must hold');
+  await page.getByLabel('Description', {exact:true}).fill('In tests/test_normalize.lua cover trimming spaces and lowercasing names.');
   await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Names become lowercase.');
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('reviewed-offer-scenario-wrong-plan');await page.reload();
@@ -152,13 +152,13 @@ for(const width of [1440,390])test(`application worker prepares grounded ordinar
   await page.setViewportSize({width,height:1000});
   const client=width===390;
   await page.goto('/intake/new?kind=feature');
-  await page.getByLabel('Title Required').fill(client?'Cover storing a trimmed last name':'Cover lowercase name normalization');
-  await page.getByLabel('Description Required').fill(client
+  await page.getByLabel('Title Optional').fill(client?'Cover storing a trimmed last name':'Cover lowercase name normalization');
+  await page.getByLabel('Description', {exact:true}).fill(client
     ? `In tests/test_client.lua cover trimming spaces before storing the last name.\n${clientExample}`
     : `In tests/test_normalize.lua cover trimming spaces and lowercasing names.\n${moduleExample}`);
   await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill(client?'The last name stores bob after a spaced input.':'Spaces and capital letters normalize to alice.');
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   const planned=JSON.parse(fixture('reviewed-offer-automatic-worker'));
@@ -201,13 +201,13 @@ for(const width of [1440,390])test(`application worker prepares grounded ordinar
 test('grounded intake asks for exact example values before opening approval',async({page})=>{
   fixture('reviewed-offer-automatic-setup');
   await page.goto('/');
-  await page.getByRole('link',{name:'Create a task',exact:true}).click();
-  await page.getByText('Task options',{exact:true}).click();
-  await page.getByLabel('Title Required').fill('Cover lowercase name normalization');
-  await page.getByLabel('Description Required').fill('Synthetic fixture only. In tests/test_normalize.lua cover trimming spaces and lowercasing names.');
+  await page.getByRole('link',{name:'Create a task',exact:true}).filter({visible:true}).click();
+  await page.getByLabel('Type of work').selectOption('coverage');
+  await page.getByLabel('Title Optional').fill('Cover lowercase name normalization');
+  await page.getByLabel('Description', {exact:true}).fill('Synthetic fixture only. In tests/test_normalize.lua cover trimming spaces and lowercasing names.');
   await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Spaces and capital letters normalize to alice.');
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   const held=JSON.parse(fixture('reviewed-offer-automatic-worker'));
@@ -242,11 +242,11 @@ test('grounded intake asks for exact example values before opening approval',asy
 test('application preparation policy denial is a specific hold without a duplicate retry button',async({page})=>{
   fixture('reviewed-offer-automatic-setup');await page.setViewportSize({width:390,height:1000});
   await page.goto('/intake/new?kind=feature');
-  await page.getByLabel('Title Required').fill('Cover lowercase normalization with reviewed policy');
-  await page.getByLabel('Description Required').fill(`In tests/test_normalize.lua cover trimming spaces and lowercasing names.\n${moduleExample}`);
+  await page.getByLabel('Title Optional').fill('Cover lowercase normalization with reviewed policy');
+  await page.getByLabel('Description', {exact:true}).fill(`In tests/test_normalize.lua cover trimming spaces and lowercasing names.\n${moduleExample}`);
   await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Spaces and capital letters normalize to alice.');
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('reviewed-offer-automatic-worker');await page.reload();
@@ -269,10 +269,10 @@ test('application preparation policy denial is a specific hold without a duplica
 async function openLocalOffer(page: import('@playwright/test').Page) {
   fixture('reviewed-offer-automatic-setup');
   await page.goto('/');
-  await page.getByRole('link',{name:'Create a task',exact:true}).click();
-  await page.getByText('Task options',{exact:true}).click();
-  await page.getByLabel('Title Required').fill('Cover lowercase name normalization');
-  await page.getByLabel('Description Required').fill('Cover trimming spaces and lowercasing names.');
+  await page.getByRole('link',{name:'Create a task',exact:true}).filter({visible:true}).click();
+  await page.getByLabel('Type of work').selectOption('coverage');
+  await page.getByLabel('Title Optional').fill('Cover lowercase name normalization');
+  await page.getByLabel('Description', {exact:true}).fill('Cover trimming spaces and lowercasing names.');
   await page.getByLabel('Add a check for existing behavior').check();
   await page.getByLabel('Expected test results').fill('Spaces and capital letters normalize to alice.');
   await page.getByText('Optional test details',{exact:true}).click();
@@ -281,7 +281,7 @@ async function openLocalOffer(page: import('@playwright/test').Page) {
   await page.getByLabel('Example input',{exact:true}).fill('  ALICE ');
   await page.getByLabel('Expected example result',{exact:true}).fill('alice');
   await page.getByLabel('Incorrect example result to reject',{exact:true}).fill('ALICE');
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   const planned=JSON.parse(fixture('reviewed-offer-automatic-worker'));
@@ -391,8 +391,8 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
       await review.screenshot({path:artifactPath(`local-browser/result-${width}.png`)});
     }
     await page.goto('/');
-    const recent=page.locator('.task-lane').filter({has:page.getByRole('heading',{name:'Recent outcomes'})});
-    await expect(recent.getByRole('link',{name:/Cover lowercase name normalization.*Checks passed/})).toBeVisible();
+    const recent=page.locator('.workshop-panel').filter({has:page.getByRole('heading',{name:'Recent outcomes',exact:true})});
+    await expect(recent.getByRole('link',{name:/Cover lowercase name normalization.*Ready to review/})).toBeVisible();
     for(const width of [1440,390]){
       await page.setViewportSize({width,height:1000});
       await overflow(page);
@@ -442,7 +442,7 @@ test('expired local approval holds the task without starting a run', async ({pag
   await expect(page.getByRole('button',{name:'Approve local run',exact:true})).toHaveCount(0);
   await page.goto('/');
   await expect(page.getByRole('heading',{name:'Needs your attention'})).toBeVisible();
-  await expect(page.locator('.task-lane').filter({has:page.getByRole('heading',{name:'Needs your attention'})}).locator(`a[href="${task}"]`)).toBeVisible();
+  await expect(page.locator('.workshop-panel').filter({has:page.getByRole('heading',{name:'Needs your attention',exact:true})}).locator(`a[href="${task}"]`)).toBeVisible();
 });
 
 test('everyday intake completes two different local tasks in one saved history',async({page})=>{
@@ -454,19 +454,20 @@ test('everyday intake completes two different local tasks in one saved history',
   await page.goto('/models/configure?provider=local');
   await page.getByLabel('Preferred model · Local LLM').selectOption('pilot-qwen38-27b');
   await page.getByRole('button',{name:'Save model preferences'}).click();
-  await expect(page.getByText('Configuration saved; not activated.')).toBeVisible();
+  await expect(page.getByText('Preferences saved for eligible new requests. Each task still needs approval.')).toBeVisible();
   for(const width of [1440,390]){
     const module=width===1440;
     const path=module?'tests/test_normalize.lua':'tests/test_client.lua';
     await page.setViewportSize({width,height:1000});
     await page.goto('/intake/new');
-    await expect(page.getByText('Available for local execution')).toBeVisible();
-    await page.getByLabel('Title Required').fill(module?'Cover lowercase normalization':'Cover the client’s stored name');
-    await page.getByLabel('Description Required').fill(
+    await page.getByLabel('Type of work').selectOption('coverage');
+    await expect(page.getByText(/Available now: supported offline Lua bugs/)).toBeVisible();
+    await page.getByLabel('Title Optional').fill(module?'Cover lowercase normalization':'Cover the client’s stored name');
+    await page.getByLabel('Description', {exact:true}).fill(
       `In ${path} check how spaces are trimmed.\n${module?moduleExample:clientExample}`);
     await page.getByLabel('Add a check for existing behavior').check();
     await page.getByLabel('Expected test results').fill(module?'The normalized name is alice.':'The stored name is bob.');
-    await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+    await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
     await page.getByLabel('Allow one local Qwen request to plan this task').check();
     await overflow(page);
     await page.screenshot({path:artifactPath(`everyday/intake-${width}.png`),fullPage:true});
@@ -495,7 +496,8 @@ test('everyday intake completes two different local tasks in one saved history',
     fixture('reviewed-offer-automatic-tick');
     await expect(page.getByRole('heading',{name:'Preparing approved task'})).toBeVisible();
     fixture('reviewed-offer-automatic-local-pass');
-    const activity=page.getByRole('region',{name:'Task model activity'});
+    const activity=page.locator('details[aria-label="Task model activity"]');
+    await activity.locator('summary').click();
     await expect(activity.getByText(/Explicit one-task owner grant; fallback disabled/)).toBeVisible();
     await page.getByRole('link',{name:'Review changes and checks'}).click();
     const result=page.getByRole('region',{name:'Run result and checks'});
@@ -520,8 +522,9 @@ test('planning provider consent shows both fallback directions on desktop and ph
   for(const width of [1440,390]){
     await page.setViewportSize({width,height:1000});
     await page.goto('/intake/new');
+    await page.getByLabel('Type of work').selectOption('coverage');
     await page.getByLabel('Add a check for existing behavior').check();
-    await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+    await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
     const providers=page.getByRole('group',{name:'Planning provider'});
     const qwen=providers.getByLabel('Allow one local Qwen request to plan this task');
     const codex=providers.getByLabel('Allow one signed-in Codex turn to plan this task');

@@ -9,12 +9,12 @@ test('ordinary bug report reaches a checked local patch through separate browser
   await page.goto('/models/configure?provider=local');
   await page.getByLabel('Preferred model · Local LLM').selectOption('pilot-qwen38-27b');
   await page.getByRole('button',{name:'Save model preferences'}).click();
-  await expect(page.getByText('Configuration saved; not activated.')).toBeVisible();
+  await expect(page.getByText('Preferences saved for eligible new requests. Each task still needs approval.')).toBeVisible();
 
   await page.goto('/intake/new?kind=issue');
-  await page.getByLabel('Title Required').fill('Name normalization leaves uppercase letters');
-  await page.getByLabel('Description Required').fill('Entering ALICE with surrounding spaces returns ALICE. It should return alice.');
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Title Optional').fill('Name normalization leaves uppercase letters');
+  await page.getByLabel('Description', {exact:true}).fill('Entering ALICE with surrounding spaces returns ALICE. It should return alice.');
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByLabel('Allow local Qwen to investigate this report').check();
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();

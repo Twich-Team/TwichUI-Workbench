@@ -77,7 +77,7 @@ test('missing descriptive metadata has honest fallbacks', async ({ page }, info)
 for (const width of [390,1440]) {
   test(`catalog regression views at ${width}px`, async ({page},info) => {
     await page.setViewportSize({width,height:1000});
-    await page.goto('/backlog');
+    await page.goto('/backlog?source=fixture');
     await page.getByRole('button',{name:'Expand Make guide progress easier to follow'}).click();
     await page.getByRole('button',{name:'Expand Clear, predictable step selection'}).click();
     await expect(page.getByRole('link',{name:/Keep your place in a guide/})).toBeVisible();
@@ -87,9 +87,19 @@ for (const width of [390,1440]) {
     await expect(page.getByRole('heading',{name:'Keep your place in a guide'})).toBeVisible();
     await capture(page,info,`m2-detail-${width}`);
     await expect(page).toHaveScreenshot(`catalog-detail-${width}.png`,{fullPage:true});
-    await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'History'}).click();
+    await page.goto('/history');
     await expect(page.getByRole('heading',{name:'Guide inspection found no additional changes'})).toBeVisible();
     await capture(page,info,`m2-history-${width}`);
     await expect(page).toHaveScreenshot(`catalog-history-${width}.png`,{fullPage:true});
   });
 }
+
+for(const width of [1440,390])test(`selected workshop dashboard and everyday entry ${width}px`,async({page},info)=>{
+ await page.setViewportSize({width,height:width===390?844:1000});
+ await page.goto('/');await expect(page.getByText('No work running',{exact:true})).toBeVisible();
+ await overflow(page);await capture(page,info,`selected-dashboard-${width}`);
+ await expect(page).toHaveScreenshot(`selected-dashboard-${width}.png`,{fullPage:true,mask:[page.locator('.freshness-note')]});
+ await page.getByRole('link',{name:'Create a task',exact:true}).filter({visible:true}).click();
+ await expect(page.getByLabel('Description',{exact:true})).toBeVisible();await overflow(page);
+ await expect(page).toHaveScreenshot(`selected-task-entry-${width}.png`,{fullPage:true});
+});

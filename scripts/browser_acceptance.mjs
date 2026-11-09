@@ -17,7 +17,7 @@ function originalRequest(value, expected) {
   check(uuid(value.request_id), 'intake identity missing');
   const submitted = without(value, 'request_id');
   // Response schemas materialize optional nulls. No non-null extra request data is allowed.
-  for (const key of ['local_planning', 'supported_task', 'regression_tests']) if (submitted[key] === null) delete submitted[key];
+  for (const key of ['local_planning', 'supported_task', 'regression_tests', 'requested_work']) if (submitted[key] === null) delete submitted[key];
   if (submitted.regression_tests?.text_example === null)
     submitted.regression_tests = without(submitted.regression_tests, 'text_example');
   exact(submitted, expected, 'intake request changed');
@@ -312,7 +312,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
       await page.getByText('Optional test details', {exact:true}).click();
       await page.getByLabel('Existing test paths').fill(candidate.request.regression_tests.test_paths[0]);
     }
-    await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+    await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
     const local = candidate.request.local_planning.startsWith('qwen-');
     await page.getByRole('checkbox', {name:local ? (bug ? /Allow local Qwen to investigate/ : /Allow one local Qwen request/) : (bug ? /Allow signed-in Codex to investigate/ : /Allow one signed-in Codex turn/)}).check();
     if (candidate.reason) await page.getByRole('checkbox', {name:local ?

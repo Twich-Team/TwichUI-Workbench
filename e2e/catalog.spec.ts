@@ -5,7 +5,7 @@ import { fixture, capture, overflow, openReview, answerAll } from './helpers';
 test.beforeEach(() => fixture('reset'));
 
 test('navigate hierarchy, detail, search and browser Back/Forward', async ({ page }, info) => {
-  await page.goto('/backlog');
+  await page.goto('/backlog?source=fixture');
   await page.getByRole('button', { name: 'Expand Make guide progress easier to follow' }).click();
   await page.getByRole('button', { name: 'Expand Clear, predictable step selection' }).click();
   await page.getByRole('link', { name: /Keep your place in a guide/ }).click();
@@ -36,7 +36,7 @@ test('pilot stale evidence is read only, paged and never claims live activity', 
   await expect(page.getByText('Maintenance · stale observations')).toBeVisible();
   await expect(page.getByText('Current count unavailable')).toBeVisible();
   await expect(page.getByText('Current work isn’t confirmed.')).toBeVisible();
-  await page.getByRole('navigation', {name:'Main navigation'}).getByRole('link',{name:'Backlog'}).click();
+  await page.goto('/backlog?source=pilot');
   await page.getByRole('button',{name:'Expand Recorded guide improvement'}).click();
   await expect(page.getByText('28 recorded items · Page 1 of 3')).toBeVisible();
   await page.getByRole('button',{name:'Next',exact:true}).first().click();
@@ -46,7 +46,7 @@ test('pilot stale evidence is read only, paged and never claims live activity', 
   await expect(page.getByRole('link',{name:'Open fixture review'})).toHaveCount(0);
   await expect(page.getByText(/Review, retry, scheduling and publication actions are unavailable/)).toBeVisible();
   await capture(page,info,'m2-pilot-stale-desktop');
-  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'History'}).click();
+  await page.goto('/history?source=pilot');
   await expect(page.getByLabel('Workspace source')).toHaveValue('pilot');
   await expect(page.getByText('29 recorded items · Page 1 of 2')).toBeVisible();
   await page.getByRole('button',{name:'Next',exact:true}).click();
@@ -62,7 +62,7 @@ test('saved review leaves actionable count and creates truthful history', async 
   await expect(page.getByRole('heading',{name:'0 decisions'})).toBeVisible();
   await expect(page.getByText('1 saved decision waiting to apply.')).toBeVisible();
   fixture('worker');
-  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'History'}).click();
+  await page.goto('/history');
   await expect(page.getByRole('heading',{name:'Review applied',exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Review decision saved',exact:true})).toBeVisible();
 });
@@ -70,7 +70,7 @@ test('saved review leaves actionable count and creates truthful history', async 
 for(const width of [320,390,768,1440]) {
   test(`catalog layouts, text enlargement and forms fit ${width}px`,async ({page},info) => {
     await page.setViewportSize({width,height:900});
-    await page.goto('/backlog');
+    await page.goto('/backlog?source=fixture');
     await page.getByRole('button',{name:'Expand Make guide progress easier to follow'}).click();
     await page.getByRole('button',{name:'Expand Clear, predictable step selection'}).click();
     await overflow(page);
@@ -79,7 +79,7 @@ for(const width of [320,390,768,1440]) {
     await expect(page.getByRole('heading',{name:'Keep your place in a guide'})).toBeVisible();
     await overflow(page);
     if(width===390 || width===1440) await capture(page,info,`m2-detail-${width}`);
-    await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'History'}).click();
+    await page.goto('/history');
     await expect(page.getByRole('heading',{name:'History',exact:true})).toBeVisible();
     await overflow(page);
     await capture(page,info,`m2-history-${width}`);
@@ -95,7 +95,7 @@ for(const width of [320,390,768,1440]) {
 
 test('failed catalog requests can recover without inventing records', async ({page},info) => {
   await page.route('**/api/backlog*',route=>route.abort('failed'));
-  await page.goto('/backlog');
+  await page.goto('/backlog?source=fixture');
   await expect(page.getByText('This view couldn’t be loaded.')).toBeVisible();
   await capture(page,info,'m2-backlog-error');
   await page.unroute('**/api/backlog*');
@@ -127,7 +127,7 @@ test('development file serving excludes backend and private runtime files', asyn
 
 test('selectable demos exercise real pagination, hierarchy, search and mode separation', async ({page},info) => {
   fixture('pilot-fresh');
-  await page.goto('/backlog');
+  await page.goto('/backlog?source=fixture');
   await page.getByLabel('Demo scenario').selectOption('mixed');
   await page.getByLabel('Backlog view').selectOption('all');
   await expect(page.getByText('16 top-level records · Page 1 of 2')).toBeVisible();
@@ -159,14 +159,14 @@ test('selectable demos exercise real pagination, hierarchy, search and mode sepa
   await page.getByRole('button',{name:'Search',exact:true}).click();
   await page.getByRole('link',{name:/Long player-facing/}).click();
   await expect(page.getByRole('heading',{name:/Long player-facing/})).toBeVisible();
-  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'History'}).click();
+  await page.goto('/history');
   await capture(page,info,'iteration-history-phone');
   await page.getByLabel('Workspace source').selectOption('pilot');
   await expect(page.getByLabel('Demo scenario')).toHaveCount(0);
   await expect(page.getByText('Maintenance · fresh observation')).toBeVisible();
   await page.getByLabel('Workspace source').selectOption('fixture');
   await page.getByLabel('Demo scenario').selectOption('empty');
-  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Backlog'}).click();
+  await page.goto('/backlog?source=fixture');
   await expect(page.getByText('No records to show.')).toBeVisible();
 });
 
@@ -179,7 +179,7 @@ test('decision summary opens the relevant real review', async ({page}) => {
 });
 
 test('combined filters preserve descendant context and restore unfiltered expansion', async ({page},info) => {
-  await page.goto('/backlog');
+  await page.goto('/backlog?source=fixture');
   await page.getByLabel('Demo scenario').selectOption('mixed');
   await page.getByText('Filters and sorting', {exact:true}).click();
   await page.getByRole('group',{name:'Type',exact:true}).getByLabel('Task',{exact:true}).click();

@@ -1,9 +1,10 @@
+import {Dashboard,WorkspaceBacklog,WorkspaceResults} from './Workspace';
 import {ExecutionRuns} from './ExecutionRuns';
 import {RealExecutionReview} from './RealExecutionReview';
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Activity, History as HistoryIcon, FolderTree, ArrowLeft, ArrowRight, BookOpen, Check, CheckCheck, ChevronRight, CircleDot, Clock3, FileCheck2, Settings as SettingsIcon, Monitor, Cpu, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Activity, History as HistoryIcon, FolderTree, ArrowLeft, ArrowRight, BookOpen, Check, CheckCheck, ChevronRight, CircleDot, Clock3, FileCheck2, Settings as SettingsIcon, Monitor, Cpu, Home, ListTodo, ScrollText, Plus, RefreshCw, ShieldCheck } from 'lucide-react';
 import { ApiError, loadTask, readDraft, request, saveDecision, taskKey, type Task, type Decision, type Receipt } from './api';
 import { Button } from './components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from './components/ui/dialog';
@@ -26,25 +27,25 @@ export function taskDisplayState(task: Task) {
 }
 
 export function App() {
-  const location = useLocation();
-  const source = useSource();
-  const taskWorkflow = location.pathname.startsWith('/intake') || location.pathname.startsWith('/executions');
-  const everyday = taskWorkflow || location.pathname === '/';
-  const destination = location.pathname.startsWith('/executions') ? 'Run results' : location.pathname.startsWith('/intake') ? 'Tasks' : (location.pathname.startsWith('/backlog') || location.pathname.startsWith('/records/')) ? 'Backlog' : location.pathname.startsWith('/history') ? 'History' : location.pathname.startsWith('/models') ? 'Models' : location.pathname.startsWith('/settings') ? 'Settings' : location.pathname.startsWith('/monitoring') ? 'Monitoring' : 'Work';
-  return <div className="app-shell">
+  const location=useLocation();
+  const path=location.pathname;
+  const links=[{title:'Dashboard',to:'/',icon:Home,active:path==='/'||path==='/intake/new'},
+    {title:'Backlog',to:'/backlog',icon:ListTodo,active:path.startsWith('/backlog')||(path.startsWith('/intake')&&path!='/intake/new')||path.startsWith('/records')},
+    {title:'Results',to:'/results',icon:ScrollText,active:path.startsWith('/results')||path.startsWith('/executions')||path.startsWith('/history')},
+    {title:'Settings',to:'/settings',icon:SettingsIcon,active:path.startsWith('/settings')||path.startsWith('/models')||path.startsWith('/monitoring')}];
+  const create=<Button asChild><Link to="/intake/new"><Plus size={18}/>Create a task</Link></Button>;
+  return <div className="app-shell styled-workbench">
     <a className="skip-link" href="#main">Skip to content</a>
-    <aside className="sidebar">
-      <Link to="/" className="brand" aria-label="TwichUI Workbench home"><img className="brand-logo" src="/art/branding/twichui-launcher-transparent-edited.png" alt="" /><span>TwichUI<small>WORKBENCH</small></span></Link>
-      <div className="workspace-label">YOUR WORKSPACE</div>
-      <nav className="primary-nav" aria-label="Main navigation">{['Work','Backlog','History','Monitoring','Models','Settings'].map((name,index) => <NavLink className={({isActive}) => 'nav-item'+(isActive || (name === 'Work' && taskWorkflow) || (name === 'Models' && location.pathname.startsWith('/models/')) || (name === 'Backlog' && location.pathname.startsWith('/records/')) ? ' active' : '')} key={name} to={index === 0 && source !== 'pilot' ? '/' : `${index === 0 ? '/' : '/'+name.toLowerCase()}?source=${source}`} end>{index === 0 ? <Activity size={18} /> : index === 1 ? <FolderTree size={18} /> : index === 2 ? <HistoryIcon size={18} /> : index === 3 ? <Monitor size={18} /> : index === 4 ? <Cpu size={18} /> : <SettingsIcon size={18} />}{name}<ChevronRight size={15} /></NavLink>)}</nav>
-      <div className="sidebar-note"><ShieldCheck size={20} /><p>{everyday?'Your workshop':'Review workspace'}<br /><span>{everyday?'Tasks, decisions and results':'Decisions and recorded outcomes'}</span></p></div>
-      <div className="fixture-mark"><span /> LOCAL WORKBENCH</div>
-    </aside>
-    <div className="workspace">
-      <header className="topbar"><span>Workbench <ChevronRight size={13} /> <strong>{destination}</strong></span><span className="topbar-mode">{everyday?'Local Workbench · Task-specific permissions':'Local Workbench · No live actions'}</span></header>
-      <main id="main"><Routes><Route path="/executions" element={<ExecutionRuns />} /><Route path="/executions/:identity" element={<RealExecutionReview />} /><Route path="/" element={<TaskList />} /><Route path="/intake" element={<IntakeList />} /><Route path="/intake/new" element={<IntakeForm />} /><Route path="/intake/:identity" element={<IntakeDetail />} /><Route path="/backlog" element={<Backlog />} /><Route path="/history" element={<History />} /><Route path="/monitoring" element={<Monitoring />} /><Route path="/settings" element={<Settings />} /><Route path="/models/*" element={<Models />} /><Route path="/records/:source/:recordId" element={<RecordDetail />} /><Route path="/tasks/:taskId/*" element={<TaskPage />} /><Route path="*" element={<Notice title="That page has wandered off." text="Return to your work to find the current review." />} /></Routes></main>
-      <footer><span>TwichUI Workbench</span><span>{everyday?'Runs and publishing require your permission':'Local examples or read-only observations · Nothing is published here'}</span></footer>
-    </div>
+    <header className="identity-bar"><Link to="/" className="brand" aria-label="TwichUI Workbench home"><img className="brand-logo" src="/art/branding/twichui-launcher-transparent-edited.png" alt=""/><span>TwichUI Workbench</span></Link><span className="identity-note"><ShieldCheck size={15}/>Private workshop</span><div className="mobile-create">{create}</div></header>
+    <aside className="sidebar"><nav className="primary-nav" aria-label="Main navigation">{links.map(({title,to,icon:Icon,active})=><Link key={title} to={to} aria-current={active?'page':undefined} className={'nav-item'+(active?' active':'')}><Icon size={21}/><span>{title}</span></Link>)}</nav><div className="sidebar-create">{create}</div><p className="sidebar-caption">Your addon.<br/>Your decisions.</p></aside>
+    <div className="workspace"><main id="main"><Routes>
+      <Route path="/" element={new URLSearchParams(location.search).has('source')?<TaskList/>:<Dashboard/>}/>
+      <Route path="/backlog" element={new URLSearchParams(location.search).has('source')||new URLSearchParams(location.search).has('focus')?<Backlog/>:<WorkspaceBacklog/>}/>
+      <Route path="/results" element={<WorkspaceResults/>}/><Route path="/executions" element={<ExecutionRuns/>}/><Route path="/executions/:identity" element={<RealExecutionReview/>}/>
+      <Route path="/intake" element={<IntakeList/>}/><Route path="/intake/new" element={<IntakeForm/>}/><Route path="/intake/:identity" element={<IntakeDetail/>}/>
+      <Route path="/history" element={<History/>}/><Route path="/monitoring" element={<Monitoring/>}/><Route path="/settings" element={<Settings/>}/><Route path="/models/*" element={<Models/>}/>
+      <Route path="/records/:source/:recordId" element={<RecordDetail/>}/><Route path="/tasks/:taskId/*" element={<TaskPage/>}/><Route path="*" element={<Notice title="That page has wandered off." text="Return to your dashboard to find the current task."/>}/>
+    </Routes></main><footer><span>TwichUI Workbench</span><span>Checked changes stay local. Publishing needs separate permission.</span></footer></div>
   </div>;
 }
 

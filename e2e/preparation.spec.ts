@@ -9,9 +9,9 @@ test.beforeEach(()=>fixture('reset'));
 
 async function ready(page:Page) {
   await page.goto('/intake/new?kind=feature');
-  await page.getByLabel('Title Required').fill(definition.request.title);
-  await page.getByLabel('Description Required').fill(definition.request.description);
-  await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');
+  await page.getByLabel('Title Optional').fill(definition.request.title);
+  await page.getByLabel('Description', {exact:true}).fill(definition.request.description);
+  await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();
   fixture('planning');
@@ -353,7 +353,9 @@ for(const width of [1440,390])test(`durable real runs are reachable from Work an
   });
   await page.route('**/api/real-executions/non-model-handoff',route=>route.fulfill({json:{...completed,base:'frozen-test-base',current_grant:false,grant_id:'NON-MODEL',expires_at:'2026-11-04T12:00:00Z',source:'real',publication_allowed:false,result:{inference_ran:false,verification:'passed',files:[],checks:[{status:'pass',rc:0,out:'NON-MODEL check evidence'}]}}}));
   await page.goto('/');
-  await page.getByRole('link',{name:'Run results',exact:true}).click();
+  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Results',exact:true}).click();
+  await page.getByText('Other history and evidence',{exact:true}).click();
+  await page.getByRole('link',{name:'All recorded runs, including earlier attempts',exact:true}).click();
   const runs=page.getByRole('region',{name:'Recorded real task runs'});
   await expect(runs.getByRole('list').getByText('Checks passed',{exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Run results',exact:true})).toBeVisible();
@@ -430,7 +432,7 @@ for(const width of [1440,390])test(`task progress connects the submitted task to
 test('task progress saves an explicit stop once and keeps its returned state',async({page})=>{
   const identity='non-model-stop',task='non-model-stop-task';
   // Reuse the real issue/triage path to get a task; only its execution state is controlled.
-  await page.goto('/intake/new?kind=issue');await page.getByLabel('Title Required').fill('Controlled stop request');await page.getByLabel('Description Required').fill('NON-MODEL: exercise the task stop state with controlled transport only.');await page.getByLabel('Does this request change the interface?').selectOption('nonvisual');await page.getByRole('button',{name:'Submit request',exact:true}).click();fixture('planning');
+  await page.goto('/intake/new?kind=issue');await page.getByLabel('Title Optional').fill('Controlled stop request');await page.getByLabel('Description', {exact:true}).fill('NON-MODEL: exercise the task stop state with controlled transport only.');await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');await page.getByRole('button',{name:'Submit request',exact:true}).click();fixture('planning');
   await expect(page.getByText('Findings ready',{exact:true})).toBeVisible();
   const progress={intake_id:identity,task_id:task,stage:'running',message:'Controlled active operation; no inference.',current_approval:true,execution_configured:false,runs:[{id:'controlled-stop-run',status:'running',message:'Controlled active operation',verification:null,candidate_id:null,current_task:true}],publication_allowed:false,accepted:false};
   await page.route('**/api/intake/*/tasks/*/execution',route=>route.fulfill({json:progress}));let saved:string|undefined;

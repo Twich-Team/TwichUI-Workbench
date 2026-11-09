@@ -45,6 +45,8 @@ def submit(engine, body, *, owner_provenance=None):
     from workbench import bug_investigation, everyday
 
     original = body.model_dump(mode='json')
+    if body.requested_work and (body.kind != 'feature' or body.local_planning or body.supported_task or body.regression_tests):
+        raise HTTPException(422, 'This kind of work can be saved for later, but cannot authorize a model or repair in this release.')
     if body.supported_task is None:
         original.pop('supported_task', None)
     if body.regression_tests is not None and (body.supported_task or body.kind != 'feature'):
@@ -91,12 +93,13 @@ def submit(engine, body, *, owner_provenance=None):
                 except ValueError as error:
                     raise HTTPException(409, str(error)) from None
                 planning['local_planning_receipt'] = receipt
-            connection.execute(intakes.insert().values(id=identity, payload=original, status='queued',
+            connection.execute(intakes.insert().values(id=identity, payload=original, status='unavailable' if body.requested_work else 'queued',
                 revision=0, created_at=at, priority_override=None))
             connection.execute(intake_scopes.insert().values(intake_id=identity, revision=1, command_id=identity,
                 visual_requirement=body.visual_requirement, stage='implementation', origin='human',
                 note='Recorded with the original request.', change_payload=original, created_at=now()))
-            enqueue(connection, identity, 'planning', 1, planning)
+            if not body.requested_work:
+                enqueue(connection, identity, 'planning', 1, planning)
     return view(engine, identity)
 
 

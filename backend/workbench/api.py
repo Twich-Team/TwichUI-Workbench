@@ -20,6 +20,7 @@ from workbench.schemas import (Decision, Problem, Receipt, Session, Task, Intake
 from workbench.service import get_task, submit, task_view
 from workbench.real_execution import RunPage, StopRequest
 from workbench.task_execution import TaskExecutionContext
+from workbench.workspace_view import WorkspacePage
 
 # Exact authorities only. The dedicated HTTPS service admits the configured home subnet.
 AUTHORITIES = {"127.0.0.1:8787", "localhost:8787", "127.0.0.1:5180", "localhost:5180",
@@ -316,6 +317,14 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     def history(source: str = 'fixture', page: int = Query(default=1, ge=1, le=1000),
                 demo: Literal['simple','mixed','hierarchy','reviews','empty'] = 'simple'):
         return catalog.history(app.state.engine, source, app.state.pilot_path, page, demo)
+
+    @app.get('/api/workspace', response_model=WorkspacePage)
+    def everyday_workspace(page: int = Query(default=1, ge=1, le=10000),
+                           search: str = Query(default='', max_length=160),
+                           state: str = Query(default='all', max_length=40),
+                           page_size: int = Query(default=12, ge=1, le=100)):
+        from workbench.workspace_view import listing
+        return listing(app.state.engine, page=page, search=search, state=state, page_size=page_size)
 
     @app.get('/api/supported-tasks')
     def supported_task_catalog():

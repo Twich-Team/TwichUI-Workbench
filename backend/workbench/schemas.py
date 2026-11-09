@@ -274,6 +274,7 @@ class RegressionTestRequest(StrictModel):
 
 
 class IntakeInput(StrictModel):
+    requested_work: Literal['feature', 'inspection', 'simulation', 'data', 'other'] | None = Field(default=None, exclude_if=lambda value: value is None)
     visual_requirement: VisualRequirement = 'unclassified'
     request_id: UUID
     kind: Literal['issue', 'feature']
@@ -583,7 +584,7 @@ class IntakeView(StrictModel):
     id: str
     original: IntakeInput
     clarifications: list[ClarificationView]
-    status: Literal['queued', 'investigating', 'completed', 'waiting_for_information', 'failed', 'approved', 'tasks_ready', 'decomposition_failed', 'declined', 'scope_review_required']
+    status: Literal['queued', 'investigating', 'completed', 'waiting_for_information', 'failed', 'approved', 'tasks_ready', 'decomposition_failed', 'declined', 'scope_review_required', 'unavailable']
     created_at: str
     revision: int
     jobs: list[PlanningJobView]

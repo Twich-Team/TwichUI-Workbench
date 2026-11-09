@@ -44,7 +44,7 @@ function summary(item: Intake, execution?: Execution, approval?: RunApprovalCont
   if (approval && !approval.receipt) {
     if (approval.available) return {step:2, title:'Ready for your run decision', next:'Review what Workbench can do and the limits for this run.', group:'attention' as const};
     if (!approval.preparing) return {step:2, title:'Preparation is on hold', next:'Open the task for the reason and next step.', group:'attention' as const};
-    return {step:2, title:'Preparing the approved work', next:'Workbench is running the approved check on the original code.', group:'current' as const};
+    return {step:2, title:'Preparing the approved work', next:'Workbench is preparing the protected working copy and approved scope.', group:'current' as const};
   }
   return intakeProgress(item);
 }
