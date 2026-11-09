@@ -1,3 +1,44 @@
+## Verified current — original vendor task now has a usable plan for OWNER review
+
+As of 2026-11-09T22:27:34.970510+00:00, installedc5873b1/deployment83 has ORIGINALintake2dc5b8ba revision20,
+proposal a51b2d33: realQwen source-grounded readable scope for NPC item/stock code
+and relevant NPC stock test. Actual runtime cause remains uncertain; no vendor
+implementation, task approval, live addon change or publication. Next genuine
+owner action is visual-scope classification (originalunclassified preserved),
+then plan review and separate execution approval as appropriate. No new engineering
+permission/access is needed. [Concise current handoff](VENDOR_CURRENT_HANDOFF.md).
+
+Latest real refinement completed3responses/74802tokens; total88COMPLETE known
+1914712tokens, legacyunknown unchanged. No pending Workbench operations. Qwen/
+fallbackOff/policy18 unchanged. Final source/bindings and earlierDBrows verified;
+all4services restart with identical history; plan browser reload/desktop/phone
+passed; all6earlier checked results remain canonically valid/readable without
+replay. Independent final backup/restore, original source, normal model/auth and
+network/browser protections verified. Owned maintenance pause restored, locks
+released, temporary units/profiles closed. No archival/pruning or envelope expansion.
+Private bound record: vendor-planning-recovery-20261109/final-recovery-closeout.json.
+Broader initial product remains unfinished. Older status sections below are
+historical observations; they do not describe current active work.
+
+Current concise model-ready handoff: [VENDOR_CURRENT_HANDOFF](VENDOR_CURRENT_HANDOFF.md).
+
+## ACTIVE installed83/c5873b1: original-task plan refinement running; do not replay
+
+All installation/history/network/browser gates and6prior accepted canonical results
+pass on installed83. Original vendor request2dc5b8ba remains the same. Normal
+read-only 'Refine this plan' command921007b8 accepted22:12:54UTC; job1eeab6c5,
+attempt32ca018b-a0a9-4974-9315-b96282e416c3, v5freshsource/context with85priorCOMPLETE/
+1839910knowntokens retained. Qwenonly/fallbackOff/policy18; no decisions/addonwrites.
+Driver77101 observes real-plan-refinement.jsonl and saves real-refined-original-task
+on settlement. Check actual DB/process/receipts before any new operation. Earlier
+plan19 is sourcegrounded but NOT yet usable (cutoff wording/irrelevanttest). No
+live replay since that settled6response operation; new input is generic quality
+feedback and automatic related-test source selection, no developer solution/paths.
+Next: assess actual refined plan, preserve usage/history, leave genuine OWNERreview,
+then quiescent restart/history/6results/network/model verification, backup and
+hash-bound maintenance resume. Maintenance NEWadmissions STILL owned-paused. No
+new engineering authorization or former campaign cap applies.
+
 ## Current installed82; final fresh-context refinement correction verified, no live request duplicated
 
 Installedb96736f/82 passes all installation/history/network gates. Originalvendor
