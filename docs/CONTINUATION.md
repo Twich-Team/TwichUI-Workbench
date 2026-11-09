@@ -1,3 +1,31 @@
+## CURRENT76/be93162 — November9 18:22UTC, original vendor task RUNNING with revised reasoning
+
+76installed; exact source/seal/history/network/browser/model/auth gates pass;6priorreal
+accepted results canonically revalidated without replay. Same original intake2dc5b8ba-
+2d22-4c2c-9f90-3bd58d29d5fd normal browser commandfcd93d1b-af9a-4c50-9841-
+0a55a10307b1 recorded; job56b4d1ec-cb83-4f14-b6b7-8060972cae19/revision14RUNNING.
+Actualattempt92b6b88f-be77-4b05-b11a-b9347db752fd firstrequest76030bytes packed
+18:20:31UTC. Observer52340; private real-grounded-reasoning-renewal.jsonl,
+browser-observer/renew-grounded-reasoning.mjs/live-grounded-reasoning-renewal-binding.json.
+Do NOT replay healthy/uncertain activity. No vendorplan/addon approval or implementation.
+
+Intent-only Qwen investigation reasoning2048 vs1024 and generic instruction to follow
+matching committed evidence before causal claims installed. SAME totaloutput2600,
+request300s/input131072/prompt26000/capacityguard/source262144/saved model/fallbackOff/
+shared accounting/approval boundaries. This evaluates a hypothesis, not proof of cause.
+170affected+74finalprofile tests/native2confined process workflows pass; full55state
+actual-tokenizer assembly73120bytes19861tokens/32768context passes zero generation.
+Priorbroad/full/static checks reused explicitly in R76/offline-verification.json.
+
+All55COMPLETE incident responses1058062tokens retained; originalNULLs/unknown unchanged.
+75operation settled3responses71926tokens after complete-content settings stop; ALL
+preference VALUES restored rev12→13→14; normal modelidle/auth verified before cutover.
+Maintenance NEW admissions STILL OWNED PAUSED: hash-bound supported opsctl resume after
+owned work. Need real usableplan/genuineproductquestion and ownerreview ifvalidplan,
+settled4service restart/history/results/model/network continuity and maintenance restore.
+No source toCodex, addonwrite/publication/paidbilling or approval bypass. Standingauthority
+continues; no campaign caps/engineering renewals. Keep working past checkpoint.
+
 ## CURRENT75/7238a87 — November9 18:14UTC, original vendor task settled; reasoning profile verified
 
 Attempt3174eb9c... definitively settled3COMPLETE local responses71926tokens after normal
