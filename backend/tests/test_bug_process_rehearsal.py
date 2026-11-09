@@ -500,16 +500,28 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         payload = c.execute(select(planning_jobs.c.payload).join(intakes).where(
             intakes.c.payload['title'].as_string() == cases[1]['request']['title'],
             planning_jobs.c.kind == 'planning')).scalar_one()
-    [page, next_page] = payload['bug_inspection_packet']['inspection_windows']
-    if case_provider=='codex':
+    pages = payload['bug_inspection_packet']['inspection_windows']
+    if intent_mode and case_provider == 'codex':
+        # A single complete source read is sufficient; compact provenance no
+        # longer tricks the scripted provider into requesting it twice.
+        assert len(pages) == 1
+        page = pages[0]
+        assert page['line'] == 1 and page['through_line'] == len(alert_source.splitlines())
+        assert page['next_line'] is None
+        assert page['requested_through_line'] == 9999 and page['coverage'] == 'partial requested committed lines'
+    elif case_provider=='codex':
+        [page, next_page] = pages
         # The larger Codex page contains this complete committed fixture.
         assert page['through_line']==len(alert_source.splitlines()) and page['next_line'] is None
         assert next_page['line']==1 and next_page['cached_prefix_through_line'] is None
+        assert page['requested_through_line'] == 9999 and page['coverage'] == 'partial requested committed lines'
+        assert next_page['requested_start_line'] == 1 and next_page['next_line'] is None
     else:
+        [page, next_page] = pages
         assert page['through_line']==80 and page['next_line']==81
         assert next_page['line']==81 and next_page['cached_prefix_through_line']==80
-    assert page['requested_through_line'] == 9999 and page['coverage'] == 'partial requested committed lines'
-    assert next_page['requested_start_line'] == 1 and next_page['next_line'] is None
+        assert page['requested_through_line'] == 9999 and page['coverage'] == 'partial requested committed lines'
+        assert next_page['requested_start_line'] == 1 and next_page['next_line'] is None
     assert not git(source, "status", "--porcelain").strip()
     assert (source / PRODUCTION).read_text() == BUGGY
     assert (source / CLIENT_SOURCE).read_text() == alert_source
