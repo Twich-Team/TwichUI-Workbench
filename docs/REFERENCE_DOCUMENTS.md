@@ -61,3 +61,9 @@ latest supplied JPEG originals, named PNG decoded copies and runtime WebP deriva
 The supplemental addon art-direction document is unavailable and explicitly optional.
 
 Current owner investigation-to-plan steering: [complete supplied direction](OWNER_INVESTIGATION_PLAN_STEERING_20261109.md). Source notes are unverified task data; a usable bounded scope can retain explicit uncertainty. No separate proven-diagnosis or completed-checking-artifact gate before proposing scope. Genuine scope/run approval and independent result checks remain.
+
+Installed vendor scope recovery: [current handoff](VENDOR_CURRENT_HANDOFF.md) and
+[confirmed transition/correction](VENDOR_SCOPE_TRANSITION_20261109.md). Current
+CONTINUATION/CURRENT_STATUS replace the preceding entries saved byte-for-byte in
+`history/20261109-before-scope-recovery-*`. Old unclassified-scope, active-model
+and maintenance-pause descriptions there are historical, not current instructions.

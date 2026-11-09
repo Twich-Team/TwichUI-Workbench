@@ -54,10 +54,13 @@ offer. Fault checks cover active/unknown activity, changed evidence, duplicate
 commands, transaction interruption and reload. These are controlled tests,
 not new real-provider acceptance or permission for this vendor repair.
 
-Installation/original-task recovery is still in progress. Final identity,
-installed action/result, history/restart proof, retained six accepted results
-and any remaining owner review are recorded in the current handoff and private
-evidence directory below. Do not treat this source checkpoint as completion.
+Installed candidate691edf7/deployment84 demonstrated the recovery on the ORIGINAL
+task through the normal browser. Proposal23 is Ready for your review, scope2
+unchanged, no plan/run approvals or model call. Desktop/phone/reload and all-four-
+service restart pass; prior history, six accepted results, model/auth, network
+and independent backup/restore verified. This restores review, not a vendor fix.
+Final bound evidence is final-scope-recovery-closeout.json in the directory below;
+the current handoff records exact identity, checks/skips and remaining owner review.
 
 Private evidence: `/home/rich/.local/share/TwichUI-Workbench/vendor-scope-transition-recovery-20261109`.
 `read-only-reconciliation-proof.json` binds the exact failing local entry,
