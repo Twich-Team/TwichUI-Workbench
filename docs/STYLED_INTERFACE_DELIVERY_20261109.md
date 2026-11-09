@@ -49,3 +49,26 @@ policy, disclosure permissions and all unknown historical accounting remain.
 The screenshot/rendering assignment does not authorize unrelated provider replays.
 Broader features, general inspections, external simulator, proactive automation,
 global pause behavior and authorized PR delivery remain unfinished.
+
+## Real installed demonstration and final presentation correction
+
+Deployment61 completed a fresh ordinary local-Qwen coverage request through the
+shared styled form, numeric clarification, separate bound plan/run decisions,
+real model implementation and independent checking. Intake784583e0-b2ec-40ea-
+b1c6-fc2a80af9d2c; execution4e9f05ae-d4b5-5df6-8242-d36640216e04;
+candidate103745ea1e292b2f55200239102155e9486fe859332d23233da35c9c48f7bff5.
+Only tests/test_map_viewmath_tileat.lua changed. Full167 addon tests, syntax,
+focused test and independent coverage oracle passed. Four implementation responses
+reported14,213tokens; planning is accounted separately. No Codex call, fallback,
+publication or live addon change occurred. Native preparation took16minutes and
+was actively running confined test children; quiet receipt intervals were not hangs.
+The observer reopened the same current proposal after clarification; no model or
+request replay. Private receipts/screenshots are in styled-interface-20261109.
+
+A final small delta distinguishes protected-copy preparation from model
+investigation, labels the selected provider truthfully, names recorded execution
+permission plainly and distinguishes view refresh from task progress. It changes
+no dispatch, consent, budget, checker, scope or fallback semantics. Focused56backend,
+32frontend and11affected browser checks pass; the complete prior suites remain
+applicable outside this presentation/state projection delta. Activation follows
+settlement and a fresh latest-history copy, then all-service restart verification.

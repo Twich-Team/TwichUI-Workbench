@@ -68,7 +68,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
   if(query.isPending)return <p>Loading task offer…</p>;
   if(!current)return <div role="alert"><p>The current run decision is unavailable. The plan or its permissions may have changed.</p><Button variant="secondary" onClick={()=>void query.refetch()}>Reload run decision</Button></div>;
   if(receipt)return <section className="soft-callout" aria-label="Saved task run approval">
-    <h3>{receipt.status==='pending'?'Task budget saved · Waiting to apply':receipt.status==='applied'?'Task budget applied':'Task budget held'}</h3>
+    <h3>{receipt.status==='pending'?'Run permission saved · Waiting to apply':receipt.status==='applied'?'Run approved':'Run permission needs attention'}</h3>
     <p role="status">{receipt.status==='pending'?'Workbench saved your permission. It will check the offer again before applying it.':receipt.status==='applied'?'Your decision is recorded for this one attempt.':receipt.message}</p>
     <p>{receipt.payload.run_budget?.publication==='draft-pr'?'One draft PR was authorized for this run.':'The result stays in Workbench. Publication requires separate approval.'}</p>
     {current.approval_hold && <p>{current.approval_hold}</p>}

@@ -67,15 +67,15 @@ for(const width of [1440,390])test(`reviewed certified offer browser approval re
   const send=page.waitForResponse(r=>r.url().endsWith('/run-approval')&&r.request().method()==='POST');
   await offer.getByRole('button',{name:'Approve run and draft pull request',exact:true}).click();
   expect((await send).status()).toBe(200);
-  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Run permission saved · Waiting to apply'})).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Run permission saved · Waiting to apply'})).toBeVisible();
   const result=JSON.parse(fixture('reviewed-offer-controller'));
   expect(result.controller_calls).toBe(1);expect(result.preparations[0].certified).toBe(true);
   expect(result.authority_counts).toMatchObject({real_execution_grants:0,real_execution_requests:0,model_attempts:0,real_publications:0,task_sessions:1});
   const {writeFileSync}=await import('node:fs');writeFileSync(artifactPath(`reviewed-offers/handoff-${width}.json`),JSON.stringify(result,null,2));
   await page.reload();await page.getByText('Permission for this run',{exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Task budget applied'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Run approved'})).toBeVisible();
   await expect(page.getByText('CONTROLLED executor prepared and certified the bound task. No model, lease or PR.',{exact:true})).toBeVisible();
   const identity=page.url().split('/intake/')[1].split('?')[0];
   const data=await page.request.get('/api/intake/'+identity).then(r=>r.json());
@@ -85,6 +85,6 @@ for(const width of [1440,390])test(`reviewed certified offer browser approval re
   await page.getByRole('region',{name:'Saved task run approval'}).screenshot({path:artifactPath(`reviewed-offers/applied-${width}.png`)});
   fixture('reviewed-offer-stale');await page.reload();
   await page.getByText('Permission for this run',{exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Task budget applied'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Run approved'})).toBeVisible();
   await expect(page.getByRole('button',{name:'Approve run and draft pull request',exact:true})).toHaveCount(0);
 });

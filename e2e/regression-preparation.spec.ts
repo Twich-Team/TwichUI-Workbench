@@ -107,7 +107,7 @@ for(const width of [1440,390])test(`generated behavioral examples need independe
   await offer.getByRole('radio',{name:'Also allow one draft pull request'}).check();
   await offer.getByRole('checkbox',{name:'I reviewed the run and publishing permission.'}).check();
   await offer.getByRole('button',{name:'Approve run and draft pull request',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Run permission saved · Waiting to apply'})).toBeVisible();
   const result=JSON.parse(fixture('reviewed-offer-controller'));
   expect(result.controller_calls).toBe(1);expect(result.preparations[0].certified).toBe(true);
   expect(result.authority_counts).toMatchObject({real_execution_grants:0,real_execution_requests:0,model_attempts:0,real_publications:0,task_sessions:1});
@@ -336,9 +336,9 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
   expect(first.status()).toBe(200);
   const body=first.request().postDataJSON();
   expect(body.run_budget).toMatchObject({publication:'hold',activate_once:true,fallback:false});
-  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Run permission saved · Waiting to apply'})).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Run permission saved · Waiting to apply'})).toBeVisible();
 
   // Exercise server-side replay and attempted publication escalation after the browser decision.
   const csrf=await page.request.get('/api/session').then(r=>r.json());
@@ -354,7 +354,7 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
   fixture('reviewed-offer-automatic-local-wait');
   await expect(page.getByRole('heading',{name:'Preparing approved task'})).toBeVisible();
   await page.getByText('Permission for this run',{exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Task budget applied'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Run approved'})).toBeVisible();
   await expect(page.getByText('The result stays in Workbench. Publication requires separate approval.')).toBeVisible();
   const result=JSON.parse(fixture('reviewed-offer-automatic-local-'+outcome));
   expect(result).toMatchObject({adapter_calls:0,grants:1,requests:1,publications:0});
@@ -434,7 +434,7 @@ test('expired local approval holds the task without starting a run', async ({pag
   const task=new URL(page.url()).pathname;
   await offer.getByRole('checkbox',{name:'I reviewed what this run allows.'}).check();
   await offer.getByRole('button',{name:'Approve local run',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Run permission saved · Waiting to apply'})).toBeVisible();
   const expired=JSON.parse(fixture('reviewed-offer-automatic-local-expire'));
   expect(expired).toMatchObject({grants:0,requests:0,publications:0});
   await page.reload();
@@ -489,9 +489,9 @@ test('everyday intake completes two different local tasks in one saved history',
     await offer.screenshot({path:artifactPath(`everyday/approval-${width}.png`)});
     await offer.getByRole('checkbox',{name:'I reviewed what this run allows.'}).check();
     await run.dblclick();
-    await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'Run permission saved · Waiting to apply'})).toBeVisible();
     await page.reload();
-    await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'Run permission saved · Waiting to apply'})).toBeVisible();
     fixture('reviewed-offer-automatic-tick');
     fixture('reviewed-offer-automatic-tick');
     await expect(page.getByRole('heading',{name:'Preparing approved task'})).toBeVisible();

@@ -12,13 +12,14 @@ from workbench import task_execution, task_budget
 from workbench.planning_provider import configured_mode
 from workbench.result_rejection import later_review
 
-State = Literal['queued', 'understanding', 'needs_input', 'needs_approval', 'decision_pending',
+State = Literal['queued', 'understanding', 'preparing', 'needs_input', 'needs_approval', 'decision_pending',
                 'working', 'checking', 'cleanup', 'held', 'failed', 'interrupted', 'stopped',
                 'completed', 'unavailable', 'paused']
 # Meaning comes from a recorded state, never from model-generated status prose.
 LABELS = {
     'queued': ('Queued', 'Your request is saved and waiting to start.'),
     'understanding': ('Understanding the request', 'Workbench is reading relevant code and investigating.'),
+    'preparing': ('Preparing the reviewed work', 'Workbench is preparing a protected copy and checking the approved limits. Implementation has not started.'),
     'needs_input': ('Needs your input', 'Answer the question on this task to continue.'),
     'needs_approval': ('Needs approval', 'Review the proposed next step before work starts.'),
     'decision_pending': ('Decision recorded', 'Your choice is saved and waiting to apply.'),
@@ -33,7 +34,7 @@ LABELS = {
     'unavailable': ('Saved for later', 'This kind of work is not executable in this release.'),
     'paused': ('Paused', 'No new work is starting for this task.'),
 }
-ACTIVE = {'understanding', 'working', 'checking', 'cleanup'}
+ACTIVE = {'understanding', 'preparing', 'working', 'checking', 'cleanup'}
 NEEDS = {'needs_input', 'needs_approval'}
 
 
@@ -115,12 +116,12 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                 context = task_execution.context(engine, identity, eligible[0]['id'])
                 relevant = next((r for r in context['runs'] if r['current_task']), None)
                 phase = {'running':'working', 'checking':'checking', 'checked':'completed', 'completed':'completed',
-                         'preparing':'understanding', 'pending':'queued', 'settling':'cleanup', 'recovering':'interrupted',
+                         'preparing':'preparing', 'pending':'queued', 'settling':'cleanup', 'recovering':'interrupted',
                          'held':'held', 'failed':'failed', 'blocked':'held', 'cancelled':'stopped',
                          'cancel_requested':'cleanup', 'interrupted':'interrupted'}.get(context['stage'], 'held')
                 if context['stage']=='waiting' and not context['run_budget'] and context['current_approval']:
                     offer = task_budget.run_context(engine, identity, eligible[0]['id'])
-                    phase = 'needs_approval' if offer.get('available') else ('understanding' if any(j['status']=='running' for j in current_jobs) else 'queued') if offer.get('preparing') else 'held'
+                    phase = 'needs_approval' if offer.get('available') else ('preparing' if any(j['status']=='running' for j in current_jobs) else 'queued') if offer.get('preparing') else 'held'
                 if context['runs'] and not relevant:
                     phase = 'held'  # An earlier checked run is not completion of the current plan.
                 if context['stage']=='preparing' and (context.get('session') or {}).get('status')=='pending':

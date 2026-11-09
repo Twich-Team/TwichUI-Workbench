@@ -42,7 +42,7 @@ test('ordinary bug report reaches a checked local patch through separate browser
   await expect(offer.getByText('Publishing options')).toHaveCount(0);
   await offer.getByRole('checkbox',{name:'I reviewed what this run allows.'}).check();
   await run.click();
-  await expect(page.getByRole('heading',{name:'Task budget saved · Waiting to apply'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Run permission saved · Waiting to apply'})).toBeVisible();
   fixture('reviewed-offer-bug-tick');
   fixture('reviewed-offer-bug-tick');
   fixture('reviewed-offer-bug-run');

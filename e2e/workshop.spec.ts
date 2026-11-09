@@ -64,9 +64,9 @@ test('styled phone and enlarged text keep navigation, task entry and failures us
 
 test('isolated UI state fixtures show activity only for active records and retain readable image fallbacks',async({page},info)=>{
  // Deliberately synthetic display records; no provider acceptance or history mutation.
- const labels={working:'Working on the change',checking:'Checking the change',paused:'Paused',failed:'Could not finish',interrupted:'Waiting for recovery',queued:'Queued',decision_pending:'Decision recorded'};
+ const labels={preparing:'Preparing the reviewed work',working:'Working on the change',checking:'Checking the change',paused:'Paused',failed:'Could not finish',interrupted:'Waiting for recovery',queued:'Queued',decision_pending:'Decision recorded'};
  for(const [state,stage] of Object.entries(labels)){
-  const active=['working','checking'].includes(state);
+  const active=['preparing','working','checking'].includes(state);
   const row={id:'synthetic-display-only',title:'A deliberately long task name about keeping guide progress after reconnecting and reloading',kind:'bug',state,stage,message:'Synthetic display state, not a provider result.',active,needs_you:false,created_at:'2026-11-09T00:00:00Z',updated_at:'2026-11-09T00:00:00Z'};
   await page.route('**/api/workspace?*',r=>r.fulfill({json:{items:[row],total:1,all_total:1,page:1,page_size:12,counts:{all:1,active:active?1:0,needs_you:0,queued:state==='queued'?1:0},observed_at:'2026-11-09T00:00:00Z',mode:'demo',highlights:{active:active?[row]:[],needs_you:[],completed:[]}}}));
   await page.goto('/');await expect(page.locator('.work-status').getByText(active?'Working':'No work running',{exact:true})).toBeVisible();

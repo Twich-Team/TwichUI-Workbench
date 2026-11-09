@@ -92,6 +92,7 @@ def test_future_work_cannot_smuggle_execution_or_provider_permission(client, hea
 
 @pytest.mark.parametrize('stage,verification,candidate,expected,result', [
     ('running', None, None, 'working', False),
+    ('preparing', None, None, 'preparing', False),
     ('checking', None, 'partial-candidate', 'checking', False),
     ('checked', 'passed', 'checked-candidate', 'completed', True),
     ('checked', 'failed', 'failed-candidate', 'failed', True),

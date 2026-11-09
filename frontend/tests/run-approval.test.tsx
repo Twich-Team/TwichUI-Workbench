@@ -68,7 +68,7 @@ it('requires refreshed consent when runtime availability changes without a scope
 
 it('displays an applied receipt as history while explaining current certification holds',async()=>{
   vi.stubGlobal('fetch',vi.fn(async()=>({ok:true,json:async()=>({available:false,offer:null,message:'Certification changed; execution held.',receipt:{id:'saved',status:'applied',message:'Approval applied.',payload:{run_budget:budget}}})})));
-  form();await screen.findByRole('heading',{name:'Task budget applied'});
+  form();await screen.findByRole('heading',{name:'Run approved'});
   await waitFor(()=>expect(screen.getByText('Certification changed; execution held.')).toBeVisible());
   expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
 });
