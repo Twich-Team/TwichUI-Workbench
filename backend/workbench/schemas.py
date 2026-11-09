@@ -577,7 +577,15 @@ class TaskProviderActivity(StrictModel):
     routing_reason: str
 
 
+class ProjectSourceView(StrictModel):
+    inspected_base: str
+    current_base: str
+    stale: bool
+    refresh_binding: str | None = None
+
+
 class IntakeView(StrictModel):
+    project_source: ProjectSourceView | None = Field(default=None,exclude_if=lambda value:value is None)
     planning_resume_binding: str | None = Field(default=None, exclude_if=lambda value: value is None)
     planning_start_binding: str | None = Field(default=None, exclude_if=lambda value: value is None)
     provider_activity: list[TaskProviderActivity] = Field(default_factory=list, exclude_if=lambda value: not value)
@@ -620,6 +628,8 @@ class InvestigationStart(StrictModel):
 
 
 class ClarificationInput(StrictModel):
+    refresh_source: bool = False
+    source_refresh_binding: str | None = None
     renew_operation: bool = False
     continue_investigation: bool = False
     command_id: UUID

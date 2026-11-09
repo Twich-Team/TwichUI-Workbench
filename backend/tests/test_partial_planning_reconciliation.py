@@ -79,7 +79,7 @@ def partial(client, headers, store, monkeypatch, program=False):
     assert (
         attempt["outcome"] == "incomplete_output" and job["status"] == "failed" and len(calls) == 2
     )
-    monkeypatch.setattr("workbench.planning_provider.local_slot", lambda: nullcontext())
+    monkeypatch.setattr("workbench.planning_provider.local_slot", lambda **_: nullcontext())
     monkeypatch.setattr(
         settle, "probe_local", lambda model, task, completion_limit=2600: dict(task=task, idle=True, completion_limit=completion_limit)
     )

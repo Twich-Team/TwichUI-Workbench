@@ -869,7 +869,7 @@ def test_9187_scenario_shape_through_local_parser_and_preparation(
     key.chmod(0o600)
     monkeypatch.setenv("WORKBENCH_PLANNER", "local")
     monkeypatch.setenv("WORKBENCH_LOCAL_KEY", str(key))
-    monkeypatch.setattr(planning_provider, "local_slot", nullcontext)
+    monkeypatch.setattr(planning_provider, "local_slot", lambda **_: nullcontext())
     planner = ControlledPlanner()
 
     class Transport:
@@ -1017,7 +1017,7 @@ def test_saved_model_pinned_before_transport_and_through_review(
     key.chmod(0o600)
     monkeypatch.setenv("WORKBENCH_PLANNER", "local")
     monkeypatch.setenv("WORKBENCH_LOCAL_KEY", str(key))
-    monkeypatch.setattr(planning_provider, "local_slot", nullcontext)
+    monkeypatch.setattr(planning_provider, "local_slot", lambda **_: nullcontext())
     planner = ControlledPlanner()
     selected = saved.providers["local"].model
     other = "different-local-model"

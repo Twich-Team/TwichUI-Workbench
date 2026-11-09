@@ -196,7 +196,7 @@ export function IntakeDetail() {
   const [startProvider,setStartProvider]=useState('qwen-once');
   const [startConfirmed,setStartConfirmed]=useState(false);
   const [startCommand]=useState(()=>crypto.randomUUID());
-  useEffect(()=>{if(!selected && query.data?.proposals[0]) setSelected(query.data.proposals[0].id);},[selected,query.data]);
+  useEffect(()=>{if(query.data?.proposals[0]) setSelected(query.data.proposals[0].id);},[query.data?.proposals[0]?.id]);
   async function act(suffix:string, body:unknown, method='POST') {
     setError('');setBusy(true);
     try { await mutate(`/api/intake/${identity}/${suffix}`,body,method,suffix==='clarification'?AbortSignal.timeout(60000):undefined); const refreshed = await query.refetch(); if(['scope','research-revision'].includes(suffix) && refreshed.data?.proposals[0]) setSelected(refreshed.data.proposals[0].id); void client.invalidateQueries({queryKey:['backlog']}); void client.invalidateQueries({queryKey:['workspace']}); }
@@ -230,6 +230,13 @@ export function IntakeDetail() {
   const currentTasks = data.tasks.filter(t => t.kind==='task' && (t.proposal_id===data.proposals[0]?.id || (!t.proposal_id && !p)) && !t.scope_review_required);
   return <div className="intake-page task-detail">
     <Link className="back-link" to="/backlog"><ArrowLeft size={15}/>All tasks</Link>
+    {data.project_source?.stale&&<section className="panel"><h2>This investigation used older addon code</h2>
+      <p>The saved investigation used revision {data.project_source.inspected_base.slice(0,7)}. The current project snapshot is {data.project_source.current_base.slice(0,7)}. Earlier evidence and usage remain saved. The older proposal cannot authorize a repair of the new code.</p>
+      {data.project_source.refresh_binding&&<><p>Refresh the project source and start a fresh read-only investigation with your saved provider. This does not approve a plan, addon changes, or publication.</p>
+        <Button disabled={blocked} onClick={()=>void act('clarification',{command_id:crypto.randomUUID(),revision:data.revision,
+          text:'Investigate the original report using the current committed project source. Retain previous history and usage; no addon change is approved.',
+          continue_investigation:true,renew_operation:true,refresh_source:true,source_refresh_binding:data.project_source?.refresh_binding}).catch(()=>{})}>Refresh source and investigate</Button></>}
+    </section>}
     {params.has('received') && data.status==='queued' && <p className="soft-callout" role="status">Request received and saved. You can leave this page and come back for the next step.</p>}
     <div className="page-heading detail-heading"><div><p className="eyebrow">{sample?'Sample task':data.original.kind==='issue'?'Bug investigation':data.original.regression_tests?'Test coverage':'Task request'}</p>
       <h1>{sample?'Sample plan: tidy a label':data.original.title}</h1>{!asking && <p className="original-text task-request-copy">{data.original.regression_tests
@@ -374,7 +381,7 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
   const [role,setRole] = useState<Artifact['role']>('mockup');
   const [label,setLabel] = useState('');
   const [file,setFile] = useState<File|null>(null);
-  const stale = review.binding !== proposal.binding || review.revision !== data.revision || review.scope_revision !== data.human_scope.revision;
+  const stale = review.binding !== proposal.binding || review.revision !== data.revision || review.scope_revision !== data.human_scope.revision || Boolean(data.project_source&&review.task_contract?.resolved_base&&review.task_contract.resolved_base!==data.project_source.current_base);
   const saved = data.decisions.some(d=>d.proposal_id===review.id && d.binding===review.binding);
   const locked = busy || stale || saved || data.status !== 'completed';
   async function decide(action:Decision['action']) {

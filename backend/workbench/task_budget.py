@@ -176,10 +176,26 @@ def _reviewed_spec(c, ref, runtime):
     reviewed=linked['proposal_review']['task_contract']
     prepared=(bug_check_preparation.load(runtime.root,reviewed)['evidence']
               if reviewed.get('bug_intent') and not spec.get('repair_cycle') else None)
+    retained=None
+    from workbench.db import real_execution_grants,real_execution_requests
+    from sqlalchemy import select
+    rows=c.execute(select(real_execution_grants.c.snapshot).join(real_execution_requests,
+        real_execution_requests.c.grant_id==real_execution_grants.c.id).where(
+            real_execution_requests.c.status=='checked',real_execution_requests.c.finished_at.is_not(None))).scalars()
+    for row in rows:
+        linked=row.get('workflow_task',{})
+        if (row.get('recovery',{}).get('root')==str(runtime.root)
+                and linked.get('intake_id')==ref['intake_id']
+                and linked.get('task',{}).get('id')==ref['task_id']
+                and ref['approval_id'] in {linked.get('approval',{}).get('id'),
+                    linked.get('approval',{}).get('payload',{}).get('execution_continuation',{}).get('scope_approval_id')}):
+            retained=spec['contract']
+            break
     actual = from_review(c, ref, oracle=runtime.oracle_source.read_text(),
                         behavior_id=spec['behavior']['id'], read_paths=spec['read_paths'],
                         focused_test=spec['focused_test'], identity=spec['identity'],prepared=prepared,
-                        repair_cycle=bool(spec.get('repair_cycle')),api_contracts=spec.get('api_contracts'))
+                        repair_cycle=bool(spec.get('repair_cycle')),api_contracts=spec.get('api_contracts'),
+                        retained_result=retained)
     if actual != spec:
         raise ValueError('Certified recipe differs from the current reviewed contract')
     return actual

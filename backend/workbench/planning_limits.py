@@ -69,13 +69,14 @@ def operation_request_bound(payload):
     bound=request_bound(payload.get('local_planning_receipt',{}))
     followup=payload.get('bug_followup',{})
     version=followup.get('budget_version')
-    if version is not None and (type(version) is not int or version not in (2,3,4)):
+    if version is not None and (type(version) is not int or version not in (2,3,4,5)):
         raise ValueError('The continuation accounting version is unavailable')
-    if version == 4:
+    if version in (4,5):
         if (followup.get('operation_request_bound') != bound
                 or type(followup.get('consumed_requests')) is not int
                 or followup['consumed_requests'] < 1 or not followup.get('prior_phases')
-                or not followup.get('source_scope') or not followup.get('renewal_consent')):
+                or not (followup.get('source_scope') if version==4 else followup.get('source_refresh') is True)
+                or not followup.get('renewal_consent')):
             raise ValueError('Fresh operation consent or preserved phase accounting is unavailable')
         return bound
     if version in (2,3):
@@ -219,7 +220,7 @@ def codex_observations(connection, identity, usage, *, bug, planning):
     return count
 
 
-def renewed_budget(connection, initial, *, exclude_job=None):
+def renewed_budget(connection, initial, *, exclude_job=None, fresh_source=False):
     """A fresh bounded operation preserves settled history instead of resetting it.
 
     This is explicit same-provider consent. It grants neither implementation nor
@@ -236,6 +237,13 @@ def renewed_budget(connection, initial, *, exclude_job=None):
     if any(p['backend']!=provider or p['requested_model']!=model
             or p['actual_model'] is not None and p['actual_model']!=model for p in phases):
         raise ValueError('Renewal cannot silently switch the investigation provider')
+    if fresh_source:
+        return dict(budget_version=5,renewal_consent=True,source_refresh=True,
+            operation_request_bound=request_bound(initial['payload']['local_planning_receipt']),
+            consumed_requests=sum(p['requests'] for p in phases),known_prior_usage=snapshot['known_usage'],
+            prior_phases=[{k:p[k] for k in ('job','sequence','attempt','backend','actual_model',
+                'database_outcome','provider_state','usage','input_binding')} for p in phases],
+            next_sequence=snapshot['next_sequence'])
     latest=phases[-1]
     row=connection.exec_driver_sql('SELECT payload FROM planning_jobs WHERE id=?',(latest['job'],)).fetchone()
     payload=json.loads(row[0]) if isinstance(row[0],str) else row[0]
@@ -257,6 +265,16 @@ def renewed_budget(connection, initial, *, exclude_job=None):
     from workbench import investigation_memory, bug_source_planning
     from workbench.trusted_preparation import configuration
     current_policy=configuration(connection.engine)
+    if isinstance(cached,dict) and packet.get('base')!=cached.get('base'):
+        # A recorded fresh-source operation establishes a new read-only source
+        # epoch. Earlier usage remains in phases; stale code/findings do not.
+        if not any((json.loads(r[0]) if isinstance(r[0],str) else r[0]).get('bug_followup',{}).get('source_refresh')
+                for r in connection.exec_driver_sql('SELECT payload FROM planning_jobs WHERE intake_id=?',(initial['intake_id'],))):
+            raise ValueError('Source revision changed without a fresh source operation')
+        from workbench import intake,bug_investigation
+        from workbench.db import intakes
+        original=intake.require(connection,intakes,initial['intake_id'])['payload']
+        packet=bug_investigation.context(original,'',current_policy)
     packet=investigation_memory.relocated_packet(packet,current_policy,connection.engine)
     if isinstance(cached,dict):
         cached=investigation_memory.relocated_packet(cached,current_policy,connection.engine)

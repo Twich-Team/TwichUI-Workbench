@@ -328,7 +328,7 @@ def test_local_http_adapter_bounds_identity_schema_and_timeout(tmp_path,monkeypa
     key=tmp_path/'local.key'
     key.write_text('synthetic-test-key')
     monkeypatch.setenv('WORKBENCH_LOCAL_KEY',str(key))
-    monkeypatch.setattr(module,'local_slot',nullcontext)
+    monkeypatch.setattr(module,'local_slot',lambda **_:nullcontext())
     captured=[]
     response={'model':'recorded-local-model','choices':[{'finish_reason':'stop','message':{'content':'{"tasks": []}'}}]}
     class Fake:

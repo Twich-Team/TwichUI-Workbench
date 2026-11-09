@@ -362,7 +362,7 @@ def test_fallback_cannot_start_after_the_shared_planning_deadline(
 
     save_codex_policy(store, both=True)
     now = [10]
-    monkeypatch.setattr(regression_preparation, 'time', SimpleNamespace(monotonic=lambda: now[0]))
+    monkeypatch.setattr(regression_preparation, 'time', SimpleNamespace(monotonic=lambda: now[0], time=lambda: now[0]))
     monkeypatch.setenv('WORKBENCH_PLANNING_DEADLINE_S', '120')
 
     def expired(*_args):

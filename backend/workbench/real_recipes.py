@@ -123,7 +123,7 @@ def load(root):
     return spec
 
 
-def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity, prepared=None, repair_cycle=False, api_contracts=None):
+def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity, prepared=None, repair_cycle=False, api_contracts=None, retained_result=None):
     """Compile task data from the actual applied review, never a task registry.
 
     Oracle semantics and bounded read selection still require trusted preparation.
@@ -149,6 +149,12 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
             or not reviewed['intended_behavior'].strip()):
         raise ValueError('Incomplete or changed reviewed verification requirements')
     root, base, _ = regression_preparation.repository()
+    if retained_result is not None and (base!=reviewed['resolved_base'] or str(root)!=retained_result['source']):
+        # Only the checked-result reader supplies this. New offers and execution
+        # always use current main and require fresh approval after source moves.
+        root,base,_=regression_preparation.repository(retained_base=retained_result['base'])
+        if str(root)!=retained_result['source']:
+            raise ValueError('Retained result source path changed.')
     if (base != reviewed['resolved_base']
             or regression_preparation.git(root, 'rev-parse', '--verify', 'refs/heads/main').decode().strip() != base
             or regression_preparation.git(root, 'status', '--porcelain=v1', '--ignored')):

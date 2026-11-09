@@ -44,7 +44,7 @@ def interrupted(client, headers, store, monkeypatch, *, dead=True):
             c.execute(
                 update(planning_jobs).where(planning_jobs.c.id == job["id"]).values(payload=payload)
             )
-    monkeypatch.setattr("workbench.planning_provider.local_slot", lambda: nullcontext())
+    monkeypatch.setattr("workbench.planning_provider.local_slot", lambda **_: nullcontext())
     probes = []
 
     def probe(model, task):

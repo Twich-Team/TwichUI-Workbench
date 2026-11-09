@@ -150,7 +150,7 @@ def test_loaded_client_transport_to_review(fault, explanation, store, client, he
                                    choices=[dict(finish_reason="length" if fault == "incomplete" else "stop",
                                                  message=dict(content=content))])).encode()
 
-    monkeypatch.setattr(planning_provider, "local_slot", nullcontext)
+    monkeypatch.setattr(planning_provider, "local_slot", lambda **_: nullcontext())
     monkeypatch.setattr(planning_provider, "LocalHTTP", lambda _: nullcontext(Transport()))
     original = HOLD["original"]
     if fault == "other-operation":

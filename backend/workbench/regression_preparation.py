@@ -8,7 +8,6 @@ import copy
 import hashlib
 import json
 import os
-from pathlib import Path
 import re
 import select as io_select
 import subprocess
@@ -82,11 +81,15 @@ def git(root, *args, max_bytes=131072):
             process.stdout.close()
 
 
-def repository():
+def repository(*, retained_base=None):
     configured = os.environ.get('WORKBENCH_RESEARCH_ROOT')
     if not configured:
         raise RepositoryUnavailable('Configure an existing read-only TwichUI research checkout before resolving a base.')
-    root = Path(configured)
+    from workbench import project_source
+    try:
+        root = project_source.retained_root(retained_base) if retained_base else project_source.active_root()
+    except (OSError,ValueError):
+        raise RepositoryUnavailable('The configured project checkout or retained source snapshot is unavailable. No repository code ran.') from None
     if (not root.is_absolute() or root.is_symlink() or root.resolve() != root
             or not root.is_dir() or root.stat().st_uid != os.getuid()
             or not (root / '.git').exists() or (root / '.git').is_symlink()):
@@ -329,6 +332,29 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
         raw = None
         try:
             if everyday_mode:
+                # Fresh project code is obtained by a fixed credential-free
+                # download component, before model admission. Existing bound
+                # continuations do not silently change their source revision.
+                if not job['payload'].get('bug_followup') or job['payload'].get('bug_followup',{}).get('source_refresh'):
+                    from workbench.project_source import ensure_current,registry
+                    from workbench.db import real_execution_requests
+                    with engine.connect() as active:
+                        pending=active.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()
+                        pending=pending or active.execute(select(real_execution_requests.c.id).where(
+                            real_execution_requests.c.status.in_(['pending','running','checking','cancel_requested']))).first()
+                    if pending and os.environ.get('WORKBENCH_RESEARCH_ROOT') and registry().exists():
+                        return False  # Never change active source under owned execution.
+                    if job['payload'].get('source_refresh_retry_at',0)>time.time():
+                        return False
+                    try:
+                        ensure_current()
+                    except (ValueError,OSError,subprocess.SubprocessError):
+                        with write_transaction(engine) as waiting:
+                            if intake.require(waiting,planning_jobs,job['id'])==job:
+                                waiting.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(
+                                    payload={**job['payload'],'source_refresh_retry_at':time.time()+60},
+                                    message='Waiting for a verified project-source refresh. No model request has started.'))
+                        return False
                 with engine.connect() as c:
                     everyday.check_planning(c, original, job if bug else None)
                 if choice == 'qwen-once' and adapter is None and os.environ.get('WORKBENCH_LOCAL_KEY'):
@@ -740,7 +766,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 payload = {**job['payload'], **({'bug_inspection_packet': inspection_packet} if inspection_packet else {}), **({'scenario_generation': dict(model=model, basis=basis, evidence_sha256=(digest(packet['files']) if bug else packet['evidence_sha256']) if packet else None, policy_sha256=packet['policy_sha256'] if packet else None, diagnostics=getattr(adapter_used, 'diagnostics', {}))} if generation else {}), 'prepared_proposal_id': identity, 'task_contract': contract,
                     'basis': 'preparation', 'evidence': references, 'result': dict(summary=content['summary'],
                         clarification=('' if limitation else ' '.join(clarification)[:800]),
-                        evidence_ids=[ref['id'] for ref in references], related_ids=[], proposal=content)}
+                        evidence_ids=[ref['id'] for ref in references if not contract.get('bug_intent') or ref['label'] in contract['bug_intent']['plan']['read_paths']][:12], related_ids=[], proposal=content)}
                 c.execute(intakes.update().where(intakes.c.id == original['id']).values(revision=job['revision'],
                     status='failed' if limitation else 'waiting_for_information' if contract['scope_missing'] else 'completed'))
             else:

@@ -1,3 +1,64 @@
+## Current source correction — verification in progress
+
+The central source-version defect is confirmed: preserved research main1caf530
+predates vendor items (feature commitb06effe). Current verified project main is
+df07bb4. Source freshness, immutable snapshots, same-request read-only refresh,
+stale-approval protection and checked-result-only historical compatibility are
+implemented; operational details: [PROJECT_SOURCE](PROJECT_SOURCE.md).
+Original vendor request remains revision18 with one unapproved, irrelevant
+OLD-SOURCE scope; no usable recovery is claimed. Installed13670ac still runs.
+No model, planning or implementation operation is active. Usage/history and
+all6 accepted results remain preserved. Source bundle independent restore passed.
+171 affected backend checks pass; final full suites and native checks are in
+progress. The first full run exposed outdated mocks and historical-selection
+expectations; these were corrected without relaxing production safeguards.
+Next: complete verification, seal/install, use the ordinary original-task
+source-refresh action, and obtain a relevant real Qwen plan for OWNER review.
+Qwen/local and fallbackOff remain unchanged; no task decisions/addon writes.
+Maintenance admissions remain owned-paused and must be hash-bound restored at
+closeout. No new owner engineering permission or obsolete campaign cap applies.
+
+## CRITICAL CURRENT: source-version cause confirmed; no active model; source-refresh correction in verification
+
+Installed80/13670ac (not79) remains actual service build. Original vendor task2dc5b8ba-
+2d22-4c2c-9f90-3bd58d29d5fd revision18 has ONE UNAPPROVED OLD-SOURCE proposal. It is
+NOT a usable recovery. Latest47c6092a/340c7426 settled20:38:38UTC:2COMPLETE53986tokens,
+all79COMPLETE1679374tokens. No unknown activity/approval/addonwrites. Policy18/localQwen/
+fallbackOff unchanged. Browser50432 stopped afterAPI500; no request remains active.
+
+Principal confirmed cause: configured research source1caf530 is November5; the real
+vendor-item feature was added November8 commitb06effe, absent from that snapshot.
+Remote main df07bb432c260998f001edad3979152b2d533aae fetched read-only and independently
+verified, no model disclosure. Thus source searches could not find the reported feature.
+I should have verified freshness earlier. Unified planning itself now produced a real
+Qwen scope in2responses, but it targeted unrelated Restock/Config from OLD source and
+must not be treated as a valid plan.19source refs also exceed12summary links, causing
+current installed taskGET500; read-only projection/producer fix is written and tested.
+
+New source manager: immutable snapshots under original research .git/workbench-source;
+originalcheckout HEAD/tree/config/files unchanged and bundle saved. Fixed public GitHub
+project read uses an ephemeral systemd USER unit asRich +bwrap: no ownerhome/credentials/
+internal sockets, NoNewPrivs and zero capabilities. Existing roothelper/network/services
+unchanged. Actual download and final isolation smoke pass; no provider calls. Current
+snapshot df07bb4 includes real vendor modules. Fresh initial tasks check source before
+model admission; failures wait/back off with ZEROmodel requests. Same-task fresh-source
+v5consent preserves every oldphase/usage and discards stale code/findings, no approvals
+copied. Stale plan approval is refused; UI refresh action written. Checked-result-only
+historical recipe lookup retains exact old source; all6prior accepted recipes revalidated
+with newcode/current source and ZERO provider replay. Unexecuted oldapproval remainsheld.
+
+5source-specific+84related tests/static/contracts/build pass. FULLbackend suite68579,
+FULLbrowser3528 andfrontend26138 running; inspect logs source-final-complete-*. Native
+2current intent modes must run afterbrowser finishes, no concurrentPlaywright/Vitebuild.
+No verified candidate for installation yet; rootuncommitted code is ahead of80.
+Source manager initial interrupted75415 completed successfully; no lingering unit.
+Next: finish checks, checkpoint/seal/install, normal original-task 'Refresh source and
+investigate' read-only browser action, realQwen usable source-grounded plan, OWNERreview,
+quiescent restart/history/results/model/network continuity and maintenance restoration.
+Maintenance NEW admissions STILL OWNED PAUSED (hash-bound opsctl resume required).
+Preserve rootowner documents/credentials/history/6results/source/disclosure/billing/LAN/
+publication/checking/recovery safeguards. No campaign caps or renewedengineeringapproval.
+
 ## Unified investigation-to-scope correction verified; installed79 remains until checked cutover
 
 Read/apply complete owner steering in OWNER_INVESTIGATION_PLAN_STEERING_20261109.md

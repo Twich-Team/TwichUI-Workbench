@@ -258,6 +258,18 @@ def view_in(connection, identity):
         item['dependencies'] = list(connection.execute(select(backlog_dependencies.c.requires_id).where(
             backlog_dependencies.c.item_id == item['id'])).scalars())
     results = [j for j in jobs if j['kind'] == 'planning' and j['status'] == 'completed']
+    result=None
+    if results and not retained:
+        saved=results[-1]['payload']
+        result=saved.get('result')
+        if result:
+            # Keep every private/advanced reference, but the summary contract
+            # has twelve links. Prefer the reviewed read scope, never rewrite
+            # older saved payloads or drop their later-discovered source.
+            paths=(saved.get('task_contract',{}).get('bug_intent') or {}).get('plan',{}).get('read_paths',[])
+            refs=saved.get('evidence',[])
+            selected=[r['id'] for p in paths for r in refs if r.get('label')==p]
+            result={**result,'evidence_ids':list(dict.fromkeys(selected or result.get('evidence_ids',[])))[:12]}
     activity = []
     if row['payload'].get('local_planning'):
         activity = connection.execute(select(
@@ -268,8 +280,10 @@ def view_in(connection, identity):
                 model_attempts.c.backend.is_not(None))
             .order_by(model_attempts.c.started_at.desc(), model_attempts.c.id)).mappings().all()
     from workbench.investigation_start import resume_binding
+    from workbench.project_source import refresh_view
     latest = max((j for j in jobs if j['kind']=='planning'),key=lambda j:j['revision'],default=None)
-    return dict(planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
+    has_authority=bool(planned) or bool(connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
+    return dict(project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
         planning_start_binding=digest(row['payload']) if configured_mode()=='everyday' and row['payload']['kind']=='issue' and not row['payload'].get('local_planning') and not row['payload'].get('supported_task') and row['status'] in {'failed','waiting_for_information'} else None,
         provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
         created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],
@@ -279,7 +293,7 @@ def view_in(connection, identity):
         decisions=[dict({k:v for k,v in d.items() if k not in {'snapshot','intake_id'}},
             scope_review_required=approval_needs_scope_review(connection, d)) for d in connection.execute(select(proposal_decisions).where(
             proposal_decisions.c.intake_id == identity).order_by(proposal_decisions.c.created_at.desc())).mappings()],
-        result=results[-1]['payload'].get('result') if results and not retained else None,
+        result=result,
         evidence=evidence_previews(next((j['payload']['evidence'] for j in reversed(jobs) if j['kind']=='planning' and 'evidence' in j['payload']), [])), tasks=[{k:v for k,v in t.items() if k not in {'intake_id','created_at'}} for t in planned], priority=priority(row, sum(len(t['dependencies']) for t in planned)))
 
 
@@ -331,6 +345,11 @@ def decide(engine, identity, body):
             from workbench.task_budget import validate_selection
             validate_selection(connection, proposal['id'], body.run_budget)
         if body.action == 'approve':
+            from workbench.project_source import require_current
+            try:
+                require_current(review.get('task_contract'))
+            except ValueError as error:
+                raise HTTPException(409,str(error)) from None
             validate_review(connection, proposal, review, body.scope_revision)
             from workbench.bug_evidence import validate_expectation_review
             validate_expectation_review(review, payload)
@@ -471,18 +490,33 @@ def clarify(engine, identity, body):
             if job['payload'].get('clarification_id') == str(body.command_id):
                 if (job['payload'].get('feedback') != body.text
                         or bool(job['payload'].get('bug_followup')) != body.continue_investigation
+                        or job['payload'].get('refresh_source',False)!=body.refresh_source
+                        or job['payload'].get('source_refresh_binding')!=body.source_refresh_binding
                         or bool(job['payload'].get('explicit_renewal',job['payload'].get('renew_operation',False))) != body.renew_operation):
                     raise HTTPException(409, 'Clarification ID already used.')
                 return
+        refresh=body.refresh_source
+        if refresh:
+            from workbench.project_source import refresh_view
+            authority=bool(connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
+                or connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
+            offered=refresh_view(row,sorted(jobs,key=lambda j:j['created_at']),has_authority=authority)
+            if (not offered or not offered['refresh_binding'] or offered['refresh_binding']!=body.source_refresh_binding
+                    or not body.continue_investigation or not body.renew_operation):
+                raise HTTPException(409,'Source refresh needs the current read-only offer, settled work, and no old repair approvals.')
+        elif body.source_refresh_binding is not None:
+            raise HTTPException(422,'Source-refresh binding needs explicit read-only refresh consent.')
         bug_continuation=(bug_investigation.requested(row['payload']) and row['status']=='failed'
             and any(j['kind']=='planning' and j['revision']==row['revision'] and j['status']=='completed'
                 and j['payload'].get('task_contract',{}).get('scope_missing') for j in jobs)
             and not connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
             and not connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
-        if (row['status'] != 'waiting_for_information' and not bug_continuation and not (body.renew_operation and row['status']=='failed') or row['revision'] != body.revision
+        if (row['status'] != 'waiting_for_information' and not bug_continuation and not refresh and not (body.renew_operation and row['status']=='failed') or row['revision'] != body.revision
                 or retained_planning_failure(row, jobs)):
             raise HTTPException(409, 'The request changed. Refresh before answering.')
         next_input = {'feedback': body.text, 'clarification_id': str(body.command_id)}
+        if refresh:
+            next_input.update(refresh_source=True,source_refresh_binding=body.source_refresh_binding)
         next_sequence=row['revision']+1
         if body.renew_operation:
             next_input.update(renew_operation=True,explicit_renewal=True)
@@ -504,7 +538,7 @@ def clarify(engine, identity, body):
                     if (connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
                             or connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first()):
                         raise ValueError('An approved or dispatched task cannot be renewed through investigation')
-                    continuation=renewed_budget(connection,initial)
+                    continuation=renewed_budget(connection,initial,fresh_source=refresh)
                     next_sequence=continuation['next_sequence']
                 else:
                     continuation=followup_budget(connection,initial,row['revision'])

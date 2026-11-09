@@ -281,7 +281,7 @@ def check_planning(c, original, job=None):
         data = job['payload']
         binding = digest(dict(original=original['payload'], revision=original['revision'],
                               feedback=data['feedback'], clarification_id=data['clarification_id']))
-        fresh=followup.get('budget_version')==4
+        fresh=followup.get('budget_version') in (4,5)
         if (not fresh and (job['revision'] != original['revision']+1 or claimed > original['revision'])
                 or followup['binding'] != binding or followup['route'] != approved(c, original)
                 or data.get('scenario_generation_claim')):
@@ -296,7 +296,7 @@ def check_planning(c, original, job=None):
             from workbench.planning_limits import renewed_budget
             if not initial:
                 raise ValueError('The original investigation permission is unavailable')
-            actual=renewed_budget(c,initial,exclude_job=job['id'])
+            actual=renewed_budget(c,initial,exclude_job=job['id'],fresh_source=followup.get('budget_version')==5)
             if (not data.get('renew_operation') or job['revision']!=actual['next_sequence']
                     or any(followup.get(k)!=v for k,v in actual.items())):
                 raise ValueError('Fresh operation binding or retained phase accounting changed')

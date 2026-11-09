@@ -63,6 +63,11 @@ test('C D E · revised proposal, exact approval receipt, one hierarchy, stale re
   await page.getByRole('button',{name:'Request changes',exact:true}).click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('apply-planning');fixture('planning');
+  // A newly delivered plan opens automatically. Historical revisions remain
+  // readable, and returning from one never grants its stale approval.
+  await expect(page.getByRole('heading',{name:'The plan',exact:true})).toBeVisible();
+  await page.getByText('Original request, planning history and evidence',{exact:true}).click();
+  await page.getByLabel('Proposal revision').selectOption(oldProposal.id);
   await page.getByRole('button',{name:'Open current proposal'}).click();
   await expect(page.getByRole('heading',{name:'The plan',exact:true})).toBeVisible();
   expect((await snapshot(page)).proposals[0].revision).toBe(2);
@@ -274,4 +279,33 @@ test('declining a plan records the choice and produces no work',async({page})=>{
   expect(saved.decisions[0]).toMatchObject({status:'applied',payload:{action:'decline'}});
   expect(saved.tasks).toHaveLength(0);
   await expect(page.getByRole('button',{name:'Approve plan',exact:true})).toHaveCount(0);
+});
+
+test('source refresh is a separate read-only action and duplicate clicks do not approve a plan',async({page})=>{
+  await submit(page,'feature','Controlled source-refresh presentation');fixture('planning');
+  const state=await snapshot(page);
+  // Isolated presentation fixture only. Backend epoch/accounting behavior is
+  // exercised by test_project_source; this is not real-provider acceptance.
+  state.project_source={inspected_base:'a'.repeat(40),current_base:'b'.repeat(40),stale:true,refresh_binding:'c'.repeat(64)};
+  let sent=0;
+  await page.route('**/api/intake/'+state.id,async route=>{
+    if(route.request().method()!=='GET')return route.continue();
+    return route.fulfill({json:state});
+  });
+  await page.route('**/api/intake/'+state.id+'/clarification',async route=>{
+    const body=route.request().postDataJSON();
+    expect(body).toMatchObject({revision:state.revision,continue_investigation:true,renew_operation:true,refresh_source:true,source_refresh_binding:'c'.repeat(64)});
+    expect(Object.keys(body)).toHaveLength(7);
+    expect(body).not.toHaveProperty('run_budget');expect(body).not.toHaveProperty('action');
+    sent++;state.status='queued';state.project_source!.refresh_binding=null;
+    await new Promise(resolve=>setTimeout(resolve,100));
+    return route.fulfill({json:state});
+  });
+  await page.reload();
+  await expect(page.getByRole('heading',{name:'This investigation used older addon code'})).toBeVisible();
+  await expect(page.getByText('This does not approve a plan, addon changes, or publication.')).toBeVisible();
+  await page.getByRole('button',{name:'Refresh source and investigate',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Refresh source and investigate',exact:true})).toHaveCount(0);
+  expect(sent).toBe(1);expect(state.decisions).toHaveLength(0);
+  await page.reload();await expect(page.getByRole('heading',{level:1,name:state.original.title})).toBeVisible();
 });
