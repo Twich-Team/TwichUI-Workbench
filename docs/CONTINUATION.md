@@ -1,9 +1,11 @@
-## CURRENT73/8a62dd2 — November9 17:26UTC, original vendor task continuation queued
+## CURRENT73/8a62dd2 — November9 17:29UTC, original vendor task continuation RUNNING
 
 73/8a62dd2 installed with all source/seal/latest-history/network/browser/model/auth
 gates passed; six earlier real results canonically revalidated, zero provider replay.
 Normal browser same-intake continuation commandd0ec186e-5745-4eeb-95bd-bc78d34b7121
-recorded; job3214b14b-5189-40e9-a35b-984ab3ec340d/revision11queued. Observer13682,
+recorded; job3214b14b-5189-40e9-a35b-984ab3ec340d/revision11RUNNING. Actual
+attempt42e9ce2b-c96b-4bff-8a8d-52e13c5afee8 completed first real response and
+requested fresh source/search; request2active. Observer13682,
 private real-relocated-renewal.jsonl and browser-observer/renew-relocated.mjs with
 live-relocated-renewal-binding.json. Do NOT replay pending/healthy work. No usable
 vendor plan or addon approvals/implementation claimed. Previous41COMPLETE responses
