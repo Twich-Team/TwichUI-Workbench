@@ -1,3 +1,13 @@
+# Vendor report: corrected discovery installed and real investigation running
+
+69/c7be9ba installed and verified; all six prior checked results/history preserved.
+Live tool-error recovery was demonstrated on68; investigation then hit the old12file
+limit.69 gives discovery a24file working set and allows fresh owner-reviewed repair
+proposals for relevant inspected project files. It does not grant edits or make
+helpers writable. Same original report continues with Qwen/fallbackOff; no vendor
+plan or patch yet. Eight complete responses149411tokens retained. Current observer,
+restoration duty and exact evidence are in CONTINUATION. No owner renewal needed.
+
 # Same saved vendor report: source-read recovery installed
 
 68/a4e44fe installed with history/network/auth gates passed and six accepted results

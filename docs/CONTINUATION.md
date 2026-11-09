@@ -1,3 +1,35 @@
+## Current installed69/c7be9ba vendor investigation — November9 15:49UTC
+
+SAME owner intake2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd is running normal Qwen-only
+read-only continuation job6378f78c-2a8a-44db-b0f3-7116dbbfd6da, command
+f08e58af-6540-45c5-89c3-64099a4fca5d. Observer76832 /real-discovery-renewal.jsonl,
+live-discovery-renewal-binding.json and browser-observer/renew-discovery.mjs in
+private vendor-planning-recovery-20261109. Do NOT replay healthy operation.
+
+68 real tool-error recovery worked and followed new committed dependencies across
+four completed responses, then hit the old12file selection limit. Settled; no
+uncertainty/implementation. Eight complete responses149411tokens known across
+incident. Old attempts/unknown/null accounting preserved.69 separates investigation
+working set24 from reviewed read12/write3 scope. New inspected ordinary code/tests
+can enter a fresh proposal, helpers remain read-only. This is proposal eligibility,
+never editing permission. Existing owner plan/run decisions remain mandatory.
+No addon plan/run decision or patch has been fabricated; eventual usable plan waits
+for genuine owner review. No vendor source sent to Codex or fallback enabled.
+
+138affected tests +static/contracts/build, two actual confined controlled provider
+workflows (local source omitted initially→discovery→review→edit/check/restart/secondtask),
+and6request actual-state capture pass. Full earlier1918backend/113browser/32frontend
+results reused with explicit affected delta. All source/seal/history/network/model/
+auth installation gates pass. All six earlier real checked results canonically
+revalidated, zero replay. Initial controlled fixture failures retained and fixed;
+constant-only source no-function reference lookup correction is tested.
+
+IMPORTANT maintenance admissions remain temporarily paused under A11. Restore ONLY
+if control hash matches maintenance-admission-hold.json using supported opsctl resume.
+Need usable Qwen plan/genuine question, full settled restart/history/model/auth recovery,
+admissions restoration and final screenshots/report/checkpoint. Continue under standing
+authority; do not stop at this checkpoint. Exact release lineage in outcome-c7be9ba.
+
 ## Active vendor recovery — installed68/a4e44fe, November9 15:31UTC
 
 Same owner report2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd continues via normal browser
