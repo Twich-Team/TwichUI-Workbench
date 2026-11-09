@@ -1,3 +1,40 @@
+## CURRENT: installed70/6e27933, real vendor task running — November9 16:19UTC
+
+Same intake2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd, new normal browser Qwen-only
+read-only continuation job1bb4ce6c-5712-4ef6-96a2-c2075d5c0760, command
+95c5f742-23fc-48b8-b7a8-2a3946f07829. Observer tool88763; private
+vendor-planning-recovery-20261109/real-focus-renewal.jsonl and browser-observer/
+renew-focus.mjs, live-focus-renewal-binding.json. Do NOT replay healthy operation.
+Actual attempt identity is in normal API provider_activity/current private journals.
+
+69 operation7a0e686c-94c2-4e58-82e6-ff8a33fb141a definitively finished16real
+Qwen responses, then stopped at operation turn limit with no plan. Not uncertain.
+All24completed incident responses452501tokens retained, original NULL observations
+and failures unchanged. It re-requested cached Map/Collect/Store code because old
+keyword-derived context displaced earlier requested bodies. No addon implementation,
+plan/run approval, or publication was created. Do not call diagnostics a vendorfix.
+
+70 keeps previously read bodies of requested files ahead of unrelated inferred code,
+selects their actual callees/declarations and omits unrelated test examples during
+intent investigation. Fresh requested source/mandatory declarations still protected.
+Wire65536/prompt22000/output2600/source262144/actual scope/run guards unchanged.
+Reader now supports256records under SAME64KiBfile/16KiBrecord/private owner+mode/
+no-symlink guards; actual prior parent had49records and old32-record reader would
+lose recovery.130affected tests, both confined separate-process controlled provider
+workflows, static/contracts/build/migrations, actual49record proof and SIX-request
+replay from full24response settled state pass with zero new modelcalls/DB mutation.
+Native local availability is explicitly controlled in fixture; production locks unchanged.
+981a709 staged but never activated;6e27933 includes final journal correction.
+
+All source/seal/history/network/model/auth cutover gates passed. Six prior real
+checked results canonically revalidated with no replay. Model defaults/fallbackOff,
+original report and rejection evidence preserved. Maintenance admission hold STILL
+OWNED (hash unchanged at16:00); restore ONLY via hash-bound supported opsctl resume.
+Need actual usable Qwen plan/genuine question, settled full restart/history/model/
+auth verification, admission restoration and final screenshot/report/checkpoint.
+Owner must genuinely review addon plan/run; standing engineering authority continues.
+Per-operation safeguards remain bounded, old campaign/global caps remain superseded.
+
 ## Current installed69/c7be9ba vendor investigation — November9 15:49UTC
 
 SAME owner intake2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd is running normal Qwen-only

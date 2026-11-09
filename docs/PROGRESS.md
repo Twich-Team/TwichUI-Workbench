@@ -1,3 +1,13 @@
+## November9 16:19UTC — focused source context and full journal recovery installed
+
+70/6e27933 verified cutover retains same report/sixacceptedresults. Previous operation
+settled16responses/noplan; total24responses452501tokens remain counted. Corrected
+source retention follows requested files/callees rather than unrelated keyword context;
+reader handles actual49recordjournal with unchanged64KiB/private-file guards.130tests,
+2confined controlled workflows/static and6request fullactualstate replay pass. Same
+normal browser Qwen read-only continuation active; no addon decision or vendorfix yet.
+Continue through plan/restart/restoration, not checkpoint stop.
+
 ## November9 15:23UTC — exact packing installed; same report continuing
 
 67/d3b6f33 source/seal/history/network/auth gates and six prior result revalidations pass.

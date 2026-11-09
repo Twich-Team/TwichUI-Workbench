@@ -1,3 +1,13 @@
+# Vendor-task planning recovery: focused context installed; real investigation active
+
+70/6e27933 installed after checked history/network/auth gates. Six prior accepted
+results preserved and revalidated. The last Qwen operation settled after16responses
+without a plan; all24completed incident responses452501tokens retained. App context
+had displaced earlier requested code with unrelated inferred bodies. Corrected focus
+and complete bounded-journal recovery now verified; SAME report investigating through
+normal browser again with Qwen/fallbackOff. No vendor plan/implementation claimed.
+Current job/observer and mandatory maintenance-admission restoration are in CONTINUATION.
+
 # Vendor report: corrected discovery installed and real investigation running
 
 69/c7be9ba installed and verified; all six prior checked results/history preserved.
