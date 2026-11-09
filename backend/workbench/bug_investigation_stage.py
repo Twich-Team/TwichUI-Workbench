@@ -46,6 +46,8 @@ INSTRUCTIONS = (
     'Return finding and exactly one draft: inspection, diagnosis, question, or limitation. '
     'Use app-owned literal search or committed line inspection for missing bodies, callers, event handlers, '
     'state consumers and existing test startup. Do not ask the owner to locate source. '
+    'A source read error returns no source for that path. Correct it using literal search in the permitted project; '
+    'never infer that a guessed filename exists or repeat an unavailable read unchanged. '
     'A diagnosis states the suspected cause in one concise sentence and cites exact supplied file paths in evidence_paths. '
     'Copy paths exactly: no line-number suffix, basename abbreviation, API symbol or descriptive label. '
     'Distinguish actual source behavior from the desired behavior and from comments. '

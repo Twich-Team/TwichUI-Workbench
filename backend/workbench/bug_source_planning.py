@@ -232,7 +232,7 @@ def verify_packet(initial, supplied):
     return supplied
 
 
-def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_budget=6500):
+def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_budget=6500, errors=None):
     total = 0
     windows, matches = [], []
     for index, request in enumerate(requests):
@@ -253,6 +253,10 @@ def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_bu
         try:
             raw, item = committed(request.path, packet['base'])
         except ValueError as error:
+            if errors is not None and str(error) == 'The requested committed source is unavailable.':
+                errors.append(dict(path=request.path, status='unavailable',
+                    note='No source returned: this path is absent or not a readable regular Lua blob within the committed-source limits. Search the permitted committed project for actual paths; do not assume a file exists.'))
+                continue
             raise ResponseValidationError('The requested committed source is unavailable or disallowed.',
                 ['inspection', index, 'path'], 'an allowed regular committed Lua/test file', request.path) from error
         lines = raw.decode().splitlines()
@@ -453,6 +457,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     response_added = True
     original_stop = adapter.stop_event
     rejected = set()
+    unavailable_reads = set()
     review_rejected = set()
     rejected_behaviors = ({lessons['rejected_behavior_sha256']} if lessons and
                           lessons.get('rejected_behavior_sha256') else set())
@@ -695,12 +700,20 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                              else dict(path=r.path, start=r.start, end=r.end) for r in draft.inspection])
             if index+1 == requests:
                 raise PlanningUnavailable('The bounded investigation needs more source inspection.', 'inspection_limit')
+            read_errors = []
             windows, matches, chars = (inspect(packet, draft.inspection, disclosure_paths=adapter.source_manifest,
-                          page_lines=160,result_budget=16000)
-                if getattr(adapter, 'source_manifest', None) is not None else inspect(packet, draft.inspection))
+                          page_lines=160,result_budget=16000, errors=read_errors)
+                if getattr(adapter, 'source_manifest', None) is not None else inspect(packet, draft.inspection, errors=read_errors))
             if evidence:
                 evidence.record('source-read-result',characters=chars,search_matches=len(matches),
                     windows=[{key:value for key,value in window.items() if key!='text'} for window in windows])
+                if read_errors:
+                    evidence.record('source-read-unavailable', errors=read_errors, approved=False, executed=False)
+            if read_errors and not windows and not any(hasattr(r, 'query') for r in draft.inspection):
+                signature = tuple(sorted(e['path'] for e in read_errors))
+                if signature in unavailable_reads:
+                    raise PlanningUnavailable('The investigator repeated unavailable source requests without new evidence.', 'inspection_unchanged')
+                unavailable_reads.add(signature)
             if program_mode:
                 search_chars += sum(len(m['text']) for m in matches)
                 read_chars = source_characters(packet)+search_chars
@@ -715,6 +728,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             if diagnosis:
                 wire['investigation_diagnosis'] = dict(**diagnosis, untrusted=True, approved=False, executed=False)
             wire['inspection_result']['requested'] = [r.model_dump(mode='json') for r in draft.inspection]
+            if read_errors:
+                wire['inspection_result']['read_errors'] = read_errors
             if wire['coverage'].get('call_driven') and not packet.get('inspection_windows') and not review_required and not intent_mode:
                 wire['coverage']['require_inspection'] = True
     finally:

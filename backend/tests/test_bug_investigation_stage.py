@@ -55,6 +55,79 @@ def test_read_only_inspection_then_diagnosis_retains_exact_source(client, header
     assert calls[2]['investigation_diagnosis']['evidence_paths'] == [PRODUCTION]
 
 
+@pytest.mark.usefixtures('installed')
+def test_unavailable_guess_returns_tool_feedback_without_losing_valid_reads_or_usage(client, headers, store, monkeypatch):
+    enable(monkeypatch)
+    missing = '!!!TwichUI/not-a-committed-file.lua'
+    read = dict(finding='Read source, without assuming these guessed files exist.', draft=dict(inspection=[
+        dict(path=PRODUCTION,start=1,end=1), dict(path=missing,start=1,end=80)]))
+    calls = scripted(monkeypatch, [read, diagnosis(), response(), review()])
+    item, attempt = run(client, headers, store)
+    assert item['status'] == 'completed' and not item['decisions'] and not item['tasks']
+    feedback = calls[1]['inspection_result']
+    assert feedback['read_errors'][0]['path'] == missing and feedback['read_errors'][0]['status'] == 'unavailable'
+    assert feedback['visible_requested_windows'][0]['path'] == PRODUCTION
+    assert missing not in {f['path'] for f in calls[1]['files']}
+    assert attempt['usage']['requests_observed'] == 4
+
+
+@pytest.mark.usefixtures('installed')
+def test_unchanged_unavailable_reads_do_not_loop(client, headers, store, monkeypatch):
+    enable(monkeypatch)
+    read = dict(finding='A guessed unavailable file.',draft=dict(inspection=[
+        dict(path='!!!TwichUI/not-a-committed-file.lua',start=1,end=80)]))
+    calls = scripted(monkeypatch, [read, read])
+    item, attempt = run(client, headers, store)
+    assert item['status'] == 'failed' and len(calls) == 2 and not item['proposals']
+    from sqlalchemy import select
+    from workbench.db import planning_jobs
+    with store.connect() as c:
+        payload = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.id == attempt['job_id'])).scalar_one()
+    assert payload['diagnostics']['category'] == 'inspection_unchanged'
+    assert attempt['usage']['requests_observed'] == 2
+
+
+@pytest.mark.parametrize('cause', ['The committed project changed during investigation.',
+                                  'Source inspection is restricted to committed project Lua and tests.'])
+def test_tool_feedback_does_not_hide_policy_or_repository_failures(monkeypatch, cause):
+    from workbench import bug_source_planning as source
+    from workbench.bug_evidence import InvestigationRead
+    def denied(*_): raise ValueError(cause)
+    monkeypatch.setattr(source, 'committed', denied)
+    errors = []
+    with pytest.raises(ResponseValidationError):
+        source.inspect(dict(base='pinned'), [InvestigationRead(path=PRODUCTION,start=1,end=80)], errors=errors)
+    assert errors == []
+
+
+def test_missing_external_disclosure_still_holds_before_any_read(monkeypatch):
+    from workbench import bug_source_planning as source
+    from workbench.bug_evidence import InvestigationRead
+    from workbench.planning_transport import PlanningUnavailable
+    def unexpected(*_): raise AssertionError('Forbidden read happened')
+    monkeypatch.setattr(source, 'committed', unexpected)
+    errors = []
+    with pytest.raises(PlanningUnavailable) as hold:
+        source.inspect(dict(base='pinned'), [InvestigationRead(path=PRODUCTION,start=1,end=80)],
+            disclosure_paths=set(), errors=errors)
+    assert hold.value.reason == 'disclosure' and errors == []
+
+
+@pytest.mark.usefixtures('installed')
+def test_changed_search_after_missing_read_is_new_evidence_even_without_matches(client, headers, store, monkeypatch):
+    enable(monkeypatch)
+    missing = dict(path='!!!TwichUI/not-a-committed-file.lua',start=1,end=80)
+    first = dict(finding='Check a guessed path.',draft=dict(inspection=[missing]))
+    changed = dict(finding='Search the committed project to correct the guess.',draft=dict(inspection=[
+        missing, dict(query='NoSuchCommittedSymbol12345')]))
+    question = dict(finding='No claim of a fix.',draft=dict(question='What visible behavior should change?'))
+    calls = scripted(monkeypatch, [first, changed, question])
+    item, attempt = run(client, headers, store)
+    assert len(calls) == 3 and item['status'] != 'failed' and not item['tasks']
+    assert calls[2]['inspection_result']['search_matches'] == []
+    assert attempt['usage']['requests_observed'] == 3
+
+
 @pytest.mark.parametrize('outcome', ['question', 'limitation'])
 @pytest.mark.usefixtures('installed')
 def test_nonplan_outcomes_do_not_construct_or_approve_plan(client, headers, store, monkeypatch, outcome):

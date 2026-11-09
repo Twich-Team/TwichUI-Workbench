@@ -226,6 +226,9 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 answer=dict(finding='PRIVATE_REJECTED_CONTENT'*30,draft=dict(question='A specific question.'))
             elif case.get('clarification') and 'Technical context:' not in packet.get('owner_reply',''):
                 answer=dict(finding=finding,draft=dict(question='Should normalization happen each time?'))
+            elif case_provider == 'local' and case['client_case'] and packet.get('investigation_progress', {}).get('request_number') == 1:
+                answer=dict(finding='A controlled guessed file must return tool feedback, not terminate the task.',
+                    draft=dict(inspection=[dict(path='!!!TwichUI/not-a-committed-file.lua',start=1,end=80)]))
             elif ((case['client_case'] and not (
                     len([w for w in packet.get('source_memory', {}).get('read_windows', [])
                          if w['path'] == CLIENT_SOURCE]) >= 2 or
