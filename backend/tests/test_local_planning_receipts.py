@@ -95,3 +95,35 @@ def test_intent_working_packet_is_packed_before_wire_bound(monkeypatch):
     packet["coverage"] = {}
     with pytest.raises(PlanningUnavailable, match="input budget"):
         LocalProvider().generate(packet, Response, expected_model="saved")
+
+
+@pytest.mark.parametrize("fault", [None, "uncertain", "missing", "duplicate", "wire", "boolean"])
+def test_explicit_local_non_dispatch_is_not_inferred_from_empty_text(tmp_path, fault):
+    from workbench.provider_receipts import not_started_local_turn
+
+    identity = str(uuid4())
+    root = tmp_path / "stage"
+    p = root / "release/artifacts/runs" / ("planning-evidence-" + identity) / "events.jsonl"
+    p.parent.mkdir(parents=True, mode=0o700)
+    e = dict(phase="request-stopped", category="input_budget", generation_state="not_started")
+    rows = [] if fault == "missing" else [e, e] if fault == "duplicate" else [e]
+    if fault == "wire":
+        rows.append(dict(phase="wire-received"))
+    p.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    p.chmod(0o600)
+    d = dict(
+        generation_state="uncertain" if fault == "uncertain" else "not_started",
+        investigation_requests=False if fault == "boolean" else 0,
+        stopped_request_generation_state="not_started",
+        stopped_request_category="input_budget",
+    )
+    if fault:
+        with pytest.raises(ValueError):
+            not_started_local_turn(identity, [root], d)
+    else:
+        proof = not_started_local_turn(identity, [root], d)
+        assert (
+            proof["requests"] == 0
+            and proof["usage_observation"] is None
+            and proof["database_records_unchanged"]
+        )

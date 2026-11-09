@@ -172,10 +172,13 @@ def seed(packet, original, current_attempt, engine):
                             windows.extend(event.get('windows', []))
                 candidate = copy.deepcopy(packet)
                 used = []
-                seen = set()
+                existing = [(w['path'],w['line'],w['through_line'],w['sha256'])
+                            for w in candidate.get('inspection_windows',[])]
+                seen = set(existing)
                 for window in windows:
                     key = (window['path'], window['line'], window['through_line'], window['sha256'])
-                    if key in seen:
+                    if key in seen or any(p==key[0] and sha==key[3] and start<=key[1] and key[2]<=end
+                                          for p,start,end,sha in existing):
                         continue
                     seen.add(key)
                     if len(seen) > source.window_limit(candidate):

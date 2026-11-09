@@ -364,7 +364,10 @@ class LocalProvider:
                 if len(encoded_body) <= request_limit:
                     break
         if (issubclass(schema, ScenarioResponse) or schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse)) and len(encoded_body) > request_limit:
-            raise PlanningUnavailable('Serialized grounded request exceeds the input budget; narrow the request.')
+            self.diagnostics.update(request_bytes=len(encoded_body),request_byte_limit=request_limit)
+            if self.response_evidence:
+                self.response_evidence.record('request-rejected',generation_state='not_started',category='input_budget',request_bytes=len(encoded_body),request_byte_limit=request_limit)
+            raise PlanningUnavailable('Serialized grounded request exceeds the input budget before generation.', 'input_budget')
         if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse):
             self.diagnostics['input_bytes'] = len(body['messages'][1]['content'].encode())
             self.diagnostics['request_bytes'] = len(encoded_body)

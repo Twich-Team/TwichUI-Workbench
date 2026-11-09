@@ -302,3 +302,23 @@ def completed_local_turns(identity, usage, evidence_roots, requested_model, diag
             raise ValueError('The stopped local request is not a verified preflight rejection')
         records.append(dict(non_dispatch=phase,source_sha256=sha))
     return dict(provider_outcome='completed',actual_model=requested_model,model_observation='Every retained envelope affirmed equality to the saved requested model.',records=records,usage=summed,database_records_unchanged=True)
+
+
+def not_started_local_turn(identity, evidence_roots, diagnostics):
+    """Explicit adapter non-dispatch state plus its private stop event; never blank-content inference."""
+    if (str(UUID(identity))!=identity or diagnostics.get('generation_state')!='not_started'
+            or type(diagnostics.get('investigation_requests')) is not int or diagnostics.get('investigation_requests')!=0
+            or diagnostics.get('stopped_request_generation_state')!='not_started'):
+        raise ValueError('Local non-dispatch is not established')
+    roots=list(dict.fromkeys(Path(p) for p in evidence_roots))
+    paths=[p/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl' for p in roots]
+    paths=[p for p in paths if p.is_file()]
+    if len(paths)!=1:
+        raise ValueError('Local stop evidence is missing or ambiguous')
+    events,sha=_read(paths[0],lines=True,bound=65536)
+    stops=[e for e in events if e.get('phase')=='request-stopped']
+    if (len(stops)!=1 or stops[0].get('generation_state')!='not_started'
+            or stops[0].get('category')!=diagnostics.get('stopped_request_category')
+            or any(e.get('phase') in {'wire-received','envelope','provider-result'} for e in events)):
+        raise ValueError('Local stop does not prove non-dispatch')
+    return dict(provider_outcome='not_started',requests=0,usage_observation=None,source_sha256=sha,database_records_unchanged=True)

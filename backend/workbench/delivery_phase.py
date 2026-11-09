@@ -40,6 +40,10 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
         terminal_proof=None
         if local in {'queued','running'} or attempt and not terminal:
             provider_state='active'
+        elif attempt and terminal and backend=='local' and facts.get('generation_state')=='not_started' and facts.get('investigation_requests')==0:
+            from workbench.provider_receipts import not_started_local_turn
+            terminal_proof=not_started_local_turn(attempt,evidence_roots,facts)
+            provider_state='not_started'
         elif attempt and terminal and isinstance(usage,dict) and usage.get('status')=='complete':
             if backend=='codex':
                 terminal_proof=(interrupted_turns(attempt,usage,evidence_roots,facts,caps)
@@ -65,7 +69,7 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
                 if type(value) is not int or value<0:
                     raise ValueError('Completed phase accounting is malformed')
                 totals[key]=totals.get(key,0)+value
-        count=usage.get('requests_observed',1) if isinstance(usage,dict) else None
+        count=0 if provider_state=='not_started' else usage.get('requests_observed',1) if isinstance(usage,dict) else None
         if provider_state in {'completed','interrupted'} and (type(count) is not int or count<1
                 or provider_state=='completed' and (actual!=requested or not actual)
                 or actual is not None and actual!=requested):
@@ -88,4 +92,4 @@ def renewable(snapshot):
     """A local rejection is renewable only after every old generation is settled."""
     return bool(snapshot['phases']) and all(
         p['local_status'] in {'completed','failed'} and p['local_finished'] and
-        p['provider_state'] in {'completed','interrupted'} and p['read_only'] and not p['execution_authorized'] for p in snapshot['phases'])
+        p['provider_state'] in {'completed','interrupted','not_started'} and p['read_only'] and not p['execution_authorized'] for p in snapshot['phases'])

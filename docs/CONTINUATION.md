@@ -1,3 +1,36 @@
+## Current vendor recovery — context deduplication verified, November9 15:02UTC
+
+Installed65/54e2881. Owner task remains2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd.
+No active Workbench provider operation: job3/b38cba42... had2COMPLETE local
+responses,37511tokens, then stopped preparing a third input before dispatch.
+Oldactual_modelNULL is preserved; private envelope proof recovers model equality
+and terminal/accounting facts separately. Job4/c8efb03e-fbf6-4254-9747-a6fcec1057ff /
+attempt0c7b3ecd-d0b6-495a-b06e-0c8c807eedd1 definitively NOTSTARTED: recovery
+appended already-cached source twice, prepared126658bytes, serialized request could
+notfit. Not model outage or invalid model output. No partial/uncertain request to replay.
+Private incident directory vendor-planning-recovery-20261109 contains all snapshots,
+responses, logs, completed-local-prefix-proof and no-model full assembly proof.
+
+Current connected correction de-duplicates source coordinates already retained,
+keeps known not-started phases in accounting with usageNULL (not fabricated token0),
+and permits safe normal read-only renewal from verified private stop evidence.
+Full actual recovery→memory→request builder was exercised with real saved report,
+source/cache and capture-only transport: prepared100049, actualwire65490<=65536;
+no new modelcall. Previous simpler assembler check missed the second memory merge;
+this full-path proof now covers it.247affected tests+57denials/static pass; API
+renewal test asserts no duplicate read-window metadata. No scope/checker weakening.
+Root source changes pending next checked deploy; keep old source/input/history.
+
+IMPORTANT: maintenance admission pause remains owned under A11. Restore ONLY if
+control hash still matches maintenance-admission-hold.json via supported opsctl
+resume. Original snapshot retained; no service/unit/root changes or kills occurred.
+No addon proposal, plan/run decision, patch or publication exists for this vendor
+report yet. Need checked next candidate, normal browser clarification continuation
+on SAME intake (renew_operation:true, keepQwen/fallbackOff, no addon approval), then
+follow real response to usable plan or genuine question. All generations/requests
+from failed phases remain counted. No old campaign caps or engineering renewals.
+Do not stop at deployment/checkpoint; finish actual planning/restart/restoration.
+
 ## Active real Qwen vendor investigation — November9, 14:36UTC
 
 Installed64/39e5c35 (full identity in outcome-39e5c35/dormant-stage.json) passed

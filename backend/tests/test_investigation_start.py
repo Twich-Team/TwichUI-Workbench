@@ -357,10 +357,13 @@ def test_completed_reads_survive_later_preflight_failure_and_normal_renewal(
     renewed = client.post(endpoint, headers=headers, json=reply)
     assert renewed.status_code == 200, renewed.text
     assert client.post(endpoint, headers=headers, json=reply).status_code == 200
-    scripted(monkeypatch, [response()])
+    renewed_calls=scripted(monkeypatch, [response()])
     assert worker.tick(store)
     current = client.get("/api/intake/" + item["id"]).json()
     assert current["status"] == "completed" and current["proposals"]
+    windows=renewed_calls[0].get('source_memory',{}).get('read_windows',[])
+    keys=[(w['path'],w['line'],w['through_line']) for w in windows]
+    assert len(keys)==len(set(keys))  # A cached continuation must not append the same windows again.
     with store.connect() as c:
         assert (
             dict(
