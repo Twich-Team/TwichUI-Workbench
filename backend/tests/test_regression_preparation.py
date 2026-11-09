@@ -287,7 +287,7 @@ def test_preparation_never_claims_permission_when_planner_is_unavailable(store, 
     assert read(client, item['id'])['proposals'][0]['basis'] == 'preparation'
 
 
-def test_preparation_scope_change_does_not_borrow_previous_contract(store, client, headers, research):
+def test_preparation_scope_change_retains_bounded_plan_with_fresh_visual_review(store, client, headers, research):
     item = request(client, headers)
     planning_worker.process_one(store, ForbiddenModel())
     p = read(client, item['id'])['proposals'][0]
@@ -296,16 +296,19 @@ def test_preparation_scope_change_does_not_borrow_previous_contract(store, clien
                   visual_requirement='visual', stage='implementation', note='Now requires interface changes.'))
     assert response.status_code == 200, response.text
     revised = response.json()['proposals'][0]
-    assert 'task_contract' not in revised
+    # Scope classification is a local review revision. It neither invents a
+    # visual implementation nor expands the source/write contract. Human visual
+    # requirements and a fresh approval binding still apply to the retained plan.
+    assert revised['task_contract'] == p['task_contract']
+    assert revised['binding'] != p['binding']
     assert revised['approval_blockers']
-    assert 'fresh regression-test preparation' in ' '.join(revised['approval_blockers'])
-    assert response.json()['status'] == 'queued'
-    assert planning_worker.process_one(store, ForbiddenModel())
-    refreshed = read(client, item['id'])['proposals'][0]
-    assert refreshed['revision'] > revised['revision']
-    assert refreshed['task_contract']['review_feedback'] == 'Now requires interface changes.'
-    assert refreshed['human_scope']['visual_requirement'] == 'visual'
-    assert refreshed['approval_blockers']  # The minimum visual safeguards still apply.
+    assert revised['required_artifacts'] == ['mockup','game_context']
+    assert revised['human_scope']['visual_requirement'] == 'visual'
+    assert response.json()['status'] == 'completed'
+    assert response.json()['jobs'][-1]['operation_kind'] == 'scope_binding'
+    assert not planning_worker.process_one(store, ForbiddenModel())
+    assert not response.json()['decisions'] and not response.json()['tasks']
+    assert not revised['task_contract']['execution_authorized']
 
 
 def test_git_output_cap_stops_inspection_without_running_repository_code(research):
