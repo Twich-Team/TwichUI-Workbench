@@ -371,7 +371,7 @@ function ScopeControl({data,proposal,act,busy}: {data:Intake;proposal:Proposal;a
   const [stage,setStage] = useState<ScopeInput['stage']>(scope.stage);
   const [note,setNote] = useState('');
   const [command] = useState(crypto.randomUUID());
-  const current = proposal.revision===data.revision;
+  const current = proposal.revision===data.revision && !data.scope_recovery;
   return <div className="human-scope">
     <details open={scope.origin==='legacy'}><summary>Change what this plan may cover</summary>
     <p><strong>In-game changes</strong> {scopeLabels[scope.visual_requirement]}</p>

@@ -152,6 +152,8 @@ def test_legacy_saved_scope_is_recovered_idempotently_with_no_approval_or_model_
     url = '/api/intake/'+item['id']
     assert item['status'] == 'failed' and item['scope_recovery']
     before = copy.deepcopy(item)
+    blocked = client.post(url+'/scope',headers=headers,json=scope_command(item))
+    assert blocked.status_code == 409 and get(client,item) == item
     body = dict(command_id=str(uuid4()),binding=item['scope_recovery']['binding'])
     r = client.post(url+'/scope-recovery',headers=headers,json=body)
     assert r.status_code == 200,r.text

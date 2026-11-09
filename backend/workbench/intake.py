@@ -622,6 +622,8 @@ def revise_scope_in(connection, identity, proposal, visual_requirement, stage, n
         raise HTTPException(422, 'Explain this scope revision.')
     row = require(connection, intakes, identity)
     source = scope_binding.prepared_job(connection, proposal) if proposal['basis'] == 'preparation' else None
+    if proposal['basis'] == 'preparation' and not source and stage == 'implementation':
+        raise HTTPException(409, 'The source-bound plan is not ready for a scope update. Apply the saved scope recovery or refine the plan first. Your existing choice remains saved.')
     if source and connection.execute(select(planning_jobs.c.id).where(planning_jobs.c.intake_id == identity,
             planning_jobs.c.kind == 'planning', planning_jobs.c.status.in_(['queued','running']))).first():
         raise HTTPException(409, 'Workbench is still refining this plan. Your scope choice has not been submitted; wait for the investigation to settle, then save it.')
