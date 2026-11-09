@@ -90,7 +90,7 @@ def read_journal(path):
             raise ValueError('Oversized private source journal')
         from workbench.planning_response import strict_json
         lines = raw.splitlines()
-        if len(lines) > 32 or any(len(line.encode()) > 16384 for line in lines):
+        if len(lines) > 256 or any(len(line.encode()) > 16384 for line in lines):
             raise ValueError('Private source journal exceeds record bounds')
         rows = [strict_json(line) for line in lines]
         if any(not isinstance(row, dict) or not isinstance(row.get('phase'), str) for row in rows):

@@ -10,6 +10,22 @@ from workbench.planning_provider import LocalProvider, BUG_INPUT, MAX_OUTPUT
 from workbench.bug_evidence import BugPlanningResponse
 
 
+@pytest.mark.parametrize('records,allowed', [(48,True),(256,True),(257,False)])
+def test_reader_accepts_bounded_multi_turn_writer_journals_without_removing_size_guards(tmp_path, records, allowed):
+    from workbench.investigation_memory import read_journal
+    path=tmp_path/'events.jsonl'
+    path.write_text(''.join(json.dumps(dict(phase='source-followup',turn=i))+'\n' for i in range(records)))
+    path.chmod(0o600)
+    if allowed:
+        assert len(read_journal(path)) == records
+    else:
+        with pytest.raises(ValueError,match='record bounds'):
+            read_journal(path)
+    path.write_text('x'*65537)
+    with pytest.raises(ValueError,match='Unsafe private source journal'):
+        read_journal(path)
+
+
 def test_compact_ranges_preserve_every_coordinate_and_never_bridge_unknown_gaps():
     from workbench.source_memory import ranges
     windows = [dict(path=path,line=a,through_line=b) for path,a,b in [
