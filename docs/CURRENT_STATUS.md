@@ -1,3 +1,48 @@
+## Current: installed81 has real proposal19; all85 responses settled; quality correction verified
+
+Attempt362d7baa completed21:49:30UTC:6COMPLETE160536tokens, six retained terminal
+envelopes independently matched. Original vendor task revision19 has2unapproved
+proposals. Latest correctly uses currentdf07bb4 NPC code but is NOT yet usable:
+finding/scope cut off at800characters and focusedtest is unrelated Mage sell.
+All85COMPLETE known1839910tokens; legacyunknownusage unchanged. No activecall.
+Priority cycle-lock waited for completeHTTP. Workerstop was correctly REFUSED by
+unchanged helper (ingress open); NO service/policy change. Task finished naturally,
+NOT cancelled/quarantined. Lock released; policy18/localQwen/fallbackOff unchanged.
+
+Connected correction verified: exact scope relation feedback; unchanged violating
+relationships stop wording-only retries; cutoff check applies to fresh responses
+only, historical Intent semantics unchanged; source discovery pairs affected
+modules with related tests; ordinary read-only refinement reuses clarification
+owner without plan/run approval.229integrated+274bug/source+32frontend+4browser+
+2nativepass. Full2021baseline retained, not claimed rerun on final change. All6
+prior accepted recipes revalidated with newcode; actual generic source selection
+now chooses NPC stock/search tests. No developer paths/solution sent to model.
+Next: checkpoint/seal/install82 using supported INGRESS-FIRST cutover; normal
+original-task refinement with generic quality feedback, actual usable plan for
+OWNERreview, restart/history/results/network/model checks and hash-bound maintenance
+resume. Maintenance admissions STILL owned-paused. No new engineering approval.
+
+## Current installed81 — original task refreshed through normal browser, live Qwen active
+
+Verified candidate5c329f4 is installed; source and seal in outcome-5c329f4.
+Fullbackend2021+frontend32 pass, finalaffectedbrowser5/currentnative2 pass.
+Initialbrowser110pass/4fail/2skip retained; all4 review-selection failures corrected
+by restoring established review behavior and retested. Actual old listing500 was
+reproduced as the original19-reference display defect; newcode all50 native and
+normal HTTP history views pass, history identical. Installation/TLS/network/browser/
+auth guards pass; all6prior real results canonically revalidated, ZERO replay.
+Newsource download succeeded from the INSTALLED worker, fixed isolated Rich unit,
+currentdf07bb4. Originalreport unchanged; normal 'Refresh source and investigate'
+POSTfd5367f4 retained previous history/usage and created v5sourceepoch19jobec633417.
+Attempt362d7baa began21:39:33UTC, Qwenonly/fallbackOff. No approval/addonwrite. Driver
+35131 observes only; do NOT replay it. Inspect real-current-source.jsonl and actual
+DB before continuing. First browser launch failed beforeanyHTTP due missing LD path;
+rerun used existing project_env, no newdeps and no duplicated provider request.
+Original task STILL requires an actual relevant usable plan; old1caf scope is not
+success. After settlement inspect real output, retain accounting, validate/reload/
+restart history and6results, verify network/model and hash-bound maintenance resume.
+Maintenance newadmissions STILL owned-paused. No new engineering authority needed.
+
 ## Current source correction — verification in progress
 
 The central source-version defect is confirmed: preserved research main1caf530

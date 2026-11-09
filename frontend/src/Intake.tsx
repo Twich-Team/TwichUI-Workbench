@@ -193,6 +193,7 @@ export function IntakeDetail() {
   const [clarificationInput,setClarification] = useState('');
   const [selected,setSelected] = useState('');
   const [pickedFile, setPickedFile] = useState('');
+  const [refinement,setRefinement]=useState('');
   const [startProvider,setStartProvider]=useState('qwen-once');
   const [startConfirmed,setStartConfirmed]=useState(false);
   const [startCommand]=useState(()=>crypto.randomUUID());
@@ -324,6 +325,14 @@ export function IntakeDetail() {
         ? <ProposalReview key={p.id} proposal={p} data={data} act={act} busy={blocked}/>
         : <details className="supporting-plan"><summary>{asking?'Read the supporting plan':'Read the plan'}</summary><ProposalReview key={p.id} proposal={p} data={data} act={act} busy={blocked}/></details>}
     </>}
+    {bugInvestigation&&data.status==='completed'&&!data.tasks.length&&!data.decisions.length&&!data.project_source?.stale&&<details className="panel">
+      <summary>Ask Workbench to refine this plan</summary>
+      <p>Use your saved provider to clarify or improve this unapproved proposal. Earlier plans and usage stay saved. This approves no addon changes, execution, or publication.</p>
+      <form onSubmit={e=>{e.preventDefault();void act('clarification',{command_id:crypto.randomUUID(),revision:data.revision,text:refinement,continue_investigation:true,renew_operation:true}).catch(()=>{});}}><label htmlFor="plan-refinement">What should the plan explain or reconsider?</label>
+        <textarea id="plan-refinement" value={refinement} onChange={e=>setRefinement(e.target.value)} required maxLength={1600} rows={4} disabled={blocked}/>
+        <Button disabled={blocked||!refinement.trim()}>Refine this plan</Button>
+      </form>
+    </details>}
     <details className="panel planning-context">
       <summary>Original request, planning history and evidence</summary>
       <p>Saved {formatTime(data.created_at)}</p><p className="original-text">{data.original.description}</p>

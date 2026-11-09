@@ -711,7 +711,11 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     facts=intent_correction(error)
                 else:
                     facts = correction(error, raw)
-                stamp = hashlib.sha256(json.dumps(dict(raw=raw, facts=facts), sort_keys=True).encode()).hexdigest()
+                if intent_mode:
+                    from workbench.investigation_strategy import rejection_signature
+                    stamp=rejection_signature(raw,facts)
+                else:
+                    stamp = hashlib.sha256(json.dumps(dict(raw=raw, facts=facts), sort_keys=True).encode()).hexdigest()
                 if (facts and index+1 < requests and stamp not in rejected
                         and diagnostics.get('generation_state') == 'finished'
                         and diagnostics.get('accounting_state') == 'complete'

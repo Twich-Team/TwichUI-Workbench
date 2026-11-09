@@ -295,3 +295,97 @@ def test_repeated_cached_reads_prompt_scoped_search_instead_of_a_diagnosis_renew
     assert worker.tick(store)
     result=client.get('/api/intake/'+item['id']).json()
     assert len(calls)==4 and len(result['proposals'])==1 and not result['decisions'] and not result['tasks']
+
+
+@pytest.mark.usefixtures("installed")
+def test_unapproved_plan_can_be_refined_read_only_without_an_owner_approval_or_usage_reset(
+    client, headers, store, monkeypatch
+):
+    from test_bug_source_planning import scripted
+    from workbench.db import planning_jobs
+
+    enable_bugs(monkeypatch)
+    config = Path(os.environ["WORKBENCH_PREPARATION_CONFIG"])
+    settings = json.loads(config.read_text())
+    settings["bug_plan_review"] = "source-grounded-intent-v1"
+    write_policy(config, settings)
+
+    def corrected(packet, schema):
+        assert packet["validation_feedback"]["errors"][0]["path"] == ["plan", "writable_paths"]
+        assert "THREE writable files TOTAL" in packet["validation_feedback"]["errors"][0]["rule"]
+        return dict(finding="A complete source-grounded scope for review.", plan=scope())
+
+    invalid = scope()
+    invalid["writable_paths"] = invalid["writable_paths"][:1]
+    calls = scripted(
+        monkeypatch,
+        [
+            dict(finding="Initial unapproved scope.", plan=scope()),
+            dict(finding="An incomplete test boundary.", plan=invalid),
+            corrected,
+        ],
+    )
+    item = client.post("/api/intake", headers=headers, json=report()).json()
+    assert worker.tick(store)
+    url = "/api/intake/" + item["id"]
+    before = client.get(url).json()
+    command = dict(
+        command_id=str(uuid4()),
+        revision=before["revision"],
+        text="Make the scope and test boundaries clear before review.",
+        continue_investigation=True,
+        renew_operation=True,
+    )
+    assert client.post(url + "/clarification", headers=headers, json=command).status_code == 200
+    assert client.post(url + "/clarification", headers=headers, json=command).status_code == 200
+    assert worker.tick(store)
+    after = client.get(url).json()
+    assert after["status"] == "completed" and len(after["proposals"]) == 2
+    assert (
+        after["proposals"][1] == before["proposals"][0] and after["original"] == before["original"]
+    )
+    assert not after["decisions"] and not after["tasks"] and len(calls) == 3
+    with store.connect() as c:
+        jobs = c.execute(select(planning_jobs).order_by(planning_jobs.c.revision)).mappings().all()
+        assert jobs[-1]["payload"]["bug_followup"]["known_prior_usage"]["total_tokens"] == 50
+        assert not c.execute(select(real_execution_grants)).first()
+
+
+@pytest.mark.usefixtures("installed")
+def test_same_missing_test_relation_stops_after_two_completed_rejections_despite_wording_changes(
+    client, headers, store, monkeypatch
+):
+    from test_bug_source_planning import scripted
+
+    enable_bugs(monkeypatch)
+    config = Path(os.environ["WORKBENCH_PREPARATION_CONFIG"])
+    settings = json.loads(config.read_text())
+    settings["bug_plan_review"] = "source-grounded-intent-v1"
+    write_policy(config, settings)
+    invalid = scope()
+    invalid["writable_paths"] = invalid["writable_paths"][:1]
+    second = copy.deepcopy(invalid)
+    second["scope"] = "A differently worded scope that has not fixed its test boundary."
+    calls = scripted(
+        monkeypatch,
+        [
+            dict(finding="First description.", plan=invalid),
+            dict(finding="Another description.", plan=second),
+        ],
+    )
+    item = client.post("/api/intake", headers=headers, json=report()).json()
+    assert worker.tick(store)
+    after = client.get("/api/intake/" + item["id"]).json()
+    assert (
+        after["status"] == "failed"
+        and not after["proposals"]
+        and not after["decisions"]
+        and len(calls) == 2
+    )
+    with store.connect() as c:
+        attempt = (
+            c.execute(select(model_attempts).where(model_attempts.c.task_id == item["id"]))
+            .mappings()
+            .one()
+        )
+        assert attempt["finished_at"] and attempt["usage"]["requests_observed"] == 2

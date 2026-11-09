@@ -130,3 +130,89 @@ def test_read_only_schema_feedback_does_not_select_ambiguous_outcomes_or_copy_va
     assert feedback["rejected"] and not feedback["approved"] and not feedback["executed"]
     assert "PRIVATE_SOURCE_VALUE" not in str(feedback)
     assert "THREE source operations TOTAL" in feedback["note"]
+
+
+@pytest.mark.parametrize(
+    "fault,field,code",
+    [
+        ("reads", "read_paths", "distinct_read_paths"),
+        ("writes", "writable_paths", "distinct_writable_paths"),
+        ("unread", "read_paths", "writable_source_not_read"),
+        ("test", "writable_paths", "focused_test_not_writable"),
+        ("production", "writable_paths", "production_scope_required"),
+        ("criteria", "criteria", "distinct_criteria"),
+    ],
+)
+def test_scope_relationship_feedback_identifies_the_actual_constraint_without_echoing_source(
+    fault, field, code
+):
+    from pydantic import ValidationError
+    from workbench.bug_intent import Response
+    from test_bug_intent import plan
+
+    value = plan()
+    if fault == "reads":
+        value["read_paths"].append(value["read_paths"][0])
+    if fault == "writes":
+        value["writable_paths"].append(value["writable_paths"][0])
+    if fault == "unread":
+        value["read_paths"] = value["read_paths"][1:]
+    if fault == "test":
+        value["writable_paths"] = value["writable_paths"][:1]
+    if fault == "production":
+        value["writable_paths"] = value["writable_paths"][1:]
+    if fault == "criteria":
+        value["criteria"].append(value["criteria"][0])
+    with pytest.raises(ValidationError) as rejected:
+        Response.model_validate(dict(finding="PRIVATE_SOURCE_VALUE", plan=value))
+    feedback = strategy.correction(rejected.value)
+    assert feedback["errors"][0]["path"] == ["plan", field]
+    assert feedback["errors"][0]["constraint"] == code and feedback["errors"][0]["rule"]
+    assert "PRIVATE_SOURCE_VALUE" not in str(feedback) and "sample.lua" not in str(feedback)
+    if fault == "test":
+        assert "THREE writable files TOTAL" in feedback["errors"][0]["rule"]
+    assert not feedback["approved"] and not feedback["executed"]
+
+
+def test_scope_wording_churn_is_not_progress_on_an_unchanged_missing_writable_test():
+    from pydantic import ValidationError
+    from workbench.bug_intent import Response
+    from test_bug_intent import plan
+
+    value = plan()
+    value["writable_paths"] = value["writable_paths"][:1]
+    raw = dict(finding="First description.", plan=value)
+    with pytest.raises(ValidationError) as rejected:
+        Response.model_validate(raw)
+    facts = strategy.correction(rejected.value)
+    before = strategy.rejection_signature(raw, facts)
+    raw = copy.deepcopy(raw)
+    raw["finding"] = "Different wording."
+    raw["plan"]["scope"] = "Another description."
+    assert strategy.rejection_signature(raw, facts) == before
+    raw["plan"]["writable_paths"].append("tests/test_sample.lua")
+    assert strategy.rejection_signature(raw, facts) != before
+
+
+@pytest.mark.parametrize("field", ["finding", "scope"])
+def test_character_limit_cutoff_is_rejected_for_fresh_responses_without_invalidating_history(field):
+    from pydantic import ValidationError
+    from workbench.bug_intent import Response, Plan
+    from test_bug_intent import plan
+
+    value = dict(finding="A complete finding.", plan=plan())
+    cutoff = "A long unfinished sentence " + ("x" * 800)
+    if field == "finding":
+        value[field] = cutoff[:800]
+    else:
+        value["plan"][field] = cutoff[:800]
+    with pytest.raises(ValidationError) as rejected:
+        Response.model_validate(value)
+    feedback = strategy.correction(rejected.value)
+    assert feedback["errors"][0]["path"] == (
+        ["finding"] if field == "finding" else ["plan", "scope"]
+    )
+    assert "complete concise sentences" in feedback["errors"][0]["rule"]
+    assert Plan.model_validate(
+        value["plan"]
+    )  # Historical bindings retain their original semantics.

@@ -68,6 +68,14 @@ def correction(error):
     from pydantic import ValidationError
     from workbench.planning_response import ResponseValidationError
     if isinstance(error,ValidationError):
+        relations={
+            'distinct_read_paths':('read_paths','Use distinct read paths.'),
+            'distinct_writable_paths':('writable_paths','Use distinct writable paths.'),
+            'writable_source_not_read':('read_paths','Include every writable path in read_paths.'),
+            'focused_test_not_writable':('writable_paths','Include focused_test in writable_paths and read_paths; at most THREE writable files TOTAL including the test. Do not silently add a fourth file or remove required behavior.'),
+            'production_scope_required':('writable_paths','Include the project production source needed for this repair.'),
+            'distinct_criteria':('criteria','Use distinct behavior criterion identifiers.'),
+        }
         fields={'finding','plan','inspection','question','limitation','scope','read_paths','writable_paths',
                 'focused_test','criteria','id','description','risks','path','start','end','query',
                 'InvestigationRead','InvestigationSearch'}
@@ -75,7 +83,15 @@ def correction(error):
         for issue in error.errors(include_input=False,include_context=False,include_url=False)[:8]:
             path=[p if (type(p) is int and 0<=p<=512 or isinstance(p,str) and p in fields)
                   else 'response' for p in issue['loc'][:6]]
-            issues.append(dict(path=path,constraint=issue['type']))
+            relation=relations.get(issue['type'])
+            if relation and path==['plan']:
+                field,rule=relation
+                issues.append(dict(path=['plan',field],constraint=issue['type'],rule=rule))
+            elif issue['type'] in {'incomplete_finding','incomplete_scope'}:
+                issues.append(dict(path=['finding'] if issue['type']=='incomplete_finding' else ['plan','scope'],
+                    constraint=issue['type'],rule='Use complete concise sentences within 800 characters. Summarize the request instead of copying it; retain material facts, uncertainty and limits.'))
+            else:
+                issues.append(dict(path=path,constraint=issue['type']))
     elif isinstance(error,ResponseValidationError):
         issues=[dict(path=['response'],constraint='semantic_validation')]
     else:
@@ -85,3 +101,16 @@ def correction(error):
              'Return a fresh complete reply against the declared schema. Exactly one outcome; '
              'at most THREE source operations TOTAL across reads and searches, never three of each. '
              'Keep pending reads for a later turn. Do not drop requirements, invent evidence or broaden scope.')
+
+
+def rejection_signature(raw,facts):
+    """Wording churn cannot count as correcting the same scope relationship."""
+    errors=facts.get('errors',[]) if facts else []
+    relations={'distinct_read_paths','distinct_writable_paths','writable_source_not_read',
+               'focused_test_not_writable','production_scope_required','distinct_criteria'}
+    if errors and all(e['constraint'] in relations for e in errors):
+        plan=raw.get('plan') or {}
+        values={key:plan.get(key) for key in ('read_paths','writable_paths','focused_test')}
+        values['criteria']=[c.get('id') for c in plan.get('criteria',[]) if isinstance(c,dict)]
+        return digest(dict(errors=errors,scope_relationships=values))
+    return digest(dict(raw=raw,facts=facts))

@@ -9,6 +9,7 @@ from typing import Annotated, Literal
 import re
 
 from pydantic import Field, model_validator
+from pydantic_core import PydanticCustomError
 
 from workbench.bug_evidence import Data, InvestigationRead, InvestigationSearch,ReadPath
 from workbench.regression_evidence import LuaPath, TestPath
@@ -32,13 +33,17 @@ class Plan(Data):
 
     @model_validator(mode='after')
     def coherent(self):
-        if (len(self.read_paths)!=len(set(self.read_paths))
-                or len(self.writable_paths)!=len(set(self.writable_paths))
-                or not set(self.writable_paths)<=set(self.read_paths)
-                or self.focused_test not in self.writable_paths
-                or not any(p.startswith(('!!!TwichUI/', 'TwichUI_Settings/')) for p in self.writable_paths)
-                or len({c.id for c in self.criteria})!=len(self.criteria)):
-            raise ValueError('A repair scope needs distinct source paths, a focused writable test and distinct behavior criteria')
+        checks=(
+            (len(self.read_paths)==len(set(self.read_paths)), 'distinct_read_paths', 'Read paths must be distinct.'),
+            (len(self.writable_paths)==len(set(self.writable_paths)), 'distinct_writable_paths', 'Writable paths must be distinct.'),
+            (set(self.writable_paths)<=set(self.read_paths), 'writable_source_not_read', 'Every writable path must also be a read path.'),
+            (self.focused_test in self.writable_paths, 'focused_test_not_writable', 'The focused test must be included in writable paths, within the three-file total.'),
+            (any(p.startswith(('!!!TwichUI/', 'TwichUI_Settings/')) for p in self.writable_paths), 'production_scope_required', 'A repair scope must include project production code.'),
+            (len({c.id for c in self.criteria})==len(self.criteria), 'distinct_criteria', 'Behavior criterion identifiers must be distinct.'),
+        )
+        for valid,code,message in checks:
+            if not valid:
+                raise PydanticCustomError(code,message)
         return self
 
 
@@ -54,6 +59,13 @@ class Response(Data):
     def one_outcome(self):
         if sum(v is not None for v in (self.plan,self.inspection,self.question,self.limitation))!=1:
             raise ValueError('Return exactly one scope plan, source inspection, owner question or established limitation')
+        # Grammar-constrained providers can otherwise finish a JSON string at
+        # its character boundary in the middle of a sentence. This check owns
+        # fresh responses only; historical Intent/result bindings are unchanged.
+        if len(self.finding)>=795 and self.finding[-1] not in '.!?':
+            raise PydanticCustomError('incomplete_finding','Summarize the finding in complete sentences within 800 characters.')
+        if self.plan and len(self.plan.scope)>=795 and self.plan.scope[-1] not in '.!?':
+            raise PydanticCustomError('incomplete_scope','Summarize the repair scope in complete sentences within 800 characters; do not copy the entire report.')
         return self
 
 
@@ -121,6 +133,8 @@ INSTRUCTIONS = (
     'Use plan for a scope, inspection for source reads, question for a genuine missing owner fact, or limitation for an established boundary. '
     'A plan describes the behavior to repair, exact read/write paths, focused existing test, distinct behavior criteria '
     'and risks. Include every recorded behavior requirement. Do not truncate a sentence to fit a field. '
+    'The focused_test MUST be included in both writable_paths and read_paths. The writable limit is THREE files TOTAL, including that test; '
+    'choose the minimum necessary production scope plus the focused test, with distinct paths and distinct criterion ids. '
     'Do not write an addon patch or executable reproducer in this scope-planning phase. '
     'A separate run approval may authorize isolated edits and test development together. Independent checking gates a checked result, not permission to attempt the bounded repair. '
     'Do not ask the owner to interpret APIs or locate code. An ambiguous observation does not prove a negative fact. '

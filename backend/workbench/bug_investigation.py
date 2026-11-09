@@ -169,7 +169,7 @@ def context(original, feedback, policy):
             if matches:
                 blocks.setdefault(index // 16, set()).update(matches)
         hits = name_hits.union(*blocks.values())
-        if hits:
+        if hits or path.startswith('tests/test_'):
             document_frequency.update(hits)
             candidates.append((path, oid, raw, lines, name_hits, blocks))
 
@@ -193,9 +193,16 @@ def context(original, feedback, policy):
     order = sorted(rankings, key=lambda entry: (-entry[0], entry[1]))
     core = [item for _, path, _, item in order if path.startswith('!!!TwichUI/')]
     settings = [item for _, path, _, item in order if path.startswith('TwichUI_Settings/')]
-    tests = sorted([row for row in order if row[1].startswith('tests/')],
-                   key=lambda row: (not row[2], -row[0], row[1]))
     primary = core[:3]
+    def path_terms(path):
+        value=re.sub(r'([a-z])([A-Z])',r'\1 \2',path)
+        return words(value)-{'twichui','lua','test','tests','page','module'}
+    primary_terms=[path_terms(item['path']) for item in primary]
+    def related_test(row):
+        names=path_terms(row[1])
+        return max((len(names & component) for component in primary_terms),default=0)
+    tests = sorted([row for row in order if row[1].startswith('tests/')],
+                   key=lambda row: (-related_test(row),not row[2], -row[0], row[1]))
     companions, load_order = client_context(root, base, primary, inspected)
     files = [*primary, *companions]
     selected = {item['path'] for item in files}

@@ -304,3 +304,21 @@ test('source refresh is a separate read-only action and duplicate clicks do not 
   expect(sent).toBe(1);expect(state.decisions).toHaveLength(0);
   await page.reload();await expect(page.getByRole('heading',{level:1,name:state.original.title})).toBeVisible();
 });
+
+test('an unapproved bug plan can request read-only refinement without a plan or run decision',async({page})=>{
+  await submit(page,'feature','Controlled plan refinement presentation');fixture('planning');
+  const state=await snapshot(page);state.original.kind='issue';state.original.local_planning='qwen-once';
+  let sent=0;
+  await page.route('**/api/intake/'+state.id,async route=>route.request().method()==='GET'?route.fulfill({json:state}):route.continue());
+  await page.route('**/api/intake/'+state.id+'/clarification',async route=>{
+    const body=route.request().postDataJSON();
+    expect(body).toMatchObject({revision:state.revision,continue_investigation:true,renew_operation:true,text:'Explain the uncertainty in complete sentences.'});
+    expect(Object.keys(body)).toHaveLength(5);expect(body).not.toHaveProperty('action');expect(body).not.toHaveProperty('run_budget');
+    sent++;state.status='queued';await route.fulfill({json:state});
+  });
+  await page.reload();await page.getByText('Ask Workbench to refine this plan',{exact:true}).click();
+  await page.getByLabel('What should the plan explain or reconsider?').fill('Explain the uncertainty in complete sentences.');
+  await page.getByRole('button',{name:'Refine this plan',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Refine this plan',exact:true})).toHaveCount(0);
+  expect(sent).toBe(1);expect(state.decisions).toHaveLength(0);expect(state.tasks).toHaveLength(0);
+});

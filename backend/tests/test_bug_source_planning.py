@@ -647,3 +647,47 @@ def test_all_saved_owner_behavior_clauses_reach_planning_and_self_review(store,m
     reviewed=bug_plan_review.request(wire,response())
     assert reviewed['requested_behavior_clauses']==wire['requested_behavior_clauses']
     assert reviewed['owner_reply']==feedback
+
+
+@pytest.mark.usefixtures("installed")
+def test_initial_source_context_pairs_the_affected_module_with_related_tests_instead_of_keyword_noise(
+    monkeypatch,
+):
+    from workbench import bug_investigation
+
+    root = enable_bugs(monkeypatch)
+    module = root / "!!!TwichUI/bags/Counter.lua"
+    module.parent.mkdir(parents=True)
+    module.write_text("local Counter={}\nfunction Counter.Read() return 1 end\nreturn Counter\n")
+    related = root / "tests/test_bags_counter.lua"
+    related.write_text("assert(true) -- existing isolated regression framework\n")
+    noise = root / "tests/test_item_counts.lua"
+    noise.write_text(
+        "-- bag counter wrong stored amount item name icon label\n" * 30 + "assert(true)\n"
+    )
+    git(root, "add", ".")
+    git(
+        root,
+        "-c",
+        "user.name=Fixture",
+        "-c",
+        "user.email=fixture@invalid",
+        "commit",
+        "-qm",
+        "Related test discovery fixture",
+    )
+    request = report()
+    request.update(
+        title="Bag counter reads the wrong stored amount",
+        description="The bag counter displays the wrong amount.",
+    )
+    packet = bug_investigation.context(
+        request, "", dict(allowed_classes=[bug_investigation.CATEGORY], scenario_generation=True)
+    )
+    paths = [f["path"] for f in packet["files"] if f["path"].startswith("tests/test_")]
+    assert paths[0] == "tests/test_bags_counter.lua"
+    assert any(f["path"] == "!!!TwichUI/bags/Counter.lua" for f in packet["files"])
+    assert (module.read_text(), related.read_text()) == (
+        "local Counter={}\nfunction Counter.Read() return 1 end\nreturn Counter\n",
+        "assert(true) -- existing isolated regression framework\n",
+    )

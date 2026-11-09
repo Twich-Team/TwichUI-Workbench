@@ -506,12 +506,24 @@ def clarify(engine, identity, body):
                 raise HTTPException(409,'Source refresh needs the current read-only offer, settled work, and no old repair approvals.')
         elif body.source_refresh_binding is not None:
             raise HTTPException(422,'Source-refresh binding needs explicit read-only refresh consent.')
+        refinement=(not refresh and row['status']=='completed' and body.continue_investigation and body.renew_operation
+            and bug_investigation.requested(row['payload'])
+            and all(j['status'] in {'completed','failed'} for j in jobs)
+            and not connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
+            and not connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
+        if refinement:
+            from workbench.project_source import require_current
+            latest=max((j for j in jobs if j['kind']=='planning'),key=lambda j:j['revision'])
+            try:
+                require_current(latest['payload'].get('task_contract'))
+            except ValueError as error:
+                raise HTTPException(409,str(error)) from None
         bug_continuation=(bug_investigation.requested(row['payload']) and row['status']=='failed'
             and any(j['kind']=='planning' and j['revision']==row['revision'] and j['status']=='completed'
                 and j['payload'].get('task_contract',{}).get('scope_missing') for j in jobs)
             and not connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
             and not connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
-        if (row['status'] != 'waiting_for_information' and not bug_continuation and not refresh and not (body.renew_operation and row['status']=='failed') or row['revision'] != body.revision
+        if (row['status'] != 'waiting_for_information' and not bug_continuation and not refresh and not refinement and not (body.renew_operation and row['status']=='failed') or row['revision'] != body.revision
                 or retained_planning_failure(row, jobs)):
             raise HTTPException(409, 'The request changed. Refresh before answering.')
         next_input = {'feedback': body.text, 'clarification_id': str(body.command_id)}
