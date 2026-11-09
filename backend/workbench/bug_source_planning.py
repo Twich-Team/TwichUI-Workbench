@@ -406,6 +406,9 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             kwargs['text_budget'] = read_limit(packet)
         kwargs['packing_context'] = packing_context
         result=next_wire(*args,**kwargs)
+        if intent_mode:
+            from workbench.source_directory import directory
+            result['source_directory']=directory(packet['base'],getattr(adapter,'source_manifest',None))
         added=packet.get('inspection_windows',[])[before:]
         if parent:
             for offset in range(0,len(added),16):

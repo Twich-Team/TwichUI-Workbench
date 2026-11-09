@@ -215,6 +215,11 @@ def view_in(connection, identity):
         retained['message'] = scenario_failure_message(diagnostics.get('category'))
     for job in jobs:
         facts=job['payload'].get('diagnostics',{})
+        capabilities=job['payload'].get('recovery_capabilities',{})
+        if (job['status']=='failed' and (facts.get('category')=='cancelled' or facts.get('stopped_request_category')=='cancelled')
+                and facts.get('generation_state')=='finished' and facts.get('accounting_state')=='complete'
+                and all(capabilities.get(k) is False for k in ('source_writes','execution_dispatch','external_action_tools'))):
+            job['message']='Read-only investigation stopped. Its completed responses and usage are saved. Your original report remains available, and this step made no addon changes.'
         if (job['status']=='failed' and facts.get('stopped_request_category') in {'input_budget','context_budget'}
                 and facts.get('stopped_request_generation_state')=='not_started'):
             job['message']='Workbench stopped preparing a larger source request before sending it. Earlier read-only work and usage remain saved. No repair started; the source-packing problem must be corrected before continuing.'

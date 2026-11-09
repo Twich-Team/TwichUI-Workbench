@@ -23,12 +23,13 @@ def scope():
         criteria=[dict(id='normalization',description='The actual function trims spaces and normalizes uppercase names.')],risks=[])
 
 
+@pytest.mark.parametrize('new_path',['!!!TwichUI/discovered.lua','TwichUI_Settings/pages/discovered.lua'])
 @pytest.mark.usefixtures('installed')
-def test_followup_discovery_can_propose_new_existing_source_without_registration(client, headers, store, monkeypatch):
+def test_followup_discovery_can_propose_new_existing_source_without_registration(client, headers, store, monkeypatch,new_path):
     from test_bug_source_planning import scripted
     from test_verification_profiles import git
     root = enable_bugs(monkeypatch)
-    new_path = '!!!TwichUI/discovered.lua'
+    (root/new_path).parent.mkdir(parents=True,exist_ok=True)
     (root/new_path).write_text('local otherwise = 1\nreturn otherwise\n')
     git(root, 'add', '.')
     git(root, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid', 'commit', '-qm', 'Discovery fixture')

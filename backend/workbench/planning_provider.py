@@ -310,6 +310,17 @@ class LocalProvider:
         if schema is IntentResponse:
             from workbench.bug_intent import INSTRUCTIONS as INTENT_INSTRUCTIONS
             instructions = INTENT_INSTRUCTIONS
+        if (schema in (InvestigationResponse, IntentResponse)
+                and context.get('coverage', {}).get('scope_plan_format') == 'readable-intent-v1'
+                and not context.get('approved_intent')):
+            # Cause/scope discovery precedes executable check construction. Keep
+            # the full canonical packet in the app; show navigation before excerpts.
+            context.pop('app_test_runtime', None)
+            context.pop('declarations', None)
+            navigation=context.pop('source_directory', None)
+            if navigation is not None:
+                context={'source_directory':navigation,**context}
+            encoded=json.dumps(context,ensure_ascii=True,separators=(',',':'))
         if schema is BugPlanningResponse and context.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1':
             from workbench.bug_program import INSTRUCTIONS as PROGRAM_INSTRUCTIONS
             instructions = PROGRAM_INSTRUCTIONS

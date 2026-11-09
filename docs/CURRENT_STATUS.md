@@ -1,3 +1,32 @@
+## Current vendor recovery: settled original task; file navigation correction verified locally
+
+Installed77/d85a4e2 remains current until the next checked cutover. Original intake
+2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd still has no usable plan or addon changes.
+Latest attempt51184b61 settled10COMPLETE responses255457tokens; all70COMPLETE
+incident responses1430529tokens retained, originalNULLs unchanged. Normal model
+and authentication restored; ALL provider values restored rev16→17→18, fallbackOff.
+No uncertain activity or addon approval. Earlier RUNNING entries below are historical.
+
+Specific source-access gap: lexical first12 search matches hid later UI paths;
+agent had no committed-file directory. setup/TwichConfig.lua Restock/Ammo helpers
+are candidates for OTHER settings lists, not proven to be the reported NPC vendor
+renderer. Prior clue-retention proof establishes transport, not bug causation.
+New generic read-only committed directory (460eligible names) lets the agent choose
+relevant implementation/settings/tests itself; no addon answer or file target in
+production. Intent wire removes unrelated check-runtime/duplicate metadata before
+planning; actual source declarations retained. Legitimate settings-only repair scope
+now allowed with inspected-source, fresh owner plan/run approvals and all independent
+checks unchanged. Stopped settled read-only work is described truthfully in the UI.
+226affected checks pass; separate-process browser rehearsal and actual accumulated-state
+wire/tokenizer proof are being finalized before sealing. Not yet real-provider-proven.
+
+Next: checked deployment, same original report Qwen-only continuation through normal
+browser, usable plan for genuine owner review, settled restart/history/results/network/
+model continuity. No vendor source toCodex, addonwrite/publication or paidbilling.
+Maintenance NEW admissions STILL OWNED PAUSED: hash-bound supported opsctl resume
+required after owned work. Preserve6prioracceptedresults and recovery copies.
+Standing owner authority continues; no campaign caps/engineering renewal/checkpointstop.
+
 ## CURRENT77/d85a4e2 — November9 18:49UTC, original vendor task continuation RUNNING
 
 77installed; all source/seal/history/network/browser/model/auth gates pass;6priorreal

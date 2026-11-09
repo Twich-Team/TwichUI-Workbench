@@ -226,6 +226,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         conflict = packet['report']['title'].endswith(' · controlled conflicting outcomes')
         fault = conflict or packet['report']['title'].endswith(' · controlled malformed response')
         case = cases[0] if fault else next(c for c in cases if c["request"]["title"] == packet["report"]["title"])
+        if intent_mode and not preparing:
+            navigation=packet['source_directory']
+            assert navigation['complete']
+            discovered={parent+'/'+name for parent,names in navigation['directories'].items() for name in names}
+            assert (CLIENT_SOURCE if case['client_case'] else PRODUCTION) in discovered
         answer = program_answer(case['client_case'],session=intent_mode) if program_mode else three_observations(case['client_case'])
         if investigating:
             finding='Controlled committed source diagnosis, no approval or execution.'

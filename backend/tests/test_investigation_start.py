@@ -317,7 +317,7 @@ def test_local_lock_race_waits_before_transport_and_honors_cancellation(tmp_path
                 pass
 
 
-@pytest.mark.parametrize("packing_failure", ["input_budget", "context_budget"])
+@pytest.mark.parametrize("packing_failure", ["input_budget", "context_budget", "cancelled"])
 @pytest.mark.usefixtures("installed")
 def test_completed_reads_survive_later_preflight_failure_and_normal_renewal(
     client, headers, store, monkeypatch, packing_failure
@@ -341,7 +341,7 @@ def test_completed_reads_survive_later_preflight_failure_and_normal_renewal(
     assert worker.tick(store)
     failed = client.get("/api/intake/" + item["id"]).json()
     assert failed["status"] == "failed" and not failed["proposals"]
-    assert "before sending" in failed["jobs"][-1]["message"]
+    assert ("completed responses and usage are saved" if packing_failure=="cancelled" else "before sending") in failed["jobs"][-1]["message"]
     with store.connect() as c:
         initial = first(c, item["id"])
         old = dict(c.execute(select(model_attempts)).mappings().one())

@@ -787,6 +787,8 @@ def test_program_working_set_uses_exact_verified_context_capacity(count,allowed,
     from workbench.bug_investigation_stage import InvestigationResponse
     packet=dict(coverage=({'reproducer_format':'lua-phases-v1'} if profile=='program' else {'scope_plan_format':'readable-intent-v1'}),files=[dict(path='!!!TwichUI/Example.lua',
         excerpts=[dict(line=1,text='local a = 1\n'*3500)])])
+    packet.update(app_test_runtime={'marker':'CHECK_CONSTRUCTION_ONLY'},declarations=['duplicate navigation'],
+        source_directory=dict(complete=True,directories={'!!!TwichUI':['Example.lua']}))
     calls=[]
     class Transport:
         seconds=300
@@ -798,6 +800,13 @@ def test_program_working_set_uses_exact_verified_context_capacity(count,allowed,
         def read(self,request,limit):
             calls.append('generate')
             assert len(request.data)<=131072 and limit==(65536 if profile=='program' else 24000)
+            outgoing=json.loads(json.loads(request.data)['messages'][1]['content'])
+            assert outgoing['files']==packet['files']
+            if profile=='intent':
+                assert 'app_test_runtime' not in outgoing and 'declarations' not in outgoing
+                assert next(iter(outgoing))=='source_directory'
+            else:
+                assert outgoing['app_test_runtime']==packet['app_test_runtime']
             return json.dumps(dict(id='controlled-full-source',model=MODEL,
                 usage=dict(prompt_tokens=10,completion_tokens=5,total_tokens=15),choices=[
                     dict(finish_reason='stop',message=dict(content=json.dumps(dict(

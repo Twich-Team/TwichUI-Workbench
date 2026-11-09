@@ -36,7 +36,7 @@ class Plan(Data):
                 or len(self.writable_paths)!=len(set(self.writable_paths))
                 or not set(self.writable_paths)<=set(self.read_paths)
                 or self.focused_test not in self.writable_paths
-                or not any(p.startswith('!!!TwichUI/') for p in self.writable_paths)
+                or not any(p.startswith(('!!!TwichUI/', 'TwichUI_Settings/')) for p in self.writable_paths)
                 or len({c.id for c in self.criteria})!=len(self.criteria)):
             raise ValueError('A repair scope needs distinct source paths, a focused writable test and distinct behavior criteria')
         return self
