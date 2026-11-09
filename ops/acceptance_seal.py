@@ -4,6 +4,7 @@ from hashlib import file_digest
 import json
 import os
 from pathlib import Path
+import re
 import stat
 
 
@@ -15,6 +16,56 @@ RUNTIME_FILES = {
     'release/.local/task-runtime.json', 'release/.local/everyday-worker.json', 'release/.local/everyday-worker.lock',
 }
 RUNTIME_DIRS = {'artifacts', 'scratch', 'release/artifacts/runs'}
+PRIMARY_FILES = {
+    'release/.local/real-primary-session.json': 65536,
+    'release/.local/real-primary-session.json.events.jsonl': 8 << 20,
+    'release/.local/real-primary-session.json.lock': 0,
+}
+UUID = r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+LEASE = re.compile(r'release/\.local/chronicle-primary-lease-(task-lease-task-session-'+UUID+r'-[0-9]{2})\Z')
+LEASE_FILES = {'original.key': 4096, 'temporary.key': 4096,
+               'serve.env.original': 65536, 'serve.env.temporary': 65536,
+               'state.json': 65536, 'restore.lock': 0,
+               'certification.json': 65536, 'watchdog-ready.json': 65536}
+
+
+def private_runtime_file(path, ceiling):
+    info = path.lstat()
+    if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
+            or info.st_mode & 0o077 or info.st_size > ceiling):
+        raise ValueError('Qwen runtime file ownership, privacy or size differs')
+
+
+def settled_primary_runtime(stage, path, rel):
+    """Recognize bounded private lease data, never arbitrary release additions.
+
+    This is an installation/closeout inventory check, not live eligibility or
+    cancellation evidence. Preflight still checks settled jobs and model/auth
+    restoration separately. Secret key/environment contents are never read.
+    """
+    if rel in PRIMARY_FILES:
+        private_runtime_file(path, PRIMARY_FILES[rel])
+        if rel.endswith('/real-primary-session.json') and json.loads(path.read_text()).get('state') != 'released':
+            raise ValueError('Primary session is not settled; retain its identity')
+        return True
+    matched = LEASE.fullmatch(rel)
+    if not matched:
+        return False
+    info = path.lstat()
+    run = stage / 'release/artifacts/runs' / matched[1]
+    if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077
+            or not run.is_dir() or run.resolve() != run or run.stat().st_uid != os.getuid()
+            or run.stat().st_mode & 0o077):
+        raise ValueError('Private lease directory or owning run differs')
+    for child in path.iterdir():
+        if child.name not in LEASE_FILES:
+            raise ValueError('Unexpected file in a private Qwen lease')
+        private_runtime_file(child, LEASE_FILES[child.name])
+    state = json.loads((path / 'state.json').read_text())
+    if not all(state.get(k) is True for k in ('restored', 'original_config_verified',
+                                              'original_access_verified', 'temporary_access_rejected')):
+        raise ValueError('Qwen lease restoration is not verified')
+    return True
 
 
 def inventory(stage, active):
@@ -23,6 +74,12 @@ def inventory(stage, active):
         for name in sorted([*dirs, *names]):
             path = Path(folder) / name
             rel = path.relative_to(stage).as_posix()
+            if not active and (rel in PRIMARY_FILES or LEASE.fullmatch(rel)):
+                raise ValueError('Dormant release contains primary runtime data')
+            if active and settled_primary_runtime(stage, path, rel):
+                if name in dirs:
+                    dirs.remove(name)
+                continue
             if rel in RUNTIME_DIRS:
                 if path.is_symlink() or not path.is_dir():
                     raise ValueError('Unexpected runtime path type')

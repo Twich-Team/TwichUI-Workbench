@@ -133,8 +133,21 @@ browser two-bug/revision/restart checks pass2/4deselected63.57s:
 WORKBENCH_CG_ROOT and correctly held; relaunched via R58/native-process-launch.py
 in dedicated delegated user unit. No application correction/bypass needed for that
 launcher mistake. Check/contracts/static/build/migrations pass; source-proof verifies
-464exact tracked files, pinnedCLI, auth metadata and owner documents. No cutover
-until full suite passes and preflight/history/model/network gates are fresh.
+464exact tracked files, pinnedCLI, auth metadata and owner documents. Full1869backend/8defaultskips/383.17s and25frontend pass; final static checks pass.
+Preflight held before any cutover: prior deployment57 has normal completed Qwen
+lease/runtime files not declared by the old seal checker. Sealed immutable bytes
+all unchanged. New ops/acceptance_seal.py narrowly recognizes bounded private owned
+Qwen runtime only with released session/restored lease flags and exact owned run.
+Keys/environment contents are never read.10denial/positive tests pass.
+R57/settled-primary-runtime-seal-revalidation.json proves exact original inventory
+using that checker;11unsealed reproducible Python bytecodes were inventoried and
+removed only after exact original hashes/ownership checks. Credentials, lease
+records, history and unknown usage untouched. f9ff5ba never activated.
+Create a fresh candidate/seal for this installation-only correction. Reuse f9 full
+application verification with explicit exact backend/frontend/core comparison;
+new ops inventory test and real prior-stage revalidation cover the changed code.
+Do not rerun full suites solely for identical application source. All normal
+preflight/history/model/network gates still required. No preflight-ok yet.
 R58/revalidate-prior-real-evidence.py is prepared for read-only POST-cutover
 canonical recipe/code compatibility and evidence-only case pointers; NEVER execute
 new provider calls for already successful flight/Codex/Qwen cases. New normal
