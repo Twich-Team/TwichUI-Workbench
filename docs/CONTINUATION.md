@@ -1,3 +1,36 @@
+## Installed57; operator distinguishes checked tests from accepted result — Nov9 03:08 UTC
+
+Deployment57/18605b975d085d2bea4d5ef4a766fbecae0df09e is NOWinstalled. Allpre/post-
+installation gatespass: original79/latest304rows preserved, all44history views,
+rootdocuments/source/pinnedCLI/authmetadata, originalQwen/restoration, TLS/subnet/
+browser/internalendpoint isolation. Final exact executable1833backend+25frontend,
+static/contracts/TS/Vite/migrations and2confined controlled browser journeys pass.
+R57/offline-verification.json binds evidence. Original8765 untouched. Services
+active/disabled pending functionalacceptance. No archive/dependency/billing changes.
+Initial operator-record mode preflight correctly denied0664; only owned new private
+records tightened0600 andfullpreflight rerunpassed. No protection weakened.
+
+Freshbug42 driver hit a separate OPERATOR gate before intake/model dispatch: it
+incorrectly treated old nativeCHECKED output as completed successful acceptance,
+although independent API-shaped review disproved it. Appnormalintake itself has
+no such gate. Newoperator policy allows fresh bug work ONLY with a private bound
+negative review, the exact frozen candidate/test/manifest, canonical current API-
+shaped oracle, safe meaningful new-assertion failure, revokedoldgrant/no publication,
+and normal globalterminal/accounting gates. Regression successes cannot use this
+path; missing/tampered/unrelated/uncertain evidence stillholds.24focused policy/
+negativeproof controls pass. Actual confined oldcandidate failure is recorded in
+S57/artifacts/acceptance/rejected-results/2efed208-b38a-5d09-bd85-4fe68ea9b702.*;
+R57/postcheck-rejection-proof.json. This rejects that faulty result, never resets
+accounting or reuses its oldapproval. Developer has supplied no addon solution.
+
+NEXT: bind corrected standalone acceptance-policy operator to installed57 (no
+servicecutover needed for operator-only repair), readonly actualsubmit-admission
+check, preserve the closed no-dispatch receipt and startfreshbug42 via normal UI.
+Retain existing per-character persistence decision in clarification/review.
+C1realCodex-only PASSED; other3notdemonstrated. Do not rerun C1; carry genuineoldstage
+receipt withexplicitprovenance whenappropriate. Realflightpatch exists but remains
+NOTaccepted. Allbroaderunfinishedscope preserved. Noowneraction/campaignrenewal.
+
 ## First supporting real-provider case passed; corrected build staged — Nov9 02:53 UTC
 
 Codex-only supporting case PASSED through installed56, normal browser decisions,
