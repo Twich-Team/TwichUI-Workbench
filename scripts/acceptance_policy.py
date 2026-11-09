@@ -372,7 +372,7 @@ def current_run_offer(connection,proposal):
     from sqlalchemy import create_engine
     from workbench import task_budget
     database=connection.execute('PRAGMA database_list').fetchone()[2]
-    engine=create_engine('sqlite://',creator=lambda:sqlite3.connect(Path(database).as_uri()+'?mode=ro',uri=True))
+    engine=create_engine('sqlite:///'+database,creator=lambda:sqlite3.connect(Path(database).as_uri()+'?mode=ro',uri=True))
     try:
         with engine.connect() as c:
             selected=task_budget.offer(c,proposal)

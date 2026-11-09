@@ -117,6 +117,11 @@ def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_d
     cycle=before['offer']['repair_cycle']
     assert cycle['verification']=='not_run' and cycle['continuation']['execution_ids']==[rid]
     assert before['offer']['id']!=view['offer']['id']
+    import sqlite3
+    from acceptance_policy import current_run_offer
+    with sqlite3.connect(Path(store.url.database).as_uri()+'?mode=ro',uri=True) as independent:
+        private=current_run_offer(independent,proposal['id'])
+        assert private['id']==before['offer']['id'] and private['fingerprint']==before['offer']['fingerprint']
     # GET neither registers an offer nor changes saved source/history.
     assert client.get(endpoint).json()==before
     with store.connect() as c:
