@@ -1,3 +1,29 @@
+## CURRENT75/7238a87 — November9 18:04UTC, SAME vendor task continuation queued
+
+75installed, source/seal/history/network/browser/model/auth gates PASS;6prioracceptedreal
+results canonically revalidated without replay. Same intake2dc5b8ba-2d22-4c2c-9f90-
+3bd58d29d5fd browser continuation de642fc7-c5fe-41bf-a38a-c358409a8159 recorded;
+job6251a467-d8d6-41b6-994d-4867ab30ca48/revision13QUEUED. Observer15884/private
+real-search-text-renewal.jsonl, browser-observer/renew-search-text.mjs and live-search-
+text-renewal-binding.json. Inspect actual state before another call; never replay
+pending/uncertain work. No vendorplan/addon approval or implementation claimed yet.
+
+Generic bounded exact literal-match text for already-selected files now survives followup
+context (same12Knotebook, no unselected file text or authority).124affected/native2checks,
+actual local tokenizer and full52settled-state assembly pass (82156bytes/22368tokens/
+32768context; no generation/DBchange). Previous74body/pagination/static verification
+reused explicitly; oldbroad1918backend/113browser/32frontend evidence lineage retained.
+No new real Codex/game/external simulator/publication proof. Legacy4pre-edit modes skipped.
+
+ALL52COMPLETE responses986136tokens retained; oldNULL/unknown unchanged. Latest4responses
+95261tokens settled normally after complete-content settings stop. ALL preference VALUES
+restored via browser rev10→11→12; modelidle/auth verified. Six prior result/history/rejection
+artifacts carried forward. Qwen-only/fallbackOff, no addondecisions/sourceupload/paiduse.
+Maintenance NEW admissions STILL OWNED PAUSED: restore hash-bound supported opsctl resume
+after owned work. Need real usableplan/genuineproductquestion, ownerreview ifvalidplan,
+settled4service restart/history/result/model/network continuity and maintenance restoration.
+Standing authority/no campaign caps/renewals continues. This checkpoint is not a stop.
+
 ## CURRENT74/7ec0e4c — November9 18:00UTC, original vendor task settled; search-text correction pending
 
 Latestattempt2b0556dc... settled4COMPLETE responses95261tokens after normal provider
