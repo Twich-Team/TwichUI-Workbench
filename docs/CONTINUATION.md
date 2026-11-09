@@ -1,4 +1,4 @@
-# Continuation — November 9, 2026, 04:10 UTC
+# Continuation — November 9, 2026, 04:19 UTC
 
 Read the three authoritative root owner documents and AGENTS.md. One agent only.
 Standing autonomy continues; old campaign clocks/counts/revisions/cumulative test
@@ -47,9 +47,9 @@ R/result-restart-browser.json + checked-history-{before,after}-restart.json:
 original-failure explanation visible, no recovery pending/publication. Screenshots
 R/checked-result-{desktop,phone}.png inspected. Models/auth restored.
 
-## Current active work — do not replay
+## Latest settled real work — do not replay
 
-Qwen-only supporting case is RUNNING through normal browser.
+Qwen-only supporting case PASSED through normal browser04:13:50.
 Driver tool70715; R/qwen-once-launch.log; R/qwen-once-driver.txt;
 S/artifacts/acceptance/qwen-once.jsonl.
 Intake76d92e53-2609-440b-b660-1a8a1176f7f1; actual local planning model attempt
@@ -58,14 +58,21 @@ Intake76d92e53-2609-440b-b660-1a8a1176f7f1; actual local planning model attempt
 approved03:34:31. Separate Run003b2b6d-e130-475e-8aba-1ad6de1f691c approved03:50:54.
 Preparation finished04:07:24; capability8a7fbb95-c412-4ff2-b291-8e61121534b9
 passed04:08:01; real local implementationd213b93f-3580-4238-a95e-a955833edf13
-/execution66e3841c-4621-589d-9405-287c5547d4d5 running since04:08:03. Inspect receipts/processes rather
+/execution66e3841c-4621-589d-9405-287c5547d4d5 checked04:13:42,
+candidate0a8d7f6122f6f9f2c23f80a720ec918cb5b5fdb1684d1be66320ef7e95d3a593.
+Session completed/model restored04:13:49. R/qwen-once-closed.json and
+model-auth-qwen-once-restored.json; ledger appended exactly once: planning1request
+312completion/2961prompt; implementation4requests340completion/13862prompt;
+capability1request64prompt, generated1..60, exact generated count unknown.
+No unaddressed execution uncertainty. Latest337row historySHA
+49d960644923076187863b6ac5f047140136bd0e845420e72b38ea475c06ff40. Inspect receipts/processes rather
 than assume it hung. Current regression path runs four actual full-suite control
 matrices during preparation and repeats them in the fresh execution workspace;
 roughly16minutes each on this host. This is known latency, not renewed model calls
 or a campaign clock. Do not interrupt healthy owned work merely to report status.
 
 Use `bash "$R/driver-case-reviewed-rejection.sh" CASE` for remaining cases, one at
-a time: qwen-once alreadyactive, then codex-with-local-fallback, then
+a time: qwen-once completed, then codex-with-local-fallback, then
 qwen-with-codex-fallback. Wrapper refuses existing case receipts. Never rerun a
 successful case or replay partial/uncertain external activity. The two fallback
 cases induce only the existing approved connector stop/private-worker drop-in,
@@ -73,7 +80,7 @@ restore normal service before implementation, and must record actual routing.
 Use existing helper only; no arbitrary root commands. Scope/run decisions remain
 separate and acceptance-only delegated. No campaign/cumulative allowance renewals.
 
-Only1/4 real supporting provider cases passed: Codex-only. Original receipt:
+Only2/4 real supporting provider cases passed: Codex-only and Qwen-only. Original receipt:
 C/outcome-bc9bdfb/codex-once-closed.json; observed deployment56/bc9bdfb, candidate
 400995bd1da3cae8e13549c4985cc6826afd454721563c72ed89a73e02cf81b0.
 R/codex-once-evidence-compatibility.json proves current canonical regression recipe
@@ -84,8 +91,7 @@ not another provider call. Billing reads there are historical, never new eligibi
 
 On each newly checked case, read actual model_attempt usage and controller cleanup,
 append ledger exactly once by IDs. Account capability/cancellation probes too.
-Do not count planning alone or controlled tests as a real provider pass. Current
-Qwen phase is not yet in cumulative ledger totals; DB receipts are authoritative.
+Do not count planning alone or controlled tests as a real provider pass. Qwen phase is now accounted; DB receipts remain authoritative.
 Then demonstrate a subsequent ordinary supported bug submission through normal UI,
 without registration/setup. Controlled native two-bug source-discovery/restart
 journeys already pass, but do NOT call that a second real ordinary submission.
@@ -111,7 +117,14 @@ misread flat usage telemetry; its failure retained, source preparation reused
 without repeating it; final proof completed on final executable sources.
 Focused41passed; check/contracts/types/build/ruff/migrations passed. Complete
 backend/frontend `/tmp/wb-control-reuse-complete-test.log` active (tool49783).
-No new candidate/seal/install yet. Do NOT cut over while Qwen is active.
+Initial candidate dd44d7f was staged/sealed but NEVER activated. Full suite
+9failed/1859passed/8skipped exposed that source-retirement check. Corrected reuse
+validates frozen evidence/committed source, not the intentionally deleted disposable
+preparation copy. Regression/source tampering remain denied. Corrected focused64
+pass; actual confinement R/development-control-reuse/corrected-source/native-result.json
+passes with source clone removed:17original checks then1fresh boundary. New
+complete suite and opt-in four-case browser still required before activation.
+Qwen is now settled, so a verified future candidate may cut over normally.
 Any future installation needs normal verified lineage/history/network/rollback
 gates and updated real-evidence compatibility; preserve successful cases, do not
 replay them just because verification helper hashes changed.

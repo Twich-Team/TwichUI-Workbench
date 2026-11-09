@@ -211,7 +211,7 @@ def control_certificate(runtime):
     Reuse concerns pre-model controls only. Candidate checks always use the new
     workspace and commands, and every run must prove its own sandbox boundary.
     """
-    from workbench.real_workspace import Runtime, sha, tree
+    from workbench.real_workspace import Runtime, sha
     from workbench.trusted_preparation import owned
 
     reference = runtime.root/'profile-reference.json'
@@ -227,7 +227,6 @@ def control_certificate(runtime):
     previous=Runtime(source)
     if (value.get('version')!=1 or previous.recipe!=runtime.recipe
             or binding(previous)!=binding(runtime)
-            or tree(previous.workspace)!=json.loads(previous.initial.read_text())
             or value['evidence_sha256']!=sha((source/'profile-evidence.json').read_bytes())
             or value['controls_sha256']!=sha((source/'controls-passed.json').read_bytes())):
         raise ValueError('Prepared profile inputs or source evidence changed')

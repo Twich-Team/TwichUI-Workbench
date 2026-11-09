@@ -80,7 +80,7 @@ def test_reuse_keeps_original_commands_and_requires_a_new_boundary(tmp_path):
         "oracle",
         "scope",
         "dirty-current",
-        "source-workspace",
+        "source-manifest",
         "source-evidence",
         "source-boundary",
         "patch",
@@ -101,8 +101,8 @@ def test_changed_or_untrustworthy_preparation_cannot_supply_reused_controls(tmp_
         current.recipe["contract"]["paths"].append("tests/test_other.lua")
     elif fault == "dirty-current":
         (current.workspace / TEST).write_text("assert(true)\n")
-    elif fault == "source-workspace":
-        (previous.workspace / TEST).write_text("assert(true)\n")
+    elif fault == "source-manifest":
+        previous.initial.write_text("{}")
     elif fault == "source-evidence":
         (previous.root / "profile-evidence/original/check-00.json").write_text("{}")
     elif fault == "source-boundary":
@@ -149,6 +149,18 @@ def test_legacy_template_without_a_source_still_requires_full_preparation(tmp_pa
     _, current, patches = prepared(tmp_path)
     assert not profiles.reuse_controls(current, None, patches)
     assert not current.controls_valid()
+
+
+def test_retired_preparation_copy_is_not_required_for_frozen_evidence(tmp_path):
+    import shutil
+
+    previous, current, patches = prepared(tmp_path)
+    # Normal application retention removes this disposable copy after freezing.
+    # No commands in the new execution may read it or copy candidate results.
+    shutil.rmtree(previous.workspace.parent)
+    assert profiles.reuse_controls(current, previous.root, patches)
+    current.record_controls(boundary(current))
+    assert current.controls_valid()
 
 
 @pytest.mark.parametrize("value", [None, [], {}, {"source": 7}, {"source": None}])

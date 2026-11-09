@@ -1,4 +1,4 @@
-# Current status — November 9, 2026, 04:10 UTC
+# Current status — November 9, 2026, 04:19 UTC
 
 **A real flight-path repair has completed through the installed application.**
 Real signed-in Codex investigated the report, proposed a reviewed scope, and edited
@@ -32,11 +32,11 @@ confirmation was reused after unchanged boundary/CA checks; no new remote load c
 | Choice | Evidence |
 |---|---|
 | Codex alone | **Passed** real planning, implementation, independent checks and restoration. Observed on deployment56; exact regression recipe and unchanged provider/execution code revalidated for57. No repeat call. |
-| Qwen alone | **Running**. Real Qwen plan and separate run approved; preparation and capability check passed; actual local implementation active since04:08 UTC. |
+| Qwen alone | **Passed** real planning, approved execution, checked test patch and model/auth restoration at04:13 UTC. |
 | Codex first → Qwen | Implemented/controlled-tested; real case pending. Pre-generation unavailable/reserve only. |
 | Qwen first → Codex | Implemented/controlled-tested; real case pending. Pre-generation connection failure only. |
 
-Only1/4 supporting real-provider cases passed. The real Codex bug repair is separate
+Only2/4 supporting real-provider cases passed. The real Codex bug repair is separate
 additional evidence. Saved settings, explicit consent, shared task accounting,
 isolation, independent checks and no uncertain cross-provider replay remain required.
 Codex included-allowance checks are snapshots, not a verified per-turn billing lock.
@@ -62,10 +62,12 @@ Development-only improvement now reuses exact already-certified pre-model contro
 observations in a fresh workspace, with a fresh sandbox proof and fresh candidate
 checking. Changed recipes, source, helper versions, oracle, control patches or
 evidence reject reuse. Targeted denial tests and actual confined tiny-profile
-preparation/reuse pass (17commands then1fresh boundary). Complete suites are
-running; this improvement is NOT installed and does not interrupt Qwen.
+preparation/reuse pass (17commands then1fresh boundary). The first complete suite found an unnecessary requirement for the deleted
+disposable preparation copy. Frozen evidence remains authoritative; corrected
+source-retirement behavior passes64focused checks and a fresh actual confinement
+proof. Complete suites are being repeated on the correction; this improvement is NOT installed and did not interrupt the now-settled Qwen case.
 
-Next: finish Qwen-only and both real fallback cases, demonstrate a subsequent
+Next: verify/install the preparation improvement and finish both real fallback cases, demonstrate a subsequent
 ordinary submission, verify final cleanup/restoration and leave the working build.
 Broader features, general inspections, simulator integration and authorized draft
 PR delivery remain unfinished. A8 and the full initial product are NOT complete.
