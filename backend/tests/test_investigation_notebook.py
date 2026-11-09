@@ -146,3 +146,37 @@ def test_breadcrumb_size_keeps_all_negative_facts_and_does_not_mutate_receipts()
     assert len(json.dumps(result).encode()) <= notebook.WIRE_BYTES
     assert len(result["searches"]) == 24 and result["searches"][-1]["match_count"] == 0
     assert result["read_only"] and packet == before
+
+
+def test_full_history_budget_keeps_selected_clue_before_earlier_unselected_hits():
+    import json
+
+    selected = "!!!TwichUI/Relevant.lua"
+    packet = dict(base="pinned", files=[dict(path=selected)])
+    for n in range(15):
+        matches = [
+            dict(
+                path="!!!TwichUI/noise/RepeatedLongModuleName" + str(i) + ".lua",
+                line=100 + n,
+                text="unselected",
+            )
+            for i in range(10)
+        ]
+        matches.append(dict(path=selected, line=400 + n, text="local label = ResolveKnownValue()"))
+        notebook.record(packet, "literal-" + str(n), matches, None)
+    before = copy.deepcopy(packet)
+    result = notebook.wire(packet)
+    assert (
+        result["positive_coordinates_limited"]
+        and len(json.dumps(result).encode()) <= notebook.WIRE_BYTES
+    )
+    for entry in result["searches"]:
+        assert entry["match_count"] == 11 and entry["complete_scan"]
+        assert entry["matches"][0] == dict(
+            path=selected,
+            line=400 + int(entry["query"].split("-")[1]),
+            text="local label = ResolveKnownValue()",
+        )
+        assert entry["omitted_match_coordinates"] == 11 - len(entry["matches"])
+        assert all("text" not in m for m in entry["matches"] if m["path"] != selected)
+    assert packet == before

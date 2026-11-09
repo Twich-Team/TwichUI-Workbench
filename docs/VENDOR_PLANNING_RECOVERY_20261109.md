@@ -1,3 +1,29 @@
+## CURRENT76/be93162 — November9 18:37UTC, original vendor task settled; critical notebook-budget fix verified
+
+Latest92b6b88f... settled5COMPLETE responses117010tokens after complete-content normal
+settingsstop. ALL preference VALUES restored rev14→15→16; modelidle/auth verified.
+All60COMPLETE incident responses1175072tokens retained; originalNULLs unchanged. No
+uncertainty/quarantine, vendorplan, addonapproval or implementation. Task remains original.
+
+More reasoning produced a real literal-match followup into Restock, then correctly noted
+other locations were omitted. Actual15query source notebook exceeded12K, removedALLtext
+and blindly keptfirst2coordinates: the relevant selected-file clue was truly absent.
+Earlier13query proof was insufficient. Paired actual-packet proof confirms old4854byte
+projection drops it. New generic selected-file priority trims lower-value coordinates
+first, retains counts/scopes/negatives/explicit omissions, keeps SAME12Kbound. No addon
+answer/file target hardcoded in production. Source cache/history untouched.
+
+111affected+11boundary notebook tests/native2confined controlled API/worker/browser PASS.
+Full60state actual-tokenizer request81581bytes22173tokens/32768context PASS; postserializer
+assert confirms exact critical source match really present (not merely cached), notebook
+11999bytes. ZEROgeneration/DBmutation in capture. Root notebook/test change verified,
+not yet installed;76remains. Need seal/cutover, normal same-task Qwen-only continuation,
+usableplan/genuineproductquestion, meaningfulownerreview, settledrestart/history/results/
+model/network continuity and maintenance restoration. No old campaign caps/renewalgates.
+Maintenance NEW admissions STILL OWNED PAUSED: supported hash-bound opsctl resume after
+owned work. Preserve6priorresults, credentials/source/billing/privateLAN/publication/
+independent-check/unknownusage safeguards. Continue, not checkpointstop.
+
 ## CURRENT76/be93162 — November9 18:22UTC, original vendor task RUNNING with revised reasoning
 
 76installed; exact source/seal/history/network/browser/model/auth gates pass;6priorreal

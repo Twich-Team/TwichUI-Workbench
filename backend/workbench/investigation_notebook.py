@@ -75,19 +75,25 @@ def wire(packet):
     # Keep a bounded literal breadcrumb for each already-selected matching file.
     # Coordinates alone lose what a stateless provider actually found. Never add
     # source from a file outside the current selected/disclosure projection.
+    if len(json.dumps(result).encode()) > WIRE_BYTES:
+        for item in searches:
+            item['matches'].sort(key=lambda m:(m['path'] not in selected,'text' not in m))
+        # Discard lower-priority redundant coordinates before the selected-file
+        # source clue. Keep every query/count/scope/negative and explicit omissions.
+        while len(json.dumps(result).encode()) > WIRE_BYTES:
+            candidates=[item for item in searches if len(item['matches'])>2]
+            if not candidates:
+                break
+            item=max(candidates,key=lambda item:len(item['matches']))
+            item['matches'].pop()
+            item['omitted_match_coordinates']=item.get('omitted_match_coordinates',0)+1
+            result['positive_coordinates_limited']=True
     snippets=sorted((m for item in searches for m in item['matches'] if 'text' in m),
                     key=lambda m:len(m['text']),reverse=True)
     for match in snippets:
         if len(json.dumps(result).encode())<=WIRE_BYTES:
             break
         match.pop('text')
-    if len(json.dumps(result).encode()) > WIRE_BYTES:
-        # Keep every query/scope/count/negative fact. Positive text can be read
-        # from its exact committed coordinates without inventing absent content.
-        for item in searches:
-            item["omitted_match_coordinates"] = max(0, len(item["matches"]) - 2)
-            item["matches"] = item["matches"][:2]
-        result["positive_coordinates_limited"] = True
     if len(json.dumps(result).encode()) > WIRE_BYTES:
         raise ValueError("The bounded search notebook cannot fit this request")
     return result
