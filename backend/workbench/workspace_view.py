@@ -146,6 +146,9 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                       *[p['finished_at'] or p['started_at'] for p in providers[identity]]]
         kind = body.get('requested_work') or ('coverage' if body.get('regression_tests') else 'bug' if body['kind']=='issue' else 'feature')
         label, message = LABELS[phase]
+        if (configured_mode()=='everyday' and body['kind']=='issue' and not body.get('local_planning')
+                and not body.get('supported_task') and original['status'] in {'failed','waiting_for_information'}):
+            phase, label, message = 'needs_approval', 'Ready for investigation', 'Your report is saved. Choose a provider and allow read-only investigation; no repair is approved.'
         if expired_permission:
             message = 'The earlier run permission expired. Open the task to review the next step.'
         rows.append(dict(id=identity, title=body['title'], kind=kind, state=phase, stage=label, message=message,

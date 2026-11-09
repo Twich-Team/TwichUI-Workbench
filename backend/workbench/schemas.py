@@ -578,6 +578,7 @@ class TaskProviderActivity(StrictModel):
 
 
 class IntakeView(StrictModel):
+    planning_start_binding: str | None = Field(default=None, exclude_if=lambda value: value is None)
     provider_activity: list[TaskProviderActivity] = Field(default_factory=list, exclude_if=lambda value: not value)
     human_scope: HumanScope
     scope_history: list[HumanScope]
@@ -608,6 +609,12 @@ class PlanningRetry(StrictModel):
     command_id: UUID | None = None
     review_binding: Annotated[str,Field(pattern=r'^[a-f0-9]{64}$')] | None = None
     renew_check_construction: bool = False
+
+
+class InvestigationStart(StrictModel):
+    command_id: UUID
+    binding: Annotated[str, Field(pattern=r'^[a-f0-9]{64}$')]
+    provider: Literal['qwen-once', 'qwen-with-codex-fallback', 'codex-once', 'codex-with-local-fallback']
 
 
 class ClarificationInput(StrictModel):

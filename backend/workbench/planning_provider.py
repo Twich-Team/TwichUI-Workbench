@@ -461,7 +461,7 @@ class LocalProvider:
 def provider(stop_event=None):
     mode = configured_mode()
     if mode == 'everyday':
-        raise PlanningUnavailable('Only the test coverage option can use the local model in this installation.')
+        raise PlanningUnavailable('Read-only investigation requires explicit provider permission on the saved report. No model was contacted.', 'planning_permission')
     if mode == 'demo':
         return DemoProvider()
     if mode == 'local':

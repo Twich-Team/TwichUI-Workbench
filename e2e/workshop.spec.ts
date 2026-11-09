@@ -78,3 +78,30 @@ test('isolated UI state fixtures show activity only for active records and retai
  expect(await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(22, 15, 11)');
  await overflow(page);await capture(page,info,'workshop-no-texture',{keepInCompact:true});
 });
+
+test('saved ordinary bug starts investigation without recreating the task or approving a repair',async({page},info)=>{
+ await page.goto('/intake/new?kind=issue');
+ await page.getByLabel('Title Optional').fill('Vendor items showing item number instead of name for some items');
+ await page.getByLabel('Description',{exact:true}).fill('Vendors and Trainers shows Item 4289 for some items while their icon and tooltip are correct. Other item names work.');
+ await page.getByRole('button',{name:'Submit request',exact:true}).click();
+ await expect(page).toHaveURL(/\/intake\/[a-f0-9-]{36}/);
+ const path=new URL(page.url()).pathname;const item=await page.request.get('/api'+path).then(r=>r.json());
+ // Isolated API responses exercise the browser only; real transaction/decoder coverage is in backend tests.
+ const binding='9'.repeat(64);let writes=0;let posted:any;
+ let current={...item,status:'waiting_for_information',jobs:[],planning_start_binding:binding};
+ await page.route('**/api'+path,route=>route.fulfill({json:current}));
+ await page.route('**/api'+path+'/investigation',async route=>{
+  writes++;posted=route.request().postDataJSON();
+  expect(posted.binding).toBe(binding);expect(posted.provider).toBe('qwen-once');
+  expect(Object.keys(posted).sort()).toEqual(['binding','command_id','provider']);
+  current={...current,status:'queued',planning_start_binding:undefined};
+  await route.fulfill({json:current});
+ });
+ await page.reload();await expect(page.getByText('Ready for read-only investigation',{exact:true})).toBeVisible();
+ const panel=page.getByRole('region',{name:'Start saved bug investigation'});await expect(panel.getByRole('button',{name:'Start investigation',exact:true})).toBeDisabled();
+ await panel.getByLabel('Allow this read-only investigation').check();await panel.getByRole('button',{name:'Start investigation',exact:true}).dblclick();
+ await expect(page.getByText('Waiting to start',{exact:true})).toBeVisible();expect(writes).toBe(1);expect(posted.command_id).toMatch(/^[a-f0-9-]{36}$/);
+ await page.reload();await expect(page.getByRole('button',{name:'Start investigation',exact:true})).toHaveCount(0);
+ expect(new URL(page.url()).pathname).toBe(path);expect(item.decisions).toHaveLength(0);
+ await page.setViewportSize({width:390,height:844});await overflow(page);await capture(page,info,'saved-report-investigation-recorded',{keepInCompact:true});
+});

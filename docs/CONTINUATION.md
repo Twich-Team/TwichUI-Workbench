@@ -1,3 +1,23 @@
+## Active real-use repair — November 9, 2026
+
+The owner-reported vendor-name task2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd
+is saved on installed62/d34cf17. Both failed clicks reached the disabled legacy
+planner before any model call: original has no local_planning permission and
+unclassified visual scope. Do not repeat that route or create another task.
+Private actual DB/source proof and initial snapshots:
+/home/rich/.local/share/TwichUI-Workbench/vendor-planning-recovery-20261109.
+Connected correction/tests in progress; installed app still unchanged. All prior
+checked results preserved; this real-use failure disproves broad dependability.
+New design adds a journaled read-only permission to this existing report, preserves
+its exact original snapshot and two failed attempts, and uses supported bug path.
+No implicit repair/run/publication approval. Read-only discovery need not wait for
+visual classification; human scope still gates repair approval. Local Qwen only
+for this incident; no new external-source permission or fallback. Complete suites
+running under standing authority; no old delivery caps. Continue implementation,
+verification, checked installation, real saved-task planning and restart/history
+verification; leave usable actual plan for owner review if required. Lower entries
+are historical checkpoints, not a statement this incident has been fixed.
+
 ## Current continuation — styled delivery complete, November 9, 2026, 13:30 UTC
 
 Read CURRENT_STATUS and root owner authority first. Installed62/d34cf17984e4054e6be09e3865b7eceedd0a2a6e

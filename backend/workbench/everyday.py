@@ -246,7 +246,12 @@ def check_planning(c, original, job=None):
     jobs = c.execute(select(planning_jobs.c.payload).where(
         planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')).scalars().all()
     from workbench.provider_routes import CHOICES
-    expected = planning_receipt(original['payload'], original['created_at'])
+    from workbench.investigation_start import first, validate_prefix
+    initial = first(c, original['id'])
+    if initial:
+        validate_prefix(c, initial)
+    approved_at = initial['payload'].get('planning_start', {}).get('approved_at', original['created_at']) if initial else original['created_at']
+    expected = planning_receipt(original['payload'], approved_at)
     operation_seconds = expected.get('planning_deadline_seconds', 120)
     def matches_saved_operation(payload):
         received = payload.get('local_planning_receipt', {})
@@ -283,17 +288,14 @@ def check_planning(c, original, job=None):
             raise ValueError('The follow-up no longer matches the approved investigation.')
         if followup.get('budget_version') in (2,3):
             from workbench.planning_limits import followup_budget
-            initial=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==original['id'],
-                planning_jobs.c.kind=='planning',planning_jobs.c.revision==1,
-                planning_jobs.c.status=='completed')).mappings().first()
-            if not initial:
+            if not initial or initial['status']!='completed':
                 raise ValueError('The original investigation is unavailable')
             if any(followup.get(k)!=v for k,v in followup_budget(c,initial,original['revision']).items()):
                 raise ValueError('The continuation source or consumed accounting changed')
         if fresh:
             from workbench.planning_limits import renewed_budget
-            initial=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==original['id'],
-                planning_jobs.c.kind=='planning',planning_jobs.c.revision==1)).mappings().one()
+            if not initial:
+                raise ValueError('The original investigation permission is unavailable')
             actual=renewed_budget(c,initial,exclude_job=job['id'])
             if (not data.get('renew_operation') or job['revision']!=actual['next_sequence']
                     or any(followup.get(k)!=v for k,v in actual.items())):

@@ -276,6 +276,7 @@ def process_one(engine, adapter=None, fail_before_commit=False, stop_event=None,
                   'incomplete_output':'The local provider stopped before completing structured output.',
                   'transport':'The local model connection failed.',
                   'configuration':'The local planning deadline configuration is invalid.'}
+        causes['planning_permission'] = 'No model was contacted. The saved report needs read-only investigation permission; repeating this legacy planner cannot correct that.'
         cause = causes.get(category, 'Planning unavailable or invalid output.')
         job['payload']['diagnostics'] = {**getattr(adapter, 'diagnostics', {}), 'category':category}
         if isinstance(error, PlanningUnavailable):

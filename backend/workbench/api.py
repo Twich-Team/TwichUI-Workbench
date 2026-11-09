@@ -16,7 +16,7 @@ from workbench.schemas import CatalogPage, CatalogDetail, WorkOverview, HistoryP
 from workbench.db import commands, engine_for, tasks
 from workbench.schemas import (Decision, Problem, Receipt, Session, Task, IntakeInput, IntakeView,
     IntakePage, ProposalDecisionInput, ProposalReceipt, ArtifactInput, PlanningRetry,
-    ClarificationInput, ResearchRevision, PriorityInput, ScopeRevisionInput)
+    ClarificationInput, ResearchRevision, PriorityInput, ScopeRevisionInput, InvestigationStart)
 from workbench.service import get_task, submit, task_view
 from workbench.real_execution import RunPage, StopRequest
 from workbench.task_execution import TaskExecutionContext
@@ -162,6 +162,12 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     @app.post('/api/intake/{identity}/retry', response_model=IntakeView, responses=errors)
     def planning_retry(identity: str, body: PlanningRetry):
         intake.retry(app.state.engine, identity, body.job_id, preparation=body)
+        return intake.view(app.state.engine, identity)
+
+    @app.post('/api/intake/{identity}/investigation', response_model=IntakeView, responses=errors)
+    def investigation_start(identity: str, body: InvestigationStart):
+        from workbench.investigation_start import start
+        start(app.state.engine, identity, body)
         return intake.view(app.state.engine, identity)
 
     @app.post('/api/intake/{identity}/clarification', response_model=IntakeView, responses=errors)

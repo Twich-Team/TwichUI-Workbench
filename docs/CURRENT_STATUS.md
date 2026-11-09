@@ -1,3 +1,12 @@
+# Active real-use failure — vendor task
+
+The styled app is installed, but the owner’s ordinary vendor-name report hit a
+broken intake branch twice. No model was contacted: a report saved without provider
+permission was incorrectly sent to the disabled legacy planner. Recovery on the
+same request is being implemented and verified; no new usable plan is claimed yet.
+Follow CONTINUATION for current evidence and work. Previous styling acceptance
+below remains valid for its demonstrated path, not proof every ordinary entry works.
+
 # Styled Workbench installed and demonstrated — November 9, 2026, 13:30 UTC
 
 Following the Project Working Philosophy: the requested styled application is

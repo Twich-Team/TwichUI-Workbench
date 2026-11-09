@@ -123,6 +123,9 @@ def continuation_budget(initial,parent,phases=None):
 def settled_planning_chain(connection, identity, revision=None):
     """Return every settled phase; a clarification cannot hide the first phase's usage."""
     from workbench.visual_scope import digest
+    from workbench.investigation_start import first, validate_prefix
+    initial = first(connection, identity)
+    excluded = validate_prefix(connection, initial) if initial else set()
     query='''SELECT j.id,j.revision,j.status,j.attempts,j.payload,a.id,a.usage,a.outcome,
                     a.finished_at,a.backend,a.actual_model,a.requested_model
              FROM planning_jobs j JOIN model_attempts a ON a.job_id=j.id
@@ -133,6 +136,8 @@ def settled_planning_chain(connection, identity, revision=None):
     records=[]
     for row in cursor.fetchall():
         job,rev,status,claims,payload,attempt,usage,outcome,finished,backend,actual,requested=row
+        if job in excluded:
+            continue
         payload=json.loads(payload) if isinstance(payload,str) else payload
         usage=json.loads(usage) if isinstance(usage,str) else usage
         # The existing single-turn regression connector records terminal outcome
@@ -156,7 +161,8 @@ def settled_planning_chain(connection, identity, revision=None):
             raise ValueError('The investigation phase is unsettled or lacks complete accounting')
         records.append(dict(id=attempt,job_id=job,revision=rev,payload=payload,usage=usage,
             outcome=outcome,finished_at=finished,backend=backend,actual_model=actual,requested_model=requested))
-    if (not records or [r['revision'] for r in records]!=list(range(1,len(records)+1))
+    start = initial['revision'] if initial else 1
+    if (not records or [r['revision'] for r in records]!=list(range(start,start+len(records)))
             or revision is not None and records[-1]['revision']!=revision):
         raise ValueError('The investigation phase history changed')
     first=records[0]

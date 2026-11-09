@@ -56,7 +56,7 @@ def submit(engine, body, *, owner_provenance=None):
         if not load(body.supported_task):
             raise HTTPException(409, 'This supported task is unavailable.')
     bug = bug_investigation.requested(original)
-    if body.local_planning and ((not body.regression_tests and not bug) or body.visual_requirement != 'nonvisual'):
+    if body.local_planning and ((not body.regression_tests and not bug) or (not bug and body.visual_requirement != 'nonvisual')):
         raise HTTPException(422, 'Model investigation is available for eligible offline bug fixes and test coverage.')
     if body.kind == 'feature' and body.lua_error:
         raise HTTPException(422, 'Lua errors belong to issue reports.')
@@ -64,7 +64,10 @@ def submit(engine, body, *, owner_provenance=None):
     with write_transaction(engine) as connection:
         old = connection.execute(select(intakes).where(intakes.c.id == identity)).mappings().first()
         if old:
-            saved_input=IntakeInput.model_validate(old['payload']).model_dump(mode='json')
+            from workbench.investigation_start import first
+            initial = first(connection, identity)
+            saved = initial['payload'].get('planning_start', {}).get('original_input', old['payload']) if initial else old['payload']
+            saved_input=IntakeInput.model_validate(saved).model_dump(mode='json')
             if saved_input.get('supported_task') is None:
                 saved_input.pop('supported_task',None)
             if saved_input != original:
@@ -93,12 +96,13 @@ def submit(engine, body, *, owner_provenance=None):
                 except ValueError as error:
                     raise HTTPException(409, str(error)) from None
                 planning['local_planning_receipt'] = receipt
-            connection.execute(intakes.insert().values(id=identity, payload=original, status='unavailable' if body.requested_work else 'queued',
+            needs_permission = everyday.enabled() and body.kind == 'issue' and not body.local_planning and not body.supported_task
+            connection.execute(intakes.insert().values(id=identity, payload=original, status='unavailable' if body.requested_work else 'waiting_for_information' if needs_permission else 'queued',
                 revision=0, created_at=at, priority_override=None))
             connection.execute(intake_scopes.insert().values(intake_id=identity, revision=1, command_id=identity,
                 visual_requirement=body.visual_requirement, stage='implementation', origin='human',
                 note='Recorded with the original request.', change_payload=original, created_at=now()))
-            if not body.requested_work:
+            if not body.requested_work and not needs_permission:
                 enqueue(connection, identity, 'planning', 1, planning)
     return view(engine, identity)
 
@@ -210,6 +214,12 @@ def view_in(connection, identity):
         retained['status'] = 'failed'
         retained['message'] = scenario_failure_message(diagnostics.get('category'))
     for job in jobs:
+        if (configured_mode() == 'everyday' and not row['payload'].get('local_planning')
+                and job['status'] == 'failed'):
+            from workbench.investigation_start import non_dispatch
+            attempts = connection.execute(select(model_attempts).where(model_attempts.c.job_id == job['id'])).mappings().all()
+            if non_dispatch(job, attempts):
+                job['message'] = 'Workbench tried an outdated planning route before investigation permission was recorded. No model was contacted. Start read-only investigation below; your report and earlier failed attempts remain saved.'
         if retained_source_failure(job):
             diagnostics = job['payload']['diagnostics']
             if not diagnostics.get('retained_failure'):
@@ -248,7 +258,8 @@ def view_in(connection, identity):
         ).where(model_attempts.c.task_id == identity, model_attempts.c.source == 'workbench',
                 model_attempts.c.backend.is_not(None))
             .order_by(model_attempts.c.started_at.desc(), model_attempts.c.id)).mappings().all()
-    return dict(provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
+    return dict(planning_start_binding=digest(row['payload']) if configured_mode()=='everyday' and row['payload']['kind']=='issue' and not row['payload'].get('local_planning') and not row['payload'].get('supported_task') and row['status'] in {'failed','waiting_for_information'} else None,
+        provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
         created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],
         proposals=[proposal_view(connection, dict(p)) for p in connection.execute(select(proposals).where(
             proposals.c.intake_id == identity).order_by(proposals.c.revision.desc())).mappings()
@@ -413,6 +424,8 @@ def retry(engine, identity, job_id, *, preparation=None):
             raise HTTPException(409, 'Preparation retains one durable claim. Inspect its outcome or recovery hold; retry cannot launch duplicate preparation.')
         if row['payload'].get('local_planning') and job['kind'] == 'planning':
             raise HTTPException(409, 'This approval covers one planning request. Review the saved outcome or start a new task.')
+        if configured_mode() == 'everyday' and job['kind'] == 'planning' and not row['payload'].get('supported_task'):
+            raise HTTPException(409, 'Retrying the disabled planner would repeat the same failure. Start read-only investigation on this saved report instead.')
         if retained_source_failure(job):
             raise HTTPException(409, 'This addon planning result is retained. Retry cannot start another generation for this request.')
         if job['kind'] == 'decomposition':
@@ -435,6 +448,8 @@ def clarify(engine, identity, body):
         raise HTTPException(422, 'Add the requested information.')
     with write_transaction(engine) as connection:
         row = require(connection, intakes, identity)
+        if everyday.enabled() and not row['payload'].get('local_planning'):
+            raise HTTPException(409, 'Choose read-only investigation on this saved report before sending a follow-up.')
         jobs = list(connection.execute(select(planning_jobs).where(planning_jobs.c.intake_id == identity)).mappings())
         for job in jobs:
             if job['payload'].get('clarification_id') == str(body.command_id):
@@ -458,8 +473,9 @@ def clarify(engine, identity, body):
         if bug_investigation.requested(row['payload']):
             if not body.continue_investigation:
                 raise HTTPException(422, 'Confirm the follow-up investigation before sending your answer.')
-            initial = next((job for job in jobs if job['kind'] == 'planning' and job['revision'] == 1
-                            and job['status'] == 'completed'), None)
+            initial = next((job for job in sorted(jobs,key=lambda j:j['revision']) if job['kind'] == 'planning'
+                            and job['payload'].get('local_planning_receipt')
+                            and job['status'] in ({'completed','failed'} if body.renew_operation else {'completed'})), None)
             if not initial:
                 raise HTTPException(409, 'The original settled investigation is unavailable.')
             grounding = initial['payload'].get('task_contract', {}).get('scenario_grounding', {})

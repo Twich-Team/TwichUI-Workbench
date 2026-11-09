@@ -157,9 +157,9 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
   </>}
   {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,supported_task:item?.id||null,local_planning:null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Use my description</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Use a ready-made task with a fixed plan. Your comments stay with the request. The fixed scope sets what can run.</p></>}
   {kind==='issue' && <><label className="check-label"><input type="checkbox" checked={lua} onChange={e=>{setLua(e.target.checked);if(!e.target.checked)setBody({...body,lua_error:''});}}/>Add a Lua error <span>Optional</span></label>{lua && <><label htmlFor="lua-error">Lua error <span>Plain text · never executed</span></label><textarea className="code-input" id="lua-error" maxLength={6000} rows={6} value={body.lua_error || ''} onChange={e=>setBody({...body,lua_error:e.target.value})}/></>}</>}</details>
-  <label htmlFor="request-interface">Does this change how the addon looks?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.</p>
+  <label htmlFor="request-interface">Does this change how the addon looks?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:bugWork||e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided. Read-only bug investigation can start before this is decided; repair permission is separate.</p>
   {localWork.data?.enabled&&(regression||bugWork)&&<div role="group" aria-label="Planning provider">
-    <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('qwen-')||false} disabled={body.visual_requirement!=='nonvisual'}
+    <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('qwen-')||false} disabled={!bugWork&&body.visual_requirement!=='nonvisual'}
       onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>{bugWork?'Allow local Qwen to investigate this report':'Allow one local Qwen request to plan this task'}</span></label>
     {localWork.data.codex_configured ? <>
       {!localWork.data.codex_available&&<p className="detail-copy">The Codex connector is unavailable. If you choose Codex first, planning can proceed with Qwen only if you allow that switch.</p>}
@@ -168,7 +168,7 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
           onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-with-codex-fallback':'qwen-once'})}/><span>Allow one switch to signed-in Codex if Qwen cannot connect before generation</span></label>
         {body.local_planning==='qwen-with-codex-fallback'&&<p className="detail-copy">If Qwen cannot start and Models allows the switch, this permits sending your request, clarification and {bugWork?'relevant committed addon code and test excerpts':'relevant committed source excerpts'} to OpenAI after the account and included allowance are checked.</p>}
       </>}
-      <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('codex-')||false} disabled={body.visual_requirement!=='nonvisual'}
+      <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('codex-')||false} disabled={!bugWork&&body.visual_requirement!=='nonvisual'}
         onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-once':null})}/><span>{bugWork?'Allow signed-in Codex to investigate this report':'Allow one signed-in Codex turn to plan this task'}</span></label>
       {body.local_planning?.startsWith('codex-')&&<>
         <p className="detail-copy">{bugWork&&'Investigation permits a bounded read-only operation within 30 minutes, including source inspection and plan review. Each Codex turn has a five-minute timeout. Codex can retry internally; reported usage is checked after each turn, not guaranteed by a token ceiling. '}This sends the request, clarification and {bugWork?'relevant committed addon code and test excerpts':'relevant committed source excerpts'} to OpenAI through the configured ChatGPT sign-in. Workbench will check the saved model and included allowance before sending task content.</p>
@@ -177,7 +177,7 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
       </>}
     </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
     {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. Each operation permits up to sixteen requests to inspect source and prepare a scope. Earlier operations and usage remain recorded; this is not a subscription allowance. Each phase has a thirty-minute timeout; each request has a five-minute timeout. It cannot edit files or publish. If a real-world detail is missing, Workbench may ask for information and separate permission to continue with the same provider.</p>}
-    <p className="detail-copy">Choose “Behavior or data only” to enable this permission. Workbench may send this request, your clarification and relevant source excerpts to local Qwen. {bugWork?'Permission expires after 45 minutes; the investigation runs for at most 30 minutes.':'Permission expires after 30 minutes.'} Fallback applies only to planning before generation starts. Failed, partial or uncertain generation stops for review. Review the plan and approve the run separately. The run keeps the provider that made the plan.</p>
+    <p className="detail-copy">{!bugWork&&'Choose “Behavior or data only” to enable this permission. '}Your selected provider receives this report, your replies and relevant committed source. {bugWork?'Permission expires after 45 minutes; the investigation runs for at most 30 minutes.':'Permission expires after 30 minutes.'} Fallback applies only to planning before generation starts. Failed, partial or uncertain generation stops for review. Review the plan and approve the run separately. The run keeps the provider that made the plan.</p>
   </div>}
 </fieldset>
   <p className="detail-copy">{future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)?'Your idea will be saved in the backlog. No work will start.':localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':(bugWork?'Your report will be saved. Model investigation needs your permission.':'Your request will be saved. Model planning requires the test coverage option and your permission.')):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)?'Save for later':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
@@ -193,6 +193,9 @@ export function IntakeDetail() {
   const [clarificationInput,setClarification] = useState('');
   const [selected,setSelected] = useState('');
   const [pickedFile, setPickedFile] = useState('');
+  const [startProvider,setStartProvider]=useState('qwen-once');
+  const [startConfirmed,setStartConfirmed]=useState(false);
+  const [startCommand]=useState(()=>crypto.randomUUID());
   useEffect(()=>{if(!selected && query.data?.proposals[0]) setSelected(query.data.proposals[0].id);},[selected,query.data]);
   async function act(suffix:string, body:unknown, method='POST') {
     setError('');setBusy(true);
@@ -237,6 +240,14 @@ export function IntakeDetail() {
 
     {query.isError && <p role="alert" className="form-error">Refresh failed. Showing the last saved record. Refresh before making a decision.</p>}
     {error && <p className="form-error" role="alert">{error}</p>}
+    {data.planning_start_binding&&<section className="panel" aria-label="Start saved bug investigation">
+      <h2>Your report is saved. Choose how to investigate it.</h2>
+      <p>Workbench will inspect relevant committed addon code and propose a repair scope. This cannot edit files, approve a repair or publish anything. You do not need to recreate the task.</p>
+      <label>Investigation provider<select value={startProvider} disabled={blocked} onChange={e=>{setStartProvider(e.target.value);setStartConfirmed(false);}}><option value="qwen-once">Local Qwen · Fallback off</option><option value="codex-once">Signed-in Codex · Fallback off</option></select></label>
+      <p>{startProvider==='qwen-once'?'The report and relevant source stay on this computer.':'This sends the report and relevant committed source to OpenAI. Existing source-disclosure permission and included-allowance eligibility are required. No API billing or extra credits.'} One read-only operation permits up to sixteen requests in thirty minutes, with a five-minute timeout per request. Earlier history remains saved. A repair plan and a run need separate review.</p>
+      <label className="check-label"><input type="checkbox" disabled={blocked} checked={startConfirmed} onChange={e=>setStartConfirmed(e.target.checked)}/>Allow this read-only investigation</label>
+      <Button disabled={blocked||!startConfirmed} onClick={()=>void act('investigation',{command_id:startCommand,binding:data.planning_start_binding,provider:startProvider}).catch(()=>{})}>{busy?'Recording permission…':'Start investigation'}</Button>
+    </section>}
     {asking && clarification && <section className="panel question-panel" aria-labelledby="task-question">
       <h2 id="task-question">Workbench needs your help</h2>
       {exampleNumber ? <>
@@ -273,7 +284,7 @@ export function IntakeDetail() {
       {activeJobs.map(job=><div key={job.id}><p>{job.message}</p>
         {job.kind==='behavioral_preparation'&&p?.task_contract?.bug_intent&&data.decisions.some(d=>d.status==='applied'&&d.proposal_id===p.id)
           ? <><p>Prepare an isolated repair attempt with the approved scope. Implementation and test development can proceed together after separate run approval. Unsettled earlier activity holds; no correctness result is claimed by preparation.</p><Button disabled={blocked} variant="secondary" onClick={()=>void act('retry',{job_id:job.id,command_id:crypto.randomUUID(),review_binding:p.binding,renew_check_construction:true}).catch(()=>{})}>Prepare repair attempt</Button></>
-          : job.kind!=='behavioral_preparation' && !(data.original.local_planning&&job.kind==='planning') && !job.diagnostics.retained_failure && job.attempts<3
+          : !data.planning_start_binding && job.kind!=='behavioral_preparation' && !(data.original.local_planning&&job.kind==='planning') && !job.diagnostics.retained_failure && job.attempts<3
           ? <Button disabled={blocked} variant="secondary" onClick={()=>void act('retry',{job_id:job.id}).catch(()=>{})}>Retry planning</Button>
           : <p>Your request and any saved decisions are here. You can review the details below or start a new request with updated information.</p>}</div>)}
     </section>}

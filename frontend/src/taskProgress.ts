@@ -26,6 +26,7 @@ export const runStage: Record<string, string> = {
 type Progress = {step: number; title: string; next: string; group: 'attention' | 'current' | 'results'};
 
 export function intakeProgress(item: Intake): Progress {
+  if(item.planning_start_binding)return {step:0,title:'Ready for read-only investigation',next:'Your report is saved. Choose a provider and allow investigation below; no repair is approved.',group:'attention'};
   if (item.decisions.some(d => d.status === 'pending')) {
     return {step: 1, title: 'Decision saved', next: 'Workbench is checking and applying your choice.', group: 'current'};
   }

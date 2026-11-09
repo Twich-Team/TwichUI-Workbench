@@ -17,6 +17,9 @@ def _rows(connection,query,args):
 
 
 def observe(connection,identity,evidence_roots,*,exclude_job=None):
+    from workbench.investigation_start import first, validate_prefix
+    initial = first(connection, identity)
+    excluded = validate_prefix(connection, initial) if initial else set()
     rows=_rows(connection,'''SELECT j.id,j.revision,j.status,j.finished_at,j.payload,
               a.id,a.backend,a.requested_model,a.actual_model,a.outcome,a.finished_at,a.usage
               FROM planning_jobs j LEFT JOIN model_attempts a ON a.job_id=j.id AND a.purpose='planning'
@@ -25,7 +28,7 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
     totals={}
     for row in rows:
         job,sequence,local,finished,payload,attempt,backend,requested,actual,outcome,terminal,usage=row
-        if job==exclude_job:
+        if job==exclude_job or job in excluded:
             continue
         payload=json.loads(payload) if isinstance(payload,str) else payload
         usage=json.loads(usage) if isinstance(usage,str) else usage
@@ -67,7 +70,8 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
             input_binding=digest(payload),terminal_proof=terminal_proof,read_only=read_only,
             output_accepted=local=='completed' and provider_state=='completed',
             execution_authorized=False))
-    if not phases or [p['sequence'] for p in phases]!=list(range(1,len(phases)+1)):
+    start = initial['revision'] if initial else 1
+    if not phases or [p['sequence'] for p in phases]!=list(range(start,start+len(phases))):
         raise ValueError('The processing phase history is unavailable or duplicated')
     return dict(phases=phases,next_sequence=max(p['sequence'] for p in phases)+1,
         known_usage=totals,unknown_usage=any(p['provider_state'] in {'unknown','active'} for p in phases),
