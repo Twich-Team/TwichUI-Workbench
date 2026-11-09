@@ -1,4 +1,4 @@
-# Current status — November 9, 2026, 04:19 UTC
+# Current status — November 9, 2026, 04:36 UTC
 
 **A real flight-path repair has completed through the installed application.**
 Real signed-in Codex investigated the report, proposed a reviewed scope, and edited
@@ -15,8 +15,8 @@ The patch remains local; the live addon, publication and PRs are untouched.
 
 ## Running build and access
 
-Installed candidate: `18605b975d085d2bea4d5ef4a766fbecae0df09e` (deployment57).
-Seal: `b91611f78318694a0b99e5957bbbea797256105ae00bb1e54ed9a668063cbb74`.
+Installed candidate: `1836b807bd611fd47d27a1a87573411cdbdd59a1` (deployment58).
+Seal: `d948586be36a93dfbd9bff469997886eee19e688a691deff4dcf905eae3918e9`.
 Standalone release and development checkout remain separate.
 All four named services are active and disabled pending remaining acceptance.
 History: original79 and forwarded304 rows preserved; accepted result's320-row
@@ -58,16 +58,26 @@ Operator-only reviewed-rejection policy has24focused checks; default successful-
 terminal-state, scope/accounting and provider guards remain. Installed helper grant
 unchanged. Historical unknown usage/outcomes remain unknown and isolated.
 
-Development-only improvement now reuses exact already-certified pre-model control
+Installed preparation improvement now reuses exact already-certified pre-model control
 observations in a fresh workspace, with a fresh sandbox proof and fresh candidate
 checking. Changed recipes, source, helper versions, oracle, control patches or
 evidence reject reuse. Targeted denial tests and actual confined tiny-profile
 preparation/reuse pass (17commands then1fresh boundary). The first complete suite found an unnecessary requirement for the deleted
 disposable preparation copy. Frozen evidence remains authoritative; corrected
 source-retirement behavior passes64focused checks and a fresh actual confinement
-proof. Complete suites are being repeated on the correction; this improvement is NOT installed and did not interrupt the now-settled Qwen case.
+proof. Final suites passed and it is installed. The new private/restored Qwen runtime
+inventory declaration passed10focused tests and exact actual prior-stage validation.
+No credential contents were read. All337rows were copied/checked; current loopback,
+LAN, browser guards, internal isolation and historical quarantine views passed.
+Prior real results were canonically revalidated without new model calls.
 
-Next: verify/install the preparation improvement and finish both real fallback cases, demonstrate a subsequent
+The first fallback launch correctly held before submission because an obsolete
+campaign attempt-number rule remained active. No task/model request was dispatched;
+connector restored. Operator-only correction removes that counter in standing mode
+while retaining historical campaign validation, actual task IDs, settlement, usage
+and checked-case replay protections (28focused tests).
+
+Next: finish both real fallback cases, demonstrate a subsequent
 ordinary submission, verify final cleanup/restoration and leave the working build.
 The subsequent ordinary Qwen regression task completed after the bug result.
 Two ordinary bug journeys/restart also pass with controlled providers and actual

@@ -1,3 +1,38 @@
+## Latest continuation — November 9, 2026, 04:36 UTC
+
+Deployment58/1836b807bd611fd47d27a1a87573411cdbdd59a1 is installed and all gates pass.
+Tree1bd4d1b68b334e3a01bdf8ede72d9e178803f515; seal
+ d948586be36a93dfbd9bff469997886eee19e688a691deff4dcf905eae3918e9.
+R58=C/outcome-1836b80; S58=S.parent/everyday-outcome-1836b80. Prior57 retained.
+History337rows exactSHA49d960644923076187863b6ac5f047140136bd0e845420e72b38ea475c06ff40
+copied with original79backup; current network/browser/auth/isolation gates allpass.
+R58/deployment-58-verified.json and post-install-output.txt. All old normal history
+reads and quarantined-readonly dispositions remain unchanged. Candidatef9 full
+1869backend/8skips/25frontend + native2/four-route-browser reused after exact zero
+application runtime diff; only ops inventory checker added10tests + actual old
+immutable inventory verification. R58/offline-verification.json binds this reuse.
+All3prior checked cases canonically revalidated without rerun: R58/prior-real-evidence-
+compatibility.json (SHA df7f32e4ead8e6c924e42b4aeb5acef386e8c90f4bd1a962b7c7956427785a2b)
+and evidence-only case pointers in S58/artifacts/acceptance. Their observed builds
+remain historical, not new provider calls.
+
+First Codex→Qwen launch held BEFORE submit04:34:22: stale campaign attempt label42
+was compared to all historical task IDs. No intake/model dispatch; preferences saved.
+Connector safely restored; R58/held-before-submit-evidence.json. Installed app intact.
+Do NOT replay a task: none was submitted. Preserve/rename held case receipt and
+stdout before fresh driver invocation. scripts/acceptance_policy.py now skips only
+that counter in standing outcome mode. Legacy campaign count validation, actual-ID
+settlement, accounting, current scope, duplicate successful-case and quarantine
+checks remain;28focused campaign/diagnostic/rejected-result tests pass.
+This is OPERATOR-ONLY; use a hash-bound external policy/driver like R57's mechanism,
+not another application cutover. Build manifest/immutable copies before invocation.
+Current worker has NO active owned task; all4services normal active/disabled.
+Finish both fallback cases through fresh UI bindings; do not rerun completed bug,
+Codex-only or Qwen-only cases. No owner action needed. Full scope remains unfinished.
+
+The chronological detail below is retained for evidence; this paragraph controls
+current installed identity and next action.
+
 # Continuation — November 9, 2026, 04:19 UTC
 
 Read the three authoritative root owner documents and AGENTS.md. One agent only.

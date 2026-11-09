@@ -30,11 +30,12 @@ def test_standing_authority_removes_old_delivery_caps_but_keeps_prior_reconcilia
         campaign_admission(connection, changed, dict(choice='bug-flight-paths', provider='local'), dict(outcome=OUTCOME))
 
 
-def test_standing_codex_accounting_uses_saved_operation_bound_not_old_campaign_observation_ceiling(store):
+@pytest.mark.parametrize('historical_label', [1, 3])
+def test_standing_codex_accounting_uses_saved_operation_bound_not_old_campaign_observation_ceiling(store, historical_label):
     from test_planning_limits import current
     value=request()
     value['outcome']=value.pop('campaign')
-    value['outcome'].update(attempt=3,revision=20,prior_attempts=['attempt'])
+    value['outcome'].update(attempt=historical_label,revision=20,prior_attempts=['attempt'])
     value['prior']=['attempt']
     add_intake(store,value,'earlier')
     consent=dict(current(),investigation_version=10,max_local_requests=16,
@@ -130,6 +131,10 @@ def test_campaign_checks_prior_identity_and_accepts_accounted_settled_failure(st
     value["prior"] = ["attempt"]
     value["campaign"]["prior_attempts"] = ["attempt"]
     check(store, value)
+    reused = copy.deepcopy(value)
+    reused['campaign']['attempt'] = 1
+    with pytest.raises(ValueError, match='attempt number reused'):
+        check(store, reused)
     altered = copy.deepcopy(value)
     altered["campaign"]["prior_attempts"].append("not-accounted")
     with pytest.raises(ValueError):

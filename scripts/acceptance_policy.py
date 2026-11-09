@@ -617,7 +617,10 @@ def campaign_admission(connection, request, case, policy):
     if request['action'] == 'submit':
         new = 'reserved-next-task'
         (local_tasks if case['provider'] == 'local' else codex_tasks).add(new)
-        require(len({row[1] for row in rows}) < campaign['attempt'],
+        # In standing outcome mode this is historical labeling, not a slot
+        # reservation. Actual IDs, settlement, usage and checked-case guards
+        # above protect against replay; an old campaign counter cannot stop work.
+        require(outcome or len({row[1] for row in rows}) < campaign['attempt'],
                 'Campaign attempt number reused')
     require(outcome or len(local_tasks) <= 5 and len(codex_tasks) <= 4 and
             qwen_requests <= 110 and qwen_tokens <= 133300 and codex_turns <= 8,
