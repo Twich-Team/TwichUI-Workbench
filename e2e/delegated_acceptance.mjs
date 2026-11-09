@@ -8,6 +8,8 @@ const [, , origin, policyPath, phase, database, preparation] = process.argv;
 const policy = JSON.parse(readFileSync(policyPath));
 const opened = new Date().toISOString();
 const prior = [];
+const slowReview=Number(process.env.WB_ACCEPTANCE_REVIEW_DELAY_MS||0);
+assert(Number.isInteger(slowReview)&&slowReview>=0&&slowReview<=15000);
 let attempt = 1;
 const verify = (verb, candidate, action, data) => JSON.parse(execFileSync('.venv/bin/python',
   ['scripts/acceptance_policy.py', verb, '--policy', policyPath, '--database', database, '--preparation', preparation],
@@ -74,6 +76,7 @@ try {
             ? 'codex-off' : candidate.reason === 'local_unreachable' ? 'qwen-refused' : '');
         },
         async beforeAction(action, data) {
+          if(action==='run'&&slowReview) await new Promise(resolve=>setTimeout(resolve,slowReview));
           verify('admit', candidate, action, data);
           if (action === 'plan') {
             await otherPage.goto(origin + '/intake/' + data.intake);

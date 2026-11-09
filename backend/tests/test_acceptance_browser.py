@@ -175,11 +175,18 @@ def test_delegated_journeys(store, installed, tmp_path, monkeypatch):  # noqa: F
     def advance_worker():
         try:
             while not stopped.wait(.04):
-                with store.connect() as connection:
-                    waiting = connection.execute(select(intakes.c.id, intakes.c.payload).join_from(
-                        sessions, proposal_decisions,
-                        sessions.c.id == proposal_decisions.c.id,
-                    ).join(intakes).where(sessions.c.status == 'pending')).first()
+                try:
+                    with store.connect() as connection:
+                        waiting = connection.execute(select(intakes.c.id, intakes.c.payload).join_from(
+                            sessions, proposal_decisions,
+                            sessions.c.id == proposal_decisions.c.id,
+                        ).join(intakes).where(sessions.c.status == 'pending')).first()
+                except OperationalError as error:
+                    # This probe has no effects. Match the real worker's busy
+                    # retry here too; never replay the implementation below.
+                    if getattr(error.orig,'sqlite_errorcode',0)&0xFF not in {5,6}:
+                        raise
+                    continue
                 if waiting:
                     case = by_choice[waiting.payload['local_planning']]
                     if case['provider'] == 'local':

@@ -430,6 +430,11 @@ export async function runJourney(context, origin, policy, candidate, options) {
     const panel = page.getByRole('region', {name:view.offer.repair_cycle?'Scoped repair run approval':'Certified task run approval'});
     await panel.getByText('Technical run details', {exact:true}).click();
     await panel.getByLabel('Run approval note').fill(policy.note);
+    // Private service/provenance checks happen before the browser starts its
+    // eight-second fetch timer. The exact request, current offer and bindings
+    // are still revalidated below, inside the single-mutation fence.
+    await beforeAction('run', {intake:identity, task:task.id, proposal:plan, offer:view});
+    ensure();
     await panel.getByRole('checkbox', {name:'I reviewed what this run allows.'}).check();
     const run = await act('run', 'POST', runPath, button(candidate.provider === 'codex' ? 'Approve Codex run' : 'Approve local run'),
       async body => {
@@ -447,7 +452,6 @@ export async function runJourney(context, origin, policy, candidate, options) {
         exact(without(body, 'command_id'), {scope_approval_id:scope.id, binding:view.binding,
           run_budget:view.offer.budget, note:policy.note}, 'run command differs from reviewed offer');
         check(uuid(body.command_id), 'run command identity missing');
-        await beforeAction('run', {intake:identity, task:task.id, proposal:plan, offer:view});
         record('reviewed', {action:'run', intake:identity, task:task.id, approval:scope.id, provider:candidate.provider,
           offer:view.offer.id, offerSha:digest(view.offer), checks:'current plan, exact certified offer, local-only budget'});
       });
