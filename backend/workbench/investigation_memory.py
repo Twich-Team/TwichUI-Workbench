@@ -508,3 +508,17 @@ def recent_focus(attempt, count, packet, roots):
                 if focus:
                     return focus[:3]
     return []
+
+
+def relocated_packet(packet, policy, engine):
+    """Only verified coordinate-only installation moves can rebind cached source."""
+    from workbench.trusted_preparation import relocated_policy
+    from workbench.visual_scope import digest
+    current=digest(policy)
+    if packet.get('policy_sha256')==current:
+        return packet
+    if not relocated_policy(engine,packet.get('policy_sha256'),policy):
+        raise ValueError('Retained source policy changed beyond verified installation coordinates')
+    candidate=copy.deepcopy(packet)
+    candidate['policy_sha256']=current
+    return candidate

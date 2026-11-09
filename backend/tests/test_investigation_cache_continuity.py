@@ -65,7 +65,7 @@ def test_cache_compaction_preserves_union_and_gaps_without_mutating_receipts(sou
     assert len(calls) == 3
 
 
-@pytest.mark.parametrize("change", ["text", "hash", "out_of_range", "policy", "new_key"])
+@pytest.mark.parametrize("change", ["text", "hash", "out_of_range", "base", "new_key"])
 def test_corrupted_cache_remains_a_hold(source_packet, change):
     initial, cached, _ = source_packet
     if change == "text":
@@ -74,8 +74,8 @@ def test_corrupted_cache_remains_a_hold(source_packet, change):
         cached["inspection_windows"][0]["sha256"] = "changed"
     elif change == "out_of_range":
         cached["inspection_windows"][0]["through_line"] = 999
-    elif change == "policy":
-        cached["policy_sha256"] = "changed"
+    elif change == "base":
+        cached["base"] = "changed"
     else:
         cached["approved"] = True
     with pytest.raises(ValueError):
@@ -139,3 +139,33 @@ def test_recent_focus_retains_completed_ninth_turn_across_search_only_turn(tmp_p
         ],
     )
     assert recent_focus(identity, 8, packet, [tmp_path]) == []
+
+
+@pytest.mark.parametrize("allowed", [False, True])
+def test_changed_installation_binding_needs_verified_coordinate_only_move(
+    source_packet, monkeypatch, allowed
+):
+    from workbench.investigation_memory import relocated_packet
+    from workbench.visual_scope import digest
+    from workbench import trusted_preparation
+
+    initial, cached, _ = source_packet
+    policy = dict(current="private configured installation")
+    before = copy.deepcopy(cached)
+    observed = []
+
+    def relocate(engine, sha, current):
+        observed.append((engine, sha, current))
+        return allowed
+
+    monkeypatch.setattr(trusted_preparation, "relocated_policy", relocate)
+    if not allowed:
+        with pytest.raises(ValueError, match="installation coordinates"):
+            relocated_packet(cached, policy, "existing engine")
+    else:
+        current = relocated_packet(cached, policy, "existing engine")
+        assert current["policy_sha256"] == digest(policy)
+        assert ranges(current["inspection_windows"]) == ranges(cached["inspection_windows"])
+        assert current["files"] == cached["files"]
+    assert cached == before
+    assert observed == [("existing engine", cached["policy_sha256"], policy)]

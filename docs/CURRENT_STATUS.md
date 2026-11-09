@@ -1,3 +1,23 @@
+## November9 17:23UTC —72installed; continuation held before dispatch; relocation correction
+
+72/a3f0699 installed and all source/seal/history/network/auth gates pass. Six prior
+real results canonically revalidated without replay. Browser command0d24651c... was
+rejected409 before enqueue/model dispatch: latest source cache still bound the old
+installation policy. Same task/41completedresponses762137tokens unchanged. No uncertain
+execution or addon decision. Preserve real-cache-renewal.jsonl/driver diagnostics.
+
+Correction uses existing verified private policy relocation: ONLY database identity/
+path/output coordinates may differ; repository, classes, model-planning mode and
+identity semantics must match. Rebind source-only cache to current policy; all pinned
+source bytes rechecked. No stale approval/plan authority copied.139affected tests and
+9relocation positive/denial checks pass; actual post-cutover source assembly under
+verification. Prior native2workflows/static and exact8response replay remain applicable
+with this focused policy correction; no unrelated frontend/provider/checker changes.
+Finish actual-state verification/seal/install and normal same-task browser continuation.
+Maintenance admission pause still owned; restore hash-bound resume after owned work.
+Standing authority/no campaign caps, Qwen-only/fallbackOff, source/billing/network/
+publication/independent verification and genuine addon approval safeguards unchanged.
+
 ## November9 17:18UTC — original vendor task settled; cache/focus correction under verification
 
 Installed71/c364075 remains running. Original intake2dc5b8ba-2d22-4c2c-9f90-

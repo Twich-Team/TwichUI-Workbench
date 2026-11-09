@@ -255,7 +255,11 @@ def renewed_budget(connection, initial, *, exclude_job=None):
     # Reuse the latest settled source cache, not only the first phase's reads.
     # This copies no response, diagnosis, plan, approval or execution authority.
     from workbench import investigation_memory, bug_source_planning
+    from workbench.trusted_preparation import configuration
+    current_policy=configuration(connection.engine)
+    packet=investigation_memory.relocated_packet(packet,current_policy,connection.engine)
     if isinstance(cached,dict):
+        cached=investigation_memory.relocated_packet(cached,current_policy,connection.engine)
         if provider=='codex' and not {f['path'] for f in cached.get('files',[])} <= {f['path'] for f in packet['files']}:
             raise ValueError('Retained source exceeds the existing external disclosure scope')
         packet=investigation_memory.compact_packet(packet,cached)
