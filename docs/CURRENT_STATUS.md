@@ -1,4 +1,4 @@
-# Current status — November 9, 2026, 06:00 UTC
+# Current status — November 9, 2026, 06:24 UTC
 
 **A real flight-path repair has completed through the installed application.**
 Real signed-in Codex investigated the report, proposed a reviewed scope, and edited
@@ -18,9 +18,11 @@ The patch remains local; the live addon, publication and PRs are untouched.
 Installed candidate: `2ecbce2b3bb8d067f285d57b824f49043bc174c6` (deployment59).
 Seal: `27cbde42ed4e462b0c4de353e7a4093a0c589bd6460acfef548cebfdef39a926`.
 Standalone release and development checkout remain separate.
-All four named services are active and disabled pending remaining acceptance.
-History: original79 and forwarded355 rows preserved; accepted result's320-row
-store was identical before and after restart. Original port8765 unchanged.
+All four named services are active and enabled after acceptance.
+History: original79 and forwarded355 rows preserved; final372-row store was
+identical before and after a full service restart, normal browser reads and
+network checks. A verified final recovery copy preserves all five real results.
+Original port8765 unchanged.
 
 Use `http://127.0.0.1:9487` or `https://10.0.0.9:9487` on trusted10.0.0.0/24.
 Existing server-CA trust applies. No client certificates/passphrase/public ingress;
@@ -34,9 +36,9 @@ confirmation was reused after unchanged boundary/CA checks; no new remote load c
 | Codex alone | **Passed** real planning, implementation, independent checks and restoration. Observed on deployment56; exact regression recipe and unchanged provider/execution code revalidated through58. No repeat call. |
 | Qwen alone | **Passed** real planning, approved execution, checked test patch and model/auth restoration at04:13 UTC. |
 | Codex first → Qwen | **Passed** real pre-generation switch, Qwen planning/implementation, independent checks and normal restoration at05:01 UTC. |
-| Qwen first → Codex | Real case active on59: Qwen readiness refusal before generation, Codex plan completed, normal worker restored and delegated plan approval applied. Independent preparation running; implementation/result not yet demonstrated. |
+| Qwen first → Codex | **Passed** real pre-generation readiness refusal, Codex planning, separately approved execution, checked regression patch and settlement on59 at06:18 UTC. |
 
-Only3/4 supporting real-provider cases passed. The real Codex bug repair is separate
+All4/4 supporting real-provider cases passed. The real Codex bug repair is separate
 additional evidence. Saved settings, explicit consent, shared task accounting,
 isolation, independent checks and no uncertain cross-provider replay remain required.
 Codex included-allowance checks are snapshots, not a verified per-turn billing lock.
@@ -87,8 +89,12 @@ routing and test-only scope, preserving unknown account data and snapshot limita
 Focused39model tests/build checks, complete suites and four controlled browser routes
 passed. The updated copy is now installed in59; no provider or approval guard changed.
 
-Next: finish the active Qwen-to-Codex case, verify final cleanup/restoration and leave
-the working build.
+The verified build remains installed. All five results reopen through the normal
+API/browser after restart; desktop and phone screenshots were inspected. Fallback
+is Off by default, normal Qwen authentication restored, the temporary worker
+network drop-in absent, and all four named services enabled. No running Workbench
+user units remain. Thirteen old failed transient-unit markers were cleared only
+after recording their dead/empty state; journals and source evidence remain.
 The subsequent ordinary Qwen regression task completed after the bug result.
 Two ordinary bug journeys/restart also pass with controlled providers and actual
 confinement on development candidatef9ff5ba; this is not a second real-provider bug.
@@ -104,8 +110,17 @@ model authentication, isolated execution and prior real evidence revalidation pa
 The read-only compatibility observer first named the wrong method for the tested
 watcher change; its exact source diff was rechecked, the observer corrected, and the
 held diagnostic preserved. No application relaxation or new call resulted from that hold.
-Final case intake7a9c75d1... and planningfc3c2dbe...; evidence is under
-`outcome-2ecbce2` in the private delivery record. No owner action currently needed.
+Final case intake7a9c75d1..., execution2a84674f..., candidate6b431113...;
+two known completed Codex turns accounted once, historical unknowns unchanged.
+Its one-response planning usage format differs from multi-turn bug accounting;
+the operator reconciliation was corrected against the retained validated response,
+without repeating a model call. Evidence is under `outcome-2ecbce2`, especially
+`functional-evidence-closeout.json`, in the private delivery record.
+No provider operation is active. Next connected application work: expose the
+independent later rejection of the earlier native-checked flight patch in its
+historical result view without erasing the original outcome or usage. The accepted
+replacement is linked in Everyday use. Broader requirements remain unfinished.
+No owner action currently needed.
 Continue under standing authority, without old
 campaign caps or routine renewals. See [CONTINUATION](CONTINUATION.md) and
 [Everyday use](EVERYDAY_USE.md).

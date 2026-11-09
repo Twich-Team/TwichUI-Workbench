@@ -29,14 +29,19 @@ in isolated copies; correctness checks gate the checked result, not the first ed
 | Codex alone | Passing | **Passed** complete regression journey on56, revalidated without replay for57; also accepted real Codex flight-path repair on57. |
 | Qwen alone | Passing | **Passed** real planning, separately approved execution, checked regression patch and model/auth restoration on57 at04:13 UTC. |
 | Codex first → Qwen | Passing | **Passed** real pre-generation unavailable switch, Qwen plan/implementation/checks/restoration on58 at05:01 UTC. |
-| Qwen first → Codex | Passing | Real case active on59: Qwen readiness refusal before generation, Codex planning completed, normal worker restored and separate delegated plan approval applied. Preparation running; no checked result yet. |
+| Qwen first → Codex | Passing | **Passed** on59 at06:18 UTC: real Qwen readiness refusal before generation, Codex plan, separately approved execution, checked regression result and settlement. |
 
 The real flight-path result is candidatee2f1341..., execution143ecdc6...; original
 route failure, current-master learning, later refresh, conservative missing data,
 per-GUID isolation and saved restoration in a fresh Lua process passed independently.
 All167addon tests pass. Full app restart preserved320rows and the result/patch.
 Offline game simulation is not in-game acceptance; no live addon installation or PR.
-Only3/4 supporting provider cases are accepted, not4controlled passes counted asreal.
+All4/4 supporting provider cases are accepted as real-provider results. The final
+372-row store and all five results survive a full service restart; normal model
+authentication/network restored, fallback Off and four named services enabled.
+Evidence: private `outcome-2ecbce2/functional-evidence-closeout.json`. The last case
+used2knowncompleted Codex turns; historical uncertain outcomes/usage unchanged.
+No Qwen bug repair or in-game acceptance is inferred from regression-provider cases.
 
 ## Billing and accounting
 
@@ -58,8 +63,8 @@ only after actual capabilities, recovery and late-result isolation are verified.
 
 ## Still unfinished
 
-Finish the Qwen-to-Codex real fallback journey, durable closeout/cleanup and a
-subsequent ordinary bug demonstration. A fresh ordinary Qwen regression task
+The broader initial product and a second real-provider ordinary bug demonstration
+remain unfinished. A fresh ordinary Qwen regression task
 submitted after the flight-path result did complete through the normal browser;
 two distinct ordinary bug journeys, code/test revision and restart pass separately
 with controlled providers and actual confinement. These do not claim a second

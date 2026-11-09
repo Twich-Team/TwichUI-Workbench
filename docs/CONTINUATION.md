@@ -1,4 +1,54 @@
-## Actual current continuation — November 9, 2026, 06:00 UTC
+## Actual current continuation — November 9, 2026, 06:24 UTC
+
+**Real flight-path repair accepted offline; ALL FOUR REAL PROVIDER CASES PASS.**
+Installed59 remains2ecbce2b3bb8d067f285d57b824f49043bc174c6;
+treea7ce5261008d67a936c21811db133fa4500125e5;
+seal27cbde42ed4e462b0c4de353e7a4093a0c589bd6460acfef548cebfdef39a926.
+R=C/outcome-2ecbce2, C=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a;
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-2ecbce2.
+NO ACTIVE PROVIDER OPERATION. Never replay these successful cases.
+Final Qwen→Codex finished06:18:56: intake7a9c75d1-03b8-4ee2-9860-bbf853b25fc7;
+execution2a84674f-cc4c-5378-abb5-9df0ad6b6317;
+candidate6b431113a1d3ee7ef86995b8fa6fd487d257f831b670a9f6a40edbf7c47c1586.
+Planningfc3c2dbe-45dd-4273-ac7c-847d3752f104, implementation4b37fc02-ad72-458d-852f-99dcb3c1d7df.
+Fresh separate delegated plan/run approvals; explicit pre-generation readiness refusal,
+Codex output, independent checks and controller settlement all passed.
+R/qwen-with-codex-fallback-closed.json and final-case-accounting.txt; ledger updated
+ONCE with2knowncompleted Codex turns (148total). Historical unknowns unchanged.
+Operator accounting initially expected the multi-turn usage envelope on a one-response
+regression planner; held log preserved, exact retained validated response checked,
+format handling corrected without model replay or fabricated usage fields.
+
+**FINAL RESTART/CLOSEOUT PASSED.**372rows, logicalSHA
+3c1524b3f4a7fc7cff23381030944cdb87ae5e7286dad7ac4488ed6a8692ae5f
+identical before/after full4service restart and browser/network reads.
+S/artifacts/cutover/accepted-final.sqlite3 independently copied/fingerprinted.
+Original79 and cutover355 histories preserved. All5real results reopen via normal
+API/browser; desktop/phone screenshots VIEWED (bug checked/local-only/original-failure
+visible; Models snapshot limitations; normal task form). No new submitted bug claimed
+from merely opening that form. A subsequent real Qwen regression task already passed;
+two distinct next-bug process journeys passed with controlled providers/native isolation.
+Normal Qwen key/auth restored401/200, fallback Off. All4named services ACTIVE/ENABLED,
+normal worker netns/no temporary drop-in; exact source/seal/TLS/subnet/browser guards
+passed.13dead/empty historical user transient-unit markers preserved then reset-failed;
+journals and original evidence untouched; no running Workbench user units remain.
+Read R/functional-evidence-closeout.json and CURRENT_STATUS for bounded claims.
+
+Continue connected product work, not another successful-case replay or new live-call
+allocation. Concrete follow-up discovered: the older native-checked flight patch
+(execution2efed208..., candidate3afdc232...) was independently rejected but its normal
+UI still shows the historical native check without the later rejection. Preserve
+native history/usage, add a durable later-review warning through supported application
+handling. Existing rejected evidence is S57/artifacts/acceptance/rejected-results/
+2efed208-b38a-5d09-bd85-4fe68ea9b702.json (S57=everyday-outcome-18605b9).
+Do not alter addon solution or overwrite old outcome. Correct accepted result is
+143ecdc6.../e2f1341..., linked in EVERYDAY_USE. No full redesign or styling started.
+Broader features, general inspections, external simulator and authorized PR delivery
+remain unfinished. A8/full initial product are NOT declared complete by4regression
+cases. No owner action/access needed. Keep standing autonomy, actual protections,
+latest backups, unique failures and verified fixture archive. No new campaign caps.
+
+## Prior continuation — November 9, 2026, 06:00 UTC
 
 Installed **deployment59/2ecbce2b3bb8d067f285d57b824f49043bc174c6**;
 treea7ce5261008d67a936c21811db133fa4500125e5;
