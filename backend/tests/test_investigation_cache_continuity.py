@@ -169,3 +169,37 @@ def test_changed_installation_binding_needs_verified_coordinate_only_move(
         assert current["files"] == cached["files"]
     assert cached == before
     assert observed == [("existing engine", cached["policy_sha256"], policy)]
+
+
+def test_fully_cached_source_does_not_restart_every_partial_display_page(source_packet):
+    from workbench.bug_evidence import InvestigationRead
+
+    initial, cached, _ = source_packet
+    request = InvestigationRead(path=initial["files"][0]["path"], start=50, end=150)
+    original = copy.deepcopy(cached)
+    pages = []
+    for _ in range(3):
+        windows, _, _ = source.inspect(cached, [request], page_lines=40, result_budget=6500)
+        pages.append((windows[0]["line"], windows[0]["through_line"]))
+        source.verify_packet(initial, cached)
+    assert pages == [(50, 89), (90, 129), (130, 150)]
+    assert original["inspection_windows"] == cached["inspection_windows"][:4]
+    cached["inspection_windows"][-1]["pagination_version"] = 3
+    with pytest.raises(ValueError, match="pagination version"):
+        source.verify_packet(initial, cached)
+
+
+def test_pagination_uses_actual_file_end_for_a_larger_requested_range():
+    windows = [
+        dict(path="committed.lua", line=1, through_line=100),
+        dict(
+            path="committed.lua",
+            line=1,
+            through_line=40,
+            requested_start_line=1,
+            requested_through_line=200,
+            file_lines=100,
+            next_line=41,
+        ),
+    ]
+    assert source.page_start(windows, "committed.lua", 1, 100) == 41

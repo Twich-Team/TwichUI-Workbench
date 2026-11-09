@@ -191,7 +191,7 @@ class LocalProvider:
         program = packet.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1'
         intent_context = packet.get('coverage', {}).get('scope_plan_format') == 'readable-intent-v1' and schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse)
         # This is the app working packet BEFORE source packing. The actual wire
-        # byte/token/output ceilings below remain unchanged.
+        # byte/token/output ceilings below are enforced independently.
         prepared_limit = PROGRAM_PREPARED_INPUT if program or intent_context else BUG_PREPARED_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) else MAX_INPUT
         self.diagnostics.update(prepared_input_bytes=len(encoded.encode()), prepared_input_limit=prepared_limit)
         if len(encoded.encode()) > prepared_limit:
@@ -340,12 +340,15 @@ class LocalProvider:
                         chat_template_kwargs=dict(enable_thinking=True))
         program = context.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1'
         from workbench.planning_limits import PROGRAM_COMPLETION, PROGRAM_REASONING
+        # Intent investigation needs room for related source, under the actual
+        # tokenizer/capacity guard. Output/reasoning and saved consent stay unchanged.
+        expanded_input = program or context.get('coverage', {}).get('scope_plan_format') == 'readable-intent-v1'
         completion_limit = PROGRAM_COMPLETION if program else 2600
         reasoning_limit = PROGRAM_REASONING if program else body['reasoning_budget_tokens']
         if program:
             body.update(max_tokens=completion_limit, reasoning_budget_tokens=reasoning_limit)
         encoded_body = json.dumps(body, separators=(',', ':')).encode()
-        request_limit = PROGRAM_INPUT if program else BUG_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) else MAX_INPUT
+        request_limit = PROGRAM_INPUT if expanded_input else BUG_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) else MAX_INPUT
         if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) and self.request_packer is not None:
             def encode_context(outgoing):
                 envelope = dict(body)
@@ -405,7 +408,7 @@ class LocalProvider:
                 counts = transport.context_budget(secret, body)
                 count, capacity = counts.get('prompt_tokens'), counts.get('context_tokens')
                 if (type(count) is not int or type(capacity) is not int or count < 1
-                        or capacity < 4096 or count > min(26000 if program else 22000, capacity-completion_limit-(512 if program else 1024))):
+                        or capacity < 4096 or count > min(26000 if expanded_input else 22000, capacity-completion_limit-(512 if program else 1024))):
                     raise PlanningUnavailable('Local context exceeds the verified planning bound; no generation started.',
                                               'context_budget')
                 self.diagnostics.update(context_prompt_tokens=count, context_capacity_tokens=capacity)

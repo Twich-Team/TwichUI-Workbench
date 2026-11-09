@@ -782,9 +782,10 @@ def test_private_corrective_context_is_fitted_before_http_bound(monkeypatch):
 
 
 @pytest.mark.parametrize('count,allowed',[(24543,True),(26000,True),(26001,False),(29000,False)])
-def test_program_working_set_uses_exact_verified_context_capacity(count,allowed):
+@pytest.mark.parametrize('profile',['program','intent'])
+def test_program_working_set_uses_exact_verified_context_capacity(count,allowed,profile):
     from workbench.bug_investigation_stage import InvestigationResponse
-    packet=dict(coverage=dict(reproducer_format='lua-phases-v1'),files=[dict(path='!!!TwichUI/Example.lua',
+    packet=dict(coverage=({'reproducer_format':'lua-phases-v1'} if profile=='program' else {'scope_plan_format':'readable-intent-v1'}),files=[dict(path='!!!TwichUI/Example.lua',
         excerpts=[dict(line=1,text='local a = 1\n'*3500)])])
     calls=[]
     class Transport:
@@ -792,11 +793,11 @@ def test_program_working_set_uses_exact_verified_context_capacity(count,allowed)
         def models(self,_):return MODEL
         def context_budget(self,_,body):
             calls.append('count')
-            assert body['max_tokens']==6144 and body['reasoning_budget_tokens']==3072
+            assert body['max_tokens']==(6144 if profile=='program' else 2600) and body['reasoning_budget_tokens']==(3072 if profile=='program' else 1024)
             return dict(prompt_tokens=count,context_tokens=32768)
         def read(self,request,limit):
             calls.append('generate')
-            assert len(request.data)<=131072 and limit==65536
+            assert len(request.data)<=131072 and limit==(65536 if profile=='program' else 24000)
             return json.dumps(dict(id='controlled-full-source',model=MODEL,
                 usage=dict(prompt_tokens=10,completion_tokens=5,total_tokens=15),choices=[
                     dict(finish_reason='stop',message=dict(content=json.dumps(dict(

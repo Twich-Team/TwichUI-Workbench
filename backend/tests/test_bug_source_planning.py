@@ -38,7 +38,8 @@ def scripted(monkeypatch, answers):
 
             def read(self, request, limit):
                 program=packet.get('coverage',{}).get('reproducer_format')=='lua-phases-v1'
-                assert len(request.data) <= (131072 if program else 65536) and limit == (65536 if program else 24000)
+                expanded=program or packet.get('coverage',{}).get('scope_plan_format')=='readable-intent-v1'
+                assert len(request.data) <= (131072 if expanded else 65536) and limit == (65536 if program else 24000)
                 system = json.loads(request.data)['messages'][0]['content']
                 from workbench.bug_plan_review import ReviewResponse
                 from workbench.bug_investigation_stage import InvestigationResponse

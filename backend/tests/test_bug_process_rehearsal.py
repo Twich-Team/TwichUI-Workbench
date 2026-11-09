@@ -310,7 +310,8 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 return dict(prompt_tokens=8000, context_tokens=32768)
             def read(self, request, limit):
                 program=packet.get('coverage',{}).get('reproducer_format')=='lua-phases-v1'
-                assert len(request.data)<=(131072 if program else 65536) and limit==(65536 if program else 24000)
+                expanded=program or packet.get('coverage',{}).get('scope_plan_format')=='readable-intent-v1'
+                assert len(request.data) <= (131072 if expanded else 65536) and limit == (65536 if program else 24000)
                 content=answer
                 from workbench.bug_investigation_stage import InvestigationResponse
                 from workbench.bug_intent import Response as IntentResponse

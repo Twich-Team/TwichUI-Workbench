@@ -179,6 +179,25 @@ def unread_start(windows, path, start, end):
     return first if first <= end else start
 
 
+
+def page_start(windows, path, start, end):
+    """A repeated paged read advances even when all lines exist in the disk cache.
+
+    Cached knowledge is not proof the provider saw a whole range in one request.
+    Old receipts keep their original pagination interpretation during verification.
+    """
+    first=unread_start(windows,path,start,end)
+    if first!=start:
+        return first
+    for window in reversed(windows):
+        if (window['path']==path and window.get('requested_start_line')==start
+                and min(window.get('requested_through_line',end),window.get('file_lines',end))==end):
+            following=window.get('next_line')
+            if type(following) is int and start<following<=end:
+                return following
+            break
+    return start
+
 def verify_packet(initial, supplied):
     if (set(supplied) - set(initial) - {'inspection_windows','inspection_searches','inspection_focus'}
             or supplied.get('base') != initial['base'] or supplied.get('policy_sha256') != initial['policy_sha256']
@@ -229,8 +248,11 @@ def verify_packet(initial, supplied):
                 raise ValueError('The source continuation metadata changed.')
             if 'requested_start_line' in window:
                 requested = window['requested_start_line']
+                pager=page_start if window.get('pagination_version')==2 else unread_start
+                if ('pagination_version' in window and (type(window['pagination_version']) is not int or window['pagination_version']!=2)):
+                    raise ValueError('The source pagination version changed.')
                 if (type(requested) is not int or not 1 <= requested <= start
-                        or start != unread_start(windows[:index], window['path'], requested,
+                        or start != pager(windows[:index], window['path'], requested,
                                                  min(wanted, len(lines)))
                         or window.get('cached_prefix_through_line') != (start-1 if start > requested else None)):
                     raise ValueError('The cached source prefix changed.')
@@ -275,7 +297,7 @@ def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_bu
         if not 1 <= request.start <= request.end or request.start > len(lines):
             raise ResponseValidationError('The requested source lines are outside the committed file.',
                 ['inspection', index, 'end'], f'committed line range 1..{len(lines)}', request.end)
-        first = unread_start([*packet.get('inspection_windows', []), *windows], request.path,
+        first = page_start([*packet.get('inspection_windows', []), *windows], request.path,
                              request.start, min(request.end, len(lines)))
         end = min(request.end, first+page_lines-1, len(lines))
         allowance = (result_budget-total)//max(1, len(requests)-index)
@@ -294,7 +316,7 @@ def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_bu
         text = '\n'.join(selected_lines)
         end = first+len(selected_lines)-1
         total += len(text)
-        window = dict(line=first, through_line=end, text=text,
+        window = dict(line=first, through_line=end, text=text,pagination_version=2,
                       requested_start_line=request.start,
                       cached_prefix_through_line=first-1 if first > request.start else None,
                       requested_through_line=request.end, file_lines=len(lines),

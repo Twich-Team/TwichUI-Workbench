@@ -1,3 +1,32 @@
+## CURRENT73/8a62dd2 — November9 17:44UTC, vendor attempt settled; pagination/capacity correction verified
+
+Same original report latestattempt42e9ce2b... settled7COMPLETE local responses128738tokens;
+request8 NOTsent, context packing refused. Total48COMPLETE responses890875tokens retained,
+no unknown/replayed execution. No usable vendor plan/addon scope or run approval. Observer
+13682ended with exact failure in real-relocated-renewal.jsonl/task snapshot. The bounded
+settle-paging-loop observer was closed after terminal state; it made NO provider toggle
+(model-policy-owned-paging-stop.json absent). ALL saved provider/fallback values unchanged.
+Maintenance NEW admissions still OWNED PAUSED; hash-bound supported resume required later.
+
+Confirmed cached full ranges could repeatedly display first partial page, preventing the
+provider receiving a requested tail. New versioned pagination advances actual explicit
+page receipts; legacy metadata verified unchanged. Related required source also exceeded
+legacy65536envelope. Intent input now uses supported131072request bound and exact local
+prompt<=26000, additionally capacity-output-margin guarded. Output2600/reason1024 and
+saved consent6144maximum remain unchanged. No token ceiling or provider allowance claim.
+
+227affectedtests/static/contracts/types/build/migrations and2confined controlled native
+API/worker/browser workflows pass. Recorded7REALresponses replayed with controlled output
+and ACTUALlocaltokenizer:8requests78335..84674bytes/20991..23024prompttokens, all fit32768
+context with existing margins; ZEROgenerationcalls/DBchanges. Latest48response-state
+recovery assembly PASSES:132windows16files13searches/81480bytes/22363actualprompttokens,
+zero generation/DBchanges. Fixes verified in root;73installed unchanged pending cutover.
+Next: seal/install verified source, normal SAME-intake Qwen-only continuation, usableplan
+for genuine owner review, restart/history/model/network checks and maintenance restoration.
+Standing autonomous authority continues; no campaign caps/engineering renewal. Preserve
+all6priorresults, credentials, unknown historical usage, source/billing/network/publication
+safeguards and actual independent checking. Do not call supporting repairs task recovery.
+
 ## CURRENT73/8a62dd2 — November9 17:29UTC, original vendor task continuation RUNNING
 
 73/8a62dd2 installed with all source/seal/latest-history/network/browser/model/auth
