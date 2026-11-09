@@ -27,7 +27,7 @@ in isolated copies; correctness checks gate the checked result, not the first ed
 | Choice | Controlled evidence | Real evidence |
 |---|---|---|
 | Codex alone | Passing | **Passed** complete regression journey on56, revalidated without replay for57; also accepted real Codex flight-path repair on57. |
-| Qwen alone | Passing | Plan completed; full real case running. Not yet a pass. |
+| Qwen alone | Passing | **Passed** real planning, separately approved execution, checked regression patch and model/auth restoration on57 at04:13 UTC. |
 | Codex first → Qwen | Passing | Pending real case. Only unavailable/reserve before generation. |
 | Qwen first → Codex | Passing | Pending real case. Only connection failure before generation. |
 
@@ -36,7 +36,7 @@ route failure, current-master learning, later refresh, conservative missing data
 per-GUID isolation and saved restoration in a fresh Lua process passed independently.
 All167addon tests pass. Full app restart preserved320rows and the result/patch.
 Offline game simulation is not in-game acceptance; no live addon installation or PR.
-Only1/4 supporting provider cases is accepted, not4controlled passes counted asreal.
+Only2/4 supporting provider cases are accepted, not4controlled passes counted asreal.
 
 ## Billing and accounting
 
@@ -58,8 +58,12 @@ only after actual capabilities, recovery and late-result isolation are verified.
 
 ## Still unfinished
 
-Finish Qwen-only and both real fallback journeys, durable closeout/cleanup and a
-subsequent ordinary submission. Current everyday scope is existing Lua regression
+Finish both real fallback journeys, durable closeout/cleanup and a
+subsequent ordinary bug demonstration. A fresh ordinary Qwen regression task
+submitted after the flight-path result did complete through the normal browser;
+two distinct ordinary bug journeys, code/test revision and restart pass separately
+with controlled providers and actual confinement. These do not claim a second
+real-provider bug repair. Current everyday scope is existing Lua regression
 coverage and eligible offline Lua bug repairs with ordinary discovery/review/run/
 checking. Features, general inspection, external simulator integration, authorized
 PR delivery and broader roadmap are not complete. No campaign caps/routine renewals

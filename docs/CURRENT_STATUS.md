@@ -69,6 +69,9 @@ proof. Complete suites are being repeated on the correction; this improvement is
 
 Next: verify/install the preparation improvement and finish both real fallback cases, demonstrate a subsequent
 ordinary submission, verify final cleanup/restoration and leave the working build.
+The subsequent ordinary Qwen regression task completed after the bug result.
+Two ordinary bug journeys/restart also pass with controlled providers and actual
+confinement on development candidatef9ff5ba; this is not a second real-provider bug.
 Broader features, general inspections, simulator integration and authorized draft
 PR delivery remain unfinished. A8 and the full initial product are NOT complete.
 Styling/full requirements audit follow the functional gate; neither is a substitute.

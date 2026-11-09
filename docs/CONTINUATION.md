@@ -116,14 +116,32 @@ Private reference now created0600 independent of umask. First native observer
 misread flat usage telemetry; its failure retained, source preparation reused
 without repeating it; final proof completed on final executable sources.
 Focused41passed; check/contracts/types/build/ruff/migrations passed. Complete
-backend/frontend `/tmp/wb-control-reuse-complete-test.log` active (tool49783).
+backend/frontend `/tmp/wb-control-reuse-complete-test.log` active (historical failed tool49783; corrected tool82822).
 Initial candidate dd44d7f was staged/sealed but NEVER activated. Full suite
 9failed/1859passed/8skipped exposed that source-retirement check. Corrected reuse
 validates frozen evidence/committed source, not the intentionally deleted disposable
 preparation copy. Regression/source tampering remain denied. Corrected focused64
 pass; actual confinement R/development-control-reuse/corrected-source/native-result.json
-passes with source clone removed:17original checks then1fresh boundary. New
-complete suite and opt-in four-case browser still required before activation.
+passes with source clone removed:17original checks then1fresh boundary. Corrected candidatef9ff5ba9128279b7eecc9d06f108ed844324f72a staged but NOT active:
+R58=C/outcome-f9ff5ba; S58=S.parent/everyday-outcome-f9ff5ba; tree
+b59f41096f0df621a9775bf7839ec63e56216e0f; seal
+43b2d354b15783a21f571b11c8f3eca2ce36aae76c1f4b9708133a14a8a2059e.
+Full `/tmp/wb-control-reuse-corrected-complete.log` running(tool82822).
+Four controlled provider/browser cases pass111.11s, final native separate API/worker/
+browser two-bug/revision/restart checks pass2/4deselected63.57s:
+`/tmp/wb-control-reuse-native-process-delegated.log`. Initial native launch lacked
+WORKBENCH_CG_ROOT and correctly held; relaunched via R58/native-process-launch.py
+in dedicated delegated user unit. No application correction/bypass needed for that
+launcher mistake. Check/contracts/static/build/migrations pass; source-proof verifies
+464exact tracked files, pinnedCLI, auth metadata and owner documents. No cutover
+until full suite passes and preflight/history/model/network gates are fresh.
+R58/revalidate-prior-real-evidence.py is prepared for read-only POST-cutover
+canonical recipe/code compatibility and evidence-only case pointers; NEVER execute
+new provider calls for already successful flight/Codex/Qwen cases. New normal
+R58/driver-case.sh uses sealed installed driver, then remaining fallback cases.
+Original337row history captured at R58/history-forward-before.json.
+R58 files copied from57 and adapted; verify post-install assertion revision58
+and normal rollback pointers. No preflight-ok/offline-verification yet.
 Qwen is now settled, so a verified future candidate may cut over normally.
 Any future installation needs normal verified lineage/history/network/rollback
 gates and updated real-evidence compatibility; preserve successful cases, do not
