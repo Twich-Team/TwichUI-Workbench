@@ -19,12 +19,14 @@ def enabled(spec):
     return isinstance(spec,dict) and spec.get('repair_cycle')=='scoped-repair-v1'
 
 
-def oracle(focused_test):
+def oracle(focused_test, api_contracts=None):
     if not re.fullmatch(r'tests/test_[A-Za-z0-9_-]+\.lua',focused_test):
         raise ValueError('An existing focused Lua test is required')
     # A real generic assertion runner, not a prewritten addon reproducer/solution.
     # It gains task-specific assertions only when the coding agent adds them.
-    return ("local ok, failure = xpcall(function() dofile("+json.dumps(Path(focused_test).name)+") end, debug.traceback)\n"
+    from workbench.api_mock_contract import guard
+    return ((guard(api_contracts) if api_contracts is not None else '')+
+            "local ok, failure = xpcall(function() dofile("+json.dumps(Path(focused_test).name)+") end, debug.traceback)\n"
             "if not ok then io.write(tostring(failure), '\\n') end\n"
             "io.write('WB_BEHAVIOR bug-reproducer ', ok and 'PASS' or 'FAIL', '\\n')\n"
             "if not ok then os.exit(1) end\n")
@@ -46,7 +48,7 @@ def readiness(runtime):
         baseline_sha256=sha((runtime.root/'fresh-baseline-suite.json').read_bytes()),
         boundary_sha256=sha((runtime.root/'boundary-proof.json').read_bytes()))
     if (value!=expected or not enabled(runtime.recipe)
-            or runtime.oracle_source.read_text()!=oracle(runtime.recipe['focused_test'])
+            or runtime.oracle_source.read_text()!=oracle(runtime.recipe['focused_test'], runtime.recipe.get('api_contracts'))
             or not suite_inventory(baseline,runtime.expected_suite())
             or not boundary.get('checks')
             or any(c.get('status')!='pass' or c.get('rc')!=0 or c.get('usage',{}).get('cgroup_removed') is not True

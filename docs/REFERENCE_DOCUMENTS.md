@@ -40,3 +40,6 @@ Other disclosure/write/billing/network/publication safeguards remain unchanged.
 OWNER_FLIGHT_PATH_PERSISTENCE_20261108.md is the later behavior decision for the
 existing flight-path task: persistent per-character knowledge, unknown is not absence,
 reliable observation reconciliation and unrelated-data preservation. No extra authority.
+
+[Everyday use](EVERYDAY_USE.md) describes the supported installed workflow; consult
+CURRENT_STATUS for actual acceptance and unfinished work. It is not new authority.

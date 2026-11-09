@@ -83,7 +83,7 @@ def validate(spec):
             if (not enabled(spec) or spec['verification_profile']!='lua-offline-bugfix-v1'
                     or spec['read_paths']!=intent.plan.read_paths or spec['contract']['paths']!=intent.plan.writable_paths
                     or spec['focused_test']!=intent.plan.focused_test or spec['contract']['base']!=intent.base
-                    or spec['oracle_sha256']!=hashlib.sha256(oracle(spec['focused_test']).encode()).hexdigest()):
+                    or spec['oracle_sha256']!=hashlib.sha256(oracle(spec['focused_test'],spec.get('api_contracts')).encode()).hexdigest()):
                 raise ValueError('Scoped repair recipe differs from the approved intent or fixed assertion runner')
     elif (
         not isinstance(controls, dict)
@@ -123,7 +123,7 @@ def load(root):
     return spec
 
 
-def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity, prepared=None, repair_cycle=False):
+def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity, prepared=None, repair_cycle=False, api_contracts=None):
     """Compile task data from the actual applied review, never a task registry.
 
     Oracle semantics and bounded read selection still require trusted preparation.
@@ -185,7 +185,7 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         if repair_cycle:
             from workbench.repair_cycle import oracle as assertion_runner
             plan=intent['plan']
-            if (prepared is not None or oracle!=assertion_runner(plan['focused_test'])
+            if (prepared is not None or oracle!=assertion_runner(plan['focused_test'],api_contracts)
                     or behavior_id!='bug-reproducer' or read_paths!=plan['read_paths']
                     or focused_test!=plan['focused_test']):
                 raise ValueError('Scoped repair attempt differs from the approved behavior/source scope')
@@ -231,6 +231,15 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         if repair_cycle:
             spec['repair_cycle']='scoped-repair-v1'
             spec['approved_intent']=reviewed['bug_intent']
+            if api_contracts is not None:
+                from workbench.api_mock_contract import source_support
+                actual,references=source_support(root,base,read_paths)
+                if actual!=api_contracts:
+                    raise ValueError('Mock API contracts differ from the pinned source-matched declarations')
+                spec['api_contracts']=actual
+                # Public API evidence used in planning must also reach the coding
+                # agent. It supplies signatures/types, never the addon repair.
+                spec['instruction']+='\nUntrusted pinned public game API declarations: '+json.dumps(references,ensure_ascii=True)
         spec['source_context']=[]
         for path in read_paths:
             raw=regression_preparation.git(root,'show',base+':'+path).decode()

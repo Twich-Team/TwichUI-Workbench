@@ -1,3 +1,75 @@
+## API-shaped verification implemented; real revision still pending — Nov9 02:42 UTC
+
+Development now supplies the same pinned public API declarations to both coding
+providers' repair instructions, and freezes source-matched return-field contracts
+in new scoped-repair recipes. The post-edit native assertion runner wraps test
+client API mocks and omits fields absent from declared array-record structures.
+It preserves partial/failed observations, characters, nil/multiple returns and
+client inheritance; it invents no missing values or addon solution. Legacy frozen
+records remain readable unchanged. This does NOT add a pre-implementation gate.
+
+R56/documented-api-review/guarded-existing-model-tests.json proves the actual old
+model patch's own tests FAIL under the new check at test_nav.lua575. No new model
+call or addon-source edit. 109affected checks pass; 10API-contract tests include
+actual Lua mocks and public-reference hash tamper; 22final guard/assertion checks
+pass. Two actual confined separate-process API/worker/browser repair journeys
+pass63.73s (CONTROLLED providers), including feedback/revision/restart and another
+ordinary fixture bug. Full revised application suite is running; inspect
+/tmp/wb-api-contract-full-test.log. Earlier1823backend/25frontend and static pass
+were on84fc20c before this API work and do not certify the final revision. Public
+client source confirms globalGetTaxiMapID is used by the pinned flight-map UI;
+missing generated declaration was NOT treated as denial. Exact URLs inR56/
+documented-api-review/public-client-usage-review.json. Canonical actual-scope
+recipe rebuild succeeds, unchanged8reads/2writes/150lines,19,140instructionchars,
+4,439oraclechars. No private-source disclosure expansion.
+
+Installed still56/bc9bdfb. Real codex-once case423cb159... passed independent
+preparation; browser Run9a9cd43f-d3c8-47e1-815d-95f92af7c390 accepted02:31:14.
+Session ACTIVE preparing a fresh isolated runtime, no implementation model turn
+yet at lastread. It currently repeats the four certified control suites during
+run preparation; long but observed healthy progress. Driver44692 remainsactive.
+Do NOT replay it or cutover while its owned execution is active. Finish settlement
+first. Other3real supporting cases and corrected flight-path acceptance remain
+unfinished. Bug receipt nowendsacceptance-reopened; prioraccepted row preserved.
+Do not count that old review as a valid first repair. New code mustbe checkpointed,
+verified/sealed before deployment; then use normal fresh browser task/scope/run
+bindings with the recorded API failure as feedback, never manually supply a patch.
+A new failed semantic check is a corrective purpose, not replay of a successfulcase.
+[Everyday use](EVERYDAY_USE.md) explains supported next-bug entry and limitations.
+No owner engineering decision or access needed; continue all agreed outcome work.
+
+## Correction: flight-path acceptance reopened for API-contract failure — Nov9 02:29 UTC
+
+A real Codex-authored149line patch exists, native checks/full167suite passed and
+history/result survived restart. BUT final flight-path acceptance is withdrawn.
+The independent fixture incorrectly returned `state` from GetTaxiNodesForMap.
+Pinned Forever TaxiMapDocumentation declares that function returns MapTaxiNodeInfo
+(no state); current-flight-master states belong to GetAllTaxiNodes/TaxiNodeInfo.
+Correctly separated documented API mocks make the ACTUAL frozen patch fail its
+first positive learning assertion. R=.../delivery-campaign-7b5963a/outcome-bc9bdfb;
+R/documented-api-review/result.json andcandidate-result.json preserve exact proof.
+The prior checker, review and native CHECKED database result remain historical,
+not proof of a valid finished repair. Ledger removes completed-case projection,
+retains141known Codexturns andall historical usage/unknowns, appendsreopening.
+No provider replay, manual addon fix or live-game change occurred.
+
+Principal connected defect: planning had the public API declarations, but the
+implementation prompt omitted them, and candidate-created mocks could invent
+return fields. Implement bounded public API evidence in repair context and a
+post-edit generic check that strips undeclared fields from mocked API array records.
+This is after-edit validation, NOT restoration of a pre-edit artifact gate.
+Then renew normal task/scope/run bindings through supported UI feedback; preserve
+prior patch/result/history and let Workbench's model author the actual correction.
+No owner engineering permission is needed. Do not call the first repair complete.
+
+Codex-only supporting case423cb159... has a real completed plan and healthy owned
+independent control preparation; let it continue. Other3real cases not yet run;
+no supporting case counted aspassed yet. Fullbackend/frontend run justpassed on
+84fc20c; new API-contract work invalidates relevant checks and mustbe verified.
+Installed56 remainsbc9bdfb; newprojection84fc20c is NOTinstalled. Existing access,
+billing/disclosure/verification/source/publication/recovery protections unchanged.
+Earlier optimistic acceptance statement below is explicitly superseded here.
+
 ## Real flight-path patch independently checked and accepted — Nov9 02:17 UTC
 
 **Actual product milestone:** real signed-in Codex, through the installed Workbench

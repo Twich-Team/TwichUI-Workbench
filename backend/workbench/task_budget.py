@@ -179,7 +179,7 @@ def _reviewed_spec(c, ref, runtime):
     actual = from_review(c, ref, oracle=runtime.oracle_source.read_text(),
                         behavior_id=spec['behavior']['id'], read_paths=spec['read_paths'],
                         focused_test=spec['focused_test'], identity=spec['identity'],prepared=prepared,
-                        repair_cycle=bool(spec.get('repair_cycle')))
+                        repair_cycle=bool(spec.get('repair_cycle')),api_contracts=spec.get('api_contracts'))
     if actual != spec:
         raise ValueError('Certified recipe differs from the current reviewed contract')
     return actual

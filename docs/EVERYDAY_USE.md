@@ -1,0 +1,52 @@
+# Using the installed Workbench
+
+Current demonstration and acceptance status: [CURRENT_STATUS](CURRENT_STATUS.md).
+This guide describes the supported workflow, not completion of the full product.
+
+Open `http://127.0.0.1:9487` on the server, or `https://10.0.0.9:9487` on the
+trusted home LAN. Each browser device must trust the existing Workbench server CA
+for HTTPS. This is server identification, not a client certificate or dashboard
+password. Any device on the trusted subnet has operator access.
+
+## Report the next supported bug
+
+1. Choose **Create a task**, then **Investigate a bug**.
+2. Describe what happens, what you expected, and what triggers it. Include a Lua
+   error if there is one. You do not need to name files or register a new task type.
+3. Choose the provider policy and review its consent. Local Qwen keeps the source
+   local. Codex additionally requires applicable external-source permission and
+   included-allowance eligibility; choosing it does not expand disclosure rights.
+4. Answer any actual behavior question. Review the proposed repair scope and
+   behavior criteria before approving the plan.
+5. Review the separate run offer and limits. Approval permits an attempt in an
+   isolated copy; it does not mean the repair is already correct.
+6. Workbench can develop code and tests together and revise from check feedback.
+   A checked result requires the independent checks, including regression against
+   the original code. Open the saved result to inspect the patch and check details.
+
+The supported repair route is offline Lua work that Workbench can investigate and
+check in the committed addon and its existing test framework. Source discovery is
+performed anew for each report; it is not limited to the flight-path acceptance
+files. Reading relevant code does not grant permission to edit it.
+
+Results stay local. They do not modify the installed game addon, publish a change,
+or create a PR. Offline Lua/game-API fixtures do not establish in-game correctness.
+Features, general inspections, external simulators and broader automation remain
+unfinished; their requirements have not been waived.
+
+## Providers and recovery
+
+The app offers Qwen alone, Codex alone, and an explicitly enabled switch in either
+direction when the first provider is unavailable **before generation**. See the
+current readiness record for which real-provider cases have passed. Partial or
+uncertain generated work does not authorize a cross-provider replay.
+
+Codex uses the existing signed-in subscription connection with the recorded
+included-allowance policy. Eligibility reads are snapshots, not a verified per-turn
+billing lock. API keys, purchases, extra credits and automatic reload are not used
+or authorized. Missing eligibility information holds the operation.
+
+Reloading a result or restarting the app must preserve it without running the
+task again. Failed and uncertain attempts remain in history. A different scoped
+repair attempt needs valid current task/run bindings; ordinary development of
+Workbench itself does not need renewed engineering permission.
