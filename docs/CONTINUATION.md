@@ -1,3 +1,40 @@
+## CURRENT71/c364075 REAL QWEN RUN — November9 16:47UTC
+
+Installed71/c364075 exactsource/seal/history/network/model/auth gates PASS. Six prior
+real checked results canonically revalidated with ZEROreplay. Normal same-report
+read-only browser continuation jobf0aff7c6-07dd-4918-ade4-412db76bda05,
+commandbf03a699-6acf-439c-9116-393fc03e533c, intake2dc5b8ba-2d22-4c2c-
+9f90-3bd58d29d5fd RUNNING. Observer40008 logs real-explicit-renewal.jsonl in
+private vendor-planning-recovery-20261109; config live-explicit-renewal-binding.json
+and browser-observer/renew-explicit.mjs. Do NOT replay healthy/uncertain activity.
+No vendor plan/implementation or addon scope/run decisions exist yet.
+
+Model findings on70 repeatedly said literal search was needed but emitted path
+reads.71 local transport now uses explicit reads/searches fields and examples,
+with original strict semantic codec after usage collection (same strict forms
+already used by Codex). No interpretation of prose as a tool call or invented plan.
+171affected tests,2native confined API/worker/browser controlled workflows, static/
+contracts/build/migrations, full33response settled-state/6request capture pass.
+Original malformed/conflicting transport keeps complete usage/exact action errors.
+Initial native failures disclosed: mapping before accounting lost action diagnostics;
+fixed common planner mapping. Parallel Vite build raced native fixture dist; corrected
+serial build→native checks. Installed stable app separate from dev and unaffected.
+
+70 oldattemptf596dfed... was safely settled via normal temporary provider toggle
+at complete-content boundary:9COMPLETE responses165107tokens. Total33COMPLETE
+incident responses617608tokens known; oldNULLs/unknown historical incidents unchanged.
+Actual model idle/auth verified, no quarantine/uncertain response needed. ALL saved
+provider/model/fallback VALUES restored; revision8→9→10 remains in history. No provider
+switch, paid call, external vendor source or addon decision. Stop/restore proofs in
+private directory. Maintenance NEW admissions STILL OWNED PAUSED under A11: restore
+ONLY hash-bound supported opsctl resume after operation settlement. Do not forget.
+
+Need realQwen actualsearch→usableplan/genuinequestion, then full settled4service restart,
+history/result/model/auth continuity, maintenance admission restoration, final desktop/
+phone inspections and accurate report/checkpoint. Valid addon plan needs genuine owner
+review; Workbench engineering authority is not addon scope/run approval. Continue, not
+checkpoint stop; no superseded campaign caps or routine renewals apply.
+
 ## CURRENT SETTLED VENDOR TASK / EXPLICIT SEARCH PROTOCOL IN VERIFICATION — November9 16:41UTC
 
 Installed70/6e27933; root source has further UNCOMMITTED explicit local-wire changes.

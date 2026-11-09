@@ -1,3 +1,13 @@
+# Installed explicit source-search protocol; original report running with real Qwen
+
+71/c364075 verified install preserves same request/history/sixcheckedresults/network.
+The local model previously described literal searches while emitting path reads. New
+strict explicit read/search transport passed171affected tests and2confined controlled
+process/browser workflows plus actual-state capture; real same-report verification
+is now running. No vendor plan or addon change yet. Prior33complete responses617608
+known tokens retained; model preference VALUES restored, fallbackOff. Current observer
+and mandatory maintenance-admission restoration are in CONTINUATION. No owner renewal.
+
 # Vendor recovery: latest repeating operation settled; explicit search protocol being verified
 
 Installed70/6e27933. No vendor plan or patch yet. The real model repeatedly described
