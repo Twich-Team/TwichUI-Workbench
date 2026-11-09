@@ -1,3 +1,14 @@
+# Styled build installed — November 9, 2026, 12:53 UTC
+
+Installed61/e7469cd passed cutover/history/network/service checks. The selected
+leather interface, four main routes, shared task entry and inline results are live.
+The accepted flight-path repair and all four real-provider cases remain preserved.
+A fresh Qwen coverage task has completed planning and received its separate plan
+approval through the styled app. Native control preparation is running; no new
+implementation or completed result is claimed yet. CONTINUATION binds current
+receipts/observer session and next actions. No owner action or renewed authority
+is needed. Full broader product remains unfinished. Prior status below is historical.
+
 # Styling delivery in progress — November 9, 2026
 
 The accepted app remains installed at60/b067449. Styled development is under

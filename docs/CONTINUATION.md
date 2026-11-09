@@ -1,3 +1,59 @@
+## Installed styled application — November 9, 2026, 12:53 UTC
+
+Deployment61/e7469cdd25b411204784472dc353445206b1f33f is installed and running.
+Tree75a8e625f2e18e96f37f672dd22c923437d37b4d;
+seal34995dbb3bfea8070f3787b3b74fdbbeb14dc984a62b3a69f0db5082e626e5f7.
+R=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-e7469cd;
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-e7469cd;
+V=/home/rich/.local/share/TwichUI-Workbench/styled-interface-20261109.
+All4services ACTIVE/ENABLED, same addresses/CA/subnet/internal isolation; scoped
+cutover,372-row history copies/fingerprints, four later-rejection files and normal
+reads passed. Baseline60/b067449 retained for recovery. All5 prior REAL successes
+canonically revalidated without replay; original unknown accounting unchanged.
+R/offline-verification.json distinguishes full1909backend/32frontend, final55state/
+boundary checks,112default browser+2separate opt-ins,12visual,4controlled routes,
+and2actual confined process journeys. Default opt-in flags must not be applied to
+all legacy tests together (different fixture modes); failed configuration log retained.
+No source execution/provider/checker change. All493tracked packaged files, exact
+root owner documents, authmetadata and pinned CLI verified. Preview9187 closed;
+its copied372history unchanged. No source/addon publication or game install.
+
+FRESH REAL QWEN DEMONSTRATION ACTIVE — do not submit again.
+Intake784583e0-b2ec-40ea-b1c6-fc2a80af9d2c, map coverage beyond east edge,
+source1caf530; expected first TileAt(0,-18000) result65 vs64. Initial request and
+numeric clarification used normal UI. Real Qwen planning b9f1968f-3690-4f4d-bd65-
+d9a1add7bb11 COMPLETED; plan049e915f-5380-5632-a35d-539d90c3b1aa,
+binding6a602a3ff331d8de90ff77e40b188bfbb3aae6b7e5ac24b7d4d41f0976bb8aec.
+Separate delegated PLAN approvalc6c40dbd-eff4-49fb-b17e-857488e8f505 applied.
+No implementation/run approval yet. App-owned behavioral_preparationcbd615a8-
+1ee6-4522-bc6e-eb8827d01131 is running actual native controls/full suite. Original
+syntax/focused pass and original coverage-oracle failure are EXPECTED; active
+Lua test children/CPU advance. Do not mistake absence of a new JSON receipt while
+a suite runs for a hang. Watch bounded phase evidence and actual child activity.
+
+Tool session47335 runs V/browser-observer/styled-journey.mjs resume-1. It waits
+for fresh independent RUN review at V/resume-1-live-run-offer.json, then requires
+V/resume-1-live-run-offer-review.json with approved:true and binding equal offer
+fingerprint. Read the actual offer/scope/limits before writing that review. Local
+Qwen only, fallbackOff, existing test additive-only, no publication/live addon.
+Original driver was deliberately settled at its PLAN review handshake to reopen
+the current proposal after clarification. Its log/source/hash/false observer-review
+are retained; this was an automation-view correction, not provider failure. Resume
+reopened THE SAME task without submission/model replay or stale approval reuse.
+V/styled-journey-resume-1.jsonl, live-demonstration-resume-1.json bind exact driver.
+Initial source observer lacked configuration env; corrected read-only invocation
+revalidated5results; initial error retained. No application guard was weakened.
+
+Next: let healthy native controls finish; independently review new offer, approve
+through waiting normal browser driver, follow real Qwen implementation/checks to
+saved result. Safely diagnose ordinary failures without replaying uncertain work.
+Then confirm model/auth restoration, all history/results+later rejection across
+full4service restart, normal desktop/phone interactions/screenshots and both URLs.
+Record actual usage once, preserve source/recovery and commit concise closeout.
+No owner action needed. No old campaign caps or engineering renewal gates.
+Broader features/inspections/simulator/PR/global pause remain unfinished. No in-game,
+physical Safari or live Qwen bug-repair claim from this regression demonstration.
+
 ## Styled-interface delivery in progress — November 9, 2026
 
 Current owner assignment authorizes the selected frameless visual direction and
