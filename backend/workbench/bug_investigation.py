@@ -330,16 +330,18 @@ def report_coverage(original):
 
 
 def planning_request(packet, original, feedback):
-    from workbench.bug_intent import Response as IntentResponse
+    from workbench.bug_intent import Response as IntentResponse, scope_candidates
     from workbench.bug_program import RUNTIME_INTERFACE
     model=IntentResponse if packet.get('plan_review')=='source-grounded-intent-v1' else BugPlanningResponse
+    candidates = scope_candidates(packet) if model is IntentResponse else None
     return model, dict(
         purpose='investigate-addon-bug', base=packet['base'],
         **({'app_test_runtime':copy.deepcopy(RUNTIME_INTERFACE)} if packet.get('plan_review') in
            {'source-grounded-lua-v1','source-grounded-intent-v1'} else {}),
         **({'api_references':packet['api_references']} if 'api_references' in packet else {}),
         **({'declarations':packet.get('declarations',[])} if packet.get('plan_review') in {'source-grounded-lua-v1','source-grounded-intent-v1'} else {}),
-        files=[{k: v for k, v in item.items() if k not in ('git_blob', 'sha256')}
+        files=[{**{k: v for k, v in item.items() if k not in ('git_blob', 'sha256')},
+                **({'repair_scope_candidate':item['path'] in candidates} if candidates is not None else {})}
                for item in packet['files']],
         report=dict(title=original['title'], description=original['description'],
                     lua_error=original.get('lua_error', '')), owner_reply=feedback,

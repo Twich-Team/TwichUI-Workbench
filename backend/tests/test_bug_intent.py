@@ -68,3 +68,32 @@ def test_scope_cannot_broaden_writes_or_hide_missing_criteria_and_source(fault):
         return
     with pytest.raises(ValueError):
         bug_intent.bind(proposed,packet,{},'')
+
+
+@pytest.mark.parametrize('path,eligible', [
+    ('!!!TwichUI/discovered.lua', True), ('TwichUI_Settings/pages/Discovered.lua', True),
+    ('tests/test_discovered.lua', True), ('tests/harness.lua', False),
+    ('tests/fixtures/helper.lua', False), ('!!!TwichUI/libs/ThirdParty.lua', False),
+    ('!!!TwichUI/../outside.lua', False)])
+def test_new_inspection_can_propose_project_repair_but_cannot_promote_helpers(path, eligible):
+    packet = source()
+    packet['files'].append(dict(path=path,support_only=True,git_blob='d'*40,sha256='e'*64))
+    assert path not in bug_intent.scope_candidates(packet)
+    packet['inspection_windows'] = [dict(path=path,line=1,through_line=1,text='exact inspected code')]
+    assert (path in bug_intent.scope_candidates(packet)) is eligible
+    assert packet['files'][-1]['support_only'] is True  # No permission or historical metadata rewritten.
+
+
+def test_discovered_source_enters_fresh_bound_scope_not_an_execution_grant():
+    packet = source()
+    path = '!!!TwichUI/discovered.lua'
+    packet['files'].append(dict(path=path,support_only=True,git_blob='d'*40,sha256='e'*64))
+    packet['inspection_windows'] = [dict(path=path,line=1,through_line=1,text='exact inspected code')]
+    proposal = plan()
+    proposal['read_paths'][0] = proposal['writable_paths'][0] = path
+    intent = bug_intent.bind(proposal,packet,{},'')
+    assert intent.checks_prepared is False
+    assert bug_intent.validate_review(intent,{},'',packet) == intent
+    packet['files'][-1]['sha256'] = 'f'*64
+    with pytest.raises(ValueError):
+        bug_intent.validate_review(intent,{},'',packet)

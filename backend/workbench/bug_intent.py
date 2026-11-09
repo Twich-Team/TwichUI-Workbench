@@ -6,6 +6,7 @@ is complete. Independent original/candidate checking gates the checked result,
 not permission to attempt scoped edits. This module never runs code or grants access.
 """
 from typing import Annotated, Literal
+import re
 
 from pydantic import Field, model_validator
 
@@ -71,12 +72,31 @@ def review_digest(base, report_binding, source_binding, plan):
         report_binding=report_binding,source_binding=source_binding,plan=plan))
 
 
+def scope_candidates(packet):
+    """Proposal eligibility, never editing permission. Helpers remain read-only.
+
+    Initial keyword selection is navigation, not an immutable repair allowlist.
+    App-inspected ordinary project code/tests may enter a fresh bounded scope;
+    the normal owner scope/run decisions still grant actual write authority.
+    """
+    inspected = {w['path'] for w in packet.get('inspection_windows', [])}
+    result = set()
+    for item in packet['files']:
+        path = item['path']
+        if not item.get('support_only'):
+            result.add(path)
+        elif (path in inspected and re.fullmatch(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/test_[A-Za-z0-9_./-]+)\.lua', path)
+              and not any(p.startswith('.') for p in path.split('/'))
+              and not {'lib','libs','vendor'} & {p.lower() for p in path.split('/')}):
+            result.add(path)
+    return result
+
+
 def bind(plan,packet,original,feedback):
     """Validate actual committed source/write scope; retain every recorded requirement."""
     checked=Plan.model_validate(plan)
     files={f['path']:f for f in packet['files']}
-    if not set(checked.read_paths)<=files.keys() or any(
-            files[p].get('support_only') for p in checked.writable_paths):
+    if not set(checked.read_paths)<=files.keys() or not set(checked.writable_paths)<=scope_candidates(packet):
         raise ValueError('The proposed repair scope exceeds inspected source or writes a read-only dependency')
     report_binding=digest(dict(original=original,feedback=feedback))
     source_binding=digest([dict(path=p,sha256=files[p]['sha256'],git_blob=files[p]['git_blob'])
@@ -106,6 +126,8 @@ INSTRUCTIONS = (
     'Do not ask the owner to interpret APIs or locate code. An ambiguous observation does not prove a negative fact. '
     'Prefer a conservative testable scope that meets the explicit requirements without unsupported destructive inferences. '
     'No source editing, arbitrary tools, publication, billing changes or execution authority is granted by this response. '
+    'Files marked repair_scope_candidate may be proposed for a bounded repair after inspection, including relevant newly discovered project code and existing test files. '
+    'That mark is not permission to edit: investigation remains read-only and scope/run decisions are still required. Helpers and reference files stay read-only. '
     'A planned check is not a passed check. Missing code requires inspection, not an invented method or result.'
 )
 
@@ -113,7 +135,7 @@ INSTRUCTIONS = (
 def schema(files):
     result=Response.model_json_schema()
     paths=[f['path'] for f in files]
-    writes=[f['path'] for f in files if not f.get('support_only')]
+    writes=[f['path'] for f in files if f.get('repair_scope_candidate', not f.get('support_only'))]
     tests=[p for p in writes if p.startswith('tests/test_')]
     properties=result['$defs']['Plan']['properties']
     properties['read_paths']['items']={'type':'string','enum':paths}

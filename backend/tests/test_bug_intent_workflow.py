@@ -23,6 +23,48 @@ def scope():
         criteria=[dict(id='normalization',description='The actual function trims spaces and normalizes uppercase names.')],risks=[])
 
 
+@pytest.mark.usefixtures('installed')
+def test_followup_discovery_can_propose_new_existing_source_without_registration(client, headers, store, monkeypatch):
+    from test_bug_source_planning import scripted
+    from test_verification_profiles import git
+    root = enable_bugs(monkeypatch)
+    new_path = '!!!TwichUI/discovered.lua'
+    (root/new_path).write_text('local otherwise = 1\nreturn otherwise\n')
+    git(root, 'add', '.')
+    git(root, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid', 'commit', '-qm', 'Discovery fixture')
+    config=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
+    settings=json.loads(config.read_text())
+    settings['bug_plan_review']='source-grounded-intent-v1'
+    write_policy(config,settings)
+    from workbench import bug_investigation
+    original_context=bug_investigation.context
+    def initial_without_dependency(*args, **kwargs):
+        packet=original_context(*args, **kwargs)
+        packet['files']=[f for f in packet['files'] if f['path']!=new_path]
+        return packet
+    monkeypatch.setattr(bug_investigation,'context',initial_without_dependency)
+    proposed=scope()
+    proposed['read_paths'][0]=new_path
+    proposed['writable_paths'][0]=new_path
+    calls=scripted(monkeypatch,[
+        dict(finding='Inspect a relevant committed dependency before proposing it.',draft=dict(inspection=[dict(path=new_path,start=1,end=2)])),
+        dict(finding='A controlled diagnosis.',draft=dict(diagnosis=dict(cause='A controlled source finding.',evidence_paths=[new_path]))),
+        dict(finding='A fresh scope for genuine review, no editing permission.',draft=dict(plan=proposed))])
+    item=client.post('/api/intake',headers=headers,json=report()).json()
+    assert worker.tick(store)
+    item=client.get('/api/intake/'+item['id']).json()
+    assert new_path not in {f['path'] for f in calls[0]['files']}
+    discovered=next(f for f in calls[2]['files'] if f['path']==new_path)
+    assert discovered['support_only'] is True and discovered['repair_scope_candidate'] is True
+    wire_schema=bug_intent.schema(calls[2]['files'])
+    assert new_path in wire_schema['$defs']['Plan']['properties']['writable_paths']['items']['enum']
+    assert len(item['proposals'])==1 and not item['decisions'] and not item['tasks']
+    contract=item['proposals'][0]['task_contract']
+    assert new_path in contract['writable_paths'] and not contract['execution_authorized']
+    with store.connect() as c:
+        assert not c.execute(select(real_execution_grants)).first()
+
+
 def prepared_scope(client,headers,store,monkeypatch):
     enable_bugs(monkeypatch)
     config=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])

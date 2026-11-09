@@ -215,7 +215,7 @@ def context(packet, original, programs=()):
     dependencies=[]
     for _ in range(2):
         for declaration in module_rows:
-            refs=references[declaration['path']]
+            refs=references.setdefault(declaration['path'], set())
             if (declaration['names'] & refs or (declaration['export'] or declaration['registration']) and declaration['references'] & refs):
                 if declaration not in dependencies:
                     dependencies.append(declaration)

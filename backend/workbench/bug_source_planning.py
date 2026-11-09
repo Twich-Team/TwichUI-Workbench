@@ -15,7 +15,7 @@ from workbench.planning_response import Evidence, ResponseValidationError, wire_
 from workbench import bug_plan_review, bug_investigation_stage as stage
 
 REQUESTS = bug.INVESTIGATION_REQUESTS
-MAX_FILES = 12
+MAX_FILES = 24
 READ_CHARS = 45000
 WIRE_TEXT = 24000
 INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/[A-Za-z0-9_./-]+)\.lua')
@@ -291,7 +291,7 @@ def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_bu
         selected = next((f for f in packet['files'] if f['path'] == request.path), None)
         if selected is None:
             if len(packet['files']) >= MAX_FILES:
-                raise ValueError('The bounded investigation already selected twelve files.')
+                raise ValueError(f'The bounded investigation already selected {MAX_FILES} files.')
             item['excerpts'] = [window]
             packet['files'].append(item)
         windows.append(dict(path=request.path, sha256=item['sha256'], **window))

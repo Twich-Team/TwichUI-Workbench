@@ -159,6 +159,15 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     git(source, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@invalid',
         'commit', '-qm', 'Controlled long source read')
     native = os.environ.get("WB_PROCESS_NATIVE") == "1"
+    if reproduction_mode == 'source-grounded-intent-v1' and case_provider == 'local':
+        original_context = bug_investigation.context
+        def without_initial_client(*args, **kwargs):
+            packet = original_context(*args, **kwargs)
+            packet['files'] = [f for f in packet['files'] if f['path'] != CLIENT_SOURCE]
+            return packet
+        # Relevance search is only a starting point: the real source must be
+        # discovered through reads and enter a new reviewed scope normally.
+        monkeypatch.setattr(bug_investigation, 'context', without_initial_client)
     if native:
         from workbench.real_workspace import Runtime
         monkeypatch.setattr(trusted_preparation, "Runtime", Runtime)

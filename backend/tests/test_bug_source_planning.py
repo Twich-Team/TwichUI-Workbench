@@ -49,7 +49,11 @@ def scripted(monkeypatch, answers):
                 elif not program:
                     assert 'You may request app-owned read-only committed-source search or line inspection' in system
                 assert 'You have no tools' not in system
-                if not program and schema not in (ReviewResponse, InvestigationResponse):
+                from workbench.bug_intent import Response as IntentResponse
+                if schema is IntentResponse:
+                    assert 'Propose a clear bounded repair scope' in system
+                    assert 'No source editing, arbitrary tools, publication' in system
+                elif not program and schema not in (ReviewResponse, InvestigationResponse):
                     assert 'a read-only inspection request, a plan, a useful question, or a limitation' in system
                     assert 'Missing code is not a real-world question or a limitation' in system
                     assert 'no shell, editing, approval, external-tool or publication authority' in system
@@ -71,6 +75,24 @@ def inspection(path=PRODUCTION):
     return dict(finding='I need the exact committed implementation before proposing the check.',
                 plan=None, question=None, limitation=None,
                 inspection=[dict(path=path, start=1, end=1)])
+
+
+def test_investigation_reads_beyond_initial_selection_without_widening_write_scope(monkeypatch):
+    from workbench import bug_source_planning as source
+    from workbench.bug_evidence import InvestigationRead
+    import hashlib
+    packet=dict(base='pinned',files=[dict(path=f'!!!TwichUI/initial{n}.lua') for n in range(12)])
+    raw=b'local value = 1\n'
+    def committed(path, base):
+        return raw,dict(path=path,git_blob='b'*40,sha256=hashlib.sha256(raw).hexdigest(),support_only=True,excerpts=[])
+    monkeypatch.setattr(source,'committed',committed)
+    for n in range(12,24):
+        name=f'!!!TwichUI/followup{n}.lua'
+        windows,_,_=source.inspect(packet,[InvestigationRead(path=name,start=1,end=1)])
+        assert windows[0]['path']==name and packet['files'][-1]['support_only'] is True
+    with pytest.raises(ValueError,match='24 files'):
+        source.inspect(packet,[InvestigationRead(path='!!!TwichUI/beyond.lua',start=1,end=1)])
+    assert len(packet['files'])==24
 
 
 def missing_load():
