@@ -108,16 +108,36 @@ def advance(engine, path, action):
         parent.mkdir(mode=0o700, exist_ok=True)
         research = path.parent / 'reviewed-research'
         research.mkdir(mode=0o700, exist_ok=True)
-        if action == 'bug-setup':
+        if action in {'bug-setup', 'bug-scope-setup'}:
             fresh_controlled_source(path)
             policy_file(engine, parent)
             setup(path)
         os.environ.update(WORKBENCH_RESEARCH_ROOT=str(research / 'source'),
                           WORKBENCH_PREPARATION_CONFIG=str(parent / 'preparation.json'))
         adapter = BugPlanner(response())
-        if action == 'bug-setup':
+        if action in {'bug-setup', 'bug-scope-setup'}:
             with MonkeyPatch.context() as isolated:
                 enable_bugs(isolated)
+            if action == 'bug-scope-setup':
+                config = parent / 'preparation.json'
+                value = json.loads(config.read_text())
+                value['bug_plan_review'] = 'source-grounded-intent-v1'
+                config.write_text(json.dumps(value))
+                config.chmod(0o600)
+        elif action == 'bug-scope-tick':
+            from workbench import bug_intent
+            from workbench.planning_provider import LocalProvider
+            from test_bug_intent_workflow import scope
+
+            def generated(self, packet, schema, expected_model):
+                assert schema is bug_intent.Response
+                self.diagnostics = dict(actual_model=expected_model, generation_state='finished',
+                    accounting_state='complete', finish_reason='stop', request_completion_limit=6144,
+                    usage=dict(units='tokens', values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))
+                return dict(finding='The inspected function omits normalization.',plan=scope()), expected_model, 'local'
+
+            with patch.object(LocalProvider, 'generate', generated), patch.object(trusted_preparation, 'Runtime', ControlledPreparer):
+                assert worker.tick(engine)
         elif action == 'bug-tick':
             with patch.object(trusted_preparation, 'Runtime', ControlledPreparer):
                 assert worker.tick(engine, planning_adapter=adapter)

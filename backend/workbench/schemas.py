@@ -514,6 +514,7 @@ class ProposalView(StrictModel):
 
 
 class PlanningJobView(StrictModel):
+    operation_kind: Literal['scope_binding'] | None = Field(default=None, exclude_if=lambda value: value is None)
     diagnostics: dict[str, str | int | float] = {}
     id: str
     kind: Literal['planning', 'decomposition', 'behavioral_preparation']
@@ -584,7 +585,20 @@ class ProjectSourceView(StrictModel):
     refresh_binding: str | None = None
 
 
+class ScopeRecoveryView(StrictModel):
+    binding: Annotated[str, Field(pattern=r'^[a-f0-9]{64}$')]
+    proposal_id: str
+    scope_revision: int
+    note: str
+
+
+class ScopeRecoveryInput(StrictModel):
+    command_id: UUID
+    binding: Annotated[str, Field(pattern=r'^[a-f0-9]{64}$')]
+
+
 class IntakeView(StrictModel):
+    scope_recovery: ScopeRecoveryView | None = Field(default=None, exclude_if=lambda value: value is None)
     project_source: ProjectSourceView | None = Field(default=None,exclude_if=lambda value:value is None)
     planning_resume_binding: str | None = Field(default=None, exclude_if=lambda value: value is None)
     planning_start_binding: str | None = Field(default=None, exclude_if=lambda value: value is None)

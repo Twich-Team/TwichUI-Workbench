@@ -230,7 +230,7 @@ def renewed_budget(connection, initial, *, exclude_job=None, fresh_source=False)
     roots=everyday.configuration(connection.engine).evidence_roots
     snapshot=delivery_phase.observe(connection,initial['intake_id'],roots,exclude_job=exclude_job)
     if not delivery_phase.renewable(snapshot):
-        raise ValueError('Previous generation is active, uncertain, consequential or lacks terminal evidence')
+        raise ValueError(delivery_phase.hold_reason(snapshot))
     phases=snapshot['phases']
     provider=phases[0]['backend']
     model=phases[0]['requested_model']

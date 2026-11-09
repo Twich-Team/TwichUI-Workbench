@@ -228,6 +228,9 @@ def contract_for(connection, proposal):
         planning_jobs.c.revision == proposal['revision'], planning_jobs.c.status == 'completed')).scalar()
     if not payload or payload.get('prepared_proposal_id') != proposal['id']:
         return None
+    if payload.get('operation_kind') == 'scope_binding':
+        from workbench.scope_binding import local_operation, prepared_job
+        local_operation(connection, prepared_job(connection, proposal))
     return RegressionTaskContract.model_validate(payload['task_contract']).model_dump(mode='json')
 
 
@@ -720,6 +723,11 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                           'Provider completion is uncertain. Workbench held the task without switching.')
             elif state == 'partial':
                 detail = 'The provider finished with partial output. Workbench held the task without switching.'
+            if not claimed_generation and job['attempts'] == 0:
+                # This is persisted by the pre-dispatch owner, before any
+                # atomic model claim. Absence of a process is never used as proof.
+                job['payload']['preflight_rejection'] = dict(version=1, provider_dispatch='not_started',
+                    input_binding=digest({k:v for k,v in job['payload'].items() if k not in {'diagnostics','preflight_rejection'}}))
             c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
                 status='failed', finished_at=intake.now(), lease=None, lease_until=None,
                 payload={**job['payload'], 'diagnostics': diagnostics},

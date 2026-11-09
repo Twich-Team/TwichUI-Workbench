@@ -197,21 +197,23 @@ export function IntakeDetail() {
   const [startProvider,setStartProvider]=useState('qwen-once');
   const [startConfirmed,setStartConfirmed]=useState(false);
   const [startCommand]=useState(()=>crypto.randomUUID());
+  const [scopeRecoveryCommand]=useState(()=>crypto.randomUUID());
   useEffect(()=>{if(!selected && query.data?.proposals[0]) setSelected(query.data.proposals[0].id);},[selected,query.data]);
   async function act(suffix:string, body:unknown, method='POST') {
     setError('');setBusy(true);
-    try { await mutate(`/api/intake/${identity}/${suffix}`,body,method,suffix==='clarification'?AbortSignal.timeout(60000):undefined); const refreshed = await query.refetch(); if(['scope','research-revision'].includes(suffix) && refreshed.data?.proposals[0]) setSelected(refreshed.data.proposals[0].id); void client.invalidateQueries({queryKey:['backlog']}); void client.invalidateQueries({queryKey:['workspace']}); }
+    try { await mutate(`/api/intake/${identity}/${suffix}`,body,method,suffix==='clarification'?AbortSignal.timeout(60000):undefined); const refreshed = await query.refetch(); if(['scope','scope-recovery','research-revision'].includes(suffix) && refreshed.data?.proposals[0]) setSelected(refreshed.data.proposals[0].id); void client.invalidateQueries({queryKey:['backlog']}); void client.invalidateQueries({queryKey:['workspace']}); }
     catch(e){setError((e as Error).message);throw e;} finally {setBusy(false);}
   }
   if(!query.data) return <div className="panel" role="status">{query.isPending?'Opening request…':<>Request unavailable. <Button onClick={()=>void query.refetch()}>Try again</Button></>}</div>;
   const data = query.data;
   const p = data.proposals.find(p=>p.id===selected) || data.proposals[0];
+  const hasConsequentialDecision = data.decisions.some(d=>d.payload.action!=='changes');
 
   const sample = data.original.title === 'Synthetic feature · Admission rehearsal';
-  const renewable=!data.planning_resume_binding&&data.status==='failed'&&data.original.kind==='issue'&&Boolean(data.original.local_planning)&&!data.tasks.length&&!data.decisions.length&&data.jobs.some(j=>j.kind==='planning'&&j.status==='failed')&&data.jobs.filter(j=>j.kind==='planning').every(j=>['completed','failed'].includes(j.status));
+  const renewable=!data.scope_recovery&&!data.planning_resume_binding&&data.status==='failed'&&data.original.kind==='issue'&&Boolean(data.original.local_planning)&&!data.tasks.length&&!hasConsequentialDecision&&data.jobs.some(j=>j.kind==='planning'&&j.status==='failed')&&data.jobs.filter(j=>j.kind==='planning').every(j=>['completed','failed'].includes(j.status));
   const asking = renewable || data.status==='waiting_for_information' || (data.status==='failed' &&
     data.original.kind==='issue' && Boolean(data.original.local_planning) && !data.tasks.length &&
-    !data.decisions.length && Boolean(data.proposals[0]?.task_contract?.scope_missing.length) &&
+    !hasConsequentialDecision && Boolean(data.proposals[0]?.task_contract?.scope_missing.length) &&
     data.jobs.filter(j=>j.kind==='planning').every(j=>j.status==='completed') &&
     Boolean(data.provider_activity?.length) && data.provider_activity?.every(a=>a.purpose==='planning'&&a.outcome==='completed'));
   const waiting = data.jobs.find(job=>job.status==='queued'&&job.message.startsWith('Waiting for '));
@@ -290,7 +292,12 @@ export function IntakeDetail() {
         {(attempt.actual_model||attempt.requested_model)&&<p className="small-text">{attempt.actual_model?'Reported model':'Selected model'} {attempt.actual_model||attempt.requested_model}</p>}
       </li>)}</ul>
     </details>}
-    {activeJobs.length > 0 && <section className="panel"><h2>{activeJobs.some(j=>j.kind==='behavioral_preparation')?'Repair preparation needs attention':'Why planning stopped'}</h2>
+    {data.scope_recovery&&<section className="panel" aria-label="Apply saved scope"><h2>Your scope choice is saved</h2>
+      <p>Workbench stopped while applying your choice to the existing plan, before contacting a model. The earlier investigation is settled. You can apply that saved choice locally and review the plan.</p>
+      <p>{data.scope_recovery.note}</p><p>This does not approve the plan, start addon work, or make a model request.</p>
+      <Button disabled={blocked} onClick={()=>void act('scope-recovery',{command_id:scopeRecoveryCommand,binding:data.scope_recovery!.binding}).catch(()=>{})}>Apply saved scope to plan</Button>
+    </section>}
+    {activeJobs.length > 0 && !data.scope_recovery && <section className="panel"><h2>{activeJobs.some(j=>j.kind==='behavioral_preparation')?'Repair preparation needs attention':'Why planning stopped'}</h2>
       {activeJobs.map(job=><div key={job.id}><p>{job.message}</p>
         {job.kind==='behavioral_preparation'&&p?.task_contract?.bug_intent&&data.decisions.some(d=>d.status==='applied'&&d.proposal_id===p.id)
           ? <><p>Prepare an isolated repair attempt with the approved scope. Implementation and test development can proceed together after separate run approval. Unsettled earlier activity holds; no correctness result is claimed by preparation.</p><Button disabled={blocked} variant="secondary" onClick={()=>void act('retry',{job_id:job.id,command_id:crypto.randomUUID(),review_binding:p.binding,renew_check_construction:true}).catch(()=>{})}>Prepare repair attempt</Button></>
@@ -325,7 +332,7 @@ export function IntakeDetail() {
         ? <ProposalReview key={p.id} proposal={p} data={data} act={act} busy={blocked}/>
         : <details className="supporting-plan"><summary>{asking?'Read the supporting plan':'Read the plan'}</summary><ProposalReview key={p.id} proposal={p} data={data} act={act} busy={blocked}/></details>}
     </>}
-    {bugInvestigation&&data.status==='completed'&&!data.tasks.length&&!data.decisions.length&&!data.project_source?.stale&&<details className="panel">
+    {bugInvestigation&&data.status==='completed'&&!data.tasks.length&&!hasConsequentialDecision&&!data.project_source?.stale&&<details className="panel">
       <summary>Ask Workbench to refine this plan</summary>
       <p>Recheck current project source with your saved provider to clarify or improve this unapproved proposal. Earlier evidence, plans and usage stay saved. This approves no addon changes, execution, or publication.</p>
       <form onSubmit={e=>{e.preventDefault();void act('clarification',{command_id:crypto.randomUUID(),revision:data.revision,text:refinement,continue_investigation:true,renew_operation:true}).catch(()=>{});}}><label htmlFor="plan-refinement">What should the plan explain or reconsider?</label>
@@ -341,8 +348,8 @@ export function IntakeDetail() {
       {data.clarifications.map((c,i)=><div key={i}><p>Reply for revision {c.revision} · {formatTime(c.created_at)}</p><p className="original-text">{c.text}</p></div>)}
       {p && <label className="revision-picker">{sample?'Plan version':'Proposal revision'}<select value={p.id} onChange={e=>setSelected(e.target.value)}>{data.proposals.map(plan=><option key={plan.id} value={plan.id}>{sample?'Version':'Revision'} {plan.revision}</option>)}</select></label>}
       <h3>Planning history</h3>
-      {data.jobs.map(job=><div className="planning-job" key={job.id}><strong>{job.kind==='planning'?'Investigation / proposal':job.kind==='behavioral_preparation'?'Behavioral scenario preparation':'Detailed task planning'} · Revision {job.revision}</strong><StateBadge value={job.status}/><p>{job.message}</p>
-        <details><summary>Job provenance</summary><p>{job.model || 'No validated model response'} · {job.attempts} bounded attempt(s)</p><pre>{JSON.stringify(job.diagnostics,null,2)}</pre></details></div>)}
+      {data.jobs.map(job=><div className="planning-job" key={job.id}><strong>{job.operation_kind==='scope_binding'?'Saved scope applied locally':job.kind==='planning'?'Investigation / proposal':job.kind==='behavioral_preparation'?'Behavioral scenario preparation':'Detailed task planning'} · Revision {job.revision}</strong><StateBadge value={job.status}/><p>{job.message}</p>
+        <details><summary>Job provenance</summary><p>{job.operation_kind==='scope_binding'?'Existing model plan retained · No new model request':(job.model || 'No validated model response')+' · '+job.attempts+' bounded attempt(s)'}</p><pre>{JSON.stringify(job.diagnostics,null,2)}</pre></details></div>)}
       {data.decisions.length>0 && <><h3>Decision history</h3>{data.decisions.map(d=><details key={d.id}><summary>{d.payload.action} · {d.status}</summary><p>{d.message}</p><pre>{JSON.stringify(d,null,2)}</pre></details>)}</>}
       {data.evidence.map(e=><details key={e.id}><summary>{e.label}</summary><pre>{e.excerpt}</pre><p>{e.id} · SHA-256 {e.sha256} · Source revision {e.source_revision || 'Unavailable'}</p></details>)}
       <label htmlFor="priority">Priority</label><p>{data.priority.reason} Priority orders work and grants no run permission.</p>
@@ -457,6 +464,7 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
     <details open={Boolean(draft?.note) || undefined}><summary>Add a note or request changes</summary>
     <label htmlFor="decision-note">Note <span>Required when requesting changes</span></label>
     <textarea id="decision-note" rows={2} maxLength={1600} disabled={locked || Boolean(draft)} value={draft?.note ?? note} onChange={e=>setNote(e.target.value)}/>
+    {intent&&<p>Requesting changes lets Workbench revise this read-only plan with your saved model and fallback policy. It does not approve addon changes or a run.</p>}
     {!draft && <Button variant="secondary" disabled={locked || !note.trim()} onClick={()=>void decide('changes')}>Request changes</Button>}
     </details>
     {draft ? <Button disabled={locked || offerChanged} onClick={()=>void decide(draft.action)}>Retry same decision</Button> :
@@ -488,7 +496,7 @@ function RegressionContract({contract:c, asking}: {contract:NonNullable<Proposal
       <div><dt>Expected result</dt><dd>{JSON.stringify(o.expected)}</dd></div>
       <div><dt>Incorrect result to catch</dt><dd>{JSON.stringify(o.incorrect)}</dd></div>
     </dl>)}
-    {c.bug_intent&&<p>Approving this scope allows Workbench to construct and check isolated tests using the same provider and committed source. It cannot change addon files until you approve a separately certified run.</p>}
+    {c.bug_intent&&<p>Approving this scope lets Workbench prepare an isolated repair attempt. A separate run decision permits edits and test development together using the saved provider. Independent checks must pass before a checked result is available.</p>}
     <ul>{c.acceptance.map((result,i)=><li key={i}>{result}</li>)}</ul>
     {c.writable_paths.length
       ? <p className="permission-files"><strong>{bug?'Files in scope':'Tests in scope'}</strong> {c.writable_paths.map((path,i)=><span key={path}>{i>0?', ':''}<code>{path}</code></span>)}</p>

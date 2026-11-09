@@ -82,7 +82,10 @@ def proposal_review(connection, proposal):
     if prepared:
         requirements['approval_blockers'].extend(prepared['scope_missing'])
     elif proposal['basis'] == 'preparation':
-        requirements['approval_blockers'].append('This revised scope needs fresh regression-test preparation before approval.')
+        requirements['approval_blockers'].append(
+            'This research-only revision excludes the earlier repair contract. This release cannot run it as a repair; implementation remains held.'
+            if requirements['research_only'] else
+            'The source-bound task contract is unavailable for this revision. Reconcile the saved scope or refine the plan before approval.')
     bound = {'contract':2, 'proposal':dict(proposal), 'human_scope':scope,
              'required_artifacts':requirements['required_artifacts'], 'artifacts':artifacts}
     if prepared:

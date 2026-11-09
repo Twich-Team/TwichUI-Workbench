@@ -74,7 +74,16 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
                 raise HTTPException(409, 'Human scope changed')
             status, message = 'applied', ('Scope and one task budget applied. Waiting for certified execution; no model or PR started.' if receipt['payload'].get('run_budget') else 'Scope decision applied. No execution or publication permission was granted.')
             state = {'approve':'approved', 'changes':'queued', 'decline':'declined'}[action]
-            connection.execute(intakes.update().where(intakes.c.id == row['id']).values(status=state))
+            from workbench.bug_investigation import requested as bug_requested
+            read_only_changes = action == 'changes' and bug_requested(row['payload'])
+            if read_only_changes:
+                from workbench.schemas import ClarificationInput
+                intake.clarify_in(connection, row['id'], ClarificationInput(
+                    command_id=receipt['id'], revision=row['revision'], text=receipt['payload']['note'],
+                    continue_investigation=True, renew_operation=True))
+                message = 'Your requested changes are saved. Workbench will refine the plan with the saved provider; addon work remains unapproved.'
+            else:
+                connection.execute(intakes.update().where(intakes.c.id == row['id']).values(status=state))
             if action == 'approve':
                 source_payload = connection.execute(select(planning_jobs.c.payload).where(
                     planning_jobs.c.intake_id == row['id'], planning_jobs.c.kind == 'planning',
@@ -84,7 +93,7 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
                 intake.enqueue(connection, row['id'], 'decomposition', proposal['revision'],
                     {'proposal_id':proposal['id'], 'approval_id':receipt['id'], 'binding':receipt['binding'],
                      **({'owner_provenance':provenance} if provenance else {})})
-            elif action == 'changes':
+            elif action == 'changes' and not read_only_changes:
                 intake.enqueue(connection, row['id'], 'planning', proposal['revision']+1,
                     {'feedback':receipt['payload']['note'], 'previous_proposal':proposal['content']})
         except HTTPException as error:

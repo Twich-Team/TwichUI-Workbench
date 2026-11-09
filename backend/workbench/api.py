@@ -16,7 +16,7 @@ from workbench.schemas import CatalogPage, CatalogDetail, WorkOverview, HistoryP
 from workbench.db import commands, engine_for, tasks
 from workbench.schemas import (Decision, Problem, Receipt, Session, Task, IntakeInput, IntakeView,
     IntakePage, ProposalDecisionInput, ProposalReceipt, ArtifactInput, PlanningRetry,
-    ClarificationInput, ResearchRevision, PriorityInput, ScopeRevisionInput, InvestigationStart)
+    ClarificationInput, ResearchRevision, PriorityInput, ScopeRevisionInput, InvestigationStart, ScopeRecoveryInput)
 from workbench.service import get_task, submit, task_view
 from workbench.real_execution import RunPage, StopRequest
 from workbench.task_execution import TaskExecutionContext
@@ -178,6 +178,12 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     @app.post('/api/intake/{identity}/scope', response_model=IntakeView, responses=errors)
     def planning_scope(identity: str, body: ScopeRevisionInput):
         intake.revise_scope(app.state.engine, identity, body)
+        return intake.view(app.state.engine, identity)
+
+    @app.post('/api/intake/{identity}/scope-recovery', response_model=IntakeView, responses=errors)
+    def planning_scope_recovery(identity: str, body: ScopeRecoveryInput):
+        from workbench.scope_binding import recover
+        recover(app.state.engine, identity, body)
         return intake.view(app.state.engine, identity)
 
     @app.post('/api/intake/{identity}/research-revision', response_model=IntakeView, responses=errors)

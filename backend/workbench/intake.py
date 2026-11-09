@@ -214,6 +214,11 @@ def view_in(connection, identity):
         retained['status'] = 'failed'
         retained['message'] = scenario_failure_message(diagnostics.get('category'))
     for job in jobs:
+        from workbench.scope_binding import legacy_failure
+        if legacy_failure(connection, job):
+            job['message'] = 'Your scope choice was saved. The older scope handler tried unnecessary replanning, which was rejected before contacting a model. The earlier plan and evidence remain saved.'
+            job['payload'] = {**job['payload'], 'diagnostics':{**job['payload'].get('diagnostics', {}),
+                'provider_dispatch':'not_started', 'operation_phase':'scope_update'}}
         facts=job['payload'].get('diagnostics',{})
         capabilities=job['payload'].get('recovery_capabilities',{})
         if (job['status']=='failed' and (facts.get('category')=='cancelled' or facts.get('stopped_request_category')=='cancelled')
@@ -281,12 +286,17 @@ def view_in(connection, identity):
             .order_by(model_attempts.c.started_at.desc(), model_attempts.c.id)).mappings().all()
     from workbench.investigation_start import resume_binding
     from workbench.project_source import refresh_view
+    from workbench.scope_binding import offer as scope_recovery_offer
+    try:
+        recovery = scope_recovery_offer(connection, identity)
+    except (ValueError, OSError):
+        recovery = None  # Unverifiable earlier work remains held, never replayed.
     latest = max((j for j in jobs if j['kind']=='planning'),key=lambda j:j['revision'],default=None)
     has_authority=bool(planned) or bool(connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
-    return dict(project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
+    return dict(**({'scope_recovery':recovery} if recovery else {}),project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
         planning_start_binding=digest(row['payload']) if configured_mode()=='everyday' and row['payload']['kind']=='issue' and not row['payload'].get('local_planning') and not row['payload'].get('supported_task') and row['status'] in {'failed','waiting_for_information'} else None,
         provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
-        created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],
+        created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, **({'operation_kind':'scope_binding'} if j['payload'].get('operation_kind')=='scope_binding' else {}), diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],
         proposals=[proposal_view(connection, dict(p)) for p in connection.execute(select(proposals).where(
             proposals.c.intake_id == identity).order_by(proposals.c.revision.desc())).mappings()
             if not retained or p['revision'] != retained['revision']],
@@ -477,97 +487,106 @@ def retry(engine, identity, job_id, *, preparation=None):
 
 
 def clarify(engine, identity, body):
+    with write_transaction(engine) as connection:
+        clarify_in(connection, identity, body)
+
+
+def clarify_in(connection, identity, body):
     from workbench import bug_investigation, everyday, provider_routes
 
     if not body.text.strip():
         raise HTTPException(422, 'Add the requested information.')
-    with write_transaction(engine) as connection:
-        row = require(connection, intakes, identity)
-        if everyday.enabled() and not row['payload'].get('local_planning'):
-            raise HTTPException(409, 'Choose read-only investigation on this saved report before sending a follow-up.')
-        jobs = list(connection.execute(select(planning_jobs).where(planning_jobs.c.intake_id == identity)).mappings())
-        for job in jobs:
-            if job['payload'].get('clarification_id') == str(body.command_id):
-                if (job['payload'].get('feedback') != body.text
-                        or bool(job['payload'].get('bug_followup')) != body.continue_investigation
-                        or job['payload'].get('refresh_source',False)!=body.refresh_source
-                        or job['payload'].get('source_refresh_binding')!=body.source_refresh_binding
-                        or bool(job['payload'].get('explicit_renewal',job['payload'].get('renew_operation',False))) != body.renew_operation):
-                    raise HTTPException(409, 'Clarification ID already used.')
-                return
-        refresh=body.refresh_source
-        if refresh:
-            from workbench.project_source import refresh_view
-            authority=bool(connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
-                or connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
-            offered=refresh_view(row,sorted(jobs,key=lambda j:j['created_at']),has_authority=authority)
-            if (not offered or not offered['refresh_binding'] or offered['refresh_binding']!=body.source_refresh_binding
-                    or not body.continue_investigation or not body.renew_operation):
-                raise HTTPException(409,'Source refresh needs the current read-only offer, settled work, and no old repair approvals.')
-        elif body.source_refresh_binding is not None:
-            raise HTTPException(422,'Source-refresh binding needs explicit read-only refresh consent.')
-        refinement=(not refresh and row['status']=='completed' and body.continue_investigation and body.renew_operation
-            and bug_investigation.requested(row['payload'])
-            and all(j['status'] in {'completed','failed'} for j in jobs)
-            and not connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
-            and not connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
-        if refinement:
-            from workbench.project_source import require_current
-            latest=max((j for j in jobs if j['kind']=='planning'),key=lambda j:j['revision'])
-            try:
-                require_current(latest['payload'].get('task_contract'))
-            except ValueError as error:
-                raise HTTPException(409,str(error)) from None
-        bug_continuation=(bug_investigation.requested(row['payload']) and row['status']=='failed'
-            and any(j['kind']=='planning' and j['revision']==row['revision'] and j['status']=='completed'
-                and j['payload'].get('task_contract',{}).get('scope_missing') for j in jobs)
-            and not connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
-            and not connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
-        if (row['status'] != 'waiting_for_information' and not bug_continuation and not refresh and not refinement and not (body.renew_operation and row['status']=='failed') or row['revision'] != body.revision
-                or retained_planning_failure(row, jobs)):
-            raise HTTPException(409, 'The request changed. Refresh before answering.')
-        next_input = {'feedback': body.text, 'clarification_id': str(body.command_id)}
-        if refresh:
-            next_input.update(refresh_source=True,source_refresh_binding=body.source_refresh_binding)
-        next_sequence=row['revision']+1
-        if body.renew_operation:
-            next_input.update(renew_operation=True,explicit_renewal=True)
-        if bug_investigation.requested(row['payload']):
-            if not body.continue_investigation:
-                raise HTTPException(422, 'Confirm the follow-up investigation before sending your answer.')
-            initial = next((job for job in sorted(jobs,key=lambda j:j['revision']) if job['kind'] == 'planning'
-                            and job['payload'].get('local_planning_receipt')
-                            and job['status'] in ({'completed','failed'} if body.renew_operation else {'completed'})), None)
-            if not initial:
-                raise HTTPException(409, 'The original settled investigation is unavailable.')
-            grounding = initial['payload'].get('task_contract', {}).get('scenario_grounding', {})
-            try:
-                from workbench.planning_limits import followup_budget, renewed_budget
-                from workbench.trusted_preparation import configuration
-                fresh_operation=body.renew_operation or configuration(engine).get('bug_plan_review')=='source-grounded-intent-v1'
-                if fresh_operation:
-                    next_input.update(renew_operation=True,explicit_renewal=body.renew_operation)
-                    if (connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
-                            or connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first()):
-                        raise ValueError('An approved or dispatched task cannot be renewed through investigation')
-                    continuation=renewed_budget(connection,initial,fresh_source=refresh or refinement)
-                    next_sequence=continuation['next_sequence']
-                else:
-                    continuation=followup_budget(connection,initial,row['revision'])
-                next_input['local_planning_receipt']=initial['payload']['local_planning_receipt']
-                route = provider_routes.approved(connection, row)
-                next_input['bug_followup'] = dict(
-                    binding=digest(dict(original=row['payload'], revision=row['revision'],
-                        feedback=body.text, clarification_id=str(body.command_id))),
-                    expires_at=everyday.planning_receipt(row['payload'], now())['expires_at'],
-                    route=route, provider=grounding.get('basis'),
-                    fallback_reason=grounding.get('fallback_reason'),**continuation)
-            except ValueError as error:
-                raise HTTPException(409, str(error)) from None
-        elif body.continue_investigation or body.renew_operation:
-            raise HTTPException(422, 'This request has no bug investigation to continue.')
-        enqueue(connection, identity, 'planning', next_sequence, next_input)
-        connection.execute(intakes.update().where(intakes.c.id == identity).values(status='queued'))
+    row = require(connection, intakes, identity)
+    if everyday.enabled() and not row['payload'].get('local_planning'):
+        raise HTTPException(409, 'Choose read-only investigation on this saved report before sending a follow-up.')
+    jobs = list(connection.execute(select(planning_jobs).where(planning_jobs.c.intake_id == identity)).mappings())
+    # A request for changes is feedback, not implementation permission. It
+    # must not make the next fresh read-only operation look like approved work.
+    consequential_decision = connection.execute(select(proposal_decisions.c.id).where(
+        proposal_decisions.c.intake_id == identity,
+        proposal_decisions.c.payload['action'].as_string() != 'changes')).first()
+    for job in jobs:
+        if job['payload'].get('clarification_id') == str(body.command_id):
+            if (job['payload'].get('feedback') != body.text
+                    or bool(job['payload'].get('bug_followup')) != body.continue_investigation
+                    or job['payload'].get('refresh_source',False)!=body.refresh_source
+                    or job['payload'].get('source_refresh_binding')!=body.source_refresh_binding
+                    or bool(job['payload'].get('explicit_renewal',job['payload'].get('renew_operation',False))) != body.renew_operation):
+                raise HTTPException(409, 'Clarification ID already used.')
+            return
+    refresh=body.refresh_source
+    if refresh:
+        from workbench.project_source import refresh_view
+        authority=bool(connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
+            or consequential_decision)
+        offered=refresh_view(row,sorted(jobs,key=lambda j:j['created_at']),has_authority=authority)
+        if (not offered or not offered['refresh_binding'] or offered['refresh_binding']!=body.source_refresh_binding
+                or not body.continue_investigation or not body.renew_operation):
+            raise HTTPException(409,'Source refresh needs the current read-only offer, settled work, and no old repair approvals.')
+    elif body.source_refresh_binding is not None:
+        raise HTTPException(422,'Source-refresh binding needs explicit read-only refresh consent.')
+    refinement=(not refresh and row['status']=='completed' and body.continue_investigation and body.renew_operation
+        and bug_investigation.requested(row['payload'])
+        and all(j['status'] in {'completed','failed'} for j in jobs)
+        and not connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
+        and not consequential_decision)
+    if refinement:
+        from workbench.project_source import require_current
+        latest=max((j for j in jobs if j['kind']=='planning'),key=lambda j:j['revision'])
+        try:
+            require_current(latest['payload'].get('task_contract'))
+        except ValueError as error:
+            raise HTTPException(409,str(error)) from None
+    bug_continuation=(bug_investigation.requested(row['payload']) and row['status']=='failed'
+        and any(j['kind']=='planning' and j['revision']==row['revision'] and j['status']=='completed'
+            and j['payload'].get('task_contract',{}).get('scope_missing') for j in jobs)
+        and not connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
+        and not consequential_decision)
+    if (row['status'] != 'waiting_for_information' and not bug_continuation and not refresh and not refinement and not (body.renew_operation and row['status']=='failed') or row['revision'] != body.revision
+            or retained_planning_failure(row, jobs)):
+        raise HTTPException(409, 'The request changed. Refresh before answering.')
+    next_input = {'feedback': body.text, 'clarification_id': str(body.command_id)}
+    if refresh:
+        next_input.update(refresh_source=True,source_refresh_binding=body.source_refresh_binding)
+    next_sequence=row['revision']+1
+    if body.renew_operation:
+        next_input.update(renew_operation=True,explicit_renewal=True)
+    if bug_investigation.requested(row['payload']):
+        if not body.continue_investigation:
+            raise HTTPException(422, 'Confirm the follow-up investigation before sending your answer.')
+        initial = next((job for job in sorted(jobs,key=lambda j:j['revision']) if job['kind'] == 'planning'
+                        and job['payload'].get('local_planning_receipt')
+                        and job['status'] in ({'completed','failed'} if body.renew_operation else {'completed'})), None)
+        if not initial:
+            raise HTTPException(409, 'The original settled investigation is unavailable.')
+        grounding = initial['payload'].get('task_contract', {}).get('scenario_grounding', {})
+        try:
+            from workbench.planning_limits import followup_budget, renewed_budget
+            from workbench.trusted_preparation import configuration
+            fresh_operation=body.renew_operation or configuration(connection.engine).get('bug_plan_review')=='source-grounded-intent-v1'
+            if fresh_operation:
+                next_input.update(renew_operation=True,explicit_renewal=body.renew_operation)
+                if (connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
+                        or consequential_decision):
+                    raise ValueError('An approved or dispatched task cannot be renewed through investigation')
+                continuation=renewed_budget(connection,initial,fresh_source=refresh or refinement)
+                next_sequence=continuation['next_sequence']
+            else:
+                continuation=followup_budget(connection,initial,row['revision'])
+            next_input['local_planning_receipt']=initial['payload']['local_planning_receipt']
+            route = provider_routes.approved(connection, row)
+            next_input['bug_followup'] = dict(
+                binding=digest(dict(original=row['payload'], revision=row['revision'],
+                    feedback=body.text, clarification_id=str(body.command_id))),
+                expires_at=everyday.planning_receipt(row['payload'], now())['expires_at'],
+                route=route, provider=grounding.get('basis'),
+                fallback_reason=grounding.get('fallback_reason'),**continuation)
+        except ValueError as error:
+            raise HTTPException(409, str(error)) from None
+    elif body.continue_investigation or body.renew_operation:
+        raise HTTPException(422, 'This request has no bug investigation to continue.')
+    enqueue(connection, identity, 'planning', next_sequence, next_input)
+    connection.execute(intakes.update().where(intakes.c.id == identity).values(status='queued'))
 
 
 def validate_approval(connection, receipt):
@@ -598,9 +617,14 @@ def validate_approval(connection, receipt):
 
 
 def revise_scope_in(connection, identity, proposal, visual_requirement, stage, note, command_id, payload):
+    from workbench import scope_binding
     if not note.strip():
         raise HTTPException(422, 'Explain this scope revision.')
     row = require(connection, intakes, identity)
+    source = scope_binding.prepared_job(connection, proposal) if proposal['basis'] == 'preparation' else None
+    if source and connection.execute(select(planning_jobs.c.id).where(planning_jobs.c.intake_id == identity,
+            planning_jobs.c.kind == 'planning', planning_jobs.c.status.in_(['queued','running']))).first():
+        raise HTTPException(409, 'Workbench is still refining this plan. Your scope choice has not been submitted; wait for the investigation to settle, then save it.')
     scope = human_scope(connection, identity)
     revision = scope['revision']+1
     connection.execute(intake_scopes.insert().values(intake_id=identity, revision=revision,
@@ -613,15 +637,17 @@ def revise_scope_in(connection, identity, proposal, visual_requirement, stage, n
             scope=['Research the original request and prepare evidence: '+note[:650]],
             acceptance=['Document findings and unresolved questions; return for a new implementation proposal review.'],
             exclusions=[RESEARCH_EXCLUSION], stages=['Inspect relevant evidence.', 'Return a new proposal for human review.'])
-    connection.execute(proposals.insert().values(id=str(uuid4()), intake_id=identity, revision=row['revision']+1,
-        scope_revision=revision, content=content, model=proposal['model'], basis=proposal['basis'], created_at=now()))
+    proposal_id = str(uuid4())
+    connection.execute(proposals.insert().values(id=proposal_id, intake_id=identity, revision=row['revision']+1,
+        scope_revision=revision, content=content, model=proposal['model'],
+        basis=proposal['basis'], created_at=now()))
+    if source and stage == 'implementation':
+        saved_scope = dict(connection.execute(select(intake_scopes).where(intake_scopes.c.command_id == command_id)).mappings().one())
+        scope_binding.complete(connection, source, proposal, saved_scope, proposal_id, row['revision']+1)
     connection.execute(intakes.update().where(intakes.c.id == identity).values(revision=row['revision']+1, status='completed'))
     # Keep historical decisions as made; flag their authority separately. Pending is rejected at application.
     connection.execute(proposal_decisions.update().where(proposal_decisions.c.intake_id == identity,
         proposal_decisions.c.status.in_(['pending','applied'])).values(scope_review_required=1))
-    if proposal['basis'] == 'preparation' and stage == 'implementation':
-        enqueue(connection, identity, 'planning', row['revision']+2, {'feedback':note})
-        connection.execute(intakes.update().where(intakes.c.id == identity).values(status='queued'))
 
 
 def revise_scope(engine, identity, body):
