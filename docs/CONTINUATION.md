@@ -1,3 +1,32 @@
+## Running continuation — November 9, 2026, 04:40 UTC
+
+Installed58 remains1836b80/seald94858...; normal network/services/history preserved.
+Operator checkpointcf6cb2a is external only (standing counter correction), not cutover.
+After two pre-submit holds, no tasks/provider calls were made in either held launch.
+First counter rule fixed; second exposed external operator policy ROOT missing sealed
+input files. Both receipts retained in S58/artifacts/acceptance as
+codex-with-local-fallback.pre-submit-{counter,policy-root}-held.jsonl; connector restored
+after each. R58/operator-root-correction.json and held-before-submit-evidence.json.
+
+Current ACTIVE healthy case: Codex→Qwen. Driver tool48016. R58/
+ driver-case-standing-admission-v2.sh is the ONLY remaining-case entrypoint; it
+verifies immutable R58/operator-standing-admission-v2/binding.json,28tests, current
+seal, external policy and unchanged browser/timing hashes. Driver changes only
+fixed sealed release and policy path. External policy additionally binds ROOT to
+S58/release. R58/operator-readonly-submit-preflight.json passed before dispatch.
+Current receipt S58/artifacts/acceptance/codex-with-local-fallback.jsonl.
+Intakef211bb5f-b2fc-4cee-a77b-0be530b65849, actual local planning model
+4903ef19-c224-4748-9a9f-cd0ed4d94ad0 completed04:38:56. Routing reason explicitly
+Codex unavailable before generation, approved Qwen fallback. Connector restored
+04:38:58. Proposal32790630-2899-5506-8699-a6d3d0f5b7fa, scope approval
+6e0808bf-f0e3-4138-a1b9-b01b41212549, binding
+c31e35232bd324ef83e2c3b1c0fcf4a529ebc98c26f18951731116d13e1cceb3.
+Independent full control preparation running (~16min). Do NOT interrupt healthy work.
+Fresh execution should reuse exact frozen controls, then fresh boundary/candidate
+checks. No real provider case3pass yet; real count2/4. Ledger has not yet added this
+new active phase; DB actual receipts authoritative. Then Qwen→Codex remaining case.
+Do not replay successful bug/Codex/Qwen cases. No owner action needed.
+
 ## Latest continuation — November 9, 2026, 04:36 UTC
 
 Deployment58/1836b807bd611fd47d27a1a87573411cdbdd59a1 is installed and all gates pass.
