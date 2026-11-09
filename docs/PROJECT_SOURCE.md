@@ -37,3 +37,10 @@ snapshots; do not prune them as generic download caches.
 Missing source must hold new source-dependent work, while history and unrelated
 demo records remain readable. Advanced evidence retains all references even
 when the summary displays a bounded selection.
+
+A settled, unapproved bug plan can be refined through the ordinary clarification
+action. This explicitly rechecks current source and rebuilds context using the
+current discovery rules, retaining the earlier source evidence, plans and usage
+in history. It avoids treating an obsolete excerpt ordering as a fresh source
+constraint. It grants no scope or execution approval; approved/dispatched work
+cannot enter this read-only refinement path.

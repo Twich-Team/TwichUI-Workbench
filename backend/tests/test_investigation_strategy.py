@@ -189,6 +189,8 @@ def test_scope_wording_churn_is_not_progress_on_an_unchanged_missing_writable_te
     raw = copy.deepcopy(raw)
     raw["finding"] = "Different wording."
     raw["plan"]["scope"] = "Another description."
+    raw["plan"]["criteria"][0]["id"] = "renamed-criterion-does-not-fix-the-test-boundary"
+    raw["plan"]["read_paths"].reverse()
     assert strategy.rejection_signature(raw, facts) == before
     raw["plan"]["writable_paths"].append("tests/test_sample.lua")
     assert strategy.rejection_signature(raw, facts) != before

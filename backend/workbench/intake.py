@@ -550,7 +550,7 @@ def clarify(engine, identity, body):
                     if (connection.execute(select(backlog_items.c.id).where(backlog_items.c.intake_id==identity)).first()
                             or connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first()):
                         raise ValueError('An approved or dispatched task cannot be renewed through investigation')
-                    continuation=renewed_budget(connection,initial,fresh_source=refresh)
+                    continuation=renewed_budget(connection,initial,fresh_source=refresh or refinement)
                     next_sequence=continuation['next_sequence']
                 else:
                     continuation=followup_budget(connection,initial,row['revision'])

@@ -1,3 +1,23 @@
+## Current installed82; final fresh-context refinement correction verified, no live request duplicated
+
+Installedb96736f/82 passes all installation/history/network gates. Originalvendor
+request remains revision19,2unapproved plans; latest sourcegrounded but wording
+cutoff/testchoice still require refinement. All85responses settled,1839910known
+tokens; policy18/Qwenonly/fallbackOff unchanged. No activeprovider or approval.
+Before another model call, combined renewal inspection exposed old cached-prefix
+assumptions after source co-selection changed. Unapproved-plan refinement now uses
+existing v5 fresh source/context owner, retains every prior phase/usage, and creates
+no task/run/publication approval. Same-source changed-selection API/worker test
+passes, historical plans unchanged. Semantic repetition signature now uses only
+actual failing relation (criterion renaming cannot disguise missing writabletest).
+108relatedAPI+52finalconstraints+2finalbrowser+staticpass;229integrated/274bugsource/
+32frontend/4browser/2native from immediately preceding code retained where unchanged.
+Next: checkpoint/seal/install83, ordinary ORIGINAL-task refinement with generic
+quality guidance and no paths/solution injection. Then validate genuinely usable
+plan, leave for OWNERreview, restart/history/6results/network/model checks, and
+hash-bound maintenance resume. Maintenance admissions STILL owned-paused. Standing
+engineering authority applies, no old campaign limits or owner renewal needed.
+
 ## Current: installed81 has real proposal19; all85 responses settled; quality correction verified
 
 Attempt362d7baa completed21:49:30UTC:6COMPLETE160536tokens, six retained terminal

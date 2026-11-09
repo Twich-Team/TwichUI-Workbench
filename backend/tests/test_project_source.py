@@ -172,6 +172,34 @@ def test_original_report_refreshes_to_new_committed_source_without_reusing_a_pla
             == 2
         )
 
+    # A later planner revision can select a better source/test context at the
+    # same commit. Refinement must rebuild it, not demand an obsolete cache prefix.
+    from workbench import bug_investigation
+
+    context_before = bug_investigation.context
+    previous_first = calls[-1]["files"][0]["path"]
+    changed_seeds = []
+
+    def context_with_new_selection(*args, **kwargs):
+        packet = context_before(*args, **kwargs)
+        packet["files"] = list(reversed(packet["files"]))
+        changed_seeds.append(packet["files"][0]["path"])
+        return packet
+
+    monkeypatch.setattr(bug_investigation, "context", context_with_new_selection)
+    refine = dict(command_id=str(uuid4()), revision=after["revision"],
+                  text="Clarify the unapproved plan using current source discovery.",
+                  continue_investigation=True, renew_operation=True)
+    refined = client.post(endpoint, headers=headers, json=refine)
+    assert refined.status_code == 200, refined.text
+    assert worker.tick(store)
+    final = client.get("/api/intake/" + identity).json()
+    assert final["status"] == "completed" and len(final["proposals"]) == 3
+    assert final["proposals"][1:] == after["proposals"]
+    assert not final["decisions"] and not final["tasks"]
+    assert calls[-1]["files"][0]["path"] == changed_seeds[-1] != previous_first
+    assert len(calls) == 3
+
 
 def test_source_root_rejects_unowned_or_symlink_snapshot_selection(tmp_path, monkeypatch):
     from workbench import project_source

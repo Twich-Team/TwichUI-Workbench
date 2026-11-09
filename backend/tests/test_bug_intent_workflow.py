@@ -348,6 +348,8 @@ def test_unapproved_plan_can_be_refined_read_only_without_an_owner_approval_or_u
     with store.connect() as c:
         jobs = c.execute(select(planning_jobs).order_by(planning_jobs.c.revision)).mappings().all()
         assert jobs[-1]["payload"]["bug_followup"]["known_prior_usage"]["total_tokens"] == 50
+        assert jobs[-1]["payload"]["bug_followup"]["budget_version"] == 5
+        assert "retained_source_packet" not in jobs[-1]["payload"]["bug_followup"]
         assert not c.execute(select(real_execution_grants)).first()
 
 

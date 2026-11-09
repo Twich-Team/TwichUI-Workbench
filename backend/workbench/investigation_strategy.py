@@ -110,7 +110,19 @@ def rejection_signature(raw,facts):
                'focused_test_not_writable','production_scope_required','distinct_criteria'}
     if errors and all(e['constraint'] in relations for e in errors):
         plan=raw.get('plan') or {}
-        values={key:plan.get(key) for key in ('read_paths','writable_paths','focused_test')}
-        values['criteria']=[c.get('id') for c in plan.get('criteria',[]) if isinstance(c,dict)]
-        return digest(dict(errors=errors,scope_relationships=values))
+        fields={
+            'distinct_read_paths':('read_paths',),
+            'distinct_writable_paths':('writable_paths',),
+            'writable_source_not_read':('read_paths','writable_paths'),
+            'focused_test_not_writable':('writable_paths','focused_test'),
+            'production_scope_required':('writable_paths',),
+            'distinct_criteria':('criteria',),
+        }
+        signatures=[]
+        for error in errors:
+            values={key:([c.get('id') for c in plan.get(key,[]) if isinstance(c,dict)] if key=='criteria'
+                         else sorted(plan.get(key,[])) if key.endswith('_paths') else plan.get(key))
+                    for key in fields[error['constraint']]}
+            signatures.append(dict(constraint=error['constraint'],values=values))
+        return digest(signatures)
     return digest(dict(raw=raw,facts=facts))

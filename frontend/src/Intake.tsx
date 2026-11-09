@@ -327,7 +327,7 @@ export function IntakeDetail() {
     </>}
     {bugInvestigation&&data.status==='completed'&&!data.tasks.length&&!data.decisions.length&&!data.project_source?.stale&&<details className="panel">
       <summary>Ask Workbench to refine this plan</summary>
-      <p>Use your saved provider to clarify or improve this unapproved proposal. Earlier plans and usage stay saved. This approves no addon changes, execution, or publication.</p>
+      <p>Recheck current project source with your saved provider to clarify or improve this unapproved proposal. Earlier evidence, plans and usage stay saved. This approves no addon changes, execution, or publication.</p>
       <form onSubmit={e=>{e.preventDefault();void act('clarification',{command_id:crypto.randomUUID(),revision:data.revision,text:refinement,continue_investigation:true,renew_operation:true}).catch(()=>{});}}><label htmlFor="plan-refinement">What should the plan explain or reconsider?</label>
         <textarea id="plan-refinement" value={refinement} onChange={e=>setRefinement(e.target.value)} required maxLength={1600} rows={4} disabled={blocked}/>
         <Button disabled={blocked||!refinement.trim()}>Refine this plan</Button>
