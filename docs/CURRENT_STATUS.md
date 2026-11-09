@@ -1,10 +1,12 @@
-## CURRENT74/7ec0e4c — November9 17:48UTC, original vendor task continuation QUEUED
+## CURRENT74/7ec0e4c — November9 17:51UTC, original vendor task continuation RUNNING
 
 74installed; exact source/seal/history/network/browser/model/auth gates PASS. All6prior
 real accepted results canonically revalidated without provider replay. Same intake
 2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd new normal browser continuation command
  d8b87a23-c2d2-4aca-be36-506697ee6fc4 recorded: job9a615c43-e861-4679-9d9c-
-57489c50bad5/revision12QUEUED. Observer11688, private real-paging-renewal.jsonl,
+57489c50bad5/revision12RUNNING. Attempt2b0556dc-9e18-474f-b9a9-cb6873934a7b
+first request84390bytes packed under131072 with36000source characters. Observer11688,
+private real-paging-renewal.jsonl,
 browser-observer/renew-paging.mjs/live-paging-renewal-binding.json. Reconcile actual
 state before any replay; no usable vendorplan or addon decision/implementation yet.
 
