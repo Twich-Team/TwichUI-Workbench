@@ -93,7 +93,7 @@ def capabilities(path=None):
         except (ValueError, OSError):
             pass
     return CapabilityReport(executors=[ExecutorCapability(backend=b, executor=e, source='No discovery metadata configured',
-        limitation=('WB-15: grounded planning and actual decomposition remain unaccepted; 2/2 investigation approaches exhausted. Other local capabilities remain unknown.' if b == 'local' else 'Installed CLI alone does not establish model access, capacity or permission.'))
+        limitation=('No recent model catalog is configured here. Availability and model support are unverified; actual task receipts report observed execution.' if b == 'local' else 'Installed CLI alone does not establish model access, capacity or permission.'))
         for b, e in [('local', 'local llama.cpp'), ('codex', 'Codex CLI'), ('claude', 'Claude Code')]])
 
 
@@ -286,7 +286,16 @@ class ModelOverview(StrictModel):
 
 
 def overview(engine, report):
+    from workbench import everyday
+
     policy = read(engine)
+    if everyday.enabled():
+        return ModelOverview(policy=policy, capabilities=report,
+            acknowledgment='Saved model choices are bound to eligible task planning and execution. Each task still requires its own scope and run approvals; this is not a global worker acknowledgment.',
+            observations=[Observation(backend=b) for b in ('local','codex','claude')],
+            routing=preview(policy, report), cases=CASES,
+            usage_message='Reported tokens and requests describe Workbench activity. Codex eligibility reads before a turn are snapshots, not a per-turn included-allowance lock or an account balance. This page does not fetch account data.',
+            allocation_message='Task-wide provider and operation bounds remain enforced across permitted switches. Historical campaign totals do not limit new tasks. Internal Codex retries may not be fully observable; missing usage remains unknown. API-key execution and credit purchases are not provided. Subscription-percentage allocation remains unfinished.')
     return ModelOverview(policy=policy, capabilities=report,
         acknowledgment='Configuration saved; not activated for implementation. Grounded local planning records its saved model selection per attempt when separately configured.',
         observations=[Observation(backend=b) for b in ('local','codex','claude')],

@@ -457,3 +457,23 @@ def test_demo_dated_coverage_does_not_invent_interrupted_end_time(client):
     assert sum(row['attempts'] for row in data['outcomes']) == 5
     missing = [row for row in data['rows'] if row['finished_at'] is None]
     assert len(missing) == 1 and missing[0]['outcome'] == 'interrupted_unknown'
+
+
+def test_installed_model_overview_does_not_poll_providers_or_grant_execution(client, store, monkeypatch):
+    from workbench import codex_provider
+
+    monkeypatch.setenv('WORKBENCH_PLANNER', 'everyday')
+    monkeypatch.setattr(LocalProvider, 'generate', lambda *_: pytest.fail('Overview invoked local generation'))
+    monkeypatch.setattr(codex_provider, 'generate', lambda *_: pytest.fail('Overview invoked Codex generation'))
+    with store.connect() as c:
+        before = [c.scalar(select(func.count()).select_from(t))
+                  for t in (execution_policies, model_attempts, planning_jobs)]
+    response = client.get('/api/models')
+    assert response.status_code == 200
+    result = response.json()
+    assert result['acknowledged_revision'] is None
+    assert not result['routing']['execution_allowed']
+    assert all(o['availability'] == 'unknown' and o['capacity'] == 'unknown' for o in result['observations'])
+    with store.connect() as c:
+        assert before == [c.scalar(select(func.count()).select_from(t))
+                          for t in (execution_policies, model_attempts, planning_jobs)]
