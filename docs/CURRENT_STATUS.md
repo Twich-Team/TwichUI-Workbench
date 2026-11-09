@@ -1,3 +1,12 @@
+# Installed correction; original saved report continuing with Qwen
+
+67/d3b6f33 installed after checked history copy, source/seal/network/auth verification.
+All six prior checked results preserved and canonically revalidated without replay.
+The same saved vendor task is in normal read-only investigation again using corrected
+exact packing; no vendor repair plan/implementation yet. Current bounded operation,
+restoration duty and private receipts are in CONTINUATION. Plan/run owner decisions
+remain separate; no addon approval fabricated. Maintenance admissions temporarily held.
+
 # Vendor recovery: real response retained, packing correction verified locally
 
 Same saved owner report has three completed real Qwen inspection responses (56268

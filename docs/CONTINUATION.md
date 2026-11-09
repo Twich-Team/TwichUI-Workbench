@@ -1,3 +1,30 @@
+## Installed vendor recovery — November9 15:23UTC
+
+Installed67/d3b6f33 (full identity/seal in outcome-d3b6f33/dormant-stage.json).
+Exact source, focused210 tests, static/build/contracts/migrations, local and Codex
+native separate-process controlled workflows, and full SIX-request saved-state
+capture passed. Earlier controlled-provider fixture failures retained; only fixture
+adaptation to lossless coordinate ranges was needed. eded944 staged but never active.
+Normal cutover/history/network/model/auth gates pass; all six prior real checked
+results canonically revalidated without any new provider call. Four services active.
+
+SAME owner intake2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd now has normal browser
+read-only continuation job47740591-71e0-4798-8c35-c6f0cdaaff86, command
+ea5737c8-12b6-4998-9e59-cbf38972b525. Observer tool25170 logs real-exact-renewal.jsonl;
+keep following without replay/interrupt. No addon plan/run approvals or repair exists.
+Current config/driver live-exact-renewal-binding.json/browser-observer/renew-exact.mjs
+in private vendor-planning-recovery-20261109. Initial browser launch missed prepared
+LD_LIBRARY_PATH and failed before opening/posting; corrected launch uses stage/browser/lib.
+Original request/history/settings/fallbackOff/source/publication protections preserved.
+
+Three prior real responses COMPLETE,56268tokens known. Later packing failures explicitly
+NOTSTARTED, null historical usage untouched. Exact packing protects source and limits,
+not model diagnosis quality; actual usable planning still must be demonstrated.
+Maintenance admission pause STILL OWNED; restore by hash-bound supported opsctl resume
+on settlement. Need settled plan, actual restart/history recovery, final screenshots,
+model/auth restoration and admissions restoration. No owner engineering decision needed;
+a usable addon repair plan must wait for genuine owner review. Do not stop here.
+
 ## Vendor recovery — exact local request packing, November9 15:18UTC
 
 Installed66/a47ec77 remains settled, not active. Owner intake2dc5b8ba-2d22-4c2c-
