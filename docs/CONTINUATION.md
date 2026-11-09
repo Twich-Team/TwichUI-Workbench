@@ -1,3 +1,29 @@
+## CURRENT73/8a62dd2 — November9 17:26UTC, original vendor task continuation queued
+
+73/8a62dd2 installed with all source/seal/latest-history/network/browser/model/auth
+gates passed; six earlier real results canonically revalidated, zero provider replay.
+Normal browser same-intake continuation commandd0ec186e-5745-4eeb-95bd-bc78d34b7121
+recorded; job3214b14b-5189-40e9-a35b-984ab3ec340d/revision11queued. Observer13682,
+private real-relocated-renewal.jsonl and browser-observer/renew-relocated.mjs with
+live-relocated-renewal-binding.json. Do NOT replay pending/healthy work. No usable
+vendor plan or addon approvals/implementation claimed. Previous41COMPLETE responses
+762137tokens retained; accounting in incident-accounting-through-41.json. No uncertainty.
+
+72 continuation409 was definitively before enqueue/provider: original policy binding
+still pointed to earlier store.73uses existing verified private coordinate-only policy
+relocation; semantics/source/disclosure still validated.139affected+9relocation guard
+checks and actual copied-store request capture pass. Previous2native controlled process
+workflows/static/exact failed8response sequence replay reused explicitly; final cache
+assembly119windows15files10searches61635bytes, no model call/DB mutation.
+
+Next: actual Qwen-only same-report investigation to usable plan/genuine product question,
+then normal plan review by owner; no unseen addon decisions. Restart/history/results/
+model/network continuity and owned maintenance admission restoration still required.
+Maintenance NEW admissions remain OWNED PAUSED; hash-bound opsctl resume after owned
+work, never overwrite another control change. Existing private-network/billing/source/
+credential/independent-check/publication safeguards unchanged. No campaign caps or
+routine engineering renewals. Continue through outcome, not checkpoint stop.
+
 ## November9 17:23UTC —72installed; continuation held before dispatch; relocation correction
 
 72/a3f0699 installed and all source/seal/history/network/auth gates pass. Six prior
