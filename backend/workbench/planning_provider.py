@@ -367,13 +367,32 @@ class LocalProvider:
             body.update(max_tokens=completion_limit, reasoning_budget_tokens=reasoning_limit)
         encoded_body = json.dumps(body, separators=(',', ':')).encode()
         request_limit = PROGRAM_INPUT if expanded_input else BUG_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) else MAX_INPUT
+        measured_body = None
+        measured_counts = None
+        def measure_context(outgoing):
+            nonlocal measured_body, measured_counts
+            envelope = dict(body)
+            envelope['messages'] = [body['messages'][0],dict(role='user',content=json.dumps(outgoing,ensure_ascii=True,separators=(',',':')))]
+            measured_body = json.dumps(envelope,separators=(',',':')).encode()
+            measured_counts = transport.context_budget(secret,envelope)
+            count, capacity = measured_counts.get('prompt_tokens'),measured_counts.get('context_tokens')
+            if type(count) is not int or type(capacity) is not int or count < 1 or capacity < 4096:
+                raise PlanningUnavailable('Exact local context accounting is invalid; no generation started.','context_budget')
+            bound=min(26000 if expanded_input else 22000,capacity-completion_limit-(512 if program else 1024))
+            self.diagnostics.update(context_prompt_tokens=count,context_capacity_tokens=capacity,context_prompt_limit=bound)
+            return count,bound
         if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) and self.request_packer is not None:
             def encode_context(outgoing):
                 envelope = dict(body)
                 envelope['messages'] = [body['messages'][0], dict(role='user', content=json.dumps(
                     outgoing, ensure_ascii=True, separators=(',', ':')))]
                 return json.dumps(envelope, separators=(',', ':')).encode()
-            context, packing = self.request_packer(context, encode_context, request_limit)
+            constraints={}
+            if len(encoded_body)>MAX_INPUT:
+                if not hasattr(transport,'context_budget'):
+                    raise PlanningUnavailable('Exact local context accounting is unavailable; no generation started.','context_budget')
+                constraints['measure']=measure_context
+            context, packing = self.request_packer(context, encode_context, request_limit, **constraints)
             body['messages'][1]['content'] = json.dumps(context, ensure_ascii=True, separators=(',', ':'))
             encoded_body = encode_context(context)
             if self.response_evidence:
@@ -423,7 +442,7 @@ class LocalProvider:
                 if not hasattr(transport, 'context_budget'):
                     raise PlanningUnavailable('Exact local context accounting is unavailable; no generation started.',
                                               'context_budget')
-                counts = transport.context_budget(secret, body)
+                counts = measured_counts if measured_body==encoded_body else transport.context_budget(secret, body)
                 count, capacity = counts.get('prompt_tokens'), counts.get('context_tokens')
                 if (type(count) is not int or type(capacity) is not int or count < 1
                         or capacity < 4096 or count > min(26000 if expanded_input else 22000, capacity-completion_limit-(512 if program else 1024))):

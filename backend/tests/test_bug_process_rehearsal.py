@@ -537,7 +537,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             intakes.c.payload['title'].as_string() == cases[1]['request']['title'],
             planning_jobs.c.kind == 'planning')).scalar_one()
     pages = payload['bug_inspection_packet']['inspection_windows']
-    if intent_mode and case_provider == 'codex':
+    if intent_mode:
         # A single complete source read is sufficient; compact provenance no
         # longer tricks the scripted provider into requesting it twice.
         assert len(pages) == 1

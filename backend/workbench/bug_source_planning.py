@@ -509,9 +509,9 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     original_packer = getattr(adapter, 'request_packer', None)
     if hasattr(adapter, 'request_packer'):
         from workbench.request_context import fit
-        adapter.request_packer = lambda outgoing, encode, limit: fit(
+        adapter.request_packer = lambda outgoing, encode, limit, **constraints: fit(
             outgoing, packet, packing_context.get('windows', []),
-            packing_context.get('requested', []), encode, limit, should_stop)
+            packing_context.get('requested', []), encode, limit, should_stop, **constraints)
 
 
     def observe_usage(facts):
@@ -740,9 +740,9 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             if index+1 == requests:
                 raise PlanningUnavailable('The bounded investigation needs more source inspection.', 'inspection_limit')
             read_errors = []
-            windows, matches, chars = (inspect(packet, draft.inspection, disclosure_paths=adapter.source_manifest,
+            windows, matches, chars = (inspect(packet, draft.inspection, disclosure_paths=getattr(adapter,'source_manifest',None),
                           page_lines=160,result_budget=16000, errors=read_errors)
-                if getattr(adapter, 'source_manifest', None) is not None else inspect(packet, draft.inspection, errors=read_errors))
+                if getattr(adapter, 'source_manifest', None) is not None or intent_mode else inspect(packet, draft.inspection, errors=read_errors))
             if evidence:
                 evidence.record('source-read-result',characters=chars,search_matches=len(matches),
                     windows=[{key:value for key,value in window.items() if key!='text'} for window in windows])

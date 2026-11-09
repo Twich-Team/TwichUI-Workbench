@@ -1,3 +1,30 @@
+## Current78/2e59de7: original report settled; tokenizer-aware packing ready for final proof
+
+Real Qwen on original intake2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd discovered previously
+unseen NPC settings page through the new directory.4COMPLETE responses111434tokens;
+next request refused BEFORE generation by exact context guard. Jobb514720e/attempt
+122c5ce4 settled19:42:37UTC, no uncertain activity, no plan/approval/addonchanges.
+All74COMPLETE1541963tokens preserved; policy18/fallbackOff unchanged; normalmodel/auth
+verified. Original NULLs untouched. Browser observer94370finished; diagnostics retained.
+
+Byte-only packing could fit131072bytes then fail26000prompt limit. New packer uses
+actual tokenizer as a second constraint, trims optional history only, preserves exact
+required reads/declarations/bootstrap/approval data, stops at required-source minimum.
+Unknown/invalid accounting holds, limits unchanged; no new generation in reproduction.
+Intent source pages now160lines/16000chars vs80/6500 (same existing Codex tool size),
+under unchanged total source/wire/token guard, reducing repeated read round trips.
+257affectedchecks and2actualconfined controlled process/browser workflows PASS.
+The native fixture's obsolete two-page expectation updated because complete source is
+now returned in one page; successful real task evidence not replaced. Paired real-
+response reproduction must include ALL historical worker clarification text; earlier
+single-reply reproduction did not establish the actual failure. Final exact proof,
+seal/install then same-task Qwen continuation remain. No usable vendorplan claimed.
+
+Owned maintenance NEW admissions STILL PAUSED: hash-bound supported opsctl resume after
+owned work. Need genuine owner plan review if plan valid, settled restart/history/results/
+model/network continuity. Standing authority continues without oldcampaigncaps/renewals;
+checkpoint not stop. Preserve all6prior accepted results and original history/source.
+
 ## Installed78/2e59de7 — original saved vendor report continuation accepted
 
 All source/seal/history/network/browser/model/auth installation gates pass; all6prior
