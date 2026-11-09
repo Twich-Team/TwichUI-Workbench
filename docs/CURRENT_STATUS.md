@@ -1,3 +1,27 @@
+## Installed79/071009a — original vendor report continuing after exact packing reproduction
+
+All source/seal/history/network/browser/model/auth gates pass;6priorrealacceptedresults
+canonically revalidated without replay. Original intake2dc5b8ba-2d22-4c2c-9f90-
+3bd58d29d5fd browser command498b59ae-8d17-4908-bbf9-f8f5181833b8 accepted19:55:31UTC.
+Jobbc9640c4-e50b-4187-942d-4788147ffe90/revision17QUEUED; observer91313, private
+real-token-packing-renewal.jsonl / live-token-packing-renewal-binding.json. Inspect actual
+state before replay. No vendorplan, addonapproval/implementation claimed.
+
+Correct paired replay includes ALL actual historical clarification text (1617bytes):
+old fifthrequest98037bytes26161tokens refused before generation; new97109bytes25918
+fits SAME26000/32768 bound, exact required-source preservation recorded. First4request
+bytes identical; saved real responses used, zero newgeneration. Earlier single-feedback
+replay failed to reproduce and is retained honestly.257affected/2confinednative controlled
+process/browser journeys PASS. Bounded160line/16000char intent reads now reduce source
+roundtrips; same total source/wire/token/output/authority limits. Offlineproof distinguishes
+controlled replay usage from real accounting; latest real total74COMPLETE1541963tokens,
+originalNULLs unchanged. Model/auth verified, savedpolicy18/fallbackOff unchanged.
+
+Owned maintenance NEW admissions STILL PAUSED: restore hash-bound supported opsctl resume
+after owned work. Need usable real plan for genuine owner review, quiescent restart/
+history/results/model/network continuity. No vendor source toCodex, addon write or
+publication/paid use. Standing authority continues; no oldcampaigncaps/renewal/stop.
+
 ## Current78/2e59de7: original report settled; tokenizer-aware packing ready for final proof
 
 Real Qwen on original intake2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd discovered previously
