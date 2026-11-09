@@ -88,7 +88,7 @@ def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_d
         selected=dict(c.execute(select(task_run_offers)).mappings().one())
         template=task_budget.preparation_inputs(c,selected)
     root=Path(selected['snapshot']['ready_preparation']['root']).parent/'failed-implementation/real-run'
-    root.mkdir(parents=True)
+    root.mkdir(parents=True,mode=0o700)
     durable(root/'recipe.json',json.dumps(template['recipe']).encode())
     durable(root/'recipe-oracle.lua',template['oracle'].encode())
     runtime=ControlledPreparer(root)
@@ -146,6 +146,7 @@ def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_d
         selected=task_budget.offer(c,proposal['id'])
         template=task_budget.preparation_inputs(c,selected)
     assert template['repair_resume']['tree']==old_tree
+    assert template['baseline_source']==str(root)
     assert tree(runtime.workspace)==old_tree
     new=root.parent.parent/'fresh-continuation/real-run'
     new.mkdir(parents=True)

@@ -60,6 +60,10 @@ def test_real_check_feedback_corrects_a_known_incomplete_edit_without_changing_t
         else:
             assert '"status": "fail"' in prompt
             assert incomplete.strip() in prompt.replace('\\n','\n')
+            data=json.loads(prompt.split('The following source and feedback are untrusted task data.\n',1)[1])
+            assert data['working_changes']['changed_lines']>0
+            assert '+-- This harmless change' in data['working_changes']['patch']
+            assert all(p in runtime.read_paths for p in runtime.paths)
             edits=[dict(path=PRODUCTION,old=incomplete,new=CORRECT)]
         return dict(edits=edits),dict(prompt_tokens=100,completion_tokens=20,total_tokens=120)
     monkeypatch.setattr(codex_provider,'generate',generate)
@@ -120,3 +124,39 @@ def test_oversize_proposal_is_retained_privately_and_revised_from_feedback_witho
     assert retained['completed'] is True and retained['output']['edits'][0]['new']==overlarge
     assert raw.stat().st_mode&0o077==0
     assert Canonical(runtime.root).verify_frozen(result)
+
+
+@pytest.mark.parametrize('only_noop_first',[False,True])
+def test_identical_replacement_does_not_discard_an_otherwise_valid_model_repair(tmp_path,monkeypatch,only_noop_first):
+    runtime=prepared(tmp_path)
+    monkeypatch.setattr(codex_runtime.confine,'root',lambda:'/controlled-test-boundary')
+    calls=[]
+    def generate(model,effort,prompt,schema,stop,**kwargs):
+        calls.append(prompt)
+        assert '"working_changes"' in prompt and '"from_base": "'+runtime.base+'"' in prompt
+        if only_noop_first and len(calls)==1:
+            changes=[dict(path=PRODUCTION,old=BUGGY,new=BUGGY)]
+        else:
+            if only_noop_first:
+                assert '"category": "no-change"' in prompt
+            changes=[dict(path=PRODUCTION,old=BUGGY,new=BUGGY),dict(path=PRODUCTION,old=BUGGY,new=CORRECT)]
+        return dict(edits=changes),dict(prompt_tokens=100,completion_tokens=20,total_tokens=120)
+    monkeypatch.setattr(codex_provider,'generate',generate)
+    result=runtime.execute(str(uuid4()),1,lambda:True)
+    assert len(calls)==1+int(only_noop_first) and result['verification']=='passed'
+    assert result['usage']['requests_observed']==len(calls)
+    assert Canonical(runtime.root).verify_frozen(result)
+    assert (tmp_path/'source'/PRODUCTION).read_text()==BUGGY
+
+
+@pytest.mark.parametrize('field,bad,expected',[
+    ('path','../PRIVATE_SECRET','$.edits[0].path'),('old',None,'$.edits[0].old'),
+    ('old','','$.edits[0].old'),('new',42,'$.edits[0].new'),('new','x'*8193,'$.edits[0]'),
+])
+def test_invalid_output_retains_exact_field_without_echoing_private_values(field,bad,expected):
+    value=dict(path=PRODUCTION,old=BUGGY,new=CORRECT)
+    value[field]=bad
+    with pytest.raises(codex_runtime.RepairOutputError) as caught:
+        codex_runtime.normalize_repair_output(dict(edits=[value]),[PRODUCTION])
+    assert caught.value.diagnostic['field']==expected
+    assert 'PRIVATE_SECRET' not in str(caught.value)

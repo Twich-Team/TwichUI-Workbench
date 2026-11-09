@@ -1,3 +1,58 @@
+## Real code/test cycle reached; harmless no-op correction ready — Nov9 01:25UTC
+
+Installed55 remains5968dd047ac35e6ceb6ca3e9fd533f6dfcdad118 (tree/seal/records
+inpreviousentry). Real Run903707ad.../execution4f9e3b6e-2459-535b-9ddd-8ee6c153aee5
+FAILED settled01:18:02; model/fencee2ebb425-6af4-4056-9f6e-000243c6088e.
+Actualbaselinepassed, original95linemodelwork copied underfreshgrant, realCodex
+added54testlines+1productionline (65add/31deleteTravel+54addtest=150total).
+Focusedindependentcheck failed atnewtest_nav.lua:597 (reenable/listener/emptyresult
+assertion). Appreturnedfeedback andmodelrevised. Turn2proposedchanginganoriginal
+testline, atomicallyrejected;turn3proposed161totalchanges, atomicallyrejected with
+correctcounts. Turn4included4meaningfulreplacements plus1identicalold==new edit;
+overlystrictlocalvalidator rejectedwholeoutput beforeapplying. NOrealcheckedresult,
+nooriginal-failureproof yet;4real supportingcases remain0/4. This HASreachedreal
+model-authoredimplementationANDnative regressiondevelopment, notonlyplanning.
+
+All4Codexturnscompleted/closed;187838totaltokensknown, grantrevoked, ownedunitinactive,
+controllerrestored/no_lease; no uncertaincurrentactivity. Ledger137knowncompleted
+Codexturns, historicalunknownsunchanged. Exactsettlement and150linemodelpatch in
+C/outcome-5968dd0/settled-implementation;4rawcompletedoutputs+usage/privatefeedback
+inS55 runtime. Do NOTmodifythatworkspace orreplay externalrequests. Runtime root
+S55/release/artifacts/runs/task-lease-task-session-903707ad-bf41-461c-83e1-d4f46d1c6879-
+01/real-run. Driver85225endedheld, receipts/logsretained.
+
+Newdevelopment(notinstalled): normalizeONLYvalidatedidenticalreplacements away;
+all-noop gets no-changefeedback, repeatedunchangedproposalholds. Preserve original
+fulloutput/usage; malformedfields retain exactpath/type/constraint/phase/completion
+andreceiptprivate diagnostics. No scope/type/budget/test/verification weakening.
+Pass exactapprovedworkingdiff+currentchangedlinecount asuntrustedcontext, soagent
+can distinguish originaltestlines fromits additions andfit the total150limit.
+This sendsONLYcurrentapprovedread/writefiles, norawoutsidechecklogs. Actualturn4
+normalizedoffline:4meaningfuleditsretained/1noopremoved, correct157linebudgetfeedback,
+0fileschanged/0newprovidercalls; R55/known-noop-proposal-replay.json. No manualfix.
+
+Continuation nowselectslatestknownfailedrun'sverifiedoriginalbaseline. Actual
+newpristineclone replay confirmedreuse withsamebase/recipe/checker/interpreters,
+0extra suites/0edits/0modelcalls. R55/continuation-baseline-replay/result.json.
+Newboundaryprobealwaysruns andposteditverificationNEVERreused. This avoids another
+unchanged4minpre-editbaseline. Finalaffected198checks passed under
+/tmp/wb-noop-diff-corrected-affected.log; staticpass.2confined separate-process normal
+browsernativejourneys passed59.08s with oversizedbatch→feedback→realedits+testsbearing
+harmlessnoop→independentchecks/restart/secondordinaryfixturebug. CONTROLLEDproviders.
+Full1806backend/25frontend/4casebrowser from5968remainvalid forunchanged code; final
+narrowchanges have targeted/native verification. Onecachefixturemode corrected to
+private700 to matchproduction; no guardloosened. No newownerdecision required.
+
+NEXT: commit/seal/deploy56 fromcurrentconnectedchanges, preservinglatest282ishrows
+(measureexact), rootdocs/history/recovery/cgroups/network/auth/source/billing. Reuse
+sameappliedscope/clarification withfreshnormalRun forpreserved150linemodelwork (both
+files), appendOLDmodel_e2ebb425... to operationalprioraccounting/settled_implementations
+alongwith12e674b7..., neverresetusage. Latestcodewillreuse actualS55baseline safely.
+Realrenewalpurpose: normalizeharmlessnop andprovidescopedactualdiff/linebudget, not
+unchangedretry. Keep task41 first; completecheckedrepair, meaningfulfinalsemantic
+reviewall9owner+7scopecriteria, durable result/restart/nextordinarysubmission/all4real
+providercases/fullremainingproduct. No campaigncaps/engineeringrenewal gates.
+
 ## Installed55; real repair continuation approved and preparing — Nov9 01:12UTC
 
 Installedcandidate5968dd047ac35e6ceb6ca3e9fd533f6dfcdad118,

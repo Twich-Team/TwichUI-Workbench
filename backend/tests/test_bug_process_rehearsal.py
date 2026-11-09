@@ -348,6 +348,12 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 else:
                     assert wire['feedback']['category']=='change-budget'
                     assert wire['feedback']['allowed_changed_lines']==150
+                    assert wire['working_changes']['changed_lines']==0
+                    assert wire['working_changes']['patch']==''
+                    # A harmless no-op beside actual code/test edits must not
+                    # discard the complete, accounted provider response.
+                    answer['edits'].append(dict(path=CLIENT_SOURCE if client_case else PRODUCTION,
+                        old=BAD_ALERT if client_case else BUGGY,new=BAD_ALERT if client_case else BUGGY))
         # Source-heavy observations must cross the former65k threshold through
         # the actual application, rather than rehearsing only tiny token counts.
         return answer,dict(prompt_tokens=70000,completion_tokens=10,total_tokens=70010,reasoning_tokens=2)
