@@ -1,3 +1,13 @@
+# Vendor-task recovery running
+
+Installed64/39e5c35 repairs the wrong planning route and transient model contention.
+The same saved report is now in a bounded real Qwen investigation. No vendor repair
+plan, implementation or checked fix is claimed yet. No addon decision was fabricated.
+The original input, two legacy failures, known pre-generation hold, six prior results,
+styled interface, model preferences and network safeguards remain saved. Maintenance
+admissions are temporarily paused under local-model priority and must be restored
+on settlement. CONTINUATION binds exact live activity; do not replay it.
+
 # Active real-use failure — vendor task
 
 The styled app is installed, but the owner’s ordinary vendor-name report hit a

@@ -1,3 +1,31 @@
+## Active real Qwen vendor investigation — November9, 14:36UTC
+
+Installed64/39e5c35 (full identity in outcome-39e5c35/dormant-stage.json) passed
+checked cutover with latest398rows, retained original/sixsuccessfulresults and
+network/auth/browser protections. Same owner intake2dc5b8ba-2d22-4c2c-9f90-
+3bd58d29d5fd resumed through normal browser, no DB repair or new task.
+Newjob b38cba42-352c-4c17-9506-3423d2a6a803; first real model attempt
+4fe2ffe6-c2ca-41c5-b62b-26bf0b8fc535 RUNNING. Do not replay or interrupt healthy
+work. Tool session11378 runs private browser-observer/resume-saved-task.mjs;
+real-resume.jsonl is its progress. real-resumed-task.json appears on terminal state.
+Only read-only Qwen permission, original expiry unchanged. NO addon scope/run/
+publication decisions recorded. Any usable plan needs genuine owner review.
+
+Private incident directory same as below. Supported maintenance admission pause
+is STILL OWNED: restore via opsctl resume only if control hash matches recorded
+maintenance-admission-hold.json; initial control snapshot retained. Current pilot
+task drained naturally, no termination/unit/rootchange; locks freed before resume.
+On settlement check model/auth restoration, all results/history and full service
+restart, then restore admissions safely. Newcode waits beforeclaim while busy and
+bounds races without generating/losing unused consent. First contention attempt
+remains failed/usageNULL; no model request or output was replayed. Actual generation
+has now reached private request-schema evidence; wait for a supported terminal
+receipt, do not infer completion from text. Prior initial complete1918/32/113browser
+verification reused with259affected/11finaldenial/32frontend/3browser/2native confined
+checks and static/contracts/build on64. All pass, details in offline-verification.
+Older log filename issue is disclosed in native-log-lineage.json; new final native
+log is separate. No platform interruption resets authority or consumes oldcaps.
+
 ## Vendor recovery: model contention correction ready — November9
 
 Installed63/769048f repaired the original missing-permission legacy route; same
