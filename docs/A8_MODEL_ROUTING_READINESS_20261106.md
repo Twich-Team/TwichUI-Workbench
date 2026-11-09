@@ -27,7 +27,11 @@ fulloutput/usage; malformedfields retain exactpath/type/constraint/phase/complet
 andreceiptprivate diagnostics. No scope/type/budget/test/verification weakening.
 Pass exactapprovedworkingdiff+currentchangedlinecount asuntrustedcontext, soagent
 can distinguish originaltestlines fromits additions andfit the total150limit.
-This sendsONLYcurrentapprovedread/writefiles, norawoutsidechecklogs. Actualturn4
+This sendsONLYcurrentapprovedread/writefiles, norawoutsidechecklogs. Continuation
+also carries the previous focused-check failure ONLY when its recorded fulltree,
+base, execution and patchhash exactlymatch the restored work. Actualprivate replay
+R55/continued-feedback-replay/result.json matchedtest_nav.lua593..601; no rawlogs
+externally disclosed, no checks falsely reused. Actualturn4
 normalizedoffline:4meaningfuleditsretained/1noopremoved, correct157linebudgetfeedback,
 0fileschanged/0newprovidercalls; R55/known-noop-proposal-replay.json. No manualfix.
 
@@ -35,8 +39,8 @@ Continuation nowselectslatestknownfailedrun'sverifiedoriginalbaseline. Actual
 newpristineclone replay confirmedreuse withsamebase/recipe/checker/interpreters,
 0extra suites/0edits/0modelcalls. R55/continuation-baseline-replay/result.json.
 Newboundaryprobealwaysruns andposteditverificationNEVERreused. This avoids another
-unchanged4minpre-editbaseline. Finalaffected198checks passed under
-/tmp/wb-noop-diff-corrected-affected.log; staticpass.2confined separate-process normal
+unchanged4minpre-editbaseline. Finalaffected200checks passed under
+/tmp/wb-noop-diff-context-affected.log; staticpass.2confined separate-process normal
 browsernativejourneys passed59.08s with oversizedbatch→feedback→realedits+testsbearing
 harmlessnoop→independentchecks/restart/secondordinaryfixturebug. CONTROLLEDproviders.
 Full1806backend/25frontend/4casebrowser from5968remainvalid forunchanged code; final

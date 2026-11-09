@@ -160,3 +160,29 @@ def test_invalid_output_retains_exact_field_without_echoing_private_values(field
         codex_runtime.normalize_repair_output(dict(edits=[value]),[PRODUCTION])
     assert caught.value.diagnostic['field']==expected
     assert 'PRIVATE_SECRET' not in str(caught.value)
+
+
+@pytest.mark.parametrize('changed',[False,True])
+def test_continuation_reuses_failed_check_context_only_for_exact_preserved_work(tmp_path,changed):
+    from types import SimpleNamespace
+    root=tmp_path/'fresh'
+    previous=tmp_path/'previous'
+    folder=previous/'working-checks/00'
+    folder.mkdir(parents=True)
+    root.mkdir()
+    resume=dict(root=str(previous),execution_id='settled-previous',tree={'approved.lua':'known'},patch_sha256='patch')
+    (root/'repair-resume.json').write_text(json.dumps(resume))
+    manifest=dict(request_id='settled-previous',base='base',tree=resume['tree'],patch_sha256='different' if changed else 'patch')
+    (folder/'manifest.json').write_text(json.dumps(manifest))
+    outcome=dict(status='fail',failed_check_name='focused',diagnostic='PRIVATE_OUTSIDE_DISCLOSURE',
+        context_hint=dict(path=PRODUCTION,start=1,end=2))
+    (folder/'outcome.json').write_text(json.dumps(outcome))
+    feedback=codex_runtime.continued_feedback(SimpleNamespace(root=root,base='base'))
+    if changed:
+        assert feedback is None
+        assert not (root/'prior-check-feedback-context.json').exists()
+    else:
+        assert feedback==outcome
+        external=codex_runtime.disclosed_feedback(feedback,[PRODUCTION])
+        assert external['failed_check_name']=='focused' and 'PRIVATE' not in json.dumps(external)
+        assert json.loads((root/'prior-check-feedback-context.json').read_text())['verification_reused'] is False

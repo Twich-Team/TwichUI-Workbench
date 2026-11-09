@@ -54,6 +54,33 @@ def normalize_repair_output(value,paths):
     return selected,len(edits)-len(selected)
 
 
+def continued_feedback(runtime):
+    """Reuse failed-check information only for the exact restored working tree.
+
+    It is context for revision, never a verification result or execution grant.
+    The caller still strips arbitrary private output before external disclosure.
+    """
+    from workbench.repair_continuation import private_json
+    path=runtime.root/'repair-resume.json'
+    if not path.exists():
+        return None
+    resume=private_json(path)
+    for folder in sorted((Path(resume['root'])/'working-checks').glob('[0-9][0-9]'),reverse=True):
+        if not (folder/'outcome.json').exists():
+            continue
+        manifest=private_json(folder/'manifest.json')
+        if (manifest.get('request_id')!=resume['execution_id'] or manifest.get('base')!=runtime.base
+                or manifest.get('tree')!=resume['tree'] or manifest.get('patch_sha256')!=resume['patch_sha256']):
+            continue
+        outcome=private_json(folder/'outcome.json')
+        if outcome.get('status')=='fail':
+            durable(runtime.root/'prior-check-feedback-context.json',json.dumps(dict(
+                previous_execution=resume['execution_id'],working_tree_matches=True,
+                evidence=str(folder),verification_reused=False),sort_keys=True).encode())
+            return outcome
+    return None
+
+
 def disclosed_feedback(feedback,read_paths):
     """Keep exact logs private; external feedback contains no arbitrary test text.
 
@@ -223,7 +250,7 @@ class CodexRuntime(Runtime):
         Test feedback is data and cannot alter the frozen independent oracle.
         """
         receipts=[]
-        feedback=None
+        feedback=continued_feedback(self)
         failure=None
         changed=False
         source_lines={}
