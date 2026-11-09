@@ -254,3 +254,51 @@ def recorded_check_quarantine(connection, identity, evidence_roots):
     if not any(p.get('attempt')==identity and p.get('read_only_quarantine')==proof for p in records[0].get('settlement',[])):
         raise ValueError('The application has not recorded this exact disposition')
     return dict(proof,requests_started=len(proof['completed_prefix']['turns'])+1)
+
+
+def completed_local_turns(identity, usage, evidence_roots, requested_model, diagnostics):
+    """Recover terminal match/usage facts from local envelopes, never plan content."""
+    if (str(UUID(identity))!=identity or not isinstance(usage,dict) or usage.get('status')!='complete'
+            or diagnostics.get('generation_state')!='finished'):
+        raise ValueError('Complete local response accounting is unavailable')
+    count=usage.get('requests_observed')
+    if type(count) is not int or not 1<=count<=16 or not requested_model:
+        raise ValueError('Local response attribution is unavailable')
+    roots=list(dict.fromkeys(Path(p) for p in evidence_roots))
+    matches=[p for p in roots if (p/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl').is_file()]
+    if len(matches)!=1:
+        raise ValueError('Local receipt owner is missing or ambiguous')
+    root=matches[0]
+    summed={k:0 for k in ('prompt_tokens','completion_tokens','total_tokens')}
+    records=[]
+    seen=set()
+    for index in range(count):
+        phase=identity if index==0 else str(uuid5(UUID(identity),'committed-source-turn-'+str(index)))
+        rows,sha=_read(root/'release/artifacts/runs'/('planning-evidence-'+phase)/'events.jsonl',lines=True,bound=65536)
+        envelopes=[x for x in rows if x.get('phase')=='envelope']
+        if len(envelopes)!=1:
+            raise ValueError('Local terminal envelope is missing or duplicated')
+        e=envelopes[0]
+        values=e.get('usage',{}).get('values',{})
+        if (e.get('generation_state')!='finished' or e.get('completion')!='stop'
+                or e.get('accounting_state')!='complete' or e.get('model_matches')!=1
+                or not e.get('response_identity') or e['response_identity'] in seen
+                or any(type(values.get(k)) is not int or values[k]<0 for k in summed)
+                or values['prompt_tokens']+values['completion_tokens']!=values['total_tokens']):
+            raise ValueError('Local terminal state or usage is not established')
+        seen.add(e['response_identity'])
+        for k in summed:
+            summed[k]+=values[k]
+        records.append(dict(phase=phase,source_sha256=sha,response_identity=e['response_identity']))
+    if summed!=usage.get('values'):
+        raise ValueError('Local terminal usage differs from recorded accounting')
+    # A later preflight rejection is not another generation. Require its own
+    # explicit non-dispatch receipt, rather than inferring it from blank text.
+    if diagnostics.get('stopped_request_generation_state')=='not_started':
+        phase=str(uuid5(UUID(identity),'committed-source-turn-'+str(count)))
+        rows,sha=_read(root/'release/artifacts/runs'/('planning-evidence-'+phase)/'events.jsonl',lines=True,bound=65536)
+        if (not any(x.get('phase')=='request-rejected' and x.get('generation_state')=='not_started' for x in rows)
+                or any(x.get('phase') in {'wire-received','envelope'} for x in rows)):
+            raise ValueError('The stopped local request is not a verified preflight rejection')
+        records.append(dict(non_dispatch=phase,source_sha256=sha))
+    return dict(provider_outcome='completed',actual_model=requested_model,model_observation='Every retained envelope affirmed equality to the saved requested model.',records=records,usage=summed,database_records_unchanged=True)

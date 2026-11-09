@@ -315,3 +315,59 @@ def test_local_lock_race_waits_before_transport_and_honors_cancellation(tmp_path
         with pytest.raises(planning_provider.PlanningUnavailable, match="No generation started"):
             with planning_provider.local_slot(ends_at=time.monotonic() + 2, stop_event=stopping):
                 pass
+
+
+@pytest.mark.usefixtures("installed")
+def test_completed_reads_survive_later_preflight_failure_and_normal_renewal(
+    client, headers, store, monkeypatch
+):
+    from workbench.planning_provider import LocalProvider, PlanningUnavailable
+    from test_bug_source_planning import inspection
+    from test_bug_workflow import CLIENT_SOURCE
+
+    enable_bugs(monkeypatch)
+    calls = scripted(monkeypatch, [inspection(), inspection(CLIENT_SOURCE)])
+    generated = LocalProvider.generate
+
+    def stop_third(self, *args, **kwargs):
+        if len(calls) == 2:
+            self.diagnostics = dict(generation_state="not_started", category="input_budget")
+            raise PlanningUnavailable("Controlled working packet overflow.", "input_budget")
+        return generated(self, *args, **kwargs)
+
+    monkeypatch.setattr(LocalProvider, "generate", stop_third)
+    item = client.post("/api/intake", headers=headers, json=report()).json()
+    assert worker.tick(store)
+    failed = client.get("/api/intake/" + item["id"]).json()
+    assert failed["status"] == "failed" and not failed["proposals"]
+    with store.connect() as c:
+        initial = first(c, item["id"])
+        old = dict(c.execute(select(model_attempts)).mappings().one())
+        assert old["usage"]["status"] == "complete" and old["usage"]["requests_observed"] == 2
+        assert old["actual_model"] == everyday.MODEL
+        assert initial["payload"]["bug_inspection_packet"]["inspection_windows"]
+    endpoint = "/api/intake/" + item["id"] + "/clarification"
+    reply = dict(
+        command_id=str(uuid4()),
+        revision=failed["revision"],
+        text="Continue the original report using the retained source.",
+        continue_investigation=True,
+        renew_operation=True,
+    )
+    renewed = client.post(endpoint, headers=headers, json=reply)
+    assert renewed.status_code == 200, renewed.text
+    assert client.post(endpoint, headers=headers, json=reply).status_code == 200
+    scripted(monkeypatch, [response()])
+    assert worker.tick(store)
+    current = client.get("/api/intake/" + item["id"]).json()
+    assert current["status"] == "completed" and current["proposals"]
+    with store.connect() as c:
+        assert (
+            dict(
+                c.execute(select(model_attempts).where(model_attempts.c.id == old["id"]))
+                .mappings()
+                .one()
+            )
+            == old
+        )
+    assert not current["tasks"] and not current["decisions"]

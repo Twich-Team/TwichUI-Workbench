@@ -238,7 +238,14 @@ def renewed_budget(connection, initial, *, exclude_job=None):
         raise ValueError('Renewal cannot silently switch the investigation provider')
     packet=initial['payload'].get('bug_inspection_packet')
     if not isinstance(packet,dict) or not packet.get('files') or not packet.get('base'):
-        raise ValueError('The original committed disclosure scope is unavailable')
+        from workbench import intake, bug_investigation, investigation_memory
+        from workbench.db import intakes
+        from workbench.trusted_preparation import configuration
+        original=intake.require(connection,intakes,initial['intake_id'])['payload']
+        fresh=bug_investigation.context(original,'',configuration(connection.engine))
+        packet,_,_=investigation_memory.seed(fresh,original,'not-a-provider-attempt',connection.engine)
+        if not packet.get('files') or not packet.get('base'):
+            raise ValueError('The original committed disclosure scope is unavailable')
     return dict(budget_version=4,renewal_consent=True,
         operation_request_bound=request_bound(initial['payload']['local_planning_receipt']),
         consumed_requests=sum(p['requests'] for p in phases),
@@ -246,4 +253,5 @@ def renewed_budget(connection, initial, *, exclude_job=None):
         prior_phases=[{k:p[k] for k in ('job','sequence','attempt','backend','actual_model',
                        'database_outcome','provider_state','usage','input_binding')} for p in phases],
         next_sequence=snapshot['next_sequence'],
-        source_scope=dict(base=packet['base'],files={f['path']:f['sha256'] for f in packet['files']}))
+        source_scope=dict(base=packet['base'],files={f['path']:f['sha256'] for f in packet['files']}),
+        retained_source_packet=packet)

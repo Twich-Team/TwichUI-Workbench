@@ -214,6 +214,10 @@ def view_in(connection, identity):
         retained['status'] = 'failed'
         retained['message'] = scenario_failure_message(diagnostics.get('category'))
     for job in jobs:
+        facts=job['payload'].get('diagnostics',{})
+        if (job['status']=='failed' and facts.get('stopped_request_category')=='input_budget'
+                and facts.get('stopped_request_generation_state')=='not_started'):
+            job['message']='Workbench stopped preparing a larger source request before sending it. Earlier read-only work and usage remain saved. No repair started; the source-packing problem must be corrected before continuing.'
         if (configured_mode() == 'everyday' and not row['payload'].get('local_planning')
                 and job['status'] == 'failed'):
             from workbench.investigation_start import non_dispatch

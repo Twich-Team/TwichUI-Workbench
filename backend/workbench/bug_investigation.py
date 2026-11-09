@@ -343,7 +343,7 @@ def planning_request(packet, original, feedback):
                for item in packet['files']],
         report=dict(title=original['title'], description=original['description'],
                     lua_error=original.get('lua_error', '')), owner_reply=feedback,
-        coverage={**report_coverage(original), **({'reproducer_format':'lua-phases-v1'}
+        coverage={**report_coverage(original), **({'scope_plan_format':'readable-intent-v1'} if packet.get('plan_review')=='source-grounded-intent-v1' else {}), **({'reproducer_format':'lua-phases-v1'}
             if packet.get('plan_review') == 'source-grounded-lua-v1' else {})},
         context_note='Exact committed lines. Coverage labels distinguish complete and partial functions. '
                      'A bootstrap tail shows final loads; its full committed prefix is independently checked.')

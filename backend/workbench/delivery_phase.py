@@ -49,6 +49,12 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
             elif (outcome=='completed' or facts.get('generation_state')=='finished' and
                     facts.get('accounting_state')=='complete'):
                 provider_state='completed'
+            elif backend=='local' and facts.get('generation_state')=='finished':
+                from workbench.provider_receipts import completed_local_turns
+                terminal_proof=completed_local_turns(attempt,usage,evidence_roots,requested,facts)
+                provider_state=terminal_proof['provider_outcome']
+                if actual is None:
+                    actual=terminal_proof['actual_model']  # Recovered fact only; database stays unchanged.
         if provider_state in {'completed','interrupted'}:
             values=usage.get('values',{})
             if (usage.get('units')!='tokens' or not isinstance(values,dict)

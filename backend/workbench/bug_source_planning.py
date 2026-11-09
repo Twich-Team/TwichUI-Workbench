@@ -347,7 +347,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     if wire['coverage'].get('call_driven') and not review_required and not intent_mode:
         wire['coverage']['require_inspection'] = True
     parent = adapter.response_evidence
-    journals, receipts = [], []
+    journals, receipts, observed_models = [], [], []
     lessons = None
     predecessor = None
     historical_pending = False
@@ -516,6 +516,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 wire['prior_rejected_plan_feedback'] = lessons
             try:
                 raw, model, basis = adapter.generate(wire, schema, expected_model=expected_model)
+                observed_models.append(model)
             except PlanningUnavailable as error:
                 diagnostics = dict(adapter.diagnostics)
                 response_added = observe_usage(diagnostics)
@@ -732,10 +733,14 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     r['values']['total_tokens'] for r in receipts), status='complete')
             if current.get('generation_state') != 'partial':
                 diagnostics['generation_state'] = 'finished'
+            diagnostics['accounting_state'] = 'complete'
+            if observed_models and set(observed_models)=={expected_model}:
+                diagnostics['actual_model'] = expected_model
         elif receipts:
             diagnostics['known_usage'] = json.dumps(summed, sort_keys=True)
             diagnostics['usage'] = None
         adapter.diagnostics = diagnostics
+        adapter.inspection_packet = packet
         adapter.response_evidence = parent
         adapter.stop_event = original_stop
         if getattr(adapter, 'source_investigation', False):

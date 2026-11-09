@@ -186,7 +186,10 @@ class LocalProvider:
             raise PlanningUnavailable('Grounded local planning requires a saved model selection.', 'model_policy')
         encoded = json.dumps(packet, ensure_ascii=True, separators=(',', ':'))
         program = packet.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1'
-        prepared_limit = PROGRAM_PREPARED_INPUT if program else BUG_PREPARED_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) else MAX_INPUT
+        intent_context = packet.get('coverage', {}).get('scope_plan_format') == 'readable-intent-v1' and schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse)
+        # This is the app working packet BEFORE source packing. The actual wire
+        # byte/token/output ceilings below remain unchanged.
+        prepared_limit = PROGRAM_PREPARED_INPUT if program or intent_context else BUG_PREPARED_INPUT if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) else MAX_INPUT
         self.diagnostics.update(prepared_input_bytes=len(encoded.encode()), prepared_input_limit=prepared_limit)
         if len(encoded.encode()) > prepared_limit:
             self.diagnostics['category'] = 'input_budget'

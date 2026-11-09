@@ -199,7 +199,7 @@ export function IntakeDetail() {
   useEffect(()=>{if(!selected && query.data?.proposals[0]) setSelected(query.data.proposals[0].id);},[selected,query.data]);
   async function act(suffix:string, body:unknown, method='POST') {
     setError('');setBusy(true);
-    try { await mutate(`/api/intake/${identity}/${suffix}`,body,method); const refreshed = await query.refetch(); if(['scope','research-revision'].includes(suffix) && refreshed.data?.proposals[0]) setSelected(refreshed.data.proposals[0].id); void client.invalidateQueries({queryKey:['backlog']}); void client.invalidateQueries({queryKey:['workspace']}); }
+    try { await mutate(`/api/intake/${identity}/${suffix}`,body,method,suffix==='clarification'?AbortSignal.timeout(60000):undefined); const refreshed = await query.refetch(); if(['scope','research-revision'].includes(suffix) && refreshed.data?.proposals[0]) setSelected(refreshed.data.proposals[0].id); void client.invalidateQueries({queryKey:['backlog']}); void client.invalidateQueries({queryKey:['workspace']}); }
     catch(e){setError((e as Error).message);throw e;} finally {setBusy(false);}
   }
   if(!query.data) return <div className="panel" role="status">{query.isPending?'Opening request…':<>Request unavailable. <Button onClick={()=>void query.refetch()}>Try again</Button></>}</div>;

@@ -4,6 +4,7 @@ Preparation uses the existing intake/job/proposal/decision owners. It deliberate
 does not register a runtime recipe, an offer, a budget or an execution permission.
 """
 
+import copy
 import hashlib
 import json
 import os
@@ -362,6 +363,13 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     continuation=job['payload'].get('bug_followup',{})
                     packet=bug_investigation.context(original['payload'], '' if continuation else feedback, policy)
                     frozen=continuation.get('source_scope')
+                    retained=continuation.get('retained_source_packet')
+                    if frozen and retained:
+                        from workbench.bug_source_planning import verify_packet
+                        verify_packet(packet,retained)
+                        if retained.get('policy_sha256')!=packet['policy_sha256']:
+                            raise ValueError('The retained source policy changed.')
+                        packet=copy.deepcopy(retained)
                     if frozen and (packet['base']!=frozen['base'] or
                             {f['path']:f['sha256'] for f in packet['files']}!=frozen['files']):
                         raise ValueError('The continuation source scope changed; no new source was transmitted.')
@@ -669,6 +677,14 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             diagnostics.update(validation_diagnostics)
             if response_evidence:
                 diagnostics['evidence_id'] = response_evidence.identifier
+            retained_packet=getattr(adapter_used,'inspection_packet',None)
+            if bug and retained_packet and packet:
+                try:
+                    from workbench.bug_source_planning import verify_packet
+                    verify_packet(initial_source_packet,retained_packet)
+                    job['payload']['bug_inspection_packet']=retained_packet
+                except (ValueError,KeyError,TypeError):
+                    diagnostics['retained_context_unavailable']=1
             if (loaded_selection or bug) and claimed_generation:
                 diagnostics['retained_failure'] = 1
             state = diagnostics.get('generation_state')
