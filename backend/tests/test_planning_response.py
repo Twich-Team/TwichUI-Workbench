@@ -19,6 +19,47 @@ from workbench.planning_response import ResponseValidationError, strict_json
 MODEL = "controlled-model"
 
 
+@pytest.mark.parametrize('fault', [None,'missing','conflicting'])
+def test_local_explicit_search_transport_maps_only_complete_unambiguous_fields(tmp_path, fault):
+    from workbench.bug_investigation_stage import InvestigationResponse
+    raw=dict(finding='Search actual committed text.', action='inspect', reads=[],
+        searches=[dict(query='a literal marker')], diagnosis=None, question=None, limitation=None)
+    if fault=='missing':
+        raw.pop('reads')
+    if fault=='conflicting':
+        raw['question']='Conflicting consequential choice.'
+    class Transport:
+        seconds=300
+        def models(self,_):return MODEL
+        def read(self, request, limit):
+            body=json.loads(request.data)
+            shape=body['response_format']['json_schema']['schema']
+            assert {'action','reads','searches'}<=shape['properties'].keys()
+            assert 'draft' not in shape['properties']
+            assert 'searches:' in body['messages'][0]['content']
+            return json.dumps(dict(id='controlled-explicit-search',model=MODEL,
+                usage=dict(prompt_tokens=10,completion_tokens=5,total_tokens=15),choices=[dict(
+                    finish_reason='stop',message=dict(content=json.dumps(raw)))])).encode()
+    provider=LocalProvider()
+    evidence=Evidence(tmp_path,str(uuid4()),InvestigationResponse)
+    provider.response_evidence=evidence
+    try:
+        from workbench.codex_wire import normalize
+        value,model,_=provider._infer(Transport(),'inert',InvestigationResponse,'{}',expected_model=MODEL)
+        if fault:
+            with pytest.raises(ResponseValidationError):
+                normalize(value)
+        else:
+            value,_=normalize(value)
+            assert value==dict(finding=raw['finding'],draft=dict(inspection=[dict(query='a literal marker')]))
+            assert model==MODEL
+        assert provider.diagnostics['generation_state']=='finished'
+        assert provider.diagnostics['usage']['values']['total_tokens']==15
+    finally:
+        evidence.close()
+    assert 'local-wire-schema' in evidence.file.read_text()
+
+
 def test_long_investigation_journal_keeps_terminal_diagnostics_with_same_byte_limit(tmp_path):
     evidence = Evidence(tmp_path,str(uuid4()),BugPlanningResponse)
     try:

@@ -311,9 +311,22 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
             def read(self, request, limit):
                 program=packet.get('coverage',{}).get('reproducer_format')=='lua-phases-v1'
                 assert len(request.data)<=(131072 if program else 65536) and limit==(65536 if program else 24000)
+                content=answer
+                from workbench.bug_investigation_stage import InvestigationResponse
+                from workbench.bug_intent import Response as IntentResponse
+                if schema in (InvestigationResponse,IntentResponse):
+                    outcome=answer.get('draft',answer)
+                    final='diagnosis' if schema is InvestigationResponse else 'plan'
+                    content=dict(finding=answer['finding'],action='inspect',reads=[],searches=[],
+                        **{final:None},question=None,limitation=None)
+                    for key in (final,'question','limitation'):
+                        if outcome.get(key) is not None:
+                            content.update(action='diagnose' if key=='diagnosis' else key,**{key:outcome[key]})
+                    for item in outcome.get('inspection',[]):
+                        content['searches' if 'query' in item else 'reads'].append(item)
                 return json.dumps(dict(id='controlled-response', model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
-                    choices=[dict(finish_reason='stop', message=dict(content=json.dumps(answer),
+                    choices=[dict(finish_reason='stop', message=dict(content=json.dumps(content),
                         reasoning_content='CONTROLLED_NATIVE_REASONING_NOT_A_MODEL'))])).encode()
         return self._infer(Transport(), 'fixture-no-credential', schema, json.dumps(packet), expected_model=expected_model)
 
@@ -501,7 +514,7 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         job = c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == failed)).scalar_one()
     evidence = tmp_path/'artifacts/runs'/('planning-evidence-'+job['diagnostics']['evidence_id'])/'events.jsonl'
     rows = [json.loads(row) for row in evidence.read_text().splitlines()]
-    prefix=['schema','request-schema','request-context-packed']+(['request-limits'] if program_mode and not intent_mode else [])+['wire-received','envelope'] if case_provider=='local' else ['schema','request-schema','codex-wire-schema','codex-request-budget','private-proposed-data','provider-result']
+    prefix=['schema','request-schema','local-wire-schema','request-context-packed']+(['request-limits'] if program_mode and not intent_mode else [])+['wire-received','envelope'] if case_provider=='local' else ['schema','request-schema','codex-wire-schema','codex-request-budget','private-proposed-data','provider-result']
     assert [row['phase'] for row in rows][:len(prefix)] == prefix
     assert len(rows[1]['schema_sha256']) == 64 and rows[1]['corrective'] is False
     if case_provider=='codex':

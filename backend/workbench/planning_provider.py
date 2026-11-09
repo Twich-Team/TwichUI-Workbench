@@ -174,6 +174,8 @@ class LocalBeforeGeneration(PlanningUnavailable):
 
 
 class LocalProvider:
+    explicit_source_wire = True
+
     def __init__(self, stop_event=None, *, ends_at=None):
         self.stop_event = stop_event
         self.ends_at = ends_at
@@ -311,10 +313,23 @@ class LocalProvider:
         if schema is BugPlanningResponse and context.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1':
             from workbench.bug_program import INSTRUCTIONS as PROGRAM_INSTRUCTIONS
             instructions = PROGRAM_INSTRUCTIONS
+        output_schema = planning_response.wire_schema(schema, context.get('coverage'), context.get('files'))
+        flat_local = schema in (InvestigationResponse, IntentResponse)
+        if flat_local:
+            from workbench.codex_wire import schema as explicit_schema, FLAT_NOTE, PLAN_NOTE
+            output_schema, _ = explicit_schema(output_schema)
+            instructions = instructions.replace(
+                'Return finding and exactly one draft: inspection, diagnosis, question, or limitation. ', '')
+            instructions += ' ' + (FLAT_NOTE if schema is InvestigationResponse else PLAN_NOTE)
+            instructions += (' To perform a literal search use searches:[{"query":"literal text"}] and reads:[]. '
+                'A statement that a search is needed does not perform one. Use reads only for actual path/start/end requests; '
+                'do not substitute guessed paths for a search. Both operations remain app-owned and read-only.')
+            if self.response_evidence:
+                self.response_evidence.record('local-wire-schema', codec='explicit-read-search-v1',
+                    schema_sha256=hashlib.sha256(json.dumps(output_schema, sort_keys=True).encode()).hexdigest())
         body = dict(model=expected_model or actual, temperature=0, max_tokens=2600, reasoning_budget_tokens=0,
             tools=[], response_format=dict(type='json_schema', json_schema=dict(
-                name='planning', strict=True, schema=planning_response.wire_schema(schema,
-                    context.get('coverage'), context.get('files')))),
+                name='planning', strict=True, schema=output_schema)),
             messages=[dict(role='system', content=general + instructions),
                 dict(role='user', content=encoded)])
         if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse):

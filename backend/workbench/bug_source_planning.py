@@ -551,7 +551,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             if not response_added:
                 raise PlanningUnavailable('Source investigation usage is unavailable.', 'accounting')
             try:
-                if getattr(adapter, 'source_investigation', False):
+                if getattr(adapter, 'source_investigation', False) or getattr(adapter, 'explicit_source_wire', False):
                     from workbench.codex_wire import normalize as normalize_inspection
                     raw, changes = normalize_inspection(raw)
                     if changes and evidence:
