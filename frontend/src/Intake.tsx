@@ -207,7 +207,7 @@ export function IntakeDetail() {
   const p = data.proposals.find(p=>p.id===selected) || data.proposals[0];
 
   const sample = data.original.title === 'Synthetic feature · Admission rehearsal';
-  const renewable=data.status==='failed'&&data.original.kind==='issue'&&Boolean(data.original.local_planning)&&!data.tasks.length&&!data.decisions.length&&data.jobs.some(j=>j.kind==='planning'&&j.status==='failed')&&data.jobs.filter(j=>j.kind==='planning').every(j=>['completed','failed'].includes(j.status));
+  const renewable=!data.planning_resume_binding&&data.status==='failed'&&data.original.kind==='issue'&&Boolean(data.original.local_planning)&&!data.tasks.length&&!data.decisions.length&&data.jobs.some(j=>j.kind==='planning'&&j.status==='failed')&&data.jobs.filter(j=>j.kind==='planning').every(j=>['completed','failed'].includes(j.status));
   const asking = renewable || data.status==='waiting_for_information' || (data.status==='failed' &&
     data.original.kind==='issue' && Boolean(data.original.local_planning) && !data.tasks.length &&
     !data.decisions.length && Boolean(data.proposals[0]?.task_contract?.scope_missing.length) &&
@@ -241,6 +241,7 @@ export function IntakeDetail() {
 
     {query.isError && <p role="alert" className="form-error">Refresh failed. Showing the last saved record. Refresh before making a decision.</p>}
     {error && <p className="form-error" role="alert">{error}</p>}
+    {data.planning_resume_binding&&<section className="panel"><h2>Qwen was busy. No generation started.</h2><p>Workbench verified that the model request never started. Your original permission is still bound to this report and provider. Continue the same read-only investigation when Qwen is available; this does not approve an addon repair.</p><Button disabled={blocked} onClick={()=>void act('retry',{job_id:data.jobs.filter(j=>j.kind==='planning').at(-1)!.id,command_id:crypto.randomUUID(),review_binding:data.planning_resume_binding,resume_before_generation:true}).catch(()=>{})}>Wait for Qwen and continue</Button></section>}
     {data.planning_start_binding&&<section className="panel" aria-label="Start saved bug investigation">
       <h2>Your report is saved. Choose how to investigate it.</h2>
       <p>Workbench will inspect relevant committed addon code and propose a repair scope. This cannot edit files, approve a repair or publish anything. You do not need to recreate the task.</p>

@@ -1,3 +1,37 @@
+## Vendor recovery: model contention correction ready — November9
+
+Installed63/769048f repaired the original missing-permission legacy route; same
+owner task now has explicit Qwen-only read-only consent. First supported operation
+job a54329f0-4f2e-4414-9114-fdd6342e0ede / attempt5d1d82af-876a-4aa0-aa78-
+02b1b32a98e6 definitively stopped on pilot maintenance locks BEFORE generation:
+not_started, investigation_requests0, no response, usage null unchanged. Do not
+repeat a generic clarification or create another task. Current corrective code
+adds pre-claim resource waiting and bounded lock-race waiting, plus same-unused-
+permission resume via normal Retry endpoint (new bound resume flag). Failed jobs,
+model rows, original report and expiry remain immutable; no addon plan/run approval.
+Complete1918backend/32frontend and113browser passed on63; final delta259focused,
+11final denial/transport tests,2native confined journeys and3affected browsers pass;
+static passes. Exact final record will bind reused versus rerun evidence.
+
+IMPORTANT: supported pilot opsctl pause temporarily holds NEW maintenance admissions
+under A11; current task drained and locks are now free. Original control snapshot,
+owned pause hash and safe restoration instructions at private incident directory:
+/home/rich/.local/share/TwichUI-Workbench/vendor-planning-recovery-20261109.
+Restore via opsctl resume ONLY if control bytes still match our recorded hold.
+No maintenance service/unit/root change or termination was performed. Model/auth
+unchanged. Do not forget this restoration if session interrupts.
+Next seal/deploy current verified delta using existing helper, resume same saved
+vendor report via normal browser after checking exact planning_resume_binding.
+Original consent approved14:22:51UTC expires15:07:51; no deadline reset. Start check
+needs30minutes remaining, so begin before14:37:51UTC or obtain fresh recorded
+read-only consent through an honest supported action. No model generation occurred
+in this task yet; do not claim real-provider plan success. No owner engineering
+renewal/campaign cap. Leave eventual actual repair plan for owner's genuine review.
+One repeat native stdout filename was accidentally reused; original text lost,
+initial success retained in native-launch.log/systemd receipt and old hash record;
+new complete passing native-final-process.log is separate. No provider/history
+receipts affected. Detailed native-log-lineage.json records this honestly.
+
 ## Active real-use repair — November 9, 2026
 
 The owner-reported vendor-name task2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd

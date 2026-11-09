@@ -614,7 +614,7 @@ def test_bug_transport_timeout_is_explicit_and_shared_deadline_still_wins(monkey
     monkeypatch.setenv('WORKBENCH_PLANNING_DEADLINE_S','60')
     key=tmp_path/'fixture-key'
     key.write_text('CONTROLLED-NOT-A-CREDENTIAL')
-    monkeypatch.setattr(planning_provider,'local_slot',lambda:nullcontext())
+    monkeypatch.setattr(planning_provider,'local_slot',lambda **kwargs:nullcontext())
     class Probe(LocalHTTP):
         def __enter__(self):
             return self

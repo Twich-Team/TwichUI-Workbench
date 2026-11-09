@@ -330,6 +330,17 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             if everyday_mode:
                 with engine.connect() as c:
                     everyday.check_planning(c, original, job if bug else None)
+                if choice == 'qwen-once' and adapter is None and os.environ.get('WORKBENCH_LOCAL_KEY'):
+                    from workbench.planning_provider import local_slot
+                    try:
+                        with local_slot():
+                            pass  # Admission observation only; the actual request obtains its own locks.
+                    except BlockingIOError:
+                        with write_transaction(engine) as c:
+                            if intake.require(c, planning_jobs, job['id']) == job:
+                                c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(
+                                    message='Waiting for local Qwen. Background maintenance holds the model; no generation has started.'))
+                        return False
                 try:
                     everyday.require_room(everyday.configuration(engine))
                 except everyday.CapacityHold as error:

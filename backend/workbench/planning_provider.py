@@ -27,6 +27,7 @@ BUG_PREPARED_INPUT = 98304
 PROGRAM_INPUT = 131072
 PROGRAM_PREPARED_INPUT = 196608
 MAX_OUTPUT = 24000
+LOCAL_LOCKS = ('cycle.lock', 'queue/model-request.lock')
 
 
 def configured_mode():
@@ -97,12 +98,21 @@ def evidence_packet(original):
 
 
 @contextmanager
-def local_slot():
+def local_slot(*, ends_at=None, stop_event=None):
     # Existing pilot lock protocol; open existing files read-only, never create them.
     with ExitStack() as stack:
-        for relative in ('cycle.lock', 'queue/model-request.lock'):
+        for relative in LOCAL_LOCKS:
             handle = stack.enter_context((Path('/home/rich/twichui-pilot/batch') / relative).open('rb'))
-            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            while True:
+                try:
+                    fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError:
+                    if ends_at is None or time.monotonic()>=ends_at:
+                        raise
+                    if stop_event is not None and stop_event.is_set():
+                        raise PlanningUnavailable('Worker stopped while waiting for model access. No generation started.','canceled') from None
+                    time.sleep(.25)
         from workbench.real_primary import quarantined
         if quarantined(ROOT/'.local/real-primary-session.json'):
             raise PlanningUnavailable('Prior real generation is quarantined; no new inference.', 'contention')
@@ -210,7 +220,7 @@ class LocalProvider:
             self.diagnostics['elapsed_s'] = round(time.monotonic()-started, 3)
 
     def _request(self, schema, encoded, key_path, expected_model):
-        with local_slot():
+        with local_slot(ends_at=min(self.ends_at or time.monotonic()+300,time.monotonic()+300), stop_event=self.stop_event):
             secret = Path(key_path).read_text().strip()
             transport = LocalHTTP(self.stop_event)
             if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse):

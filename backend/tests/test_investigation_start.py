@@ -205,7 +205,113 @@ def test_new_permission_reaches_real_decoder_and_typed_plan_with_unknown_visual_
     from workbench.delivery_phase import observe, renewable
     from pathlib import Path
     import os
+
     with store.connect() as c:
-        phases = observe(c,item["id"],[Path(os.environ["WORKBENCH_RESEARCH_ROOT"]).parent])
+        phases = observe(c, item["id"], [Path(os.environ["WORKBENCH_RESEARCH_ROOT"]).parent])
     assert phases["next_sequence"] == 3 and renewable(phases)
     assert len(phases["phases"]) == 1 and phases["phases"][0]["sequence"] == 2
+
+
+@pytest.mark.usefixtures("installed")
+@pytest.mark.parametrize("permission_at_intake", [False, True])
+def test_model_lock_hold_keeps_unused_consent_and_prior_attempt_without_replay(
+    client, headers, store, monkeypatch, permission_at_intake
+):
+    enable_bugs(monkeypatch)
+    body = report()
+    if not permission_at_intake:
+        body.pop("local_planning")
+    body["visual_requirement"] = "unclassified"
+    item = client.post("/api/intake", headers=headers, json=body).json()
+    if not permission_at_intake:
+        assert start(client, headers, item)[1].status_code == 200
+    from workbench.planning_provider import LocalProvider, PlanningUnavailable
+
+    def busy(self, *args, **kwargs):
+        self.diagnostics = dict(generation_state="not_started", category="contention")
+        raise PlanningUnavailable("Model is locked.", "contention")
+
+    monkeypatch.setattr(LocalProvider, "generate", busy)
+    assert worker.tick(store)
+    stopped = client.get("/api/intake/" + item["id"]).json()
+    assert stopped["planning_resume_binding"]
+    parent = stopped["jobs"][-1]
+    with store.connect() as c:
+        before = intake.require(c, planning_jobs, parent["id"])
+        original_attempt = dict(c.execute(select(model_attempts)).mappings().one())
+    command = dict(
+        job_id=parent["id"],
+        command_id=str(uuid4()),
+        review_binding=stopped["planning_resume_binding"],
+        resume_before_generation=True,
+    )
+    endpoint = "/api/intake/" + item["id"] + "/retry"
+    result = client.post(endpoint, headers=headers, json=command)
+    assert result.status_code == 200, result.text
+    assert client.post(endpoint, headers=headers, json=command).status_code == 200
+    with store.connect() as c:
+        assert intake.require(c, planning_jobs, parent["id"]) == before
+        assert dict(c.execute(select(model_attempts)).mappings().one()) == original_attempt
+        initial = first(c, item["id"])
+        assert (
+            initial["payload"]["local_planning_receipt"]
+            == before["payload"]["local_planning_receipt"]
+        )
+        assert validate_prefix(c, initial) == {parent["id"]}
+        everyday.check_planning(c, intake.require(c, intakes, item["id"]), initial)
+    calls = scripted(monkeypatch, [response()])
+    assert worker.tick(store)
+    current = client.get("/api/intake/" + item["id"]).json()
+    assert current["status"] == "completed" and calls and len(current["jobs"]) == 2
+    assert current["decisions"] == [] and current["tasks"] == []
+
+
+@pytest.mark.usefixtures("installed")
+def test_busy_local_admission_waits_without_claim_or_provider_call(
+    client, headers, store, monkeypatch
+):
+    from contextlib import contextmanager
+
+    enable_bugs(monkeypatch)
+    body = report()
+    item = client.post("/api/intake", headers=headers, json=body).json()
+    monkeypatch.setenv("WORKBENCH_LOCAL_KEY", "unused-probe-key")
+
+    @contextmanager
+    def busy():
+        raise BlockingIOError("Controlled existing maintenance owner")
+        yield
+
+    monkeypatch.setattr("workbench.planning_provider.local_slot", busy)
+    assert not worker.tick(store)
+    current = client.get("/api/intake/" + item["id"]).json()
+    assert current["status"] == "queued" and current["jobs"][0]["status"] == "queued"
+    assert current["jobs"][0]["message"].startswith("Waiting for local Qwen")
+    assert current["jobs"][0]["attempts"] == 0
+    with store.connect() as c:
+        assert not c.execute(select(model_attempts)).first()
+
+
+def test_local_lock_race_waits_before_transport_and_honors_cancellation(tmp_path, monkeypatch):
+    import fcntl
+    import time
+    import threading
+    from workbench import planning_provider
+
+    lock = tmp_path / "owned-test.lock"
+    lock.touch()
+    monkeypatch.setattr(planning_provider, "LOCAL_LOCKS", (str(lock),))
+    monkeypatch.setattr("workbench.real_primary.quarantined", lambda p: False)
+    with lock.open("rb") as owner:
+        fcntl.flock(owner, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        timer = threading.Timer(0.05, lambda: fcntl.flock(owner, fcntl.LOCK_UN))
+        timer.start()
+        with planning_provider.local_slot(ends_at=time.monotonic() + 2):
+            pass
+        timer.join()
+        fcntl.flock(owner, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        stopping = threading.Event()
+        stopping.set()
+        with pytest.raises(planning_provider.PlanningUnavailable, match="No generation started"):
+            with planning_provider.local_slot(ends_at=time.monotonic() + 2, stop_event=stopping):
+                pass

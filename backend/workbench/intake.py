@@ -258,7 +258,10 @@ def view_in(connection, identity):
         ).where(model_attempts.c.task_id == identity, model_attempts.c.source == 'workbench',
                 model_attempts.c.backend.is_not(None))
             .order_by(model_attempts.c.started_at.desc(), model_attempts.c.id)).mappings().all()
-    return dict(planning_start_binding=digest(row['payload']) if configured_mode()=='everyday' and row['payload']['kind']=='issue' and not row['payload'].get('local_planning') and not row['payload'].get('supported_task') and row['status'] in {'failed','waiting_for_information'} else None,
+    from workbench.investigation_start import resume_binding
+    latest = max((j for j in jobs if j['kind']=='planning'),key=lambda j:j['revision'],default=None)
+    return dict(planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
+        planning_start_binding=digest(row['payload']) if configured_mode()=='everyday' and row['payload']['kind']=='issue' and not row['payload'].get('local_planning') and not row['payload'].get('supported_task') and row['status'] in {'failed','waiting_for_information'} else None,
         provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
         created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],
         proposals=[proposal_view(connection, dict(p)) for p in connection.execute(select(proposals).where(
@@ -413,6 +416,10 @@ def retry(engine, identity, job_id, *, preparation=None):
         row = require(connection, intakes, identity)
         if job['intake_id'] != identity:
             raise HTTPException(404, 'Job not found for this request.')
+        if preparation and preparation.resume_before_generation:
+            from workbench.investigation_start import resume_in
+            resume_in(connection,row,job,preparation)
+            return
         if job['kind'] == 'behavioral_preparation':
             if preparation and preparation.renew_check_construction:
                 from workbench.bug_preparation_retry import request_in

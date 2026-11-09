@@ -578,6 +578,7 @@ class TaskProviderActivity(StrictModel):
 
 
 class IntakeView(StrictModel):
+    planning_resume_binding: str | None = Field(default=None, exclude_if=lambda value: value is None)
     planning_start_binding: str | None = Field(default=None, exclude_if=lambda value: value is None)
     provider_activity: list[TaskProviderActivity] = Field(default_factory=list, exclude_if=lambda value: not value)
     human_scope: HumanScope
@@ -605,6 +606,7 @@ class IntakePage(StrictModel):
 
 
 class PlanningRetry(StrictModel):
+    resume_before_generation: bool = False
     job_id: UUID
     command_id: UUID | None = None
     review_binding: Annotated[str,Field(pattern=r'^[a-f0-9]{64}$')] | None = None

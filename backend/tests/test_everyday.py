@@ -229,6 +229,8 @@ def test_saved_qwen_selection_reaches_adapter_and_changed_preference_fences_run(
         return response, expected_model, 'local'
 
     monkeypatch.setenv('WORKBENCH_LOCAL_KEY', '/unused-offline')
+    from contextlib import nullcontext
+    monkeypatch.setattr('workbench.planning_provider.local_slot',lambda **kwargs:nullcontext())
     monkeypatch.setattr(LocalProvider, '_request', offline_request)
     item = client.post('/api/intake', headers=headers, json=body()).json()
     assert worker.tick(store)
@@ -417,6 +419,8 @@ def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
 
         monkeypatch.setattr(LocalProvider, '_request', unavailable)
         monkeypatch.setenv('WORKBENCH_LOCAL_KEY', '/fixture-only-unused')
+    from contextlib import nullcontext
+    monkeypatch.setattr('workbench.planning_provider.local_slot',lambda **kwargs:nullcontext())
     saved = client.post('/api/intake', headers=headers, json={**body(), 'local_planning': choice})
     assert saved.status_code == 200, saved.text
     item = saved.json()
@@ -500,6 +504,8 @@ def test_qwen_only_switches_on_a_proven_pre_generation_refusal(
     calls = []
     reported = dict(prompt_tokens=6, completion_tokens=5, total_tokens=11)
     monkeypatch.setenv('WORKBENCH_LOCAL_KEY', '/fixture-only-unused')
+    from contextlib import nullcontext
+    monkeypatch.setattr('workbench.planning_provider.local_slot',lambda **kwargs:nullcontext())
 
     class Transport:
         seconds = 120

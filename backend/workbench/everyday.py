@@ -243,13 +243,13 @@ def planning_receipt(original, created_at):
 
 def check_planning(c, original, job=None):
     from workbench.db import planning_jobs
-    jobs = c.execute(select(planning_jobs.c.payload).where(
-        planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')).scalars().all()
+    rows = c.execute(select(planning_jobs.c.id,planning_jobs.c.payload).where(
+        planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')).mappings().all()
     from workbench.provider_routes import CHOICES
     from workbench.investigation_start import first, validate_prefix
     initial = first(c, original['id'])
-    if initial:
-        validate_prefix(c, initial)
+    excluded = validate_prefix(c, initial) if initial else set()
+    jobs = [r['payload'] for r in rows if r['id'] not in excluded]
     approved_at = initial['payload'].get('planning_start', {}).get('approved_at', original['created_at']) if initial else original['created_at']
     expected = planning_receipt(original['payload'], approved_at)
     operation_seconds = expected.get('planning_deadline_seconds', 120)
