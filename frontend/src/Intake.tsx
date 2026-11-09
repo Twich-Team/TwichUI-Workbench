@@ -196,7 +196,7 @@ export function IntakeDetail() {
   const [startProvider,setStartProvider]=useState('qwen-once');
   const [startConfirmed,setStartConfirmed]=useState(false);
   const [startCommand]=useState(()=>crypto.randomUUID());
-  useEffect(()=>{if(query.data?.proposals[0]) setSelected(query.data.proposals[0].id);},[query.data?.proposals[0]?.id]);
+  useEffect(()=>{if(!selected && query.data?.proposals[0]) setSelected(query.data.proposals[0].id);},[selected,query.data]);
   async function act(suffix:string, body:unknown, method='POST') {
     setError('');setBusy(true);
     try { await mutate(`/api/intake/${identity}/${suffix}`,body,method,suffix==='clarification'?AbortSignal.timeout(60000):undefined); const refreshed = await query.refetch(); if(['scope','research-revision'].includes(suffix) && refreshed.data?.proposals[0]) setSelected(refreshed.data.proposals[0].id); void client.invalidateQueries({queryKey:['backlog']}); void client.invalidateQueries({queryKey:['workspace']}); }

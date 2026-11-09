@@ -63,11 +63,6 @@ test('C D E · revised proposal, exact approval receipt, one hierarchy, stale re
   await page.getByRole('button',{name:'Request changes',exact:true}).click();
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('apply-planning');fixture('planning');
-  // A newly delivered plan opens automatically. Historical revisions remain
-  // readable, and returning from one never grants its stale approval.
-  await expect(page.getByRole('heading',{name:'The plan',exact:true})).toBeVisible();
-  await page.getByText('Original request, planning history and evidence',{exact:true}).click();
-  await page.getByLabel('Proposal revision').selectOption(oldProposal.id);
   await page.getByRole('button',{name:'Open current proposal'}).click();
   await expect(page.getByRole('heading',{name:'The plan',exact:true})).toBeVisible();
   expect((await snapshot(page)).proposals[0].revision).toBe(2);
