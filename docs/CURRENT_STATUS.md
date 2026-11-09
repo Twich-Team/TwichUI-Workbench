@@ -116,9 +116,12 @@ Its one-response planning usage format differs from multi-turn bug accounting;
 the operator reconciliation was corrected against the retained validated response,
 without repeating a model call. Evidence is under `outcome-2ecbce2`, especially
 `functional-evidence-closeout.json`, in the private delivery record.
-No provider operation is active. Next connected application work: expose the
+No provider operation is active. Connected application work now implements the
 independent later rejection of the earlier native-checked flight patch in its
-historical result view without erasing the original outcome or usage. The accepted
+historical result view without erasing the original outcome or usage. Shared proof
+validation, read-only projection and a stronger publication hold pass focused checks
+and an actual historical-data rehearsal; this correction is NOT installed yet.
+Complete verification and a separate-process browser check precede any update. The accepted
 replacement is linked in Everyday use. Broader requirements remain unfinished.
 No owner action currently needed.
 Continue under standing authority, without old

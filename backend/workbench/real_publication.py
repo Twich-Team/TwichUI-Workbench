@@ -53,6 +53,10 @@ def _proof(row, grant):
 
 def current(c, row, grant):
     from workbench.session_authorship import usage_eligible
+    from workbench.result_rejection import later_review
+
+    if later_review(c.connection.driver_connection, row['id']):
+        raise DeliveryHeld('A later independent review prevents delivery of this patch. Resolve that review before requesting publication.')
 
     if row["status"] != "checked" or grant["binding"] != digest(grant["snapshot"]):
         raise DeliveryHeld("A bound independently checked real result is required.")

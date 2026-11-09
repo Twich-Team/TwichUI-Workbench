@@ -173,3 +173,55 @@ def test_only_bound_private_meaningful_failure_can_disprove_checked_result(store
         assert c.execute(
             select(real.requests.c.status).where(real.requests.c.id == identity)
         ).scalar_one() == ("running" if fault == "checked-status" else "checked")
+
+
+@pytest.mark.parametrize('damage', [None, 'candidate', 'symlink', 'missing'])
+def test_normal_app_shows_later_review_without_rewriting_history_or_granting_delivery(store, tmp_path, monkeypatch, damage):
+    from everyday_store import fingerprint
+    from workbench import task_execution
+    from workbench.real_publication import current, DeliveryHeld
+
+    identity, folder, review, _ = rejection(store, tmp_path)
+    with write_transaction(store) as c:
+        grant = dict(c.execute(select(real.grants)).mappings().one())
+        snapshot = json.loads(json.dumps(grant['snapshot']))
+        snapshot['workflow_task'].update(task_id='earlier-task', task=dict(id='earlier-task', title='Historical bug'))
+        c.execute(real.grants.update().values(snapshot=snapshot))
+    monkeypatch.setattr(task_execution, 'current', lambda *_: False)
+    path = folder / (identity+'.json')
+    if damage == 'candidate':
+        review['candidate'] = 'b'*64
+        path.write_text(json.dumps(review))
+    elif damage == 'symlink':
+        target = folder/'untrusted.json'
+        path.rename(target)
+        path.symlink_to(target)
+    elif damage == 'missing':
+        path.unlink()
+    with sqlite3.connect(store.url.database) as c:
+        before = fingerprint(c)
+    view = real.review(store, identity)
+    assert view['status'] == 'checked' and view['result']['verification'] == 'passed'
+    assert view['publication_allowed'] is False
+    listing = real.listing(store)
+    later = view['later_review']
+    assert listing['items'][0]['later_review'] == later
+    if damage == 'missing':
+        assert later is None
+    else:
+        assert later['state'] == ('rejected' if damage is None else 'unavailable')
+        assert not view['behavior_reproduced']
+        with store.connect() as c:
+            row = c.execute(select(real.requests)).mappings().one()
+            grant = c.execute(select(real.grants)).mappings().one()
+            with pytest.raises(DeliveryHeld, match='later independent review'):
+                current(c, row, grant)
+    with sqlite3.connect(store.url.database) as c:
+        assert fingerprint(c) == before
+
+
+def test_review_identity_cannot_become_a_file_path(store, monkeypatch):
+    from workbench.result_rejection import later_review
+    monkeypatch.setattr('workbench.result_rejection.os.path.lexists', lambda _: pytest.fail('Invalid identity reached filesystem'))
+    with sqlite3.connect(store.url.database) as c:
+        assert later_review(c, '../../private') is None

@@ -1624,3 +1624,13 @@ existing lines. Codex may propose up to six exact replacements in the
 reviewed files in one turn. Both provider paths still use the local scope
 and independent verification owners. Neither proposal nor verification
 creates publication authority.
+## Later independent result review — November 9, 2026
+
+`result_rejection` owns read-only validation/projection of an independently disproved
+historical checked patch. Operator renewal checks, normal result views and publication
+guards share it. Private bounded evidence binds exact execution/candidate, frozen tree,
+reviewed criterion, oracle, test and meaningful confined failure. Neither a rejection
+nor unavailable evidence changes native history/usage or creates execution/publication
+permission. Accounting-only evidence roots are not used as authority. The fixed private
+review directory belongs to the corresponding history store and must survive checked
+updates alongside database copies. Missing/malformed evidence never grants renewal.

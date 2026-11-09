@@ -577,6 +577,8 @@ def review(engine, identity):
         if not row:
             raise HTTPException(404, 'Real request not found')
         grant = c.execute(select(grants).where(grants.c.id == row['grant_id'])).mappings().one()
+        from workbench.result_rejection import later_review
+        followup = later_review(c.connection.driver_connection, identity)
     # Stored review data only. No client filesystem paths or arbitrary artifact reads.
     linked = grant['snapshot'].get('workflow_task')
     from workbench import task_execution
@@ -621,10 +623,16 @@ def review(engine, identity):
                 message=notice or row['message'], base=grant['snapshot']['contract']['base'], current_grant=valid(grant),
                 workflow_task=dict(intake_id=linked['intake_id'],task_id=linked['task']['id'],
                                    binding=binding) if linked else None,
-                current_task=task_current, behavior_checked=behavior_checked, behavior_reproduced=behavior_reproduced,
+                current_task=task_current, behavior_checked=behavior_checked, behavior_reproduced=behavior_reproduced and not followup,
+                later_review=followup,
                 grant_id=grant['id'], expires_at=grant['expires_at'],
                 recovery_pending=recovering,
                 publication_allowed=False, publication_requested=grant['snapshot'].get('task_budget',{}).get('budget',{}).get('publication')=='draft-pr', source='real', result=row['result'])
+
+
+class LaterReview(BaseModel):
+    state: Literal['rejected', 'unavailable']
+    reason: str
 
 
 class RunSummary(BaseModel):
@@ -637,6 +645,7 @@ class RunSummary(BaseModel):
     verification: str | None
     has_candidate: bool
     recovery_pending: bool = False
+    later_review: LaterReview | None = None
 
 
 class RunPage(BaseModel):
@@ -675,6 +684,9 @@ def listing(engine, page=1, group='all'):
     with engine.connect() as c:
         total = c.scalar(select(func.count()).select_from(requests).where(condition))
         items = [dict(row) for row in c.execute(query).mappings()]
+        from workbench.result_rejection import later_review
+        for item in items:
+            item['later_review'] = later_review(c.connection.driver_connection, item['id'])
     for item in items:
         item['title'] = item['title'] or 'Recorded task run'
         recovering, notice = recovery_notice(item['status'], dict(owner=item.pop('execution_owner'),

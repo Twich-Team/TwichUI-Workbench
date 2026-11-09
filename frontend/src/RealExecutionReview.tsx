@@ -13,6 +13,7 @@ type View={id:string;title:string;status:string;message:string;base:string;curre
   grant_id:string;expires_at:string;publication_allowed:false;source:'real';
   behavior_checked?:string[];
   behavior_reproduced?:boolean;
+  later_review?:{state:'rejected'|'unavailable';reason:string}|null;
   workflow_task?:{intake_id:string;task_id:string;binding:string}|null;current_task?:boolean|null;
   result:null|{inference_ran?:boolean|null;verification?:string;candidate_id?:string;
     handler_returned?:boolean;
@@ -40,7 +41,7 @@ export function RealExecutionReview(){
   if(query.isPending)return <section className="panel" aria-busy="true">Opening the run result…</section>;
   if(!query.data)return <section className="panel" role="alert">The result could not be loaded. <Button variant="secondary" onClick={()=>void query.refetch()}>Try again</Button></section>;
   const row=query.data,result=row.result;
-  const checked=row.status==='checked'&&result?.verification==='passed';
+  const checked=row.status==='checked'&&result?.verification==='passed'&&!row.later_review;
   const active=['pending','running','checking','cancel_requested'].includes(row.status);
   const testOnly=Boolean(result?.files?.length&&result.files.every(file=>file.path.startsWith('tests/')&&(!file.old_path||file.old_path.startsWith('tests/'))));
   const workflow=row.workflow_task;
@@ -50,12 +51,13 @@ export function RealExecutionReview(){
     <section className="panel candidate-review real-execution-review" aria-label="Run result and checks">
       {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded result.</p>}
       {row.current_task===false&&<p className="soft-callout">This result belongs to an earlier plan. The current task still needs its own review and checks.</p>}
-      <h2>{row.recovery_pending?'Waiting for safe recovery':checked?(testOnly?'Test changes checked':'Changes checked'):row.status==='checked'?'Run result saved':runStage[row.status]||'Recorded result'}</h2>
+      <h2>{row.later_review?(row.later_review.state==='rejected'?'Later review rejected this patch':'Later review needs attention'):row.recovery_pending?'Waiting for safe recovery':checked?(testOnly?'Test changes checked':'Changes checked'):row.status==='checked'?'Run result saved':runStage[row.status]||'Recorded result'}</h2>
       {checked?<><p className="result-lead">{testOnly?'Only test files changed.':'The changes passed checks in a separate copy.'}</p>
         {row.behavior_reproduced&&<p>The reviewed check reproduced the bug in the original code and passed with this patch.</p>}
         {Boolean(row.behavior_checked?.length) && <><h3>Behavior checked</h3><ul>{row.behavior_checked?.map((behavior,i)=><li key={i}>{behavior}</li>)}</ul></>}
         <p>{row.publication_requested?'The checked copy is saved locally. See the separate draft delivery status below.':'Saved locally. This run did not install or publish the result.'}</p></>
-        :<p>{row.message}</p>}
+        :<p>{row.later_review?.reason||row.message}</p>}
+      {row.later_review&&<p className="soft-callout">The original check results and usage are retained below. This review does not authorize another run or publication.</p>}
       {row.recovery_pending?<p>Workbench is waiting to confirm cleanup. It will keep the evidence and will not run the work again.</p>
         :!checked&&!active&&<p>Review the saved reason and any check results below. Another attempt needs fresh permission.</p>}
       {result?.inference_ran===false && !active && !checked && !result.authorship && <p>No model implementation ran.</p>}

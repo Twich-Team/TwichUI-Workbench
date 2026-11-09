@@ -24,9 +24,9 @@ export function ExecutionRuns(){
       </select></label>
       {!items.length?<p>{group==='all'?'No runs are recorded here yet.':'No runs match this view.'}</p>:<ul className="execution-run-list">{items.map(row=><li key={row.id}>
         <Link to={'/executions/'+encodeURIComponent(row.id)}>{row.title}</Link>
-        <p className="badge">{row.status==='checked'&&row.verification!=='passed'?'Run result saved':runStage[row.recovery_pending?'recovering':row.status]||'Recorded state unavailable'}</p><p>{row.message}</p>
+        <p className="badge">{row.later_review?(row.later_review.state==='rejected'?'Later review rejected this patch':'Later review needs attention'):row.status==='checked'&&row.verification!=='passed'?'Run result saved':runStage[row.recovery_pending?'recovering':row.status]||'Recorded state unavailable'}</p><p>{row.later_review?.reason||row.message}</p>
         <small>{row.finished_at?'Finished':'Saved'} {formatTime(row.finished_at||row.created_at)}</small>
-        {row.has_candidate&&<p>Changes saved · {row.verification==='passed'?'Independent checks passed':'Review check results'}</p>}
+        {row.has_candidate&&<p>Changes saved · {row.later_review?'Review the later finding':row.verification==='passed'?'Independent checks passed':'Review check results'}</p>}
       </li>)}</ul>}
       {data.total>data.page_size&&<nav aria-label="Task run pages"><button disabled={page===1} onClick={()=>setSearch({group,page:String(page-1)})}>Previous</button> <span>Page {page} of {Math.ceil(data.total/data.page_size)}</span> <button disabled={page*data.page_size>=data.total} onClick={()=>setSearch({group,page:String(page+1)})}>Next</button></nav>}
     </>}

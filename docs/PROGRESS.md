@@ -1,4 +1,13 @@
-Latest Nov8 16:16UTC: c778installedhealthy. Real36settled5Codexturns completeusage, readfootprint128650hit128000; no plan/implementation and no realprovider case complete. Inspection working-set262144 fits full12authorizedsources+API222917, outgoing128000characters/196608bytes/disclosure unchanged. Targeted/static/twoaffectedconfinedbrowser/full1620backend25frontend passed. Latest228preserved, no owner decision. Next checked update and purposefulfresh37. See CONTINUATION.md. Lower entries historical.
+Latest Nov9 06:24UTC: real Codex flight-path repair independently accepted offline;
+all four supporting REAL provider cases pass. Installed59/2ecbce2 active/enabled,
+372-row history and all five results survive full restart, normal model restored,
+fallback Off, LAN/browser/isolation guards pass. No provider active or owner action
+needed. Exact1887backend/25frontend verification before installation. Continue
+connected product work: show later independent rejection on the older historical
+native-checked result without overwriting its outcome/usage. Broader product remains
+unfinished. See CURRENT_STATUS and CONTINUATION; lower entries are historical.
+
+Historical Nov8 16:16UTC: c778installedhealthy. Real36settled5Codexturns completeusage, readfootprint128650hit128000; no plan/implementation and no realprovider case complete. Inspection working-set262144 fits full12authorizedsources+API222917, outgoing128000characters/196608bytes/disclosure unchanged. Targeted/static/twoaffectedconfinedbrowser/full1620backend25frontend passed. Latest228preserved, no owner decision. Next checked update and purposefulfresh37. See CONTINUATION.md. Lower entries historical.
 
 Latest Nov8 15:48UTC:491cutover failed HTTP500 oversized history preview; cutover had advanced after failedpreflight in error. Approved original loopback/firewall/model rollback verified, latest224preserved, no new provider call. Preview fix passesactual37historyreads/1618backend/25frontend and affected confined browser checks. Mandatory freshpreflight receipt guard fault-tested. Next corrected install fromrestored state; no real repair/provider case complete, no owner decision pending. See CONTINUATION.md. Lower entries historical.
 

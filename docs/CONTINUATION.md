@@ -1,4 +1,39 @@
-## Actual current continuation — November 9, 2026, 06:24 UTC
+## Active connected repair — November 9, 2026, 06:40 UTC
+
+The functional closeout immediately below remains valid: installed59/2ecbce2,
+all4real cases pass, accepted bug/result history372 restart-durable, all4services
+active/enabled, normal model restored/fallback Off. NO provider active; no replay.
+
+Development now implements the identified historical-result warning. Shared backend
+result_rejection.validated_rejection is extracted from the existing tested operator
+validator (same proof/criterion/oracle/frozen-candidate/meaningful-failure rules),
+with bounded no-follow reads and UUID/path checks. acceptance_policy delegates to it.
+Normal result/detail/list pages show a later rejected/unavailable review separately
+from native history; publication holds on either state. No DB write/new schema,
+grant, model request, new approval or changed addon solution. Missing evidence keeps
+legacy behavior; malformed/symlink/mismatched review cannot become acceptance.
+68focused backend and3frontend tests, static/contracts/build/migrations pass; final
+18rejection-focused pass after path guard. All actual native/provider/checker source
+is unchanged. Generated contracts were regenerated, not manually edited.
+
+Actual old rejection + accepted replacement tested on a VERIFIED PRIVATE COPY of
+the final372-row DB at R/later-review-rehearsal/workbench.sqlite3, with4hash-identical
+old private rejection files. Rejected oldcandidate correctly flagged, accepted new
+candidate unaffected, history unchanged/no provider calls. Proof:
+R/later-review-rehearsal/actual-historical-rejection-proof.json.
+This is not a new addon task or developer-authored repair. Installed59 not modified.
+Next: exact new candidate full suites, separate-process GET-only browser projection
+on that copied history, preserve/seal source and verification, checked update if
+appropriate. Carry the4verified rejected-result artifacts into the new active DB's
+artifacts/acceptance/rejected-results before API start. They live with original
+S57history now; copying DB alone would lose the warning. Preserve original native
+outcome/usage. Future updates must preserve this evidence, not only database bytes.
+No need to repeat any successful real provider case. Revalidate all5 recipes/results
+after unchanged provider/checker paths; real_execution review/listing/RunSummary/
+LaterReview and real_publication.current stronger guard changed, not execution.
+Continue broader unmet requirements under standing authority; no owner action needed.
+
+## Verified functional closeout — November 9, 2026, 06:24 UTC
 
 **Real flight-path repair accepted offline; ALL FOUR REAL PROVIDER CASES PASS.**
 Installed59 remains2ecbce2b3bb8d067f285d57b824f49043bc174c6;
