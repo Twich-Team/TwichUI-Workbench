@@ -1,3 +1,61 @@
+## Installed55; real repair continuation approved and preparing — Nov9 01:12UTC
+
+Installedcandidate5968dd047ac35e6ceb6ca3e9fd533f6dfcdad118,
+treea5f92922253951d7d83dfb36b1a9430d9c2b17d9,
+seal3ee78f94b51be3154a40c911f78193ae3664fa0c88fec8c9be6628a386d83f05.
+R=C/outcome-5968dd0; S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-5968dd0.
+Verified installation/postinstallation:original79/latest276rows unchanged, all43
+history reads, historical unknown/quarantine rows unchanged, all4servicesactive/
+disabled pendingfunctionalacceptance, network/TLS/browser/internalendpoint guards,
+normalQwen/context/auth restored andunchanged. No archives/dependency/account changes.
+Dormant9f5bdb4 was NEVERactivated; its independent admission DBidentity issue was
+corrected in5968dd0, actual controlled4-case browser rerun passed121.42s.
+
+Complete backend1806pass/8defaults opt-ins skipped;25frontend/static/contracts/TS/
+Vite/ruff/migrationspass.90transport tests use realGit-backed fixture bases andpass
+(no production validation bypass);69affected and final15private admission/APItests
+pass.2confined native separate-process actualbrowser journeys pass60.70s, including
+injected oversized multi-fileproposal→atomic rejection→model revision→originalFAIL/
+candidatePASS→restart+secondordinaryfixturebug. These are CONTROLLED providers.
+Full suite predates only final1line read-only operator engine URL correction+its
+regression, covered by final15tests+all4controlled browserchoices. Exactbounded
+logs/hashes/skip consequences inR/offline-verification.json. No third useless full
+suite for that separately exercised1line policy fix. Nativelegacy4formatvariants
+unchanged; historical guild-roster readiness utility not rerun/notcurrentflightproof.
+
+InstallednormalAPI offers exact continuation7aeefee2-c6a7-545f-8668-7efe76a8ee65 /
+878ebc24380e8abee473389a9d57f1aea434a0c88259a5accb5c4eb115ba4355.
+Onlymodel-generated95lineunfinishedTravel.lua work, same150line/2writes/8reads and
+Codexprovider. Scope0a4e1e71.../daf461... unchanged. Read-onlydesktop+phone screenshots
+R/repair-{desktop,phone}.png inspected: continuationvisible, freshcheckbox/Run, honest
+correctnesspendingnotice, nooverflow. Normalbrowser fresh Run903707ad-bf41-461c-83e1-
+d4f46d1c6879 dispatched+200 at01:11:16.897; app sessionACTIVE, preparing original
+clean isolated copy and actualbaseline/boundary. Saved partialwork is frozen and
+will be restored ONLY after fresh currentgrant, before provider reads. No sourcefix
+was supplied by development. NO independently checked flightpathresult yet.4real
+supportingcases0/4. Do not replay priorcompleted requests or alter oldworkspace.
+
+Driver exec85225 runsR/driver-case.sh bug-flight-paths. LogsR/applied-scope-driver.log,
+R/bug-flight-paths-driver.txt; decisionsS/artifacts/acceptance/bug-flight-paths.jsonl.
+Runtime S/release/artifacts/runs/task-lease-task-session-903707ad-bf41-461c-83e1-
+d4f46d1c6879-01/real-run. Watchactualbaseline/checkprocesses, providerreceipts and
+DBcurrentexecution; leavehealthyworkrunning. Prioroldexecutionbc44...fullysettled:
+2completeCodexrequests93444tokens, oldgrantrevoked/unitdead/restored,95linepartial.
+Actual2ndproposal195linesreproduced offline and newatomiclogic rejects with0writes.
+C/outcome-7e468e8/settled-implementation preservesrawrecoveredproposal/patch/proofs.
+Ledger133knowncompletedCodexturns beforecurrentnewgeneration; unknownhistoryunchanged.
+
+Private clarification/appliedscope/independentreview revalidated fornewseal. Window
+priorattempt list APPENDS oldknownfailedimplementation12e674b7... for honest
+continuation accounting; oldwindow savedR/window-before-continuation.json and delta
+R/continuation-history-context.json. No budgets/history reset. No ownerdecision pending.
+Whenchecked:inspectactualmodelpatch+tests/originalandcandidatebehavior againstall9
+ownerrequirements+7scopecriteria; createONLYhonestboundprivatebug-result-review.json
+forawaitingdriver (format inpreviousentries). Then durable restart/nextordinarytask,
+all4realproviderchecks/fullremainingproduct. Do not count controlledtests or another
+installedbuild asproduct completion. Billing/disclosure/access/network/publication/
+independentchecking/unknown-outcome protections unchanged. No campaign caps/renewals.
+
 ## Model-authored addon changes preserved; repair continuation under verification — Nov9 00:57UTC
 
 Current installed deployment54 remains7e468e865e5ef878b2b3d221d59a2a6e4b0945da.
