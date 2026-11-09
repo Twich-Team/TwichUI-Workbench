@@ -588,7 +588,7 @@ def review(engine, identity):
     proposal = (linked or {}).get('proposal_review') or {}
     contract = proposal.get('task_contract') or {}
     binding = digest(linked) if linked else None
-    # Only the frozen verification profile ties these examples to the checks.
+    # Only frozen, task-bound verification evidence can describe checked behavior.
     behavior_checked = []
     behavior_reproduced = False
     if (linked and row['status'] == 'checked' and result.get('verification') == 'passed'
@@ -602,6 +602,21 @@ def review(engine, identity):
             index = scenario.get('acceptance_index')
             if type(index) is int and 0 <= index < len(expected) and expected[index] not in behavior_checked:
                 behavior_checked.append(expected[index])
+    if (linked and row['status'] == 'checked' and result.get('verification') == 'passed'
+            and contract.get('bug_intent') and manifest.get('scope_ready_sha256')
+            and manifest.get('workflow_task_binding') == binding):
+        rounds = result.get('model_check_rounds') or []
+        final = rounds[-1] if rounds else {}
+        differential = final.get('original_test_differential') or {}
+        behavior_reproduced = bool(
+            final.get('status') == 'pass'
+            and type(final.get('check_round')) is int
+            and result.get('independent_check_evidence') == f"working-checks/{final['check_round']:02}"
+            and differential.get('status') == 'pass'
+            and differential.get('original_production_unchanged') is True
+            and differential.get('result_sha256'))
+        # A differential proves that new assertions expose the original bug;
+        # it does not establish every proposed criterion individually.
     return dict(id=row['id'], title=linked['task']['title'] if linked else grant['snapshot']['contract']['title'], status=row['status'],
                 message=notice or row['message'], base=grant['snapshot']['contract']['base'], current_grant=valid(grant),
                 workflow_task=dict(intake_id=linked['intake_id'],task_id=linked['task']['id'],

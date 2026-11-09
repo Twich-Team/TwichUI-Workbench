@@ -145,6 +145,44 @@ def test_safe_read_only_review_and_authority_separation(store, client):
     assert client.post('/api/real-executions/'+receipt['id'], json={}).status_code != 200
 
 
+@pytest.mark.parametrize('fault', [None, 'binding', 'readiness', 'intent', 'evidence', 'failed-round', 'original-changed', 'unverified'])
+def test_scoped_repair_review_reports_original_reproduction_without_inventing_criterion_coverage(store, monkeypatch, fault):
+    from workbench import task_execution
+
+    runtime, grant, receipt = granted(store)
+    real.process_one(store, runtime)
+    linked = dict(intake_id='controlled-intake', task=dict(id='controlled-task', title='Controlled repair'),
+        proposal_review=dict(task_contract=dict(bug_intent={'version': 1}, acceptance=['Unproven separate criterion'])))
+    result = dict(verification='passed', candidate_id='controlled',
+        manifest=dict(scope_ready_sha256='a'*64, workflow_task_binding=real.digest(linked)),
+        independent_check_evidence='working-checks/02', model_check_rounds=[dict(check_round=2, status='pass',
+            original_test_differential=dict(status='pass', original_production_unchanged=True, result_sha256='b'*64))])
+    if fault == 'binding':
+        result['manifest']['workflow_task_binding'] = 'changed'
+    elif fault == 'readiness':
+        result['manifest'].pop('scope_ready_sha256')
+    elif fault == 'intent':
+        linked['proposal_review']['task_contract'].pop('bug_intent')
+        result['manifest']['workflow_task_binding'] = real.digest(linked)
+    elif fault == 'evidence':
+        result['independent_check_evidence'] = 'working-checks/01'
+    elif fault == 'failed-round':
+        result['model_check_rounds'][0]['status'] = 'fail'
+    elif fault == 'original-changed':
+        result['model_check_rounds'][0]['original_test_differential']['original_production_unchanged'] = False
+    elif fault == 'unverified':
+        result['verification'] = 'failed'
+    monkeypatch.setattr(task_execution, 'current', lambda *_: True)
+    with write_transaction(store) as c:
+        snapshot = {**grant['snapshot'], 'workflow_task': linked}
+        c.execute(real.grants.update().where(real.grants.c.id == grant['id']).values(snapshot=snapshot))
+        c.execute(real.requests.update().where(real.requests.c.id == receipt['id']).values(result=result))
+    review = real.review(store, receipt['id'])
+    assert review['behavior_reproduced'] is (fault is None)
+    assert review['behavior_checked'] == []
+    assert review['publication_allowed'] is False
+
+
 def test_create_only_artifacts_reject_partial_conflicting_freeze(tmp_path):
     path = tmp_path/'candidate'/'manifest'
     durable(path, b'complete')

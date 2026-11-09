@@ -1,3 +1,61 @@
+## Real flight-path patch independently checked and accepted — Nov9 02:17 UTC
+
+**Actual product milestone:** real signed-in Codex, through the installed Workbench
+and delegated normal scope/run decisions, produced a local reviewable addon patch.
+Execution2efed208-b38a-5d09-bd85-4fe68ea9b702 is CHECKED; sessionfec4b217-aa5c-4875-a7c1-
+312130bbea4a completed. Candidate3afdc232a737cfe75e88d05b0e63793c62d8b8a3a9274543a2ebdb77d9a89b42.
+Travel.lua65add/31delete and test_nav.lua53add,149total within the approved150.
+Four real completed Codex turns/200162reported tokens; ledger now141known completed
+turns. Historical unknown outcomes and usage preserved. No addon solution supplied
+by development; original addon remains untouched and patch NOT installed/published.
+
+Installed56 is bc9bdfb20dd6d951664b8ab48acb1f1f7f6a1873, treea669b55cd066e82e156eb8fe136881d744bbef45,
+seal37b069c444db00d4f305c9b122de6d1eab44818d8f86a08436f587fda8b710b8.
+S=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-bc9bdfb.
+R=/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-bc9bdfb.
+Repoa61e600 adds only independently verified operator pre-click review scheduling;
+all exact-body/task/offer/duplicate checks remain in the7s mutation fence and the
+frontend8s deadline is unchanged. Controlled4case browser rehearsal includes8s
+read-only preflight delay and passes. SeeR/operator-preclick-review/binding.json.
+
+Native independent verification: frozen candidate passes syntax/focused/assertion/
+complete addon suite167pass, and the same added assertions FAIL against unchanged
+original production for map-listings-as-learning. Supplemental confined checks
+R/independent-flight-review/result.json independently reproduce actual original
+Journey.PlanNow flight-route failure; candidate walks before learning/with one
+endpoint, flies after later observation, retains positives across partial/failure,
+isolates2characters with their own positive records, and restores the entire saved
+variables in a fresh Lua process/full addon-client initialization without a visit.
+Disable/enable/Refresh registers exactly once. These are simulated game APIs,
+NOT actual in-game acceptance. A failed unsupported single-module hot-swap harness
+expectation was corrected to actual full-client reload, preserving both versions
+and exact diagnosis. This changes only the independent checker, never addon code.
+
+All7approved scope criteria and3case requirements reviewed after implementation:
+S/artifacts/acceptance/bug-result-review.json. Browser observer timedout02:10 while
+this supplemental review ran; timeout record retained and read-only closeout resumed
+for the SAME checked execution, with0task/database mutations and0provider replays.
+R/read-only-closeout-resume.json; bug-flight-paths.jsonl endsCHECKED. Oldheld row
+remains historical. Appservices restarted after settled result; identical before/
+after full history fingerprints, normalQwen/auth restored. Desktop/phone result
+visible at/executions/2efed208-b38a-5d09-bd85-4fe68ea9b702 and patch available.
+Read-only browser found one presentation gap: scoped-repair original reproduction
+is in private frozen evidence but API behavior_reproduced still recognizes only
+legacy profile certificates. Repair this projection without inventing criterion
+coverage or rerunning successful model work. R/result-restart-browser.json.
+
+NEXT/current: codex-once supporting case launched02:14:31 through normal browser,
+plan approved02:14:42; actual independent preparation running. Driver session44692,
+R/codex-once-launch.log andS/artifacts/acceptance/codex-once.jsonl. Do NOT replay.
+Then qwen-once and both pre-generation fallback cases, preserving first success.
+All4real supporting cases remain0/4 until actual receipts endchecked; controlled
+passes are not real passes. Subsequent ordinary bug submission still pending.
+Normal services active, stilldisabled pending functional acceptance. Existing
+loopback/LAN/auth/credential/billing/source/publication protections unchanged; no
+ownerdecision needed. A8/full product NOT complete; features/inspection/simulator/
+other agreed capabilities remain visible. Continue, no obsolete campaign caps.
+Earlier entries below are chronological history, not current state.
+
 ## Real code/test cycle reached; harmless no-op correction ready — Nov9 01:25UTC
 
 Installed55 remains5968dd047ac35e6ceb6ca3e9fd533f6dfcdad118 (tree/seal/records
