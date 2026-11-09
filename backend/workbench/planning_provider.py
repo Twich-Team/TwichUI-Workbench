@@ -338,6 +338,13 @@ class LocalProvider:
             # profile below selects its own shared output/reasoning bound. Never log reasoning.
             body.update(reasoning_budget_tokens=1024, reasoning_format='deepseek',
                         chat_template_kwargs=dict(enable_thinking=True))
+        intent_investigation = schema is InvestigationResponse and context.get('coverage', {}).get('scope_plan_format') == 'readable-intent-v1'
+        if intent_investigation:
+            body['reasoning_budget_tokens'] = 2048
+            body['messages'][0]['content'] += (
+                ' Use retained completed_searches as source evidence: inspect committed locations matching the reported symptoms before asserting a cause. '
+                'Component or file names alone are not evidence of behavior. State the source evidence and remaining gap in finding; do not use an action word as the finding. '
+                'Keep read/search replies compact so complete JSON fits the unchanged total output bound.')
         program = context.get('coverage', {}).get('reproducer_format') == 'lua-phases-v1'
         from workbench.planning_limits import PROGRAM_COMPLETION, PROGRAM_REASONING
         # Intent investigation needs room for related source, under the actual

@@ -1,3 +1,29 @@
+## CURRENT75/7238a87 — November9 18:14UTC, original vendor task settled; reasoning profile verified
+
+Attempt3174eb9c... definitively settled3COMPLETE local responses71926tokens after normal
+complete-content settings stop; no uncertainty or addon decision.55COMPLETE incident
+responses1058062tokens preserved, originalNULLs unchanged. ALL preference VALUES restored
+rev12→13→14 throughbrowser; modelidle/auth verified. No vendorplan or implementation.
+Original report retained; six accepted prior results/history/rejection evidence intact.
+
+The supplied notebook now contains exact literal fallback match and committed coordinates,
+but Qwen still chose collection reads. Source absence is no longer the complete explanation.
+New generic retrieval instruction prioritizes matching evidence before asserting cause;
+intent investigation reasoning2048 (was1024), SAME totaloutput2600, requestdeadline300,
+input131072/prompt26000/capacityguard and savedmodel/fallbackOff/permissions unchanged.
+This tests a reasoning-budget hypothesis; it is not a proven cause or realplan yet.
+170affected tests plus final74transport/profile tests and2confined controlled native
+API/worker/browser workflows PASS. Current55state actual-tokenizer assembly PASSES73120bytes19861tokens/32768context,
+zero generation or DBmutation. Root provider/test changes verified;75installed unchanged
+pending corrected candidate cutover.
+
+Next: finish55state verification, seal/install, normal SAMEreport read-only Qwen run to
+usableplan/genuineproductquestion, ownerreview forvalidplan, settledrestart/history/
+result/model/network continuity and maintenance restoration. Maintenance NEW admissions
+STILL OWNED PAUSED; supported hash-bound opsctl resume after owned work. No source toCodex,
+addonwrite/publication/paidbilling/extra credit or approval bypass. Standingauthority
+continues, no old campaign caps/engineering renewals. Do not stop at checkpoint.
+
 ## CURRENT75/7238a87 — November9 18:06UTC, SAME vendor task continuation RUNNING
 
 75installed, source/seal/history/network/browser/model/auth gates PASS;6prioracceptedreal

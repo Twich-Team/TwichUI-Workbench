@@ -793,7 +793,7 @@ def test_program_working_set_uses_exact_verified_context_capacity(count,allowed,
         def models(self,_):return MODEL
         def context_budget(self,_,body):
             calls.append('count')
-            assert body['max_tokens']==(6144 if profile=='program' else 2600) and body['reasoning_budget_tokens']==(3072 if profile=='program' else 1024)
+            assert body['max_tokens']==(6144 if profile=='program' else 2600) and body['reasoning_budget_tokens']==(3072 if profile=='program' else 2048)
             return dict(prompt_tokens=count,context_tokens=32768)
         def read(self,request,limit):
             calls.append('generate')
