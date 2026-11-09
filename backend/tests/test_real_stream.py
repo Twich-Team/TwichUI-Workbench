@@ -143,16 +143,29 @@ def test_small_replacements_reuse_scope_and_rollback(tmp_path):
     from workbench.real_workspace import Tools
     from workbench.real_execution import PATHS
     class Runtime:
-        workspace=tmp_path
+        workspace=tmp_path/'workspace'
         def enforce_storage(self):
             pass
         def scope(self):
-            if (tmp_path/PATHS[0]).read_text() == 'out of scope':
+            if (self.workspace/PATHS[0]).read_text() == 'out of scope':
                 raise ValueError('Scope violation')
-    path=tmp_path/PATHS[0]
+    path=tmp_path/'workspace'/PATHS[0]
     path.parent.mkdir(parents=True)
     path.write_text('first\nsecond\n')
-    tools=Tools(Runtime(), lambda: True)
+    from test_verification_profiles import git
+    runtime=Runtime()
+    runtime.root=tmp_path/'evidence'
+    runtime.root.mkdir()
+    runtime.paths=PATHS
+    for name in PATHS[1:]:
+        other=runtime.workspace/name
+        other.parent.mkdir(parents=True,exist_ok=True)
+        other.write_text('-- unchanged allowed fixture\n')
+    git(runtime.workspace,'init','-q')
+    git(runtime.workspace,'add','.')
+    git(runtime.workspace,'-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Controlled base')
+    runtime.base=git(runtime.workspace,'rev-parse','HEAD').strip()
+    tools=Tools(runtime, lambda: True)
     tools.handle('replace_text', {'path': PATHS[0], 'old': 'first', 'new': 'changed'})
     assert path.read_text() == 'changed\nsecond\n'
     with pytest.raises(ValueError, match='exactly one'):

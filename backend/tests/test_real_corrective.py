@@ -47,7 +47,23 @@ def tape(tmp_path, monkeypatch):
         def scope(self):
             pass
 
-    state.tools = Tools(Runtime(), lambda: True)
+    # Edit transactions now preview the real pinned candidate, rather than
+    # trusting a fake scope callback. Keep transport mocked; use a tiny Git base.
+    from test_verification_profiles import git
+    runtime=Runtime()
+    runtime.root=tmp_path/'evidence'
+    runtime.root.mkdir()
+    runtime.paths=job.PATHS
+    for name in job.PATHS:
+        other=runtime.workspace/name
+        other.parent.mkdir(parents=True,exist_ok=True)
+        if not other.exists():
+            other.write_text('-- unchanged allowed fixture\n')
+    git(runtime.workspace,'init','-q')
+    git(runtime.workspace,'add','.')
+    git(runtime.workspace,'-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Controlled base')
+    runtime.base=git(runtime.workspace,'rev-parse','HEAD').strip()
+    state.tools = Tools(runtime, lambda: True)
     state.file = file
 
     class Response(io.BytesIO):

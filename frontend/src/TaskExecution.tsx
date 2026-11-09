@@ -25,10 +25,11 @@ export function TaskExecution({intakeId,taskId,separateApproval,showWaiting=fals
   const data=query.data, latest=data.runs[0];
   const progress=executionProgress(data);
   const waiting=data.stage==='waiting';
+  const reviewRun=waiting||data.stage==='failed';
   const expired=(waiting || data.stage==='held')&&data.run_budget?.current===false;
   const showProgress=!waiting || Boolean(data.run_budget) || showWaiting;
   return <>
-    {separateApproval&&waiting&&!expired&&<RunApproval intakeId={intakeId} taskId={taskId}/>}
+    {separateApproval&&reviewRun&&!expired&&<RunApproval intakeId={intakeId} taskId={taskId}/>}
     {showProgress&&<section className="task-execution" aria-label="Task implementation progress">
       <h3>{expired?'Run approval expired':progress?.title||(waiting?'Waiting to start':runStage[data.stage]||'Progress unavailable')}</h3>
       {data.message.replace(/[.!]$/, '').trim()!==progress?.title &&
@@ -47,6 +48,6 @@ export function TaskExecution({intakeId,taskId,separateApproval,showWaiting=fals
       {data.runs.length===10&&<p>Showing up to 10 recent runs. <Link to="/executions">All run results</Link></p>}
       {data.runs.length>1&&<details><summary>Earlier runs ({data.runs.length-1})</summary><ul>{data.runs.slice(1).map(run=><li key={run.id}><Link to={'/executions/'+encodeURIComponent(run.id)}>{runStage[run.status]||'Recorded run'}</Link><p>{run.message}</p></li>)}</ul></details>}
     </section>}
-    {separateApproval&&!waiting&&<details><summary>Permission for this run</summary><RunApproval intakeId={intakeId} taskId={taskId}/></details>}
+    {separateApproval&&!reviewRun&&<details><summary>Permission for this run</summary><RunApproval intakeId={intakeId} taskId={taskId}/></details>}
   </>;
 }

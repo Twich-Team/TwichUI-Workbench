@@ -137,7 +137,8 @@ def offer(c, proposal_id):
                 and (not review.get('task_contract') or saved['specification'].get('verification_profile'))
                 and certified_offer_current(c, row)
             ):
-                return dict(row)
+                from workbench.repair_continuation import preview
+                return preview(c,dict(row))
             if saved['specification'].get('verification_profile') or 'certified_preparation' in saved:
                 return None  # A changed newest preparation cannot resurrect an older binding.
         except (KeyError, TypeError, ValueError):
@@ -234,6 +235,9 @@ def certified_offer_current(c, row):
             return False
         if spec.get('repair_cycle'):
             from workbench.repair_cycle import readiness
+            if saved.get('repair_resume'):
+                from workbench.repair_continuation import validate_frozen
+                validate_frozen(saved['repair_resume'])
             runtime=Runtime(saved['ready_preparation']['root'])
             return (_reviewed_spec(c,selected['ref'],runtime)==spec
                     and dict(root=str(runtime.root),readiness=readiness(runtime))==saved['ready_preparation'])
@@ -254,6 +258,7 @@ def preparation_inputs(c, selected):
     profile = saved['specification']['controls']
     return dict(recipe=saved['specification'], oracle=(root / 'recipe-oracle.lua').read_text(),
                 **(dict(baseline_source=str(root)) if saved.get('ready_preparation') else {}),
+                **(dict(repair_resume=saved['repair_resume']) if saved.get('repair_resume') else {}),
                 control_patches={name: (root / 'profile-evidence' / name / 'input.patch').read_text()
                                  for name in profile if name != 'original'})
 
@@ -421,7 +426,11 @@ def prepared_behavior_view(c,selected):
     saved=selected['snapshot']
     if saved.get('ready_preparation') and saved.get('specification',{}).get('repair_cycle'):
         return dict(repair_cycle=dict(verification='not_run',
-            notice='This approves an isolated repair attempt with test development. Correctness requires new regression assertions to fail against original production, pass with the repair, and all independent checks to pass.',
+            **(dict(continuation=dict(
+                execution_ids=[r['execution_id'] for r in saved['repair_resume']['histories']],
+                session_ids=[r['session_id'] for r in saved['repair_resume']['histories']],
+                model_attempt_ids=[r['model_attempt_id'] for r in saved['repair_resume']['histories']])) if saved.get('repair_resume') else {}),
+            notice=('Continue the saved unfinished model-authored repair under a fresh run approval. Prior failed execution and usage remain recorded. ' if saved.get('repair_resume') else '')+'This approves an isolated repair attempt with test development. Correctness requires new regression assertions to fail against original production, pass with the repair, and all independent checks to pass.',
             criteria=saved['specification']['approved_intent']['plan']['criteria']))
     ref=saved.get('reviewed_task',{}).get('ref')
     if not ref or not saved.get('specification',{}).get('source_context'):
@@ -487,7 +496,7 @@ def preparation_status(c, proposal):
 
 
 def run_context(engine, intake_id, task_id):
-    """Current offer and exact scope for a first browser budget after scope review."""
+    """Current exact scope and fresh run binding; prior usage remains history."""
     from workbench import intake, task_execution
 
     with engine.connect() as c:
@@ -499,6 +508,7 @@ def run_context(engine, intake_id, task_id):
         saved = c.execute(select(proposal_decisions).where(
             proposal_decisions.c.proposal_id == task['proposal_id'],
             proposal_decisions.c.payload['run_budget']['offer_id'].as_string().is_not(None),
+            *([proposal_decisions.c.payload['run_budget']['offer_id'].as_string()==selected['id']] if selected else []),
         ).order_by(proposal_decisions.c.created_at.desc()).limit(1)).mappings().first()
         receipt = intake.receipt_view(saved) if saved else None
         if not selected or 'reviewed_task' not in selected['snapshot']:
@@ -529,7 +539,8 @@ def approve_run(engine, intake_id, task_id, body):
     """One explicit browser decision, through the existing durable approval owner.
 
     Scope is reaffirmed without rewriting its applied decision/decomposition.
-    First budget only: consumed attempts never gain a fresh run through this UI.
+    A settled scoped-repair failure may retain its exact unfinished work under
+    a fresh separately reviewed binding. Active/uncertain/checked work cannot.
     """
     from workbench import intake, task_execution
 
@@ -549,6 +560,8 @@ def approve_run(engine, intake_id, task_id, body):
         if parent['payload'].get('execution_continuation') or parent['payload'].get('run_budget'):
             raise HTTPException(409, 'A first scope-only approval is required; earlier budgets cannot be reset')
         selected = validate_selection(c, parent['proposal_id'], body.run_budget, admitting=True)
+        from workbench.repair_continuation import freeze
+        freeze(c,selected)
         from workbench import everyday
         if everyday.enabled():
             readiness = everyday.status(engine)
@@ -559,7 +572,8 @@ def approve_run(engine, intake_id, task_id, body):
             raise HTTPException(409, 'Scope, certification or offer changed. Review the current task again.')
         for row in c.execute(select(proposal_decisions).where(
                 proposal_decisions.c.proposal_id == parent['proposal_id'])).mappings():
-            if row['payload'].get('run_budget'):
+            if row['payload'].get('run_budget') and (not selected['snapshot'].get('repair_resume')
+                    or row['payload']['run_budget']['offer_id']==selected['id']):
                 raise HTTPException(409, 'A task budget is already saved. Refresh its receipt; no new run was created.')
         review = linked['proposal_review']
         continuation = dict(scope_approval_id=parent['id'], scope_binding=parent['binding'],

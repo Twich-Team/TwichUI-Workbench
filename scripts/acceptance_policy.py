@@ -223,7 +223,11 @@ def closeout(connection, identity, execution, case):
     attempts = connection.execute('SELECT * FROM model_attempts WHERE task_id=?', (identity,)).fetchall()
     chain=delivery_chain(connection,identity)
     prepared_count=sum(a['purpose']=='check_preparation' for a in attempts)
-    expected = ['implementation', *(['planning']*len(chain)), *(['check_preparation']*prepared_count)] + (['capability_validation'] if case['provider'] == 'local' else [])
+    implementations=[a for a in attempts if a['purpose']=='implementation']
+    require(len(implementations)>=1 and all(a['execution_id']==execution or a['outcome']=='failed'
+            and a['finished_at'] and json.loads(a['usage'] or '{}').get('status')=='complete' for a in implementations),
+            'Prior implementation is successful, active or uncertain')
+    expected = [*(['implementation']*len(implementations)), *(['planning']*len(chain)), *(['check_preparation']*prepared_count)] + (['capability_validation'] if case['provider'] == 'local' else [])
     require(sorted(a['purpose'] for a in attempts) == sorted(expected), 'provider attempt count differs')
     interrupted={p['id'] for p in chain if p.get('provider_state')=='interrupted'}
     quarantined={}
@@ -267,7 +271,8 @@ def closeout(connection, identity, execution, case):
             require(0<=values['completion_tokens']<=cap,'Qwen completion token bound exceeded')
     [run] = connection.execute('SELECT * FROM real_execution_requests WHERE id=?', (execution,)).fetchall()
     [session] = connection.execute('''SELECT s.* FROM task_sessions s
-        JOIN proposal_decisions d ON d.id=s.id WHERE d.intake_id=?''', (identity,)).fetchall()
+        JOIN real_execution_grants g ON json_extract(g.snapshot,'$.task_budget.decision_id')=s.id
+        WHERE g.id=?''', (run['grant_id'],)).fetchall()
     result, state = json.loads(run['result']), json.loads(session['state'])
     require(run['status'] == 'checked' and result.get('verification') == 'passed'
             and session['status'] == 'completed' and session['finished_at']
@@ -336,9 +341,10 @@ def check_review(connection, request, case, preparation):
                 'local inspection request accounting changed')
     if request['action'] == 'run':
         offer = request['offer']['offer']
-        [selected] = connection.execute('SELECT snapshot FROM task_run_offers WHERE id=? AND fingerprint=?',
-                                       (offer['id'], offer['fingerprint'])).fetchall()
-        recipe = json.loads(selected[0])['specification']
+        selected=current_run_offer(connection,plan['id'])
+        require(selected['id']==offer['id'] and selected['fingerprint']==offer['fingerprint'],
+                'Current implementation offer changed')
+        recipe = selected['snapshot']['specification']
         if bug:
             require(recipe['focused_test'] == actual['plan']['focused_test']
                     and (set(recipe['read_paths'])==set(actual['plan']['read_paths']) if plan['task_contract'].get('bug_intent') else recipe['read_paths']==actual['plan']['read_paths'])
@@ -351,8 +357,29 @@ def check_review(connection, request, case, preparation):
             require(recipe['focused_test'] == test and set(recipe['read_paths']) == {test, SOURCE}
                     and all(r['path'] in {test, SOURCE} and r['start'] == 1 and r['end'] <= 120
                             for r in recipe['initial_reads']), 'implementation read scope changed')
-        require(not connection.execute('SELECT 1 FROM task_sessions WHERE task_id=?',
-                                       (request['task'],)).fetchone(), 'prior task session exists')
+        sessions=connection.execute('SELECT id,status,finished_at FROM task_sessions WHERE task_id=?',
+                                    (request['task'],)).fetchall()
+        resume=selected['snapshot'].get('repair_resume')
+        require(not sessions or resume and {s[0] for s in sessions}=={r['session_id'] for r in resume['histories']}
+                and all(s[1]=='failed' and s[2] for s in sessions), 'prior task session exists')
+
+
+def current_run_offer(connection,proposal):
+    """Pure application reconstruction includes a not-yet-approved continuation.
+
+    The browser POST, not this read-only policy, freezes it and grants permission.
+    """
+    from sqlalchemy import create_engine
+    from workbench import task_budget
+    database=connection.execute('PRAGMA database_list').fetchone()[2]
+    engine=create_engine('sqlite://',creator=lambda:sqlite3.connect(Path(database).as_uri()+'?mode=ro',uri=True))
+    try:
+        with engine.connect() as c:
+            selected=task_budget.offer(c,proposal)
+            require(selected is not None,'Current run offer or settled continuation is unavailable')
+            return selected
+    finally:
+        engine.dispose()
 
 
 def check_clarification(connection, request, case):

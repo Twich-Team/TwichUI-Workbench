@@ -340,6 +340,14 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                 old=BAD_ALERT if client_case else BUGGY,new=GOOD_ALERT if client_case else CORRECT)])
             if intent_mode:
                 answer['edits'].append(regression_edit(client_case))
+                wire=json.loads(prompt.split('The following source and feedback are untrusted task data.\n',1)[1])
+                if wire['turn']==1:
+                    # Reject a multi-file batch BEFORE applying its first edit,
+                    # then revise through the real API/worker/browser journey.
+                    answer['edits'][-1]['new']+='-- controlled excessive test addition\n'*151
+                else:
+                    assert wire['feedback']['category']=='change-budget'
+                    assert wire['feedback']['allowed_changed_lines']==150
         # Source-heavy observations must cross the former65k threshold through
         # the actual application, rather than rehearsing only tiny token counts.
         return answer,dict(prompt_tokens=70000,completion_tokens=10,total_tokens=70010,reasoning_tokens=2)

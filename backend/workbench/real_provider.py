@@ -117,6 +117,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
     end = time.monotonic()+LIMITS['implementation_s']
     completion = prompt = 0
     corrections = read_errors = tool_errors = 0
+    rejected_constraints=set()
     reads_done = 0
     edits_done = 0
     refresh = editing_announced = False
@@ -278,20 +279,26 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                 function = call.get('function', {}) if isinstance(call, dict) else {}
                 name = function.get('name') if isinstance(function, dict) else None
                 recoverable = (name == 'read_file' and error.code in RECOVERABLE_READ_CODES or
-                               name == 'replace_text' and error.code == 'replace_match' or
+                               name == 'replace_text' and error.code in {'replace_match','exact-match','change-budget','test-preservation','file-budget'} or
                                name == 'run_check' and error.code == 'check_name' or
                                name == 'find_text' and error.code in {'search_input','argument_json','argument_object','duplicate_field'} or
                                name == 'read_check_log' and error.code in {'check_log_input','argument_json','argument_object','duplicate_field'})
                 if not recoverable:
                     raise
+                constraint=error.code in {'change-budget','test-preservation','file-budget'}
+                if constraint:
+                    fingerprint=json.dumps(function,sort_keys=True)
+                    if fingerprint in rejected_constraints:
+                        raise ToolBudgetExceeded('unchanged_rejection','Repeated unchanged rejected edit; inspect feedback and change approach') from None
+                    rejected_constraints.add(fingerprint)
                 read_errors += int(name == 'read_file')
-                tool_errors += 1
-                if corrections >= LIMITS['corrective_tool_errors']:
+                tool_errors += int(not constraint)
+                if not constraint and corrections >= LIMITS['corrective_tool_errors']:
                     events[0].update(original_input_error_code=error.code, error_class='budget',
                                      error_code='read_correction_limit' if name == 'read_file' else 'tool_correction_limit')
                     raise ToolBudgetExceeded(events[0]['error_code'],
                         'Two safe input corrections consumed; third error terminates') from None
-                corrections += 1
+                corrections += int(not constraint)
                 refresh = refresh or name in ('read_file','replace_text')
                 if force_edit and name == 'replace_text':
                     repair.edit_required = False

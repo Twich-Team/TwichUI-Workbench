@@ -70,3 +70,28 @@ console.log('PASS');
     result=subprocess.run(['node','--input-type=module','-e',source],cwd=root,env=environment(),capture_output=True,text=True,timeout=10)
     assert result.returncode==0,result.stderr
     assert result.stdout.strip()=='PASS'
+
+
+def test_continuation_browser_keeps_known_failed_history_but_never_ignores_new_failure_or_uncertainty():
+    root=Path(__file__).resolve().parents[2]
+    source="""
+import assert from 'node:assert/strict';
+import {preparationReady,scopeConsentValid,checkedProgress} from './scripts/browser_acceptance.mjs';
+const scope={id:'scope',status:'applied',proposal_id:'p',binding:'b',scope_revision:1,payload:{action:'approve'}};
+const prior={id:'old-session',status:'applied',payload:{execution_continuation:{scope_approval_id:'scope'},run_budget:{publication:'hold'}}};
+const item={decisions:[prior,scope],tasks:[{}],jobs:[{revision:1,status:'completed',kind:'planning'}]};
+assert(preparationReady(item,{revision:1},scope));
+assert(scopeConsentValid(item,{id:'p',binding:'b',scope_revision:1},new Date(Date.now()-3600000).toISOString(),Date.now()));
+const old={id:'old',status:'failed',recovery_pending:false};
+const waiting={stage:'failed',runs:[old],session:{id:'old-session',status:'failed'},publication_allowed:false};
+assert(!checkedProgress(waiting,['old'],['old-session']));
+assert.throws(()=>checkedProgress({...waiting,session:{id:'new-session',status:'failed'}},['old'],['old-session']));
+assert.throws(()=>checkedProgress({...waiting,runs:[{...old,recovery_pending:true}]},['old'],['old-session']));
+const done={...waiting,stage:'checked',session:{id:'new-session',status:'completed'},runs:[{id:'new',status:'checked',verification:'passed'},old]};
+assert(checkedProgress(done,['old'],['old-session']));
+assert.throws(()=>checkedProgress(done));
+console.log('PASS');
+"""
+    result=subprocess.run(['node','--input-type=module','-e',source],cwd=root,env=environment(),capture_output=True,text=True,timeout=10)
+    assert result.returncode==0,result.stderr
+    assert result.stdout.strip()=='PASS'

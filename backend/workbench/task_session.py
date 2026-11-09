@@ -380,6 +380,8 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
             raise ValueError("Frozen supported-task oracle is unavailable")
         durable(real / "recipe.json", json.dumps(template["recipe"], sort_keys=True).encode())
         durable(real / "recipe-oracle.lua", oracle.encode())
+        if template.get('repair_resume'):
+            durable(real/'repair-resume.json',json.dumps(template['repair_resume'],sort_keys=True).encode())
         runtime = Runtime(real)
         db = Path(engine.url.database)
         stat = db.stat()
@@ -576,7 +578,7 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
                 engine,
                 config,
                 row["status"],
-                "Implementation ended without a qualifying candidate; no replacement attempt.",
+                "Implementation ended without a qualifying candidate. Its work and usage are saved; a settled scoped repair can be reviewed for continuation.",
             )
         return False  # Existing sealed-outcome recovery still owns pending delivery.
     if config.get("allow_publication") is not True:

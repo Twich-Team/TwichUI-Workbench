@@ -38,7 +38,7 @@ export function planningRecordMatches(attempt, candidate, reply) {
 }
 export function preparationReady(item, plan, scope) {
   const receipt=item.decisions.find(d=>d.id===scope.id);
-  check(item.decisions.length<=1&&(!receipt||['pending','applied'].includes(receipt.status)),
+  check(item.decisions.every(d=>d.id===scope.id||d.status==='applied'&&d.payload?.execution_continuation?.scope_approval_id===scope.id&&d.payload?.run_budget?.publication==='hold')&&(!receipt||['pending','applied'].includes(receipt.status)),
     'plan decision or independent preparation held');
   const current=item.jobs.filter(j=>j.revision===plan.revision);
   check(item.jobs.every(j=>j.revision<=plan.revision&&
@@ -53,8 +53,8 @@ export function scopeConsentValid(item,plan,consentTime,now) {
   // Planning consent expires for new proposals. A scope already approved by the
   // owner remains bound to its exact inputs; the separate run offer has its own
   // fresh expiry and is rechecked before dispatch. Do not invent a renewal gate.
-  const decision=item.decisions[0];
-  return item.decisions.length===1&&decision.status==='applied'&&decision.proposal_id===plan.id&&
+  const decision=item.decisions.find(d=>d.proposal_id===plan.id&&!d.payload?.run_budget&&!d.payload?.execution_continuation);
+  return Boolean(decision)&&decision.status==='applied'&&decision.proposal_id===plan.id&&
     decision.binding===plan.binding&&decision.scope_revision===plan.scope_revision&&
     decision.payload?.action==='approve'&&!decision.payload.run_budget&&!decision.payload.execution_continuation;
 }
@@ -78,7 +78,7 @@ export function reviewClarification(item, candidate, reply) {
   return item;
 }
 
-export function reviewPlan(item, candidate, identity, revision, now, reply, settledPreparations=[]) {
+export function reviewPlan(item, candidate, identity, revision, now, reply, settledPreparations=[], settledRepairs=[]) {
   const phases = reply ? (reply.renew_operation ? reply.processing_sequence : (reply.revision || 1)+1) : 1;
   check(item.id === identity && item.revision === phases && item.proposals.length === (reply ? priorProposals(reply).length+1 : 1) &&
     item.clarifications.length === (reply ? (reply.prior_clarifications||[]).length+1 : 0) && item.scope_history.length === 1, 'unexpected intake revision or history');
@@ -130,9 +130,9 @@ export function reviewPlan(item, candidate, identity, revision, now, reply, sett
   check(planningActivity.length===phases && planningActivity.every(attempt=>
     planningRecordMatches(attempt,candidate,reply)) &&
     preparedActivity.every(a=>Boolean(plan.task_contract.bug_intent)&&item.tasks.length>0&&item.decisions.some(d=>d.status==='applied')&&
-      a.purpose==='check_preparation'&&a.backend===candidate.provider&&a.requested_model===candidate.model&&
+      (a.purpose==='check_preparation'||a.purpose==='implementation'&&a.outcome==='failed'&&settledRepairs.includes(a.id))&&a.backend===candidate.provider&&a.requested_model===candidate.model&&
       (a.actual_model===candidate.model||a.actual_model===null&&a.outcome==='interrupted_unknown'&&settledPreparations.includes(a.id))&&
-      (a.outcome==='completed'||['failed','interrupted_unknown'].includes(a.outcome)&&settledPreparations.includes(a.id))),
+      (a.outcome==='completed'||['failed','interrupted_unknown'].includes(a.outcome)&&(settledPreparations.includes(a.id)||settledRepairs.includes(a.id)))),
     'planning or check preparation is uncertain or unexpected');
   const jobs = item.jobs.filter(job => job.kind === 'planning');
   check(jobs.length === phases && jobs.every(job => (job.status==='completed'||reply?.renew_operation&&job.status==='failed') && job.attempts === 1) &&
@@ -154,7 +154,8 @@ export function reviewRun(view, task, plan, approval, candidate, policy) {
   if(plan.task_contract.bug_intent&&cycle) {
     check(!prepared&&cycle.verification==='not_run'&&typeof cycle.notice==='string'&&cycle.notice.length>=40,'repair attempt misrepresents verification');
     exact(cycle.criteria,plan.task_contract.bug_intent.plan.criteria,'repair behavior criteria changed');
-    exact(Object.keys(cycle).sort(),['criteria','notice','verification'],'unexpected repair attempt permission');
+    exact(Object.keys(cycle).sort(),[...(cycle.continuation?['continuation']:[]),'criteria','notice','verification'],'unexpected repair attempt permission');
+    if(cycle.continuation) check(['execution_ids','session_ids','model_attempt_ids'].every(k=>Array.isArray(cycle.continuation[k])&&cycle.continuation[k].length>0&&cycle.continuation[k].every(uuid)),'continuation history binding missing');
   } else if(plan.task_contract.bug_intent) check(prepared&&prepared.intent_digest===plan.task_contract.bug_intent.review_digest&&hex(prepared.review_digest)&&hex(prepared.oracle_sha256)&&prepared.reproducer.observations.length>=1,'frozen behavioral checks missing');
   else check(!prepared&&!cycle,'unexpected prepared behavior');
   exact(offer, {...(prepared?{prepared_behavior:prepared}:{}),...(cycle?{repair_cycle:cycle}:{}),id: offer.id, fingerprint: offer.fingerprint, title: candidate.request.title,
@@ -164,10 +165,14 @@ export function reviewRun(view, task, plan, approval, candidate, policy) {
   'implementation files, commands, publication or budget changed');
 }
 
-export function checkedProgress(row) {
+export function checkedProgress(row,previous=[],previousSessions=[]) {
+  // A newly saved decision can precede the worker applying it. Its old failed
+  // session remains history during that brief interval, not a new failed run.
+  if(previous.length&&row.stage==='failed'&&previousSessions.includes(row.session?.id)&&
+    row.runs.length===previous.length&&row.runs.every(r=>previous.includes(r.id)&&r.status==='failed'&&!r.recovery_pending)&&!row.publication_allowed) return false;
   check(!['failed','held','blocked','interrupted','cancelled','recovering'].includes(row.stage) &&
-    row.runs.length <= 1 && !row.publication_allowed, 'implementation checks, completion or restoration held');
-  return row.stage === 'checked' && row.session?.status === 'completed' && row.runs.length === 1 &&
+    row.runs.filter(r=>!previous.includes(r.id)).length <= 1 && row.runs.every(r=>!previous.includes(r.id)||r.status==='failed'&&!r.recovery_pending) && !row.publication_allowed, 'implementation checks, completion or restoration held');
+  return row.stage === 'checked' && row.session?.status === 'completed' && row.runs.filter(r=>!previous.includes(r.id)).length === 1 &&
     row.runs[0].status === 'checked' && row.runs[0].verification === 'passed';
 }
 
@@ -360,7 +365,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
     if(resume) {
       const expectedPlan={revision:resume.revision};
       complete=await eventually(readItem,item=>preparationReady(item,expectedPlan,{id:resume.approval}),options.preparationMs??600000);
-      plan=reviewPlan(complete,candidate,identity,saved.revision,now(),reply,resume.settled_preparations||[]);
+      plan=reviewPlan(complete,candidate,identity,saved.revision,now(),reply,resume.settled_preparations||[],resume.settled_implementations||[]);
       scope=complete.decisions.find(d=>d.id===resume.approval);
       check(plan.id===resume.proposal&&plan.binding===resume.binding&&scope?.binding===plan.binding&&scope.proposal_id===plan.id&&scope.status==='applied',
         'applied scope differs from resume binding');
@@ -410,7 +415,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
     }
     const prepared = await eventually(readItem,item=>preparationReady(item,plan,scope), options.preparationMs ?? 600000);
     const tasks = prepared.tasks.filter(t => t.kind === 'task');
-    check(tasks.length === 1 && tasks[0].id === 'intake-' + identity + '-' + plan.revision + '-implementation' && prepared.decisions[0].binding === plan.binding,
+    check(tasks.length === 1 && tasks[0].id === 'intake-' + identity + '-' + plan.revision + '-implementation' && prepared.decisions.find(d=>d.id===scope.id)?.binding === plan.binding,
       'prepared task identity changed');
     const [task] = tasks;
     const runPath = url + '/tasks/' + task.id + '/run-approval';
@@ -418,7 +423,9 @@ export async function runJourney(context, origin, policy, candidate, options) {
       check(!row.receipt && !row.approval_hold, 'prior run decision or stale offer');
       return row.available;
     }, options.preparationMs ?? 600000);
-    reviewRun(view, task, plan, prepared.decisions[0], candidate, policy);
+    reviewRun(view, task, plan, scope, candidate, policy);
+    const previousRuns=view.offer.repair_cycle?.continuation?.execution_ids||[];
+    const previousSessions=view.offer.repair_cycle?.continuation?.session_ids||[];
     if(plan.task_contract.bug_intent&&view.offer.prepared_behavior&&options.reviewPreparedBug) await options.reviewPreparedBug({intake:identity,task:task.id,proposal:plan,offer:view});
     const panel = page.getByRole('region', {name:view.offer.repair_cycle?'Scoped repair run approval':'Certified task run approval'});
     await panel.getByText('Technical run details', {exact:true}).click();
@@ -430,12 +437,11 @@ export async function runJourney(context, origin, policy, candidate, options) {
         check(work.codex_available, 'connector changed after planning');
         exact(await json(runPath), view, 'certified offer changed after review');
         const current = await readItem();
-        exact(reviewPlan(current, candidate, identity, saved.revision, now(), reply,resume?.settled_preparations||[]), plan, 'plan changed before run');
+        exact(reviewPlan(current, candidate, identity, saved.revision, now(), reply,resume?.settled_preparations||[],resume?.settled_implementations||[]), plan, 'plan changed before run');
         exact(current.tasks, prepared.tasks, 'task version changed before run');
-        check(current.decisions.length === 1 && current.decisions[0].id === scope.id &&
-          current.decisions[0].status === 'applied', 'reviewed approval changed');
+        check(current.decisions.every(d=>d.id===scope.id&&d.status==='applied'||previousSessions.includes(d.id)&&d.status==='applied'), 'reviewed approval changed');
         const progress = await json(url + '/tasks/' + task.id + '/execution');
-        check(progress.current_approval && !progress.session && !progress.runs.length && !progress.publication_allowed,
+        check(progress.current_approval && (!progress.session||previousSessions.includes(progress.session.id)&&progress.session.status==='failed') && progress.runs.every(r=>previousRuns.includes(r.id)&&r.status==='failed'&&!r.recovery_pending) && progress.runs.length===previousRuns.length && !progress.publication_allowed,
           'an earlier run, recovery, or publication exists');
         check(blockDeadline - now() >= (options.minimumRunMs ?? 60*60000), 'run and restoration do not fit the case budget');
         exact(without(body, 'command_id'), {scope_approval_id:scope.id, binding:view.binding,
@@ -446,7 +452,7 @@ export async function runJourney(context, origin, policy, candidate, options) {
           offer:view.offer.id, offerSha:digest(view.offer), checks:'current plan, exact certified offer, local-only budget'});
       });
     const progress = await eventually(() => json(url + '/tasks/' + task.id + '/execution'),
-      checkedProgress, options.minimumRunMs ?? 60*60000);
+      row=>checkedProgress(row,previousRuns,previousSessions), options.minimumRunMs ?? 60*60000);
     const [execution] = progress.runs;
     check(execution.current_task && execution.candidate_id, 'checked result belongs to another task version');
     const result = await finish({intake:identity, task:task.id, execution:execution.id, run:run.id});

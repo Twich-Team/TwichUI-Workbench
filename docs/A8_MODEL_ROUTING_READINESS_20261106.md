@@ -1,3 +1,49 @@
+## Model-authored addon changes preserved; repair continuation under verification — Nov9 00:57UTC
+
+Current installed deployment54 remains7e468e865e5ef878b2b3d221d59a2a6e4b0945da.
+The real scoped repair reached implementation, but NO independently checked repair
+or final result exists and all4real supporting provider cases remain0/4.
+Executionbc44c35d-9b22-5762-9ae6-3ed7691f8db0/session12bc67c4... FAILED00:27:44.
+Both real Codex turns completed;2requests/93444total tokens are fully accounted.
+Old grant revoked, owned Codex unit inactive/MainPID0, controller restored/no_lease,
+all4appservices active.95changedlines of model-authored Travel.lua remain in its
+owned isolated workspace; no test edit persisted. Original addon untouched.
+
+Exact cause now reproduced: the completed second proposal was recovered privately
+from supported CLI assistant-message session records. It proposed195changedlines,
+above the approved150. Old per-file application retained earlier edits in that
+batch before rejecting the test edit. Private settlement, partial patch, recovered
+proposal and zero-provider-call replay are C/outcome-7e468e8/settled-implementation/.
+New atomic whole-batch preview rejects the SAME actual proposal with all files
+unchanged. Lost provider output is now retained privately before local validation.
+The prior record's ACTIVE/overall-usage-unsettled claims below are HISTORICAL.
+Ledger updated once:133known completed Codex turns; historical unknowns unchanged.
+
+Development, NOT installed yet: atomic scoped edit transactions with durable before/
+after journals and conservative interruption reconciliation; explicit bound feedback
+for excessive changes rather than terminal local rejection; fast missing-regression
+feedback before an unnecessary complete old-suite run; normal fresh Run approval
+for settled failed scoped repairs, hash-bound preservation of their known unfinished
+work, same provider/source/write/150line limits, old usage/history unchanged.
+Active/unknown/checked work cannot renew. No approval or success is fabricated.
+Browser/API/private admission checks now distinguish saved failed history from a
+new run. Continuation uses normal supported app APIs, not DB repair or a manual
+addon solution. Original scope and separate fresh Run consent remain required and
+may use valid acceptance-only delegation. No pre-edit model checking artifact gate.
+
+Actual verification so far:25focused integration checks passed, including unchanged
+files on whole-batch rejection, multi-file rollback, interrupted journal recovery,
+unknown/active/checked denial, repeat-command deduplication and known partial-work
+restoration through normal API scope/run decisions. Frontend25pass; static/contracts/
+TS/Vite/migrations pass. Complete backend suite and actual confined separate-process
+controlled browser journeys RUNNING; inspect /tmp/wb-atomic-{full-backend,native}.log.
+Do not stop at this checkpoint. Finish verification, record/seal/deploy nextrevision,
+then continue real task41 from its known unfinished model work via fresh normal
+Run approval. Fix ordinary issues; no owner decision pending. Do not relax150lines,
+source disclosure, billing/network/access/publication safeguards or unknown history.
+No campaign clocks/attempt/revision/cumulative testing caps. Complete real behavior,
+independent result review, durable restart/nextbug/all4real checks/fullproduct scope.
+
 ## Real addon implementation is active through Workbench — Nov9 00:27UTC
 
 Installed54/7e468e865e5ef878b2b3d221d59a2a6e4b0945da;

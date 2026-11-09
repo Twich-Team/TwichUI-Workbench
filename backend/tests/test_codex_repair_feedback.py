@@ -93,3 +93,30 @@ def test_uncertain_later_turn_retains_known_usage_and_never_replays_or_freezes_s
     assert facts['usage']['known_values']['total_tokens']==120
     assert facts['provider_terminal'] is False
     assert time.monotonic()<runtime.implementation_deadline
+
+
+def test_oversize_proposal_is_retained_privately_and_revised_from_feedback_without_partial_apply(tmp_path,monkeypatch):
+    runtime=prepared(tmp_path)
+    monkeypatch.setattr(codex_runtime.confine,'root',lambda:'/controlled-test-boundary')
+    calls=[]
+    overlarge=BUGGY+''.join('-- excessive\n' for _ in range(151))
+    def generate(model,effort,prompt,schema,stop,**kwargs):
+        calls.append(prompt)
+        assert (runtime.workspace/PRODUCTION).read_text()==BUGGY
+        if len(calls)==1:
+            replacement=overlarge
+        else:
+            assert '"category": "change-budget"' in prompt
+            assert '"allowed_changed_lines": 150' in prompt
+            replacement=CORRECT
+        return dict(edits=[dict(path=PRODUCTION,old=BUGGY,new=replacement)]),dict(prompt_tokens=100,completion_tokens=20,total_tokens=120)
+    monkeypatch.setattr(codex_provider,'generate',generate)
+    identity=str(uuid4())
+    result=runtime.execute(identity,1,lambda:True)
+    assert len(calls)==2 and result['verification']=='passed'
+    assert result['usage']['requests_observed']==2
+    raw=runtime.root/('codex-output-'+identity+'-1.json')
+    retained=json.loads(raw.read_text())
+    assert retained['completed'] is True and retained['output']['edits'][0]['new']==overlarge
+    assert raw.stat().st_mode&0o077==0
+    assert Canonical(runtime.root).verify_frozen(result)

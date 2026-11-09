@@ -26,7 +26,7 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
   const current=query.data;
   useEffect(()=>{if(!review&&current?.available)setReview(current);},[review,current]);
   const shown=review||current;
-  const receipt=current?.receipt||saved;
+  const receipt=current?.receipt||(saved?.payload.run_budget?.offer_id===current?.offer?.id?saved:null);
   const offerRegion=useRef<HTMLElement>(null);
   const offerVisible=Boolean(shown?.available&&shown.offer&&!receipt);
   useEffect(()=>{

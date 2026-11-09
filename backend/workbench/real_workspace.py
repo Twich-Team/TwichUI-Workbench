@@ -151,10 +151,11 @@ class Runtime:
                     package=self.package,
                     completion_context_sha256=self.context_sha(),
                     recipe_sha256=sha((self.root/'recipe.json').read_bytes()) if self.recipe else None,
+                    repair_resume_sha256=sha((self.root/'repair-resume.json').read_bytes()) if (self.root/'repair-resume.json').is_file() else None,
                     base_manifest_sha256=sha(self.initial.read_bytes()) if self.initial.is_file() else None,
                     oracle_sha256=sha(self.oracle_source.read_bytes()), contract=job.digest(self.execution_contract),
                     helper_sha256={name: sha(Path(__file__).with_name(name).read_bytes()) for name in
-                       ['real_execution.py','real_workspace.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py']})
+                       ['real_execution.py','real_workspace.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py','repair_edits.py','repair_continuation.py']})
         if self.recipe:
             value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes()) for name in ['real_recipes.py','task_budget.py','verification_process.py']})
             if self.recipe.get('repair_cycle'):
@@ -491,6 +492,14 @@ class Runtime:
         durable(folder/'changes.patch', patch.encode())
         for path in changed:
             durable(folder/'files'/path, (self.workspace/path).read_bytes())
+        if self.recipe and self.recipe.get('repair_cycle') and self.recipe['focused_test'] not in changed:
+            feedback=dict(status='fail',check_round=index,completed_checks=0,required_checks=len(self.expected_checks()),
+                failed_check_name='original-with-new-tests',original_test_differential=dict(status='fail',
+                    reason='Add regression assertions to the approved focused test while implementing the repair.'),
+                note='The edit was permitted; a green old suite cannot establish a checked repair. Add meaningful regression assertions before expensive complete checks.')
+            durable(folder/'outcome.json',json.dumps(feedback,sort_keys=True).encode())
+            self._last_candidate_check=dict(tree=current,checks=[],feedback=feedback,evidence=str(folder.relative_to(self.root)))
+            return feedback
         expected = self.expected_checks()
         commands = [(argv, self.workspace/'tests' if i in (len(expected)-3,len(expected)-2) else self.workspace,
                      [self.root/'oracle.lua'] if i==len(expected)-2 else (),
@@ -556,6 +565,8 @@ class Runtime:
             {'owner': job.owner_identity(), 'cgroup': confine.root()}).encode())
         from workbench.real_provider import implement
         self._request_id, self._fence, self._context_sha = identity, fence, self.context_sha()
+        from workbench.repair_continuation import restore
+        restore(self,permitted)
         self.implementation_deadline = time.monotonic()+job.LIMITS['implementation_s']
         tools = Tools(self, permitted)
         instruction = ('Complete Chronicle invalid played-time handling. Preserve finite behavior, entries, '
@@ -728,6 +739,10 @@ class Tools:
         self.seen_search = set()
         self.fixed_checks = 0
 
+    def replace_batch(self,edits):
+        from workbench.repair_edits import replace_batch
+        return replace_batch(self.runtime,edits,self.permitted)
+
     def handle(self, name, args):
         if not self.permitted():
             raise ValueError('Current grant required')
@@ -816,7 +831,7 @@ class Tools:
                     raise ValueError('Replace requires nonempty old and <=8 KiB strings')
                 if source.count(old) != 1:
                     raise ToolInputError('replace_match','Replace requires exactly one match; no content changed')
-                content = source.replace(old, new, 1)
+                return self.replace_batch([dict(path=args['path'],old=old,new=new)])
             else:
                 content = args['content']
             if not isinstance(content, str) or len(content.encode()) > 65536:

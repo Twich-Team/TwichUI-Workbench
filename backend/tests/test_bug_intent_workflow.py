@@ -23,10 +23,7 @@ def scope():
         criteria=[dict(id='normalization',description='The actual function trims spaces and normalizes uppercase names.')],risks=[])
 
 
-@pytest.mark.usefixtures('installed')
-def test_scope_and_sandbox_offer_allow_repair_before_new_tests_exist_but_do_not_grant_it(
-    client,headers,store,monkeypatch,
-):
+def prepared_scope(client,headers,store,monkeypatch):
     enable_bugs(monkeypatch)
     config=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
     settings=json.loads(config.read_text())
@@ -59,6 +56,14 @@ def test_scope_and_sandbox_offer_allow_repair_before_new_tests_exist_but_do_not_
     for _ in range(3):
         assert worker.tick(store)
     endpoint,offer=get_run_offer(client,item)
+    return item,command,proposal,calls,endpoint,offer
+
+
+@pytest.mark.usefixtures('installed')
+def test_scope_and_sandbox_offer_allow_repair_before_new_tests_exist_but_do_not_grant_it(
+    client,headers,store,monkeypatch,
+):
+    item,command,proposal,calls,endpoint,offer=prepared_scope(client,headers,store,monkeypatch)
     assert offer['available'],offer
     assert len(calls)==2
     assert 'prepared_behavior' not in offer['offer']
