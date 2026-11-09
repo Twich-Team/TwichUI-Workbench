@@ -1,9 +1,10 @@
-## CURRENT75/7238a87 — November9 18:04UTC, SAME vendor task continuation queued
+## CURRENT75/7238a87 — November9 18:06UTC, SAME vendor task continuation RUNNING
 
 75installed, source/seal/history/network/browser/model/auth gates PASS;6prioracceptedreal
 results canonically revalidated without replay. Same intake2dc5b8ba-2d22-4c2c-9f90-
 3bd58d29d5fd browser continuation de642fc7-c5fe-41bf-a38a-c358409a8159 recorded;
-job6251a467-d8d6-41b6-994d-4867ab30ca48/revision13QUEUED. Observer15884/private
+job6251a467-d8d6-41b6-994d-4867ab30ca48/revision13RUNNING. Attempt3174eb9c-
+df27-4cf1-81f0-18952751eb19 first request85066bytes packed. Observer15884/private
 real-search-text-renewal.jsonl, browser-observer/renew-search-text.mjs and live-search-
 text-renewal-binding.json. Inspect actual state before another call; never replay
 pending/uncertain work. No vendorplan/addon approval or implementation claimed yet.
