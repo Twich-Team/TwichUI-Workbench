@@ -119,6 +119,12 @@ def wait_ready(secret, end):
     raise RuntimeError('Owned service readiness deadline exceeded')
 
 
+def watchdog_command(private):
+    # The watcher intentionally gets a clean environment. Pass -B explicitly
+    # rather than depending on an inherited PYTHONDONTWRITEBYTECODE setting.
+    return [sys.executable, '-B', '-m', 'workbench.real_lease', str(private)]
+
+
 def restore(private):
     """Idempotent operator/watchdog path; refuses unexpected config or ownership."""
     private = Path(private)
@@ -275,7 +281,7 @@ class Lease:
         atomic(self.private/'state.json', json.dumps(state).encode())
         # Watchdog is temporary; restores on owner loss/setup timeout/lease expiration.
         env = {'PATH': os.environ['PATH'], 'PYTHONPATH': str(Path(__file__).resolve().parents[1])}
-        command = [sys.executable, '-m', 'workbench.real_lease', str(self.private)]
+        command = watchdog_command(self.private)
         from workbench import everyday
 
         if everyday.enabled():

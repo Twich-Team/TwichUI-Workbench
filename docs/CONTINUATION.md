@@ -1,3 +1,46 @@
+## Latest continuation — November 9, 2026, 05:12 UTC
+
+**3/4 real provider cases PASSED.** Real Codex→Qwen case finished05:01:58.
+Intakef211bb5f-b2fc-4cee-a77b-0be530b65849; executiona40635ea-40aa-578d-995b-159175c6adbe;
+session56ba5d8a-94f1-4d65-8867-8e850316f26f; model67ff495f-e41e-4a91-a1ba-7a6a683ca980;
+candidateac7bbdaf343ad5fcf5ccb90035531da86d166fda4ba77c45f6edaa9f4a86ffcf.
+R58/codex-with-local-fallback-closed.json and model-auth-codex-to-qwen-restored.json.
+Ledger accounted once:6local requests (5knowncomplete+1bounded cancel probe),
+744knowncompletiontokens,16888knownprompttokensincl64probe. Unknown exact probe
+count remains unknown. Current355row SHA9ddca069c7f7f5d5b525af7b7eb98fa9d94de2264d6df1f3c42d822b99c0be73.
+All owned work settled; all4services normal active/disabled. Real bug accepted/durable;
+Qwen-only,Codex-only,Codex→Qwen passed; Qwen→Codex still pending.
+
+Healthy cache reuse demonstrated in REAL installed path R58/real-control-reuse-
+demonstrated.json: exact frozen controls reused, fresh boundary passed, no candidate
+verification reused. Fresh implementation began18seconds afterRun (not16more minutes).
+
+Unactivated candidate28df89f staged at R59=C/outcome-28df89f and S59 parent/everyday-
+outcome-28df89f; seal5d8d624d37139af6e16de975e8dd29cc4a7ae60d7406bae98adc98b5db431c1d.
+Full1881backend/8skips/401.53s,25frontend, static checks,39focused model checks and
+four controlled browser routes107.78s PASS. NEVER activated. First operator metadata
+script accidentally used systemPython; no cutover, corrected with project interpreter.
+Then fresh preflight correctly caught11regenerated pycs in old58. Cause demonstrated:
+real_lease independent watcher clears environment and dropped PYTHONDONTWRITEBYTECODE.
+New watchdog_command passes -B explicitly.32stream/package/inventory tests pass,
+including ACTUAL production watcher module in clean env with already-restored fixture:
+ready receipt produced, no cache/source changes and no provider/service operations.
+R58/legacy-watchdog-bytecode-cleanup.json proves exact immutable old files unchanged
+and only11knownreproduciblepycs removed; private lease/keys/history untouched.
+This corrects cause, do not repeatedly clean unchanged new code.
+
+Need NEW candidate/seal for watcher launch fix before cutover. Reuse28df full backend/
+frontend/browser/static evidence for unchanged code with explicit one-function launch
+change +32targeted actual-process/recovery checks; do not rerun unrelated full suite
+just to get a new commit label. No active provider operation now. Use project .venv
+interpreter for ALL operator scripts importing app modules; set -e before Python.
+R59newest files not yet installed; adapt its prepared fresh355row history/rollback/
+read-only evidence-chain observer to next candidate. Forward source is58/1836b80,
+next actual deployment revision59. Preserve successful cases, do not repeat them.
+Final case can use normal sealed driver once installed source includes counterfix;
+no external policy workaround needed in the new build. Current installed58 unchanged.
+No owner action needed. Continue under standing authority; no campaign caps.
+
 ## Development side work — November 9, 2026, 04:48 UTC
 
 Healthy real Codex→Qwen case still active (f211...); do not interrupt/replay it.

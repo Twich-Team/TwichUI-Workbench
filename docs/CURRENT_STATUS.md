@@ -1,4 +1,4 @@
-# Current status — November 9, 2026, 04:48 UTC
+# Current status — November 9, 2026, 05:12 UTC
 
 **A real flight-path repair has completed through the installed application.**
 Real signed-in Codex investigated the report, proposed a reviewed scope, and edited
@@ -33,10 +33,10 @@ confirmation was reused after unchanged boundary/CA checks; no new remote load c
 |---|---|
 | Codex alone | **Passed** real planning, implementation, independent checks and restoration. Observed on deployment56; exact regression recipe and unchanged provider/execution code revalidated through58. No repeat call. |
 | Qwen alone | **Passed** real planning, approved execution, checked test patch and model/auth restoration at04:13 UTC. |
-| Codex first → Qwen | Real plan completed via approved pre-generation fallback; separate plan approved; preparation running. Full case not yet passed. |
+| Codex first → Qwen | **Passed** real pre-generation switch, Qwen planning/implementation, independent checks and normal restoration at05:01 UTC. |
 | Qwen first → Codex | Implemented/controlled-tested; real case pending. Pre-generation connection failure only. |
 
-Only2/4 supporting real-provider cases passed. The real Codex bug repair is separate
+Only3/4 supporting real-provider cases passed. The real Codex bug repair is separate
 additional evidence. Saved settings, explicit consent, shared task accounting,
 isolation, independent checks and no uncertain cross-provider replay remain required.
 Codex included-allowance checks are snapshots, not a verified per-turn billing lock.

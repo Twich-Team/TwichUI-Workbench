@@ -188,6 +188,29 @@ def test_watchdog_restores_on_owner_loss_or_deadline(tmp_path, monkeypatch):
     assert calls == [tmp_path, tmp_path]
 
 
+def test_actual_settled_watchdog_preserves_source_with_a_clean_environment(tmp_path):
+    """Actual production module, no provider/service calls: already-restored state."""
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    source = tmp_path / 'source'
+    shutil.copytree(Path(lease.__file__).parent, source / 'workbench',
+                    ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+    private = tmp_path / 'private'
+    private.mkdir(mode=0o700)
+    (private / 'state.json').write_text(json.dumps({'restored': True}))
+    before = {str(p.relative_to(source)): p.read_bytes() for p in source.rglob('*') if p.is_file()}
+    child = subprocess.run(lease.watchdog_command(private),
+                           env={'PATH': '/usr/bin:/bin', 'PYTHONPATH': str(source)},
+                           capture_output=True, timeout=15)
+    assert child.returncode == 0, child.stderr.decode()
+    assert (private / 'watchdog-ready.json').is_file()
+    assert not list(source.rglob('__pycache__'))
+    assert before == {str(p.relative_to(source)): p.read_bytes()
+                      for p in source.rglob('*') if p.is_file()}
+
+
 @pytest.mark.parametrize('kind', ['stream_bytes', 'line_bytes'])
 def test_stream_limit_diagnostics_are_content_free_and_still_cancel(tmp_path, monkeypatch, kind):
     """NON-MODEL: actual named adapter with deterministic installed-format SSE."""
