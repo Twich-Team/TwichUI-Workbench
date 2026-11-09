@@ -1,9 +1,13 @@
-## CURRENT77/d85a4e2 — November9 18:45UTC, original vendor task continuation QUEUED
+## CURRENT77/d85a4e2 — November9 18:49UTC, original vendor task continuation RUNNING
 
 77installed; all source/seal/history/network/browser/model/auth gates pass;6priorreal
 accepted results canonically revalidated without replay. Same intake2dc5b8ba-2d22-4c2c-
 9f90-3bd58d29d5fd browser commandc0283445-f31d-4a83-a2de-7d77949dea2d recorded;
-job31ab65d2-b675-4d36-b5bc-23e204fa79a3/revision15QUEUED. Observer1288/private
+job31ab65d2-b675-4d36-b5bc-23e204fa79a3/revision15RUNNING. Attempt51184b61-fa76-
+476a-beaf-b3d9e7899ce7 firstresponse COMPLETE, followed retained literal match into
+setup/TwichConfig.lua and compared the alternate component. Actual request2active.
+Private real-preserved-selected-search-progress.json proves source advance, not a
+diagnosis/plan/fix. Observer1288/private
 real-preserved-search-renewal.jsonl, browser-observer/renew-preserved-search.mjs and
 live-preserved-search-renewal-binding.json. Inspect actual state before any replay.
 No vendorplan/addon approval or implementation claimed. CurrentsourceRootHEAD mayadd
