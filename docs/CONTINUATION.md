@@ -1,3 +1,31 @@
+## November9 17:18UTC — original vendor task settled; cache/focus correction under verification
+
+Installed71/c364075 remains running. Original intake2dc5b8ba-2d22-4c2c-9f90-
+3bd58d29d5fd latest operation9f8fbd13... definitively settled after8COMPLETE Qwen
+responses. Request9 was NOT sent: exact context packing refused before generation.
+All41COMPLETE incident responses762137tokens (713340prompt+48797completion) remain
+recorded; original NULL/unknown observations unchanged. No vendor plan, addon change
+or scope/run approval exists. No uncertain external execution is being replayed.
+
+Confirmed search-only steps reset focus to broad inferred source; source renewal
+also reconstructed older packet prefixes and only scanned8of16supported turns.
+Connected correction retains bounded focus across searches, revalidates latest
+settled source cache, losslessly compacts overlapping/adjacent ranges with gaps
+preserved, and reads all turns in the immutable saved operation bound. Source bytes
+are fetched from pinned Git; no generated solution/diagnosis/authority is reused.
+Real prior8responses reproduce the old failure locally; corrected request9 fits.
+Full actual41response-state capture retains15files/10searches/lastreadfocus, fits
+61635bytes, no new model calls/DB changes. Targeted tests/static pass; confined
+separate-process browser verification ongoing. No claim of a real usable plan yet.
+
+Standing owner authority continues; no campaign caps or engineering renewals.
+Qwen only/fallbackOff; vendor source stays local. Preserve all6acceptedrealresults,
+original failed rows/history/model/auth/network/recovery evidence. Maintenance NEW
+admissions still OWNED PAUSED: restore hash-bound opsctl resume after owned work.
+Next: finish verification, seal/install under normal gates, same-report read-only
+browser continuation, usable plan for genuine owner review, restart/result/model/
+network continuity and maintenance restoration. This checkpoint is not a stop.
+
 ## CURRENT71/c364075 REAL QWEN RUN — November9 16:47UTC
 
 Installed71/c364075 exactsource/seal/history/network/model/auth gates PASS. Six prior

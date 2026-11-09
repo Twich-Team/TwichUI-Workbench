@@ -151,7 +151,8 @@ def seed(packet, original, current_attempt, engine):
                     continue
                 prior = str(UUID(attempt['id']))
                 windows = []
-                for index in range(8):
+                from workbench.planning_limits import attempt_request_bound
+                for index in range(attempt_request_bound(connection,prior)):
                     identity = prior if index == 0 else str(uuid5(UUID(prior), f'committed-source-turn-{index}'))
                     matches = [root/'artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl' for root in roots]
                     matches = [path for path in matches if path.exists()]
@@ -451,3 +452,59 @@ def draft_for_critique(prior, engine, packet, original, feedback):
         except (ValueError,OSError,KeyError,TypeError):
             continue
     return None
+
+
+def compact_packet(initial, cached):
+    """Fresh source-only projection. Historical receipts and gaps stay unchanged."""
+    from workbench import bug_source_planning as source
+    from workbench.source_memory import ranges
+    source.verify_packet(initial,cached)
+    candidate=copy.deepcopy(cached)
+    windows=[]
+    for path, intervals in ranges(cached.get('inspection_windows',[])).items():
+        raw,metadata=source.committed(path,initial['base'])
+        lines=raw.decode().splitlines()
+        for first,last in intervals:
+            for start in range(first,last+1,159):
+                end=min(last,start+158)
+                windows.append(dict(path=path,sha256=metadata['sha256'],line=start,through_line=end,
+                    text='\n'.join(lines[start-1:end]),coverage='revalidated committed source cache'))
+    candidate['inspection_windows']=windows
+    source.verify_packet(initial,candidate)
+    return candidate
+
+
+def recent_focus(attempt, count, packet, roots):
+    """Attention from completed read receipts, never from generated prose/authority."""
+    allowed={f['path']:f['sha256'] for f in packet['files']}
+    for index in reversed(range(count)):
+        identity=str(UUID(attempt) if index==0 else uuid5(UUID(attempt),f'committed-source-turn-{index}'))
+        paths=[Path(root)/'artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl' for root in roots]
+        journals=[read_journal(path) for path in paths if path.exists()]
+        if not journals:
+            continue
+        if any(j!=journals[0] for j in journals[1:]):
+            raise ValueError('Conflicting source journals')
+        complete=False
+        for event in journals[0]:
+            if event.get('phase')=='envelope':
+                complete=(event.get('generation_state')=='finished' and event.get('accounting_state')=='complete'
+                    and event.get('completion')=='stop' and event.get('model_matches')==1)
+            if complete and event.get('phase')=='source-read-result':
+                focus=[]
+                for window in event.get('windows',[]):
+                    path=window['path']
+                    if (allowed.get(path)!=window['sha256'] or not any(w['path']==path
+                            and w['line']<=window['line']<=window['through_line']<=w['through_line']
+                            for w in packet.get('inspection_windows',[]))):
+                        # Compacted ranges may have a chunk boundary within this read.
+                        from workbench.source_memory import ranges
+                        if allowed.get(path)!=window['sha256'] or not any(
+                                start<=window['line']<=window['through_line']<=end
+                                for start,end in ranges(packet.get('inspection_windows',[])).get(path,[])):
+                            raise ValueError('Retained source focus exceeds inspected source')
+                    if path not in focus:
+                        focus.append(path)
+                if focus:
+                    return focus[:3]
+    return []

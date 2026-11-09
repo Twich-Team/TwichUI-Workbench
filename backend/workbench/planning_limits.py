@@ -236,6 +236,10 @@ def renewed_budget(connection, initial, *, exclude_job=None):
     if any(p['backend']!=provider or p['requested_model']!=model
             or p['actual_model'] is not None and p['actual_model']!=model for p in phases):
         raise ValueError('Renewal cannot silently switch the investigation provider')
+    latest=phases[-1]
+    row=connection.exec_driver_sql('SELECT payload FROM planning_jobs WHERE id=?',(latest['job'],)).fetchone()
+    payload=json.loads(row[0]) if isinstance(row[0],str) else row[0]
+    cached=payload.get('bug_inspection_packet')
     packet=initial['payload'].get('bug_inspection_packet')
     if not isinstance(packet,dict) or not packet.get('files') or not packet.get('base'):
         from workbench import intake, bug_investigation, investigation_memory
@@ -243,9 +247,22 @@ def renewed_budget(connection, initial, *, exclude_job=None):
         from workbench.trusted_preparation import configuration
         original=intake.require(connection,intakes,initial['intake_id'])['payload']
         fresh=bug_investigation.context(original,'',configuration(connection.engine))
-        packet,_,_=investigation_memory.seed(fresh,original,'not-a-provider-attempt',connection.engine)
+        packet=fresh
+        if not isinstance(cached,dict):
+            packet,_,_=investigation_memory.seed(fresh,original,'not-a-provider-attempt',connection.engine)
         if not packet.get('files') or not packet.get('base'):
             raise ValueError('The original committed disclosure scope is unavailable')
+    # Reuse the latest settled source cache, not only the first phase's reads.
+    # This copies no response, diagnosis, plan, approval or execution authority.
+    from workbench import investigation_memory, bug_source_planning
+    if isinstance(cached,dict):
+        if provider=='codex' and not {f['path'] for f in cached.get('files',[])} <= {f['path'] for f in packet['files']}:
+            raise ValueError('Retained source exceeds the existing external disclosure scope')
+        packet=investigation_memory.compact_packet(packet,cached)
+        focus=investigation_memory.recent_focus(latest['attempt'],latest['requests'],packet,roots)
+        if focus:
+            packet['inspection_focus']=focus
+        bug_source_planning.verify_packet(packet,packet)
     return dict(budget_version=4,renewal_consent=True,
         operation_request_bound=request_bound(initial['payload']['local_planning_receipt']),
         consumed_requests=sum(p['requests'] for p in phases),

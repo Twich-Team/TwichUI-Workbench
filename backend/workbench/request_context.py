@@ -32,6 +32,6 @@ def fit(wire, packet, current, requested, encode, limit, stop=lambda:False):
             break
         budget = max(0, budget-max(256, size-limit))
         retain(result, packet, [*current, *protected], budget, requested=protected,
-            focus_paths={w['path'] for w in requested})
+            focus_paths=set(packet.get('inspection_focus',[])) or {w['path'] for w in requested})
         result.setdefault('inspection_result', {})['visible_requested_windows'] = requested_visibility(result, requested)
     raise PlanningUnavailable('The complete request cannot fit while preserving required source.', 'context_budget')

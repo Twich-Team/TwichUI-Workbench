@@ -180,7 +180,7 @@ def unread_start(windows, path, start, end):
 
 
 def verify_packet(initial, supplied):
-    if (set(supplied) - set(initial) - {'inspection_windows','inspection_searches'}
+    if (set(supplied) - set(initial) - {'inspection_windows','inspection_searches','inspection_focus'}
             or supplied.get('base') != initial['base'] or supplied.get('policy_sha256') != initial['policy_sha256']
             or supplied.get('plan_review') != initial.get('plan_review')
             or supplied.get('api_references') != initial.get('api_references')
@@ -189,8 +189,18 @@ def verify_packet(initial, supplied):
             or not len(initial['files']) <= len(supplied['files']) <= MAX_FILES
             or len({f['path'] for f in supplied['files']}) != len(supplied['files'])):
         raise ValueError('The inspected source binding changed.')
+    focus=supplied.get('inspection_focus',[])
+    if (not isinstance(focus,list) or len(focus)>3 or any(not isinstance(p,str) for p in focus) or len(focus)!=len(set(focus))
+            or any(not isinstance(p,str) or p not in {f['path'] for f in supplied['files']}
+                   or not any(w['path']==p for w in supplied.get('inspection_windows',[])) for p in focus)):
+        raise ValueError('The inspected source focus changed.')
+    verified={}
+    def checked(path):
+        if path not in verified:
+            verified[path]=committed(path,initial['base'])
+        return verified[path]
     for item in supplied['files'][len(initial['files']):]:
-        raw, expected = committed(item['path'], initial['base'])
+        raw, expected = checked(item['path'])
         lines = raw.decode().splitlines()
         for window in item['excerpts']:
             start, end = window['line'], window['through_line']
@@ -205,7 +215,9 @@ def verify_packet(initial, supplied):
             if program_context(supplied) else sum(len(w['text']) for w in windows) > READ_CHARS):
         raise ValueError('The committed inspection evidence exceeds its operation bound.')
     for index, window in enumerate(windows):
-        raw, item = committed(window['path'], initial['base'])
+        if window['path'] not in {f['path'] for f in supplied['files']}:
+            raise ValueError('The inspected source exceeds the selected committed files.')
+        raw, item = checked(window['path'])
         lines = raw.decode().splitlines()
         start, end = window['line'], window['through_line']
         if (not 1 <= start <= end < start+160 or end > len(lines)
@@ -307,7 +319,7 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
     from workbench.source_memory import retain, requested_visibility
     if program_context(packet):
         from workbench.source_interface import context
-        focus = {w['path'] for w in requested} if packet.get('plan_review') == 'source-grounded-intent-v1' else None
+        focus = (set(packet.get('inspection_focus',[])) or {w['path'] for w in requested}) if packet.get('plan_review') == 'source-grounded-intent-v1' else None
         priority,interface=context(packet,original,programs,focus_paths=focus)
         windows=[*windows,*priority]
         wire['selected_source_interface']=interface
@@ -320,7 +332,8 @@ def next_wire(packet, original, feedback, windows, finding, matches=None, *, pro
         packing_context.clear()
         packing_context.update(windows=list(windows),requested=list(requested))
     retain(wire, packet, windows, (text_budget if text_budget is not None else 36000 if program_context(packet) else WIRE_TEXT)
-           -sum(len(m['text']) for m in (matches or [])), requested=requested)
+           -sum(len(m['text']) for m in (matches or [])), requested=requested,
+           focus_paths=focus if program_context(packet) else None)
     wire['inspection_result'] = dict(prior_finding=finding, read_only=True,
         note='Exact committed source windows are supplied within the response limit. Partial ranges include continuation pointers; '
              'a repeated range advances past a contiguous previously returned prefix when unread lines remain. '
@@ -710,6 +723,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     windows=[{key:value for key,value in window.items() if key!='text'} for window in windows])
                 if read_errors:
                     evidence.record('source-read-unavailable', errors=read_errors, approved=False, executed=False)
+            if windows and intent_mode:
+                packet['inspection_focus']=list(dict.fromkeys(w['path'] for w in windows))[:3]
             if read_errors and not windows and not any(hasattr(r, 'query') for r in draft.inspection):
                 signature = tuple(sorted(e['path'] for e in read_errors))
                 if signature in unavailable_reads:
