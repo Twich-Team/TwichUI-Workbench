@@ -1,3 +1,11 @@
+# Real source search now demonstrated on the original report; planning still active
+
+Installed71/c364075 real Qwen issued2literal searches in its first corrected reply,
+Workbench returned23matches and the same task followed pointers into another committed
+file outside initial selection. This is real-provider/app evidence, not a fixture.
+No usable vendor plan/patch yet. Current operation is healthy; follow CONTINUATION.
+No owner action needed now. All earlier recovery/history/restoration safeguards remain.
+
 # Installed explicit source-search protocol; original report running with real Qwen
 
 71/c364075 verified install preserves same request/history/sixcheckedresults/network.

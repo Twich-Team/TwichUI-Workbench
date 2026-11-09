@@ -29,7 +29,11 @@ switch, paid call, external vendor source or addon decision. Stop/restore proofs
 private directory. Maintenance NEW admissions STILL OWNED PAUSED under A11: restore
 ONLY hash-bound supported opsctl resume after operation settlement. Do not forget.
 
-Need realQwen actualsearch→usableplan/genuinequestion, then full settled4service restart,
+REAL SEARCH DEMONSTRATED on first corrected response:2actual literal queries,23matches.
+Task still running (attempt9f8fbd13-fc80-4f31-b90c-26b581168a8b); followup source read
+opened committed setup/TwichConfig.lua outside initial selection; more queries then
+new normal requests. Proof real-explicit-search-demonstrated.json. No usable plan yet.
+Need usableplan/genuinequestion, then full settled4service restart,
 history/result/model/auth continuity, maintenance admission restoration, final desktop/
 phone inspections and accurate report/checkpoint. Valid addon plan needs genuine owner
 review; Workbench engineering authority is not addon scope/run approval. Continue, not
