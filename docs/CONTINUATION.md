@@ -1,3 +1,37 @@
+## CURRENT SETTLED VENDOR TASK / EXPLICIT SEARCH PROTOCOL IN VERIFICATION — November9 16:41UTC
+
+Installed70/6e27933; root source has further UNCOMMITTED explicit local-wire changes.
+Owner intake2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd has NO plan/implementation.
+Latest job1bb4ce6c... /attemptf596dfed-691a-41b6-8ba4-855238483701 settled FAILED
+(categorycancelled) with9COMPLETE Qwen responses165107tokens. Total33COMPLETE
+incident responses617608tokens; original NULL observations remain NULL. No uncertainty.
+Do not replay completed work or claim these as a vendor fix.
+
+Observed actual model findings say literal search is needed but structured replies
+repeat path reads. New connected local wire reuses strict explicit reads/searches
+codec (already used by Codex), plus examples, no semantic invention. Common planner
+normalizes AFTER usage collection, so malformed/conflicting transport keeps complete
+accounting and exact field diagnostics. Local fixtures now emit actual flat replies.
+171affected tests pass. Native test correction also avoids concurrent Vite build/
+serving same development dist (installed stable release unaffected). Final static then
+native running tool73879; full actual33response state /6request capture tool68823.
+No new live provider request during these checks. Need final verification/seal/install,
+normal same-report Qwen browser continuation, plan/restart/restoration, not checkpoint stop.
+
+We settled the repeating read-only operation using normal provider settings AFTER
+retained complete content, not a root kill. Actual model idle/auth verified. ALL9usage
+receipts COMPLETE, no quarantine needed. Temporary local-enabled toggle was restored
+through normal browser: values identical, policy revision8→9→10 preserved. Snapshot,
+stop and restore proofs in private vendor-planning-recovery-20261109. No addon decision
+or provider switch; fallbackOff/preferredQwen/model identifiers unchanged.
+
+IMPORTANT maintenance NEW admissions still temporarily paused under ownedA11 hold.
+Restore ONLY via supported opsctl resume when hash matches maintenance-admission-hold.json.
+Six prior accepted real results/history/rejection evidence/network/auth/owner source
+preserved. No new vendor source to Codex, addon writes, publication or spending.
+Standing autonomy applies; no campaign caps/renewals. Final usable addon plan needs
+actual owner review; this assignment is not that approval. Continue work.
+
 ## CURRENT: installed70/6e27933, real vendor task running — November9 16:19UTC
 
 Same intake2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd, new normal browser Qwen-only

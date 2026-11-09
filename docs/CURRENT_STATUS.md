@@ -1,3 +1,14 @@
+# Vendor recovery: latest repeating operation settled; explicit search protocol being verified
+
+Installed70/6e27933. No vendor plan or patch yet. The real model repeatedly described
+literal searching while emitting file reads; correcting that structured tool protocol
+is the current work. Repeating run was safely stopped after complete content, all9
+responses accounted; total33complete incident responses617608tokens. Original model
+preference values restored with revision history preserved. No uncertain activity,
+provider switch or addon approval. Final checks/candidate/install and same-report
+real-Qwen planning follow. Owned maintenance admission hold still needs restoration.
+CONTINUATION identifies exact active tools/evidence; earlier running entries are historical.
+
 # Vendor-task planning recovery: focused context installed; real investigation active
 
 70/6e27933 installed after checked history/network/auth gates. Six prior accepted
