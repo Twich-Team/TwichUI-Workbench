@@ -269,7 +269,7 @@ def prepared(
             identity=dict(name="Controlled author", email="fixture@invalid"),
         )
     root = tmp_path / "certified"
-    root.mkdir()
+    root.mkdir(mode=0o700)
     durable(root / "recipe.json", json.dumps(spec, sort_keys=True).encode())
     durable(root / "recipe-oracle.lua", oracle.encode())
     runtime = PreparedLuaRuntime(root)

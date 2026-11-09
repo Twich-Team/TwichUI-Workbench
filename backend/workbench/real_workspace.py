@@ -294,9 +294,8 @@ class Runtime:
             record_readiness(self,boundary)
             return
         if self.recipe and self.recipe.get('verification_profile'):
-            from workbench.verification_profiles import certify
-            bundle = json.loads((self.root/'profile-evidence.json').read_text())
-            certificate = certify(self, bundle)
+            from workbench.verification_profiles import control_certificate
+            certificate = control_certificate(self)
             if certificate['status'] != 'certified':
                 raise ValueError('Profile verification '+certificate['status']+': '+certificate['reason'])
             proof = json.loads(Path(boundary).read_text())
@@ -305,8 +304,10 @@ class Runtime:
                     for r in proof['checks'].values()):
                 raise ValueError('Boundary/cleanup evidence incomplete')
             durable(self.root/'boundary-proof.json', Path(boundary).read_bytes())
+            reference=self.root/'profile-reference.json'
             durable(self.root/'controls-passed.json', json.dumps(dict(
-                profile_certificate=certificate, boundary_sha256=sha(Path(boundary).read_bytes())),
+                profile_certificate=certificate, boundary_sha256=sha(Path(boundary).read_bytes()),
+                **(dict(profile_reference_sha256=sha(reference.read_bytes())) if reference.exists() else {})),
                 sort_keys=True).encode())
             return
         controls_path = self.root/'oracle-controls.json'
@@ -338,16 +339,18 @@ class Runtime:
                 return True
             record = json.loads((self.root/'controls-passed.json').read_text())
             if self.recipe and self.recipe.get('verification_profile'):
-                from workbench.verification_profiles import certify
-                certificate = certify(self, json.loads((self.root/'profile-evidence.json').read_text()))
+                from workbench.verification_profiles import control_certificate
+                certificate = control_certificate(self)
+                reference=self.root/'profile-reference.json'
                 return (certificate['status'] == 'certified' and certificate == record['profile_certificate']
+                        and record.get('profile_reference_sha256')==(sha(reference.read_bytes()) if reference.exists() else None)
                         and record['boundary_sha256'] == sha((self.root/'boundary-proof.json').read_bytes()))
             return (record['oracle_sha256'] == sha(self.oracle_source.read_bytes()) and
                     record['base'] == self.base and
                     record['controls_sha256'] == sha((self.root/'oracle-controls.json').read_bytes()) and
                     record['boundary_sha256'] == sha((self.root/'boundary-proof.json').read_bytes()) and all(v == 'passed' for v in record['checks'].values())
                     and set(record['checks']) == ({'reproduction', 'positive-control', 'negative-controls', 'boundary'} if self.recipe else {'reproduction', 'formatter-only', 'cleanup', 'boundary'}))
-        except (OSError, ValueError, KeyError):
+        except (OSError, ValueError, KeyError, TypeError):
             return False
 
     def check(self, argv, cwd, ro=(), timeout=120, private_loopback=False):

@@ -98,7 +98,7 @@ def provision(runtime, template):
         if not suite_inventory(baseline,runtime.expected_suite()):
             raise ValueError('Existing baseline failed; no repair attempt is ready')
     elif (getattr(runtime, 'recipe', None) or {}).get('verification_profile'):
-        from workbench.verification_profiles import prepare
+        from workbench.verification_profiles import prepare,reuse_controls
         if 'scenario_preparation' in template:
             from workbench.regression_evidence import compile_plan, patches
             compiled = compile_plan(template['scenario_preparation'])
@@ -107,7 +107,8 @@ def provision(runtime, template):
             control_patches = patches(runtime, compiled)
         else:
             control_patches = template['control_patches']
-        prepare(runtime, control_patches)
+        if not reuse_controls(runtime,template.get('control_source'),control_patches):
+            prepare(runtime, control_patches)
     else:
         _legacy_controls(runtime, template)
     marker = runtime.root / "private-boundary-marker"

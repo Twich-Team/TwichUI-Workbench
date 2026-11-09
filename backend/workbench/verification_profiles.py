@@ -205,6 +205,86 @@ def certify(runtime, bundle):
         return result
 
 
+def control_certificate(runtime):
+    """Resolve immutable control observations without rewriting their commands.
+
+    Reuse concerns pre-model controls only. Candidate checks always use the new
+    workspace and commands, and every run must prove its own sandbox boundary.
+    """
+    from workbench.real_workspace import Runtime, sha, tree
+    from workbench.trusted_preparation import owned
+
+    reference = runtime.root/'profile-reference.json'
+    if not reference.exists():
+        return certify(runtime,json.loads((runtime.root/'profile-evidence.json').read_text()))
+    owned(reference)
+    if reference.stat().st_mode&0o077 or reference.stat().st_size>4096:
+        raise ValueError('Private bounded profile reference required')
+    value=json.loads(reference.read_text())
+    source=owned(value['source'])
+    if source==runtime.root or (source/'profile-reference.json').exists():
+        raise ValueError('Nested or recursive profile references are not permitted')
+    previous=Runtime(source)
+    if (value.get('version')!=1 or previous.recipe!=runtime.recipe
+            or binding(previous)!=binding(runtime)
+            or tree(previous.workspace)!=json.loads(previous.initial.read_text())
+            or value['evidence_sha256']!=sha((source/'profile-evidence.json').read_bytes())
+            or value['controls_sha256']!=sha((source/'controls-passed.json').read_bytes())):
+        raise ValueError('Prepared profile inputs or source evidence changed')
+    baseline=source/'fresh-baseline-suite.json'
+    observed=baseline.stat().st_mtime_ns
+    for name in ('bash','lua5.1','python3'):
+        info=(Path('/usr/bin')/name).stat()
+        if info.st_uid!=0 or info.st_mode&0o022 or max(info.st_mtime_ns,info.st_ctime_ns)>observed:
+            raise ValueError('Interpreter changed since prepared control observations')
+    if not previous.controls_valid():
+        raise ValueError('Source profile or its original sandbox evidence is invalid')
+    certificate=certify(previous,json.loads((source/'profile-evidence.json').read_text()))
+    if certificate['status']!='certified':
+        raise ValueError('Source profile controls are no longer certified')
+    return certificate
+
+
+def reuse_controls(runtime, source, patches):
+    """Reuse an exact approved preparation; never reuse candidate correctness."""
+    import os
+    from workbench.real_workspace import Runtime, durable, sha, tree
+    from workbench.trusted_preparation import owned
+
+    if source is None:
+        return False
+    folder=owned(source)
+    previous=Runtime(folder)
+    if (previous.recipe!=runtime.recipe or binding(previous)!=binding(runtime)
+            or tree(runtime.workspace)!=json.loads(runtime.initial.read_text())):
+        raise ValueError('Control reuse requires an identical recipe and a fresh base copy')
+    if (folder/'profile-reference.json').exists() or not previous.controls_valid():
+        raise ValueError('Only the original fully certified preparation can supply controls')
+    expected=set(requirements(runtime.recipe['verification_profile'])['controls'])-{'original'}
+    if set(patches)!=expected or any((folder/'profile-evidence'/name/'input.patch').read_text()!=patches[name]
+                                    for name in expected):
+        raise ValueError('Task-specific control patches changed')
+    reference=dict(version=1,source=str(folder),
+        evidence_sha256=sha((folder/'profile-evidence.json').read_bytes()),
+        controls_sha256=sha((folder/'controls-passed.json').read_bytes()))
+    path=runtime.root/'profile-reference.json'
+    # Privacy must not depend on the invoking shell's umask. Exclusive creation
+    # also prevents replacing an old reference or following a supplied symlink.
+    fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
+    with os.fdopen(fd,'wb') as stream:
+        stream.write(json.dumps(reference,sort_keys=True).encode())
+        stream.flush()
+        os.fsync(stream.fileno())
+    directory=os.open(runtime.root,os.O_DIRECTORY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+    control_certificate(runtime)  # Recheck everything before accepting the reference.
+    durable(runtime.root/'fresh-baseline-suite.json',(folder/'fresh-baseline-suite.json').read_bytes())
+    return True
+
+
 def prepare(runtime, control_patches):
     """Trusted offline preparation using existing Runtime checks/scope/freezing.
 

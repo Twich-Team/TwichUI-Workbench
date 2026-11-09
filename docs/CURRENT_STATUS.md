@@ -1,4 +1,4 @@
-# Current status — November 9, 2026, 03:35 UTC
+# Current status — November 9, 2026, 04:10 UTC
 
 **A real flight-path repair has completed through the installed application.**
 Real signed-in Codex investigated the report, proposed a reviewed scope, and edited
@@ -32,7 +32,7 @@ confirmation was reused after unchanged boundary/CA checks; no new remote load c
 | Choice | Evidence |
 |---|---|
 | Codex alone | **Passed** real planning, implementation, independent checks and restoration. Observed on deployment56; exact regression recipe and unchanged provider/execution code revalidated for57. No repeat call. |
-| Qwen alone | **Running**. Real Qwen plan approved; independent control preparation active. |
+| Qwen alone | **Running**. Real Qwen plan and separate run approved; preparation and capability check passed; actual local implementation active since04:08 UTC. |
 | Codex first → Qwen | Implemented/controlled-tested; real case pending. Pre-generation unavailable/reserve only. |
 | Qwen first → Codex | Implemented/controlled-tested; real case pending. Pre-generation connection failure only. |
 
@@ -57,6 +57,13 @@ migrations and two actual confined separate-process controlled browser journeys.
 Operator-only reviewed-rejection policy has24focused checks; default successful-case,
 terminal-state, scope/accounting and provider guards remain. Installed helper grant
 unchanged. Historical unknown usage/outcomes remain unknown and isolated.
+
+Development-only improvement now reuses exact already-certified pre-model control
+observations in a fresh workspace, with a fresh sandbox proof and fresh candidate
+checking. Changed recipes, source, helper versions, oracle, control patches or
+evidence reject reuse. Targeted denial tests and actual confined tiny-profile
+preparation/reuse pass (17commands then1fresh boundary). Complete suites are
+running; this improvement is NOT installed and does not interrupt Qwen.
 
 Next: finish Qwen-only and both real fallback cases, demonstrate a subsequent
 ordinary submission, verify final cleanup/restoration and leave the working build.

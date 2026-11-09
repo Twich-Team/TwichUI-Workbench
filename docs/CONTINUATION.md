@@ -1,4 +1,4 @@
-# Continuation — November 9, 2026, 03:35 UTC
+# Continuation — November 9, 2026, 04:10 UTC
 
 Read the three authoritative root owner documents and AGENTS.md. One agent only.
 Standing autonomy continues; old campaign clocks/counts/revisions/cumulative test
@@ -55,7 +55,10 @@ S/artifacts/acceptance/qwen-once.jsonl.
 Intake76d92e53-2609-440b-b660-1a8a1176f7f1; actual local planning model attempt
 9ff352e5-80cd-4371-90a0-68e38d7dd924 completed; proposal
 5c7367ad-4257-54cd-ad06-1400d645ed20 /scope approval06c2b27b-89c0-47ba-ba97-f385ca6d3177
-approved03:34:31. Control preparation now active. Inspect receipts/processes rather
+approved03:34:31. Separate Run003b2b6d-e130-475e-8aba-1ad6de1f691c approved03:50:54.
+Preparation finished04:07:24; capability8a7fbb95-c412-4ff2-b291-8e61121534b9
+passed04:08:01; real local implementationd213b93f-3580-4238-a95e-a955833edf13
+/execution66e3841c-4621-589d-9405-287c5547d4d5 running since04:08:03. Inspect receipts/processes rather
 than assume it hung. Current regression path runs four actual full-suite control
 matrices during preparation and repeats them in the fresh execution workspace;
 roughly16minutes each on this host. This is known latency, not renewed model calls
@@ -87,6 +90,31 @@ Then demonstrate a subsequent ordinary supported bug submission through normal U
 without registration/setup. Controlled native two-bug source-discovery/restart
 journeys already pass, but do NOT call that a second real ordinary submission.
 Keep broader features/inspection/simulator/PR requirements visible and continue.
+
+## Uninstalled preparation latency improvement
+
+The running Qwen regression repeated four full control suites after its already
+certified offer (~16minutes twice). Development now implements exact frozen-control
+references in verification_profiles, task_session/task_budget and real_workspace.
+Reopening uses original evidence/commands, not rewritten receipts. Source/recipe/
+oracle/helper/scope/control-patch/boundary integrity and private create-only
+reference are bound; every new copy proves a fresh sandbox boundary. Candidate
+verification is never reused. New test_profile_control_reuse covers changed inputs,
+source evidence, malformed references, fresh boundary failure and post-reference
+tampering. Test reviewed_offers preparation now correctly uses private0700dir.
+
+R/development-control-reuse/final-source/native-result.json: actual confined
+17-command full preparation then1-command fresh-boundary reuse, no providers.
+First controlled fixture omitted production Python suite inventory; fixed fixture.
+Private reference now created0600 independent of umask. First native observer
+misread flat usage telemetry; its failure retained, source preparation reused
+without repeating it; final proof completed on final executable sources.
+Focused41passed; check/contracts/types/build/ruff/migrations passed. Complete
+backend/frontend `/tmp/wb-control-reuse-complete-test.log` active (tool49783).
+No new candidate/seal/install yet. Do NOT cut over while Qwen is active.
+Any future installation needs normal verified lineage/history/network/rollback
+gates and updated real-evidence compatibility; preserve successful cases, do not
+replay them just because verification helper hashes changed.
 
 ## Installation and authority
 
