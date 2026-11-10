@@ -1,11 +1,11 @@
-# Current — vendor repair unfinished; source correction verified locally
+# Current — vendor task unfinished; connected context replay corrected
 
-Following the Project Working Philosophy, installed91a46f7/deployment92 preserves history, six prior real checked results and private-LAN protections. Qwen selected/fallback Off/publication held. Continuing task permission is saved; no owner renewal needed.
+Following the Project Working Philosophy, installed09a9800/deployment93 preserves history, six prior real checked results, Qwen/fallback Off and private-LAN protections. Publication held; continuing same-scope vendor permission saved.
 
-Session926e91ed/c4cb967f settled after24complete responses,2model test edits and actual app-owned checks at14and21. No vendor pass. Actual test diagnostic now shows a row reused for a different item after refresh. Latest patchd469ffe7 retained; all prior failures/unknown usage unchanged. No active vendor operation at latest inspection.
+Session4c5a620d completed its first real response with complete approved source context, then held before generation2 because the requested log exhausted context. Known complete usage, no addon edit or uncertainty. Latest model patchd469ffe7 preserved; no active vendor operation at latest inspection.
 
-Working correction supplies and refreshes complete approved small source context through real scoped tools, avoiding full-file forgetting/walking after each edit. Actual tokenizer proves all3current files plus current failure and2496response reserve fit.163affected checks plus23final context/permission checks passed. Not installed or real-provider demonstrated yet; no injected addon solution.
+Working correction supplies readable multiline code, removes duplicate old diagnostics and safely archives paired tool observations already included in completed turns. Actual-data/tokenizer replay now covers the failed log and the next source read, preserving all3files and output reserve without model calls. Final affected checks/seal/activation underway. No vendor result yet.
 
-Continue checked deployment/real-Qwen repair/independent acceptance/durable installed result, then separate ordinary real-provider self-check and nonpublishing PR preparation/recovery. Ongoing automatic release retention already observed with3independent recovery/current browser copies. Product unfinished; no in-game testing, live-addon installation or publication.
+Continue real-Qwen repair, meaningful independent checks, durable installed result, subsequent ordinary real-provider self-check and nonpublishing PR preparation/recovery. Ongoing retention observed; no live game installation or publication. Product unfinished; no routine owner renewal.
 
-[Continuation](CONTINUATION.md) · [Evidence](VENDOR_EXECUTION_STREAM_RECOVERY_20261110.md) · [Continuing permission](OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md).
+[Continuation](CONTINUATION.md) · [Continuing permission](OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md).

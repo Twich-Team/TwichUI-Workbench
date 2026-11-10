@@ -292,6 +292,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         calls = message.get('tool_calls', [])
         if len(calls) > 8:
             raise BudgetError('Too many tool calls in one response')
+        if source_view:
+            source_view.completed_input()
         messages.append(message)
         log.append(dict(turn=turn, usage=usage, finish_reason=choice['finish_reason']))
         if not calls:
