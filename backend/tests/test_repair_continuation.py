@@ -68,8 +68,9 @@ def test_changed_saved_work_or_binding_cannot_be_applied(tmp_path,fault):
 
 @pytest.mark.usefixtures('installed')
 @pytest.mark.parametrize('has_edits', [True, False])
+@pytest.mark.parametrize('authorization', ['browser', 'owner-instruction'])
 def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_denies_active_or_unknown(
-    client,headers,store,monkeypatch,has_edits,
+    client,headers,store,monkeypatch,has_edits,authorization,tmp_path,
 ):
     from uuid import uuid4
     from sqlalchemy import select
@@ -145,10 +146,30 @@ def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_d
         c.execute(requests.update().where(requests.c.id==rid).values(status='failed',result=dict(verification='unknown',usage=usage)))
     renewed=dict(command_id=str(uuid4()),scope_approval_id=scope['command_id'],binding=before['binding'],
         run_budget=before['offer']['budget'],note='Continue known unfinished repair after reviewing feedback')
-    saved=client.post(endpoint,headers=headers,json=renewed)
-    assert saved.status_code==200,saved.text
-    assert client.post(endpoint,headers=headers,json=renewed).json()==saved.json()
-    assert planning_worker.apply_one(store,command_id=renewed['command_id'])
+    if authorization=='browser':
+        saved=client.post(endpoint,headers=headers,json=renewed)
+        assert saved.status_code==200,saved.text
+        assert client.post(endpoint,headers=headers,json=renewed).json()==saved.json()
+        assert planning_worker.apply_one(store,command_id=renewed['command_id'])
+    else:
+        import hashlib
+        from workbench import owner_task
+        auth=tmp_path/'explicit-owner-local-recovery.txt'
+        auth.write_text('Controlled express same-task isolated local-Qwen recovery; fallbackOff and publication held.')
+        h=hashlib.sha256(auth.read_bytes()).hexdigest()
+        ref=dict(intake_id=item['id'],task_id=selected['snapshot']['reviewed_task']['ref']['task_id'],
+                 approval_id=scope['command_id'])
+        renewed_ref=owner_task.recover_local(store,ref,auth,h)
+        assert owner_task.recover_local(store,ref,auth,h)==renewed_ref
+        renewed['command_id']=renewed_ref['approval_id']
+        detail=client.get('/api/intake/'+item['id']).json()
+        receipt=next(d for d in detail['decisions'] if d['id']==renewed_ref['approval_id'])
+        provenance=receipt['payload']['execution_continuation']
+        assert provenance['owner_provenance']['purpose']=='same-task-local-recovery-v1'
+        assert 'browser_request' not in provenance
+        assert receipt['payload']['run_budget']['publication']=='hold'
+        assert receipt['payload']['run_budget']['fallback'] is False
+        assert client.post(endpoint,headers=headers,json={**renewed,'owner_provenance':provenance['owner_provenance']}).status_code==422
     with store.connect() as c:
         old=c.execute(select(requests).where(requests.c.id==rid)).mappings().one()
         assert old['result']['usage']==usage and old['status']=='failed'

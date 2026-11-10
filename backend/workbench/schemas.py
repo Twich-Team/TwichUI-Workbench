@@ -394,7 +394,7 @@ class OwnerInstructionProvenance(StrictModel):
     authorization_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
     authorization_path: str = Field(min_length=1, max_length=1024)
     actor: Literal['owner']
-    purpose: Literal['supported-task-to-draft-pr-v1']
+    purpose: Literal['supported-task-to-draft-pr-v1', 'same-task-local-recovery-v1']
 
 
 class ExecutionContinuationView(StrictModel):

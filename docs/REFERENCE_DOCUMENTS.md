@@ -99,3 +99,8 @@ isolated local-Qwen recovery for this same approved vendor outcome. It supersede
 the audit's then-current fresh-owner-renewal conclusion for future recovery, not
 the historical limits or provenance of either actual browser decision. New
 execution authority must be recorded distinctly by supported application owners.
+
+[Vendor response delivery/recovery](VENDOR_EXECUTION_STREAM_RECOVERY_20261110.md)
+records the actual second run, preserved partial usage, known model edit, verified
+local termination and distinct express same-task recovery authority. It does not
+claim a checked vendor patch or new real-provider acceptance.

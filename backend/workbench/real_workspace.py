@@ -158,7 +158,7 @@ class Runtime:
                     base_manifest_sha256=sha(self.initial.read_bytes()) if self.initial.is_file() else None,
                     oracle_sha256=sha(self.oracle_source.read_bytes()), contract=job.digest(self.execution_contract),
                     helper_sha256={name: sha(Path(__file__).with_name(name).read_bytes()) for name in
-                       ['real_execution.py','real_workspace.py','storage_resources.py','implementation_context.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py','repair_edits.py','repair_continuation.py']})
+                       ['real_execution.py','real_workspace.py','storage_resources.py','implementation_context.py','local_generation_recovery.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py','repair_edits.py','repair_continuation.py']})
         if self.recipe:
             value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes()) for name in ['real_recipes.py','task_budget.py','verification_process.py']})
             if self.recipe.get('repair_cycle'):

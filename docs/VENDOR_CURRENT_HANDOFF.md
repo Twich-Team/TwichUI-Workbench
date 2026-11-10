@@ -1,5 +1,24 @@
 # Vendor repair — active newly approved run and standing recovery authority
 
+## Latest verified state before the connected correction
+
+The newly approved93482f88 run has settled FAILED after a real-Qwen source edit
+and an interrupted later response. Its9complete receipts and unknown final usage
+are retained; old server/worker descendants ended, normal model/auth restored and
+termination evidence reconciled through the normal failed-result owner. No vendor
+checked result yet. The known model-authored edit is preserved for a fresh bound
+continuation under the complete explicit owner recovery instruction.
+
+Response-reading/permission overhead, tool-prefix invalidation, cancellation reserve
+and delayed service-restoration handling have connected code corrections. Tests and
+private evidence are in [the diagnosis](VENDOR_EXECUTION_STREAM_RECOVERY_20261110.md).
+Installed application is still28b8c87 until verified activation. No model operation
+is being replayed; maintenance may use the normal model. Next: final verification,
+sealed cutover, supported owner-instruction recovery ingress and real-Qwen checked
+vendor outcome. There is no routine owner renewal or engineering decision pending.
+
+The initial active-run observations below are historical; inspect actual state.
+
 Read the complete [new owner direction](OWNER_VENDOR_DELIVERY_AUTHORITY_20261110.md),
 root philosophy/standing direction/requirements and [current handoff](VENDOR_CURRENT_HANDOFF.md).
 The owner approved a fresh local run in the actual browser and explicitly authorized

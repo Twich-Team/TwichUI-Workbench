@@ -102,7 +102,8 @@ def process_matches(record, expected_secret=None):
 def restart():
     for action in ('stop', 'start'):
         r = subprocess.run(['sudo', '-n', '/usr/bin/systemctl', action, SERVICE],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           timeout=110 if action == 'stop' else 30)
         if r.returncode:
             raise RuntimeError('Owned '+action+' failed; inspect private lease state')
 
@@ -159,7 +160,11 @@ def restore(private):
             if not state.get('restoration_started'):
                 raise RuntimeError('Restoration held: original file changed outside recorded restoration')
             old_key = (private/'original.key').read_text()
-            if not process_matches(state, old_key):
+            if epoch() is None:
+                # A prior bounded stop can finish after its caller timed out.
+                # Exact recorded restoration/configuration checks above still apply.
+                restart()
+            elif not process_matches(state, old_key):
                 if not process_matches(state, secret) or epoch() != state.get('temporary_epoch'):
                     raise RuntimeError('Restoration held: changed service identity')
                 restart()

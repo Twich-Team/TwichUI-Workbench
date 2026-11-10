@@ -32,6 +32,10 @@ def instruction(runtime, fallback):
             'Use focused reads and symbol search; do not exhaustively walk every test before editing. '
             'Inspect necessary setup and relevant behavior, make a small scoped edit, run the checks '
             'and revise from actual feedback. Independent checks still gate success. '
+            'New native regression assertions must exercise actual addon behavior: fail against '
+            'unchanged original production and pass with the repair. Do not assign desired answers '
+            'into addon state, detect verification runs or remove existing assertions. '
+            'Any retained unfinished edits are prior model work, not a checked solution. '
             'No publication or live-addon change is permitted.\nCurrent reviewed task:\n' +
             json.dumps(context, ensure_ascii=True) + '\nInitial bounded reads: ' +
             json.dumps([dict(path=p, start=s, end=e) for p, s, e in windows], ensure_ascii=True) +

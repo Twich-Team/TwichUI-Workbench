@@ -83,6 +83,37 @@ def test_recoverable_restore_exact_bytes_mode_and_access(tmp_path, monkeypatch):
     assert calls == ['restart']
 
 
+def test_restore_resumes_normal_service_after_a_recorded_stop_finished_late(tmp_path, monkeypatch):
+    env = setup_restore(tmp_path, monkeypatch)
+    env.write_bytes(b'ORIGINAL\n')
+    state = json.loads((tmp_path/'state.json').read_text())
+    state['restoration_started'] = True
+    (tmp_path/'state.json').write_text(json.dumps(state))
+    epoch = [None]
+    calls = []
+    def restart():
+        calls.append('restart')
+        epoch[0] = [3, 4]
+    monkeypatch.setattr(lease, 'epoch', lambda: epoch[0])
+    monkeypatch.setattr(lease, 'restart', restart)
+    monkeypatch.setattr(lease, 'process_matches', lambda *a: True)
+    monkeypatch.setattr(lease, 'wait_ready', lambda *a: {'model_path': 'fixed', 'default_generation_settings': {'n_ctx':32768}})
+    monkeypatch.setattr(lease, 'request', lambda *a: (401, b''))
+    assert lease.restore(tmp_path)['restored']
+    assert calls == ['restart'] and epoch[0] == [3, 4]
+
+
+def test_stop_timeout_covers_the_existing_systemd_stop_deadline(monkeypatch):
+    calls = []
+    def run(args, **kwargs):
+        from types import SimpleNamespace
+        calls.append((args, kwargs['timeout']))
+        return SimpleNamespace(returncode=0)
+    monkeypatch.setattr(lease.subprocess, 'run', run)
+    lease.restart()
+    assert [(args[-2:], cap) for args,cap in calls] == [(['stop',lease.SERVICE],110),(['start',lease.SERVICE],30)]
+
+
 def test_named_transport_probe_and_normal_completion_use_same_fence(tmp_path, monkeypatch):
     import io
     import time

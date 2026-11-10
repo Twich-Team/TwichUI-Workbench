@@ -23,7 +23,8 @@ from workbench.service import now
 
 
 def instruction(path, expected_hash, purpose="connected-chronicle-acceptance-v1"):
-    if purpose not in {"connected-chronicle-acceptance-v1", "supported-task-to-draft-pr-v1"}:
+    if purpose not in {"connected-chronicle-acceptance-v1", "supported-task-to-draft-pr-v1",
+                       "same-task-local-recovery-v1"}:
         raise ValueError("Unsupported owner ingress purpose")
     p = Path(path)
     if (
@@ -517,3 +518,56 @@ def continue_supported(
         result = {**ref, "approval_id": identity}
         task_execution.snapshot(c, **result)
     return result
+
+
+def recover_local(engine, ref, path, expected_hash):
+    """Apply express same-task recovery authority, never pretend a browser click.
+
+    Each settled failure gets a distinct one-operation budget and fresh frozen
+    work binding. The original approvals/usage and every earlier budget remain
+    unchanged. This trusted ingress is unavailable to public/model commands.
+    """
+    from workbench import task_budget, task_execution, repair_continuation, provider_routes
+    from workbench.schemas import TaskBudget
+
+    proof = instruction(path, expected_hash, 'same-task-local-recovery-v1')
+    with write_transaction(engine) as c:
+        parent = intake.require(c, proposal_decisions, ref['approval_id'])
+        if parent['payload'].get('run_budget') or parent['payload'].get('execution_continuation'):
+            raise ValueError('The unchanged original scope-only approval is required')
+        linked = task_execution.snapshot(c, **ref)
+        if (linked['original'].get('local_planning') != 'qwen-once'
+                or provider_routes.run_selection(c, linked) is not None):
+            raise ValueError('Express recovery is local Qwen only, with fallback disabled')
+        selected = task_budget.offer(c, parent['proposal_id'])
+        if (not selected or not selected['snapshot'].get('repair_resume')
+                or selected['snapshot']['reviewed_task']['ref'] != ref):
+            raise ValueError('A settled same-scope isolated repair is required')
+        identity = str(uuid5(NAMESPACE_URL, 'workbench-local-recovery:'+expected_hash+':'+ref['task_id']+':'+selected['fingerprint']))
+        old = c.execute(select(proposal_decisions).where(proposal_decisions.c.id == identity)).mappings().first()
+        if old:
+            if old['payload']['execution_continuation']['owner_provenance'] != proof:
+                raise ValueError('Recovery authority identity changed')
+            return {**ref, 'approval_id': identity}
+        repair_continuation.freeze(c, selected)
+        budget = TaskBudget(activate_once=True, offer_id=selected['id'],
+                            offer_fingerprint=selected['fingerprint'], publication='hold', fallback=False)
+        task_budget.validate_selection(c, parent['proposal_id'], budget, admitting=True)
+        review = linked['proposal_review']
+        continuation = dict(scope_approval_id=parent['id'], scope_binding=parent['binding'],
+                            owner_provenance=proof, continuation_id=selected['fingerprint'])
+        value = budget.model_dump(mode='json')
+        binding = intake.digest(dict(execution_continuation=continuation, run_budget=value))
+        at = now()
+        row = dict(id=identity, intake_id=ref['intake_id'], proposal_id=parent['proposal_id'],
+            scope_revision=review['human_scope']['revision'], required_artifacts=review['required_artifacts'],
+            scope_review_required=0, binding=binding, snapshot=review, status='applied',
+            payload=dict(command_id=identity, proposal_id=parent['proposal_id'], binding=binding,
+                scope_revision=review['human_scope']['revision'], action='approve',
+                note='Owner instruction authorizes this same-task isolated local-Qwen recovery. Not a browser action. Source '+expected_hash,
+                run_budget=value, execution_continuation=continuation),
+            message='Recovery authorized by saved owner instruction. Earlier attempts retained; publication held.',
+            created_at=at, finished_at=at)
+        task_budget.permission(c, row)
+        c.execute(proposal_decisions.insert().values(**row))
+        return {**ref, 'approval_id': identity}

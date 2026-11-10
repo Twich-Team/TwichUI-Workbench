@@ -92,6 +92,8 @@ def test_real_tool_responses_support_reread_then_edit_in_same_counted_attempt(tm
     replay=json.loads(next(m['content'] for m in reversed(messages) if m['role']=='tool'))
     assert replay['replayed_spans'][0]['text']=='local controlled = 1\n'
     assert tools.read==len('local controlled = 1\n')
+    assert all(body['tools'] == Transport.bodies[0]['tools'] for body in Transport.bodies)
+    assert 'read_file' in {t['function']['name'] for t in Transport.bodies[-1]['tools']}
 
 
 def test_unchanged_read_loop_stops_with_complete_counted_receipts_not_twenty_calls(tmp_path):
@@ -110,3 +112,29 @@ def test_unchanged_read_loop_stops_with_complete_counted_receipts_not_twenty_cal
     assert len(Transport.bodies)==len(turns)==5
     assert all(t['response_completed'] and t['usage_validated'] for t in turns)
     assert p.read_text()=='local controlled = 1\n'
+
+
+def test_scoped_no_progress_forces_the_installed_string_tool_choice_without_weakening_dispatch(tmp_path):
+    path=tmp_path/PATHS[0]
+    path.parent.mkdir(parents=True)
+    path.write_text('local controlled = 1\n')
+    runtime=SimpleNamespace(workspace=tmp_path,read_paths=[PATHS[0]],paths=[PATHS[0]],
+        recipe=dict(source_context=[{}],verification_profile='lua-offline-bugfix-v1',repair_cycle='scoped-repair-v1'),
+        tool_commands=lambda:{'focused':['controlled-no-shell']})
+    class ControlledTools:
+        def __init__(self):self.runtime=runtime
+        def handle(self,name,args):
+            if name=='run_check':
+                return json.dumps(dict(status='fail',diagnostic='Controlled rejection'))
+            assert name=='replace_text'
+            path.write_text(path.read_text().replace(args['old'],args['new']))
+            return 'Edit saved in isolated workspace.'
+    Transport.responses=[response('run_check',dict(name='candidate'),0),
+        response('run_check',dict(name='candidate'),1),
+        response('replace_text',dict(path=PATHS[0],old='= 1',new='= 2'),2),answer()]
+    Transport.bodies=[]
+    implement(ControlledTools(),'Controlled scope','','controlled',lambda:True,transport=Transport)
+    assert Transport.bodies[0]['tools']==Transport.bodies[1]['tools']==Transport.bodies[3]['tools']
+    assert Transport.bodies[2]['tool_choice']=='required'
+    assert [t['function']['name'] for t in Transport.bodies[2]['tools']]==['replace_text']
+    assert '= 2' in path.read_text()

@@ -507,6 +507,11 @@ def process_one(engine, stop_event=None, advance=None):
                     state,
                 )
         reconcile_controller(root)
+        from workbench.local_generation_recovery import reconcile_for_root
+        try:
+            reconcile_for_root(engine, root/'real-run')
+        except (ValueError, OSError, KeyError, TypeError):
+            pass  # Unproven termination never releases a generation or task fence.
         (advance or task_session.process_one)(engine, cfg, stop_event=cancelled)
         if reason := getattr(stop_event, 'reason', None):
             state['resource_hold'] = reason

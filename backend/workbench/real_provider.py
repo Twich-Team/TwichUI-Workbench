@@ -131,6 +131,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         if left <= 0 or time.monotonic() >= end:
             raise BudgetError('Attempt token or wall budget exhausted')
         scope_workflow=bool(getattr(runtime,'recipe',None) and runtime.recipe.get('source_context'))
+        scoped_cycle=bool((getattr(runtime,'recipe',None) or {}).get('repair_cycle'))
         reviewing = edits_done==0 and (scope_workflow or reads_done < initial_read_calls)
         first_edit = not reviewing and edits_done == 0
         names = ({t['function']['name'] for t in definitions} if reviewing else
@@ -143,6 +144,11 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         if refresh:
             names.add('read_file')
         refresh = False
+        if scoped_cycle:
+            # These tools have the same path/scope/check guards at every stage.
+            # Keep their template prefix stable across read/edit/check transitions;
+            # changing it invalidates the local model's entire source prefix cache.
+            names = {t['function']['name'] for t in definitions}
         force_edit = bool(repair and repair.edit_required)
         if force_edit:
             names = {'replace_text'}
@@ -152,9 +158,11 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                 'a real scoped edit before more checks or log reads.'
             )))
         body = dict(model=model, messages=messages,
-                    tools=[t for t in definitions if t['function']['name'] in names],
+                    tools=[t for t in definitions if (scoped_cycle and not force_edit) or t['function']['name'] in names],
                     max_tokens=min(2496, left), **DECODING)
         if first_edit or force_edit:
+            # Installed llama.cpp accepts the string form, not a named-function
+            # object. A genuine no-progress correction advertises one edit tool.
             body['tool_choice'] = 'required'
         counted = None
         if transport is LocalHTTP and hasattr(ownership, 'count_input_tokens'):
@@ -168,11 +176,23 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             data=json.dumps(body).encode(), headers={'Content-Type': 'application/json',
                                                     'Authorization': 'Bearer '+secret}, method='POST')
         canceled, finished = threading.Event(), threading.Event()
+        checked_at = [time.monotonic()]
         def watch():
             while not finished.wait(.1):
-                if not permitted() or (stop_event and stop_event.is_set()):
+                try:
+                    current = permitted() and not (stop_event and stop_event.is_set())
+                except Exception:
+                    current = False  # Failed permission reads must fence the response.
+                if not current:
                     canceled.set()
                     return
+                checked_at[0] = time.monotonic()
+        def stream_permitted():
+            # SSE framing can have thousands of lines. Never open a SQLite
+            # transaction for each line. The heartbeat fails closed on revocation,
+            # error or a stalled permission read; every tool checks afresh below.
+            return (not canceled.is_set() and time.monotonic()-checked_at[0] < 2
+                    and not (stop_event and stop_event.is_set()))
         monitor = threading.Thread(target=watch, daemon=True, name='real-grant-watch')
         if on_request:
             on_request(dict(turn=turn, request_limit=body['max_tokens'], counted_input_tokens=counted,
@@ -203,7 +223,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             return usage, used, input_tokens, valid
         try:
             if transport is LocalHTTP:
-                response = ownership.request(body, lambda: permitted() and not canceled.is_set(),
+                response = ownership.request(body, stream_permitted,
                                              min(end, time.monotonic()+120))
             else:
                 with transport(canceled) as client:
@@ -218,6 +238,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             finished.set()
             monitor.join(timeout=.2)
         usage, used, input_tokens, usage_valid = observe_usage(response, True)
+        if not permitted() or canceled.is_set() or (stop_event and stop_event.is_set()):
+            raise BudgetError('Grant changed while receiving output; no tool or result accepted')
         if not usage_valid:
             raise BudgetError('Actual usage/ceiling cannot be independently verified; stop')
         completion += used

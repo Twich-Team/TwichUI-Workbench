@@ -44,7 +44,7 @@ def settled(c,selected):
             grants.c.snapshot['workflow_task']['task']['id'].as_string()==ref['task_id'])
         .order_by(requests.c.created_at.desc())).mappings().all()
     if not histories or any(r['status']!='failed' or not r['finished_at'] or not r['revoked_at']
-            or (r['result'] or {}).get('usage',{}).get('status')!='complete' for r in histories):
+            or not settled_accounting(r) for r in histories):
         return None
     row=histories[0]
     if row['grant_snapshot']['task_budget']['decision_id']!=budget['id']:
@@ -56,7 +56,8 @@ def settled(c,selected):
     runtime=Runtime(root)
     if not runtime.owns_recovery(dict(snapshot=row['grant_snapshot'])):
         raise ValueError('Failed repair recovery identity changed')
-    restoration=private_json(root.parent/'lease-controller-result.json')['restoration']
+    restored = root.parent/'lease-restoration-reconciled.json'
+    restoration=private_json(restored if restored.is_file() else root.parent/'lease-controller-result.json')['restoration']
     if restoration.get('restored') is not True:
         raise ValueError('Failed repair service restoration is not settled')
     # The long-running worker is not the provider. Check the actual per-run owner.
@@ -100,6 +101,35 @@ def settled(c,selected):
         usage_sha256=digest(usage),receipts_sha256=digest(receipts),provider=prior,
         histories=[dict(execution_id=r['id'],model_attempt_id=r['fence'],
             session_id=r['grant_snapshot']['task_budget']['decision_id'],usage=r['result']['usage']) for r in histories])
+
+
+def settled_accounting(row):
+    """Unknown local generation usage stays unknown after proven epoch termination.
+
+    This never covers active/uncertain effects or unknown separately billed usage.
+    The native failed outcome, no late tool dispatch and exact source are retained.
+    """
+    usage=(row['result'] or {}).get('usage',{})
+    if usage.get('status')=='complete':
+        return True
+    if usage.get('status') not in {'partial','unavailable'} or row['grant_snapshot']['runtime'].get('codex_selection'):
+        return False
+    try:
+        from workbench.local_generation_recovery import absent_epoch
+        from workbench.real_workspace import Runtime,tree
+        from workbench import real_execution as execution
+        root=Path(row['grant_snapshot']['recovery']['root'])
+        proof=private_json(root/'terminated-generation.json')
+        runtime=Runtime(root)
+        return (proof['execution_id']==row['id'] and proof['fence']==row['fence']
+            and proof['outcome']=='failed' and proof['generation_final_outcome']=='unknown'
+            and proof['final_usage']=='unknown' and proof['partial_response_dispatched'] is False
+            and proof['provider_epoch_terminated'] is True and absent_epoch(proof['terminated_epoch'])
+            and runtime.owns_recovery(dict(snapshot=row['grant_snapshot']))
+            and proof['source_tree_sha256']==execution.digest(tree(runtime.workspace))
+            and runtime.failure_evidence(row['id'],row['fence'])['usage']==usage)
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
 
 
 def preview(c,selected):

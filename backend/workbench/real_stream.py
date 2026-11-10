@@ -69,6 +69,11 @@ class NamedStream:
                                   assembled_bytes=ASSEMBLED_BYTES_LIMIT))
         try:
             with PrimarySession(self.state, [], str(self.sequence), allowed) as session:
+                # Persist native identity independently of generated content.
+                # Sequence/task numbers can recur after a server restart.
+                session.record.update(server_epoch=self.expected_epoch)
+                session._save()
+                report.update(server_epoch=self.expected_epoch, conversation_nonce=session.record['nonce'])
                 headers = session.begin(streaming=True)
                 headers.update({'Authorization': 'Bearer '+self.secret, 'Content-Type': 'application/json'})
                 request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
@@ -123,7 +128,7 @@ class NamedStream:
                         client.ends_at = min(client.ends_at, read_end)
                         report['wire_started'] = True
                         with client.opener.open(request, timeout=max(.01, read_end-time.monotonic())) as response:
-                            for data in events(response, report, allowed):
+                            for data in events(response, report, lambda: allowed() and time.monotonic() < read_end):
                                 if data == b'[DONE]':
                                     if result['choices'][0]['finish_reason'] is None:
                                         fail(report, 'done_before_finish')
@@ -198,7 +203,8 @@ class NamedStream:
             # Caller validates identity/counts; incomplete work remains a failure.
             error.stream_response = result if result.get('usage') is not None else None
             if report['stream_error'] is None:
-                report['stream_error'] = 'transport_or_protocol_failure'
+                report['stream_error'] = ('request_deadline' if time.monotonic() >= deadline-5
+                                          else 'transport_or_protocol_failure')
             raise
         finally:
             selected = result['choices'][0]
