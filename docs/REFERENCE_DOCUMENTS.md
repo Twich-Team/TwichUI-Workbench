@@ -86,3 +86,9 @@ These describe the owner's actual first run, its settled failure/usage and the
 fresh run decision. They supersede older no-run-approval statements. Exact previous
 current records are in `history/20261110-before-vendor-execution-*`. Actual task
 consent remains separate from standing engineering authority; no campaign restarted.
+
+[Vendor authorization audit](VENDOR_RUN_AUTHORIZATION_AUDIT_20261110.md) is an
+assistant finding about a specific recorded offer/approval and its disclosed bounds,
+not an owner-authored policy amendment. It checks the prior served UI, actual
+decision and settled execution against standing direction. Later explicit owner
+clarification takes precedence. No new inference or approval was manufactured.

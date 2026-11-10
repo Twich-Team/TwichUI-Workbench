@@ -1,5 +1,12 @@
 # Vendor task — installed source-read and continuation recovery
 
+Later owner check: [actual authorization audit](VENDOR_RUN_AUTHORIZATION_AUDIT_20261110.md)
+compares standing direction with the specific recorded approval and prior served
+UI. One attempt was explicitly disclosed before approval, not merely a hidden
+counter. The fixed defaults were included in the concrete offer. No new permission
+was found or manufactured. One fresh task run decision remains necessary; no new
+engineering approval. This is an assistant audit finding, not owner policy.
+
 Following the Project Working Philosophy and standing authority, no campaign caps
 or routine engineering renewals. Private receipts use UTC; current owner report is
 November9,2026 America/Denver. One agent, no vendor browser-approval delegation.

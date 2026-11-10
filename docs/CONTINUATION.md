@@ -1,5 +1,13 @@
 # Continue from installed vendor run recovery
 
+The owner requested an authorization audit after the last report. Read
+[the evidence-based finding](VENDOR_RUN_AUTHORIZATION_AUDIT_20261110.md): the prior
+form visibly disclosed one attempt and required acknowledgment; the saved concrete
+approval contains that bound, not only a hidden retry counter. App-defined defaults
+were included in the actual offer. No newer execution decision exists. Standing
+engineering authority remains; this audit grants no retry or new policy. The
+current supported fresh run action remains available; no inference was repeated.
+
 Following the Project Working Philosophy and standing owner direction, ordinary
 connected engineering remains authorized. No campaign caps or routine renewal.
 Read the exact root owner documents and [current handoff](VENDOR_CURRENT_HANDOFF.md).

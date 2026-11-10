@@ -1,5 +1,12 @@
 # Verified current — original vendor task ready for a new run decision
 
+[Authorization audit](VENDOR_RUN_AUTHORIZATION_AUDIT_20261110.md) verified the prior
+served form explicitly disclosed one local attempt and the actual approval bound
+one attempt/20 exchanges. Those were app defaults, but visible in the approved
+offer. No newer run decision exists. Ordinary engineering needs no renewal; a
+second addon-execution invocation is outside the consumed concrete grant. No model
+call or task mutation occurred during the audit. Vendor outcome remains unfinished.
+
 Following the Project Working Philosophy, installed **28b8c87 / deployment87**
 corrects the implementation source-read loop and connected recovery/decision display.
 
