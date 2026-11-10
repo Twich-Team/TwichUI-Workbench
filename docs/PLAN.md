@@ -1,4 +1,14 @@
-## Active visual delivery — November 9, 2026
+## Current verified milestone — November 10, 2026
+
+Installed ef7e23e/deployment85 recovers the original saved vendor revision through
+real Qwen. Its revised proposal24 awaits genuine owner review; no plan/run approval
+is inferred. Model-priority scheduling, shared waiting state, restart/history and
+maintenance restoration are verified. Follow [current continuation](CONTINUATION.md)
+before any new action. No engineering renewal/campaign cap applies. The sequences
+below retain earlier delivery planning and broader product scope; they are not
+instructions to replay completed acceptance or reopen the execution architecture.
+
+## Earlier visual delivery plan — November 9, 2026
 
 The accepted functional gate is demonstrated; receipts in CONTINUATION remain
 historical evidence, not permission to replay completed cases. Current owner

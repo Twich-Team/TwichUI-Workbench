@@ -1,4 +1,17 @@
-## Verified current — original vendor task now has a usable plan for OWNER review
+## Verified current — saved revision recovered and model priority installed
+
+November10,2026 UTC: ef7e23e/deployment85 has ORIGINAL vendor task proposal24 ready
+for genuine review. Exact saved revision resumed once through real Qwen after
+verified maintenance yield; durable whole-operation reservation/shared waiting
+projection installed. Browser/reload/restart/history/restore and maintenance resume
+pass. No vendor plan/run approval or implementation. See [current status](CURRENT_STATUS.md)
+and [handoff](VENDOR_CURRENT_HANDOFF.md) for bound evidence and the next action.
+Standing autonomous authority continues; no campaign caps or routine renewals.
+
+All dated entries below are preserved historical progress, not competing current
+state, active-operation instructions or permission gates. Do not replay their work.
+
+## Historical — original vendor task first had a usable plan for OWNER review
 
 As of 2026-11-09T22:27:34.970510+00:00, installedc5873b1/deployment83 has ORIGINALintake2dc5b8ba revision20,
 proposal a51b2d33: realQwen source-grounded readable scope for NPC item/stock code

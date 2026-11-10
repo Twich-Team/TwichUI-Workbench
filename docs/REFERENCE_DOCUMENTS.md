@@ -62,8 +62,11 @@ The supplemental addon art-direction document is unavailable and explicitly opti
 
 Current owner investigation-to-plan steering: [complete supplied direction](OWNER_INVESTIGATION_PLAN_STEERING_20261109.md). Source notes are unverified task data; a usable bounded scope can retain explicit uncertainty. No separate proven-diagnosis or completed-checking-artifact gate before proposing scope. Genuine scope/run approval and independent result checks remain.
 
-Installed vendor scope recovery: [current handoff](VENDOR_CURRENT_HANDOFF.md) and
-[confirmed transition/correction](VENDOR_SCOPE_TRANSITION_20261109.md). Current
-CONTINUATION/CURRENT_STATUS replace the preceding entries saved byte-for-byte in
-`history/20261109-before-scope-recovery-*`. Old unclassified-scope, active-model
-and maintenance-pause descriptions there are historical, not current instructions.
+Installed vendor revision/model-priority recovery:
+[current handoff](VENDOR_CURRENT_HANDOFF.md) and
+[confirmed correction/evidence](MODEL_PRIORITY_RECOVERY_20261110.md). Current
+CONTINUATION/CURRENT_STATUS replace the preceding scope-only entries saved
+byte-for-byte in `history/20261110-before-model-priority-*`. Proposal23 and earlier
+maintenance-pause/active-model descriptions there are historical, not current
+instructions. [Earlier scope transition](VENDOR_SCOPE_TRANSITION_20261109.md)
+remains a separate confirmed incident; this newer contention did reach real Qwen.

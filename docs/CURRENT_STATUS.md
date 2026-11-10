@@ -1,38 +1,58 @@
-# Verified current status — saved vendor scope recovered
+# Verified current status — saved revision recovered, priority installed
 
-Installed **691edf7 / deployment84**, November9,2026. Following the Project
+Installed **ef7e23e / deployment85**, November10,2026 UTC. Following the Project
 Working Philosophy, standing autonomous delivery remains in force.
 
-The ORIGINAL vendor-item task is **Ready for your review**, revision23. The
-existing real-Qwen proposal and exact owner behavior/data-only scope2 remain.
-The normal browser applied that saved choice locally. No new model request,
-vendor plan/run approval, implementation or publication occurred.
+The ORIGINAL vendor-item task is **Ready for your review**, revision24. Its exact
+saved Request changes note about delayed item names and refreshing was not lost
+or resubmitted. The same queued job resumed once through real Qwen and produced a
+complete source-grounded proposal: mixed known/late names, item-data events,
+refresh/link behavior and focused regression checks. Runtime cause remains
+uncertain until the separately authorized isolated edit/test cycle.
 
-The scope save had succeeded. Unnecessary legacy replanning failed before model
-dispatch; renewal then incorrectly treated the local entry as uncertain
-execution. Installed code separates local review operations from generations,
-retains uncertainty holds, and repairs ordinary requested-plan changes.
+**Next genuine action:** review that proposal, confirm the criteria if correct,
+choose Approve plan. Running it remains a separate decision. No vendor plan/run
+approval, implementation, live-addon change or publication occurred.
 
-Genuine next action: read the original task's plan, confirm its criteria if
-correct, choose Approve plan. Running it needs its own decision. Do not resubmit
-the scope choice. No engineering renewal or unavailable access is needed.
+The blocker was genuine maintenance, not a stale reservation. Old planning only
+polled cooperative locks and dropped them between calls. Installed scheduling now
+holds them across the operation, verifies maintenance before bounded interruption,
+checks actual readiness and preserves unknown outcomes/usage. Unknown owners hold.
+Dashboard and task share real waiting/ownership state, without counting maintenance
+as addon work or claiming activity from a stale journal.
 
-Request, scope, earlier failures/usage/decisions/history preserved; exactly one
-local job and proposal added. Qwen/fallbackOff/policy18 unchanged. No owned
-activity remains. Original88 complete responses/1914712 known tokens and earlier
-unknown accounting remain unchanged.
+Real recovery used three complete Qwen responses/79105 tokens. Original totals are
+91 complete responses/1993817 known tokens; older unknowns remain unchanged.
+Qwen/fallbackOff/policy18 preserved. No active owned job, run or pending decision
+at closeout. Background maintenance is restored and may be active normally.
 
-Normal desktop/phone/reload recovery and four-service restart pass. Before/after
-restart history matches; independent final backup/restore, installed seal,
-private-LAN/TLS/browser protections and model/auth verified. Six prior real
-checked results revalidate/read normally with zero replay. Controlled connected
-transition and affected regressions pass; exact broad-test correction, opt-in
-skips and evidence are in the installation record/current handoff.
+Controlled OS-lock, task/API, restart/duplicate and browser tests pass. Six controlled
+separate-process bug journeys are verified after correcting two stale test call
+expectations. Broad backend verification found one host-capacity-dependent fixture;
+its capacity input was isolated and a separate low-capacity refusal check added.
+Production resource safeguards were preserved. Exact runs, original failures,
+rechecks and opt-in consequences are bound in the installation record.
 
-This restores plan review; the vendor bug itself is not repaired yet. Prior
-flight-path acceptance remains an offline checked local patch. Full broader
-features/inspection/simulator/data/publication requirements remain unfinished.
+Installed original-task desktop/phone/reload and four-service restart pass. Full
+history fingerprint and independent backup/restore match. Six prior real checked
+results canonically revalidate/read with no replay. Installed native reservation
+and API observations exclude maintenance across fifteen readiness observations;
+guarded resume restores its admissions. Actual resumed maintenance is correctly
+shown separately on the dashboard. New automatic yield was tested with controlled
+owners; no duplicate live task was created merely to test it.
+
+Loopback and HTTPS/private-LAN/TLS/browser protections unchanged. Normal model/auth
+and service epoch verified. Prior physical-device evidence reused under unchanged
+address/subnet/routes/CA; no new physical-device test is claimed. Two inactive,
+byte-identical browser copies were removed with inventory/reconstruction records;
+all history, unique evidence and installed691edf7/c5873b1 recovery remain.
+
+This is a revised plan, not a checked vendor repair. Existing flight-path acceptance
+is an offline checked local patch, not in-game acceptance/live-addon installation.
+Broader features, inspection/simulator/data automation and real draft-PR delivery
+remain unfinished. Billing/disclosure/publication protections remain.
 
 [Current handoff](VENDOR_CURRENT_HANDOFF.md) · [Continuation](CONTINUATION.md) ·
-[Failure/correction record](VENDOR_SCOPE_TRANSITION_20261109.md).
-Earlier statuses remain [historical](history/20261109-before-scope-recovery-CURRENT_STATUS.md).
+[Correction record](MODEL_PRIORITY_RECOVERY_20261110.md).
+The [preceding status](history/20261110-before-model-priority-CURRENT_STATUS.md)
+remains historical. No engineering renewal or new owner access is needed.

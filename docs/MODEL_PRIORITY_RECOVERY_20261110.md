@@ -68,10 +68,36 @@ stale journals, reacquisition exclusion, duplicate dispatch, restart/reload and
 preserved approval boundaries. Browser checks cover the same waiting explanation
 on dashboard/detail at desktop and phone widths. These are not real-model passes.
 
-Installation and final ORIGINAL-task browser/restart demonstration are in progress
-at this checkpoint. Use the latest current handoff and bound private receipts for
-actual installed identity, final verification, preservation, maintenance restoration
-and genuine remaining owner review. A source checkpoint is not completion.
+The initial source checkpoint preceded installation. Final verified installation is
+**ef7e23e / deployment85**. The ORIGINAL revised proposal is visible in the normal
+desktop/phone browser, survives reload and four-service restart, and remains
+unapproved. Exact store fingerprints and an independent backup/restore match.
+Only the intake status/revision and same queued job changed; one real model attempt
+and proposal were added. All previous rows and unknown accounting remain intact.
+
+Final affected backend170, priority/source/views45, frontend34 and four browser
+checks pass. All six opt-in separate-process two-bug journeys are verified. Broad
+backend run2062 passes/8 skips plus one corrected host-capacity-dependent fixture;
+two opt-in final call expectations were corrected to count their injected rejected
+read. Production gates were not weakened. Exact initial failures, corrected checks
+and two remaining opt-in omissions/consequences are in the installation record.
+
+Installed native resource observation held actual locks across fifteen readiness
+checks while guarded supported resume restored maintenance. No model turn/task
+mutation. Actual resumed maintenance is correctly displayed separately from zero
+addon work. The automatic interruption path has controlled-owner evidence; real
+original recovery used the supported manual yield, not a duplicate live retry.
+Normal model/auth and service epoch remain; temporary reservation released. Six
+prior real checked results revalidate/read without replay. HTTPS/private-LAN and
+browser/internal endpoint protections pass; prior physical-device evidence reused
+only under unchanged address/subnet/routes/CA.
+
+Next genuine action: review proposal24 on the original task, confirm its criteria
+if correct, then Approve plan. Running it is a separate permission. No vendor fix,
+new engineering approval, spending, publication or live-addon change is implied.
+See [current handoff](VENDOR_CURRENT_HANDOFF.md) and private bound
+`final-model-priority-closeout.json` for exact files/hashes, restoration, retention
+and remaining product limitations.
 
 Private evidence:
 `/home/rich/.local/share/TwichUI-Workbench/vendor-model-priority-recovery-20261109`.

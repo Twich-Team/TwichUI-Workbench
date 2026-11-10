@@ -1,44 +1,44 @@
-# Continue from verified installed scope recovery
+# Continue from verified saved-revision recovery
 
 Following the Project Working Philosophy and standing owner direction, ordinary
-connected engineering remains authorized. No campaign caps or routine renewal.
-Read authoritative root owner documents and [current handoff](VENDOR_CURRENT_HANDOFF.md).
+connected engineering remains authorized. No campaign caps or routine renewals.
+Read the root owner documents and [current handoff](VENDOR_CURRENT_HANDOFF.md).
 
-Installed **691edf7 / deployment84**. Original vendor task
-`2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd` now has proposal23
-`4748d792-8e1d-465b-ba84-768539379b6f`, **Ready for your review**. Human scope2
-(behavior/data only, preserve layout/icons/tooltips) is already saved and applied.
-Do not ask for that choice again or launch an unnecessary investigation.
+Installed **ef7e23e / deployment85**. The ORIGINAL vendor-item task
+`2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd` has complete real-Qwen proposal24
+`1e9427a8-69a3-5191-b21d-e6f95baa9a0a`, **Ready for your review**.
+The exact saved revision about delayed game item names/refresh was applied once.
+Human scope2, original report, decisions, failures and usage remain intact.
+**No vendor plan/run approval or implementation.** Do not resubmit the revision.
 
-The old scope handler failed locally before dispatch; the phase ledger mistook
-that entry for uncertain generation. Installed local binding/reconciliation was
-demonstrated through the normal browser on the ORIGINAL task, then survived
-reload and a four-service restart. No new model request, plan/run approval,
-vendor implementation or publication. The precise addon cause remains uncertain;
-the existing real-Qwen bounded proposal is ready for meaningful review.
+Actual maintenance held both cooperative locks. Old Workbench only waited and
+released locks between model requests; its dashboard omitted queued work. A verified
+supported maintenance yield let the SAME saved job24 resume through real Qwen:
+three complete responses,79105 tokens. A durable whole-operation reservation and
+verified maintenance handoff are now installed; task/dashboard share observed state.
+No stale journal alone proves maintenance, completion, cancellation or zero usage.
 
-**Next owner action:** refresh/open the task, read the proposal, confirm its
-behavior criteria if correct, choose Approve plan. The isolated run is a separate
-decision. No vendor approval is delegated. Inspect actual state before later
-work, honor genuine approvals and never replay uncertain activity. Ordinary
-engineering problems remain work to resolve under standing authority.
+Desktop/phone/reload and four-service restart demonstrate the revised proposal.
+Exact history and independent backup/restore match. Six prior real checked results
+remain valid/readable without replay. Normal model/auth/service epoch unchanged;
+temporary reservation released and owned maintenance pause restored via guarded
+supported resume. Actual maintenance now displays separately from addon work.
+No owned provider/job/run/pending decision remains. Inspect actual state first.
 
-Qwen/fallbackOff/policy18 unchanged. No owned provider/job/run/pending decision
-at closeout. Original88 complete responses/1914712 known tokens and historical
-unknown accounting/failures remain. Six earlier real checked results remain
-canonically valid and readable without replay. History/independent restore,
-seal, normal model/auth, HTTPS/private-LAN/browser protections and restart pass.
-Prior installedc5873b1 baseline remains recoverable.
+**Next owner action:** open the original task, read the revised proposal and confirm
+its behavior criteria if correct, then Approve plan. Running it is a separate
+permission. No vendor approval is delegated. Do not infer either from this repair.
+Qwen/fallbackOff/policy18 unchanged. Earlier unknown usage/quarantines remain unknown.
+Original91 complete responses/1993817 known tokens; no completed case replayed.
 
-Bound private receipt:
-`/home/rich/.local/share/TwichUI-Workbench/vendor-scope-transition-recovery-20261109/final-scope-recovery-closeout.json`.
-Exact source/seal, tests/skips and installation:
-`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-691edf7`.
+Private bound closeout:
+`/home/rich/.local/share/TwichUI-Workbench/vendor-model-priority-recovery-20261109/final-model-priority-closeout.json`.
+Exact candidate, seal, tests/skips, installation and rollback:
+`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-ef7e23e`.
+[Cause, implementation and evidence](MODEL_PRIORITY_RECOVERY_20261110.md).
 
-No live-addon change, new spending, source-disclosure expansion or publication.
-This restores plan review, not a completed vendor fix or full initial product.
-Broader unfinished requirements remain visible in the current handoff.
-
-Earlier continuation entries are preserved, explicitly historical, in
-[the preceding record](history/20261109-before-scope-recovery-CONTINUATION.md).
-Its old active-operation/maintenance/scope instructions do not describe current state.
+No new spending/disclosure, live-addon change or publication. Broader unfinished
+requirements remain in the handoff. This recovers a revised plan, not a vendor fix
+or the full product. Prior installed691edf7 and c5873b1 remain recoverable.
+The [preceding continuation](history/20261110-before-model-priority-CONTINUATION.md)
+is historical; its proposal23 and maintenance instructions are superseded.
