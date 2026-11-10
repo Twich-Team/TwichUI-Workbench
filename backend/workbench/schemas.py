@@ -397,6 +397,13 @@ class OwnerInstructionProvenance(StrictModel):
     purpose: Literal['supported-task-to-draft-pr-v1', 'same-task-local-recovery-v1', 'same-task-local-until-result-v1']
 
 
+class LocalRepairControls(StrictModel):
+    actor: Literal['workbench-engineering'] = 'workbench-engineering'
+    mode: Literal['bounded-local-reasoning-v1'] = 'bounded-local-reasoning-v1'
+    request_seconds: Literal[300] = 300
+    reasoning_tokens: Literal[768] = 768
+
+
 class ExecutionContinuationView(StrictModel):
     browser_request: dict | None = Field(default=None, exclude_if=lambda value: value is None)
     authoring_mode: Literal['explicit-current-session'] | None = Field(default=None, exclude_if=lambda value: value is None)
@@ -404,6 +411,7 @@ class ExecutionContinuationView(StrictModel):
     scope_binding: str = Field(pattern=r'^[a-f0-9]{64}$')
     owner_provenance: OwnerInstructionProvenance | BrowserApprovalProvenance
     continuation_id: str = Field(default='', max_length=200)
+    operational_controls: LocalRepairControls | None = Field(default=None, exclude_if=lambda value: value is None)
 
 
 class StoredProposalDecisionPayload(ProposalDecisionInput):

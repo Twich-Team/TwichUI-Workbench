@@ -527,7 +527,7 @@ def recover_local(engine, ref, path, expected_hash, *, continuing=False):
     work binding. The original approvals/usage and every earlier budget remain
     unchanged. This trusted ingress is unavailable to public/model commands.
     """
-    from workbench import task_budget, task_execution, repair_continuation, provider_routes
+    from workbench import task_budget, task_execution, repair_continuation, provider_routes, continuing_repair
     from workbench.schemas import TaskBudget
 
     purpose = 'same-task-local-until-result-v1' if continuing else 'same-task-local-recovery-v1'
@@ -558,6 +558,10 @@ def recover_local(engine, ref, path, expected_hash, *, continuing=False):
         review = linked['proposal_review']
         continuation = dict(scope_approval_id=parent['id'], scope_binding=parent['binding'],
                             owner_provenance=proof, continuation_id=selected['fingerprint'])
+        if continuing:
+            # Engineering operation settings under the saved continuing direction,
+            # recorded separately from the owner's scope decision and old grants.
+            continuation['operational_controls']=dict(continuing_repair.CONTROLS)
         value = budget.model_dump(mode='json')
         binding = intake.digest(dict(execution_continuation=continuation, run_budget=value))
         at = now()

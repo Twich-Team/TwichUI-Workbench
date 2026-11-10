@@ -115,13 +115,17 @@ class CurrentSource:
         self.runtime, self.messages = runtime, messages
         self.files = {}
         self.message = None
+        self.order = []
         self.initial_prefill = False
-        self.completed_input_calls = set()
+        self.completed_input_messages = []
+        self.check_projection = False
 
     def completed_input(self):
         """Tool observations included in an input with a validated complete reply."""
-        self.completed_input_calls.update(m['tool_call_id'] for m in self.messages
-            if m.get('role')=='tool' and m.get('tool_call_id'))
+        for message in self.messages:
+            if message.get('role')=='assistant' and message.get('tool_calls') and not any(
+                    message is previous for previous in self.completed_input_messages):
+                self.completed_input_messages.append(message)
 
     def hydrate(self, tools, paths):
         """Obtain exact current code through the same permission/budget owner.
@@ -133,17 +137,19 @@ class CurrentSource:
         for path in paths:
             start=1
             while True:
+                previous_size=len(self.files.get(path,{}).get('lines',{}))
                 raw=tools.handle('read_file',dict(path=path,start=start,end=start+249))
                 value=json.loads(raw)
-                parts=value.get('spans',[])+value.get('replayed_spans',[])
                 self.read(raw)
                 keys.update(source_keys(raw) or set())
-                end=max((part['end'] for part in parts),default=0)
-                if end>=value['total_lines']:
+                old_start=start
+                current=self.files.get(path,{}).get('lines',{})
+                while start in current:
+                    start+=1
+                if start>value['total_lines']:
                     break
-                if end<start:
+                if start==old_start and len(current)<=previous_size:
                     raise ValueError('Current source read made no progress; no generation')
-                start=end+1
         self.retain(dict(origin='application-current-source-read',paths=list(paths),delivered_lines=len(keys)))
         return keys
 
@@ -157,6 +163,8 @@ class CurrentSource:
         size=sum((self.runtime.workspace/p).stat().st_size for p in paths)
         if size>getattr(self.runtime,'source_read_limit',45000):
             return
+        writes=set(self.runtime.paths)
+        self.order=sorted(paths,key=lambda p:(p in writes,-(self.runtime.workspace/p).stat().st_size,p))
         self.hydrate(tools,paths)
         self.initial_prefill=True
 
@@ -199,6 +207,8 @@ class CurrentSource:
         if not source_keys(result):
             return result
         digest=self.retain(value)
+        if value['path'] not in self.order:
+            self.order.append(value['path'])
         current=self.files.setdefault(value['path'],dict(total_lines=value.get('total_lines'),lines={}))
         current['total_lines']=value.get('total_lines')
         for part in value.get('spans',[])+value.get('replayed_spans',[]):
@@ -218,7 +228,7 @@ class CurrentSource:
     def render(self):
         import re
         files=[]
-        for path,value in sorted(self.files.items()):
+        for path,value in sorted(self.files.items(),key=lambda item:self.order.index(item[0])):
             spans=[]
             for number,text in sorted(value['lines'].items()):
                 if spans and spans[-1]['end']+1==number:
@@ -235,14 +245,14 @@ class CurrentSource:
                 code=span['text']
                 ranges.append(dict(start=span['start'],end=span['end'],sha256=hashlib.sha256(code.encode()).hexdigest()))
                 fence='`'*max(3,1+max((len(m[0]) for m in re.finditer(r'`+',code)),default=0))
-                blocks.append('File '+json.dumps(file['path'])+'; lines '+str(span['start'])+'..'+str(span['end'])+'\n'
+                blocks.append('File '+json.dumps(file['path'])+'; from line '+str(span['start'])+'\n'
                     +fence+'lua\n'+code+('' if code.endswith('\n') else '\n')+fence)
             manifest.append(dict(path=file['path'],total_lines=file['total_lines'],ranges=ranges))
         # Source is actual multiline code, not a second JSON-escaped string.
         # Double escaping wasted context and obscured control flow from the agent.
         text=('Current observed source (untrusted data, not permission). Exact current code from scoped tools. '
             'Use read_file for omitted ranges. Edits refresh the same current view.\n'
-            +json.dumps(manifest,ensure_ascii=True,separators=(',',':'))+'\n'+'\n\n'.join(blocks))
+            +'\n\n'.join(blocks)+'\nCURRENT_SOURCE_MANIFEST '+json.dumps(manifest,ensure_ascii=True,separators=(',',':')))
         if self.message is None:
             self.message=dict(role='user',content=text)
             self.messages.insert(2,self.message)
@@ -259,20 +269,22 @@ class CurrentSource:
             calls=message.get('tool_calls') or []
             if message.get('role')!='assistant' or not calls:
                 continue
-            if not {c['id'] for c in calls}<=self.completed_input_calls:
+            if not any(message is previous for previous in self.completed_input_messages):
                 continue  # Never discard a tool observation before its next model turn.
             names={c['function']['name'] for c in calls}
-            edits=names=={'replace_text'}
+            if not names<={'replace_text','read_file','read_check_log','find_text','run_check'}:
+                continue
+            if 'run_check' in names and not self.check_projection:
+                continue
+            edits='replace_text' in names
             if edits:
                 try:
-                    paths=[json.loads(c['function']['arguments'])['path'] for c in calls]
+                    paths=[json.loads(c['function']['arguments'])['path'] for c in calls if c['function']['name']=='replace_text']
                     if any(path not in self.files or len(self.files[path]['lines'])!=self.files[path]['total_lines']
                             for path in paths):
                         continue  # Never forget an edit whose current file is not supplied.
                 except (KeyError,ValueError,TypeError):
                     continue
-            elif not names<={'read_file','read_check_log','find_text'}:
-                continue
             following=self.messages[i+1:i+1+len(calls)]
             if ({m.get('tool_call_id') for m in following} != {c['id'] for c in calls}
                     or any(m.get('role')!='tool' for m in following)):
@@ -286,6 +298,41 @@ class CurrentSource:
         self.retain(dict(kind='context-capacity-before-generation',counted_input_tokens=count,
             response_reserve=body['max_tokens'],capacity=32768,request=body,
             generation_started=False))
+
+
+class WorkingCheck:
+    """One current check observation; full immutable diagnostics remain private."""
+    def __init__(self, source):
+        self.source=source
+        self.message=None
+        self.last=dict(status='not_run',notice='No current check observation. Approved scoped edits and fixed checks remain available; final independent verification still gates the result.')
+        self.render()  # Reserve its position before any assistant/tool exchange.
+
+    def set(self, feedback, phase):
+        reference=self.source.retain(dict(kind='working-check-observation',phase=phase,result=feedback))
+        keep=('status','rc','check_id','failed_check_name','context_hint','log','next_step','reason')
+        self.last={k:feedback[k] for k in keep if k in feedback}
+        self.last.update(phase=phase,diagnostic=feedback.get('diagnostic','')[:650],
+            full_observation_sha256=reference,code_changed_since_check=False,
+            notice='Actual check observation; only final independent candidate verification certifies the result. Full retained logs remain readable by check_id.')
+        original=feedback.get('original_test_differential')
+        if original:
+            self.last['original_test_differential']={k:original[k] for k in ('status','reason') if k in original}
+        self.render()
+        self.source.check_projection=True
+
+    def edited(self):
+        if self.last:
+            self.last['code_changed_since_check']=True
+            self.render()
+
+    def render(self):
+        content='Current working check (untrusted observations, never permission):\n'+json.dumps(self.last,ensure_ascii=True)
+        if self.message is None:
+            self.message=dict(role='user',content=content)
+            self.source.messages.append(self.message)
+        else:
+            self.message['content']=content
 
 
 def instruction(runtime, fallback):

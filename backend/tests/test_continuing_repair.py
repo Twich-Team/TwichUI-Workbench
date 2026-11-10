@@ -15,6 +15,7 @@ from workbench.lua_failure_context import command
 from workbench.real_usage import summarize
 from test_real_execution import Transport, answer
 from test_implementation_context import response
+from test_owner_task import owner as owner  # noqa: F401
 
 
 def approval():
@@ -24,6 +25,71 @@ def approval():
     budget=dict(turns=None,fallback=False,publication='hold',activate_once=True)
     return dict(payload=dict(execution_continuation=continuation,run_budget=budget),
         binding=digest(dict(execution_continuation=continuation,run_budget=budget)))
+
+
+def test_reasoned_controls_are_distinct_bound_engineering_settings_not_an_upgrade_to_old_decisions(tmp_path):
+    from workbench.schemas import ExecutionContinuationView,TaskRunApprovalInput
+    from pydantic import ValidationError
+    value=approval()
+    runtime=SimpleNamespace(workflow_task=dict(approval=value))
+    assert continuing.operational_controls(runtime) is None
+    value['payload']['execution_continuation']['operational_controls']=dict(continuing.CONTROLS)
+    assert not continuing.permitted_budget(value)  # Controls must be inside the fresh binding.
+    value['binding']=digest(value['payload'])
+    controls=continuing.operational_controls(runtime)
+    assert controls['request_seconds']==300 and controls['decoding']['reasoning_budget_tokens']==768
+    assert 'reasoning_effort' not in controls['decoding']
+    changed=json.loads(json.dumps(value))
+    changed['payload']['execution_continuation']['operational_controls']['request_seconds']=301
+    changed['binding']=digest(changed['payload'])
+    assert not continuing.permitted_budget(changed)
+    # Public approval input has no channel for asserting trusted owner recovery.
+    with pytest.raises(ValidationError):
+        TaskRunApprovalInput.model_validate(dict(operational_controls=continuing.CONTROLS))
+    with pytest.raises(ValidationError):
+        ExecutionContinuationView.model_validate(dict(value['payload']['execution_continuation'],unexpected='no'))
+
+
+def test_bound_reasoning_is_used_and_its_actual_total_usage_is_still_accounted(tmp_path):
+    value=approval()
+    value['payload']['execution_continuation']['operational_controls']=dict(continuing.CONTROLS)
+    value['binding']=digest(value['payload'])
+    runtime=SimpleNamespace(root=tmp_path,enforce_storage=lambda:None,workflow_task=dict(approval=value),recipe={})
+    class NoTools:
+        def __init__(self):self.runtime=runtime
+    observation=[]
+    reply=answer(80,60)
+    reply['choices'][0]['message']['reasoning_content']='CONTROLLED private reasoning; no live model.'
+    Transport.responses=[reply]
+    Transport.bodies=[]
+    result=implement(NoTools(),'Controlled task','','controlled',lambda:True,transport=Transport,on_request=observation.append)
+    body=Transport.bodies[0]
+    assert body['reasoning_budget_tokens']==768 and body['chat_template_kwargs']==dict(enable_thinking=True)
+    assert body['reasoning_format']=='deepseek' and 'reasoning_effort' not in body
+    assert body['max_tokens']==2496 and observation[0]['request_seconds']==300
+    assert result['completion_tokens']==reply['usage']['completion_tokens']
+    assert result['prompt_tokens']==reply['usage']['prompt_tokens']
+
+
+def test_new_grant_binds_recorded_operational_controls_without_changing_baseline_or_old_decision(store,monkeypatch,owner):
+    from test_real_execution import ControlledRuntime
+    from workbench import real_execution,task_execution,task_budget
+    value=approval()
+    value['payload']['execution_continuation']['operational_controls']=dict(continuing.CONTROLS)
+    value['binding']=digest(value['payload'])
+    scope=dict(approval=value)
+    monkeypatch.setattr(task_execution,'snapshot',lambda *args:scope)
+    monkeypatch.setattr(task_budget,'permission',lambda *args:dict(decision_id='CONTROLLED',
+        offer=dict(snapshot=dict(specification=dict(contract=real_execution.contract())))))
+    ref,_,_=owner
+    grant=real_execution.issue(store,'CONTROLLED owner scope, no live authorization','controlled test',
+        ControlledRuntime(),task=ref)
+    assert grant['snapshot']['contract']['decoding']==real_execution.DECODING
+    assert grant['snapshot']['operational_controls']==continuing.controls_for(value)
+    assert grant['binding']==digest(grant['snapshot'])
+    changed=json.loads(json.dumps(grant['snapshot']))
+    changed['operational_controls']['request_seconds']=301
+    assert digest(changed)!=grant['binding']
 
 
 @pytest.mark.parametrize('continued',[False,True])
@@ -67,7 +133,7 @@ def test_continuing_budget_cannot_be_forged_by_dropping_other_boundaries():
 
 def test_continuation_observes_retained_check_before_generation_and_fences_revocation(tmp_path):
     (tmp_path/'repair-resume.json').write_text('{}')
-    runtime=SimpleNamespace(root=tmp_path,paths=[PATHS[0]],read_paths=[PATHS[0]],
+    runtime=SimpleNamespace(root=tmp_path,enforce_storage=lambda:None,paths=[PATHS[0]],read_paths=[PATHS[0]],
         workflow_task=dict(approval=approval()),recipe=dict(repair_cycle='scoped-repair-v1'),
         tool_commands=lambda:{'focused':['controlled-only']})
     checked=[]
@@ -192,5 +258,6 @@ def test_unchecked_model_edit_receives_actual_check_feedback_on_a_read_stall(tmp
     if focused_pass:
         assert len(result['log'])==3 and result['completion_reason'].startswith('independent-checks-passed')
     else:
-        assert 'CONTROLLED actual check observation' in Transport.bodies[-1]['messages'][-1]['content']
+        assert any('CONTROLLED actual check observation' in m.get('content','')
+            for m in Transport.bodies[-1]['messages'])
     assert (tmp_path/'attempt/progress-check-02-focused.json').is_file()

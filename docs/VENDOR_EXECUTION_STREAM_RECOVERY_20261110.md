@@ -212,3 +212,29 @@ backend outcomes recorded separately before activation. These supporting checks 
 not a real Qwen vendor success. Ongoing automatic retention has4actual successive
 journals and3independent current/recovery browser inodes; the4GiBreserve remains.
 Continue through checked installation and original task without another owner renewal.
+
+
+## Current-state loop and recorded engineering controls
+
+After checked deployment94, actual run2569012a completed12responses and1Items.lua
+edit, with real automatic checking, before a local context hold. Full usage known,
+no next generation started, no vendor pass. Patchb880d6ae retained. Treat earlier
+active-state checkpoints as historical.
+
+One current WorkingCheck now replaces accumulated check prose in the model input,
+while immutable native/full private evidence stays. Refreshed exact source follows
+the first missing line, preserving unchanged prefixes; model-facing hashes move to
+the tail and file order stays stable. Paired tool exchanges may archive only after
+a validated completed turn included them; identity handles duplicate tool IDs.
+
+Under the owner's express permission to choose practical operation settings, new
+continuing decisions record an engineering (not owner-selected) operational profile:
+requested768reasoning tokens inside the same2496total response limit,300seconds per
+request inside the same1200second operation. This is local Qwen, not a provider or
+model change. Existing saved selection/fallback and old approvals are untouched.
+Fresh grant digest binds effective controls separately from legacy recipe defaults.
+Public input still cannot create trusted continuing authority. Request metadata and
+actual usage record effective settings. No extra billing, source, write or publication
+permission. Installed server source and existing planning behavior support these
+request fields; tokenizer/prospective-mode replay accepts them. Actual reasoning/
+repair success awaits the next verified installed real run; do not claim otherwise.

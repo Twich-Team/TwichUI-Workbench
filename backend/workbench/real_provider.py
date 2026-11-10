@@ -126,11 +126,15 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
     edits_done = 0
     refresh = editing_announced = False
     log = []
-    from workbench.continuing_repair import allows
+    from workbench.continuing_repair import allows, operational_controls
     continuing = allows(runtime)
+    controls=operational_controls(runtime)
+    request_seconds=controls['request_seconds'] if controls else 120
     source_progress = ReadProgress(lifetime=continuing)
     from workbench.implementation_context import CurrentSource
     source_view = CurrentSource(runtime,messages) if continuing else None
+    from workbench.implementation_context import WorkingCheck
+    current_check=WorkingCheck(source_view) if source_view else None
     last_checked_content = repair.writable_content() if repair else None
     if continuing and getattr(runtime, 'root', None) and (runtime.root/'repair-resume.json').is_file():
         if not permitted() or (stop_event and stop_event.is_set()):
@@ -142,9 +146,10 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             feedback = repair.checked('focused', feedback)
         from workbench.real_workspace import durable
         durable(runtime.root/'attempt/resumed-focused.json', json.dumps(feedback,sort_keys=True).encode())
-        messages.append(dict(role='user', content='Fresh working check of the retained model-authored edits, before this generation. '
-            'Use the actual failure and local observations to repair code or your new test additions; original tests remain protected. '
-            +json.dumps(feedback,ensure_ascii=True)))
+        if current_check:
+            current_check.set(feedback,'focused retained work')
+        else:
+            messages.append(dict(role='user', content='Fresh working check of retained model edits: '+json.dumps(feedback,ensure_ascii=True)))
     if source_view:
         source_view.prefill(tools)
     for turn in itertools.count():
@@ -174,7 +179,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             # Keep their template prefix stable across read/edit/check transitions;
             # changing it invalidates the local model's entire source prefix cache.
             names = {t['function']['name'] for t in definitions}
-        force_edit = bool(repair and repair.edit_required)
+        force_edit = bool(repair and repair.edit_required and not controls)
         if force_edit:
             names = {'replace_text'}
             messages.append(dict(role='user', content=(
@@ -185,6 +190,10 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         body = dict(model=model, messages=messages,
                     tools=[t for t in definitions if (scoped_cycle and not force_edit) or t['function']['name'] in names],
                     max_tokens=min(2496, left), **DECODING)
+        if controls:
+            body.pop('reasoning_effort',None)
+            body.update(controls['decoding'])
+            body['reasoning_budget_tokens']=min(controls['reasoning_tokens'],max(0,body['max_tokens']-256))
         if first_edit or force_edit:
             # Installed llama.cpp accepts the string form, not a named-function
             # object. A genuine no-progress correction advertises one edit tool.
@@ -235,6 +244,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         monitor = threading.Thread(target=watch, daemon=True, name='real-grant-watch')
         if on_request:
             on_request(dict(turn=turn, request_limit=body['max_tokens'], counted_input_tokens=counted,
+                            request_seconds=request_seconds,reasoning_budget_requested=body.get('reasoning_budget_tokens',0),
                             available_tools=sorted(names), read_calls_completed=reads_done,
                             repeated_source_reads=source_progress.repeated,
                             edits_completed=edits_done,
@@ -263,11 +273,11 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         try:
             if transport is LocalHTTP:
                 response = ownership.request(body, stream_permitted,
-                                             min(end, time.monotonic()+120))
+                                             min(end, time.monotonic()+request_seconds))
             else:
                 with transport(canceled) as client:
                     client.ends_at = min(client.ends_at, end)
-                    response = json.loads(client.read(request, 262144, timeout=min(120, max(.01, end-time.monotonic()))))
+                    response = json.loads(client.read(request, 262144, timeout=min(request_seconds, max(.01, end-time.monotonic()))))
         except Exception as error:
             receipt = getattr(error, 'stream_response', None)
             if isinstance(receipt, dict) and receipt.get('usage') is not None:
@@ -306,9 +316,12 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                 if repair:
                     feedback = repair.checked('candidate', feedback)
                     last_checked_content = repair.writable_content()
-                messages.append(dict(role='user', content='Independent candidate checks failed. '
-                    'This is feedback for repair within the SAME attempt and remaining budgets; no new attempt. '
-                    +json.dumps(feedback, ensure_ascii=True)))
+                if current_check:
+                    current_check.set(feedback,'independent candidate')
+                else:
+                    messages.append(dict(role='user', content='Independent candidate checks failed. '
+                        'This is feedback for repair within the SAME attempt and remaining budgets; no new attempt. '
+                        +json.dumps(feedback, ensure_ascii=True)))
                 refresh = True
                 continue
             return dict(log=log, completion_tokens=completion, prompt_tokens=prompt,
@@ -336,6 +349,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                         keys=source_view.edited(path,tools)
                         source_progress.known.update(keys)
                         source_progress.visible.update(keys)
+                        current_check.edited()
                 elif repair and name in ('read_file', 'find_text', 'read_check_log'):
                     repeated_log = name == 'read_check_log' and bool(
                         json.loads(result).get('already_shown_or_empty') or json.loads(result).get('previously_shown'))
@@ -352,6 +366,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                             result = json.dumps(feedback, ensure_ascii=True)
                             if events[0]['check'] in {'focused','candidate'}:
                                 last_checked_content = repair.writable_content()
+                        if current_check:
+                            current_check.set(feedback,events[0]['check'])
             except ToolInputError as error:
                 function = call.get('function', {}) if isinstance(call, dict) else {}
                 name = function.get('name') if isinstance(function, dict) else None
@@ -415,9 +431,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                 return dict(log=log,completion_tokens=completion,prompt_tokens=prompt,
                     correction_count=corrections,read_input_errors=read_errors,tool_input_errors=tool_errors,
                     final_message='',completion_reason='independent-checks-passed-after-progress-observation')
-            messages.append(dict(role='user',content='Workbench checked your unverified edits after repeated source reads. '
-                'This is actual check feedback, not a proposed solution. Correct your code or new tests from it; original tests and scope remain protected. '
-                +json.dumps(feedback,ensure_ascii=True)))
+            current_check.set(feedback,'application progress check')
             source_progress.repeated=0
             guidance=None
         if source_progress.repeated >= 4 and (getattr(runtime, 'recipe', None) or {}).get('repair_cycle'):

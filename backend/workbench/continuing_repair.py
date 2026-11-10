@@ -10,6 +10,25 @@ from sqlalchemy import select
 from workbench.db import proposal_decisions, task_sessions
 
 PURPOSE = 'same-task-local-until-result-v1'
+CONTROLS = dict(actor='workbench-engineering',mode='bounded-local-reasoning-v1',request_seconds=300,reasoning_tokens=768)
+
+
+def operational_controls(runtime):
+    if not allows(runtime):
+        return None
+    return controls_for(runtime.workflow_task['approval'])
+
+
+def controls_for(approval):
+    if not permitted_budget(approval):
+        return None
+    saved=approval['payload']['execution_continuation'].get('operational_controls')
+    if saved is None:
+        return None  # Historical continuing decisions retain their actual direct mode.
+    if saved!=CONTROLS:
+        raise ValueError('Unknown continuing operational controls')
+    return dict(**saved,decoding=dict(temperature=0.2,reasoning_format='deepseek',
+        reasoning_budget_tokens=saved['reasoning_tokens'],chat_template_kwargs=dict(enable_thinking=True)))
 
 
 def code_identity(folder=None):
@@ -82,6 +101,7 @@ def permitted_budget(approval):
     budget = payload.get('run_budget') or {}
     from workbench.visual_scope import digest
     return (proof.get('actor') == 'owner' and proof.get('purpose') == PURPOSE
+        and continuation.get('operational_controls') in (None,CONTROLS)
         and 'browser_request' not in continuation and budget.get('turns', 20) is None
         and budget.get('fallback') is False and budget.get('publication') == 'hold'
         and budget.get('activate_once') is True

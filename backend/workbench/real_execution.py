@@ -85,6 +85,13 @@ def issue(engine, authorization, provenance, activation, *, task=None):
         if task is not None:
             from workbench.task_execution import snapshot as task_snapshot
             snapshot['workflow_task'] = task_snapshot(c, task['intake_id'], task['task_id'], task['approval_id'])
+            from workbench.continuing_repair import controls_for
+            controls=controls_for(snapshot['workflow_task']['approval'])
+            if controls:
+                # The original recipe keeps its baseline defaults. This fresh
+                # grant separately binds the engineering settings in the newly
+                # recorded continuing decision; old grants are never upgraded.
+                snapshot['operational_controls']=controls
             if snapshot['workflow_task']['approval']['payload'].get('run_budget'):
                 from workbench.task_budget import permission
                 from workbench.db import proposal_decisions

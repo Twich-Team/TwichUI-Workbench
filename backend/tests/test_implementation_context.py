@@ -75,13 +75,13 @@ def test_current_source_merges_overlap_preserves_exact_text_and_invalidates_edit
     read(2,'  -- exact whitespace\nreturn value\n')
     assert first['current_source_view'] and first['delivered_ranges']==[dict(start=1,end=2)]
     assert len(messages)==3 and messages[0]['content']=='Preserved policy' and messages[1]['content']=='Preserved scope'
-    data=json.loads(messages[2]['content'].split('\n')[1])
+    data=json.loads(messages[2]['content'].rsplit('CURRENT_SOURCE_MANIFEST ',1)[1])
     assert [(r['start'],r['end']) for r in data[0]['ranges']]==[(1,3)]
     assert '```lua\nlocal value = 1\n  -- exact whitespace\nreturn value\n```' in messages[2]['content']
     assert 'local value = 1\\n' not in messages[2]['content']
     assert len(list((tmp_path/'attempt/context-sources').glob('*.json')))==2
     view.edited('source.lua')
-    assert json.loads(messages[2]['content'].split('\n')[1])==[]
+    assert json.loads(messages[2]['content'].rsplit('CURRENT_SOURCE_MANIFEST ',1)[1])==[]
 
 
 def test_current_source_compacts_only_old_complete_pure_read_exchanges(tmp_path):
@@ -201,10 +201,40 @@ def test_latest_log_can_archive_after_receipt_in_a_completed_turn_but_fresh_repl
     view.messages.extend([call,reply])
     assert not view.compact_history()
     view.completed_input()
-    new=dict(role='assistant',tool_calls=[dict(id='fresh',function=dict(name='read_file',arguments='{}'))])
-    view.messages.extend([new,dict(role='tool',tool_call_id='fresh',content='Fresh source')])
+    new=dict(role='assistant',tool_calls=[dict(id='log',function=dict(name='read_file',arguments='{}'))])
+    view.messages.extend([new,dict(role='tool',tool_call_id='log',content='Fresh source')])
     assert view.compact_history() and call not in view.messages and new in view.messages
     assert not view.compact_history()
+
+
+def test_one_line_edit_refreshes_unchanged_prefix_and_preserves_prompt_prefix(tmp_path):
+    path,tools,view=current_fixture(tmp_path)
+    view.prefill(tools)
+    before=view.message['content']
+    cost=tools.read
+    path.write_text(path.read_text().replace('current_299 = 299','current_299 = 900'))
+    view.edited('source.lua',tools)
+    assert len(view.files['source.lua']['lines'])==300
+    assert view.files['source.lua']['lines'][1]=='local current_1 = 1\n'
+    assert view.files['source.lua']['lines'][299]=='local current_299 = 900\n'
+    assert tools.read==cost+len('local current_299 = 900\n')
+    assert before.split('local current_299',1)[0]==view.message['content'].split('local current_299',1)[0]
+
+
+def test_one_check_projection_replaces_old_details_and_keeps_full_private_observations(tmp_path):
+    from workbench.implementation_context import WorkingCheck
+    path,tools,view=current_fixture(tmp_path)
+    view.prefill(tools)
+    check=WorkingCheck(view)
+    check.set(dict(status='fail',diagnostic='old failed check '+'x'*5000),'focused')
+    message=check.message
+    check.edited()
+    assert json.loads(message['content'].split('\n',1)[1])['code_changed_since_check']
+    check.set(dict(status='fail',diagnostic='new actual observation',check_id='fixed-001'),'focused')
+    assert check.message is message and 'old failed check' not in message['content']
+    assert len(message['content'])<1800 and 'new actual observation' in message['content']
+    records=[json.loads(p.read_text()) for p in (tmp_path/'attempt/context-sources').glob('*.json')]
+    assert any(r.get('result',{}).get('diagnostic')=='old failed check '+'x'*5000 for r in records)
 
 
 def test_reloading_source_into_context_does_not_turn_repetition_into_investigation_progress():
