@@ -296,7 +296,9 @@ async function openLocalOffer(page: import('@playwright/test').Page) {
   await expect(page.getByText('Saved · Pending application',{exact:true})).toBeVisible();
   fixture('reviewed-offer-automatic-tick');
   fixture('reviewed-offer-automatic-tick');
-  await expect(page.getByRole('heading',{name:'Preparing the reviewed task'})).toBeVisible();
+  const preparation=page.getByRole('region',{name:'Task preparation hold'});
+  await expect(preparation.getByRole('heading',{name:'Preparing the approved work'})).toBeVisible();
+  await expect(preparation.getByRole('status')).toContainText('No repair has started.');
   const submitted=await page.request.get('/api'+new URL(page.url()).pathname).then(r=>r.json());
   expect(submitted.original.description).toBe('Cover trimming spaces and lowercasing names.');
   expect(submitted.original.regression_tests.text_example).toEqual({input:'  ALICE ',expected:'alice',incorrect:'ALICE'});
@@ -423,7 +425,8 @@ test('browser approval refuses changed certified evidence before saving a run',a
   expect((await sent).status()).toBe(409);
   await expect(offer.getByRole('alert').filter({hasText:'offer changed'}).first()).toBeVisible();
   await offer.getByRole('button',{name:'Review current offer'}).click();
-  await expect(page.getByRole('heading',{name:'Task preparation held'})).toBeVisible();
+  const hold=page.getByRole('region',{name:'Task preparation hold'});
+  await expect(hold.getByRole('heading',{name:'Preparation is on hold'})).toBeVisible();
   expect(await page.request.get('/api'+new URL(page.url()).pathname).then(r=>r.json()).then(r=>r.decisions)).toHaveLength(1);
   expect(await page.request.get('/api/real-executions').then(r=>r.json()).then(r=>r.total)).toBe(0);
 });

@@ -7689,3 +7689,10 @@ partial output. The replacement Qwen operation reached the original comparison
 and received its exact registered log; the original still passed, so there is
 no accepted vendor result. The owner’s November 10 product direction is recorded
 in the addendum and roadmap, with no current permission or execution changes.
+
+The split hosted Chromium step finished: 110 passed, three skipped, six
+failed. One denial test used the developer's checkout path and five expected
+preparation wording no longer displayed. Tests now use the current checkout
+and the actual preparation region, while still requiring blocked access,
+correct progress, stale-offer refusal and zero execution. All six affected
+cases passed across the focused run and the final stale-offer rerun.

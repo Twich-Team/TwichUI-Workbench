@@ -120,7 +120,8 @@ test('fresh observations show recorded waiting reasons without implying inferenc
 
 test('development file serving excludes backend and private runtime files', async ({page}) => {
   for (const path of ['backend/workbench/api.py','.local/e2e-db-path']) {
-    const response=await page.request.get('/@fs/home/rich/TwichUI-Workbench/'+path);
+    const file=new URL('../'+path,import.meta.url);
+    const response=await page.request.get('/@fs'+file.pathname);
     expect(response.status()).toBe(403);
   }
 });
