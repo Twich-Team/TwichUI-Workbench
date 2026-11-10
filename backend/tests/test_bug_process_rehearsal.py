@@ -507,7 +507,11 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
     else:
         expected = [('fixture-fault', 'diagnosis'), ('fixture-conflict', 'diagnosis')]
         for case in cases:
-            expected += [(case['choice'], 'diagnosis')]*((3 if case['client_case'] else 2)+2*int(case.get('clarification',False)))
+            # The local client case deliberately guesses an uncommitted file on
+            # its first turn above. Account for that rejected read and recovery,
+            # in addition to the two source pages and final diagnosis.
+            rejected_read = int(case_provider == 'local' and case['client_case'])
+            expected += [(case['choice'], 'diagnosis')]*((3 if case['client_case'] else 2)+rejected_read+2*int(case.get('clarification',False)))
             expected += [(case['choice'], 'planning')]*2
             expected.append((case['choice'], 'self-review'))
             if program_mode:
