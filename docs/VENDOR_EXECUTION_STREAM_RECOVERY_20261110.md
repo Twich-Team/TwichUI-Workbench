@@ -82,3 +82,21 @@ Next: verified cutover preserving exact history, distinct same-task recovery gra
 real Qwen execution/checking in the original task, independent assessment of all
 approved late-name/refresh/filter/link/request criteria, durable browser/result/
 restart verification. No game-addon installation or publication is authorized.
+
+## Preflight correction before activation
+
+The dormant d55962b candidate was not activated. Its preflight correctly held
+because the prior restored lease retained the watchdog's restoration-error.json,
+which the immutable-release inventory did not recognize. The diagnostic was kept.
+The inventory now recognizes only that exact private bounded error-class/state
+metadata, while still requiring verified restoration and rejecting arbitrary
+files, payloads, links, public permissions and application changes.42 related
+checks and verification of the ACTUAL old active release pass. No service/firewall
+cutover occurred at this failed gate. The delivery code and prior history remain
+unchanged; the final candidate includes this installation-verifier correction.
+
+The complete final delivery-code backend suite and frontend suite are retained as
+full-final-candidate-suites.log. Final transport/recovery108 and delegated native
+separate-process local rehearsal pass; four desktop/phone browser regressions
+pass. The inventory-only follow-up has42 focused checks; unaffected full suites
+are reused rather than misreported as rerun on changed inventory code.

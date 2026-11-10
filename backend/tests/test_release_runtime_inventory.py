@@ -24,6 +24,8 @@ def fixture(tmp_path):
                               'original_access_verified', 'temporary_access_rejected']}
     for name in SEAL['LEASE_FILES']:
         value = json.dumps(state) if name == 'state.json' else '' if name == 'restore.lock' else 'CONTROLLED NON-SECRET FIXTURE'
+        if name == 'restoration-error.json':
+            value = json.dumps(dict(error='TimeoutExpired', state=SEAL['RESTORATION_ERROR_STATE']))
         p = lease / name
         p.write_text(value)
         p.chmod(0o600)
@@ -48,7 +50,7 @@ def test_private_settled_data_does_not_change_immutable_inventory(tmp_path, monk
         SEAL['inventory'](stage, False)
 
 
-@pytest.mark.parametrize('fault', ['extra', 'symlink', 'public', 'large', 'unsettled', 'session', 'owner-run', 'run-link'])
+@pytest.mark.parametrize('fault', ['extra', 'symlink', 'public', 'large', 'unsettled', 'session', 'owner-run', 'run-link', 'diagnostic-payload', 'diagnostic-public'])
 def test_runtime_classification_rejects_untrustworthy_data(tmp_path, fault):
     stage, lease, _ = fixture(tmp_path)
     if fault == 'extra':
@@ -67,6 +69,10 @@ def test_runtime_classification_rejects_untrustworthy_data(tmp_path, fault):
         (stage / 'release/.local/real-primary-session.json').write_text(json.dumps({'state': 'unknown'}))
     elif fault == 'owner-run':
         (stage / 'release/artifacts/runs' / RUN).rmdir()
+    elif fault == 'diagnostic-payload':
+        (lease/'restoration-error.json').write_text(json.dumps(dict(error='TimeoutExpired',state=SEAL['RESTORATION_ERROR_STATE'],unexpected='untrusted payload')))
+    elif fault == 'diagnostic-public':
+        (lease/'restoration-error.json').chmod(0o644)
     else:
         run = stage / 'release/artifacts/runs' / RUN
         run.rmdir()

@@ -26,7 +26,9 @@ LEASE = re.compile(r'release/\.local/chronicle-primary-lease-(task-lease-task-se
 LEASE_FILES = {'original.key': 4096, 'temporary.key': 4096,
                'serve.env.original': 65536, 'serve.env.temporary': 65536,
                'state.json': 65536, 'restore.lock': 0,
-               'certification.json': 65536, 'watchdog-ready.json': 65536}
+               'certification.json': 65536, 'watchdog-ready.json': 65536,
+               'restoration-error.json': 1024}
+RESTORATION_ERROR_STATE = 'Restoration held or failed; inspect exact owned config before manual recovery'
 
 
 def private_runtime_file(path, ceiling):
@@ -61,6 +63,13 @@ def settled_primary_runtime(stage, path, rel):
         if child.name not in LEASE_FILES:
             raise ValueError('Unexpected file in a private Qwen lease')
         private_runtime_file(child, LEASE_FILES[child.name])
+        if child.name == 'restoration-error.json':
+            diagnostic = json.loads(child.read_text())
+            if (not isinstance(diagnostic, dict) or set(diagnostic) != {'error', 'state'}
+                    or not isinstance(diagnostic['error'], str)
+                    or not re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]{0,63}', diagnostic['error'])
+                    or diagnostic['state'] != RESTORATION_ERROR_STATE):
+                raise ValueError('Unexpected restoration diagnostic; preserve it for inspection')
     state = json.loads((path / 'state.json').read_text())
     if not all(state.get(k) is True for k in ('restored', 'original_config_verified',
                                               'original_access_verified', 'temporary_access_rejected')):
