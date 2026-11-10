@@ -508,6 +508,7 @@ class Runtime:
                      600 if i==len(expected)-1 else 120, i==len(expected)-1)
                     for i,argv in enumerate(expected)]
         checks = []
+        original_evidence=None
         for argv, cwd, ro, timeout, private_loopback in commands:
             if not permitted():
                 raise ToolDenied('candidate_denied', 'Grant changed during candidate check')
@@ -522,6 +523,13 @@ class Runtime:
                     raise ToolDenied('profile_'+verdict, 'Missing, ambiguous or unrelated behavioral evidence')
             if result['status'] != 'pass' or result['rc'] != 0:
                 break
+            if self.recipe and self.recipe.get('repair_cycle') and len(checks)==len(expected)-1:
+                # After editing and focused checks, discriminate original
+                # behavior before spending time on the complete suite.
+                from workbench.repair_cycle import original_with_new_tests
+                original_evidence=original_with_new_tests(self,folder,permitted)
+                if original_evidence['status']!='pass':
+                    break
         if tree(self.workspace) != current or self.context_sha() != self._context_sha or not permitted():
             raise ToolDenied('candidate_changed', 'Candidate/context/permission changed during checks')
         passed = len(checks) == len(expected) and all(c['status']=='pass' and c['rc']==0 for c in checks)
@@ -533,17 +541,14 @@ class Runtime:
                 raise ToolDenied('profile_'+status, 'Candidate verification held: '+reason)
         if len(checks)==len(expected) and all(c['rc']==0 for c in checks) and not passed:
             raise ToolDenied('check_infrastructure', 'Complete-suite inventory mismatch')
-        original_evidence=None
-        if passed and self.recipe and self.recipe.get('repair_cycle'):
-            from workbench.repair_cycle import original_with_new_tests
-            original_evidence=original_with_new_tests(self,folder,permitted)
-            passed=original_evidence['status']=='pass'
+        if self.recipe and self.recipe.get('repair_cycle'):
+            passed=passed and bool(original_evidence and original_evidence['status']=='pass')
         feedback = dict(status='pass' if passed else 'fail', check_round=index,
                         completed_checks=len(checks), required_checks=len(expected),
                         note='Trusted independent checks; failure permits bounded repair in this same attempt.')
         if original_evidence is not None:
             feedback['original_test_differential']=original_evidence
-        if not passed and original_evidence is not None:
+        if not passed and original_evidence is not None and original_evidence['status']!='pass':
             feedback.update(failed_check_name='original-with-new-tests',
                 diagnostic=original_evidence.get('diagnostic',original_evidence['reason'])[-1500:])
         elif not passed:
@@ -821,8 +826,7 @@ class Tools:
                     raise ToolDenied('search_denied', 'Search is available only for registered supported tasks')
                 text = path.read_text()
                 key = (args['path'], args['query'], sha(text.encode()))
-                if key in self.seen_search:
-                    return json.dumps(dict(path=args['path'], matches=[], already_shown=True, note='Unchanged search already returned; use the earlier result.'))
+                replayed = key in self.seen_search
                 matches = []
                 for i,line in enumerate(text.splitlines()):
                     if args['query'] not in line:
@@ -831,13 +835,13 @@ class Tools:
                     if len(candidate)>12 or len(json.dumps(candidate,ensure_ascii=True).encode())>6000:
                         break
                     matches = candidate
-                cost = sum(len(x['preview']) for x in matches)
+                cost = 0 if replayed else sum(len(x['preview']) for x in matches)
                 limit = getattr(self.runtime,'source_read_limit',job.LIMITS['read_chars'])
                 if self.read+cost > limit:
                     raise ToolBudgetExceeded('source_read_limit', 'Source character limit exceeded')
                 self.read += cost
                 self.seen_search.add(key)
-                return json.dumps(dict(path=args['path'], matches=matches, max_matches=12,
+                return json.dumps(dict(path=args['path'], matches=matches, max_matches=12,already_shown=replayed,
                     note='Literal search previews only. Read a focused source window around a match.', remaining_source_chars=limit-self.read),ensure_ascii=True)
             if args['path'] not in getattr(self.runtime,'paths',job.PATHS):
                 raise ToolDenied('path_denied','This context file is read-only')

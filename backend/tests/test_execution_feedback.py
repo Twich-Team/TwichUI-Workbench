@@ -20,7 +20,10 @@ def test_failure_at_end_is_actionable_and_full_log_is_paged(tmp_path):
     assert result["context_hint"] == dict(path="tests/test_guild_locations.lua", start=916, end=924)
     page = json.loads(f.read(dict(check_id="fixed-000", start=121, end=123)))
     assert "FAILED" in page["lines"][0]["text"]
-    assert not json.loads(f.read(dict(check_id="fixed-000", start=121, end=123)))["lines"]
+    charged=f.read_chars
+    replay=json.loads(f.read(dict(check_id="fixed-000", start=121, end=123)))
+    assert replay['lines']==page['lines'] and replay['previously_shown']
+    assert f.read_chars==charged
     assert len(json.dumps(result, ensure_ascii=True).encode()) < 8192
     for identity in ["../private", "/etc/passwd", "working-01-00"]:
         with pytest.raises(ToolDenied):
@@ -202,6 +205,56 @@ def test_candidate_feedback_does_not_duplicate_escaped_diagnostic_past_wire_boun
     assert json.loads(reply)["check_id"] == "working-00-01"
 
 
+@pytest.mark.parametrize('original_pass,suite_pass',[(False,True),(True,False),(True,True)])
+def test_original_discrimination_runs_after_edit_checks_before_complete_suite(tmp_path,monkeypatch,original_pass,suite_pass):
+    from workbench.real_workspace import Runtime
+    import workbench.real_workspace as module
+    import workbench.repair_cycle as cycle
+    rt=object.__new__(Runtime)
+    rt.root=tmp_path
+    rt.workspace=tmp_path/'workspace'
+    rt.workspace.mkdir()
+    rt.initial=tmp_path/'base.json'
+    rt.initial.write_text('{}')
+    rt.oracle_source=tmp_path/'oracle.lua'
+    rt.oracle_source.write_text('-- controlled')
+    rt.base='a'*40
+    rt._request_id=rt._fence='controlled'
+    rt._context_sha=None
+    rt.context_sha=lambda:None
+    rt.paths=['source.lua','tests/test_fixture.lua']
+    for path in rt.paths:
+        target=rt.workspace/path
+        target.parent.mkdir(exist_ok=True)
+        target.write_text('-- controlled changed text')
+    rt.recipe=dict(repair_cycle='scoped-repair-v1',focused_test=rt.paths[-1])
+    rt.scope=lambda:(rt.paths,'controlled diff')
+    names=['syntax-1','syntax-2','focused','independent-oracle','complete-suite']
+    rt.expected_checks=lambda:[[name] for name in names]
+    rt.expected_suite=lambda:[]
+    rt.feedback=CheckFeedback(tmp_path,rt.paths)
+    order=[]
+    def check(argv,*args,**kwargs):
+        order.append(argv[0])
+        ok=argv[0]!='complete-suite' or suite_pass
+        return dict(status='pass' if ok else 'fail',rc=0 if ok else 1,out='CONTROLLED suite observation',
+            usage=dict(cgroup_removed=True,leaked_after_kill=False))
+    rt.check=check
+    def original(*args):
+        order.append('original-with-new-tests')
+        return dict(status='pass' if original_pass else 'fail',reason='Controlled original differential')
+    monkeypatch.setattr(cycle,'original_with_new_tests',original)
+    monkeypatch.setattr(module,'tree',lambda _:dict(controlled='changed'))
+    monkeypatch.setattr(module,'suite_inventory',lambda *args:True)
+    result=rt.candidate_feedback(lambda:True)
+    assert order==names[:-1]+['original-with-new-tests']+(['complete-suite'] if original_pass else [])
+    assert result['status']==('pass' if original_pass and suite_pass else 'fail')
+    if not original_pass:
+        assert result['failed_check_name']=='original-with-new-tests'
+    elif not suite_pass:
+        assert result['failed_check_name']=='complete-suite'
+
+
 def test_literal_symbol_search_is_bounded_scoped_and_deduplicated(tmp_path):
     tools, p = distinct(tmp_path)
     p.write_text("preamble\nfunction SH.FullName(name)\nreturn name\nend\n")
@@ -219,9 +272,8 @@ def test_literal_symbol_search_is_bounded_scoped_and_deduplicated(tmp_path):
     )
     assert result["matches"] == [dict(line=2, preview="function SH.FullName(name)")]
     cost = tools.read
-    assert json.loads(tools.handle("find_text", dict(path=PATHS[0], query="FullName")))[
-        "already_shown"
-    ]
+    replay=json.loads(tools.handle("find_text", dict(path=PATHS[0], query="FullName")))
+    assert replay['already_shown'] and replay['matches']==result['matches']
     assert tools.read == cost
     with pytest.raises(ToolDenied):
         tools.handle("find_text", dict(path="../private", query="SECRET"))

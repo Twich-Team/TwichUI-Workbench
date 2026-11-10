@@ -181,3 +181,34 @@ The latest steer adds a separate small ordinary browser-to-result real-provider
 Workbench self-check after vendor success, PR preparation/failure/recovery without
 publication, and ongoing automatic release-retention proof. None is yet claimed
 complete. No new spending, disclosure, live-addon install or publication authority.
+
+
+## Continued vendor work — exact source/log context and check feedback
+
+Sessions449aa4a6/e881c214 andf2691acf/89212f3e are settled, not still active.
+The first stopped before its next generation on real context exhaustion: old full
+check-log history had not been archived alongside current source. The second made
+another Qwen edit, then stopped after repeated reads,14complete receipts239026prompt
+and1407completion. Latest retained patcha40f0f95/5464bytes is newer than232a7100.
+No passing vendor candidate is claimed. Native history and earlier unknown usage
+remain unchanged; second-context-settled-proof.json records the new work/usage.
+
+The connected correction archives exact old source/log/search exchanges as pairs,
+retains current source and actual edit/check feedback, returns exact reread text
+without double charging, and saves exact private context-capacity diagnostics before
+local rejection. The automatic worker holds unchanged context-overflow replay.
+If unchecked model edits stall in source reads, Workbench itself runs the trusted
+focused/candidate checks and returns actual observations to the model. Success still
+requires independent original discrimination, frozen candidate and complete suite.
+Original discrimination follows focused/oracle checks and precedes the expensive full
+suite; no pre-edit checking prerequisite or developer addon answer is introduced.
+
+Actual-data replay of11source/log calls fits every request with the real tokenizer
+and full2496response reserve,0generation/task dispatch/source writes.161final focused
+regressions,37frontend tests and static checks pass; initial full run exposed a log
+repeat-classification regression now repaired/retested. Keep that failure evidence.
+Native separate-process/browser/Lua rehearsal passes, final delta rehearsal and full
+backend outcomes recorded separately before activation. These supporting checks are
+not a real Qwen vendor success. Ongoing automatic retention has4actual successive
+journals and3independent current/recovery browser inodes; the4GiBreserve remains.
+Continue through checked installation and original task without another owner renewal.

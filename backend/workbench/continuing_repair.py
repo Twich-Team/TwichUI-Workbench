@@ -154,7 +154,7 @@ def process_one(engine):
         # strategy. Continuing permission does not justify identical retries.
         if any(reason in result.get('error','') for reason in (
                 'Returned to the same previously rejected workspace', 'Repeated source reads made no progress',
-                'No progress after repeated', 'unchanged_rejection')):
+                'No progress after repeated', 'unchanged_rejection', 'context reserve exhausted', 'Context reserve exhausted')):
             continue
         try:
             renewed = owner_task.recover_local(engine, value['ref'], proof['authorization_path'],

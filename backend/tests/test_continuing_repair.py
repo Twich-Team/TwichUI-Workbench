@@ -153,3 +153,41 @@ def test_engineering_stop_needs_its_actual_command_proof_and_changed_code(monkey
     session['state']['stop_command']='stop'
     del marker['owner_provenance']
     assert not continuing.engineering_stop(session,value)
+
+
+@pytest.mark.parametrize('focused_pass',[True,False])
+def test_unchecked_model_edit_receives_actual_check_feedback_on_a_read_stall(tmp_path,focused_pass):
+    path=tmp_path/PATHS[0]
+    path.parent.mkdir(parents=True)
+    path.write_text('local controlled=1\n')
+    runtime=SimpleNamespace(root=tmp_path,enforce_storage=lambda:None,workspace=tmp_path,
+        paths=[PATHS[0]],read_paths=[PATHS[0]],workflow_task=dict(approval=approval()),
+        recipe=dict(source_context=[{}],read_budget_policy='distinct-lines-v1',
+            verification_profile='lua-offline-bugfix-v1',repair_cycle='scoped-repair-v1'),
+        tool_commands=lambda:{'focused':['controlled-only']})
+    checks=[]
+    real=Tools(runtime,lambda:True)
+    class ControlledTools:
+        def __init__(self):self.runtime=runtime
+        def handle(self,name,args):
+            if name=='run_check':
+                checks.append(args['name'])
+                return json.dumps(dict(status='pass' if focused_pass else 'fail',diagnostic='CONTROLLED actual check observation'))
+            if name=='replace_text':
+                path.write_text(path.read_text().replace(args['old'],args['new']))
+                return 'Edit saved in isolated workspace.'
+            return real.handle(name,args)
+    Transport.responses=[response('replace_text',dict(path=PATHS[0],old='=1',new='=2'),0)]+[
+        response('read_file',dict(path=PATHS[0],start=1,end=1),i) for i in range(1,4)]
+    if not focused_pass:
+        Transport.responses += [answer()]
+    Transport.bodies=[]
+    result=implement(ControlledTools(),'Controlled work','','controlled',lambda:True,
+        transport=Transport,on_finish=lambda:dict(status='pass'))
+    assert checks==(['focused','candidate'] if focused_pass else ['focused'])
+    assert '=2' in path.read_text()
+    if focused_pass:
+        assert len(result['log'])==4 and result['completion_reason'].startswith('independent-checks-passed')
+    else:
+        assert 'CONTROLLED actual check observation' in Transport.bodies[-1]['messages'][-1]['content']
+    assert (tmp_path/'attempt/progress-check-03-focused.json').is_file()

@@ -120,18 +120,19 @@ class CheckFeedback:
         cost = 0
         next_page = None
         keys = []
+        replayed = True
         for i in range(start - 1, min(end, len(lines))):
             offset = column if i == start - 1 else 0
             key = (identity, i, offset)
-            if key in self.seen:
-                continue
+            was_seen = key in self.seen
             part = lines[i][offset : offset + 700]
             candidate = output + [dict(line=i + 1, column=offset, text=part)]
             if len(json.dumps(candidate, ensure_ascii=True).encode()) > 5800:
                 next_page = dict(start=i + 1, column=offset)
                 break
             output = candidate
-            cost += len(part)
+            cost += 0 if was_seen else len(part)
+            replayed = replayed and was_seen
             keys.append(key)
             if offset + len(part) < len(lines[i]):
                 next_page = dict(start=i + 1, column=offset + len(part))
@@ -148,7 +149,8 @@ class CheckFeedback:
                 total_lines=len(lines),
                 next_page=next_page,
                 already_shown_or_empty=not output,
-                note="Previously returned log segments are omitted; use earlier messages. Continue with next_page when present.",
+                previously_shown=bool(output) and replayed,
+                note="Exact bounded log text is returned even on a reread; only new segments consume the distinct log allowance. Continue with next_page when present.",
                 remaining_log_chars=96000 - self.read_chars,
             ),
             ensure_ascii=True,

@@ -172,7 +172,7 @@ class CurrentSource:
         for i,message in enumerate(self.messages[3:-4],3):
             calls=message.get('tool_calls') or []
             if (message.get('role')!='assistant' or not calls
-                    or any(c['function']['name']!='read_file' for c in calls)):
+                    or any(c['function']['name'] not in {'read_file','read_check_log','find_text'} for c in calls)):
                 continue
             following=self.messages[i+1:i+1+len(calls)]
             if ({m.get('tool_call_id') for m in following} != {c['id'] for c in calls}
@@ -182,6 +182,11 @@ class CurrentSource:
             del self.messages[i:i+1+len(calls)]
             return True
         return False
+
+    def failed_context(self, body, count):
+        self.retain(dict(kind='context-capacity-before-generation',counted_input_tokens=count,
+            response_reserve=body['max_tokens'],capacity=32768,request=body,
+            generation_started=False))
 
 
 def instruction(runtime, fallback):
@@ -270,7 +275,7 @@ class ReadProgress:
             return False  # Legacy plain source replies are still real content.
         if not isinstance(value, dict):
             return False
-        return bool(value.get('already_shown_or_empty') or value.get('already_shown'))
+        return bool(value.get('already_shown_or_empty') or value.get('already_shown') or value.get('previously_shown'))
 
     def turn(self, results):
         # A batch is one model decision. Initial overlapping reads in a batch

@@ -98,6 +98,27 @@ def test_current_source_compacts_only_old_complete_pure_read_exchanges(tmp_path)
     assert not view.compact_history()
 
 
+def test_full_log_and_search_reads_archive_without_losing_current_source_or_check_results(tmp_path):
+    from workbench.implementation_context import CurrentSource
+    runtime=SimpleNamespace(root=tmp_path,enforce_storage=lambda:None)
+    messages=[dict(role='system',content='Policy'),dict(role='user',content='Scope')]
+    view=CurrentSource(runtime,messages)
+    view.read(json.dumps(dict(path='s',spans=[dict(start=1,end=1,text='exact source\n')])))
+    exchanges=[]
+    for name in ('read_check_log','find_text','run_check'):
+        exchange=[dict(role='assistant',tool_calls=[dict(id=name,function=dict(name=name,arguments='{}'))]),
+            dict(role='tool',tool_call_id=name,content='Exact actual observation: '+name)]
+        exchanges.append(exchange)
+        messages.extend(exchange)
+    messages.extend([dict(role='user',content='Recent actual check summary')]*4)
+    assert view.compact_history() and view.compact_history() and not view.compact_history()
+    assert all(part in messages for part in exchanges[-1])
+    assert 'exact source' in messages[2]['content'] and messages[0]['content']=='Policy'
+    archived=[json.loads(p.read_text())['read_exchange'] for p in (tmp_path/'attempt/context-sources').glob('*.json')
+        if 'read_exchange' in json.loads(p.read_text())]
+    assert all(exchange in archived for exchange in exchanges[:2])
+
+
 def test_reloading_source_into_context_does_not_turn_repetition_into_investigation_progress():
     progress=ReadProgress(lifetime=True)
     value=json.dumps(dict(path='source.lua',spans=[dict(start=1,end=1,text='local value=1\n')]))

@@ -26,7 +26,7 @@ TOOLS = [dict(type='function', function=dict(name=name, description=description,
               {'path': {'type': 'string'}, 'old': {'type': 'string'}, 'new': {'type': 'string'}}, ['path', 'old', 'new']),
              ('find_text', 'Find literal text in one allowed source file; at most12 matching line numbers and160-character previews. No regex, shell or arbitrary paths. Use this to locate a symbol before reading a focused window.',
               {'path':{'type':'string'},'query':{'type':'string','minLength':1,'maxLength':160}},['path','query']),
-             ('read_check_log', 'Read a check log returned in this attempt. 1-based inclusive start/end; start defaults1, end=start+39, at most80 lines. Follow next_page (start/column) for long lines. Previously shown log segments are omitted. No arbitrary files.',
+             ('read_check_log', 'Read a check log returned in this attempt. 1-based inclusive start/end; start defaults1, end=start+39, at most80 lines. Follow next_page (start/column) for long lines. Rereads return exact bounded text. No arbitrary files.',
               {'check_id': {'type':'string'}, 'start': {'type':'integer','minimum':1}, 'end': {'type':'integer','minimum':1}, 'column': {'type':'integer','minimum':0}}, ['check_id']),
              ('run_check', 'Run one fixed check: syntax-data, syntax-recorder, focused, or candidate (independent checks including callback behavior and complete suite). No shell.',
               {'name': {'type': 'string','enum':list(CHECK_NAMES)}}, ['name'])]]
@@ -131,6 +131,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
     source_progress = ReadProgress(lifetime=continuing)
     from workbench.implementation_context import CurrentSource
     source_view = CurrentSource(runtime,messages) if continuing else None
+    last_checked_content = repair.writable_content() if repair else None
     if continuing and getattr(runtime, 'root', None) and (runtime.root/'repair-resume.json').is_file():
         if not permitted() or (stop_event and stop_event.is_set()):
             raise BudgetError('Current permission required before checking retained work')
@@ -195,6 +196,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                     source_progress.rebuild_visible(messages)
                     counted = ownership.count_input_tokens(body, min(end, time.monotonic()+3))
                 if counted+body['max_tokens'] > 32768:
+                    if source_view:
+                        source_view.failed_context(body,counted)
                     raise BudgetError('Tokenized context reserve exhausted; no generation request sent')
         elif len(json.dumps(messages).encode())+body['max_tokens'] > 32768:
             # Conservative fallback for non-production scripted transports only.
@@ -293,6 +296,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             if feedback and feedback['status'] == 'fail':
                 if repair:
                     feedback = repair.checked('candidate', feedback)
+                    last_checked_content = repair.writable_content()
                 messages.append(dict(role='user', content='Independent candidate checks failed. '
                     'This is feedback for repair within the SAME attempt and remaining budgets; no new attempt. '
                     +json.dumps(feedback, ensure_ascii=True)))
@@ -322,8 +326,9 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                         source_view.edited(path)
                         source_progress.edited(path)
                 elif repair and name in ('read_file', 'find_text', 'read_check_log'):
-                    empty_log = name == 'read_check_log' and json.loads(result)['already_shown_or_empty']
-                    repair.observe((name, result), empty=empty_log)
+                    repeated_log = name == 'read_check_log' and bool(
+                        json.loads(result).get('already_shown_or_empty') or json.loads(result).get('previously_shown'))
+                    repair.observe((name, result), empty=repeated_log)
                 elif name == 'run_check':
                     try:
                         feedback = json.loads(result)
@@ -334,6 +339,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                         if repair:
                             feedback = repair.checked(events[0]['check'], feedback)
                             result = json.dumps(feedback, ensure_ascii=True)
+                            if events[0]['check'] in {'focused','candidate'}:
+                                last_checked_content = repair.writable_content()
             except ToolInputError as error:
                 function = call.get('function', {}) if isinstance(call, dict) else {}
                 name = function.get('name') if isinstance(function, dict) else None
@@ -376,6 +383,32 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             messages.append(dict(role='tool', tool_call_id=call['id'], content=clipped))
             tool_results.append((name, progress_result))
         guidance = source_progress.turn(tool_results)
+        if (continuing and repair and edits_done and source_progress.repeated==2
+                and repair.writable_content()!=last_checked_content):
+            # Do not depend on a model remembering to request the next check.
+            # Observe its own changed work, returning actual feedback without a
+            # new model call, fabricated tool request or extra permission.
+            from workbench.real_workspace import durable
+            for check_name in ('focused','candidate'):
+                if not permitted() or (stop_event and stop_event.is_set()):
+                    raise BudgetError('Permission changed before application progress check')
+                feedback=json.loads(tools.handle('run_check',dict(name=check_name)))
+                feedback=repair.checked(check_name,feedback)
+                durable(runtime.root/'attempt'/f'progress-check-{turn:02}-{check_name}.json',
+                    json.dumps(dict(origin='application-check-of-unverified-model-edit',turn=turn,
+                        check=check_name,result=feedback),sort_keys=True).encode())
+                last_checked_content=repair.writable_content()
+                if feedback['status']!='pass':
+                    break
+            if feedback['status']=='pass':
+                return dict(log=log,completion_tokens=completion,prompt_tokens=prompt,
+                    correction_count=corrections,read_input_errors=read_errors,tool_input_errors=tool_errors,
+                    final_message='',completion_reason='independent-checks-passed-after-progress-observation')
+            messages.append(dict(role='user',content='Workbench checked your unverified edits after repeated source reads. '
+                'This is actual check feedback, not a proposed solution. Correct your code or new tests from it; original tests and scope remain protected. '
+                +json.dumps(feedback,ensure_ascii=True)))
+            source_progress.repeated=0
+            guidance=None
         if source_progress.repeated >= 4 and (getattr(runtime, 'recipe', None) or {}).get('repair_cycle'):
             raise BudgetError('Repeated source reads made no progress after current text and guidance were returned; evidence retained, no automatic new attempt')
         if guidance:
