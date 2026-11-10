@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 from workbench.real_feedback import CheckFeedback, LOG_PAGE_BYTES
 from workbench.real_workspace import Tools
-from workbench.real_tool_contract import ToolDenied, ToolBudgetExceeded, invoke
+from workbench.real_tool_contract import ToolDenied, ToolBudgetExceeded, ToolInputError, invoke
 from workbench.real_execution import PATHS
 
 
@@ -25,9 +25,15 @@ def test_failure_at_end_is_actionable_and_full_log_is_paged(tmp_path):
     assert replay['lines']==page['lines'] and replay['previously_shown']
     assert f.read_chars==charged
     assert len(json.dumps(result, ensure_ascii=True).encode()) < 8192
-    for identity in ["../private", "/etc/passwd", "working-01-00"]:
+    for identity in ["../private", "/etc/passwd"]:
         with pytest.raises(ToolDenied):
             f.read(dict(check_id=identity))
+    # Guessing a syntactically valid ID still exposes nothing, even if a file
+    # exists at that name. The model can correct the input without a new run.
+    (tmp_path/'check-logs/working-01-00.json').write_text('unregistered private bytes')
+    with pytest.raises(ToolInputError,match='No log with that ID'):
+        f.read(dict(check_id='working-01-00'))
+    assert f.read_chars==charged
 
 
 def test_untrusted_unicode_controls_and_large_diagnostics_stay_bounded(tmp_path):
@@ -269,8 +275,11 @@ def test_original_discrimination_runs_after_edit_checks_before_complete_suite(tm
         return dict(status='pass' if ok else 'fail',rc=0 if ok else 1,out='CONTROLLED suite observation',
             usage=dict(cgroup_removed=True,leaked_after_kill=False))
     rt.check=check
-    def original(*args):
+    def original(runtime,folder,permitted):
         order.append('original-with-new-tests')
+        if not original_pass:
+            (folder/'original-with-new-tests.json').write_text(json.dumps(
+                dict(status='pass',rc=0,out='CONTROLLED original test also passed\n')))
         return dict(status='pass' if original_pass else 'fail',reason='Controlled original differential')
     monkeypatch.setattr(cycle,'original_with_new_tests',original)
     monkeypatch.setattr(module,'tree',lambda _:dict(controlled='changed'))
@@ -280,6 +289,10 @@ def test_original_discrimination_runs_after_edit_checks_before_complete_suite(tm
     assert result['status']==('pass' if original_pass and suite_pass else 'fail')
     if not original_pass:
         assert result['failed_check_name']=='original-with-new-tests'
+        assert result['status']=='fail' and 'also passed against unchanged original' in result['reason']
+        assert result['check_id']==result['log']['check_id']
+        page=json.loads(rt.feedback.read(dict(check_id=result['check_id'])))
+        assert page['lines'][0]['text']=='CONTROLLED original test also passed\n'
     elif not suite_pass:
         assert result['failed_check_name']=='complete-suite'
 

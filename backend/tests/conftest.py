@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 import tempfile
 import pytest
 from alembic import command
@@ -20,6 +21,32 @@ def managed_temporary_files(tmp_path, monkeypatch):
     """
     monkeypatch.setattr(tempfile, 'tempdir', str(tmp_path))
     monkeypatch.setenv('TMPDIR', str(tmp_path))
+
+
+@pytest.fixture
+def disposable_legacy_addon(tmp_path, monkeypatch):
+    """Real Git/source boundaries for controlled transport and delivery tests."""
+    from workbench import real_execution
+    source=tmp_path/'legacy-addon'
+    source.mkdir()
+
+    def git(*args):
+        return subprocess.check_output(['git','-c','core.hooksPath=/dev/null',
+            '-c','user.name=NON-MODEL','-c','user.email=fixture@example.invalid',
+            *args],cwd=source,text=True,timeout=10).strip()
+
+    git('init','-q')
+    for index,path in enumerate(real_execution.PATHS):
+        p=source/path
+        p.parent.mkdir(parents=True,exist_ok=True)
+        # Keep real nonempty windows through line140 for the existing SSE
+        # transport checks. No private addon code or runnable answer fixture.
+        p.write_text(''.join(f'-- controlled source {index}, line {n}\n' for n in range(1,161)))
+    git('add','.')
+    git('commit','-qm','Controlled legacy base')
+    monkeypatch.setattr(real_execution,'SOURCE',str(source))
+    monkeypatch.setattr(real_execution,'BASE',git('rev-parse','HEAD'))
+    return source
 
 
 @pytest.fixture

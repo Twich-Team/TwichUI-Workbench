@@ -7631,3 +7631,26 @@ network; original app DB/result unchanged, no remote commands/publication.
 This is local preparation evidence, not actual draft delivery or vendor success.
 11focused Chromium passes/1opt-in skip. Next: install changed verified version,
 reconcile latest returned call, observe original task to independent result.
+
+
+## November10 — deployment99, first focused vendor pass, restored hosted setup
+
+c3b270d/deployment99 verified and installed; original/latest history, six real
+results and protected listeners revalidated. Independent restore copy568rows
+matched prior fingerprint, integrity and foreign keys clean. 137affected, native
+rehearsal, static and11browser checks pass; d625656 full2165/37 preserved.
+Latest771bad72 exact termination proof leaves usage unknown and no partial tools.
+Normal worker queued78714414; model edits passed focused test after row rebinding
+and original setup restoration. Independent original also passed, so candidate
+held. Model read guessedfixed-003 because differential had no registered log ID.
+9complete230068prompt/5962completion; auto resumed07bcad1c without owner click.
+It is active and has added another test; no checked vendor result yet.
+
+New feedback registers original log, distinguishes raw original pass from failed
+differential, and carries verdict across continuation. Harmless unknown ID gets
+bounded correction; arbitrary paths/tampering still denied. 165affected, final
+static and separate browser/API/worker rehearsal passed; await actual session
+settlement before another cutover. Hosted npm11.19.1 clean install fixed by
+regenerating lock (no changed versions) and adding Lua test runtime. Hosted suite
+exposed14 host-only assumptions; exact test cases now use disposable Git fixture
+and explicit CLI import path.69 affected pass with no local setup.

@@ -31,6 +31,24 @@ def test_current_approved_brief_excludes_obsolete_planning_instructions():
         instruction(runtime, 'fallback')
 
 
+def test_continuation_remembers_that_a_passing_original_test_failed_to_discriminate(tmp_path):
+    from workbench.implementation_context import prior_failures
+    prior=tmp_path/'prior'
+    working=prior/'working-checks/00'
+    working.mkdir(parents=True)
+    (working/'outcome.json').write_text(json.dumps(dict(status='fail',
+        failed_check_name='original-with-new-tests',original_test_differential={'status':'fail'})))
+    raw=working/'original-with-new-tests.json'
+    raw.write_text(json.dumps(dict(status='pass',rc=0,out='CONTROLLED original passed')))
+    current=tmp_path/'current'
+    current.mkdir()
+    (current/'repair-resume.json').write_text(json.dumps(dict(root=str(prior))))
+    seen=prior_failures(SimpleNamespace(root=current,read_paths=['tests/test_fixture.lua']))
+    assert len(seen)==1 and seen[0]['status']=='fail'
+    assert 'also passed against unchanged original' in seen[0]['diagnostic']
+    assert json.loads(raw.read_text())['status']=='pass'
+
+
 def test_read_progress_recognizes_empty_reads_even_when_start_line_changes():
     progress = ReadProgress()
     value = json.dumps(dict(already_shown_or_empty=True, replayed_spans=[dict(text='current source')]))

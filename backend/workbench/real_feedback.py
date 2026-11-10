@@ -9,6 +9,18 @@ from pathlib import Path
 from workbench.real_tool_contract import ToolDenied, ToolInputError, ToolBudgetExceeded
 
 LOG_PAGE_BYTES = 2048
+CHECK_ID = re.compile(r"(?:working-[0-9]{2}-[0-9]{2}|fixed-[0-9]{3})")
+
+
+def original_check_summary(result):
+    """A green original run is a failed regression discriminator."""
+    if result.get('status')=='pass' and result.get('rc')==0:
+        return ('The added test also passed against unchanged original production. '
+                'Compare the behavior changed by the patch and add a check that exposes '
+                'that difference on the original, while passing with the candidate.')
+    return ('The original run failed without a qualifying new native assertion. '
+            'Inspect the saved error, preserve existing checks and use a new literal '
+            'Lua assert on the requested behavior rather than a setup or helper error.')
 
 
 class CheckFeedback:
@@ -20,7 +32,7 @@ class CheckFeedback:
 
     def record(self, result, check_id):
         # Only the trusted checker supplies IDs and content. Models cannot register logs.
-        if not re.fullmatch(r"(?:working-[0-9]{2}-[0-9]{2}|fixed-[0-9]{3})", check_id):
+        if not CHECK_ID.fullmatch(check_id):
             raise ToolDenied("check_log_denied", "Invalid trusted check identity")
         raw = result.get("out", "")
         if not isinstance(raw, str) or len(raw.encode()) > 65536:
@@ -91,10 +103,15 @@ class CheckFeedback:
                 "check_log_input", "Use check_id, start, end and optional column only"
             )
         identity = args.get("check_id")
-        if not isinstance(identity, str) or identity not in self.logs:
+        if not isinstance(identity, str) or not CHECK_ID.fullmatch(identity):
             raise ToolDenied(
                 "check_log_denied", "Only a check_id returned in this attempt is readable"
             )
+        if identity not in self.logs:
+            # An unknown ID cannot address any file. Offer bounded correction
+            # only for a well-formed ID; paths and tampered logs still fail shut.
+            raise ToolInputError('check_log_input',
+                'No log with that ID was saved in this attempt. Use the exact check_id returned by a check.')
         start = args.get("start", 1)
         end = args.get("end", start + 39) if type(start) is int else None
         if (

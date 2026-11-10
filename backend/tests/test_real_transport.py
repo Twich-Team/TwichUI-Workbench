@@ -194,7 +194,7 @@ def final_response():
 
 @pytest.mark.parametrize('linked', [False, True])
 def test_complete_production_path_read_correct_edit_check_freeze(
-    http_tape, tmp_path, monkeypatch, record_property, linked
+    http_tape, tmp_path, monkeypatch, record_property, linked, disposable_legacy_addon
 ):
     """Fake HTTP/check outcomes; discarded fixture candidate is NEVER a real result."""
     out = tmp_path / "NON_MODEL_CONTROL"
@@ -647,7 +647,7 @@ def test_ambiguous_completed_calls_fail_before_any_dispatch(http_tape, identity)
 
 @pytest.mark.parametrize("failure_via_tool", [False, True])
 def test_complete_working_session_failed_final_feedback_repair_and_handoff(
-    http_tape, tmp_path, monkeypatch, failure_via_tool
+    http_tape, tmp_path, monkeypatch, failure_via_tool, disposable_legacy_addon
 ):
     """NON-MODEL HTTP tape, comment-only edits and stub checks; never task success."""
     out = tmp_path / "NON_MODEL_REPAIR_CONTROL"
@@ -740,7 +740,7 @@ def test_complete_working_session_failed_final_feedback_repair_and_handoff(
     ],
 )
 def test_candidate_infrastructure_or_budget_cannot_be_normal_repair(
-    tmp_path, monkeypatch, status, rc, usage
+    tmp_path, monkeypatch, status, rc, usage, disposable_legacy_addon
 ):
     from workbench.real_tool_contract import ToolDenied
 
@@ -767,7 +767,7 @@ def test_candidate_infrastructure_or_budget_cannot_be_normal_repair(
         shutil.rmtree(runtime.workspace.parent)
 
 
-def test_candidate_out_of_scope_change_never_becomes_repair_feedback(tmp_path):
+def test_candidate_out_of_scope_change_never_becomes_repair_feedback(tmp_path,disposable_legacy_addon):
     from workbench.real_tool_contract import ToolDenied
 
     out = tmp_path / "NON_MODEL_SCOPE"

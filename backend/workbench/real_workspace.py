@@ -547,10 +547,17 @@ class Runtime:
                         completed_checks=len(checks), required_checks=len(expected),
                         note='Trusted independent checks; failure permits bounded repair in this same attempt.')
         if original_evidence is not None:
-            feedback['original_test_differential']=original_evidence
+            # Keep the exact output in the independent receipt and pageable
+            # log, rather than duplicating it in the bounded tool response.
+            feedback['original_test_differential']={k:v for k,v in original_evidence.items() if k!='diagnostic'}
         if not passed and original_evidence is not None and original_evidence['status']!='pass':
-            feedback.update(failed_check_name='original-with-new-tests',
-                diagnostic=original_evidence.get('diagnostic',original_evidence['reason'])[-1500:])
+            from workbench.real_feedback import original_check_summary
+            original_result=json.loads((folder/'original-with-new-tests.json').read_text())
+            details=self.feedback.record(original_result,f'working-{index:02}-{len(checks)+1:02}')
+            feedback.update({k:details[k] for k in ('check_id','log','context_hint','truncated')})
+            reason=original_check_summary(original_result)
+            feedback.update(failed_check_name='original-with-new-tests',reason=reason,
+                diagnostic=(reason+'\n'+details['diagnostic'][:450]))
         elif not passed:
             feedback['failed_check'] = len(checks)
             labels = (['syntax-'+str(i+1) for i in range(len(self.paths))]+['focused','independent-oracle','complete-suite'] if self.recipe else ['syntax-data','syntax-recorder','syntax-tests','focused','independent-oracle','complete-suite'])

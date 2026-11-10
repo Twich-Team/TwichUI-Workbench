@@ -78,7 +78,7 @@ def delivery_clock(monkeypatch):
 
 
 @pytest.fixture
-def supported(client, headers, store, tmp_path, monkeypatch):
+def supported(client, headers, store, tmp_path, monkeypatch, disposable_legacy_addon):
     template = template_data()
     folder = tmp_path / "templates"
     folder.mkdir()

@@ -14,7 +14,7 @@ def prior_failures(runtime):
     if root is None or not (root/'repair-resume.json').is_file():
         return []
     from workbench.repair_continuation import private_json
-    from workbench.real_feedback import CheckFeedback
+    from workbench.real_feedback import CheckFeedback, original_check_summary
     resume = private_json(root/'repair-resume.json')
     observed = []
     feedback = CheckFeedback(root/'prior-feedback', runtime.read_paths)
@@ -27,6 +27,20 @@ def prior_failures(runtime):
     for saved in failed[-2:]:
         summary = feedback.record(saved['result'], saved['check_id'])
         observed.append({k: summary[k] for k in ('status', 'diagnostic', 'context_hint')})
+    # A passing test against original code can be the main unresolved failure
+    # even though its raw log is green. Carry the checker verdict, not a plan
+    # or a partial tool call, into the fresh operation.
+    for folder in reversed(sorted((Path(resume['root'])/'working-checks').glob('[0-9][0-9]'))):
+        path=folder/'outcome.json'
+        if not path.is_file():
+            continue
+        verdict=private_json(path)
+        if verdict.get('status')!='fail' or verdict.get('failed_check_name')!='original-with-new-tests':
+            continue
+        raw=folder/'original-with-new-tests.json'
+        if raw.is_file() and (verdict.get('original_test_differential') or {}).get('status')=='fail':
+            observed.append(dict(status='fail',diagnostic=original_check_summary(private_json(raw)),context_hint=None))
+        break
     return observed
 
 

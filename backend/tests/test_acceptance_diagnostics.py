@@ -1,6 +1,7 @@
 """Operator policy denials expose only fixed reasons; malformed data stays private."""
 import ast
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -26,7 +27,8 @@ def test_policy_cli_returns_bounded_structured_denial_without_input_or_source(tm
         request=dict(kind='issue',PRIVATE_SECRET='PRIVATE_SOURCE'),criteria=[])])))
     request=json.dumps(dict(choice='bug-flight-paths',action='submit',PRIVATE_SECRET='PRIVATE_SOURCE'))
     result=subprocess.run([sys.executable,str(ROOT/'scripts/acceptance_policy.py'),'admit','--policy',str(path)],
-        input='{' if fault=='malformed' else request,capture_output=True,text=True,timeout=10)
+        input='{' if fault=='malformed' else request,capture_output=True,text=True,timeout=10,
+        env={**os.environ,'PYTHONPATH':str(ROOT/'backend')})
     assert result.returncode==2 and not result.stdout
     reason=json.loads(result.stderr)
     assert reason==dict(held=True,reason='pinned bug request changed' if fault=='policy' else
