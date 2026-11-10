@@ -1,12 +1,12 @@
 ## Current verified milestone — November 10, 2026
 
-Installed9ac9459/deployment86 automatically completes preparation for the original
-vendor task under its actual applied plan approval. It now awaits the separate
-owner run decision; no vendor implementation has begun. Physical storage/resource
-accounting, safe browser retention, same-job recovery, installed browser/restart and
-history/restore are verified. Follow [current continuation](CONTINUATION.md) before
-new work. No engineering renewal/campaign cap applies. The sequences below preserve
-earlier delivery planning and full scope, not instructions to replay completed cases.
+Installed28b8c87/deployment87 corrects the original vendor run's source-read loop
+and settled no-edit continuation. The owner-approved first run consumed20 complete
+responses without an edit; it remains failed with its usage preserved. The original
+task now offers a fresh run decision, not another plan approval. Browser/restart/
+history/restore and complete final suites pass. Follow [current continuation](CONTINUATION.md)
+before new work. Actual fresh task consent is required; no engineering renewal or
+campaign cap. The sequences below preserve prior planning and full product scope.
 
 ## Earlier visual delivery plan — November 9, 2026
 

@@ -71,10 +71,18 @@ maintenance-pause/active-model descriptions there are historical, not current
 instructions. [Earlier scope transition](VENDOR_SCOPE_TRANSITION_20261109.md)
 remains a separate confirmed incident; this newer contention did reach real Qwen.
 
-Current installed approved-task preparation/storage recovery:
+Earlier verified approved-task preparation/storage recovery:
 [current handoff](VENDOR_CURRENT_HANDOFF.md), [continuation](CONTINUATION.md),
 [status](CURRENT_STATUS.md) and [verified evidence](VENDOR_PREPARATION_STORAGE_20261110.md).
 These supersede the older proposal24-awaiting-plan-review description: actual scope
 approval is applied, preparation complete, separate run permission still absent.
 Their preceding exact copies are in `history/20261110-before-preparation-resource-*`.
 No owner root document was changed or unfinished product requirement waived.
+
+Current installed execution source-read/continuation correction:
+[current continuation](CONTINUATION.md), [handoff](VENDOR_CURRENT_HANDOFF.md),
+[status](CURRENT_STATUS.md) and [evidence](VENDOR_EXECUTION_READ_LOOP_20261110.md).
+These describe the owner's actual first run, its settled failure/usage and the
+fresh run decision. They supersede older no-run-approval statements. Exact previous
+current records are in `history/20261110-before-vendor-execution-*`. Actual task
+consent remains separate from standing engineering authority; no campaign restarted.

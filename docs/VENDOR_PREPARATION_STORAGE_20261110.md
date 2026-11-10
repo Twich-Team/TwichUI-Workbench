@@ -1,5 +1,10 @@
 # Approved vendor task — storage and preparation recovery
 
+This records the successful preparation/storage milestone before the owner's first
+actual vendor run. Its then-next approval action is historical. See
+[current continuation](CONTINUATION.md) and [execution recovery](VENDOR_EXECUTION_READ_LOOP_20261110.md)
+for the later consumed run and fresh decision. No historical result is reclassified.
+
 Following the Project Working Philosophy and requirements A9/A10/A11, recover the
 original approved task, preserving its scope decision and separate run permission.
 No campaign cap, development allowance or engineering renewal applies.

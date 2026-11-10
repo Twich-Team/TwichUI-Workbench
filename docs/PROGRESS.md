@@ -1,14 +1,15 @@
-## Verified current — approved original vendor task prepared
+## Verified current — source-read and fresh-run recovery installed
 
-November10,2026 UTC: installed9ac9459/deployment86 automatically recovers the same
-preparation job under actual scope approval59b032e5. Existing addon suite/isolation
-pass; original task has one valid separate run action. No run permission or vendor
-implementation inferred. Storage observation/admission/retention/recovery installed;
-disk diagnosis and safe cleanup restore free bytes4217131008→8699461632 after setup.
-Desktop/phone/reload/restart, history/restore and six prior result revalidations pass,
-without a new provider call. See [current status](CURRENT_STATUS.md),
-[handoff](VENDOR_CURRENT_HANDOFF.md) and [evidence](VENDOR_PREPARATION_STORAGE_20261110.md).
-Standing autonomy continues; the meaningful vendor run decision remains with owner.
+November10,2026 UTC: installed28b8c87/deployment87 corrects repeated source delivery,
+current coding context and settled no-edit continuation. Owner's actual first run
+failed after20 complete Qwen responses/505239 tokens, no edits/checks. That consumed
+approval/failure/usage remain. Original task now exposes a fresh run decision under
+the existing plan. No replacement model call or approval was submitted. Complete
+final backend2084/8 opt-in skips and frontend36 pass, affected process/browser checks
+pass, original installed desktop/phone/reload/restart and470-row history/independent
+restore match. Six prior real checked results retained without replay.
+See [status](CURRENT_STATUS.md), [handoff](VENDOR_CURRENT_HANDOFF.md),
+[evidence](VENDOR_EXECUTION_READ_LOOP_20261110.md). No engineering renewal/campaign cap.
 
 All dated entries below are preserved historical progress, not competing current
 state, active-operation instructions or permission gates. Do not replay their work.

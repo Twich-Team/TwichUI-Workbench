@@ -1,124 +1,70 @@
-# ACTIVE: vendor execution source-read loop correction
-
-Following the Project Working Philosophy and standing authority, continue ordinary
-engineering without campaign caps or renewal. One agent. Preserve actual task run
-consent and all billing/source/network/recovery protections.
-
-Installed9ac9459/deployment86. Owner actually approved run d6a74317, grant09af348d;
-execution54bc2aeb completed FAILED at01:58:21UTC. All20 Qwen requests have complete
-receipts:504040 prompt+1199 completion=505239 tokens. No edit/check/candidate began.
-The task controller ended, grant revoked, descendants absent and normal model
-restored to PID856896. No provider uncertainty/replay. Original scope59b032e5 and
-proposal24 preserved. Qwen/fallbackOff/policy18 unchanged.
-
-Confirmed deterministic replay: full source read by turn6, then12 reads of already
-supplied lines returned empty spans. Starts100→110 did not advance investigation.
-Stale accumulated planning instructions also entered the implementation prompt;
-this is a confirmed prompt defect, not proof of the model's historical reasoning.
-Empty failed work also raised Missing or out-of-scope implementation in the normal
-continuation preview, hiding a fresh run offer. No addon solution was supplied.
-
-Current source correction (not yet installed): bounded current-text replay of
-known windows, per-response progress detection (batched overlapping reads count
-as one decision), brief from CURRENT reviewed behavior/uncertainty rather than old
-planning instructions; preserve pinned API context. Empty work allowed only for
-settled continuation proof, never as a qualifying candidate. Fresh run approval
-still required; one20-turn grant is consumed, not a superseded campaign cap.
-
-Private evidence: /home/rich/.local/share/TwichUI-Workbench/vendor-run-turn-recovery-20261110
-Read original-read-loop-reproduction.json, corrected-original-read-loop-reproduction.json
-and original-readonly-continuation-proof.json. Corrected code previews fresh offer
-a2fd0a34, no registered new offer or permission. Read-only diagnostics need real
-engine.url.database plus a read-only connection creator, TMPDIR=installed scratch
-and installed everyday/preparation config; otherwise harness policy checks refuse.
-
-Verified: final-connected212 and verified-transitions147; frontend36/static and
-final browser5; two process-reread journeys pass. The first process rehearsal found
-per-tool rather than per-turn counting; corrected and covered. Legacy expectation
-holds no longer hide behind an unclaimed queued job; concurrent development
-housekeeping defers without bypassing physical reserve. The original full run had
-2077 passes/8 opt-in skips and5 failures; all five were corrected/rechecked (three
-CLI environment cases, stale per-tool behavior and expectation-hold projection).
-Clean complete final suites NOW running: full-final-suites.log, exec21839, normal
-wb.py test environment. Inspect before replay. No live model request is active.
-
-Next: settle verification, repair genuine failures; seal/checkpoint candidate and
-use prepare-next.py9ac9459. New installer must REMOVE the previous one-off automatic
-preparation-lineage step: prep already complete, no new work is authorized. Exact
-history equality before/after startup should hold. Verify old failure/usage/decisions,
-normal original-task fresh run offer, stale browser draft handling, restart/restore,
-six prior results and unchanged network/auth. Then leave fresh run for OWNER review.
-No vendor run is delegated; do not repeat model calls under consumed permission.
-The preceding state below is historical BEFORE the owner's actual first run.
-
-# Continue from verified approved-task preparation recovery
+# Continue from installed vendor run recovery
 
 Following the Project Working Philosophy and standing owner direction, ordinary
-connected delivery remains authorized. No campaign caps or engineering renewals.
-Read the root owner documents and [current handoff](VENDOR_CURRENT_HANDOFF.md).
+connected engineering remains authorized. No campaign caps or routine renewal.
+Read the exact root owner documents and [current handoff](VENDOR_CURRENT_HANDOFF.md).
 
-Installed **9ac9459 / deployment86**, full candidate
-`9ac94592fd8163db6d4444dbf6b0816d055182a8`. The ORIGINAL vendor-item task
-`2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd` is **Ready for your run decision**.
-Its genuine scope approval `59b032e5-f4a5-45cb-a418-50b4da3f020f` for proposal24
-was already applied. Do not request that approval again or resubmit the task.
+Installed **28b8c87 / deployment87**, candidate
+`28b8c87ff18e2dcc92762916b9c898cf0aac6c4f`, seal
+`37b6f4f66477ce3ea03affc301208fdc6a289e6f410531888555779c491e0e8f`.
+Original vendor task2dc5b8ba is **Ready for a new run decision** on desktop/phone,
+reload and after four-service restart. Its actual plan approval59b032e5 remains.
 
-The SAME preparation job `67feb54c-b13e-40c5-9c15-a40263c34b4c` automatically
-recovered, attempts1→2, through the installed worker. Actual existing addon tests
-and isolation checks passed; one canonical run offer is valid. Repair verification
-is `not_run`: preparation is **not a checked vendor repair**. No new model call,
-implementation, run grant, approval or publication occurred.
+Owner DID approve one run, decisiond6a74317, grant09af348d. Execution54bc2aeb failed
+with20 complete Qwen responses (504040 prompt+1199 completion=505239 tokens), no
+edit/check/candidate. Its consumed grant is revoked, controller/descendants absent,
+normal model restored. Outcome and usage are settled, not quarantined or replayed.
+Original plan24, human scope2, revision note, failure and decisions are unchanged.
 
-**Next genuine owner action:** open the original task, read “Run the approved
-work in a separate copy,” acknowledge its limits, and choose **Approve local run**
-if desired. The checkbox remains unchecked and submission disabled. No vendor
-execution decision is delegated. Do not infer run permission from plan approval,
-this repair, or earlier acceptance delegation.
+Confirmed replay: all three source files delivered by turn6; turns8–19 re-read
+already supplied lines and got empty spans. Starts100→110 yielded no new source.
+Stale accumulated planning prompts also entered coding; causal weight unknown.
+No-edit continuation wrongly required a nonempty implementation, hiding a new offer.
+The interface also fetched offers only before the first run. These are corrected.
 
-Real disk pressure caused the resource hold. At diagnosis ordinary available was
-4217131008 bytes, below the unchanged4294967296-byte physical recovery reserve;
-operation evidence150851 and clean scratch189852433 bytes were below their limits.
-Exact original failure measurement was lost. Old admission omitted clone growth,
-and no automatic resource recovery existed. This task was not stopped by512MiB
-cumulative admission; an obsolete separate legacy preflight gate was also removed.
+Installed: bounded current text on rereads with distinct-source accounting, per-model-
+response progress observation and guidance, current approved coding brief preserving
+pinned API references, settled no-edit continuation, and clear fresh-decision task/
+dashboard state. The same batch's overlapping reads count as one decision. Actual
+unsafe resources, unknown execution, changed scope/provider and independent checks
+still hold. Empty work can be inspected for recovery, never accepted as a candidate.
 
-Installed resource observation distinguishes disk/inodes/evidence/scratch, reserves
-actual clone growth, and renews only verified settled offline setup under the same
-approval. Old claim/failure/accounting remain. Unknown effects or altered scope hold.
-Automatic housekeeping shares only identical sealed inactive browser files; every
-path/seal remains and current/recent independent browser copies are protected.
-The soft8GiB housekeeping target is not a cap; hard4GiB reserve remains.
+**Next genuine owner action:** reload the original task at
+https://10.0.0.9:9487/intake/2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd#local-run-review
+Choose **Review current offer** if the old browser draft is shown, read the limits,
+acknowledge them and **Approve local run** if desired. Scope does not need approval
+again. No vendor run decision is delegated. The previous one-attempt/20-request
+permission was consumed; do not reset it or infer another from engineering authority.
+No replacement real-provider call was made. Vendor repair is still unimplemented.
 
-Host device250059350016 bytes (~250GB decimal), root filesystem242307891200 bytes
-(~226GiB); partition/LV geometry explains capacity, no sizeable unused region shown.
-Largest consumers: Workbench70.29GB, cache50.88GB, models49.27GB, pilot31.95GB,
-swap8.59GB. Workbench104 stages held repeated browser/env copies. Thirteen browser
-copies now share5384372370 duplicate logical bytes; one clean failed clone was
-removed with supported cleanup. After installation/backups available8699461632 bytes
-(~8.10GiB), versus4217131008. Weights/cache/personal/source/history/results preserved.
-No layout or filesystem-reserved-block change. Exact measured savings in handoff.
+Complete final backend2084 pass/8 opt-in skips, frontend36, static/contracts/build/
+schema, final connected212 and transitions147 pass. Two affected opt-in separate-
+process bug journeys (scripted local/Codex, real Lua/independent checking) and five
+browser regressions pass. These are controlled, not new real-model acceptance.
+Remaining opt-ins and initial corrected failures are explicit in the bound record.
 
-Installed desktop/phone/reload and ingress-first four-service restart pass. Store,
-independent restored copy and post-recovery fingerprint agree:464 rows, SHA256
-`8a9ff74e13f87da7e081330bb2aaa3ff8b37f04da615e6e21ccedb6ca5b179d1`.
-Only same-job recovery/projection and one run offer changed; approvals/model history
-unchanged. Six prior real checked results revalidate/read without replay. New resource
-and separate-process browser tests are controlled, not new real-provider passes.
+Installed ORIGINAL fresh-offer/stale-browser-draft/desktop/phone/reload/restart and
+normal API/history are verified with no mutation.470-row history fingerprint
+`7ed6122af57a4c12c9e44ba05eb38198f8caf2edcc0fabb64b56564ce504e169` matches pre-repair,
+cutover, restart, backup and independent restore. Six prior real checked results
+remain valid/readable without replay, including four pre-generation provider cases.
 
-Qwen/fallbackOff/policy18 unchanged. No active owned job/run/pending choice at closeout;
-inspect actual state first. Original91 complete responses/1993817 known tokens and
-historical unknowns unchanged. Normal model1429966/auth/epoch unchanged, maintenance
-unpaused and temporary Workbench reservation absent. Four services run as Rich.
-Existing loopback and HTTPS10.0.0.9:9487/LAN10.0.0.0/24 protections rechecked.
-Physical-device evidence reused under unchanged address/routes/CA, not newly tested.
+Qwen/fallbackOff/policy18 unchanged. No owned active operation or pending decision
+at closeout; inspect actual state before new work. All20 old usage receipts revalidate.
+Planning91 complete/1993817 known tokens remain separately recorded; historical
+unknowns stay unknown/isolated. Normal model856896/auth/epoch and unpaused maintenance
+unchanged by this installation, no owned reservation. Four services active/enabled
+as Rich; same helper, loopback9487, HTTPS10.0.0.9:9487/LAN10.0.0.0/24 and browser/
+internal protections verified. Prior physical-device evidence reused, not retested.
+4GiB recovery reserve remains; >8GiB available at closeout. No source/spending/
+publication/live-addon change. Prior installed9ac9459/ef7e23e and recovery remain.
 
 Private bound closeout:
-`/home/rich/.local/share/TwichUI-Workbench/vendor-preparation-storage-recovery-20261110/final-preparation-storage-closeout.json`.
-Candidate/seal/tests/skips/install/rollback:
-`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-9ac9459`.
-[Correction/evidence](VENDOR_PREPARATION_STORAGE_20261110.md). Prior installedef7e23e,
-691edf7,c5873b1 recovery remain. No spending/disclosure/publication/live-addon change.
-Broader initial product remains unfinished. Flight-path result is an offline checked
-patch, not in-game acceptance or installation. The
-[preceding continuation](history/20261110-before-preparation-resource-CONTINUATION.md)
-is historical, including its uninstalled-work prefix and earlier plan-review action.
+`/home/rich/.local/share/TwichUI-Workbench/vendor-run-turn-recovery-20261110/final-execution-read-closeout.json`.
+Install/verification/rollback:
+`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-28b8c87`.
+[Diagnosis and demonstration](VENDOR_EXECUTION_READ_LOOP_20261110.md).
+Broader product remains unfinished; earlier flight-path result is offline checked,
+not in-game tested or installed in the live addon. The
+[preceding continuation](history/20261110-before-vendor-execution-CONTINUATION.md)
+is historical: its no-run-approval statements preceded the owner's first run.

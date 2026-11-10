@@ -53,8 +53,8 @@ A new run offer explains when the prior run made no edits. It preserves prior us
 and needs fresh run consent because the first one-attempt permission was consumed.
 No duplicate plan approval, automatic model retry or execution grant is created.
 
-Verification/installation and exact original-task outcome are pending in this
-source checkpoint. Consult current continuation and private final receipts.
+At the implementation checkpoint, installation was pending. The completed
+installation and original-task demonstration follow below.
 
 Connected verification found and corrected stale expectation-hold projection
 behind an unclaimed queue entry, and development housekeeping lock contention.
@@ -62,6 +62,50 @@ Busy housekeeping now defers its cleanup while retaining the physical reserve
 check; it does not clear a lock or compete with an active archival owner.
 Original task/dashboard lead with the fresh run decision when continuation is
 actually available, retaining the failed execution and consumed approval below.
+
+## Installed demonstration and limits
+
+Candidate `28b8c87ff18e2dcc92762916b9c898cf0aac6c4f`, tree
+`538c97c19818150b2a8e60f645af56c7bc4895f6`, deployment87, seal
+`37b6f4f66477ce3ea03affc301208fdc6a289e6f410531888555779c491e0e8f` is installed.
+The original task has a valid fresh run offer under its unchanged plan approval.
+The old browser draft can be refreshed safely without resubmission; checkbox stays
+unchecked and run submission disabled until owner acknowledgment. Desktop/phone/
+reload and ingress-first four-service restart preserve the same available decision.
+Dashboard needs-you agrees, and the earlier failure stays visible as history.
+
+Complete final backend2084 pass/8 opt-in skips and frontend36 pass. Static/contracts/
+TypeScript/build/ruff/schema pass; affected connected212/transitions147, five browser
+regressions and two opt-in separate-process bug journeys pass. Controlled providers
+exercise reread→edit→independent checks with actual Lua. No new real-provider pass
+is claimed. Default skips include six process modes (two affected rerun explicitly),
+historical pinned acceptance browser and guild-roster readiness; unchanged earlier
+evidence retained. Initial failures and exact corrections remain in private logs.
+
+Entire470-row history fingerprint
+`7ed6122af57a4c12c9e44ba05eb38198f8caf2edcc0fabb64b56564ce504e169` equals pre-repair,
+cutover, post-startup/restart, backup and independent restored copy. No task-row,
+approval, usage or failure edit. All20 old usage receipts independently revalidate.
+Six prior real checked results remain valid/readable with no replay. Source, history,
+old stores, failure evidence, recovery stages and credentials are preserved.
+
+Qwen/fallbackOff/policy18 unchanged. Normal model856896/auth/epoch and unpaused
+maintenance unchanged by installation; no owned reservation or active task request.
+Four services active/enabled as Rich; helper scope/hash, loopback/private-LAN/TLS,
+host/origin/CSRF and internal execution boundaries verified unchanged. Physical
+device evidence reused under unchanged address/routes/CA.4GiB recovery reserve
+retained, over8GiB free at closeout. No new spending/source disclosure/publication
+or live-addon change.
+
+No replacement model run was authorized or submitted. Owner should reload the
+original task, choose Review current offer if prompted, review/acknowledge limits
+and Approve local run if desired. No repeated plan approval or engineering renewal.
+The vendor fix remains unfinished; controlled checks do not establish Qwen's next
+real implementation. Broader product limitations remain in the current handoff.
+
+Private bound closeout: `final-execution-read-closeout.json` in the evidence directory
+below. Exact install/rollback and verification bindings:
+`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-28b8c87`.
 
 Private evidence: `/home/rich/.local/share/TwichUI-Workbench/vendor-run-turn-recovery-20261110`.
 No new spending, provider switch, disclosure, publication or live-addon change.
