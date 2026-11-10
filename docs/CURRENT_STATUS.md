@@ -1,11 +1,11 @@
 Last updated: November 10, 2026.
 
-The private running app has the styled dashboard, ordinary task entry, Qwen/Codex choices, saved plans, permissions, differences and results. Installed build: 7b7f714 (deployment 97).
+The private app is running build d625656 (deployment 98). It has ordinary task entry, Qwen and Codex choices, separate plan and run decisions, and saved results with diffs and checks. Six earlier real-provider checked results remain available.
 
-Six earlier real-provider checked results remain preserved. The original vendor-item request has zero accepted results; its latest test still fails. No in-game acceptance or addon publication has happened.
+The original vendor request has zero accepted results. Workbench automatically resumed it under the saved permission. Qwen made an isolated edit, then a transport timeout interrupted the next response. The partial edit was not applied and its final usage is unknown.
 
-New recovery and diagnostic corrections pass controlled tests and a real browser/API/worker rehearsal. They are awaiting installation and real Qwen verification. The latest interrupted response has unknown final usage and applied no tools.
+Workbench tests and desktop and phone checks passed. A prior real result was prepared locally for a draft PR and recovered from an interrupted apply. This did not contact GitHub or publish an addon change. There has been no in-game testing.
 
-Next complete outcome: finish the original vendor repair through Qwen, independently check it, and show the durable result in the installed app. Then prove a fresh ordinary request and local PR preparation.
+Next: install the verified stream and recovery correction, continue the same vendor request, independently check the candidate, and show the durable result in the app. Then prove a fresh ordinary request.
 
-No owner decision is needed for continued engineering or Workbench development pushes. Actual addon draft-PR publication remains a separate permission.
+No owner decision is needed to continue engineering. Addon publication requires separate authorization.

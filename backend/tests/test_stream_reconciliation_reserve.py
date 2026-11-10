@@ -9,6 +9,22 @@ from workbench.real_primary import PrimaryHeld
 from test_real_transport import http_tape as http_tape, wire, frame
 
 
+def test_named_implementation_uses_its_own_bound_and_socket_revocation(http_tape):
+    # A settled reply after the unrelated120-second planning timer remains
+    # admissible within the explicit300-second grant, less its native reserve.
+    http_tape.steps = [wire([frame({'content': 'completed'}),frame(finish='stop',
+        usage=dict(prompt_tokens=30,completion_tokens=1,total_tokens=31))])]
+    allowed=[True]
+    deadline=time.monotonic()+300
+    reply=http_tape.adapter.request({'max_tokens': 100},lambda:allowed[0],deadline)
+    assert reply['choices'][0]['finish_reason']=='stop'
+    ends_at,timeout,stop_event=http_tape.socket_deadlines[0]
+    assert ends_at==deadline-5 and 120 < timeout <= 295
+    assert not stop_event.is_set()
+    allowed[0]=False
+    assert stop_event.is_set()
+
+
 def test_sse_read_cutoff_leaves_native_reconciliation_time(http_tape, monkeypatch):
     from workbench import real_stream as stream
 

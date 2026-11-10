@@ -1,79 +1,70 @@
-# Active recovery — November10, 2026
+# Active vendor recovery — November 10, 2026
 
-Actual installed7b7f714/deployment97, private preview loopback9487 and TLS LAN9487.
-Source working correction adds post-controller termination reconciliation, full
-recent Lua locals/nested raw observations and empty-search progress detection.
-124initial/92final affected checks, final static lint and normal-route native
-browser/API/worker rehearsal1pass/5deselected28.41sec630.4MiB passed. Full suites
-running in recovery-all-suites.log; earlier static contracts/TS/build/schema passed.
+Actual installed **d625656/deployment98**, private preview loopback9487 and
+TLS LAN9487. Seal586926a6f4459f5060d22f6c6e6392911a600359b00bb75a101c022a13aba83f.
+Checked latest and original history copies, normal API reads, both addresses,
+model/authentication, and all six earlier real checked results. Workbench dev
+checkpoint pushed to origin/codex/everyday-workbench. Main and the unrelated
+original checkout edits remain unchanged. Workbench pushes are authorized by
+OWNER_WORKBENCH_GIT_AUTHORITY_20261110.md; addon publication remains held.
 
-Latest original vendor task2dc5b8ba/task24 session1e6cf13b/execution5bba26e6:
-18complete responses500952prompt/13128completion; response19interrupted at
-operation deadline, final usage unknown/no tool dispatch. Native fence released,
-normal model restored, no active task at start. No accepted vendor repair.
-Root failure still model-created mixed-list row assertion631. Actual confined
-read-only diagnostic replay now displays changed row.id under its saved mapping;
-development has NOT edited or supplied an addon solution.
+## Original vendor task, still unfinished
 
-Next: checkpoint/seal/install FROM ACTUAL7b7f714 with latest history, prior six
-results revalidation; reconcile original unknown call via supported
-local_generation_recovery.reconcile using its ORIGINAL installed module so hashes
-and actual terminated epoch bind. The existing worker may then auto-continue;
-inspect actual session before issuing any continuing command. If necessary use
-scripts/recover_local_task.py with original scope59b032e5-f4a5-45cb-a418-50b4da3f020f,
-continuing owner doc SHA390d2d9ef9302cb3a8b8d06fe4e1c2434c6b9630011fc92d1e032abbdb7a0bf2.
-Qwen/fallbackOff/publication held. Preserve every previous patch and unknown usage.
+Intake2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd, task suffix24-implementation,
+proposal1e9427a8-69a3-5191-b21d-e6f95baa9a0a, original scope
+59b032e5-f4a5-45cb-a418-50b4da3f020f. Qwen selected, fallback Off, policy18.
+Only Items.lua and tests/test_npcs_stock.lua writable; Stock.lua read-only.
+Continuing instruction SHA390d2d9ef9302cb3a8b8d06fe4e1c2434c6b9630011fc92d1e032abbdb7a0bf2.
 
-After real result, independent5criteria/original-vs-candidate/full suite, installed
-browser/reload/restart/history-restore, separate ordinary real-provider test request,
-nonpublishing PR preparation/recovery and retention. No routine owner renewal.
-New owner instruction permits Workbench development commits/pushes; addon PR/push
-still separate. See PLAN inventory and OWNER_WORKBENCH_GIT_AUTHORITY_20261110.md.
+The old operation5bba26e6/session1e6cf13b ended with18completed responses,
+500952prompt/13128completion plus unknown final usage. The supported
+termination proof bound the sealed failure, exact dead provider epoch and no
+partial tool dispatch. The app then automatically queued b341ad96 without a
+new owner decision, using the original scope and frozen model work. Actual
+installed desktop/phone/reload verified one task with prior attempts collapsed.
 
----
-Historical detailed predecessor handoff follows; installed identity above wins.
+Latest execution771bad72/sessionb341ad96 made one model-authored Items.lua edit.
+Five complete responses121332prompt/4621completion; sixth incomplete at120s.
+Its private incomplete test edit mentioned the row mapping but was invalid JSON,
+never dispatched. No accepted vendor result. Native fence released and normal
+model restored; latest settled failed task still lacks its termination proof.
+Do not replay the partial tool or modify any previous result or usage.
 
-# Vendor repair — current continuation
+## Next candidate and operational steps
 
-Follow the authoritative root owner documents and [continuing vendor permission](OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md). One agent. No campaign caps or routine renewals. Qwen selected, fallback Off, policy18, publication held. Preserve credentials, original source, history, independent checks, private-LAN/authentication, billing/disclosure and recovery safeguards. No publication, spending, model replacement or live-addon installation.
+Connected source correction binds the stream socket to the authorized
+implementation deadline (less the native cancellation reserve), instead of the
+unrelated120s planning timeout. Revocation closes silent reads. The recovery
+owner now reads a missing transient terminal owner from the matching immutable
+process record only if sealed failure result/time also match exactly. Unknown
+usage stays unknown; read-only settlement check prevents repeated write locks.
+Result copy no longer tells continuing tasks they need another approval.
 
-## Current actual state — November10, 2026,10:12UTC
+After exact final checks/seal, activate FROM ACTUAL d625656 using existing
+verified history copy and rollback. Revalidate six earlier results. Then use
+supported local_generation_recovery.reconcile for 771bad72-43ae-5f0b-97e6-c06b54fb0286
+against the current copy of the DB; it checks original7b7/d625 dispatcher files
+at their actual owning release path and the original dead epoch. Inspect actual
+worker state before any trusted continuing command; it should queue automatically.
+Wait for real Qwen edits and candidate checks; no duplicate run or owner renewal.
 
-Installed **0275725/deployment96**, seal13e3b97be07b29e3e0520850596eec4f60fc8f9083d42ae62385e1e9a329041e. Original and forward history copies, all historical normal API reads, private LAN/TLS/browser/internal isolation and6earlier real checked results passed activation/revalidation. Stage /home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-0275725; operations/rollback delivery-campaign-7b5963a/outcome-0275725. Vendor remains **UNFINISHED**.
+After a candidate qualifies, run the private independent5criteria in the same
+confined runner against the frozen result; original-failure discrimination and
+full applicable addon suite remain mandatory. Show readable checked result and
+diff at desktop/phone, reload and quiescent restart/history restore. Then prove a
+separate ordinary browser local-Qwen test request with legitimate plan/run
+decisions. No live addon changes or in-game claims.
 
-Original intake **2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd**, task intake-2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd-24-implementation, proposal1e9427a8-69a3-5191-b21d-e6f95baa9a0a, scope approval59b032e5-f4a5-45cb-a418-50b4da3f020f. Only !!!TwichUI/npcs/Items.lua and tests/test_npcs_stock.lua writable; Stock.lua read-only. Scope2/nonvisual and decisions preserved. Continuing owner instruction SHA390d2d9ef9302cb3a8b8d06fe4e1c2434c6b9630011fc92d1e032abbdb7a0bf2.
+Full d625656 suites2165backend/8skips and37frontend passed, native browser/API/
+worker controlled rehearsal passed. Follow-up affected checks are tracked in
+private recovery-final-stream-affected.log; 11 browser checks passed/1 opt-in skip.
+Actual frozen historical Qwen result passed local PR staging with a deliberately
+interrupted apply, exact recovery, idempotent commit and owned cleanup in a
+network-isolated process. Zero publication rows and remote commands. Repeat
+against vendor result if checked; actual draft PR requires separate authorization.
 
-### Settled new real evidence; do not replay old work
-
-- Session5821807d/execution1fd6c210:1COMPLETE response27307prompt/901completion;2read replies exceeded the next request. No second generation/edit. Exact retained reasoning/two-call replay exposed6KiB log pages; installed0275725 bounds entire replies to2KiB with exact Unicode pagination/distinct-character accounting.
-- Session756e4630/execution39f81ade:7COMPLETE responses203830prompt/7914completion,1new Items.lua edit, then terminal finish_reason=length. Last response had5697content bytes/2142private reasoning bytes/0tools; none dispatched. Exact text was unfortunately NOT retained by this implementation path; semantic content is unknown. This is a diagnostic defect, not uncertain execution. Usage complete, native fence released and effects settled.
-- Worker used saved continuing permission with fresh bindings for session **c6b40bac-7fb7-5102-81db-dc924a6aaac0**, execution **46c6d74a-5989-5129-b788-d2626e991180**.24COMPLETE responses706266prompt/17573completion;1new test diagnostic after the already-failing assertion. App progress check again fails617 (saved row9997 now shows Item9996). It stopped on repeated source reads. All responses complete, no uncertain turn; normal model restored; no active vendor operation at latest inspection. No new accepted vendor result. Newest unverified patch **19dc57b5936bd47b77badcd854d64413ccdf257208c4819391f8e929541a1f07**,5676bytes, privately saved real-qwen-46c6d74a-unfinished.patch. All earlier patches and unknown usage remain unchanged.
-
-The row diagnostic still points to reused/sorted UI frames in the model's new test (Stock.Render rebinds rows). This development session has not supplied an addon solution or edited addon task files. Actual model work must fix it from source/check feedback.
-
-### Coherent correction verified in working code; not yet activated
-
-1. Current source retains all scoped observations privately, but large tests now SHOW setup, EVERY changed region, actual failure context and the two latest requested windows. Production/dependency files stay complete. A requested read visibly updates labeled source ranges, instead of returning metadata pointing into a giant unnumbered dump. Exact omitted code remains rereadable without reset/double charge; edits invalidate focus positions. More room retains actual tool/reasoning history instead of repeatedly evicting it.
-2. Continued reasoned scoped work uses supported tool_choice=required with ALL guarded source/edit/check tools available. Code belongs in tools, not a long prose patch. A passing candidate check finishes only after the ENTIRE tool batch settles with the exact same content and no later failed check. The independent frozen-result owner still verifies it. No pre-edit checker gate or owner approval is added.
-3. Complete and interrupted response content is retained privately BEFORE content validation can discard it, with transport completion and request-record identity separate from usage/lifecycle. Known terminal length may receive a smaller-response correction under the same continuing authority; NONE of a cut-off batch dispatches. Repeat cutoff on unchanged source stops for a changed strategy. Unknown/disconnected responses are not retried. Usage receipt precedes evidence-write failures; symlinks/conflicting immutable records are refused. Private reasoning is never printed, public or model-injected.
-
-Verification:184integrated tests passed;39final focused tests include private retention/symlink/immutable/usage safeguards and scoped tool-cycle batching. Static/contracts/TS/build/lint/schema passed (final targeted lint still required after last test addition). Separate API/worker/browser/confined Lua normal-route native rehearsal passed1case/5deselected,30.44sec652.7MiB; controlled provider, NOT a live new-cycle pass. Complete2152backend/8opt-in skips and37frontend evidence from9a8f54c reused only for unchanged owners; not claimed rerun. New response repair/focused-tool branch has controlled tests and actual tokenizer proof; live correctness remains unproven.
-
-**Actual non-generating tokenizer replay** of real retained reasoning plus BOTH real calls, then a controlled read:19789/21797/22065input+2496response fit32768. All60897chars of current code cached; production279+283lines complete,320of665testlines shown (setup/changes/focus), other exact lines remain readable. No generation, task/source/DB writes. focused-action-cycle-token-proof.json. A first counter request during the model's private lease was correctly denied; it was rerun only after verified normal restoration, not treated as a model/capability failure.
-
-### Strongest next action
-
-Finish final lint/checkpoint/seal; deploy FROM ACTUAL0275725 using existing checked mechanism, latest settled history and all6prior result revalidations. Verify no active work/owner stop. Use ONE supported continuing command with original task/scope/exact owner instruction, preserving latest19dc57b5 patch and fresh bindings. Observe real edits and actual behavioral checks early. No owner renewal is needed. Do not stop at another installed internal correction or retry an unchanged approach.
-
-All5vendor criteria, original-versus-new-test discrimination and full applicable addon suite remain mandatory. New model tests still use Check helper where the independent gate expects literal Lua assert; the model must correct invalid new tests, not weaken verification. Once app qualifies a candidate, run the private independent original/candidate check (not model input), and use supported result rejection if disproved.
-
-## Finish the connected outcome
-
-- Original checked vendor result readable in installed desktop/phone/reload; diff/checks/limitations. These are offline game-API simulations, never in-game acceptance.
-- Quiescent restart/history independent copy/restore,6prior results, model/auth and owned cleanup/restoration verified; no busy restart.
-- Separate owner-authorized ordinary browser-to-result REAL Qwen small test-only self-check, no developer registration or addon product behavior change. Use actual browser plan/run decisions under valid delegation; no vendor instruction grant for another task.
-- Verify actual result PR preparation and existing local-only failure/recovery without push/PR. Publication remains unproven/unauthorized, a genuine separate decision.
-- Recheck recurring release retention, installed+useful independent recovery copies, unique evidence/history and4GiBrecovery reserve. No unrelated/model deletion.
-- Keep broader features/inspection/simulation and original product gaps explicit; a vendor repair does not finish the full product. Review admin-grant early termination at closeout.
-
-Private evidence: /home/rich/.local/share/TwichUI-Workbench/vendor-completion-20261110. Installed operations/rollback: delivery-campaign-7b5963a/outcome-9a8f54c. Stage: /home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-9a8f54c. prepare-next.py must take ACTUAL installed short commit. See existing vendor read-loop/stream-recovery records and git history for older attempts. Check actual live state before any replay. Checkpoints/session interruption do not reinstate old caps or end authority.
+Private evidence: /home/rich/.local/share/TwichUI-Workbench/vendor-completion-20261110.
+Current stage and receipts: everyday-outcome-d625656 and delivery-campaign-7b5963a/
+outcome-d625656. Earlier detailed handoffs and failed patches are retained in Git
+history and private evidence. Preserve4GiB recovery reserve, original addon source,
+private LAN/authentication, scope/history/usage and independent checks.

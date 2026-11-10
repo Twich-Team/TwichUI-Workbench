@@ -141,6 +141,7 @@ def current(c, task_id):
 def process_one(engine):
     """Renew a settled operation using the same authority and fresh frozen work."""
     from workbench import owner_task, task_sessions as sessions
+    from workbench.repair_continuation import settled_accounting
     if not sessions.capability(engine):
         return False
     with engine.connect() as c:
@@ -164,12 +165,16 @@ def process_one(engine):
                     proposal_decisions.c.payload['execution_continuation']['owner_provenance']['purpose'].as_string() == PURPOSE)).first():
                 continue  # A fresh operation is already waiting for normal queue admission.
             from workbench.db import real_execution_grants as grants, real_execution_requests as requests
-            previous = c.execute(select(requests.c.result,grants.c.snapshot).join(grants, requests.c.grant_id == grants.c.id)
+            previous = c.execute(select(requests,grants.c.snapshot.label('grant_snapshot'))
+                .join(grants, requests.c.grant_id == grants.c.id)
                 .where(grants.c.snapshot['task_budget']['decision_id'].as_string() == value['decision']['id'])
                 .order_by(requests.c.created_at.desc()).limit(1)).mappings().first()
-            result = previous['result'] if previous else {}
-            if previous and unchanged_failure(c, previous):
+            # An unresolved receipt cannot reach the write transaction every
+            # tick. Read-only prefilter; recover_local still revalidates all
+            # histories and bindings under the authoritative transaction.
+            if not previous or not settled_accounting(previous) or unchanged_failure(c, previous):
                 continue
+            result = previous['result'] or {}
         # A deliberate loop stop asks the engineering recovery path to change
         # strategy. Continuing permission does not justify identical retries.
         if any(reason in result.get('error','') for reason in (
@@ -197,7 +202,7 @@ def unchanged_failure(c, previous):
     from workbench.repair_continuation import private_json
     from workbench.real_workspace import Runtime, sha
     try:
-        root = Path(previous['snapshot']['recovery']['root'])
+        root = Path(previous['grant_snapshot']['recovery']['root'])
         resume_path = root/'repair-resume.json'
         if not resume_path.is_file():
             return False

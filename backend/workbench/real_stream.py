@@ -51,9 +51,12 @@ class NamedStream:
 
     def request(self, body, permitted, deadline, *, probe=False):
         self.sequence += 1
+        # The caller already binds this deadline to the current operation and
+        # grant. Keep time for native cancellation before that absolute bound.
+        read_end = deadline-(7 if probe else 5)
         def allowed():
             return self.current() and permitted() and time.monotonic() < deadline
-        if not allowed():
+        if not allowed() or time.monotonic() >= read_end:
             raise PrimaryHeld('Lease/attempt deadline or epoch changed before request')
         body = {**body, 'stream': True, 'stream_options': {'include_usage': True}, 'n': 1}
         if not 1 <= body.get('max_tokens', 0) <= (60 if probe else WIRE_COMPLETION_LIMIT):
@@ -122,10 +125,20 @@ class NamedStream:
                 observer.start()
                 cancellation = None
                 try:
-                    # Probe reserves five seconds before its total deadline for reconciliation.
-                    read_end = deadline-(7 if probe else 5)
-                    with LocalHTTP() as client:
-                        client.ends_at = min(client.ends_at, read_end)
+                    # Do not inherit LocalHTTP's unrelated planning timeout.
+                    # Set the exact stream read limit before its socket monitor
+                    # starts. Planning and the short metadata calls are unchanged.
+                    class ReadFence:
+                        @staticmethod
+                        def is_set():
+                            try:
+                                return not permitted()
+                            except Exception:
+                                return True
+                    client = LocalHTTP()
+                    client.ends_at = read_end
+                    client.stop_event = ReadFence()
+                    with client:
                         report['wire_started'] = True
                         with client.opener.open(request, timeout=max(.01, read_end-time.monotonic())) as response:
                             for data in events(response, report, lambda: allowed() and time.monotonic() < read_end):
@@ -204,7 +217,7 @@ class NamedStream:
             error.stream_response = result if result.get('usage') is not None else None
             error.stream_partial_response = result
             if report['stream_error'] is None:
-                report['stream_error'] = ('request_deadline' if time.monotonic() >= deadline-5
+                report['stream_error'] = ('request_deadline' if time.monotonic() >= read_end
                                           else 'transport_or_protocol_failure')
             raise
         finally:

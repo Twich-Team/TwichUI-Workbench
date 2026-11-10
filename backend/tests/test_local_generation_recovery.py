@@ -144,6 +144,36 @@ def test_terminated_epoch_discharge_preserves_unknown_usage_original_failure_and
 
 
 @pytest.mark.parametrize(
+    'mismatch',[None,'sealed-owner','sealed-result','finished-at']
+)
+def test_normal_terminal_failure_reuses_bound_owner_without_rewriting_unknown_usage(terminated,mismatch):
+    t=terminated
+    with write_transaction(t.store) as c:
+        row=c.execute(select(execution.requests)).mappings().one()
+        owner=row['result']['owner']
+        result={k:v for k,v in row['result'].items() if k!='owner'}
+        finished=execution.now()
+        c.execute(execution.requests.update().values(status='failed',result=result,finished_at=finished))
+    def sealed(row,grant):
+        assert row['result']['owner']==owner
+        if mismatch=='sealed-owner':
+            return None
+        return dict(status='failed',result={} if mismatch=='sealed-result' else result,
+                    completed_at='different' if mismatch=='finished-at' else finished)
+    t.runtime.recover_outcome=sealed
+    if mismatch:
+        with pytest.raises(ValueError,match='Exact owned local failure evidence'):
+            recovery.reconcile(t.store,'controlled-execution')
+        assert not (t.root/'terminated-generation.json').exists()
+    else:
+        proof=recovery.reconcile(t.store,'controlled-execution')
+        assert proof['final_usage']=='unknown' and proof['partial_response_dispatched'] is False
+    with t.store.connect() as c:
+        saved=c.execute(select(execution.requests)).mappings().one()
+        assert saved['result']==result and saved['finished_at']==finished
+
+
+@pytest.mark.parametrize(
     "fault",
     [
         "state_hash",

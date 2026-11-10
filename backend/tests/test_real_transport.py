@@ -71,6 +71,7 @@ def scripted_http(tmp_path, monkeypatch):
     t = SimpleNamespace(
         steps=[],
         bodies=[],
+        socket_deadlines=[],
         reports=[],
         counts=[],
         count=100,
@@ -115,6 +116,7 @@ def scripted_http(tmp_path, monkeypatch):
         def open(self, req, **kwargs):
             body = json.loads(req.data)
             t.bodies.append(body)
+            t.socket_deadlines.append((self.ends_at, kwargs['timeout'], self.stop_event))
             step = t.steps[len(t.bodies) - 1]
             t.observed.clear()
             return Reader(step(body) if callable(step) else step)

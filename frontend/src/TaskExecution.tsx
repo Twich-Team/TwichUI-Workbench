@@ -39,7 +39,7 @@ export function TaskExecution({intakeId,taskId,separateApproval,showWaiting=fals
       {waiting && !data.run_budget && !separateApproval && <p>The plan is saved. This ready-made task needs its run permission before work can start.</p>}
       {data.session?.can_stop&&!query.isError&&<StopRun key={data.session.id} id={data.session.id} session onSaved={()=>void query.refetch()}/>}
       {data.stage==='recovering'&&<p>Workbench is waiting for cleanup to be confirmed. Your evidence is saved.</p>}
-      {!expired&&['failed','held','blocked','interrupted','cancelled'].includes(data.stage)&&<p>Review the saved evidence. Another attempt needs fresh authorization.</p>}
+      {!expired&&['failed','held','blocked','interrupted','cancelled'].includes(data.stage)&&<p>The request and any saved work stay with this task.</p>}
       {query.isError&&<p role="alert">Progress could not be refreshed. Showing the last loaded record.</p>}
       {latest&&<>
         <Link className="record-link" to={'/executions/'+encodeURIComponent(latest.id)}>{latest.candidate_id?'Review changes and checks':'View run details'}</Link>

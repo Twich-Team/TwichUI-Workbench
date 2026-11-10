@@ -232,6 +232,15 @@ def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_d
             c.execute(task_sessions.update().where(task_sessions.c.id==renewed_ref['approval_id']).values(
                 status='failed',finished_at=now()))
         from workbench import continuing_repair
+        with write_transaction(store) as c:
+            returned=c.execute(select(requests.c.result).where(requests.c.id==rid2)).scalar_one()
+            c.execute(requests.update().where(requests.c.id==rid2).values(
+                result={**returned,'usage':{'status':'partial'}}))
+        with monkeypatch.context() as hold:
+            hold.setattr(owner_task,'recover_local',lambda *a,**kw:pytest.fail('Unsettled usage reached write ingress'))
+            assert not continuing_repair.process_one(store)
+        with write_transaction(store) as c:
+            c.execute(requests.update().where(requests.c.id==rid2).values(result=returned))
         assert continuing_repair.process_one(store)
         assert not continuing_repair.process_one(store)  # Duplicate tick waits for queue ownership.
         with store.connect() as c:

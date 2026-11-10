@@ -7599,3 +7599,35 @@ passed before final recovery hook; final lint and affected tests passed afterwar
 Full suites running independently; synthetic tests are not real Qwen readiness.
 Evidence: vendor-completion-20261110/recovery-* in private local share. Next is
 verified activation/current-task real Qwen continuation, not a planning stop.
+
+
+## November10 — checked private deployment98 and exact stream diagnosis
+
+d625656 pushed on Workbench development branch, installed with seal586926a6 and
+original/latest history copies, six existing real checked results revalidated,
+both listeners/kernel/TLS/browser/connector checks passed. Workbench full suite
+2165backend/8skips,37frontend pass. Host journal I/O slowed old-worker shutdown;
+existing stop guard settled it before new start. Original main edits preserved.
+
+Post-return reconciliation alone did not recover a normal failed row because
+its transient owner is absent after terminal commit. The sealed outcome and
+owned process record had the same identity and exact result/time. Validated
+owner lookup plus mismatch tests now close that gap without DB history writes.
+This supported local ingress reconciled5bba26e6 (unknown usage stays unknown);
+worker itself queued new b341ad96, demonstrated in installed desktop/390px
+views and reload. No new browser or user decision.
+
+771bad72:5complete121332prompt/4621completion;1modelItems edit, then120.18s
+transport cutoff before complete test edit. No tools from incomplete turn,
+usage unknown, exact model normal restored. LocalHTTP inherited120s planning
+monitor even with authorized300s implementation, confirmed in production code
+and controlled transport test. New stream uses exact implementation deadline
+minus native reserve and closes silent socket on revocation. New read-only
+settlement prefilter avoids repeated write locks for unknown results.
+
+Historical real Qwen frozen candidate4e9f05ae: actual local adapter staging
+interrupted after apply and recovered same commit idempotently in isolated
+network; original app DB/result unchanged, no remote commands/publication.
+This is local preparation evidence, not actual draft delivery or vendor success.
+11focused Chromium passes/1opt-in skip. Next: install changed verified version,
+reconcile latest returned call, observe original task to independent result.

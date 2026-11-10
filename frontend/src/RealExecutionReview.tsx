@@ -62,7 +62,7 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
         :<p>{row.later_review?'A later check found a problem with this patch. Review that finding before relying on these changes.':row.message}</p>}
       {row.later_review&&<><p className="soft-callout">The original check results and usage are retained below. This review does not authorize another run or publication.</p><details><summary>Why the later review stopped this result</summary><p>{row.later_review.reason}</p></details></>}
       {row.recovery_pending?<p>Workbench is waiting to confirm cleanup. It will keep the evidence and will not run the work again.</p>
-        :!checked&&!active&&<p>Review the saved reason and any check results below. Another attempt needs fresh permission.</p>}
+        :!checked&&!active&&<p>Review the saved reason and checks below.{workflow&&' Open the task to see its current status and any available next step.'}</p>}
       {result?.inference_ran===false && !active && !checked && !result.authorship && <p>No model implementation ran.</p>}
       {result?.inference_ran===null&&<p>Workbench could not confirm how the model call ended. This attempt has been used.</p>}
       {result?.authorship?.kind==='explicit-current-session'&&<p>Codex finished the work in a separately approved session using contributions from the earlier attempt.</p>}
@@ -70,7 +70,7 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
         <p>{result.check_failure.name}{result.check_failure.context_hint&&<> · {result.check_failure.context_hint.path}</>}</p>
         <details><summary>See the failure output</summary><pre className="candidate-diff check-diagnostic" tabIndex={0}>{result.check_failure.diagnostic}</pre></details>
       </section>}
-      <p className="soft-callout">Checks here are offline. In-game and simulator behavior still need separate verification.</p>
+      <p className="soft-callout">These checks run outside the game. Any simulated behavior is limited to what the checks cover.</p>
       {result?.checks?.length?<details><summary>Check details</summary><ul className="check-summary">{result.checks.map((c,i)=><li key={i}>
         <strong>{checkName(c.command,i)}</strong><StateBadge value={c.status==='pass'&&c.rc===0?'Passed':c.status==='fail'||(c.rc!==null&&c.rc!==0)?'Failed':'Outcome unavailable'}/>
       </li>)}</ul></details>:<p>{active?'Checks are still pending or have yet to report.':'No completed checks are recorded for this run.'}</p>}

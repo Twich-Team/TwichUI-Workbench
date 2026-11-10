@@ -94,9 +94,22 @@ def reconcile(engine, identity, *, expected_primary_sha256=None):
         or execution.digest(grant["snapshot"]) != grant["binding"]
         or grant["snapshot"]["contract"]["provider"] != "local"
         or grant["snapshot"]["runtime"].get("codex_selection")
-        or not root.parent.name.startswith("task-lease-task-session-")
-        or not runtime.recover_outcome(row, grant)
     ):
+        raise ValueError("Exact owned local failure evidence is required")
+    owned = private_json(root / ("ownership-" + identity + ".json"))
+    owner = row['result'].get('owner')
+    # The normal terminal transaction stores the returned result without its
+    # transient owner field. The immutable failure seal and process marker
+    # still bind that identity. Recover it for proof inspection only; neither
+    # replace the terminal row nor accept a different sealed result.
+    terminal = owner is None and row['status']=='failed' and row['finished_at']
+    proof_row = row
+    if terminal:
+        owner = owned['owner']
+        proof_row = {**row, 'result': {**row['result'], 'owner': owner}}
+    failure = runtime.recover_outcome(proof_row, grant)
+    if not failure or (terminal and (failure['result'] != row['result']
+            or failure['completed_at'] != row['finished_at'])):
         raise ValueError("Exact owned local failure evidence is required")
     for name in ("real_provider.py", "real_stream.py"):
         if (
@@ -104,10 +117,9 @@ def reconcile(engine, identity, *, expected_primary_sha256=None):
             != grant["snapshot"]["runtime"]["helper_sha256"][name]
         ):
             raise ValueError("The original tool-dispatch implementation changed")
-    owned = private_json(root / ("ownership-" + identity + ".json"))
     group = Path(owned["cgroup"])
     if (
-        owned["owner"] != row["result"]["owner"]
+        owned["owner"] != owner
         or execution.alive(owned["owner"])
         or not group.is_relative_to("/sys/fs/cgroup")
         or not group.name.startswith("workbench-real-")
