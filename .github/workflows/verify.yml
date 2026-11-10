@@ -5,7 +5,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,8 +21,11 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Install the Lua test runtime
         run: sudo apt-get install -y lua5.1 lua-bitop
-      - run: npm run verify
+      - run: npm run check
       - run: git diff --exit-code -- frontend/openapi.json frontend/src/api.generated.ts
+      - run: npm test
+      - run: npm run test-e2e
+      - run: npm run test-visual
       - uses: actions/upload-artifact@v4
         if: always()
         with:

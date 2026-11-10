@@ -7668,3 +7668,13 @@ and six previous real results read back, and an offline restore matched the
 584-row fingerprint. Desktop and phone views reloaded without a decision.
 Remove misleading generic permission wording found in that inspection.
 The new run passed its fresh base checks and sent the first local request.
+
+Hosted cb3369a passed 2170 backend tests (11 skips) and the frontend unit
+suite; the combined job reached its wall limit during Chromium. Preserve all
+phases as separate visible steps and budget enough time for the browser suite.
+The live continuation chased a historical setup failure already cleared by
+the same focused check. The next build keeps that evidence in history but
+passes only the newest verdict per check and workspace into the model brief.
+Its controlled regression, 111 affected tests and native rehearsal passed.
+Read-only replay of the actual saved vendor logs yielded only the still-failing
+original comparison, without new model calls or saved task mutations.

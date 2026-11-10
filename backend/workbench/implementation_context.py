@@ -18,29 +18,36 @@ def prior_failures(runtime):
     resume = private_json(root/'repair-resume.json')
     observed = []
     feedback = CheckFeedback(root/'prior-feedback', runtime.read_paths)
-    failed = []
-    for path in sorted((Path(resume['root'])/'check-logs').glob('*.json')):
+    previous = Path(resume['root'])
+    latest = {}
+    logs = (previous/'check-logs').glob('*.json')
+    for path in sorted(logs, key=lambda p: (p.stat().st_mtime_ns, p.name)):
         saved = private_json(path)
-        if saved.get('result', {}).get('status') != 'fail':
-            continue
-        failed.append(saved)
-    for saved in failed[-2:]:
-        summary = feedback.record(saved['result'], saved['check_id'])
-        observed.append({k: summary[k] for k in ('status', 'diagnostic', 'context_hint')})
+        result = saved.get('result', {})
+        command = result.get('command')
+        # A later pass resolves a failure of the same command in the same
+        # workspace. Older logs without a command remain distinct evidence.
+        key = ('command', json.dumps([command, result.get('working_directory')])) if command else ('log', saved['check_id'])
+        latest.pop(key, None)
+        latest[key] = saved
     # A passing test against original code can be the main unresolved failure
     # even though its raw log is green. Carry the checker verdict, not a plan
     # or a partial tool call, into the fresh operation.
-    for folder in reversed(sorted((Path(resume['root'])/'working-checks').glob('[0-9][0-9]'))):
+    for folder in reversed(sorted((previous/'working-checks').glob('[0-9][0-9]'))):
         path=folder/'outcome.json'
         if not path.is_file():
             continue
         verdict=private_json(path)
         if verdict.get('status')!='fail' or verdict.get('failed_check_name')!='original-with-new-tests':
-            continue
+            break
         raw=folder/'original-with-new-tests.json'
         if raw.is_file() and (verdict.get('original_test_differential') or {}).get('status')=='fail':
             observed.append(dict(status='fail',diagnostic=original_check_summary(private_json(raw)),context_hint=None))
         break
+    failed = [s for s in latest.values() if s.get('result', {}).get('status') == 'fail']
+    for saved in failed[-2:]:
+        summary = feedback.record(saved['result'], saved['check_id'])
+        observed.append({k: summary[k] for k in ('status', 'diagnostic', 'context_hint')})
     return observed
 
 

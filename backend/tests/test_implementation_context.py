@@ -40,12 +40,24 @@ def test_continuation_remembers_that_a_passing_original_test_failed_to_discrimin
         failed_check_name='original-with-new-tests',original_test_differential={'status':'fail'})))
     raw=working/'original-with-new-tests.json'
     raw.write_text(json.dumps(dict(status='pass',rc=0,out='CONTROLLED original passed')))
+    logs=prior/'check-logs'
+    logs.mkdir()
+    for i, (status, command, cwd, message) in enumerate([
+        ('fail', ['lua5.1', 'test_fixture.lua'], 'workspace/tests', 'Old focused setup failure'),
+        ('fail', ['lua5.1', 'test_fixture.lua'], 'different/tests', 'Separate workspace failure'),
+        ('pass', ['lua5.1', 'test_fixture.lua'], 'workspace/tests', 'Focused check passes now'),
+    ]):
+        identity=f'fixed-{i:03}'
+        (logs/f'{identity}.json').write_text(json.dumps(dict(check_id=identity, result=dict(
+            status=status, rc=int(status!='pass'), command=command, working_directory=cwd, out=message))))
     current=tmp_path/'current'
     current.mkdir()
     (current/'repair-resume.json').write_text(json.dumps(dict(root=str(prior))))
     seen=prior_failures(SimpleNamespace(root=current,read_paths=['tests/test_fixture.lua']))
-    assert len(seen)==1 and seen[0]['status']=='fail'
+    assert len(seen)==2 and seen[0]['status']=='fail'
     assert 'also passed against unchanged original' in seen[0]['diagnostic']
+    assert seen[1]['diagnostic']=='Separate workspace failure'
+    assert json.loads((logs/'fixed-000.json').read_text())['result']['status']=='fail'
     assert json.loads(raw.read_text())['status']=='pass'
 
 
