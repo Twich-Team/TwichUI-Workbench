@@ -52,7 +52,10 @@ class CheckFeedback:
             first=next((i for i,line in enumerate(lines) if not line.startswith('WB_LOCAL_CONTEXT ')
                 and re.search(r'\.lua:[0-9]+:',line)),0)
             head='\n'.join(lines[first:first+6])[:900]
-            excerpt=head+'\n'+excerpt[-(2399-len(head)):]
+            observations=[line[:1200] for line in lines if line.startswith('WB_LOCAL_CONTEXT ')]
+            # The interpreter orders the latest locals first, so retain their
+            # nested actual values before older setup crowds them out.
+            excerpt=head+'\n'+'\n'.join(observations)[:2399-len(head)]
         hint = None
         for _, line in reversed(failures):
             for path in self.paths:

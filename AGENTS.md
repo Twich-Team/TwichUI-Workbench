@@ -32,7 +32,8 @@ recovery copies, task bindings, independent checks, port 8765 and model authenti
 Use existing authorized administrative/service mechanisms; do not bypass denied
 privileges. Keep billing/source-disclosure/private-network/publication safeguards.
 No new paid spending, public exposure, unauthorized source upload, publication,
-push/PR/merge or live game-addon changes. Task plan/run decisions remain separate
+addon push/PR/merge or live game-addon changes. Workbench development checkpoints
+and milestones may be committed/pushed under [November10 Git authority](docs/OWNER_WORKBENCH_GIT_AUTHORITY_20261110.md). Task plan/run decisions remain separate
 and may use the valid acceptance-only browser delegation. Resolve uncertain external
 execution before replay. Choose bounded observable operations and verified retention;
 a timeout stops that operation, not the assigned outcome. Ask only at genuine

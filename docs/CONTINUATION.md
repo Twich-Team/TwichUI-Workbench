@@ -1,3 +1,38 @@
+# Active recovery — November10, 2026
+
+Actual installed7b7f714/deployment97, private preview loopback9487 and TLS LAN9487.
+Source working correction adds post-controller termination reconciliation, full
+recent Lua locals/nested raw observations and empty-search progress detection.
+124initial/92final affected checks, final static lint and normal-route native
+browser/API/worker rehearsal1pass/5deselected28.41sec630.4MiB passed. Full suites
+running in recovery-all-suites.log; earlier static contracts/TS/build/schema passed.
+
+Latest original vendor task2dc5b8ba/task24 session1e6cf13b/execution5bba26e6:
+18complete responses500952prompt/13128completion; response19interrupted at
+operation deadline, final usage unknown/no tool dispatch. Native fence released,
+normal model restored, no active task at start. No accepted vendor repair.
+Root failure still model-created mixed-list row assertion631. Actual confined
+read-only diagnostic replay now displays changed row.id under its saved mapping;
+development has NOT edited or supplied an addon solution.
+
+Next: checkpoint/seal/install FROM ACTUAL7b7f714 with latest history, prior six
+results revalidation; reconcile original unknown call via supported
+local_generation_recovery.reconcile using its ORIGINAL installed module so hashes
+and actual terminated epoch bind. The existing worker may then auto-continue;
+inspect actual session before issuing any continuing command. If necessary use
+scripts/recover_local_task.py with original scope59b032e5-f4a5-45cb-a418-50b4da3f020f,
+continuing owner doc SHA390d2d9ef9302cb3a8b8d06fe4e1c2434c6b9630011fc92d1e032abbdb7a0bf2.
+Qwen/fallbackOff/publication held. Preserve every previous patch and unknown usage.
+
+After real result, independent5criteria/original-vs-candidate/full suite, installed
+browser/reload/restart/history-restore, separate ordinary real-provider test request,
+nonpublishing PR preparation/recovery and retention. No routine owner renewal.
+New owner instruction permits Workbench development commits/pushes; addon PR/push
+still separate. See PLAN inventory and OWNER_WORKBENCH_GIT_AUTHORITY_20261110.md.
+
+---
+Historical detailed predecessor handoff follows; installed identity above wins.
+
 # Vendor repair — current continuation
 
 Follow the authoritative root owner documents and [continuing vendor permission](OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md). One agent. No campaign caps or routine renewals. Qwen selected, fallback Off, policy18, publication held. Preserve credentials, original source, history, independent checks, private-LAN/authentication, billing/disclosure and recovery safeguards. No publication, spending, model replacement or live-addon installation.

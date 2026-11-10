@@ -55,6 +55,20 @@ def test_overlapping_initial_reads_in_one_batch_are_one_useful_model_decision():
     assert progress.repeated == 0
 
 
+def test_different_empty_searches_require_a_changed_navigation_strategy():
+    progress=ReadProgress(lifetime=True)
+    assert progress.observe('find_text',json.dumps(dict(matches=[],already_shown=False))) is None
+    hint=progress.observe('find_text',json.dumps(dict(matches=[],already_shown=False)))
+    assert progress.repeated==2 and 'short symbol' in hint
+    assert 'JSON-escaped' in hint
+    progress.observe('find_text',json.dumps(dict(matches=[dict(line=21,preview='local item')],already_shown=False)))
+    assert progress.repeated==0
+    # A mixed batch with actual new evidence still makes progress.
+    progress.turn([('find_text',json.dumps(dict(matches=[]))),
+                   ('find_text',json.dumps(dict(matches=[dict(line=22)])))])
+    assert progress.repeated==0
+
+
 def response(tool, args, number):
     value=answer(20,10)
     value['choices'][0]['finish_reason']='tool_calls'

@@ -356,7 +356,7 @@ class WorkingCheck:
         reference=self.source.retain(dict(kind='working-check-observation',phase=phase,result=feedback))
         keep=('status','rc','check_id','failed_check_name','context_hint','log','next_step','reason')
         self.last={k:feedback[k] for k in keep if k in feedback}
-        self.last.update(phase=phase,diagnostic=feedback.get('diagnostic','')[:650],
+        self.last.update(phase=phase,diagnostic=feedback.get('diagnostic','')[:1800],
             full_observation_sha256=reference,code_changed_since_check=False,
             notice='Actual check observation; only final independent candidate verification certifies the result. Full retained logs remain readable by check_id.')
         original=feedback.get('original_test_differential')
@@ -467,7 +467,8 @@ class ReadProgress:
             return False  # Legacy plain source replies are still real content.
         if not isinstance(value, dict):
             return False
-        return bool(value.get('already_shown_or_empty') or value.get('already_shown') or value.get('previously_shown'))
+        return bool(value.get('already_shown_or_empty') or value.get('already_shown') or value.get('previously_shown')
+                    or name == 'find_text' and value.get('matches') == [])
 
     def turn(self, results):
         # A batch is one model decision. Initial overlapping reads in a batch
@@ -484,7 +485,9 @@ class ReadProgress:
         repeated = results and all(repeated_flags)
         self.repeated = self.repeated + 1 if repeated else 0
         if self.repeated == 2:
-            return ('These source windows were already delivered. A replayed_spans field contains '
+            return ('These reads returned already delivered source or no literal search matches. '
+                    'For an empty search, use a short symbol from the exact code; do not keep searching '
+                    'long prose or JSON-escaped quotes. A replayed_spans field contains '
                     'the requested current text; it is not an empty file. Do not advance one line '
                     'at a time through the same range. Use the current source and findings to make '
                     'a scoped edit, or inspect genuinely different relevant evidence. If the task '

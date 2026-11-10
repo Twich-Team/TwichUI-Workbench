@@ -7571,3 +7571,31 @@ at1caf530; exactnewpermission saved inOWNER_SOURCE_DISCLOSURE_20261108.md/author
 No duplicatepermissionrequest. SharedCodexbuginspection/review/input-size integration
 beingimplementedoffline beforelivecomparison.198controlledaffected pass; final
 proofs/native/fullverification pending. No Codexturn orsource transmission yet.
+
+
+## November10 — autonomous recovery inspected against installed code
+
+Actual installed7b7f714/deployment97 differs from stale continuation0275725.
+Latest original vendor operation5bba26e6/session1e6cf13b:18complete responses,
+500952prompt/13128completion; nineteenth stream hit remaining implementation
+watchdog, native producer ceased/released and temporary epoch restored. Final
+usage unknown; no nineteenth tool dispatched. Two model test edits still fail631.
+No vendor acceptance. Current API counts50owner tasks/0active; prior checked
+results retained. New owner instruction permits Workbench development pushes,
+recorded separately from held addon publication.
+
+Root cause in recovery: task_sessions reconciles before advance, which blocks
+through the whole controller and restoration, then closes the failed session.
+A second reconciliation after return now creates only verified termination proof;
+unknown accounting/failure remain unchanged. Failed Lua checks now inspect all
+locals including positions beyond96 and bounded nested raw values without invoking
+metamethods. Real read-only confined replay exposes row identity changing beneath
+a cached model test mapping; no developer addon edit or solution supplied. Empty
+literal searches now count as no progress and receive useful navigation guidance.
+
+124initial integrated/92final affected checks passed; final native normal-route
+API/worker/browser rehearsal pending at entry. Static/contracts/build/lint/schema
+passed before final recovery hook; final lint and affected tests passed afterward.
+Full suites running independently; synthetic tests are not real Qwen readiness.
+Evidence: vendor-completion-20261110/recovery-* in private local share. Next is
+verified activation/current-task real Qwen continuation, not a planning stop.

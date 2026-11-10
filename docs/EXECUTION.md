@@ -52,8 +52,10 @@ alternatives, then ask only for concrete missing access if necessary.
 
 Keep the approved loopback/private-LAN scope and model-service authentication.
 Apply [preserved operating decisions](DELIVERY_OUTCOME_AUTHORITY_20261107.md):
+[November10 Workbench Git authority](OWNER_WORKBENCH_GIT_AUTHORITY_20261110.md)
+permits development checkpoint/milestone pushes. Preserve the remaining boundaries:
 no API billing/extra-credit use or purchases/reload/subscription change, no
-unauthorized external source transmission, public exposure, publication, push,
+unauthorized external source transmission, public exposure, addon publication/push,
 PR, merge or live addon changes. Keep task write scope separate from read-only
 investigation. Existing owner decisions remain valid without duplicate approval.
 Ask only for genuine product/access/spending/consequential boundaries.

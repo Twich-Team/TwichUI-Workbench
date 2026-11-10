@@ -514,6 +514,13 @@ def process_one(engine, stop_event=None, advance=None):
         except (ValueError, OSError, KeyError, TypeError):
             pass  # Unproven termination never releases a generation or task fence.
         (advance or task_session.process_one)(engine, cfg, stop_event=cancelled)
+        # advance can launch AND await the entire controller, including model
+        # restoration. Reconcile again after it returns, before closing this
+        # session; a terminal failed session is no longer selected next tick.
+        try:
+            reconcile_for_root(engine, root/'real-run')
+        except (ValueError, OSError, KeyError, TypeError):
+            pass  # Preserve unknown usage and every fence when proof is absent.
         if reason := getattr(stop_event, 'reason', None):
             state['resource_hold'] = reason
         terminal = root / "session-finished.json"

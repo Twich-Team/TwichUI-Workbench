@@ -135,6 +135,33 @@ def test_preparation_and_restart_use_same_saved_session_no_replay(store, owned_t
         assert row["status"] == "completed" and row["id"] == key
 
 
+@pytest.mark.parametrize('proof_available',[True,False])
+def test_returned_controller_gets_termination_recovery_before_terminal_delivery(
+    store, owned_template, installed, monkeypatch, proof_available
+):
+    from workbench import local_generation_recovery
+    key=approved(store,owned_template)
+    assert sessions.queue_one(store)
+    events=[]
+    def reconcile(engine,root):
+        events.append('termination-proof')
+        if not proof_available:
+            raise ValueError('Owned epoch termination is unproven')
+        return True
+    def returned(engine,cfg,stop_event):
+        events.append('controller-returned-after-restoration')
+        value=json.loads(cfg.read_text())
+        (Path(value['run_root'])/'session-finished.json').write_text(json.dumps(
+            dict(task=value['task'],status='failed',message='Retained partial response and unknown usage')))
+    monkeypatch.setattr(local_generation_recovery,'reconcile_for_root',reconcile)
+    assert sessions.process_one(store,advance=returned)
+    assert events==['termination-proof','controller-returned-after-restoration','termination-proof']
+    assert not sessions.process_one(store,advance=returned)
+    with store.connect() as c:
+        row=c.execute(select(rows).where(rows.c.id==key)).mappings().one()
+        assert row['status']=='failed'  # A termination proof never fabricates success.
+
+
 def test_queued_stop_is_idempotent_and_starts_nothing(store, owned_template, installed):
     key = approved(store, owned_template)
     sessions.queue_one(store)

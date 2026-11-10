@@ -325,6 +325,33 @@ def test_failed_working_check_retains_real_locals_and_failure_without_changing_i
         command(['bash','-c','anything'],'tests/'+test.name)
 
 
+def test_failure_observes_recent_nested_locals_without_running_metamethods(tmp_path):
+    test=tmp_path/'test_controlled.lua'
+    # A real long Lua chunk puts the important frame beyond the old96-local cut.
+    setup='\n'.join(f'local prior{i} = {i}' for i in range(110))
+    test.write_text(setup+'''
+local hostile = setmetatable({}, {
+    __index=function() error('OBSERVER CALLED INDEX') end,
+    __tostring=function() error('OBSERVER CALLED TOSTRING') end,
+    __pairs=function() error('OBSERVER CALLED PAIRS') end})
+local cycle = {}; cycle.self = cycle
+local recent = {[42]={id=71, name={text='Actual reordered label'}}}
+assert(false, 'controlled late mismatch')
+''')
+    before=test.read_bytes()
+    argv=command(['lua5.1','-e','local prelude = true',test.name],'tests/'+test.name)
+    result=subprocess.run(argv,cwd=tmp_path,capture_output=True,text=True,timeout=5)
+    assert result.returncode==1 and test.read_bytes()==before
+    assert 'recent=' in result.stderr and '"id"=71' in result.stderr
+    assert '"text"="Actual reordered label"' in result.stderr
+    assert '<cycle>' in result.stderr and 'OBSERVER CALLED' not in result.stderr
+    assert len(result.stderr)<7600
+    summary=CheckFeedback(tmp_path,['tests/'+test.name]).record(
+        dict(status='fail',rc=1,out=result.stderr),'fixed-000')
+    assert 'controlled late mismatch' in summary['diagnostic']
+    assert '"text"="Actual reordered label"' in summary['diagnostic']
+
+
 def test_reverted_workspace_loop_is_recognized_across_intervening_edits(tmp_path):
     file=tmp_path/'controlled.lua'
     file.write_text('return 1\n')

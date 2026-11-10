@@ -20,19 +20,29 @@ local function scalar(v)
     if type(v) == 'number' or type(v) == 'boolean' or type(v) == 'nil' then return tostring(v) end
     return '<' .. type(v) .. '>'
 end
-local function value(v)
+local function value(v, depth, seen)
     if type(v) ~= 'table' then return scalar(v) end
+    depth, seen = depth or 0, seen or {}
+    if seen[v] then return '<cycle>' end
+    if depth >= 3 then return '<table>' end
+    seen[v] = true
     local keys, count = {}, 0
     for k in next, v do
         count = count + 1
-        if type(k) == 'number' or type(k) == 'string' then keys[#keys+1] = k end
+        if (type(k) == 'number' or type(k) == 'string') and type(rawget(v,k)) ~= 'function' then keys[#keys+1] = k end
         if count >= 256 then break end
     end
     table.sort(keys, function(a,b) return type(a)==type(b) and a<b or type(a)<type(b) end)
-    local parts = {}
+    local parts, size = {}, 0
     for i,k in ipairs(keys) do
-        if i <= 6 or i > #keys-6 then parts[#parts+1] = scalar(k)..'='..scalar(rawget(v,k)) end
+        if i <= 6 or i > #keys-6 then
+            local part = scalar(k)..'='..value(rawget(v,k), depth+1, seen)
+            local limit = depth == 0 and 2200 or (depth == 1 and 600 or 300)
+            if size+#part > limit then parts[#parts+1]='<remaining entries omitted>'; break end
+            parts[#parts+1], size = part, size+#part
+        end
     end
+    seen[v] = nil
     return '{observed_entries='..count..(count==256 and '+' or '')..', '..table.concat(parts, ', ')..'}'
 end
 local function failure(err)
@@ -43,13 +53,17 @@ local function failure(err)
         if not info then break end
         if info.source == '@'..WB_FOCUSED then
             local locals = {}
-            for i=1,96 do
+            -- Lua permits 200 locals. Long existing tests can put the failing
+            -- value after local96; inspect the whole frame before selecting.
+            for i=1,256 do
                 local name,v = debug.getlocal(level,i)
                 if not name then break end
-                if string.sub(name,1,1) ~= '(' then locals[#locals+1] = name..'='..value(v) end
+                if string.sub(name,1,1) ~= '(' then locals[#locals+1] = {name=name, value=v} end
             end
-            for i=math.max(1,#locals-24),#locals do
-                local line = 'WB_LOCAL_CONTEXT '..info.short_src..':'..info.currentline..' '..locals[i]
+            -- Spend the bounded diagnostic on the most recently declared
+            -- values first. Never invoke user metamethods while observing them.
+            for i=#locals,math.max(1,#locals-24),-1 do
+                local line = 'WB_LOCAL_CONTEXT '..info.short_src..':'..info.currentline..' '..locals[i].name..'='..value(locals[i].value)
                 if used+#line <= 6200 then out[#out+1]=line; used=used+#line end
             end
         end

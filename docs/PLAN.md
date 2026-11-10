@@ -1,3 +1,38 @@
+# Recovery inventory and delivery order — November 10, 2026
+
+Verified starting state: development branch codex/everyday-workbench7b7f714,
+installed deployment97, private loopback/LAN preview9487; main/origin main f0314d6.
+Dependency links are untracked; original checkout edits remain untouched.
+
+| Phase A area | Actual evidence and remaining gap |
+| --- | --- |
+| Natural intake, investigation, plan, scope/run review | Installed normal APIs and browser routes; original vendor task has a source-grounded approved scope. Fresh arbitrary requests still need broader acceptance. |
+| Real provider execution and checks | Six retained real checked results revalidated at installation97. Original vendor request has ZERO accepted results after repeated model edits and test failures. |
+| Provider choice/fallback | Explicit task routes in provider_routes.py; existing real acceptance receipts need revalidation, not a new synthetic-readiness claim. Qwen/fallbackOff remains mandatory for vendor. |
+| Recovery | Latest controller completed18 responses then interrupted a nineteenth; no partial tools dispatched, usage unknown. Termination reconciliation ran before the blocking controller but missed its return. New post-return reconciliation and bounded nested failure observations are verified under controlled checks. |
+| Result/history/preview | Persisted results and ordinary history reads are installed. Vendor needs an actual checked result, readable desktop/phone diff, reload/restart and independent recovery-copy proof. |
+| PR delivery | Local preparation/recovery code exists; actual authorized addon draft PR is unproven and publication permission remains separate. |
+| Broader capabilities | Features/inspections/simulations and Phase B/C remain on the root roadmap; no unsupported task type is claimed complete. |
+
+Implementation order:
+1. Finish/checkpoint/install the connected diagnostics/navigation/recovery correction;
+   preserve latest history and independently revalidate prior results.
+2. Reconcile the exact historical interrupted local generation through supported
+   termination proof, then continue ORIGINAL vendor task under saved permission.
+   Model authors addon changes; independently check all5vendor criteria and original
+   versus candidate tests/full suite before accepting a result.
+3. Demonstrate installed result at desktop/phone, reload, quiescent restart and
+   history restore; exercise a separate ordinary browser real-provider test task.
+4. Verify local PR preparation/failure recovery; prepare any actual publication
+   request for the owner as a concrete final decision. Maintain recoverable Git
+   checkpoints and private preview with tested rollback.
+
+No routine renewal or campaign caps. Keep security, disclosure, billing, scope,
+publication, source/history preservation and model-authentication protections.
+
+---
+The earlier plan below is historical context; use current continuation and receipts.
+
 ## Current verified milestone — November 10, 2026
 
 Installed7032bc2/deployment89 retains the actual model-authored vendor patch and
