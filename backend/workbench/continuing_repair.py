@@ -125,9 +125,13 @@ def process_one(engine):
         return False
     with engine.connect() as c:
         ids = c.execute(select(task_sessions.c.task_id).where(
-            task_sessions.c.status.in_(['failed','cancelled']), task_sessions.c.finished_at.is_not(None)).distinct()).scalars().all()
+            task_sessions.c.status == 'failed', task_sessions.c.finished_at.is_not(None)).distinct()).scalars().all()
         authorized = [v for identity in ids if (v := current(c, identity))
-            and v['decision']['session_status'] in {'failed','cancelled'}]
+            and v['decision']['session_status'] == 'failed']
+        # A deliberate engineering stop awaits tested activation and the trusted
+        # continuation command; it must not start during installation history
+        # verification merely because different code has appeared. Ordinary
+        # safely settled failures still recover automatically. Owner Cancel holds.
     for value in authorized:
         # The normal continuation proof verifies dead owners/cgroups, closed edits,
         # usage, restoration and fresh provider/scope bindings before any grant.
