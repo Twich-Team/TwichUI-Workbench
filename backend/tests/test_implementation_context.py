@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from workbench.implementation_context import instruction, ReadProgress
+from workbench.implementation_context import instruction, ReadProgress, source_keys
 from workbench.real_provider import implement, BudgetError
 from workbench.real_workspace import Tools
 from workbench.real_execution import PATHS
@@ -117,6 +117,75 @@ def test_full_log_and_search_reads_archive_without_losing_current_source_or_chec
     archived=[json.loads(p.read_text())['read_exchange'] for p in (tmp_path/'attempt/context-sources').glob('*.json')
         if 'read_exchange' in json.loads(p.read_text())]
     assert all(exchange in archived for exchange in exchanges[:2])
+
+
+def current_fixture(tmp_path):
+    from workbench.implementation_context import CurrentSource
+    workspace=tmp_path/'workspace'
+    workspace.mkdir()
+    path=workspace/'source.lua'
+    path.write_text(''.join(f'local current_{i} = {i}\n' for i in range(1,301)))
+    runtime=SimpleNamespace(root=tmp_path,workspace=workspace,paths=['source.lua'],read_paths=['source.lua'],
+        enforce_storage=lambda:None,source_read_limit=45000,
+        recipe=dict(source_context=[{}],read_budget_policy='distinct-lines-v1',
+            initial_reads=[dict(path='source.lua',start=200,end=210)]))
+    messages=[dict(role='system',content='Policy'),dict(role='user',content='Scope')]
+    return path,Tools(runtime,lambda:True),CurrentSource(runtime,messages)
+
+
+def test_small_working_set_is_read_through_real_tools_and_refreshed_after_line_insertion(tmp_path):
+    path,tools,view=current_fixture(tmp_path)
+    view.prefill(tools)
+    assert view.files['source.lua']['lines'][300]=='local current_300 = 300\n'
+    original_cost=tools.read
+    assert original_cost==len(path.read_text())
+    view.hydrate(tools,['source.lua'])
+    assert tools.read==original_cost
+    path.write_text('-- model-authored inserted line\n'+path.read_text())
+    keys=view.edited('source.lua',tools)
+    assert view.files['source.lua']['lines'][301]=='local current_300 = 300\n'
+    assert view.files['source.lua']['lines'][1]=='-- model-authored inserted line\n'
+    assert len(keys)==301 and keys==view.visible_keys()
+    assert tools.read==original_cost+len(path.read_text())
+    tools.permitted=lambda:False
+    with pytest.raises(ValueError,match='Current grant'):
+        view.edited('source.lua',tools)
+    assert 'source.lua' not in view.files  # Never retain stale positions on revocation.
+
+
+def test_optional_prefill_falls_back_to_planned_windows_without_spending_reads_again(tmp_path):
+    path,tools,view=current_fixture(tmp_path)
+    view.prefill(tools)
+    cost=tools.read
+    assert view.narrow_initial() and not view.narrow_initial()
+    assert set(view.files['source.lua']['lines'])==set(range(1,81))|set(range(200,211))
+    known=view.visible_keys()
+    raw=tools.handle('read_file',dict(path='source.lua',start=299,end=300))
+    assert tools.read==cost
+    assert not source_keys(raw)<=known
+    view.read(raw)
+    assert view.files['source.lua']['lines'][300]=='local current_300 = 300\n'
+    path.write_text('x'*45001)
+    view.initial_prefill=False
+    view.prefill(tools)
+    assert not view.initial_prefill  # Large working sets keep normal scoped navigation.
+
+
+def test_old_edit_exchange_archives_only_after_the_complete_current_file_is_supplied(tmp_path):
+    path,tools,view=current_fixture(tmp_path)
+    view.prefill(tools)
+    messages=view.messages
+    edit=dict(role='assistant',tool_calls=[dict(id='edit',function=dict(name='replace_text',
+        arguments=json.dumps(dict(path='source.lua',old='old',new='new'))))])
+    reply=dict(role='tool',tool_call_id='edit',content='Edit saved')
+    messages.extend([edit,reply]+[dict(role='user',content='Latest independent failure')]*4)
+    view.edited('source.lua')
+    assert not view.compact_history() and edit in messages
+    view.hydrate(tools,['source.lua'])
+    assert view.compact_history() and edit not in messages and reply not in messages
+    assert 'local current_300' in messages[2]['content']
+    assert any(json.loads(p.read_text()).get('edit_exchange')==[edit,reply]
+        for p in (tmp_path/'attempt/context-sources').glob('*.json'))
 
 
 def test_reloading_source_into_context_does_not_turn_repetition_into_investigation_progress():

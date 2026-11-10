@@ -27,7 +27,10 @@ def approval():
 
 
 @pytest.mark.parametrize('continued',[False,True])
-def test_actual_tool_loop_can_continue_after_twenty_only_under_distinct_permission(tmp_path,continued):
+def test_actual_tool_loop_can_continue_after_twenty_only_under_distinct_permission(tmp_path,continued,monkeypatch):
+    # This isolates authority/accounting. Eager context and repetition detection
+    # have their own tests; this script intentionally delivers new lines per turn.
+    monkeypatch.setattr('workbench.implementation_context.CurrentSource.prefill',lambda *args:None)
     p=tmp_path/PATHS[0]
     p.parent.mkdir(parents=True)
     p.write_text(''.join('local controlled'+str(i)+' = 1\n' for i in range(26)))
@@ -178,7 +181,7 @@ def test_unchecked_model_edit_receives_actual_check_feedback_on_a_read_stall(tmp
                 return 'Edit saved in isolated workspace.'
             return real.handle(name,args)
     Transport.responses=[response('replace_text',dict(path=PATHS[0],old='=1',new='=2'),0)]+[
-        response('read_file',dict(path=PATHS[0],start=1,end=1),i) for i in range(1,4)]
+        response('read_file',dict(path=PATHS[0],start=1,end=1),i) for i in range(1,3)]
     if not focused_pass:
         Transport.responses += [answer()]
     Transport.bodies=[]
@@ -187,7 +190,7 @@ def test_unchecked_model_edit_receives_actual_check_feedback_on_a_read_stall(tmp
     assert checks==(['focused','candidate'] if focused_pass else ['focused'])
     assert '=2' in path.read_text()
     if focused_pass:
-        assert len(result['log'])==4 and result['completion_reason'].startswith('independent-checks-passed')
+        assert len(result['log'])==3 and result['completion_reason'].startswith('independent-checks-passed')
     else:
         assert 'CONTROLLED actual check observation' in Transport.bodies[-1]['messages'][-1]['content']
-    assert (tmp_path/'attempt/progress-check-03-focused.json').is_file()
+    assert (tmp_path/'attempt/progress-check-02-focused.json').is_file()

@@ -145,6 +145,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         messages.append(dict(role='user', content='Fresh working check of the retained model-authored edits, before this generation. '
             'Use the actual failure and local observations to repair code or your new test additions; original tests remain protected. '
             +json.dumps(feedback,ensure_ascii=True)))
+    if source_view:
+        source_view.prefill(tools)
     for turn in itertools.count():
         if not continuing and turn >= LIMITS['turns']:
             raise BudgetError('Twenty-turn limit consumed; no further inference')
@@ -190,6 +192,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         counted = None
         if transport is LocalHTTP and hasattr(ownership, 'count_input_tokens'):
             counted = ownership.count_input_tokens(body, min(end, time.monotonic()+3))
+            if turn==0 and counted+body['max_tokens']>32768 and source_view and source_view.narrow_initial():
+                counted=ownership.count_input_tokens(body,min(end,time.monotonic()+3))
             if counted+body['max_tokens'] > 32768:
                 while counted > (30272 if source_view else 24576) and (
                         source_view.compact_history() if source_view else compact_source(messages, runtime)):
@@ -202,6 +206,9 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         elif len(json.dumps(messages).encode())+body['max_tokens'] > 32768:
             # Conservative fallback for non-production scripted transports only.
             raise BudgetError('Context reserve exhausted; no request sent')
+        if turn==0 and source_view:
+            source_progress.known.update(source_view.visible_keys())
+            source_progress.visible.update(source_view.visible_keys())
         if not permitted() or (stop_event and stop_event.is_set()):
             raise BudgetError('Grant changed during context assembly; no request sent')
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
@@ -323,8 +330,10 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                         result = 'The replacement left the file unchanged. Use a different replacement.'
                     elif source_view:
                         path=json.loads(call['function']['arguments'])['path']
-                        source_view.edited(path)
                         source_progress.edited(path)
+                        keys=source_view.edited(path,tools)
+                        source_progress.known.update(keys)
+                        source_progress.visible.update(keys)
                 elif repair and name in ('read_file', 'find_text', 'read_check_log'):
                     repeated_log = name == 'read_check_log' and bool(
                         json.loads(result).get('already_shown_or_empty') or json.loads(result).get('previously_shown'))
