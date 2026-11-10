@@ -100,6 +100,15 @@ the audit's then-current fresh-owner-renewal conclusion for future recovery, not
 the historical limits or provenance of either actual browser decision. New
 execution authority must be recorded distinctly by supported application owners.
 
+[Continuing vendor permission](OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md)
+preserves the later exact owner direction: same approved task/scope, local Qwen,
+fallback Off and publication held, through ordinary failures, repairs and restarts.
+This is distinct continuing authority, not a rewrite of old one-attempt approvals.
+The later steer also authorizes a separate small isolated real-provider Workbench
+self-check after vendor success, non-publishing PR preparation/recovery checks,
+and verification of automatic release retention. These are unfinished obligations,
+not evidence that the vendor result or reusable workflow has already passed.
+
 [Vendor response delivery/recovery](VENDOR_EXECUTION_STREAM_RECOVERY_20261110.md)
 records the actual second run, preserved partial usage, known model edit, verified
 local termination and distinct express same-task recovery authority. It does not

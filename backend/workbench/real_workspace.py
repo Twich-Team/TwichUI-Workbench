@@ -879,7 +879,11 @@ class Tools:
             if key == 'candidate':
                 return json.dumps(self.runtime.candidate_feedback(self.permitted), ensure_ascii=True)
             cwd = ws/'tests' if key == 'focused' else ws
-            result = self.runtime.check(commands[key], cwd)
+            command = commands[key]
+            if key == 'focused' and (getattr(self.runtime, 'recipe', None) or {}).get('repair_cycle'):
+                from workbench.lua_failure_context import command as observed_lua
+                command = observed_lua(command, self.runtime.recipe['focused_test'])
+            result = self.runtime.check(command, cwd)
             require_safe_check(result)
             # Keep feedback valid JSON even when a check emits long/escaped output.
             if hasattr(self.runtime, 'feedback'):

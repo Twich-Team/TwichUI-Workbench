@@ -1,9 +1,8 @@
 """Current-attempt usage from bound immutable observations; never historical repair."""
 import hashlib
 import json
+import re
 from pathlib import Path
-
-from workbench.real_execution import LIMITS
 
 
 def summarize(root, request_id, fence, model):
@@ -31,7 +30,11 @@ def summarize(root, request_id, fence, model):
             invalid_records.append(str(path.relative_to(root)))
             return None
 
-    for turn in range(LIMITS['turns']):
+    # Enumerate immutable observations rather than silently dropping everything
+    # after an obsolete request count. Sparse/missing receipts remain unknown.
+    turns = sorted({int(m[1]) for p in folder.iterdir() if
+        (m := re.fullmatch(r'(?:request|turn)-([0-9]+)\.json', p.name))}) if folder.is_dir() else []
+    for turn in turns:
         marker = folder/f'request-{turn:02}.json'
         response = folder/f'turn-{turn:02}.json'
         if not marker.exists() and not response.exists():

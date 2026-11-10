@@ -1,12 +1,17 @@
 ## Current verified milestone — November 10, 2026
 
-Installed28b8c87/deployment87 corrects the original vendor run's source-read loop
-and settled no-edit continuation. The owner-approved first run consumed20 complete
-responses without an edit; it remains failed with its usage preserved. The original
-task now offers a fresh run decision, not another plan approval. Browser/restart/
-history/restore and complete final suites pass. Follow [current continuation](CONTINUATION.md)
-before new work. Actual fresh task consent is required; no engineering renewal or
-campaign cap. The sequences below preserve prior planning and full product scope.
+Installed7032bc2/deployment89 retains the actual model-authored vendor patch and
+failed checks. Its last operation settled after20 complete responses; the fixed
+exchange counter ended useful work. No unknown generation remains in that operation;
+normal model service restored. Vendor acceptance is unfinished. The owner's new
+[continuing permission](OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md) authorizes
+same-scope isolated Qwen recovery without routine renewal, with fallback Off and
+publication held. Working code records this separately, removes the fixed exchange
+stop only under that authority, retains all usage, adds observable working-test
+failure values and safe worker continuation. Verify/install/demonstrate; then a small
+ordinary real-provider self-check, durable results, non-publishing PR recovery and
+automatic storage retention. Follow [continuation](CONTINUATION.md); old caps and
+then-current renewal conclusions below are historical, not active instructions.
 
 ## Earlier visual delivery plan — November 9, 2026
 

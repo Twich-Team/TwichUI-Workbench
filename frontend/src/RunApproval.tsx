@@ -67,6 +67,11 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
 
   if(query.isPending)return <p>Loading task offer…</p>;
   if(!current)return <div role="alert"><p>The current run decision is unavailable. The plan or its permissions may have changed.</p><Button variant="secondary" onClick={()=>void query.refetch()}>Reload run decision</Button></div>;
+  if(current.continuing_permission)return <section className="soft-callout" aria-label="Continuing task permission">
+    <h3>Permission to continue is saved</h3><p role="status">{current.continuing_permission.message}</p>
+    <p>Each operation is monitored for stalled activity and resource use. Reloads and ordinary failures do not require another run decision.</p>
+    <details><summary>Latest operation record</summary><p>{current.continuing_permission.operation_status}</p>{receipt&&<pre>{JSON.stringify(receipt,null,2)}</pre>}</details>
+  </section>;
   if(receipt)return <section className="soft-callout" aria-label="Saved task run approval">
     <h3>{receipt.status==='pending'?'Run permission saved · Waiting to apply':receipt.status==='applied'?'Run approved':'Run permission needs attention'}</h3>
     <p role="status">{receipt.status==='pending'?'Workbench saved your permission. It will check the offer again before applying it.':receipt.status==='applied'?'Your decision is recorded for this one attempt.':receipt.message}</p>

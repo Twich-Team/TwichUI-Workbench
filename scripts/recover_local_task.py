@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--scope-approval-id", required=True)
     parser.add_argument("--owner-instruction", type=Path, required=True)
     parser.add_argument("--owner-sha256", required=True)
+    parser.add_argument("--continuing", action="store_true", help="Record express continuing permission for this same local repair; never infer it from a one-attempt approval")
     args = parser.parse_args()
     if (
         args.database.is_symlink()
@@ -34,7 +35,8 @@ def main():
             parser.error("Current existing schema0012 required; this command never migrates")
     ref = dict(intake_id=args.intake_id, task_id=args.task_id, approval_id=args.scope_approval_id)
     print(
-        json.dumps(owner_task.recover_local(engine, ref, args.owner_instruction, args.owner_sha256))
+        json.dumps(owner_task.recover_local(engine, ref, args.owner_instruction, args.owner_sha256,
+                                           continuing=args.continuing))
     )
 
 

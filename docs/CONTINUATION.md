@@ -1,57 +1,21 @@
 # Vendor repair — current continuation
 
-Follow the root owner documents and complete
-[express same-task recovery direction](OWNER_VENDOR_DELIVERY_AUTHORITY_20261110.md).
-Original vendor task2dc5b8ba remains unfinished. No campaign caps or routine
-owner renewals. Qwen selected/fallbackOff/policy18, same approved scope2/plan24.
-No publication, external disclosure, spending or live-addon installation.
+Follow the root owner documents and [continuing task permission](OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md), distinct from [prior express recovery](OWNER_VENDOR_DELIVERY_AUTHORITY_20261110.md). No campaign caps, routine renewals, Codex vendor use, fallback, publication or live-addon installation.
 
-Installed **e963f01/deployment88**, seal
-`e5861efcef22d164d1b1e96bbbde5d7f0c640b4431120ec651e81fea792f075e`.
-History, four services/network/browser protections and six prior checked real
-results survived installation. Owner-instruction recoveryc09059f4 was genuinely
-recorded from exact sourcec71b75c5, not forged browser consent. Its execution
-5b6ce29f failed after14COMPLETE responses: useful code/test edits and failing
-focused checks, then context reserve before another request. No unknown turn;
-grant revoked, controller settled, normal model restored (epoch1446372).
-Original four browser decisions, old failures/unknown usage and model patch
-remain unchanged. See [current evidence](VENDOR_EXECUTION_STREAM_RECOVERY_20261110.md).
+Installed **7032bc2/deployment89**. Original vendor intake2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd / task intake-2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd-24-implementation retains approved proposal24, scope2 and original approval59b032e5-f4a5-45cb-a418-50b4da3f020f. Policy18: Qwen selected, fallbackOff. All prior history and six real checked results are preserved.
 
-Working-copy context correction is verified in focused/controlled native process
-checks: lossless private source archival and token recount, actual prior failed
-check feedback and exact prior model diff on continuation, honest visible-source
-loop detection, and dashboard session precedence over historical runs.
-Current independent assertions remain strict. No vendor checked result yet.
+Latest run **3faa6004-c769-50a5-8ff0-1fd1af3bb79f**, session547211da-5289-5a17-a27f-b0e0ed362c37, settled failed after20 COMPLETE responses (477478 prompt+4286 completion tokens); no unknown turn. Further actual Qwen Items.lua edits and focused failures, then obsolete fixed exchange stop. Normal model restored epoch1550513; grant revoked/controller settled. Do not replay this operation or erase prior unknown usage from run8cc5bce6. Its known unfinished patch is retained by native continuation, not a checked result.
 
-NEXT: finish final checks/checkpoint; prepare/verify/seal/install from the current
-installed e963f01 using existing operations; refresh quiescent history fingerprint.
-Then scripts/recover_local_task.py records a fresh one-operation grant under the
-SAME express owner direction, original scope approval59b032e5 and immutable
-proposal24. Do not click an owner browser approval or reset an old grant.
-Use actual failed diagnostics and model-authored work, not developer addon code.
-Observe the resulting run; never duplicate active/uncertain execution.
+Working code now records distinct continuing owner provenance, null exchange limit only under that explicit authority, worker-owned same-scope settled recovery, real usage after20, current permission/cancel fencing, repeated rejected-workspace detection, and bounded locals in FAILED working Lua checks. Original/candidate independent checks unchanged. A continuation starts by observing its retained model work with the actual focused check. There is no developer addon solution.
 
-Current private evidence:
-`/home/rich/.local/share/TwichUI-Workbench/vendor-completion-20261110`.
-`context-exhaustion-settled-proof.json` contains native final records/usage;
-`actual-bound-next-context-proof.json` proves the original task's next context
-contains the real failing check and exact saved model diff without provider calls.
-`memory-native-process-rehearsal.log` covers forced compaction across separate
-API/worker/browser processes with native Lua and scripted providers.
-The current new instruction and its raw patch are private evidence, not a supplied
-addon solution or checked result. Independent vendor-criteria Lua program is
-prepared outside the model/app input for additive original/candidate checking.
+Private evidence: /home/rich/.local/share/TwichUI-Workbench/vendor-completion-20261110. continuing-focused-final.log passes77 checks including automatic exactly-once recovery, stop denial, real>20 controlled turns and accounting. Full suites, static/frontend and native separate-process rehearsal are being verified; inspect their actual logs before deployment. The first native rehearsal launch lacked WorkingDirectory and ran no test; the corrected second launch records actual native testing. Do not call either a real-provider pass.
 
-Supported activation scripts/current rollback:
-`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-e963f01`.
-Generator vendor-planning-recovery-20261109/prepare-next.py takes e963f01; preserve
-current compatibility function declarations. d55962b was NEVER activated. Do not
-repeat old full suites merely for status; repeat affected checks after real changes.
-Old full2110backend/8opt-in skips+36frontend and subsequent150+native checks are
-retained accurately; never claim controlled checks as real-provider acceptance.
+Independent original addon verification: independent-vendor-original.json shows ORIGINAL tests pass then an assertion that late names must refresh after an earlier notification FAILS in original production. Game API simulation, source unchanged, no provider call. The private independent-vendor-criteria.lua was not supplied to Qwen. Finish candidate comparison after the model creates a checked candidate.
 
-Only approved addon writes: !!!TwichUI/npcs/Items.lua and tests/test_npcs_stock.lua;
-read Stock.lua as approved. Real repair must satisfy all five reviewed late-name,
-link/filter/presentation/request criteria, including original-production failure.
-Finish original browser result, reload/restart/history/independent backup and
-normal model/auth/maintenance restoration. Keep broader product gaps explicit.
+NEXT: finish relevant checks; checkpoint/seal/verify/install from installed7032bc2 using vendor-planning-recovery-20261109/prepare-next.py 7032bc2. Preserve quiescent history fingerprint/mode600 and reuse valid prior evidence honestly. Use scripts/recover_local_task.py --continuing with the exact new owner file/hash and original scope ref to record this continuing authority. The normal worker owns the fresh operation and future settled recoveries; no fake browser approval, DB success edits or old-grant resets.
+
+Observe actual original-task native request/tool/check receipts. Preserve actual failure values and let Qwen repair its own work. If repeated unchanged work is stopped, investigate and change approach without another owner renewal. Uncertain consequential effects must settle first. Only writes Items.lua and tests/test_npcs_stock.lua; Stock.lua read-only. No broader addon work/disclosure.
+
+Complete all five approved vendor criteria, browser original result, desktop/phone/reload, result/history restart, independent backup/restore, model/auth/maintenance restoration and safe cleanup. Then demonstrate a separate small ordinary real-Qwen Workbench self-check through browser-to-result (owner expressly permits this), non-publishing PR preparation/recovery, and automatic release retention preserving installed/recovery copies/history. Do not invent a new addon product task or publish. Keep broader product gaps and offline-game limitations explicit.
+
+Existing operations / rollback: /home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-7032bc2. Do not restart a healthy active operation for a progress report or cutover. Source/manifests/seals must be recorded before activation. Checkpoints are not stop points; continue under standing authority.

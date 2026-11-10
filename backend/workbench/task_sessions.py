@@ -230,6 +230,7 @@ def _config(engine, row):
         reserved_tokens_per_cycle=24000,
         original_attempt_token_ceiling=24000,
         original_turns=20,
+        exchange_policy='progress-aware-v1' if policy['budget']['turns'] is None else 'historical-twenty-turn-v1',
         evidence_ceiling_bytes=64 << 20,
     )
     durable(package_root / "BUDGET_BASELINE.json", json.dumps(budget, sort_keys=True).encode())

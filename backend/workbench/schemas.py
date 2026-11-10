@@ -349,7 +349,7 @@ class TaskBudget(StrictModel):
     offer_fingerprint: str = Field(pattern=r'^[a-f0-9]{64}$')
     overall_seconds: Literal[5400] = 5400
     implementation_attempts: Literal[1] = 1
-    turns: Literal[20] = 20
+    turns: Literal[20] | None = 20
     generated_tokens: Literal[24000] = 24000
     response_tokens: Literal[2500] = 2500
     implementation_seconds: Literal[1200] = 1200
@@ -394,7 +394,7 @@ class OwnerInstructionProvenance(StrictModel):
     authorization_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
     authorization_path: str = Field(min_length=1, max_length=1024)
     actor: Literal['owner']
-    purpose: Literal['supported-task-to-draft-pr-v1', 'same-task-local-recovery-v1']
+    purpose: Literal['supported-task-to-draft-pr-v1', 'same-task-local-recovery-v1', 'same-task-local-until-result-v1']
 
 
 class ExecutionContinuationView(StrictModel):

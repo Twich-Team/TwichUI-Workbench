@@ -35,7 +35,7 @@ class CheckFeedback:
             (i, line)
             for i, line in enumerate(lines)
             if re.search(
-                r"FAILED|AssertionError|assertion failed|Error:|error:|lua5?\.1:|Traceback|expected|actual",
+                r"FAILED|AssertionError|assertion failed|Error:|error:|lua5?\.1:|Traceback|expected|actual|WB_LOCAL_CONTEXT",
                 line,
                 re.I,
             )
@@ -156,6 +156,7 @@ class RepairFeedback:
         self.content = self.writable_content()
         self.seen = set()
         self.edit_required = False
+        self.rejected = {}
 
     def writable_content(self):
         return tuple(hashlib.sha256((self.runtime.workspace / path).read_bytes()).digest()
@@ -179,6 +180,17 @@ class RepairFeedback:
 
     def checked(self, name, feedback):
         if feedback["status"] == "fail":
+            key = (self.writable_content(), name, feedback.get('diagnostic'), feedback.get('reason'))
+            self.rejected[key] = self.rejected.get(key, 0) + 1
+            if self.rejected[key] >= 3:
+                raise ToolBudgetExceeded('rejected_workspace_cycle',
+                    'Returned to the same previously rejected workspace and failure three times. '
+                    'Saved edits and diagnostics require a changed strategy, not unchanged replay.')
+            if self.rejected[key] == 2:
+                feedback = {**feedback, 'previously_rejected_workspace': True,
+                    'strategy_guidance': 'This exact workspace already failed this check, even if other edits occurred between checks. '
+                        'Inspect the failing test setup and actual local observations; distinguish a defect in your new test from a production defect. '
+                        'Do not cycle back to the same replacement. Existing original assertions must remain intact.'}
             self.runtime.check_failure = dict(
                 name=feedback.get("failed_check_name", name),
                 diagnostic=feedback.get("diagnostic") or feedback.get("reason", "Check failed."),

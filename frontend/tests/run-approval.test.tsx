@@ -73,6 +73,21 @@ it('displays an applied receipt as history while explaining current certificatio
   expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
 });
 
+it('keeps continuing task permission through a failed operation without another approval button',async()=>{
+  const fetcher=vi.fn(async(_path:string,_init?:RequestInit)=>({ok:true,json:async()=>({...available,receipt:null,
+    continuing_permission:{decision_id:'explicit-owner-instruction',operation_status:'failed',
+      message:'Your continuing permission covers this approved local repair. Publication remains held.'}})}));
+  vi.stubGlobal('fetch',fetcher);
+  const {view}=form();
+  await screen.findByRole('heading',{name:'Permission to continue is saved'});
+  expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+  expect(screen.queryByRole('button',{name:/Approve/})).not.toBeInTheDocument();
+  expect(screen.getByText(/Publication remains held/)).toBeVisible();
+  view.unmount();form();
+  await screen.findByRole('heading',{name:'Permission to continue is saved'});
+  expect(fetcher.mock.calls.every(([,init])=>!init?.method||init.method==='GET')).toBe(true);
+});
+
 it('shows the exact broader scope when an offer can change addon code',async()=>{
   const offer={...available.offer,paths:['!!!TwichUI/example.lua']};
   vi.stubGlobal('fetch',vi.fn(async()=>({ok:true,json:async()=>({...available,offer})})));

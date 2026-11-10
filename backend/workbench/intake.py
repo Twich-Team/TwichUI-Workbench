@@ -331,6 +331,8 @@ def receipt_view(row):
 
 
 def decide(engine, identity, body):
+    if body.run_budget is not None and body.run_budget.turns is None:
+        raise HTTPException(409, 'Continuing repair needs its distinct trusted owner instruction; a plan approval cannot create it')
     payload = body.model_dump(mode='json')
     if body.run_budget is None:
         payload.pop('run_budget', None)

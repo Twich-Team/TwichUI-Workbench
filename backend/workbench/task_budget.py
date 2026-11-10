@@ -317,6 +317,9 @@ def permission(c, approval, *, require_current=True, admitting=False):
     if not raw:
         return None
     budget = TaskBudget.model_validate(raw)
+    from workbench.continuing_repair import permitted_budget
+    if budget.turns is None and not permitted_budget(approval):
+        raise ValueError('Continuing local repair needs its distinct explicit owner instruction')
     if require_current and budget.activate_once:
         from workbench.db import task_sessions
 
@@ -556,6 +559,14 @@ def run_context(engine, intake_id, task_id):
                 budget_message = 'Saved approval no longer authorizes execution: ' + str(detail)
         proposal = intake.require(c, intake.proposals, task['proposal_id'])
         result = offer_view(c, proposal, selected)
+        from workbench.continuing_repair import current as continuing_current
+        continuing = continuing_current(c, task_id)
+        if continuing:
+            result['continuing_permission'] = dict(
+                decision_id=continuing['decision']['id'],
+                message='Your continuing permission covers isolated local-Qwen repairs for this approved task. '
+                    'Ordinary settled failures can recover without another approval. Scope, provider, cancellation and independent checks still apply. Publication remains held.',
+                operation_status=continuing['decision']['session_status'])
     if budget_message:
         result['message'] = budget_message
         result['approval_hold'] = budget_message
@@ -572,6 +583,8 @@ def approve_run(engine, intake_id, task_id, body):
     """
     from workbench import intake, task_execution
 
+    if body.run_budget.turns is None:
+        raise HTTPException(409, 'Continuing repair permission is recorded through its trusted owner-instruction ingress, not a one-attempt browser command')
     request = body.model_dump(mode='json')
     with write_transaction(engine) as c:
         old = c.execute(select(proposal_decisions).where(

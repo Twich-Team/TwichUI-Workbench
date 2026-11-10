@@ -68,7 +68,7 @@ def test_changed_saved_work_or_binding_cannot_be_applied(tmp_path,fault):
 
 @pytest.mark.usefixtures('installed')
 @pytest.mark.parametrize('has_edits', [True, False])
-@pytest.mark.parametrize('authorization', ['browser', 'owner-instruction'])
+@pytest.mark.parametrize('authorization', ['browser', 'owner-instruction', 'continuing'])
 def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_denies_active_or_unknown(
     client,headers,store,monkeypatch,has_edits,authorization,tmp_path,
 ):
@@ -159,17 +159,40 @@ def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_d
         h=hashlib.sha256(auth.read_bytes()).hexdigest()
         ref=dict(intake_id=item['id'],task_id=selected['snapshot']['reviewed_task']['ref']['task_id'],
                  approval_id=scope['command_id'])
-        renewed_ref=owner_task.recover_local(store,ref,auth,h)
-        assert owner_task.recover_local(store,ref,auth,h)==renewed_ref
+        continuing=authorization=='continuing'
+        renewed_ref=owner_task.recover_local(store,ref,auth,h,continuing=continuing)
+        assert owner_task.recover_local(store,ref,auth,h,continuing=continuing)==renewed_ref
         renewed['command_id']=renewed_ref['approval_id']
         detail=client.get('/api/intake/'+item['id']).json()
         receipt=next(d for d in detail['decisions'] if d['id']==renewed_ref['approval_id'])
         provenance=receipt['payload']['execution_continuation']
-        assert provenance['owner_provenance']['purpose']=='same-task-local-recovery-v1'
+        assert provenance['owner_provenance']['purpose']==('same-task-local-until-result-v1' if continuing else 'same-task-local-recovery-v1')
+        assert receipt['payload']['run_budget']['turns']==(None if continuing else 20)
         assert 'browser_request' not in provenance
         assert receipt['payload']['run_budget']['publication']=='hold'
         assert receipt['payload']['run_budget']['fallback'] is False
         assert client.post(endpoint,headers=headers,json={**renewed,'owner_provenance':provenance['owner_provenance']}).status_code==422
+        if continuing:
+            # Current session ownership is durable; an HTTP caller cannot claim
+            # continuing authority merely by setting turns=null.
+            assert client.post(endpoint,headers=headers,json={**renewed,'command_id':str(uuid4()),
+                'run_budget':{**renewed['run_budget'],'turns':None}}).status_code==409
+            with write_transaction(store) as c:
+                c.execute(task_sessions.insert().values(id=renewed_ref['approval_id'],task_id=ref['task_id'],
+                    snapshot={},binding='controlled-continuing-session',status='pending',message='Queued',
+                    state={},created_at=now(),finished_at=None))
+            from workbench.continuing_repair import current
+            with store.connect() as c:
+                assert current(c,ref['task_id'])['provenance']['authorization_sha256']==h
+            projected=client.get(endpoint).json()
+            assert projected['continuing_permission']['decision_id']==renewed_ref['approval_id']
+            with write_transaction(store) as c:
+                c.execute(task_sessions.update().where(task_sessions.c.id==renewed_ref['approval_id']).values(
+                    state=dict(cancel_requested=True)))
+            with store.connect() as c:
+                assert current(c,ref['task_id']) is None
+            with write_transaction(store) as c:
+                c.execute(task_sessions.update().where(task_sessions.c.id==renewed_ref['approval_id']).values(state={}))
     with store.connect() as c:
         old=c.execute(select(requests).where(requests.c.id==rid)).mappings().one()
         assert old['result']['usage']==usage and old['status']=='failed'
@@ -190,3 +213,31 @@ def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_d
     continuation.restore(fresh,lambda:True)
     assert tree(fresh.workspace)==old_tree
     assert (Path(os.environ['WORKBENCH_RESEARCH_ROOT'])/PRODUCTION).read_text()==BUGGY
+    if authorization=='continuing':
+        # A different worker/restart discovers the stored permission, verifies
+        # actual settlement and records exactly one new bound operation.
+        gid2,rid2=str(uuid4()),str(uuid4())
+        durable(new.parent/'lease-controller-result.json',b'{"restoration":{"restored":true}}')
+        durable(new/('ownership-'+rid2+'.json'),json.dumps(dict(owner=dict(pid=999999998,boot='dead',start='0'),
+            cgroup='/sys/fs/cgroup/workbench-real-controlled-next-absent')).encode())
+        with write_transaction(store) as c:
+            next_linked=task_execution.snapshot(c,**renewed_ref)
+            fresh_snapshot=dict(workflow_task=next_linked,task_budget=dict(decision_id=renewed_ref['approval_id']),
+                recovery=fresh.recovery_identity(),runtime=fresh.identity())
+            c.execute(grants.insert().values(id=gid2,snapshot=fresh_snapshot,binding='controlled-second-grant',
+                issued_at=now(),expires_at=now(),revoked_at=now()))
+            c.execute(requests.insert().values(id=rid2,grant_id=gid2,payload={},status='failed',fence=str(uuid4()),
+                message='Settled operation watchdog',created_at=now(),started_at=now(),finished_at=now(),
+                result=dict(error='BudgetError: Attempt token or wall budget exhausted',usage=usage)))
+            c.execute(task_sessions.update().where(task_sessions.c.id==renewed_ref['approval_id']).values(
+                status='failed',finished_at=now()))
+        from workbench import continuing_repair
+        assert continuing_repair.process_one(store)
+        assert not continuing_repair.process_one(store)  # Duplicate tick waits for queue ownership.
+        with store.connect() as c:
+            records=c.execute(select(proposal_decisions).where(proposal_decisions.c.proposal_id==proposal['id'])).mappings().all()
+            latest=max(records,key=lambda r:r['created_at'])
+            assert latest['id']!=renewed_ref['approval_id']
+            assert latest['payload']['execution_continuation']['owner_provenance']==provenance['owner_provenance']
+            assert latest['payload']['run_budget']['turns'] is None
+            assert len(c.execute(select(requests)).all())==2  # Recording permission dispatches no model itself.

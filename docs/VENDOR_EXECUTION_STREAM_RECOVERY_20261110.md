@@ -140,3 +140,44 @@ Controlled integrated checks and native separate API/worker/browser rehearsal
 force the context overflow/archival/reread path and pass. Next remains verified
 activation, real-Qwen continuation on ORIGINAL task, meaningful independent bug
 acceptance and durable installed result. No additional owner renewal is needed.
+
+## Installed89 and continuing permission
+
+7032bc2/deployment89 was actually installed with history and all six prior real
+results retained. Original task execution3faa6004 produced20 COMPLETE responses,
+477478 prompt and4286 completion tokens. It made additional Items.lua edits and
+received failing focused checks, then hit the fixed20-request stop. Model/server
+restoration passed and the session/grant settled; no unknown turn in this run.
+Source compaction was exercised in real Qwen: input dropped from about30k to23k
+tokens, then generation continued. This did not establish a correct vendor patch.
+
+The existing private independent checker exposed the original reported defect
+with original production and original passing tests: a late name after an earlier
+item notification did not refresh. Game APIs were simulated; no model call or
+source write. This checker was not supplied as the model's answer or inputs.
+
+The owner's later direction is saved exactly in
+OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md. Working implementation adds distinct
+same-task-local-until-result-v1 provenance and turns=null ONLY at trusted ingress.
+Earlier browser decisions and grants are unchanged. Public/model inputs cannot
+create this authority. Every operation still has fresh scope/work/provider bindings,
+expiry, real token/time/storage controls, revocation, owner/cgroup settlement and
+independent verification. A worker can renew settled failed operations under this
+same saved instruction; a stop/cancel, scope change, uncertain effects or a deliberate
+unchanged-work loop does not automatically replay. Loop stops need engineering
+diagnosis and a changed approach, not an owner renewal.
+
+Working focused tests now preserve real bounded locals at the failure. The original
+and candidate independent checks remain unchanged. Continued work begins with a
+fresh focused observation of retained model edits rather than exhaustive rereading
+or uncritically trusting old diagnostics. Exact repeated rejected workspaces are
+detected even after intervening edits. Usage enumeration covers all requests after20,
+preserving missing receipts as unknown. UI explains continuing permission without
+another run button; cancellation remains with the existing session owner.
+
+Verification is in vendor-completion-20261110/continuing-*.log; status below must
+distinguish those controlled checks from the next installed real-Qwen execution.
+The latest steer adds a separate small ordinary browser-to-result real-provider
+Workbench self-check after vendor success, PR preparation/failure/recovery without
+publication, and ongoing automatic release-retention proof. None is yet claimed
+complete. No new spending, disclosure, live-addon install or publication authority.

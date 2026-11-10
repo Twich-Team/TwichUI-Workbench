@@ -139,8 +139,12 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                     renewal = task_budget.run_context(engine, identity, eligible[0]['id'])
                     cycle = (renewal.get('offer') or {}).get('repair_cycle') or {}
                     if renewal.get('available') and not renewal.get('receipt') and cycle.get('continuation'):
-                        phase = 'needs_approval'
-                        fresh_run_decision = True
+                        if renewal.get('continuing_permission'):
+                            phase = 'held'
+                            preparation_message = 'Continuing repair permission is saved. Workbench is checking safe recovery; no renewed approval is needed.'
+                        else:
+                            phase = 'needs_approval'
+                            fresh_run_decision = True
                 if relevant:
                     if relevant.get('candidate_id') and phase not in ACTIVE | {'queued'}:
                         result_id = relevant['id']

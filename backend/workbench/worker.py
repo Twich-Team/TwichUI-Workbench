@@ -101,6 +101,7 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
     from workbench.preparation_resources import process_one as recover_storage
     if recover_storage(engine):
         return True
+    from workbench.continuing_repair import process_one as recover_local_repair
     return (
         process_one(engine, crash)
         or verification.process_one(engine)
@@ -108,6 +109,7 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
         or implementation.process_one(engine, crash)
         or pr_preparation.process_one(engine, crash, stop_event=stop_event, publisher=publisher)
         or task_sessions.queue_one(engine)
+        or recover_local_repair(engine)
         or task_sessions.process_one(engine, stop_event=stop_event)
         or real_execution.process_one(engine, runtime=runtime, stop_event=stop_event)
         or planning_worker.apply_one(engine)

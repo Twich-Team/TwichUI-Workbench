@@ -1,19 +1,9 @@
-# Current — vendor patch exists, independent acceptance unfinished
+# Current — vendor repair remains unfinished
 
-Following the Project Working Philosophy, installed e963f01/deployment88 preserves
-history, prior checked results and private-network protections. Real Qwen made
-further addon/test edits and received real failing test feedback under the explicit
-same-task owner-instruction grant. The run then safely failed at context capacity
-before another generation;14complete receipts, original approvals and all prior
-unknown usage remain recorded. Normal model access restored; no active owned call.
+Following the Project Working Philosophy, installed7032bc2/deployment89 preserves history, six prior real checked results and private-network protections. Latest real Qwen run made further edits but settled after20 complete responses at the obsolete fixed request stop. No checked vendor result yet; model restored, no uncertain active generation in that operation. Old unknown usage remains unchanged.
 
-A verified working-copy correction now archives older source losslessly, retains
-actual prior failures and the exact model-authored diff for continuation, and
-corrects the dashboard's historical-run override. Controlled native process/browser
-checks pass; this is not a completed vendor repair. Next: install the verified
-revision and continue the original task through fresh supported authority, without
-another routine owner approval.
+The owner explicitly grants continuing same-scope local-Qwen repair permission. Working code records this distinctly, permits useful work beyond20, retains actual usage/stop/scope/resource protections, improves real working-test diagnostics and renews safely settled operations through the worker. Verification is ongoing before activation. No renewed owner permission is needed for ordinary recovery.
 
-[Continuation](CONTINUATION.md) · [Evidence](VENDOR_EXECUTION_STREAM_RECOVERY_20261110.md) ·
-[Exact owner authority](OWNER_VENDOR_DELIVERY_AUTHORITY_20261110.md).
-Full broader product remains unfinished; no live-addon change or publication.
+After vendor success: authorized separate ordinary real-provider self-check, restart/durable result, non-publishing PR preparation/recovery and automatic release retention. These and the broader product remain unfinished. No live-addon installation or publication.
+
+[Continuation](CONTINUATION.md) · [Evidence](VENDOR_EXECUTION_STREAM_RECOVERY_20261110.md) · [Continuing permission](OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md).
