@@ -92,3 +92,10 @@ assistant finding about a specific recorded offer/approval and its disclosed bou
 not an owner-authored policy amendment. It checks the prior served UI, actual
 decision and settled execution against standing direction. Later explicit owner
 clarification takes precedence. No new inference or approval was manufactured.
+
+[Owner vendor delivery authority](OWNER_VENDOR_DELIVERY_AUTHORITY_20261110.md) is
+the complete exact later owner instruction. It authorizes necessary subsequent
+isolated local-Qwen recovery for this same approved vendor outcome. It supersedes
+the audit's then-current fresh-owner-renewal conclusion for future recovery, not
+the historical limits or provenance of either actual browser decision. New
+execution authority must be recorded distinctly by supported application owners.
