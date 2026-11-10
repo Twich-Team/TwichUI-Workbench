@@ -13,7 +13,7 @@ from workbench.db import real_execution_grants, real_execution_requests, real_pu
 from workbench.real_workspace import durable
 
 
-def advance_local(engine, database, outcome, planner, *, example="  ALICE ", native=False, staged=False, bug_edit=None, bug_test_edit=None, codex_route=None):
+def advance_local(engine, database, outcome, planner, *, example="  ALICE ", native=False, staged=False, bug_edit=None, bug_test_edit=None, codex_route=None, replay_reads=False):
     from workbench import everyday
     from test_regression_evidence import ControlledPreparer
     from test_real_transport import final_response, scripted_http, tool_response
@@ -113,6 +113,16 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
         check = tool_response([('run_check', dict(name='candidate'))])
         edit = tool_response([('replace_text', item) for item in [bug_edit,bug_test_edit] if item]) if bug_edit else scripted_edit
         tape.steps = [read, edit, check, final_response()]
+        if replay_reads:
+            assert bug_edit and runtime.recipe.get('repair_cycle')
+            replay = tool_response([reads[0]])
+            def after_reread(body):
+                source = [json.loads(m['content']) for m in body['messages'] if m['role']=='tool'
+                          and '"replayed_spans"' in m['content']][-1]
+                assert source['already_shown_or_empty'] and source['replayed_spans'][0]['text']
+                assert any('not an empty file' in m.get('content','') for m in body['messages'] if m['role']=='user')
+                return edit
+            tape.steps = [read, replay, replay, after_reread, check, final_response()]
         if outcome == 'fail':
             # Repeating a failed check requires a real edit. Finishing here
             # exercises the refusal to continue on an unchanged rejected patch.

@@ -452,7 +452,7 @@ def prepared_behavior_view(c,selected):
                 execution_ids=[r['execution_id'] for r in saved['repair_resume']['histories']],
                 session_ids=[r['session_id'] for r in saved['repair_resume']['histories']],
                 model_attempt_ids=[r['model_attempt_id'] for r in saved['repair_resume']['histories']])) if saved.get('repair_resume') else {}),
-            notice=('Continue the saved unfinished model-authored repair under a fresh run approval. Prior failed execution and usage remain recorded. ' if saved.get('repair_resume') else '')+'This approves an isolated repair attempt with test development. Correctness requires new regression assertions to fail against original production, pass with the repair, and all independent checks to pass.',
+            notice=(('The previous run ended without source edits. A fresh run approval starts a new bounded attempt; its earlier failure and usage remain recorded. ' if not saved['repair_resume']['files'] else 'Continue the saved unfinished model-authored repair under a fresh run approval. Prior failed execution and usage remain recorded. ') if saved.get('repair_resume') else '')+'This approves an isolated repair attempt with test development. Correctness requires new regression assertions to fail against original production, pass with the repair, and all independent checks to pass.',
             criteria=saved['specification']['approved_intent']['plan']['criteria']))
     ref=saved.get('reviewed_task',{}).get('ref')
     if not ref or not saved.get('specification',{}).get('source_context'):
@@ -506,7 +506,8 @@ def preparation_status(c, proposal):
         recovery = preparation['payload'].get('recovery') if preparation else None
         if recovery and recovery['authorization']['review_binding'] == binding:
             return recovery['message'], False
-        if preparation and preparation['status'] in {'queued','running'}:
+        if preparation and (preparation['status']=='running' or
+                preparation['status']=='queued' and preparation['payload'].get('storage_recovery_history')):
             return preparation['message'], True
         if outcome.get('status') == 'hold' and outcome.get('review_binding') == binding:
             return 'Last behavioral preparation held: ' + outcome['message'], False

@@ -1,3 +1,13 @@
+# ACTIVE: vendor run source-read correction under verification
+
+Owner approved one vendor run; it failed after20 complete Qwen responses without
+an edit. Original failure/505239-token usage, decisions and restored model are
+preserved. No request is active. Source replay/progress, current coding brief and
+no-edit continuation are corrected locally; clean final suites are running before
+installation. Follow [current continuation](CONTINUATION.md) and
+[diagnosis](VENDOR_EXECUTION_READ_LOOP_20261110.md). No new task run is authorized.
+The following text records the state BEFORE the owner's first actual run.
+
 # Verified current status — approved vendor task prepared
 
 Following the Project Working Philosophy, installed **9ac9459 / deployment86**

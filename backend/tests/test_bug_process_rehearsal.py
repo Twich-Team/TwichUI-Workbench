@@ -454,7 +454,8 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
                                       old=BAD_ALERT if client_case else BUGGY,
                                       new=GOOD_ALERT if client_case else CORRECT),
                             bug_test_edit=regression_edit(client_case) if intent_mode else None,
-                        codex_route=codex_route)
+                        codex_route=codex_route,
+                        replay_reads=intent_mode and case_provider=='local')
                     calls.put((case["choice"], "implementation"))
                 else:
                     worker.tick(store)

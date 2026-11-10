@@ -92,6 +92,7 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
     rows = []
     for original in originals:
         preparation_message = None
+        fresh_run_decision = False
         identity, body = original['id'], original['payload']
         current_plans, current_jobs = plans[identity], jobs[identity]
         plan = current_plans[-1] if current_plans else None
@@ -134,6 +135,12 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                     phase = 'held'  # An earlier checked run is not completion of the current plan.
                 if context['stage']=='preparing' and (context.get('session') or {}).get('status')=='pending':
                     phase = 'queued'
+                if context['stage']=='failed':
+                    renewal = task_budget.run_context(engine, identity, eligible[0]['id'])
+                    cycle = (renewal.get('offer') or {}).get('repair_cycle') or {}
+                    if renewal.get('available') and not renewal.get('receipt') and cycle.get('continuation'):
+                        phase = 'needs_approval'
+                        fresh_run_decision = True
                 if relevant:
                     if relevant.get('candidate_id') and phase not in ACTIVE | {'queued'}:
                         result_id = relevant['id']
@@ -154,6 +161,8 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                       *[p['finished_at'] or p['started_at'] for p in providers[identity]]]
         kind = body.get('requested_work') or ('coverage' if body.get('regression_tests') else 'bug' if body['kind']=='issue' else 'feature')
         label, message = LABELS[phase]
+        if fresh_run_decision:
+            label, message = 'Ready for a new run decision', 'The previous run ended. Review the saved work and limits before allowing another attempt.'
         if preparation_message:
             label, message = 'Waiting for storage' if phase=='queued' else 'Preparation needs checking', preparation_message
         if (configured_mode()=='everyday' and body['kind']=='issue' and not body.get('local_planning')

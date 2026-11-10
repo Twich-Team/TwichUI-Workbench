@@ -4,6 +4,7 @@ The working-set threshold triggers housekeeping, never an assignment cap.
 Runtime/history/recovery trees and unrelated files are never candidates.
 """
 import hashlib
+from contextlib import ExitStack
 import json
 import os
 from pathlib import Path
@@ -94,19 +95,25 @@ def maintain(root=ROOT, storage=archive.ARCHIVES):
     archive.plain(storage)
     used = artifact_bytes(root)
     archived = []
+    deferred = False
     if used > SOFT_TRIGGER:
-        with archive.locked(root):
-            candidates = sorted((root/'artifacts/runs').glob('browser-*'), key=lambda p:p.stat().st_mtime)
-            for path in candidates:
-                if used <= SOFT_TARGET:
-                    break
-                if closed_owned(root, path):
-                    archived.append(archive_closed(root, path, storage))
-                    used = artifact_bytes(root)
+        with ExitStack() as stack:
+            try:
+                stack.enter_context(archive.locked(root))
+            except BlockingIOError:
+                deferred = True  # Another housekeeping owner is active; never clear its lock.
+            if not deferred:
+                candidates = sorted((root/'artifacts/runs').glob('browser-*'), key=lambda p:p.stat().st_mtime)
+                for path in candidates:
+                    if used <= SOFT_TARGET:
+                        break
+                    if closed_owned(root, path):
+                        archived.append(archive_closed(root, path, storage))
+                        used = artifact_bytes(root)
     physical = min(shutil.disk_usage(p).free for p in [root, storage, '/dev/shm'])
     if physical < RESERVE:
         raise RuntimeError('Actual physical/shared-memory recovery reserve is below 4 GiB.')
-    return dict(counted_bytes=used, physical_free=physical, archived=archived,
+    return dict(counted_bytes=used, physical_free=physical, archived=archived, archival_deferred=deferred,
                 soft_working_set_target=SOFT_TARGET, cumulative_delivery_cap=False)
 
 

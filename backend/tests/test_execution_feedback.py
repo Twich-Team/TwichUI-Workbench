@@ -63,6 +63,40 @@ def test_distinct_reads_omit_unchanged_overlap_and_charge_changed_lines(tmp_path
         read(tools)
 
 
+def test_fully_repeated_focused_read_returns_usable_current_text_without_new_charge(tmp_path):
+    tools, p = distinct(tmp_path)
+    p.write_text(''.join(f'local value_{i} = {i}\n' for i in range(1, 181)))
+    read(tools, 1, 180)
+    used = tools.read
+    # Retained real incident: the agent narrowed the same already-read window
+    # one start line at a time because the application returned no source text.
+    for start in range(100, 111):
+        value = read(tools, start, 152)
+        assert value['already_shown_or_empty'] and value['spans'] == []
+        assert value['replayed_spans'][0]['start'] == start
+        assert value['replayed_spans'][0]['end'] == 152
+        assert f'local value_{start} = {start}\n' in value['replayed_spans'][0]['text']
+        assert value['next_start'] is None and tools.read == used
+        assert len(json.dumps(value, ensure_ascii=True).encode()) < 8192
+    value = read(tools, 200, 210)
+    assert value['total_lines'] == 180 and not value['replayed_spans']
+
+
+def test_replayed_unicode_source_remains_paged_and_does_not_hide_changed_lines(tmp_path):
+    tools, p = distinct(tmp_path)
+    p.write_text(('☃' * 20 + '\n') * 250)
+    for _ in range(10):
+        read(tools, 1, 250)
+    used = tools.read
+    value = read(tools, 1, 250)
+    assert value['replayed_spans'] and value['next_start']
+    assert len(json.dumps(value, ensure_ascii=True).encode()) < 8192
+    assert tools.read == used
+    p.write_text('fixed\n' + ('☃' * 20 + '\n') * 249)
+    assert read(tools, 1, 3)['spans'][0]['text'] == 'fixed\n'
+    assert tools.read == used + len('fixed\n')
+
+
 def test_source_budget_and_response_bound_remain_enforced(tmp_path):
     tools, p = distinct(tmp_path)
     p.write_text(("☃" * 20 + "\n") * 250)

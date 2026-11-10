@@ -74,7 +74,7 @@ def settled(c,selected):
                 raise ValueError('Interrupted local edit batch requires reconciliation first')
     if runtime.recipe!=saved['specification']:
         raise ValueError('Failed repair scope changed')
-    changed,patch=runtime.scope()
+    changed,patch=runtime.scope(allow_empty=True)
     from workbench import provider_routes,task_execution
     route=provider_routes.run_selection(c,task_execution.snapshot(c,**ref))
     prior=row['grant_snapshot']['runtime'].get('codex_selection')
@@ -159,6 +159,8 @@ def restore(runtime,permitted):
     path=runtime.root/'repair-resume.json'
     if not path.is_file():
         return
+    if not permitted():
+        raise ValueError('Fresh run permission required before restoring a continuation')
     resume=private_json(path)
     validate_frozen(resume)
     if runtime.base!=resume['base'] or not set(resume['files']).issubset(runtime.paths):

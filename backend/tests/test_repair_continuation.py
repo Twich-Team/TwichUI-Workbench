@@ -67,8 +67,9 @@ def test_changed_saved_work_or_binding_cannot_be_applied(tmp_path,fault):
 
 
 @pytest.mark.usefixtures('installed')
+@pytest.mark.parametrize('has_edits', [True, False])
 def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_denies_active_or_unknown(
-    client,headers,store,monkeypatch,
+    client,headers,store,monkeypatch,has_edits,
 ):
     from uuid import uuid4
     from sqlalchemy import select
@@ -93,7 +94,11 @@ def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_d
     durable(root/'recipe-oracle.lua',template['oracle'].encode())
     runtime=ControlledPreparer(root)
     task_session.provision(runtime,template)
-    (runtime.workspace/PRODUCTION).write_text(CORRECT)
+    if has_edits:
+        (runtime.workspace/PRODUCTION).write_text(CORRECT)
+    else:
+        with pytest.raises(ValueError,match='Missing or out-of-scope'):
+            runtime.scope()  # Empty work still cannot become a candidate.
     old_tree=tree(runtime.workspace)
     gid,rid,fence=str(uuid4()),str(uuid4()),str(uuid4())
     stamp=now()
@@ -116,6 +121,11 @@ def test_normal_browser_run_continuation_binds_failed_work_preserves_usage_and_d
     assert before['available'] and before['receipt'] is None
     cycle=before['offer']['repair_cycle']
     assert cycle['verification']=='not_run' and cycle['continuation']['execution_ids']==[rid]
+    if not has_edits:
+        assert 'without source edits' in cycle['notice']
+    dashboard=client.get('/api/workspace').json()
+    current=next(r for r in dashboard['items'] if r['id']==item['id'])
+    assert current['state']=='needs_approval' and current['needs_you'] and not current['active']
     assert before['offer']['id']!=view['offer']['id']
     import sqlite3
     from acceptance_policy import current_run_offer

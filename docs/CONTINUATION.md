@@ -1,3 +1,56 @@
+# ACTIVE: vendor execution source-read loop correction
+
+Following the Project Working Philosophy and standing authority, continue ordinary
+engineering without campaign caps or renewal. One agent. Preserve actual task run
+consent and all billing/source/network/recovery protections.
+
+Installed9ac9459/deployment86. Owner actually approved run d6a74317, grant09af348d;
+execution54bc2aeb completed FAILED at01:58:21UTC. All20 Qwen requests have complete
+receipts:504040 prompt+1199 completion=505239 tokens. No edit/check/candidate began.
+The task controller ended, grant revoked, descendants absent and normal model
+restored to PID856896. No provider uncertainty/replay. Original scope59b032e5 and
+proposal24 preserved. Qwen/fallbackOff/policy18 unchanged.
+
+Confirmed deterministic replay: full source read by turn6, then12 reads of already
+supplied lines returned empty spans. Starts100→110 did not advance investigation.
+Stale accumulated planning instructions also entered the implementation prompt;
+this is a confirmed prompt defect, not proof of the model's historical reasoning.
+Empty failed work also raised Missing or out-of-scope implementation in the normal
+continuation preview, hiding a fresh run offer. No addon solution was supplied.
+
+Current source correction (not yet installed): bounded current-text replay of
+known windows, per-response progress detection (batched overlapping reads count
+as one decision), brief from CURRENT reviewed behavior/uncertainty rather than old
+planning instructions; preserve pinned API context. Empty work allowed only for
+settled continuation proof, never as a qualifying candidate. Fresh run approval
+still required; one20-turn grant is consumed, not a superseded campaign cap.
+
+Private evidence: /home/rich/.local/share/TwichUI-Workbench/vendor-run-turn-recovery-20261110
+Read original-read-loop-reproduction.json, corrected-original-read-loop-reproduction.json
+and original-readonly-continuation-proof.json. Corrected code previews fresh offer
+a2fd0a34, no registered new offer or permission. Read-only diagnostics need real
+engine.url.database plus a read-only connection creator, TMPDIR=installed scratch
+and installed everyday/preparation config; otherwise harness policy checks refuse.
+
+Verified: final-connected212 and verified-transitions147; frontend36/static and
+final browser5; two process-reread journeys pass. The first process rehearsal found
+per-tool rather than per-turn counting; corrected and covered. Legacy expectation
+holds no longer hide behind an unclaimed queued job; concurrent development
+housekeeping defers without bypassing physical reserve. The original full run had
+2077 passes/8 opt-in skips and5 failures; all five were corrected/rechecked (three
+CLI environment cases, stale per-tool behavior and expectation-hold projection).
+Clean complete final suites NOW running: full-final-suites.log, exec21839, normal
+wb.py test environment. Inspect before replay. No live model request is active.
+
+Next: settle verification, repair genuine failures; seal/checkpoint candidate and
+use prepare-next.py9ac9459. New installer must REMOVE the previous one-off automatic
+preparation-lineage step: prep already complete, no new work is authorized. Exact
+history equality before/after startup should hold. Verify old failure/usage/decisions,
+normal original-task fresh run offer, stale browser draft handling, restart/restore,
+six prior results and unchanged network/auth. Then leave fresh run for OWNER review.
+No vendor run is delegated; do not repeat model calls under consumed permission.
+The preceding state below is historical BEFORE the owner's actual first run.
+
 # Continue from verified approved-task preparation recovery
 
 Following the Project Working Philosophy and standing owner direction, ordinary

@@ -68,4 +68,17 @@ def test_large_working_set_is_monitored_without_reinstating_campaign_cap(tmp_pat
     monkeypatch.setattr(retention, 'artifact_bytes', lambda root:retention.SOFT_TRIGGER+1)
     result = retention.maintain(root, storage)
     assert result['counted_bytes'] > retention.SOFT_TRIGGER
+
+
+def test_concurrent_housekeeping_defers_without_bypassing_physical_reserve(tmp_path,monkeypatch):
+    from types import SimpleNamespace
+    root,path,storage=closed(tmp_path,monkeypatch)
+    monkeypatch.setattr(retention,'artifact_bytes',lambda _:retention.SOFT_TRIGGER+1)
+    with archive.locked(root):
+        result=retention.maintain(root,storage)
+        assert result['archival_deferred'] and not result['archived'] and path.exists()
+        monkeypatch.setattr(retention.shutil,'disk_usage',lambda _:SimpleNamespace(free=retention.RESERVE-1))
+        with pytest.raises(RuntimeError,match='recovery reserve'):
+            retention.maintain(root,storage)
+    assert not list(storage.iterdir())
     assert result['cumulative_delivery_cap'] is False

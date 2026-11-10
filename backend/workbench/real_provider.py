@@ -7,6 +7,7 @@ import urllib.request
 from workbench.planning_transport import LocalHTTP
 from workbench.real_execution import LIMITS, DECODING, WORKFLOW
 from workbench.real_feedback import RepairFeedback
+from workbench.implementation_context import ReadProgress
 from workbench.real_tool_contract import (READ_PARAMETERS, READ_DESCRIPTION, READ_INSTRUCTION,
     invoke, ToolInputError, ToolBudgetExceeded, CHECK_NAMES)
 
@@ -93,7 +94,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             f = definition['function']
             if f['name']=='read_file':
                 if runtime.recipe.get('read_budget_policy') == 'distinct-lines-v1':
-                    f['description'] = (READ_DESCRIPTION.replace('45000',str(getattr(runtime,'source_read_limit',LIMITS['read_chars']))).replace('repeated reads count again.', 'only distinct delivered source spans count; unchanged previously shown lines are omitted. JSON spans contain start/end lines and exact text. Continue after the last end if a window is partial.'))
+                    f['description'] = (READ_DESCRIPTION.replace('45000',str(getattr(runtime,'source_read_limit',LIMITS['read_chars']))).replace('repeated reads count again.', 'only distinct delivered source spans count. JSON spans contains new source; replayed_spans repeats a fully previously shown window. Both contain start/end lines and exact text. An empty spans field does not mean the file is empty. Follow next_start only for a partial reply.'))
                 f['parameters']['properties']['path']['enum']=list(runtime.read_paths)
             if f['name']=='find_text':
                 f['parameters']['properties']['path']['enum']=list(runtime.read_paths)
@@ -122,6 +123,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
     edits_done = 0
     refresh = editing_announced = False
     log = []
+    source_progress = ReadProgress()
     for turn in range(LIMITS['turns']):
         if not permitted() or (stop_event and stop_event.is_set()):
             raise BudgetError('Grant revoked/expired, fenced or worker canceled')
@@ -175,6 +177,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         if on_request:
             on_request(dict(turn=turn, request_limit=body['max_tokens'], counted_input_tokens=counted,
                             available_tools=sorted(names), read_calls_completed=reads_done,
+                            repeated_source_reads=source_progress.repeated,
                             edits_completed=edits_done,
                             observed_at=time.time()))
         monitor.start()
@@ -247,6 +250,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             return dict(log=log, completion_tokens=completion, prompt_tokens=prompt,
                         correction_count=corrections, read_input_errors=read_errors, tool_input_errors=tool_errors,
                         final_message=(message.get('content') or '')[:8192])
+        tool_results = []
         for index, call in enumerate(calls):
             if not permitted() or time.monotonic() >= end:
                 raise BudgetError('Grant or time changed before tool handling')
@@ -312,6 +316,13 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             raw = result.encode()
             clipped = raw[:8100].decode('utf-8', 'replace')+'\n[Tool output truncated at 8 KiB.]' if len(raw)>8192 else result
             messages.append(dict(role='tool', tool_call_id=call['id'], content=clipped))
+            tool_results.append((name, result))
+        guidance = source_progress.turn(tool_results)
+        if source_progress.repeated >= 4 and (getattr(runtime, 'recipe', None) or {}).get('repair_cycle'):
+            raise BudgetError('Repeated source reads made no progress after current text and guidance were returned; evidence retained, no automatic new attempt')
+        if guidance:
+            messages.append(dict(role='user', content=guidance))
+            refresh = True
         if force_edit and repair.edit_required:
             raise BudgetError('No progress after repeated checks or reads of a rejected candidate')
         if reads_done >= initial_read_calls and not editing_announced and not scope_workflow:

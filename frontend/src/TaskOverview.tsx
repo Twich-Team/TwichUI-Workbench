@@ -26,8 +26,15 @@ function singleCurrentTask(item: Intake) {
   return tasks.length === 1 ? tasks[0] : undefined;
 }
 
+function needsRunOffer(execution?: Execution) {
+  return execution?.stage==='failed' || execution?.stage==='waiting'&&!execution.run_budget;
+}
+
 function summary(item: Intake, execution?: Execution, approval?: RunApprovalContext) {
   if (item.decisions.some(d => d.status === 'pending')) return intakeProgress(item);
+  if (execution?.stage==='failed' && approval?.available && !approval.receipt && approval.offer?.repair_cycle?.continuation) {
+    return {step:2,title:'Ready for a new run decision',next:'The previous run ended. Review the saved work and limits before allowing another attempt.',group:'attention' as const};
+  }
   if (execution) {
     if (execution.run_budget?.current===false && ['held','waiting'].includes(execution.stage)) {
       return {step:2, title:'Run approval expired', next:'Open the task to see what is still available.', group:'attention' as const};
@@ -54,13 +61,15 @@ export function TaskJourney({item}: {item: Intake}) {
   const task = singleCurrentTask(item);
   const execution = useQuery({...executionQuery(item.id, task?.id || ''), enabled: Boolean(task), refetchInterval: 3000});
   const approval = useQuery({...approvalQuery(item.id, task?.id || ''),
-    enabled: Boolean(task && (item.original.regression_tests || item.original.local_planning) && execution.data?.stage === 'waiting' && !execution.data.run_budget),
+    enabled: Boolean(task && (item.original.regression_tests || item.original.local_planning) && needsRunOffer(execution.data)),
     refetchInterval: 3000});
   const progress = summary(item, execution.isError ? undefined : execution.data, approval.isError ? undefined : approval.data);
   return <section className="panel task-journey" aria-label="Task progress">
     <ol className="journey-steps">{['Understand', 'Review plan', 'Do the work', 'Check', 'Result'].map((step, i) =>
       <li key={step} aria-current={i === progress.step ? 'step' : undefined}><span>{i + 1}</span>{step}</li>)}</ol>
-    {(!execution.data || execution.data.stage==='waiting' || item.decisions.some(d=>d.status==='pending')) &&
+    {(!execution.data || execution.data.stage==='waiting' ||
+      approval.data?.available&&!approval.data.receipt&&approval.data.offer?.repair_cycle?.continuation ||
+      item.decisions.some(d=>d.status==='pending')) &&
       <div role="status"><p className="journey-title"><strong>{progress.title}</strong></p>
         {item.status!=='waiting_for_information' && <p>{progress.next}</p>}</div>}
   </section>;
@@ -75,7 +84,7 @@ export function TaskOverview({preview = false, page = 1}: {preview?: boolean; pa
   }))});
   const approvals = useQueries({queries: targets.map(({item, task}, i) => ({
     ...approvalQuery(item.id, task?.id || ''), refetchInterval: 12000,
-    enabled: Boolean(task && (item.original.regression_tests || item.original.local_planning) && executions[i].data?.stage === 'waiting' && !executions[i].data?.run_budget &&
+    enabled: Boolean(task && (item.original.regression_tests || item.original.local_planning) && needsRunOffer(executions[i].data) &&
       !item.decisions.some(d => d.status === 'pending')),
   }))});
   if (!query.data) return query.isPending ? <p role="status">Opening your tasks…</p> :
