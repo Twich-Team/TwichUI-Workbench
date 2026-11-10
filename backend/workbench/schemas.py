@@ -514,6 +514,7 @@ class ProposalView(StrictModel):
 
 
 class PlanningJobView(StrictModel):
+    automatic_recovery: bool = Field(default=False, exclude_if=lambda value: not value)
     operation_kind: Literal['scope_binding'] | None = Field(default=None, exclude_if=lambda value: value is None)
     diagnostics: dict[str, str | int | float] = {}
     id: str

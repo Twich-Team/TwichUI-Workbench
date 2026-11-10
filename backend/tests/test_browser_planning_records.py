@@ -36,6 +36,9 @@ const old={id:'old',kind:'planning',revision:1,status:'failed',finished_at:'save
 const current={id:'current',kind:'behavioral_preparation',revision:2,status:'running'};
 const item={decisions:[{id:'scope',status:'applied'}],tasks:[{id:'task'}],jobs:[old,current]};
 assert(!preparationReady(item,{revision:2},{id:'scope'}));
+const recovering=structuredClone(item);recovering.jobs[1].status='failed';recovering.jobs[1].automatic_recovery=true;
+assert(!preparationReady(recovering,{revision:2},{id:'scope'}));
+recovering.jobs[1].automatic_recovery=false;assert.throws(()=>preparationReady(recovering,{revision:2},{id:'scope'}));
 const done=structuredClone(item);done.jobs[1].status='completed';
 assert(preparationReady(done,{revision:2},{id:'scope'}));
 for(const change of [{status:'failed'},{revision:3},{kind:'behavioral_preparation',revision:1}]) {

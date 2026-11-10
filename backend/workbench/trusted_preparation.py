@@ -442,7 +442,9 @@ def _recovery_result(recovery, result):
 
 def _hold(error):
     detail = error.detail if isinstance(error, HTTPException) else str(error)
-    return dict(status='hold', message=str(detail)[:1600], execution_authorized=False)
+    from workbench.storage_resources import StorageHold
+    return dict(status='hold', message=str(detail)[:1600], execution_authorized=False,
+                **(dict(storage=dict(code=error.code,observation=error.observation)) if isinstance(error,StorageHold) else {}))
 
 
 def process_one(engine, *, stop_event=None):
@@ -486,8 +488,11 @@ def process_one(engine, *, stop_event=None):
                         everyday.require_room(everyday.configuration(engine))
                     except everyday.CapacityHold as error:
                         if job['message'] != str(error):
-                            c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(message=str(error)))
+                            resource=dict(state='waiting',code=error.code,automatic=True,message=str(error),observed_at=intake.now())
+                            c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
+                                message=str(error),payload={**payload,'storage_recovery':resource}))
                         return False
+                payload.pop('storage_recovery',None)
                 binding = linked['proposal_review']['binding']
                 round_id=payload.get('preparation_round_id')
                 if round_id is not None and str(UUID(round_id))!=round_id:

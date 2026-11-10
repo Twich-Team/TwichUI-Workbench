@@ -80,9 +80,13 @@ export function RunApproval({intakeId,taskId}:{intakeId:string;taskId:string}){
     <h3>Run is waiting</h3><p role="status">{current.message}</p>
     <p>The reviewed behavior and plan are saved. The run decision will be available when Workbench can start it safely.</p>
   </section>;
+  if(current.preparation_resource)return <section className="soft-callout" aria-label="Preparation storage recovery">
+    <h3>{current.preparation_resource.automatic?'Making room for your task':'Preparation needs checking'}</h3>
+    <p role="status">{current.message}</p>
+    <p>Your plan approval is saved. Preparing the protected copy grants no permission to edit the addon. A separate run decision will appear when preparation is ready.</p>
+  </section>;
   if(!shown?.available||!shown.offer)return <section className="soft-callout" aria-label="Task preparation hold">
-    <h3>{current.preparing?'Preparing the reviewed task':'Task preparation held'}</h3><p role="status">{current.preparing?'Workbench is checking that the test can catch the wrong result.':'Workbench could not confirm the current test and plan are ready to run.'}</p>
-    {!current.preparing && <p>Read the reason below. If the approved work has changed, return to the current plan or submit an updated request.</p>}
+    <h3>{current.preparing?'Preparing the approved work':'Preparation is on hold'}</h3><p role="status">{current.preparing?'Workbench is preparing the protected copy and checking its existing tests and isolation. No repair has started.':'Your plan approval is saved. The reason below explains what prevented preparation.'}</p>
     <p>{current.message}</p>
   </section>;
   const {offer,scope}=shown;

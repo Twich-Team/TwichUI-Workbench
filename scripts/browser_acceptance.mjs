@@ -43,7 +43,7 @@ export function preparationReady(item, plan, scope) {
   const current=item.jobs.filter(j=>j.revision===plan.revision);
   check(item.jobs.every(j=>j.revision<=plan.revision&&
     (j.revision===plan.revision||j.kind==='planning'&&['failed','completed'].includes(j.status)&&j.finished_at))&&
-    !current.some(j=>j.status==='failed'),'current preparation failed or historical work is unsettled');
+    !current.some(j=>j.status==='failed'&&!j.automatic_recovery),'current preparation failed or historical work is unsettled');
   return receipt?.status==='applied'&&item.tasks.length>0&&current.length>0&&current.every(j=>j.status==='completed');
 }
 export function scopeConsentValid(item,plan,consentTime,now) {

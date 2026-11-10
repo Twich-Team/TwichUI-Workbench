@@ -179,6 +179,20 @@ frame:SetScript('OnEvent',function(_,_,name) Deliver(name) end)
         from workbench import bug_check_preparation
         from test_regression_evidence import ControlledPreparer
         monkeypatch.setattr(bug_check_preparation,'Runtime',ControlledPreparer)
+        if case_provider=='local':
+            # One safe post-clone storage collision in each separate worker.
+            # Recovery must retain approval/failure, issue no extra model call,
+            # and let the ordinary browser wait for the actual ready offer.
+            class ResourceCollision(ControlledPreparer):
+                stopped_once=False
+                def prepare(self):
+                    super().prepare()
+                    self.workspace.chmod(0o700)
+                    if not type(self).stopped_once:
+                        type(self).stopped_once=True
+                        from workbench.storage_resources import StorageHold
+                        raise StorageHold('low_disk','CONTROLLED temporary storage collision; approval saved.',{})
+            monkeypatch.setattr(trusted_preparation,'Runtime',ResourceCollision)
     cases = []
     for index, client_case in enumerate([False, True]):
         request = report(client_case)

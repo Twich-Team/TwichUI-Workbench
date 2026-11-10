@@ -383,6 +383,11 @@ def offer_view(c, proposal, selected):
     """Display only the selected owner's snapshot; never combine two read revisions."""
     from workbench import intake
     if not selected:
+        from workbench.preparation_resources import view as resource_view
+        resource=resource_view(c,proposal)
+        if resource:
+            return dict(available=False,message=resource['message'],preparing=resource['automatic'],
+                        preparation_resource=resource,offer=None)
         message, preparing = preparation_status(c, proposal)
         return dict(available=False, message=message, preparing=preparing, offer=None)
     spec = selected["snapshot"]["specification"]
@@ -468,6 +473,9 @@ def preparation_status(c, proposal):
     from workbench.regression_preparation import contract_for
     from workbench.db import planning_jobs
     from workbench.intake import proposal_view
+    from workbench.preparation_resources import view as resource_view
+    if resource:=resource_view(c,proposal):
+        return resource['message'],resource['automatic']
     contract = contract_for(c, proposal)
     if contract and contract.get('scenario_grounding'):
         from workbench.trusted_preparation import validate_reviewed_policy
@@ -498,6 +506,8 @@ def preparation_status(c, proposal):
         recovery = preparation['payload'].get('recovery') if preparation else None
         if recovery and recovery['authorization']['review_binding'] == binding:
             return recovery['message'], False
+        if preparation and preparation['status'] in {'queued','running'}:
+            return preparation['message'], True
         if outcome.get('status') == 'hold' and outcome.get('review_binding') == binding:
             return 'Last behavioral preparation held: ' + outcome['message'], False
         if preparation:

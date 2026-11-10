@@ -2,7 +2,6 @@
 import hashlib
 import json
 import os
-import runpy
 import re
 from pathlib import Path
 import shutil
@@ -122,6 +121,10 @@ class Runtime:
             raise ValueError('Pinned source HEAD/tree is not clean')
         if (self.root/'workspace-location.json').exists():
             raise ValueError('Never reuse an implementation workspace')
+        from workbench.storage_resources import require, regular_bytes
+        # Reserve the actual clean clone before allocating it, not merely 72 MiB
+        # of generic evidence space. This does not grant execution permission.
+        require(self.root, self.workspace, regular_bytes(source) + (4 << 20))
         from workbench import everyday
         scratch = everyday.configuration().scratch if everyday.enabled() and self.recipe else None
         parent = Path(tempfile.mkdtemp(prefix='workbench-verify-' if self.recipe else 'wb-chronicle-work-', dir=scratch))
@@ -155,7 +158,7 @@ class Runtime:
                     base_manifest_sha256=sha(self.initial.read_bytes()) if self.initial.is_file() else None,
                     oracle_sha256=sha(self.oracle_source.read_bytes()), contract=job.digest(self.execution_contract),
                     helper_sha256={name: sha(Path(__file__).with_name(name).read_bytes()) for name in
-                       ['real_execution.py','real_workspace.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py','repair_edits.py','repair_continuation.py']})
+                       ['real_execution.py','real_workspace.py','storage_resources.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py','repair_edits.py','repair_continuation.py']})
         if self.recipe:
             value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes()) for name in ['real_recipes.py','task_budget.py','verification_process.py']})
             if self.recipe.get('repair_cycle'):
@@ -268,8 +271,6 @@ class Runtime:
              self.controls_valid(), 'Fresh confined baseline/formatter-only/cleanup controls required')
         gate('fallback/publication denied', True, 'Fixed local adapter; no publishing or fallback import')
         # Fixed trusted project helper; works from CLI and worker without cwd/sys.path assumptions.
-        budget = runpy.run_path(str(Path(__file__).resolve().parents[2]/'scripts/project_env.py'))
-        total, ceiling = budget['artifact_bytes'](), budget['ARTIFACT_LIMIT']
         reservation = (72 if self.recipe else 128) << 20
         from workbench.real_package import package_for
         package = package_for(self.root.parent)
@@ -283,8 +284,8 @@ class Runtime:
             except (OSError, ValueError, RuntimeError):
                 gate('aggregate evidence reservation', False, 'Evidence, scratch or physical storage capacity needs attention.')
         else:
-            gate('aggregate evidence reservation', ceiling == 512<<20 and total+reservation <= ceiling,
-                 f'{total} bytes used; reserve remaining {reservation} bytes under authorized 512 MiB cap; owned retained package bytes count once')
+            gate('aggregate evidence reservation', space >= (4 << 30) + reservation,
+                 f'{space} bytes free; physical recovery reserve plus {reservation} bytes for this operation. Historical evidence is not a cumulative allowance.')
         self.gates = gates
         return gates
 
@@ -386,10 +387,8 @@ class Runtime:
         if self.package:
             from workbench.real_package import Package
             Package(self.package['package'],self.package['baseline_sha256']).enforce_storage()
-        evidence = sum(p.stat().st_size for p in self.root.rglob('*') if p.is_file())
-        scratch = sum(p.stat().st_size for p in self.workspace.rglob('*') if p.is_file())
-        if evidence > 64 << 20 or scratch > 1 << 30 or shutil.disk_usage(self.root).free < 4 << 30:
-            raise ValueError('Run/scratch/free-space budget exhausted; retain partial evidence')
+        from workbench.storage_resources import require
+        return require(self.root, self.workspace)
 
     def cleanup(self, row):
         if quarantined(Path(__file__).resolve().parents[2]/'.local/real-primary-session.json'):

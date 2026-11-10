@@ -83,6 +83,9 @@ def measure(policy):
 def housekeep(policy):
     from evidence_retention import maintain
     from project_env import artifact_bytes
+    from workbench.release_cache import maintain as maintain_browser_copies
+
+    maintain_browser_copies(policy, ROOT.parent)
 
     # Generic retention only touches closed owned browser evidence. Histories,
     # execution/recovery records and original stores are never candidates.
@@ -93,9 +96,10 @@ def housekeep(policy):
 
 
 class CapacityHold(ValueError):
-    def __init__(self, message, headroom):
+    def __init__(self, message, headroom, code='recovery_room'):
         super().__init__(message)
         self.headroom = headroom
+        self.code = code
 
 
 def require_room(policy, reserve=START_RESERVE):
@@ -107,8 +111,10 @@ def require_room(policy, reserve=START_RESERVE):
             continue  # Owned temporary check files may settle during a scan.
     else:
         raise ValueError('Workbench could not measure storage capacity.') from None
-    if free < 4 << 30 or scratch > 1 << 30:
-        raise CapacityHold('Waiting for resources. Workbench needs 4 GiB free and at most 1 GiB of scratch in use.', remaining)
+    if free < 4 << 30:
+        raise CapacityHold(f'Waiting for storage: {free/(1<<30):.2f} GiB free. Workbench keeps 4 GiB for safe recovery; verified cleanup is automatic.', remaining,'low_disk')
+    if scratch > 1 << 30:
+        raise CapacityHold('Waiting for working-copy storage. Disposable scratch exceeds its 1 GiB operation safety limit; Workbench is checking retained copies.',remaining,'scratch_limit')
     if remaining < reserve:
         raise CapacityHold(f'Waiting for storage. Workbench needs {reserve >> 20} MiB beyond its physical recovery reserve.', remaining)
     return remaining

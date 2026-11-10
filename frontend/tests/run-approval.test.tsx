@@ -81,3 +81,17 @@ it('shows the exact broader scope when an offer can change addon code',async()=>
   expect(screen.getByText('!!!TwichUI/example.lua')).toBeVisible();
   expect(screen.queryByText(/Your installed addon, addon code/)).not.toBeInTheDocument();
 });
+
+it('shows one automatic storage explanation without retry or run permission and recovers to a fresh run decision',async()=>{
+  const held={available:false,offer:null,preparing:true,message:'3.93 GiB free. Workbench keeps 4 GiB for safe recovery.',preparation_resource:{state:'waiting',code:'low_disk',automatic:true,message:'3.93 GiB free. Workbench keeps 4 GiB for safe recovery.'}};
+  const fetcher=vi.fn(async(_path:string,_init?:RequestInit)=>({ok:true,json:async()=>held}));vi.stubGlobal('fetch',fetcher);
+  const {client}=form();await screen.findByRole('heading',{name:'Making room for your task'});
+  expect(screen.getByRole('region',{name:'Preparation storage recovery'})).toHaveTextContent('Your plan approval is saved.');
+  expect(screen.queryByRole('button')).not.toBeInTheDocument();expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+  expect(screen.queryByText(/open the task/i)).not.toBeInTheDocument();
+  client.setQueryData(['task-run-approval','request','task'],available);
+  await screen.findByRole('button',{name:'Approve local run'});
+  expect(screen.getByRole('checkbox')).not.toBeChecked();
+  expect(screen.getByRole('button',{name:'Approve local run'})).toBeDisabled();
+  expect(fetcher.mock.calls.every(([,init])=>!init?.method||init.method==='GET')).toBe(true);
+});

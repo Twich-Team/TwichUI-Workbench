@@ -43,7 +43,8 @@ function summary(item: Intake, execution?: Execution, approval?: RunApprovalCont
   }
   if (approval && !approval.receipt) {
     if (approval.available) return {step:2, title:'Ready for your run decision', next:'Review what Workbench can do and the limits for this run.', group:'attention' as const};
-    if (!approval.preparing) return {step:2, title:'Preparation is on hold', next:'Open the task for the reason and next step.', group:'attention' as const};
+    if (approval.preparation_resource) return {step:2,title:approval.preparation_resource.automatic?'Waiting for storage':'Preparation needs checking',next:approval.preparation_resource.automatic?'Your plan approval is saved. Workbench will recover preparation automatically when it is safe.':'Your plan and evidence are saved. The preparation section explains what stopped.',group:approval.preparation_resource.automatic?'current' as const:'attention' as const};
+    if (!approval.preparing) return {step:2, title:'Preparation is on hold', next:'See the preparation reason below. Your plan approval remains saved.', group:'attention' as const};
     return {step:2, title:'Preparing the approved work', next:'Workbench is preparing the protected working copy and approved scope.', group:'current' as const};
   }
   return intakeProgress(item);

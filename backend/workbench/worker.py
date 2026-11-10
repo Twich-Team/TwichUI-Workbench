@@ -98,6 +98,9 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
     from workbench.investigation_recovery import recover_one
     if recover_one(engine):
         return True
+    from workbench.preparation_resources import process_one as recover_storage
+    if recover_storage(engine):
+        return True
     return (
         process_one(engine, crash)
         or verification.process_one(engine)

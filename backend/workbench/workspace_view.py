@@ -91,6 +91,7 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
         local_model = model_priority(c)
     rows = []
     for original in originals:
+        preparation_message = None
         identity, body = original['id'], original['payload']
         current_plans, current_jobs = plans[identity], jobs[identity]
         plan = current_plans[-1] if current_plans else None
@@ -126,6 +127,8 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                          'cancel_requested':'cleanup', 'interrupted':'interrupted'}.get(context['stage'], 'held')
                 if context['stage']=='waiting' and not context['run_budget'] and context['current_approval']:
                     offer = task_budget.run_context(engine, identity, eligible[0]['id'])
+                    if offer.get('preparation_resource'):
+                        preparation_message = offer['message']
                     phase = 'needs_approval' if offer.get('available') else ('preparing' if any(j['status']=='running' for j in current_jobs) else 'queued') if offer.get('preparing') else 'held'
                 if context['runs'] and not relevant:
                     phase = 'held'  # An earlier checked run is not completion of the current plan.
@@ -151,6 +154,8 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                       *[p['finished_at'] or p['started_at'] for p in providers[identity]]]
         kind = body.get('requested_work') or ('coverage' if body.get('regression_tests') else 'bug' if body['kind']=='issue' else 'feature')
         label, message = LABELS[phase]
+        if preparation_message:
+            label, message = 'Waiting for storage' if phase=='queued' else 'Preparation needs checking', preparation_message
         if (configured_mode()=='everyday' and body['kind']=='issue' and not body.get('local_planning')
                 and not body.get('supported_task') and original['status'] in {'failed','waiting_for_information'}):
             phase, label, message = 'needs_approval', 'Ready for investigation', 'Your report is saved. Choose a provider and allow read-only investigation; no repair is approved.'

@@ -218,7 +218,7 @@ export function IntakeDetail() {
     Boolean(data.provider_activity?.length) && data.provider_activity?.every(a=>a.purpose==='planning'&&a.outcome==='completed'));
   const waiting = data.jobs.find(job=>job.status==='queued'&&job.message.startsWith('Waiting for '));
   const displayRevision=Math.max(data.revision,...data.jobs.map(job=>job.revision));
-  const activeJobs = data.jobs.filter(job => job.revision >= displayRevision && job.status === 'failed');
+  const activeJobs = data.jobs.filter(job => job.revision >= displayRevision && job.status === 'failed' && (job.kind!=='behavioral_preparation'||data.status!=='tasks_ready'));
   const clarification = (renewable?'The last investigation ended without an accepted repair plan. Workbench will verify its terminal state and retain all usage before starting another bounded read-only operation. You can add information or ask it to continue. ': '') || data.result?.clarification || data.proposals[0]?.task_contract?.scope_missing.join(' ') || '';
   // These fixed phrases come from the deterministic regression precheck.
   const exampleNumber = data.original.regression_tests && clarification?.match(/^For expected result ([1-8])(?: \(|, no committed callable matches)/)?.[1];
