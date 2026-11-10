@@ -177,7 +177,11 @@ def main():
     engine = engine_for()
     owner = everyday.worker_owner(engine) if everyday.enabled() else nullcontext()
     with owner as policy:
-        run(engine, args, stopped, policy)
+        try:
+            run(engine, args, stopped, policy)
+        finally:
+            from workbench.local_model_priority import close
+            close()
 
 
 def run(engine, args, stopped, policy):
@@ -195,6 +199,9 @@ def run(engine, args, stopped, policy):
                 log.exception('Retention could not safely archive; originals remain preserved')
             next_housekeeping = time.monotonic()+60
         try:
+            if policy:
+                from workbench.local_model_priority import reconcile
+                reconcile(engine)
             if args.session_config:
                 from workbench import task_session
 

@@ -5,12 +5,14 @@ from typing import Literal
 
 from fastapi import HTTPException
 from pydantic import BaseModel
+from pydantic import Field
 from sqlalchemy import select
 
 from workbench.db import intakes, planning_jobs, proposals, proposal_decisions, backlog_items, model_attempts
 from workbench import task_execution, task_budget
 from workbench.planning_provider import configured_mode
 from workbench.result_rejection import later_review
+from workbench.schemas import LocalModelPriorityView
 
 State = Literal['queued', 'understanding', 'preparing', 'needs_input', 'needs_approval', 'decision_pending',
                 'working', 'checking', 'cleanup', 'held', 'failed', 'interrupted', 'stopped',
@@ -55,6 +57,7 @@ class WorkspaceTask(BaseModel):
 
 
 class WorkspacePage(BaseModel):
+    local_model: LocalModelPriorityView | None = Field(default=None,exclude_if=lambda value:value is None)
     items: list[WorkspaceTask]
     total: int
     all_total: int
@@ -84,6 +87,8 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
         tasks = indexed(c.execute(select(backlog_items).where(backlog_items.c.kind == 'task')).mappings())
         providers = indexed(c.execute(select(model_attempts).where(model_attempts.c.purpose.in_(['planning', 'implementation']))
                                       .order_by(model_attempts.c.started_at)).mappings(), 'task_id')
+        from workbench.local_model_priority import snapshot as model_priority
+        local_model = model_priority(c)
     rows = []
     for original in originals:
         identity, body = original['id'], original['payload']
@@ -151,6 +156,15 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
             phase, label, message = 'needs_approval', 'Ready for investigation', 'Your report is saved. Choose a provider and allow read-only investigation; no repair is approved.'
         if expired_permission:
             message = 'The earlier run permission expired. Open the task to review the next step.'
+        if phase == 'queued':
+            waiting_job = max((j for j in current_jobs if j['status']=='queued'),
+                              key=lambda j:j['revision'],default=None)
+            if local_model and identity in local_model['intake_ids']:
+                label = 'Making Qwen available' if local_model['state']=='yielding' else 'Waiting for local Qwen'
+                message = ('Waiting for local Qwen. It is working on another Workbench request; this saved revision remains scheduled.'
+                           if local_model['state']=='working' else local_model['message'])
+            elif waiting_job and waiting_job['message'].startswith('Waiting for '):
+                message = waiting_job['message']
         rows.append(dict(id=identity, title=body['title'], kind=kind, state=phase, stage=label, message=message,
                          created_at=original['created_at'], updated_at=max(timestamps), active=phase in ACTIVE,
                          needs_you=phase in NEEDS or expired_permission, result_id=result_id, result_kind=result_kind,
@@ -174,9 +188,10 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
             return bool(row['result_id']) or row['result_kind']=='findings'
         return row['state']==state
     selected = [r for r in matching if included(r)]
-    return dict(items=selected[(page-1)*page_size:page*page_size], total=len(selected), all_total=len(rows),
+    return dict(**({'local_model':local_model} if local_model else {}),items=selected[(page-1)*page_size:page*page_size], total=len(selected), all_total=len(rows),
                 page=page, page_size=page_size, counts=dict(counts), mode=configured_mode(),
                 highlights=dict(active=[r for r in matching if r['active']][:2],
+                                waiting=[r for r in matching if r['state']=='queued'][:3],
                                 needs_you=[r for r in matching if r['needs_you']][:3],
                                 completed=[r for r in matching if r['state']=='completed'][:3],
                                 outcomes=[r for r in matching if r['state'] in {'completed', 'failed', 'stopped'}][:3]),

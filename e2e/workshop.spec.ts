@@ -69,7 +69,7 @@ test('isolated UI state fixtures show activity only for active records and retai
   const active=['preparing','working','checking'].includes(state);
   const row={id:'synthetic-display-only',title:'A deliberately long task name about keeping guide progress after reconnecting and reloading',kind:'bug',state,stage,message:'Synthetic display state, not a provider result.',active,needs_you:false,created_at:'2026-11-09T00:00:00Z',updated_at:'2026-11-09T00:00:00Z'};
   await page.route('**/api/workspace?*',r=>r.fulfill({json:{items:[row],total:1,all_total:1,page:1,page_size:12,counts:{all:1,active:active?1:0,needs_you:0,queued:state==='queued'?1:0},observed_at:'2026-11-09T00:00:00Z',mode:'demo',highlights:{active:active?[row]:[],needs_you:[],completed:[]}}}));
-  await page.goto('/');await expect(page.locator('.work-status').getByText(active?'Working':'No work running',{exact:true})).toBeVisible();
+  await page.goto('/');await expect(page.locator('.work-status').getByText(active?'Working':state==='queued'?'Work waiting':'No work running',{exact:true})).toBeVisible();
   if(active)await expect(page.locator('.task-state').getByText(stage,{exact:true})).toBeVisible();
   await overflow(page);await page.unroute('**/api/workspace?*');
  }
@@ -77,6 +77,38 @@ test('isolated UI state fixtures show activity only for active records and retai
  await expect(page.getByLabel('Description',{exact:true})).toBeVisible();
  expect(await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(22, 15, 11)');
  await overflow(page);await capture(page,info,'workshop-no-texture',{keepInCompact:true});
+});
+
+test('a saved revision and dashboard agree about model waiting and automatic recovery',async({page},info)=>{
+ // Isolated presentation data; this is not a real-provider acceptance result.
+ await page.goto('/intake/new?kind=issue');
+ await page.getByLabel('Title Optional').fill('Names appear late in a vendor list');
+ await page.getByLabel('Description',{exact:true}).fill('Some rows show a number until the game returns item data.');
+ await page.getByRole('button',{name:'Submit request',exact:true}).click();
+ await expect(page).toHaveURL(/\/intake\/[a-f0-9-]{36}/);
+ const path=new URL(page.url()).pathname;
+ const original=await page.request.get('/api'+path).then(r=>r.json());
+ let phase='yielding';
+ const model=()=>({state:phase,message:phase==='yielding'?'Waiting for local Qwen. Workbench is asking the verified maintenance cycle to yield.':'Your revision is queued. Workbench is reconciling an old reservation; that marker does not prove maintenance is running.',automatic:true,intake_ids:[original.id],maintenance_active:phase==='yielding',reservation_owner_alive:phase==='yielding',reservation_locked:false,observed_at:null});
+ const row=()=>({id:original.id,title:original.original.title,kind:'bug',state:'queued',stage:phase==='yielding'?'Making Qwen available':'Waiting for local Qwen',message:model().message,active:false,needs_you:false,created_at:original.created_at,updated_at:original.created_at,provider:'local',result_id:null,result_kind:null});
+ await page.route('**/api/workspace?*',r=>r.fulfill({json:{items:[row()],total:1,all_total:1,page:1,page_size:12,counts:{all:1,active:0,queued:1,needs_you:0},mode:'everyday',observed_at:original.created_at,local_model:model(),highlights:{active:[],waiting:[row()],needs_you:[],completed:[]}}}));
+ await page.route('**/api'+path,r=>r.fulfill({json:{...original,status:'queued',original:{...original.original,local_planning:'qwen-once'},local_model:model()}}));
+ for(const width of [1440,390]){
+  await page.setViewportSize({width,height:844});
+  await page.goto('/');await expect(page.getByText('Work waiting',{exact:true})).toBeVisible();
+  await expect(page.getByText('Ready when you are',{exact:true})).toHaveCount(0);
+  await expect(page.getByRole('region',{name:'Local model status'})).toContainText('Recovery is automatic');
+  await page.getByRole('link',{name:/Names appear late in a vendor list/}).click();
+  const progress=page.getByRole('region',{name:'Task progress',exact:true});
+  await expect(progress).toContainText('Making Qwen available');
+  await expect(progress).toContainText('verified maintenance cycle');
+  await page.reload();await expect(progress).toContainText('Recovery is automatic');
+  await overflow(page);await capture(page,info,'priority-waiting-task-'+width,{keepInCompact:true});
+ }
+ phase='reconciling';await page.goto('/');
+ await expect(page.getByRole('region',{name:'Local model status'})).toContainText('does not prove maintenance');
+ await expect(page.getByText('Work waiting',{exact:true})).toBeVisible();
+ expect((await page.request.get('/api'+path).then(r=>r.json())).decisions).toHaveLength(0);
 });
 
 test('saved ordinary bug starts investigation without recreating the task or approving a repair',async({page},info)=>{

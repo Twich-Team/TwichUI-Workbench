@@ -38,6 +38,27 @@ def test_counts_search_pagination_and_read_only_state(client, headers, store):
         assert [dict(r) for r in c.execute(select(planning_jobs)).mappings()] == before
 
 
+@pytest.mark.parametrize('phase',['waiting','yielding','reconciling','reserved'])
+def test_waiting_revision_task_and_dashboard_share_model_state_without_inflating_work(
+    client,headers,store,monkeypatch,phase,
+):
+    from workbench import local_model_priority
+    item,_=submit(client,headers,kind='issue',title='A saved revision waiting for Qwen')
+    model=dict(state=phase,message='Waiting for local Qwen. This saved revision will resume automatically.',
+        automatic=True,intake_ids=[item['id']],maintenance_active=phase in {'waiting','yielding'},
+        reservation_owner_alive=phase!='reconciling',reservation_locked=phase=='reserved',observed_at=None)
+    monkeypatch.setattr(local_model_priority,'snapshot',lambda _:model)
+    page=index(client)
+    row=next(r for r in page['items'] if r['id']==item['id'])
+    task=client.get('/api/intake/'+item['id']).json()
+    assert page['local_model']==task['local_model']==model
+    assert page['counts']['queued']==1 and page['counts']['active']==0
+    assert page['highlights']['waiting']==[row] and not page['highlights']['active']
+    assert row['state']=='queued' and not row['active'] and not row['needs_you']
+    assert row['message']==model['message']
+    assert task['jobs'][0]['status']=='queued' and not task['decisions']
+
+
 def test_pending_decision_is_recorded_not_unanswered_or_running(client, headers, store):
     data = planned(client, headers, store)
     assert index(client)['items'][0]['state'] == 'needs_approval'

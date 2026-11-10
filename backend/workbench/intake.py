@@ -293,7 +293,9 @@ def view_in(connection, identity):
         recovery = None  # Unverifiable earlier work remains held, never replayed.
     latest = max((j for j in jobs if j['kind']=='planning'),key=lambda j:j['revision'],default=None)
     has_authority=bool(planned) or bool(connection.execute(select(proposal_decisions.c.id).where(proposal_decisions.c.intake_id==identity)).first())
-    return dict(**({'scope_recovery':recovery} if recovery else {}),project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
+    from workbench.local_model_priority import snapshot as model_priority
+    local_model = model_priority(connection) if row['status'] in {'queued','investigating'} else None
+    return dict(**({'local_model':local_model} if local_model else {}),**({'scope_recovery':recovery} if recovery else {}),project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
         planning_start_binding=digest(row['payload']) if configured_mode()=='everyday' and row['payload']['kind']=='issue' and not row['payload'].get('local_planning') and not row['payload'].get('supported_task') and row['status'] in {'failed','waiting_for_information'} else None,
         provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
         created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, **({'operation_kind':'scope_binding'} if j['payload'].get('operation_kind')=='scope_binding' else {}), diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],

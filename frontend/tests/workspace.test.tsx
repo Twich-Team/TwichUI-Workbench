@@ -41,3 +41,24 @@ it('a failed background refresh retains loaded records and explicitly marks the 
  await screen.findByText('Refresh unavailable. These are the last loaded records. Decisions need a fresh view.');
  expect(screen.getByText('Ready when you are')).toBeVisible();
 });
+
+it('queued model work stays visible without being called idle or active addon work',async()=>{
+ const queued={...task,state:'queued' as const,stage:'Waiting for local Qwen',message:'A verified maintenance cycle is yielding the model.'};
+ const data:typeof base={...base,items:[queued],counts:{all:1,active:0,queued:1,needs_you:0},
+  local_model:{state:'yielding',message:queued.message,automatic:true,intake_ids:[queued.id],maintenance_active:true,reservation_owner_alive:true,reservation_locked:false,observed_at:null},
+  highlights:{...base.highlights,waiting:[queued]}};
+ open(<Dashboard/>,data);
+ await screen.findByText('Work waiting');
+ expect(screen.queryByText('Ready when you are')).not.toBeInTheDocument();
+ expect(screen.queryByText('No work running')).not.toBeInTheDocument();
+ expect(screen.getByRole('region',{name:'Local model status'})).toHaveTextContent('Recovery is automatic');
+ expect(screen.getByRole('link',{name:/Remember the selected route/})).toBeVisible();
+ expect(document.querySelector('.task-state .lucide-activity')).toBeNull();
+});
+
+it('maintenance is described separately while addon work counts remain zero',async()=>{
+ const data:typeof base={...base,local_model:{state:'maintenance',message:'A verified maintenance cycle holds the model.',automatic:true,intake_ids:[],maintenance_active:true,reservation_owner_alive:false,reservation_locked:false,observed_at:null}};
+ open(<Dashboard/>,data);await screen.findByText('Model used by maintenance');
+ expect(screen.getByRole('region',{name:'Local model status'})).toHaveTextContent('verified maintenance');
+ expect(screen.getByRole('link',{name:/0 Working/})).toBeVisible();
+});

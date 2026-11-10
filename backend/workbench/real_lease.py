@@ -223,7 +223,11 @@ class Lease:
 
     def apply(self):
         self.private.mkdir(mode=0o700, parents=False, exist_ok=False)
+        from workbench import local_model_priority
+        self.stack.enter_context(local_model_priority.execution_reservation())
         for path in LOCKS:
+            if local_model_priority.borrowing(path):
+                continue
             f = self.stack.enter_context(path.open('rb'))
             fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
         if ENV.is_symlink() or ENV.stat().st_uid != os.getuid() or UNIT.stat().st_uid != 0:

@@ -597,7 +597,19 @@ class ScopeRecoveryInput(StrictModel):
     binding: Annotated[str, Field(pattern=r'^[a-f0-9]{64}$')]
 
 
+class LocalModelPriorityView(StrictModel):
+    state: Literal['idle','waiting','yielding','reserved','working','reconciling','held','released','maintenance']
+    message: str
+    automatic: bool
+    intake_ids: list[str]
+    maintenance_active: bool
+    reservation_owner_alive: bool
+    reservation_locked: bool
+    observed_at: str | None
+
+
 class IntakeView(StrictModel):
+    local_model: LocalModelPriorityView | None = Field(default=None, exclude_if=lambda value: value is None)
     scope_recovery: ScopeRecoveryView | None = Field(default=None, exclude_if=lambda value: value is None)
     project_source: ProjectSourceView | None = Field(default=None,exclude_if=lambda value:value is None)
     planning_resume_binding: str | None = Field(default=None, exclude_if=lambda value: value is None)

@@ -36,7 +36,9 @@ export function intakeProgress(item: Intake): Progress {
     case 'unavailable':
       return {step:0,title:'Saved for later',next:'This kind of work is not executable yet. No model or repair has started.',group:'attention'};
     case 'queued':
-      return {step: 0, title: 'Waiting to start', next: item.jobs.find(job=>job.status==='queued'&&job.message.startsWith('Waiting for '))?.message||'Your request is saved. Planning is next.', group: 'current'};
+      return item.local_model?.intake_ids.includes(item.id)
+        ? {step:0,title:item.local_model.state==='yielding'?'Making Qwen available':'Waiting for local Qwen',next:(item.local_model.state==='working'?'Local Qwen is working on another Workbench request.':item.local_model.message)+(item.local_model.automatic?' Recovery is automatic; your saved revision remains scheduled.':''),group:'current'}
+        : {step: 0, title: 'Waiting to start', next: item.jobs.find(job=>job.status==='queued'&&job.message.startsWith('Waiting for '))?.message||'Your request is saved. Planning is next.', group: 'current'};
     case 'investigating':
       return {step: 0, title: 'Looking into your request', next: 'Workbench will show its findings or bring you a plan.', group: 'current'};
     case 'waiting_for_information':

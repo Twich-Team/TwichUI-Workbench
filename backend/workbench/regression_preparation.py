@@ -366,10 +366,11 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         with local_slot():
                             pass  # Admission observation only; the actual request obtains its own locks.
                     except BlockingIOError:
+                        from workbench.local_model_priority import waiting_message
                         with write_transaction(engine) as c:
                             if intake.require(c, planning_jobs, job['id']) == job:
                                 c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(
-                                    message='Waiting for local Qwen. Background maintenance holds the model; no generation has started.'))
+                                    message=waiting_message()))
                         return False
                 try:
                     everyday.require_room(everyday.configuration(engine))

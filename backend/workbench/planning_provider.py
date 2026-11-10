@@ -100,9 +100,15 @@ def evidence_packet(original):
 @contextmanager
 def local_slot(*, ends_at=None, stop_event=None):
     # Existing pilot lock protocol; open existing files read-only, never create them.
+    from workbench import local_model_priority
+    if not local_model_priority.planning_ready():
+        raise BlockingIOError('Local model priority handoff has not settled')
     with ExitStack() as stack:
         for relative in LOCAL_LOCKS:
-            handle = stack.enter_context((Path('/home/rich/twichui-pilot/batch') / relative).open('rb'))
+            path = Path('/home/rich/twichui-pilot/batch') / relative
+            if local_model_priority.borrowing(path):
+                continue  # Same actual process/inode reservation, held across follow-up requests.
+            handle = stack.enter_context(path.open('rb'))
             while True:
                 try:
                     fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
