@@ -2,7 +2,15 @@
 
 Follow root owner documents and [continuing vendor permission](OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md). One agent. Qwen selected/fallback Off/policy18; approved scope2/plan24, publication held. No campaign caps or routine renewals. No new spending, external disclosure, live-addon install or publication.
 
-Installed **09a9800/deployment93**, seald9491fef47d4c3c46117f9468f7a28479bc2574ded9f9b0b0ba304f3345b2e8e. Prior91a46f7/75c8288 preserved for rollback. Original history and six earlier real checked results preserved. Original intake **2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd**; task intake-2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd-24-implementation, scope approval59b032e5-f4a5-45cb-a418-50b4da3f020f, proposal1e9427a8-69a3-5191-b21d-e6f95baa9a0a. Only Items.lua and tests/test_npcs_stock.lua writable; Stock.lua read-only. Vendor repair remains UNFINISHED, not independently accepted.
+Installed **7f01a03/deployment94**, seal2e505511e3348486e16453626f2ebeca61b3430dd2e08a5138f1de2091feba70. Prior09a9800/91a46f7/75c8288 preserved for rollback. Original history and six earlier real checked results preserved. Original intake **2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd**; task intake-2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd-24-implementation, scope approval59b032e5-f4a5-45cb-a418-50b4da3f020f, proposal1e9427a8-69a3-5191-b21d-e6f95baa9a0a. Only Items.lua and tests/test_npcs_stock.lua writable; Stock.lua read-only. Vendor repair remains UNFINISHED, not independently accepted.
+
+## ACTIVE original task after checked deployment94
+
+Source-format/packing correction7f01a03 installed; history, all6prior real checked outputs, both listeners/HTTPS/browser/LAN/internal-endpoint protections pass. Normal old history read/restore fingerprints preserved. New session **921ac8c7-aaea-5095-b242-4a43a2e44709**, execution **2569012a-c2a3-5fb9-adcf-cbd102aeb01a**, root release/artifacts/runs/task-lease-task-session-921ac8c7-aaea-5095-b242-4a43a2e44709-01/real-run under installedstage. Recorded ONCE via same saved continuing authority after confirming old failure settled. DO NOT duplicate/restart healthy work.
+
+Real first request27636inputtokens with complete actual3file source,0manualsourcewalkcalls. First3responses complete: log→source→reread log, packing safely continues past prior failure. Current request3has actual failed-check feedback and repeated-read guidance; input29519 fits output reserve. No new model edit or accepted vendor result at this checkpoint. Inspect actual request/response/tool/check/outcome records before acting. Model alias unchanged/Qwen selected/fallbackOff/policy18; decoding none/temperature0.2 as bound.
+
+Latest model patchd469ffe7 remains from earlier real926operation until new edits prove otherwise. All unknown historical usage unchanged. No owner decision needed. Continue real-Qwen edit/check/revise, original discrimination, five criteria, durable result/restart, ordinary self-check and nonpublishing preparation/recovery. Do not stop at this checkpoint.
 
 ## Current actual state — first-log packing correction
 
@@ -12,7 +20,7 @@ Confirmed defects: current source was JSON-escaped twice (code newlines became l
 
 **Connected ACTUAL tokenizer replay, zero generation/source/DB writes**: same actual saved first-log call, then a controlled scoped source read. Counts27636→30036→30301(before archive)→27901(after safe archive), plus2496response fits32768. Every line of all3currentfiles60752chars retained. next-read-context-token-proof.json. First replay only covered first2contexts; extended replay exposed/tested next transition before live use.24final context/permission and109final affected tests (actual HTTP/Lua, scope, continuation and checking) pass; lint/diff pass before seal. Full backend/static/frontend/native evidence retained for unchanged owners, not newly called real-provider acceptance.
 
-NEXT: finish final affected tests, checkpoint/seal/verified install FROM actual09a9800; preserve original/latest history and6priorresults; then invoke one supported same-authority continuing ingress only after verifying no pending operation/ownerstop. Current latest patchd469ffe7 must be retained. Prior actual Qwen progress checks worked, but no independent vendor result. Do not stop at another installed internal repair. Use real outcome early and continue ordinary engineering. No owner decision needed.
+Historical next step below completed by deployment94; follow ACTIVE921ac8c7 above. Preserve these findings: preserve original/latest history and6priorresults; then invoke one supported same-authority continuing ingress only after verifying no pending operation/ownerstop. Current latest patchd469ffe7 must be retained. Prior actual Qwen progress checks worked, but no independent vendor result. Do not stop at another installed internal repair. Use real outcome early and continue ordinary engineering. No owner decision needed.
 
 ## Latest actual state — source refresh correction
 
