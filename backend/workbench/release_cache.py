@@ -16,6 +16,7 @@ from uuid import uuid4
 
 STAGES = Path("/home/rich/TwichUI-Workbench/.local/m5-review")
 STATE = Path("/home/rich/.local/share/TwichUI-Workbench/storage-retention")
+TARGET_FREE = 8 << 30  # Soft working headroom; the hard reserve remains 4 GiB.
 
 
 def digest(path):
@@ -36,7 +37,7 @@ def safe(path, directory=False):
     return info
 
 
-def coalesce(source, target, state):
+def coalesce(source, target, state, protected=frozenset()):
     """Atomic replacement by byte/metadata-identical hard links; no missing path."""
     safe(source, True)
     safe(target, True)
@@ -58,6 +59,8 @@ def coalesce(source, target, state):
             if not q.is_file() or q.is_symlink():
                 continue
             a, b = safe(p), safe(q)
+            if (b.st_dev, b.st_ino) in protected:
+                continue  # An independently retained copy still owns these bytes.
 
             def same(x):
                 return (x.st_size, stat.S_IMODE(x.st_mode), x.st_uid, x.st_gid, x.st_mtime_ns)
@@ -110,7 +113,7 @@ def maintain(policy, current):
         return 0  # Disposable previews cannot touch real release storage.
     safe(STAGES, True)
     safe(current, True)
-    if shutil.disk_usage(current).free >= (4 << 30) + (1 << 30):
+    if shutil.disk_usage(current).free >= TARGET_FREE:
         return 0
     # Only explicit private installation stages, never accounting roots as write authority.
     stages = [
@@ -122,6 +125,13 @@ def maintain(policy, current):
         and (p / "browser").is_dir()
     ]
     keep = {current, *sorted(stages, key=lambda p: p.stat().st_mtime, reverse=True)[:3]}
+    protected = {
+        (info.st_dev, info.st_ino)
+        for stage in keep
+        for p in (stage / "browser").rglob("*")
+        if p.is_file() and not p.is_symlink()
+        for info in [p.stat()]
+    }
     total = 0
     for stage in sorted(stages, key=lambda p: p.stat().st_mtime):
         if stage in keep:
@@ -144,7 +154,10 @@ def maintain(policy, current):
             if not rel.startswith("browser/") or ".." in Path(rel).parts or Path(rel).is_absolute():
                 raise ValueError("Unsafe browser inventory path")
             a, b = (current / rel).stat(), (stage / rel).stat()
-            if (a.st_dev, a.st_ino) != (b.st_dev, b.st_ino):
+            if (a.st_dev, a.st_ino) != (b.st_dev, b.st_ino) and (
+                b.st_dev,
+                b.st_ino,
+            ) not in protected:
                 candidates.append(rel)
         if not candidates:
             continue
@@ -154,7 +167,7 @@ def maintain(policy, current):
                 raise ValueError("Unsafe browser inventory path")
             if digest(current / rel) != sha or digest(stage / rel) != sha:
                 raise ValueError("Retained browser differs from sealed inventory")
-        total += coalesce(current / "browser", stage / "browser", STATE)
-        if shutil.disk_usage(current).free >= (4 << 30) + (1 << 30):
+        total += coalesce(current / "browser", stage / "browser", STATE, protected)
+        if shutil.disk_usage(current).free >= TARGET_FREE:
             break
     return total
