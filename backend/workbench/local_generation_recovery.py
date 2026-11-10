@@ -69,7 +69,16 @@ def reconcile(engine, identity, *, expected_primary_sha256=None):
             .mappings()
             .one()
         )
-    if row["status"] not in {"running", "checking", "failed", "interrupted"}:
+    if row['status']=='cancelled':
+        from workbench.db import task_sessions,proposal_decisions
+        from workbench.continuing_repair import engineering_stop
+        with engine.connect() as c:
+            decision=grant['snapshot']['task_budget']['decision_id']
+            session=c.execute(select(task_sessions).where(task_sessions.c.id==decision)).mappings().one()
+            approval=c.execute(select(proposal_decisions).where(proposal_decisions.c.id==decision)).mappings().one()
+        if not engineering_stop(session,approval):
+            raise ValueError('An owner-stopped operation cannot be revived by engineering recovery')
+    elif row["status"] not in {"running", "checking", "failed", "interrupted"}:
         raise ValueError("Only a returned failed local operation may be reconciled")
     runtime = Runtime(grant["snapshot"]["recovery"]["root"])
     root = runtime.root
@@ -209,7 +218,7 @@ def reconcile_for_root(engine, root):
                 .join(execution.grants, execution.requests.c.grant_id == execution.grants.c.id)
                 .where(
                     execution.grants.c.snapshot["recovery"]["root"].as_string() == str(root),
-                    execution.requests.c.status.in_(["running", "checking", "failed"]),
+                    execution.requests.c.status.in_(["running", "checking", "failed", "cancelled"]),
                     execution.requests.c.result["usage"]["status"]
                     .as_string()
                     .in_(["partial", "unavailable"]),

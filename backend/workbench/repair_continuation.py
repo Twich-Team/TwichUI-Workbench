@@ -37,13 +37,24 @@ def settled(c,selected):
         return None
     budget=budgets[0]
     session=c.execute(select(task_sessions).where(task_sessions.c.id==budget['id'])).mappings().first()
-    if not session or session['status']!='failed' or not session['finished_at']:
+    from workbench.continuing_repair import engineering_stop
+    if (not session or not session['finished_at'] or
+            session['status']!='failed' and not (session['status']=='cancelled' and engineering_stop(session,budget))):
         return None
     histories=c.execute(select(requests,grants.c.snapshot.label('grant_snapshot'),grants.c.revoked_at)
         .join(grants,requests.c.grant_id==grants.c.id).where(
             grants.c.snapshot['workflow_task']['task']['id'].as_string()==ref['task_id'])
         .order_by(requests.c.created_at.desc())).mappings().all()
-    if not histories or any(r['status']!='failed' or not r['finished_at'] or not r['revoked_at']
+    def settled_status(row):
+        if row['status']=='failed':
+            return True
+        if row['status']!='cancelled':
+            return False
+        decision=row['grant_snapshot']['task_budget']['decision_id']
+        prior_session=c.execute(select(task_sessions).where(task_sessions.c.id==decision)).mappings().one()
+        prior_approval=c.execute(select(proposal_decisions).where(proposal_decisions.c.id==decision)).mappings().one()
+        return engineering_stop(prior_session,prior_approval)
+    if not histories or any(not settled_status(r) or not r['finished_at'] or not r['revoked_at']
             or not settled_accounting(r) for r in histories):
         return None
     row=histories[0]

@@ -44,6 +44,13 @@ class CheckFeedback:
         for i, _ in failures[-6:]:
             selected.update(range(max(0, i - 1), min(len(lines), i + 3)))
         excerpt = "\n".join(lines[i][:600] for i in sorted(selected))[-2400:]
+        if any(line.startswith('WB_LOCAL_CONTEXT ') for line in lines):
+            # Local observations supplement the actual error; never let a long
+            # variable listing push its failure/stack completely out of view.
+            first=next((i for i,line in enumerate(lines) if not line.startswith('WB_LOCAL_CONTEXT ')
+                and re.search(r'\.lua:[0-9]+:',line)),0)
+            head='\n'.join(lines[first:first+6])[:900]
+            excerpt=head+'\n'+excerpt[-(2399-len(head)):]
         hint = None
         for _, line in reversed(failures):
             for path in self.paths:

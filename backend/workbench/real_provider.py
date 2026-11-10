@@ -8,7 +8,7 @@ import urllib.request
 from workbench.planning_transport import LocalHTTP
 from workbench.real_execution import LIMITS, DECODING, WORKFLOW
 from workbench.real_feedback import RepairFeedback
-from workbench.implementation_context import ReadProgress, compact_source
+from workbench.implementation_context import ReadProgress, compact_source, source_keys
 from workbench.real_tool_contract import (READ_PARAMETERS, READ_DESCRIPTION, READ_INSTRUCTION,
     invoke, ToolInputError, ToolBudgetExceeded, CHECK_NAMES)
 
@@ -126,9 +126,11 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
     edits_done = 0
     refresh = editing_announced = False
     log = []
-    source_progress = ReadProgress()
     from workbench.continuing_repair import allows
     continuing = allows(runtime)
+    source_progress = ReadProgress(lifetime=continuing)
+    from workbench.implementation_context import CurrentSource
+    source_view = CurrentSource(runtime,messages) if continuing else None
     if continuing and getattr(runtime, 'root', None) and (runtime.root/'repair-resume.json').is_file():
         if not permitted() or (stop_event and stop_event.is_set()):
             raise BudgetError('Current permission required before checking retained work')
@@ -188,7 +190,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         if transport is LocalHTTP and hasattr(ownership, 'count_input_tokens'):
             counted = ownership.count_input_tokens(body, min(end, time.monotonic()+3))
             if counted+body['max_tokens'] > 32768:
-                while counted > 24576 and compact_source(messages, runtime):
+                while counted > (30272 if source_view else 24576) and (
+                        source_view.compact_history() if source_view else compact_source(messages, runtime)):
                     source_progress.rebuild_visible(messages)
                     counted = ownership.count_input_tokens(body, min(end, time.monotonic()+3))
                 if counted+body['max_tokens'] > 32768:
@@ -314,6 +317,10 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                     if not changed:
                         events[0]['outcome'] = 'unchanged'
                         result = 'The replacement left the file unchanged. Use a different replacement.'
+                    elif source_view:
+                        path=json.loads(call['function']['arguments'])['path']
+                        source_view.edited(path)
+                        source_progress.edited(path)
                 elif repair and name in ('read_file', 'find_text', 'read_check_log'):
                     empty_log = name == 'read_check_log' and json.loads(result)['already_shown_or_empty']
                     repair.observe((name, result), empty=empty_log)
@@ -361,10 +368,13 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                     events[0].update(correction_count=corrections, read_input_errors=read_errors,
                                      tool_input_errors=tool_errors)
                     on_tool(events[0])
+            progress_result=result
+            if source_view and name=='read_file' and source_keys(result):
+                result=source_view.read(result)
             raw = result.encode()
             clipped = raw[:8100].decode('utf-8', 'replace')+'\n[Tool output truncated at 8 KiB.]' if len(raw)>8192 else result
             messages.append(dict(role='tool', tool_call_id=call['id'], content=clipped))
-            tool_results.append((name, result))
+            tool_results.append((name, progress_result))
         guidance = source_progress.turn(tool_results)
         if source_progress.repeated >= 4 and (getattr(runtime, 'recipe', None) or {}).get('repair_cycle'):
             raise BudgetError('Repeated source reads made no progress after current text and guidance were returned; evidence retained, no automatic new attempt')

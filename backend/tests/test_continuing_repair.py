@@ -31,7 +31,7 @@ def test_actual_tool_loop_can_continue_after_twenty_only_under_distinct_permissi
     p=tmp_path/PATHS[0]
     p.parent.mkdir(parents=True)
     p.write_text(''.join('local controlled'+str(i)+' = 1\n' for i in range(26)))
-    runtime=SimpleNamespace(workspace=tmp_path,read_paths=[PATHS[0]],paths=[PATHS[0]],
+    runtime=SimpleNamespace(root=tmp_path,enforce_storage=lambda:None,workspace=tmp_path,read_paths=[PATHS[0]],paths=[PATHS[0]],
         workflow_task=dict(approval=approval()) if continued else {},
         recipe=dict(source_context=[{}],read_budget_policy='distinct-lines-v1',repair_cycle='scoped-repair-v1'),
         tool_commands=lambda:{'focused':['controlled-only']})
@@ -117,6 +117,7 @@ def test_failed_working_check_retains_real_locals_and_failure_without_changing_i
     assert original.returncode==1 and 'WB_LOCAL_CONTEXT' not in original.stderr and test.read_bytes()==before
     summary=CheckFeedback(tmp_path,['tests/'+test.name]).record(dict(status='fail',rc=1,out=result.stderr),'fixed-000')
     assert 'observed=17' in summary['diagnostic']
+    assert 'controlled actual mismatch' in summary['diagnostic']
     with pytest.raises(ValueError):
         command(['bash','-c','anything'],'tests/'+test.name)
 
@@ -135,3 +136,20 @@ def test_reverted_workspace_loop_is_recognized_across_intervening_edits(tmp_path
     assert feedback.checked('focused',failure)['previously_rejected_workspace']
     with pytest.raises(ToolBudgetExceeded,match='changed strategy'):
         feedback.checked('focused',failure)
+
+
+def test_engineering_stop_needs_its_actual_command_proof_and_changed_code(monkeypatch):
+    value=approval()
+    old={name:'a'*64 for name in continuing.code_identity()}
+    marker=dict(actor='engineering-recovery',session_id='session',command_id='stop',code_identity=old,
+        owner_provenance=value['payload']['execution_continuation']['owner_provenance'])
+    session=dict(id='session',state=dict(cancel_requested=True,stop_command='stop',engineering_yield=marker))
+    monkeypatch.setattr(continuing,'code_identity',lambda:old)
+    assert not continuing.engineering_stop(session,value)
+    monkeypatch.setattr(continuing,'code_identity',lambda:{k:'b'*64 for k in old})
+    assert continuing.engineering_stop(session,value)
+    session['state']['stop_command']='an-owner-stop-wins'
+    assert not continuing.engineering_stop(session,value)
+    session['state']['stop_command']='stop'
+    del marker['owner_provenance']
+    assert not continuing.engineering_stop(session,value)

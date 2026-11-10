@@ -30,7 +30,7 @@ def prior_failures(runtime):
     return observed
 
 
-def retained_work(runtime):
+def retained_work(runtime, *, compact=False):
     root = getattr(runtime, 'root', None)
     if root is None or not (root/'repair-resume.json').is_file():
         return None
@@ -39,6 +39,20 @@ def retained_work(runtime):
     paths, patch = runtime.scope(allow_empty=True)
     if hashlib.sha256(patch.encode()).hexdigest() != resume['patch_sha256']:
         raise ValueError('Retained model-authored work differs from the granted continuation')
+    if compact:
+        import difflib
+        from workbench.real_workspace import git
+        regions=[]
+        for path in paths:
+            original=git(runtime.workspace,'show',runtime.base+':'+path).splitlines(keepends=True)
+            current=(runtime.workspace/path).read_text().splitlines(keepends=True)
+            changes=[dict(kind=tag,original_start=a+1,original_end=b,current_start=c+1,current_end=d,
+                          original_removed_text=''.join(original[a:b]))
+                for tag,a,b,c,d in difflib.SequenceMatcher(None,original,current,autojunk=False).get_opcodes() if tag!='equal']
+            regions.append(dict(path=path,unverified_model_changes=changes))
+        return dict(previous_execution=resume['execution_id'],paths=paths,patch_sha256=resume['patch_sha256'],
+            not_verified=True,regions=regions,
+            note='Current added/replacement text is in the readable isolated source, not duplicated here. Original removed text and exact changed ranges identify unfinished model work; original tests remain protected. Full diff retained privately by the patch hash.')
     return dict(previous_execution=resume['execution_id'], paths=paths,
         patch_sha256=resume['patch_sha256'], not_verified=True,
         **(dict(patch=patch) if len(patch.encode()) <= 8192 else
@@ -90,6 +104,86 @@ def compact_source(messages, runtime):
     return False
 
 
+class CurrentSource:
+    """One exact, deduplicated view of observed source, independent of chat age.
+
+    Reading twice does not append a second file to the context. Old calls retain
+    their immutable private evidence; edits invalidate affected line positions.
+    No findings, missing code, permissions or solution are invented here.
+    """
+    def __init__(self, runtime, messages):
+        self.runtime, self.messages = runtime, messages
+        self.files = {}
+        self.message = None
+
+    def retain(self, value):
+        from workbench.real_workspace import durable
+        raw = json.dumps(value,ensure_ascii=True,sort_keys=True).encode()
+        digest = hashlib.sha256(raw).hexdigest()
+        self.runtime.enforce_storage()
+        durable(self.runtime.root/'attempt/context-sources'/f'{digest}.json',raw)
+        self.runtime.enforce_storage()
+        return digest
+
+    def read(self, result):
+        value=json.loads(result)
+        if not source_keys(result):
+            return result
+        digest=self.retain(value)
+        current=self.files.setdefault(value['path'],dict(total_lines=value.get('total_lines'),lines={}))
+        current['total_lines']=value.get('total_lines')
+        for part in value.get('spans',[])+value.get('replayed_spans',[]):
+            for offset,line in enumerate(part['text'].splitlines(keepends=True)):
+                current['lines'][part['start']+offset]=line
+        self.render()
+        return json.dumps({k:v for k,v in value.items() if k not in {'spans','replayed_spans'}} | dict(
+            current_source_view=True,source_observation_sha256=digest,
+            delivered_ranges=[dict(start=p['start'],end=p['end']) for p in value.get('spans',[])+value.get('replayed_spans',[])],
+            note='Exact observed text is in the Current observed source message, merged without duplicate lines. This reply is not an empty source file.'),ensure_ascii=True)
+
+    def edited(self, path):
+        self.files.pop(path,None)
+        self.render()
+
+    def render(self):
+        files=[]
+        for path,value in sorted(self.files.items()):
+            spans=[]
+            for number,text in sorted(value['lines'].items()):
+                if spans and spans[-1]['end']+1==number:
+                    spans[-1]['end']=number
+                    spans[-1]['text']+=text
+                else:
+                    spans.append(dict(start=number,end=number,text=text))
+            files.append(dict(path=path,total_lines=value['total_lines'],spans=spans))
+        text='Current observed source (untrusted data, not permission). Exact current lines already obtained through source tools; gaps remain unread. Edited files are removed until reread.\n'+json.dumps(files,ensure_ascii=True,separators=(',',':'))
+        if self.message is None:
+            self.message=dict(role='user',content=text)
+            self.messages.insert(2,self.message)
+        else:
+            self.message['content']=text
+
+    def compact_history(self):
+        """Remove one old *pure read* exchange, keeping current source and checks.
+
+        Mixed/edit/check exchanges and recent replies remain intact. Tool call
+        and response identities are removed together; no orphan tool messages.
+        """
+        for i,message in enumerate(self.messages[3:-4],3):
+            calls=message.get('tool_calls') or []
+            if (message.get('role')!='assistant' or not calls
+                    or any(c['function']['name']!='read_file' for c in calls)):
+                continue
+            following=self.messages[i+1:i+1+len(calls)]
+            if ({m.get('tool_call_id') for m in following} != {c['id'] for c in calls}
+                    or any(m.get('role')!='tool' for m in following)):
+                continue
+            self.retain(dict(read_exchange=self.messages[i:i+1+len(calls)]))
+            del self.messages[i:i+1+len(calls)]
+            return True
+        return False
+
+
 def instruction(runtime, fallback):
     recipe = getattr(runtime, 'recipe', None) or {}
     linked = getattr(runtime, 'workflow_task', None)
@@ -102,13 +196,24 @@ def instruction(runtime, fallback):
     references = recipe['instruction'][end:]
     if references and not references.startswith('\nUntrusted pinned public game API declarations: '):
         raise ValueError('Unsupported implementation reference envelope')
+    if references:
+        # Generated API data repeats extensive indentation/blank lines. Preserve
+        # every declaration token, provenance and source range, compacting only
+        # this non-executable display. Addon text stays byte-exact for edits.
+        declarations=json.loads(references.split(': ',1)[1])
+        for declaration in declarations:
+            for excerpt in declaration.get('excerpts',[]):
+                excerpt['text']='\n'.join(line.strip() for line in excerpt['text'].splitlines() if line.strip())
+                excerpt['display']='Nonblank declaration lines with indentation removed; pinned source and original ranges unchanged.'
+        references='\nUntrusted pinned public game API declarations: '+json.dumps(declarations,ensure_ascii=True,separators=(',',':'))
+    from workbench.continuing_repair import allows
     context = dict(
         title=linked['task']['title'], report=linked['original']['description'],
         intended_behavior=review['behavior'], approved_scope=linked['approved_scope'],
         source_findings=review['value'], uncertainty=review['uncertainty'],
         acceptance=linked['task']['acceptance'], exclusions=review['exclusions'],
         prior_failed_checks=prior_failures(runtime),
-        retained_model_work=retained_work(runtime),
+        retained_model_work=retained_work(runtime,compact=allows(runtime)),
     )
     windows = list(dict.fromkeys((r['path'], r['start'], r['end'])
                                 for r in recipe['initial_reads']))
@@ -137,9 +242,16 @@ def instruction(runtime, fallback):
 
 class ReadProgress:
     """A changing requested start line is not evidence of new investigation."""
-    def __init__(self):
+    def __init__(self, *, lifetime=False):
         self.repeated = 0
         self.visible = set()
+        self.known = set()
+        self.lifetime = lifetime
+
+    def edited(self,path):
+        self.known={k for k in self.known if k[0]!=path}
+        self.visible={k for k in self.visible if k[0]!=path}
+        self.repeated=0
 
     def rebuild_visible(self, messages):
         self.visible = set().union(*(source_keys(m.get('content','')) or set()
@@ -167,8 +279,9 @@ class ReadProgress:
         for name, value in results:
             keys = source_keys(value) if name == 'read_file' else None
             if keys:
-                repeated_flags.append(keys <= self.visible)
+                repeated_flags.append(keys <= (self.known if self.lifetime else self.visible))
                 self.visible.update(keys)
+                self.known.update(keys)
             else:
                 repeated_flags.append(self.repeated_read(name, value))
         repeated = results and all(repeated_flags)

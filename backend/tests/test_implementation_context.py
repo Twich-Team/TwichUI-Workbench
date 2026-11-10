@@ -63,6 +63,54 @@ def response(tool, args, number):
     return value
 
 
+def test_current_source_merges_overlap_preserves_exact_text_and_invalidates_edits(tmp_path):
+    from workbench.implementation_context import CurrentSource
+    runtime=SimpleNamespace(root=tmp_path,enforce_storage=lambda:None)
+    messages=[dict(role='system',content='Preserved policy'),dict(role='user',content='Preserved scope')]
+    view=CurrentSource(runtime,messages)
+    def read(start,text):
+        return view.read(json.dumps(dict(path='source.lua',total_lines=5,
+            spans=[dict(start=start,end=start+len(text.splitlines())-1,text=text)],next_start=None)))
+    first=json.loads(read(1,'local value = 1\n  -- exact whitespace\n'))
+    read(2,'  -- exact whitespace\nreturn value\n')
+    assert first['current_source_view'] and first['delivered_ranges']==[dict(start=1,end=2)]
+    assert len(messages)==3 and messages[0]['content']=='Preserved policy' and messages[1]['content']=='Preserved scope'
+    data=json.loads(messages[2]['content'].split('\n',1)[1])
+    assert data[0]['spans']==[dict(start=1,end=3,text='local value = 1\n  -- exact whitespace\nreturn value\n')]
+    assert len(list((tmp_path/'attempt/context-sources').glob('*.json')))==2
+    view.edited('source.lua')
+    assert json.loads(messages[2]['content'].split('\n',1)[1])==[]
+
+
+def test_current_source_compacts_only_old_complete_pure_read_exchanges(tmp_path):
+    from workbench.implementation_context import CurrentSource
+    runtime=SimpleNamespace(root=tmp_path,enforce_storage=lambda:None)
+    messages=[dict(role='system',content='Policy'),dict(role='user',content='Scope')]
+    view=CurrentSource(runtime,messages)
+    view.read(json.dumps(dict(path='s',spans=[dict(start=1,end=1,text='source\n')])))
+    read=dict(role='assistant',tool_calls=[dict(id='read-1',function=dict(name='read_file',arguments='{}'))])
+    messages.extend([read,dict(role='tool',tool_call_id='read-1',content='source is in current view')])
+    edit=dict(role='assistant',tool_calls=[dict(id='edit-1',function=dict(name='replace_text',arguments='{}'))])
+    messages.extend([edit,dict(role='tool',tool_call_id='edit-1',content='Edit saved')])
+    messages.extend([dict(role='user',content='Recent checker failure')]*4)
+    assert view.compact_history()
+    assert read not in messages and edit in messages and messages[-1]['content']=='Recent checker failure'
+    assert not view.compact_history()
+
+
+def test_reloading_source_into_context_does_not_turn_repetition_into_investigation_progress():
+    progress=ReadProgress(lifetime=True)
+    value=json.dumps(dict(path='source.lua',spans=[dict(start=1,end=1,text='local value=1\n')]))
+    progress.observe('read_file',value)
+    for _ in range(3):
+        progress.rebuild_visible([])
+        progress.observe('read_file',value)
+    assert progress.repeated==3
+    progress.edited('source.lua')
+    progress.observe('read_file',value)
+    assert progress.repeated==0
+
+
 def test_real_tool_responses_support_reread_then_edit_in_same_counted_attempt(tmp_path):
     path=tmp_path/PATHS[0]
     path.parent.mkdir(parents=True)

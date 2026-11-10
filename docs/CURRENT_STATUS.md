@@ -1,11 +1,9 @@
-# Current — vendor repair remains unfinished
+# Current — vendor repair still unfinished
 
-Following the Project Working Philosophy, installed291d07f/deployment90 preserves history, six prior real checked results and private-network protections. Continuing same-scope local-Qwen permission is now recorded distinctly and active in the original task. FallbackOff, publication held. Session2341f8af is preparing its protected copy; do not duplicate it. No checked vendor result yet.
+Following the Project Working Philosophy, installed291d07f/deployment90 preserves history, prior real results and private-network protections. Continuing permission genuinely let Qwen pass20 requests and correct one test; independent candidate checking then failed a new icon expectation. A later reread loop was stopped through supported cancellation with engineering provenance. No checked vendor result.44complete receipts and the final unknown usage remain recorded; cleanup/normal model restoration verified.
 
-Useful work can continue beyond20 requests under this explicit permission. Actual usage, cancellation, scope/resource protections, fresh working-test observations and repeated-work detection remain. Ordinary safely settled operations can renew through the worker without owner attendance. Prior one-attempt decisions and unknown usage remain unchanged.
+The working correction now deduplicates exact current source rather than repeatedly archiving it out of context. Actual tokenizer measurement proves all3 source files, task/tools and response reserve fit.111 affected checks and static build pass; native rehearsal pending. Next is verified activation and fresh same-authority continuation preserving the newer Qwen edit, not another owner approval.
 
-Full suites, affected final checks, native separate-process/browser rehearsal and installed desktop/phone/reload passed. Supporting checks are not real vendor acceptance. The previous failed run is settled and restored; inspect active operation before any restart.
-
-After vendor success: authorized separate ordinary real-provider self-check, restart/durable result, non-publishing PR preparation/recovery and automatic release retention. These and the broader product remain unfinished. No live-addon installation or publication.
+Separate ordinary real-provider self-check, final vendor behavior, durable result/restart, non-publishing PR preparation/recovery and ongoing automatic retention remain to demonstrate. Product remains unfinished; no live-addon installation or publication.
 
 [Continuation](CONTINUATION.md) · [Evidence](VENDOR_EXECUTION_STREAM_RECOVERY_20261110.md) · [Continuing permission](OWNER_VENDOR_CONTINUING_PERMISSION_20261110.md).

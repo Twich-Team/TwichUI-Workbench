@@ -12,6 +12,69 @@ from workbench.db import proposal_decisions, task_sessions
 PURPOSE = 'same-task-local-until-result-v1'
 
 
+def code_identity(folder=None):
+    from pathlib import Path
+    from hashlib import sha256
+    folder = Path(folder) if folder else Path(__file__).parent
+    return {name:sha256((folder/name).read_bytes()).hexdigest()
+        for name in ('real_provider.py','implementation_context.py','continuing_repair.py')}
+
+
+def request_engineering_stop(engine, identity, command_id, reason):
+    """Trusted local recovery ingress; not a browser/owner stop or a new grant.
+
+    Persist the actual actor/purpose before using normal cancellation. An owner
+    stop already recorded always wins. The old attempt and permission stay intact.
+    """
+    from uuid import UUID
+    from pathlib import Path
+    from workbench.db import write_transaction, real_execution_requests as requests, real_execution_grants as grants
+    from workbench.real_execution import now
+    from workbench.real_workspace import sha
+    from workbench.repair_continuation import private_json
+    UUID(command_id)
+    if not isinstance(reason,str) or not 20 <= len(reason) <= 600:
+        raise ValueError('A concrete bounded engineering recovery reason is required')
+    with write_transaction(engine) as c:
+        session = c.execute(select(task_sessions).where(task_sessions.c.id==identity)).mappings().one()
+        approval = c.execute(select(proposal_decisions).where(proposal_decisions.c.id==identity)).mappings().one()
+        if (not permitted_budget(approval) or session['status'] not in {'active','waiting_recovery'}
+                or session['state'].get('cancel_requested')):
+            raise ValueError('Only active continuing work without an owner stop can yield for repair')
+        row = c.execute(select(requests,grants.c.snapshot.label('grant_snapshot')).join(grants,requests.c.grant_id==grants.c.id)
+            .where(grants.c.snapshot['task_budget']['decision_id'].as_string()==identity)
+            .order_by(requests.c.created_at.desc()).limit(1)).mappings().one()
+        if row['status'] not in {'running','checking'}:
+            raise ValueError('The actual bound operation is no longer active')
+        root=Path(row['grant_snapshot']['recovery']['root'])
+        latest=max((root/'attempt').glob('request-*.json'),key=lambda p:p.stat().st_mtime)
+        observed=private_json(latest)
+        if observed['request_id']!=row['id'] or observed['fence']!=row['fence']:
+            raise ValueError('Current execution observations changed')
+        marker=dict(actor='engineering-recovery',reason=reason,command_id=command_id,session_id=identity,
+            execution_id=row['id'],fence=row['fence'],observed_request=str(latest),observed_sha256=sha(latest.read_bytes()),
+            code_identity=code_identity(root.parents[3]/'backend/workbench'),
+            owner_provenance=approval['payload']['execution_continuation']['owner_provenance'],created_at=now())
+        c.execute(task_sessions.update().where(task_sessions.c.id==identity).values(
+            state={**session['state'],'engineering_yield':marker}))
+    from workbench.task_sessions import cancel
+    return cancel(engine,identity,command_id)
+
+
+def engineering_stop(session, approval):
+    """Only the trusted recorded engineering stop, followed by changed code."""
+    state=session.get('state') or {}
+    marker=state.get('engineering_yield') or {}
+    import re
+    return (permitted_budget(approval) and marker.get('actor')=='engineering-recovery'
+        and marker.get('session_id')==session['id'] and state.get('cancel_requested') is True
+        and state.get('stop_command')==marker.get('command_id')
+        and marker.get('owner_provenance')==approval['payload']['execution_continuation']['owner_provenance']
+        and isinstance(marker.get('code_identity'),dict) and set(marker['code_identity'])==set(code_identity())
+        and all(isinstance(v,str) and re.fullmatch('[a-f0-9]{64}',v) for v in marker['code_identity'].values())
+        and marker['code_identity']!=code_identity())
+
+
 def permitted_budget(approval):
     payload = approval.get('payload') or {}
     continuation = payload.get('execution_continuation') or {}
@@ -39,7 +102,9 @@ def current(c, task_id):
         .order_by(proposal_decisions.c.created_at.desc()).limit(1)).mappings().first()
     if not row or not permitted_budget(row) or row['status'] != 'applied':
         return None
-    if row['session_status'] in {'cancelled','expired'} or row['session_state'].get('cancel_requested'):
+    stopped=dict(id=row['id'],state=row['session_state'])
+    engineering=engineering_stop(stopped,row)
+    if (row['session_status'] in {'cancelled','expired'} or row['session_state'].get('cancel_requested')) and not engineering:
         return None
     continuation = row['payload']['execution_continuation']
     from workbench import task_execution
@@ -60,9 +125,9 @@ def process_one(engine):
         return False
     with engine.connect() as c:
         ids = c.execute(select(task_sessions.c.task_id).where(
-            task_sessions.c.status == 'failed', task_sessions.c.finished_at.is_not(None)).distinct()).scalars().all()
+            task_sessions.c.status.in_(['failed','cancelled']), task_sessions.c.finished_at.is_not(None)).distinct()).scalars().all()
         authorized = [v for identity in ids if (v := current(c, identity))
-            and v['decision']['session_status'] == 'failed']
+            and v['decision']['session_status'] in {'failed','cancelled'}]
     for value in authorized:
         # The normal continuation proof verifies dead owners/cgroups, closed edits,
         # usage, restoration and fresh provider/scope bindings before any grant.
