@@ -52,7 +52,7 @@ export function Dashboard(){
  <WorkshopPanel title="Needs your attention" icon={<HelpCircle size={18}/>} action={needs>3?<Link to="/backlog?state=needs_you">View all {needs}</Link>:undefined}>
  {highlights.needs_you.length?highlights.needs_you.map(task=><TaskRow key={task.id} task={task}/>):<div className="quiet-empty"><CheckCircle2 size={20}/><p>No questions or approvals are waiting for you.</p></div>}
  </WorkshopPanel>
- <div className="dashboard-counts">{[{n:active,label:'Working',state:'active',Icon:Activity},{n:counts.queued||0,label:'Queued',state:'queued',Icon:Clock3},{n:needs,label:'Need you',state:'needs_you',Icon:HelpCircle}].map(({n,label,state,Icon})=><Link key={state} to={'/backlog?state='+state}><Icon size={25}/><strong>{n}</strong><span>{label}</span></Link>)}</div>
+ <div className="dashboard-counts">{[{n:active,label:'Working',state:'active',Icon:Activity},{n:counts.queued||0,label:'Queued',state:'queued',Icon:Clock3},{n:needs,label:'Need you',state:'needs_you',Icon:HelpCircle}].map(({n,label,state,Icon})=><Link key={state} to={'/backlog?state='+state} aria-label={`${n} ${label}`}><Icon size={25}/><strong>{n}</strong><span>{label}</span></Link>)}</div>
  <WorkshopPanel title="Recent outcomes" icon={<CheckCircle2 size={18}/>} action={<Link to="/results">All results <ArrowRight size={14}/></Link>}>
  {(highlights.outcomes||highlights.completed).length?(highlights.outcomes||highlights.completed).map(task=><TaskRow key={task.id} task={task} result/>):<p className="quiet-empty">Checked results will appear here when work finishes.</p>}
  </WorkshopPanel></div><aside className="dashboard-notes">

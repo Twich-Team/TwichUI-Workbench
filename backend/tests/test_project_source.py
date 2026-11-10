@@ -267,12 +267,18 @@ def test_interrupted_source_download_preserves_current_pointer_and_removes_only_
     tmp_path, monkeypatch
 ):
     import importlib.util
+    from types import SimpleNamespace
 
     spec = importlib.util.spec_from_file_location(
         "controlled_source_sync", Path(__file__).parents[2] / "scripts/project_source_sync.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    # This tests an interrupted transfer, independently of the host's current
+    # free space. Low-capacity admission is tested separately below.
+    monkeypatch.setattr(module.shutil, "disk_usage", lambda _: SimpleNamespace(
+        free=module.FLOOR + module.MAX_BYTES + 1
+    ))
     root = tmp_path / "source-state"
     root.mkdir()
     snapshots = root / "snapshots"
@@ -300,6 +306,25 @@ def test_interrupted_source_download_preserves_current_pointer_and_removes_only_
         and (old / "retained").read_text() == "original"
     )
     assert list(snapshots.iterdir()) == [old]
+
+
+def test_source_refresh_with_low_capacity_keeps_pointer_and_never_downloads(tmp_path, monkeypatch):
+    import importlib.util
+    from types import SimpleNamespace
+
+    spec = importlib.util.spec_from_file_location(
+        "controlled_capacity_sync", Path(__file__).parents[2] / "scripts/project_source_sync.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    pointer = tmp_path / "current.json"
+    pointer.write_text("RETAIN THIS SOURCE POINTER\n")
+    monkeypatch.setattr(module.shutil, "disk_usage", lambda _: SimpleNamespace(free=module.FLOOR))
+    monkeypatch.setattr(module, "git", lambda *a, **kw: pytest.fail("Download started without reserve"))
+    with pytest.raises(ValueError, match="recovery reserve"):
+        module.sync(tmp_path)
+    assert pointer.read_text() == "RETAIN THIS SOURCE POINTER\n"
+    assert list(tmp_path.iterdir()) == [pointer]
 
 
 def test_source_unavailability_does_not_hide_history_or_affect_unrelated_demo_approvals(
