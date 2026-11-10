@@ -1,11 +1,18 @@
 # Active vendor recovery — November 10, 2026
 
-Actual installed **c3b270d/deployment99**, private loopback/LAN preview9487.
-Seal f19f8a0b10d4d43f774899e63c838e660b08d86a1d4031a1e5faaa3086bd8d96.
-Verified latest/original history, network/TLS/browser/internal filters and all six
-earlier real checked results (no later rejection on those six). A separate restore
-from the pre-cutover copy matched the 568-row fingerprint and passed integrity and
-foreign-key checks. Dev checkpoints are pushed; main and original edits preserved.
+Actual running build **cb3369a**, private loopback/LAN preview9487. The sealed
+files were verified before starting the worker. All four roles and network/TLS,
+browser and internal boundary probes passed. The latest database and its restore
+matched 584 rows before activation; post-start comparison retained each of those
+rows and recorded the authorized new session. All 50 intake views and six earlier
+checked real results remain readable. Desktop and phone reload passed. Final
+settled-model installation closeout waits for the live vendor run to settle.
+The initial cutover caught two late, legitimately saved worker rows (one offer,
+one continuing decision). Rebased on the stopped source, verified both backup
+copies, then checked strict equality again before starting the new worker.
+Use the stopped-worker snapshot as the final cutover baseline; distinguish
+strict equality before worker start from checked row preservation after it.
+Dev checkpoints are pushed; main and original edits preserved.
 
 The installed stream uses the approved deadline less the native cancellation
 reserve, closes on permission revocation, and recovers exact sealed terminal
@@ -30,19 +37,24 @@ queued session78714414/executionc42fd845 itself. Model fixed mixed-row bookkeepi
 and original test setup; focused vendor check passes. Original-with-new-tests
 also passed, so it is not yet evidence of a repair. Model guessed a missing log ID
 and the operation ended; 9complete/230068prompt/5962completion, no uncertainty.
-Worker automatically resumed **07bcad1c/c0e25639**. It is ACTIVE at latest inspection;
-it added a new test to distinguish the original and repaired behavior. Do not
-restart, duplicate, or claim an accepted vendor result. Inspect actual live state.
+Worker automatically resumed **07bcad1c/c0e25639**. Its two focused versions
+eventually passed, but both comparison runs still passed on the unchanged addon.
+The 20-minute operation ended with 17 complete responses (465574 prompt,
+10221 completion) and an interrupted 18th request. Exact native termination
+proof was recorded automatically; final usage remains unknown and no partial
+tools were dispatched. The worker saved a continuation during the cutover.
+The new build admitted **d4906757** exactly once. It passed the fresh full-suite
+readiness run and sent its first local request. Inspect actual live state before
+taking action. Do not restart or duplicate active work.
 
-Working correction registers the exact failed differential log in the current
+The installed correction registers the exact failed differential log in the current
 attempt, explains when the original unexpectedly passes, and carries the checker
 verdict into a fresh continuation. No verification rule or scope changes. Unknown
 well-formed log IDs receive bounded correction without reading any file; path
 and integrity violations still deny. 165 affected tests, final static, and native
-normal browser/API/worker rehearsal pass. If active work finishes without a checked
-candidate and this correction is needed, deploy only after verified settlement
-FROM ACTUAL c3b270d, preserving latest work/usage and earlier six results. Original
-permission persists; the worker may have already queued a further operation.
+normal browser/API/worker rehearsal pass. Verify this feedback on the real
+operation. Original permission persists; the worker may automatically resume
+when an operation settles. No accepted vendor result exists yet.
 
 When a candidate qualifies, run private independent five vendor criteria against
 its exact frozen result. Require original discrimination and full suite; do not

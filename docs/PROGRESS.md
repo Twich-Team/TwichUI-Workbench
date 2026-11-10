@@ -7654,3 +7654,17 @@ settlement before another cutover. Hosted npm11.19.1 clean install fixed by
 regenerating lock (no changed versions) and adding Lua test runtime. Hosted suite
 exposed14 host-only assumptions; exact test cases now use disposable Git fixture
 and explicit CLI import path.69 affected pass with no local setup.
+
+The next vendor operation passed focused tests twice but both test versions
+also passed with original production. The 20-minute operation returned after
+17 complete responses; exact native termination proof retained unknown final
+usage and ruled out partial dispatch. The worker saved the next approved
+continuation during the stop. The installer detected the extra offer and
+decision instead of discarding them. It revalidated the stopped source and
+both copies, confirmed strict equality before worker start, then checked
+all 584 rows survived alongside the admitted new session on cb3369a.
+Both listeners and all local network/browser probes passed, 50 intake views
+and six previous real results read back, and an offline restore matched the
+584-row fingerprint. Desktop and phone views reloaded without a decision.
+Remove misleading generic permission wording found in that inspection.
+The new run passed its fresh base checks and sent the first local request.
