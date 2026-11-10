@@ -80,9 +80,54 @@ exercise injected storage collisions and normal browser recovery, then isolated 
 and independent checks. They are controlled evidence, not new real-provider passes.
 Prior real provider/checked results must be preserved rather than replayed.
 
-Installation/original-task demonstration is pending at this source checkpoint.
-Use current continuation and the private final receipts for actual final identity,
-installation, outcome, restart/restore and remaining owner run decision.
+## Installed and demonstrated outcome
+
+Candidate `9ac94592fd8163db6d4444dbf6b0816d055182a8`, tree
+`1dea90f1feb79ab36cb38c0d4e5f302373d70ae8`, deployment86, seal
+`9ebaae930a4e71e22311866d93b48e47c109037f6696e972d781ff4d60a8ff32` is installed.
+The same saved preparation job completed through its automatic second offline
+round under the same actual approval. Existing addon tests and isolation pass.
+One canonical separate run offer is available; no new approval/model/run grant.
+Vendor repair verification remains `not_run`. Owner must review/approve that run
+if desired; do not infer execution permission from this repair or scope approval.
+
+Additional low-space housekeeping brought total browser coalescing to13 inactive
+distributions/3900 files/5384372370 logical duplicate bytes. Every path/seal remains.
+Measured reclamation before the last two automatic coalesces was4757688320 bytes,
+including supported cleanup of the failed clean clone. The final journals include
+later coalesces. Physical free bytes after installation, backups and ordinary use:
+8699461632 versus4217131008 initially (~3.93→8.10GiB). Do not equate logical bytes
+with exact physical savings. Soft8GiB housekeeping target; hard4GiB reserve unchanged.
+
+Connected backend319, final transition114, final storage10, frontend35, browser5
+and two opt-in separate-process storage-fault journeys pass; static/contracts/build/
+schema pass. Those are controlled providers, not fresh real-model acceptance.
+Unchanged opt-ins not repeated: historical pinned four-provider browser rehearsal,
+guild-roster readiness and four other legacy process modes. Prior evidence retained;
+affected two modes exercised with resource faults, scope and fresh run boundaries.
+Existing bundle-size warning and initial corrected fixture/preflight issues retained.
+
+Installed original desktop/phone/reload and ingress-first four-service restart show
+the run decision unchecked/unsubmitted and no stale preparation hold. Task/dashboard
+agree. History comparison preserves461 old rows; only same preparation job and its
+producer diagnostic projection change, one run offer added. Final464-row fingerprint
+`8a9ff74e13f87da7e081330bb2aaa3ff8b37f04da615e6e21ccedb6ca5b179d1` matches post-recovery,
+post-restart, backup and independent restore. Six earlier real checked results remain
+canonically valid/readable without replay. Original source/history/failures/approvals,
+Qwen/fallbackOff/policy18 and historical unknowns unchanged. No new provider calls.
+
+Normal model PID1429966/auth/epoch and unpaused maintenance unchanged. Four services
+active/enabled as Rich; helper and LAN/TLS/browser/internal-endpoint protections
+verified. Prior physical-device evidence reused under unchanged routes/address/CA;
+no new device test claimed. Previous installedef7e23e/691edf7/c5873b1 recovery retained.
+No new access or storage decision needed. The meaningful separate run approval is
+the remaining owner action, not an engineering renewal. Vendor bug still unfixed.
+
+Private hash-bound closeout: `final-preparation-storage-closeout.json` in the evidence
+directory below. Exact installation/test/rollback records in
+`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-9ac9459`.
+Current [handoff](VENDOR_CURRENT_HANDOFF.md) and [continuation](CONTINUATION.md) supersede
+earlier pending-installation and awaiting-plan-review descriptions.
 
 Private evidence: `/home/rich/.local/share/TwichUI-Workbench/vendor-preparation-storage-recovery-20261110`.
 No spending, disclosure expansion, public exposure, publication or live-addon changes.

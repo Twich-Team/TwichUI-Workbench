@@ -1,12 +1,14 @@
-## Verified current — saved revision recovered and model priority installed
+## Verified current — approved original vendor task prepared
 
-November10,2026 UTC: ef7e23e/deployment85 has ORIGINAL vendor task proposal24 ready
-for genuine review. Exact saved revision resumed once through real Qwen after
-verified maintenance yield; durable whole-operation reservation/shared waiting
-projection installed. Browser/reload/restart/history/restore and maintenance resume
-pass. No vendor plan/run approval or implementation. See [current status](CURRENT_STATUS.md)
-and [handoff](VENDOR_CURRENT_HANDOFF.md) for bound evidence and the next action.
-Standing autonomous authority continues; no campaign caps or routine renewals.
+November10,2026 UTC: installed9ac9459/deployment86 automatically recovers the same
+preparation job under actual scope approval59b032e5. Existing addon suite/isolation
+pass; original task has one valid separate run action. No run permission or vendor
+implementation inferred. Storage observation/admission/retention/recovery installed;
+disk diagnosis and safe cleanup restore free bytes4217131008→8699461632 after setup.
+Desktop/phone/reload/restart, history/restore and six prior result revalidations pass,
+without a new provider call. See [current status](CURRENT_STATUS.md),
+[handoff](VENDOR_CURRENT_HANDOFF.md) and [evidence](VENDOR_PREPARATION_STORAGE_20261110.md).
+Standing autonomy continues; the meaningful vendor run decision remains with owner.
 
 All dated entries below are preserved historical progress, not competing current
 state, active-operation instructions or permission gates. Do not replay their work.

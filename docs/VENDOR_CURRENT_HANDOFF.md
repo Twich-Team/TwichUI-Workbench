@@ -1,132 +1,119 @@
-# Vendor task — verified current handoff
+# Vendor task — verified preparation recovery handoff
 
-Updated November10,2026 UTC after installation, original-task browser/restart,
-history/restore and maintenance-restoration verification. Following the Project
-Working Philosophy, standing autonomy remains; no campaign caps or renewal gates.
+Updated November10,2026 UTC. Following the Project Working Philosophy and standing
+autonomy, no campaign caps, cumulative delivery allowances or engineering renewals.
 
-## Actual installed outcome and owner decision
+## Actual task, installation and next owner action
 
-ORIGINAL task: https://10.0.0.9:9487/intake/2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd
-**Ready for your review**, proposal24 `1e9427a8-69a3-5191-b21d-e6f95baa9a0a`.
+Original: https://10.0.0.9:9487/intake/2dc5b8ba-2d22-4c2c-9f90-3bd58d29d5fd
+**Ready for your run decision**, proposal24 `1e9427a8-69a3-5191-b21d-e6f95baa9a0a`.
+Actual scope approval `59b032e5-f4a5-45cb-a418-50b4da3f020f` applied00:43:50UTC,
+explicitly no execution/publication. Earlier revision5c77ad37 about slow item names/
+refresh remains applied. Human scope2, report, proposals/failures/usage/decisions remain.
 
-The genuine Request changes decision `5c77ad37-b22b-46cb-8aea-9a6af0898aab` was
-saved/applied once. Exact note: “Also check to see if possibly the game returns
-the item names slowly, and the display needs to be refreshed or similar.”
-Human scope2 is unchanged: correct names/links, preserve layout/icons/tooltips,
-no visual redesign. The report, all earlier plans/failures/usage/decisions remain.
+Same preparation job `67feb54c-b13e-40c5-9c15-a40263c34b4c` recovered, attempts1→2.
+Actual existing addon suite and isolation checks passed; canonical run offer
+`aa01d545-e7c9-4f2e-bddf-40a59ada3d07` passes current binding validation. Recipe
+correctness `not_run`, publication held, run receiptNone. No model/grant/approval added.
 
-The revised real-Qwen plan identifies the NI.Name fallback, NI.Request/OnNames and
-GET_ITEM_INFO_RECEIVED paths, proposes focused item request/settlement changes and
-mixed known/late-name regression coverage. Read context includes Stock.lua; proposed
-writes are Items.lua and tests/test_npcs_stock.lua. No model solution was supplied
-by the development session. Actual runtime root cause is explicitly unproven.
+Owner must read “Run the approved work in a separate copy,” acknowledge its limits,
+and choose **Approve local run** if desired. No repeat plan approval. No vendor run
+is delegated; earlier acceptance delegation does not cover it. Do not infer approval
+or hand-supply a fix. Vendor implementation has not begun.
 
-**No vendor plan/run approval, addon implementation or publication.** Next genuine
-owner action: read the proposal, confirm its behavior criteria if correct, choose
-Approve plan. Isolated execution is a separate decision. No vendor approval is
-delegated. Do not infer it from repair authority or resubmit the saved revision.
+Installed candidate `9ac94592fd8163db6d4444dbf6b0816d055182a8`, tree
+`1dea90f1feb79ab36cb38c0d4e5f302373d70ae8`, deployment86, seal
+`9ebaae930a4e71e22311866d93b48e47c109037f6696e972d781ff4d60a8ff32`.
+Stage `/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-9ac9459`.
+Bindings/install/rollback:
+`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-9ac9459`.
+Later documentation checkpoints do not change that installed source identity.
 
-Installed `ef7e23e7b5788c90afa31b0dc6ae5a7c4c53c1e3`, deployment85:
-`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-ef7e23e`.
-Later documentation checkpoints do not change the installed/sealed source identity.
-Exact tree, seal, inventory, verification, install/rollback records:
-`/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a/outcome-ef7e23e`.
+## Failure, storage and durable correction
 
-Qwen/fallbackOff/policy18 unchanged. No owned queued/running job, run or pending
-choice at closeout; inspect actual state before later actions. Earlier uncertainty
-and quarantined unknown usage remain. Original total91 complete responses,
-1993817 known tokens; never report these as including unknown legacy consumption.
+Old admission checked72MiB generic room, cloned189852433 bytes before reserving growth,
+then emitted a combined storage error. Evidence150851, scratch189852433, no model or
+check started. At diagnosis ordinary free4217131008 was below hard4294967296 reserve;
+inodes ample. Exact historical failure measurement was lost, not invented. This
+path did not use512MiB cumulative admission; a separate legacy gate did and is removed.
 
-## Confirmed cause, recovery and durable correction
+Installed storage_resources records disk/inodes/evidence/scratch/growth, excludes
+workspace/symlink double-counting and binds helpers in runtime identity. Clone growth
+reserved before copying. preparation_resources verifies same applied scope, absent
+model/session/offer and absent/settled checks, clean matching copy and accounting;
+preserves old claim/failure; renews only safe offline setup in the SAME job. Unknown
+activity, modified source or altered scope holds. Existing journal/schema; no new grant.
+Worker automatic recovery and task/dashboard/driver projections agree. No obsolete
+preparation panel remains beside a valid run offer.
 
-Saved job24 `522a9cf5-e729-47d6-aaf3-5ef7b84b42db` was durably queued, attempts0.
-Actual maintenance cycle422444 and driver433514 held the locks. PID/start/boot,
-program/cgroup/process group and saved queue owner agreed. This was live maintenance,
-not a stale reservation or lost submission. Workbench's old local_slot only waited
-and released locks between requests; it had no A11 handoff. Dashboard counted active
-addon work and omitted queued work. Task wording assumed any contention meant maintenance.
+release_cache shares only byte/metadata-identical sealed inactive browser files in
+fixed private stages, preserving all paths/seals with append-only hash/inode journals.
+Current/recent independent browser copies protected. Soft8GiB target is housekeeping,
+not an admission cap. Hard4GiB recovery reserve and per-operation safety remain.
 
-Supported opsctl pause prevented new maintenance admissions; targeted verified
-SIGTERM interrupted only that maintenance group. No lock deletion or terminal
-provider evidence was invented. Its last outcome/usage remain unknown; source,
-queue and original interruption accounting remain with their owner.
+Read-only geometry: Samsung850 device250059350016 bytes (~250GB decimal), rootLV
+246780264448, ext4 total242307891200 (~225.7GiB). EFI/boot/filesystem overhead and
+binary display explain capacity. No substantial unallocated region shown. LVM tools
+denied unprivileged device access; no escalation/resize/repartition. Ordinary-vs-root
+free-block difference10983067648 is separate from Workbench reserve and unchanged.
+Root-only du explains nearly all usage, no large unexplained deleted-open consumer
+indicated. tmpfs mounts not included. No unrelated deletion.
 
-The SAME saved job resumed automatically on installed691edf7 through actual Qwen.
-Attempt `41cb2393-50cf-4bad-b3cf-1afa8bb3f88b` completed23:53:31UTC with three
-complete responses/79105 tokens. One claim, no request resubmission or approval.
+Initial large consumers: Workbench70.29GB (104 stages; browsers40.27GB after first
+reclamation, envs11.33GB), cache50.88GB (HF49.30GB), models49.27GB, pilot31.95GB
+(checkouts27.96GB), swap8.59GB. Nested categories are not additive to parents.
+Thirteen browser distributions/3900 files share5384372370 duplicate logical bytes.
+Supported cleanup removed one verified clean failed clone, preserving source/claim/
+manifest/failure. Measured reclamation before the last two automatic coalesces was
+4757688320 bytes. All later coalesces are journalled; logical savings are not exact
+physical blocks. After new installation/backup/ordinary activity, free8699461632
+versus4217131008 bytes (~3.93→8.10GiB). Weights/cache/personal/pilot/history/results/
+recovery untouched. Storage needs no new owner decision.
 
-Installed `local_model_priority` now separates resource ownership from completion:
-whole-operation cooperative reservation across planning/source follow-ups; local
-execution controllers hold theirs through authenticated restoration; only same
-process/unchanged inode borrowing. Verified maintenance can yield by bounded TERM,
-then revalidated bounded force if necessary. Unknown/foreign owners hold. Real
-server readiness is required; old journal/process absence never fabricates usage,
-completion or cancellation. Restart reconciles stale reservation ownership.
+## Verification, preservation and limits
 
-One read model supplies task/dashboard waiting, reservation and maintenance reason.
-Queued work stays visible and scheduled; automatic recovery is explicit. Maintenance
-appears separately only from verified live ownership and does not inflate task counts.
-No provider/source/write/approval/publication permission was expanded.
+Private evidence:
+`/home/rich/.local/share/TwichUI-Workbench/vendor-preparation-storage-recovery-20261110`.
+`final-preparation-storage-closeout.json` binds final receipts/hashes.
 
-## Verified evidence and limits
+- Connected backend319; final transitions114; storage10; frontend35; browser5;
+  two opt-in separate-process scoped-repair storage-fault journeys pass. Real Lua
+  and isolation with controlled providers, not new model passes. Static/contracts/
+  build/schema pass, pre-existing bundle-size warning retained.
+- Unchanged opt-ins not replayed: pinned historical four-provider browser rehearsal,
+  guild-roster readiness, four other legacy process modes. Affected two modes were
+  rechecked with storage collision/recovery. Prior broader evidence is historical,
+  not falsely claimed rerun. Initial fixture/Path.open and preflight mode errors
+  retained with successful corrections; no production safeguard weakened.
+- Exact quiescent history matched before startup. With ingress closed, installed
+  worker recovered same approval/job.461 old rows unchanged; only that job and its
+  producer diagnostic projection changed, one offer added. No model/approval/run.
+- ORIGINAL desktop/phone/reload and after ingress-first four-service restart show
+  one run action, checkbox unchecked, submit disabled, no stale hold. Read-only
+  browser observer permitted GET/HEAD only; no mutation attempted. Dashboard lists
+  needs-you, not false activity. No task resubmission/developer database edits.
+- Store464 rows; SHA256
+  `8a9ff74e13f87da7e081330bb2aaa3ff8b37f04da615e6e21ccedb6ca5b179d1` agrees with
+  post-preparation, restart, final backup and independent restored copy. Original
+  79-row store and preceding463-row store retained; no migration.
+- Six prior real checked results revalidate/read without replay: flight-path repair,
+  four provider configurations, styled Qwen regression. Fallback evidence is permitted
+  pre-generation switching, never partial/uncertain replay. No new provider call here.
+- Qwen/fallbackOff/policy18 and original91 complete responses/1993817 known tokens
+  unchanged. Historical unknowns stay unknown/isolated. No active owned job/run/pending
+  choice at closeout; inspect actual state before new work.
+- Four services active/enabled as Rich; helper/hash/scope unchanged, no drop-ins.
+  Normal model1429966/auth/epoch unchanged; no model restart/pause/reservation needed.
+  Maintenance admissions unpaused. TLS/loopback9487, HTTPS10.0.0.9:9487/LAN10.0.0.0/24,
+  host/origin/CSRF/internal endpoint protections rechecked. Earlier physical-device
+  evidence reused under unchanged address/routes/CA; no new physical test claimed.
 
-Private evidence: `/home/rich/.local/share/TwichUI-Workbench/vendor-model-priority-recovery-20261109`.
-`final-model-priority-closeout.json` binds final receipts/hashes.
-
-- Controlled actual OS-process/lock tests: maintenance handoff, unknown owner refusal,
-  stale journal/PID recovery, lock replacement, exclusion between requests, same saved
-  revision dispatched once, duplicate commands/reload/restart and approval boundaries.
-- Final affected backend170, priority/source/views45, frontend34 and four browser
-  cases pass. Broad run2062 passes/8 opt-in skips plus one resolved fixture issue.
-  Six opt-in API/worker/browser two-bug journeys verified: four initial passes,
-  two corrected expected call sequences (the deliberately rejected read was omitted).
-  Actual checked journeys had already completed. No production gate weakened.
-- Remaining opt-ins not rerun: old pinned four-case browser rehearsal and historical
-  guild-roster repair-readiness fixture. Their consequences and preserved prior
-  coverage are explicit in `offline-verification.json`; no new live pass inferred.
-- Installed ORIGINAL plan and exact saved choices/real output demonstrated on normal
-  desktop/phone browser, reload and after ingress-first four-service restart.
-  After maintenance resume, browser shows Model used by maintenance, zero addon
-  work and the original plan awaiting genuine review. No mutation/approval added.
-- Exact table comparison: only original intake status/revision and same job changed;
-  one real attempt and one proposal added. All other rows, unknown accounting,
-  report/scope/revision note/decisions/failures preserved. Current store equals
-  post-real-revision snapshot and restart fingerprint; final independent restore matches.
-- Six prior real checked results canonically revalidate and read normally without
-  replay: flight-path repair, four provider configurations, styled Qwen regression.
-  Fallback evidence is permitted pre-generation switching, not partial/uncertain replay.
-- Installed resource smoke held actual locks/readiness across fifteen observations
-  while supported guarded resume restored maintenance admission. No model turn or
-  task mutation. The new automatic interruption path has controlled-owner evidence;
-  original real recovery used the supported manual yield, not a second live retry.
-- Four services run as Rich. Loopback http://127.0.0.1:9487, HTTPS https://10.0.0.9:9487,
-  trusted10.0.0.0/24, CA and browser/internal endpoint protections unchanged. Previous
-  physical-device evidence reused only under unchanged address/subnet/routes/CA.
-- Model same epoch1429966 and normal auth/config; temporary reservation released.
-  Our maintenance pause was hash-guarded and restored; normal maintenance may run
-  now. Do not stop it unnecessarily: the installed coordinator gives eligible
-  Workbench work priority. Administrative helper scope/hash unchanged; verify expiry.
-
-Two inactive identical browser copies (olderb96736f/13670ac) were removed after
-content/metadata comparison and reconstruction mapping. Protected non-browser OS
-processes not open-handle inspected are disclosed in the private proofs. Source,
-seals, original stores, checked results and unique evidence retained. Unactivated79c
-prepared tooling moved into final sealed stage, not recopied or cut over. Installed
-691edf7/c5873b1 and current recovery copies remain. Initial local verification-driver
-metadata/row-factory mistakes and corrected results are retained, not model failures.
-
-## Continue safely and retain full scope
-
-Await genuine vendor plan/run decisions. Ordinary engineering work remains authorized
-without renewal; never replay uncertain activity or duplicate completed cases. Vendor
-source remains local to Qwen, fallback Off; billing/disclosure/read-only-quarantine,
-network/isolation/independent-check/publication protections unchanged. Use existing
-supported admin/service operations and ingress-first checked update/rollback.
-
-This is a revised proposal, not a vendor fix or full initial product. Broader feature,
-inspection, simulator/data automation and real draft-PR delivery remain unfinished.
-The accepted flight-path patch is offline-game-simulated, not in-game acceptance or
-installed into the live addon. No push/merge/publication or live-addon change.
-
-The [preceding handoff](history/20261110-before-model-priority-VENDOR_CURRENT_HANDOFF.md)
-is retained as history; its proposal23/no-new-model-call description is superseded.
+Prior installed stagesef7e23e,691edf7,c5873b1 and recovery stores remain. Original
+source, unrelated edits, credentials, accepted results and unique evidence preserved.
+Ordinary engineering authority continues; only actual task run permission gates a run.
+No new spending/disclosure/publication or live-addon change. Vendor source local to
+Qwen, fallback Off. Preparation is not a vendor fix/full initial-product completion.
+Broader feature/inspection/simulator/data automation and real draft-PR delivery remain
+unfinished. Flight-path patch is offline checked, not in-game or live-addon installed.
+The [preceding handoff](history/20261110-before-preparation-resource-VENDOR_CURRENT_HANDOFF.md)
+is historical, including its awaiting-plan-review/no-plan-approval statements.

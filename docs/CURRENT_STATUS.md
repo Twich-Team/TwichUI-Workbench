@@ -1,58 +1,53 @@
-# Verified current status — saved revision recovered, priority installed
+# Verified current status — approved vendor task prepared
 
-Installed **ef7e23e / deployment85**, November10,2026 UTC. Following the Project
-Working Philosophy, standing autonomous delivery remains in force.
+Following the Project Working Philosophy, installed **9ac9459 / deployment86**
+recovers the ORIGINAL approved vendor-item task through its next genuine stage.
 
-The ORIGINAL vendor-item task is **Ready for your review**, revision24. Its exact
-saved Request changes note about delayed item names and refreshing was not lost
-or resubmitted. The same queued job resumed once through real Qwen and produced a
-complete source-grounded proposal: mixed known/late names, item-data events,
-refresh/link behavior and focused regression checks. Runtime cause remains
-uncertain until the separately authorized isolated edit/test cycle.
+**Ready for your run decision.** The saved plan approval remains applied. Its same
+failed preparation job automatically completed the actual existing addon suite
+and isolation checks. One valid run offer is visible on desktop/phone, including
+after reload and four-service restart. No unchanged plan resubmission is needed.
 
-**Next genuine action:** review that proposal, confirm the criteria if correct,
-choose Approve plan. Running it remains a separate decision. No vendor plan/run
-approval, implementation, live-addon change or publication occurred.
+**Next owner action:** read the limits in the original task, acknowledge them,
+and choose **Approve local run** if desired. No run permission, implementation or
+correctness is inferred. The vendor bug is not yet fixed; this establishes readiness
+to attempt it. No vendor execution decision is delegated.
 
-The blocker was genuine maintenance, not a stale reservation. Old planning only
-polled cooperative locks and dropped them between calls. Installed scheduling now
-holds them across the operation, verifies maintenance before bounded interruption,
-checks actual readiness and preserves unknown outcomes/usage. Unknown owners hold.
-Dashboard and task share real waiting/ownership state, without counting maintenance
-as addon work or claiming activity from a stale journal.
+Real filesystem pressure was hidden by a combined error. Available at diagnosis
+was4217131008 bytes, below the unchanged4GiB recovery reserve; evidence/scratch
+were small. Exact original free bytes were not retained. Admission omitted clone
+growth and no automatic settled recovery existed. This task was not stopped by512MiB
+cumulative admission; an obsolete separate legacy preflight gate was also removed.
 
-Real recovery used three complete Qwen responses/79105 tokens. Original totals are
-91 complete responses/1993817 known tokens; older unknowns remain unchanged.
-Qwen/fallbackOff/policy18 preserved. No active owned job, run or pending decision
-at closeout. Background maintenance is restored and may be active normally.
+Installed correction observes disk/inodes/per-operation evidence/scratch/growth,
+retains specific diagnostics, renews safe settled offline setup under the same
+approval and shares identical sealed inactive browser files automatically. Unknown
+activity, altered scope and unsafe resources hold. No reserve/check/approval weakened.
 
-Controlled OS-lock, task/API, restart/duplicate and browser tests pass. Six controlled
-separate-process bug journeys are verified after correcting two stale test call
-expectations. Broad backend verification found one host-capacity-dependent fixture;
-its capacity input was isolated and a separate low-capacity refusal check added.
-Production resource safeguards were preserved. Exact runs, original failures,
-rechecks and opt-in consequences are bound in the installation record.
+Read-only geometry explains the226GiB filesystem on an approximately250GB physical
+drive. Largest consumers: Workbench70.29GB (104 repeated stages), cache50.88GB,
+models49.27GB, pilot31.95GB and swap8.59GB. Thirteen browser copies now share identical
+files; one verified clean failed workspace was removed with supported cleanup.
+After installation/backups available8699461632 bytes (~8.10GiB), up from3.93GiB.
+Weights/cache/personal/source/history/results/recovery remain. No storage-layout
+or filesystem-reserved-block change was made; no storage access decision is needed.
 
-Installed original-task desktop/phone/reload and four-service restart pass. Full
-history fingerprint and independent backup/restore match. Six prior real checked
-results canonically revalidate/read with no replay. Installed native reservation
-and API observations exclude maintenance across fifteen readiness observations;
-guarded resume restores its admissions. Actual resumed maintenance is correctly
-shown separately on the dashboard. New automatic yield was tested with controlled
-owners; no duplicate live task was created merely to test it.
+Controlled backend/frontend/browser and separate-process resource-fault checks pass.
+Installed original preparation/dashboard/reload/restart, exact history and independent
+backup/restore pass. Six prior real checked results revalidate/read without replay;
+no new model call here. Controlled checks are not new real-provider acceptance.
 
-Loopback and HTTPS/private-LAN/TLS/browser protections unchanged. Normal model/auth
-and service epoch verified. Prior physical-device evidence reused under unchanged
-address/subnet/routes/CA; no new physical-device test is claimed. Two inactive,
-byte-identical browser copies were removed with inventory/reconstruction records;
-all history, unique evidence and installed691edf7/c5873b1 recovery remain.
+Qwen/fallbackOff/policy18 unchanged. No owned active execution or pending choice at
+closeout. Normal model/auth/epoch, unpaused maintenance, helper scope, TLS, loopback/
+private-LAN and browser protections verified. Historical unknowns remain unknown.
+Physical-device evidence reused under unchanged network/certificate conditions.
 
-This is a revised plan, not a checked vendor repair. Existing flight-path acceptance
-is an offline checked local patch, not in-game acceptance/live-addon installation.
-Broader features, inspection/simulator/data automation and real draft-PR delivery
-remain unfinished. Billing/disclosure/publication protections remain.
+Broader feature/inspection/simulator/data automation and real draft-PR delivery remain
+unfinished. Flight-path acceptance is an offline checked local patch, not in-game
+acceptance or live-addon installation. No publication/spending/disclosure expansion.
+Ordinary engineering authority continues; the separate vendor run decision is genuine.
 
-[Current handoff](VENDOR_CURRENT_HANDOFF.md) · [Continuation](CONTINUATION.md) ·
-[Correction record](MODEL_PRIORITY_RECOVERY_20261110.md).
-The [preceding status](history/20261110-before-model-priority-CURRENT_STATUS.md)
-remains historical. No engineering renewal or new owner access is needed.
+[Handoff](VENDOR_CURRENT_HANDOFF.md) · [Continuation](CONTINUATION.md) ·
+[Evidence](VENDOR_PREPARATION_STORAGE_20261110.md). The
+[preceding status](history/20261110-before-preparation-resource-CURRENT_STATUS.md)
+is historical; its awaiting-plan-review description is superseded.

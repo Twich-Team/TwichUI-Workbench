@@ -1,12 +1,12 @@
 ## Current verified milestone — November 10, 2026
 
-Installed ef7e23e/deployment85 recovers the original saved vendor revision through
-real Qwen. Its revised proposal24 awaits genuine owner review; no plan/run approval
-is inferred. Model-priority scheduling, shared waiting state, restart/history and
-maintenance restoration are verified. Follow [current continuation](CONTINUATION.md)
-before any new action. No engineering renewal/campaign cap applies. The sequences
-below retain earlier delivery planning and broader product scope; they are not
-instructions to replay completed acceptance or reopen the execution architecture.
+Installed9ac9459/deployment86 automatically completes preparation for the original
+vendor task under its actual applied plan approval. It now awaits the separate
+owner run decision; no vendor implementation has begun. Physical storage/resource
+accounting, safe browser retention, same-job recovery, installed browser/restart and
+history/restore are verified. Follow [current continuation](CONTINUATION.md) before
+new work. No engineering renewal/campaign cap applies. The sequences below preserve
+earlier delivery planning and full scope, not instructions to replay completed cases.
 
 ## Earlier visual delivery plan — November 9, 2026
 
