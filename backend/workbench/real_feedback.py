@@ -8,6 +8,8 @@ from pathlib import Path
 
 from workbench.real_tool_contract import ToolDenied, ToolInputError, ToolBudgetExceeded
 
+LOG_PAGE_BYTES = 2048
+
 
 class CheckFeedback:
     def __init__(self, root, paths):
@@ -121,19 +123,44 @@ class CheckFeedback:
         next_page = None
         keys = []
         replayed = True
+        def page(parts, pointer, remaining=96000, repeated=False):
+            return json.dumps(dict(check_id=identity, lines=parts, total_lines=len(lines),
+                next_page=pointer, already_shown_or_empty=not parts,
+                previously_shown=bool(parts) and repeated,
+                note='Exact log text; rereads are free. Continue with next_page when present.',
+                remaining_log_chars=remaining), ensure_ascii=True)
+
         for i in range(start - 1, min(end, len(lines))):
             offset = column if i == start - 1 else 0
-            key = (identity, i, offset)
-            was_seen = key in self.seen
             part = lines[i][offset : offset + 700]
-            candidate = output + [dict(line=i + 1, column=offset, text=part)]
-            if len(json.dumps(candidate, ensure_ascii=True).encode()) > 5800:
+            def pointer(length):
+                if offset + length < len(lines[i]):
+                    return dict(start=i + 1, column=offset + length)
+                return dict(start=i + 2, column=0) if i + 1 < len(lines) else None
+
+            # Bound the whole wire reply, including Unicode escaping and metadata.
+            # A long line must produce a smaller progressing page, never an empty
+            # page with the same cursor. No characters are discarded or invented.
+            low, high = 0, len(part)
+            while low < high:
+                middle = (low + high + 1) // 2
+                candidate = output + [dict(line=i + 1, column=offset, text=part[:middle])]
+                if len(page(candidate, pointer(middle)).encode()) <= LOG_PAGE_BYTES:
+                    low = middle
+                else:
+                    high = middle - 1
+            if not low and part:
                 next_page = dict(start=i + 1, column=offset)
                 break
-            output = candidate
-            cost += 0 if was_seen else len(part)
-            replayed = replayed and was_seen
-            keys.append(key)
+            part = part[:low]
+            output.append(dict(line=i + 1, column=offset, text=part))
+            # Page sizes vary with preceding lines and escaped text. Account for
+            # the exact characters delivered, including overlapping rereads.
+            delivered = [(identity, i, offset + j) for j in range(len(part))]
+            new = sum(key not in self.seen for key in delivered)
+            cost += new
+            replayed = replayed and not new
+            keys.extend(delivered)
             if offset + len(part) < len(lines[i]):
                 next_page = dict(start=i + 1, column=offset + len(part))
                 break
@@ -142,19 +169,7 @@ class CheckFeedback:
             raise ToolBudgetExceeded("check_log_budget", "96000 check-log characters consumed")
         self.read_chars += cost
         self.seen.update(keys)
-        return json.dumps(
-            dict(
-                check_id=identity,
-                lines=output,
-                total_lines=len(lines),
-                next_page=next_page,
-                already_shown_or_empty=not output,
-                previously_shown=bool(output) and replayed,
-                note="Exact bounded log text is returned even on a reread; only new segments consume the distinct log allowance. Continue with next_page when present.",
-                remaining_log_chars=96000 - self.read_chars,
-            ),
-            ensure_ascii=True,
-        )
+        return page(output, next_page, 96000 - self.read_chars, replayed)
 
 
 class RepairFeedback:

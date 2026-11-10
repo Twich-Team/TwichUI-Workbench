@@ -3,7 +3,7 @@
 import json
 from types import SimpleNamespace
 import pytest
-from workbench.real_feedback import CheckFeedback
+from workbench.real_feedback import CheckFeedback, LOG_PAGE_BYTES
 from workbench.real_workspace import Tools
 from workbench.real_tool_contract import ToolDenied, ToolBudgetExceeded, invoke
 from workbench.real_execution import PATHS
@@ -154,11 +154,40 @@ def test_unicode_multiline_summary_and_long_log_line_are_retrievable(tmp_path):
     loops = 0
     while position:
         value = json.loads(f.read(dict(check_id="fixed-000", **position)))
+        assert len(json.dumps(value, ensure_ascii=True).encode()) <= LOG_PAGE_BYTES
         output.extend(x["text"] for x in value["lines"])
         position = value["next_page"]
         loops += 1
         assert loops < 100
     assert "".join(output) == raw
+
+
+def test_adaptive_log_pages_charge_only_delivered_characters_in_overlapping_rereads(tmp_path):
+    f = CheckFeedback(tmp_path, [])
+    raw = 'prefix\n' + ('☃' * 700) + '\n'
+    f.record(dict(status='fail', rc=1, out=raw), 'fixed-000')
+    first = json.loads(f.read(dict(check_id='fixed-000', start=1)))
+    charged = sum(len(x['text']) for x in first['lines'])
+    assert f.read_chars == charged and first['next_page']['start'] == 2
+    # Same start offset, different available page space: the longer second
+    # fragment must charge its new tail. A cursor-only seen-set missed this.
+    overlap = json.loads(f.read(dict(check_id='fixed-000', start=2)))
+    assert len(overlap['lines'][0]['text']) > len(first['lines'][1]['text'])
+    assert not overlap['previously_shown']
+    assert f.read_chars == len('prefix\n') + len(overlap['lines'][0]['text'])
+    used = f.read_chars
+    replay = json.loads(f.read(dict(check_id='fixed-000', start=2)))
+    assert replay['previously_shown'] and f.read_chars == used
+    cursor = overlap['next_page']
+    while cursor:
+        value = json.loads(f.read(dict(check_id='fixed-000', **cursor)))
+        assert value['lines'] and value['next_page'] != cursor
+        cursor = value['next_page']
+    assert f.read_chars == len(raw)
+    f.read_chars = 96000
+    f.record(dict(status='fail', rc=1, out='new log'), 'fixed-001')
+    with pytest.raises(ToolBudgetExceeded):
+        f.read(dict(check_id='fixed-001'))
 
 
 def test_saved_log_tamper_is_denied(tmp_path):
