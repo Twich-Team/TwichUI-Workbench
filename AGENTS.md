@@ -4,6 +4,8 @@ Read [PROJECT_WORKING_PHILOSOPHY.md](PROJECT_WORKING_PHILOSOPHY.md),
 [STANDING_OWNER_DIRECTION_AUTONOMOUS_DELIVERY.md](STANDING_OWNER_DIRECTION_AUTONOMOUS_DELIVERY.md),
 and [TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md](TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md)
 before assignments. These exact owner-supplied root documents are authoritative.
+Read the [November 10 product direction addendum](docs/OWNER_PRODUCT_DIRECTION_20261110.md)
+for later requirements and roadmap decisions. It grants no current task permission.
 Follow [CONTINUATION](docs/CONTINUATION.md) and verified receipts for actual status.
 [Reference locations](docs/REFERENCE_DOCUMENTS.md) distinguish current from historical copies.
 

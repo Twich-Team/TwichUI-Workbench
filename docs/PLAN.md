@@ -30,6 +30,32 @@ Implementation order:
 No routine renewal or campaign caps. Keep security, disclosure, billing, scope,
 publication, source/history preservation and model-authentication protections.
 
+## Future delivery order
+
+The [November 10 product direction addendum](OWNER_PRODUCT_DIRECTION_20261110.md)
+records the owner's approved direction. These are future requirements; the
+original vendor result and ordinary real browser workflow remain first.
+
+1. **Finish Phase A.** Demonstrate the checked bug result and recovery in the
+   installed browser. Keep local Qwen as primary, deliberate Codex selection,
+   and a simple configurable fallback. Exercise draft delivery only under
+   applicable publication authorization.
+2. **Extend the proven workflow.** Automate supported feature requests within
+   permission. Once safe settlement, eligibility, and spending checks are
+   proven, add preauthorized Codex fallback when Qwen cannot make progress.
+   Add in-app notifications and qualifying draft PR delivery with an owner
+   merge decision. Preserve the task's visible plan, evidence, and controls.
+3. **Phase B.** Keep the everyday dashboard focused on current work, decisions,
+   backlog, and results in the approved WoW-inspired style. Keep advanced
+   controls secondary; reserve the usage charts for reliable data.
+4. **Phase C.** Add proactive low-risk discovery and implementation with
+   continuous, idle-only, and scheduled operation, pause and resource guards,
+   and grouping of related changes with urgent fixes separate. Add Smart Model
+   Allocation for Qwen, Codex, and Claude: independently measured planned,
+   reserved, and unallocated capacity, using only supported allowance data.
+   Then add interactive usage, allowance, trends, success, and fallback charts.
+   Keep observed usage, subscription allowance, and API spending distinct.
+
 ---
 The earlier plan below is historical context; use current continuation and receipts.
 

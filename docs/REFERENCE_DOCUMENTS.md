@@ -6,6 +6,12 @@ and `STANDING_OWNER_DIRECTION_AUTONOMOUS_DELIVERY.md` exactly match the complete
 November 7 owner attachments. Use these files, AGENTS.md and docs/CONTINUATION.md.
 No feature completion is established by reference-document installation.
 
+[November 10 product direction](OWNER_PRODUCT_DIRECTION_20261110.md) records the
+owner's later requirements for autonomous features, provider fallback, proactive
+work, draft reviews, scheduling, notifications, and Smart Model Allocation.
+Apply it alongside the preserved v1.1 text; the [roadmap](PLAN.md) records the
+sequence. These product decisions do not grant current execution or publication.
+
 `docs/history/before-owner-refresh-20261107-*` preserves replaced references,
 including earlier owner decisions absent from the new condensed requirements.
 Historical campaign approvals, reports and sealed releases remain immutable
