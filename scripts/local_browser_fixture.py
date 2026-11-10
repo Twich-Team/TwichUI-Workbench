@@ -123,6 +123,11 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
                 assert any('not an empty file' in m.get('content','') for m in body['messages'] if m['role']=='user')
                 return edit
             tape.steps = [read, replay, replay, after_reread, check, final_response()]
+            # Exercise production compaction across the real API/worker/browser
+            # boundary, using controlled tokenizer counts and no live inference.
+            tape.count = lambda body: (31000 if len(body['messages']) >= 10
+                and not any('retained_source_sha256' in m.get('content','')
+                            for m in body['messages']) else 100)
         if outcome == 'fail':
             # Repeating a failed check requires a real edit. Finishing here
             # exercises the refusal to continue on an unchanged rejected patch.
@@ -142,6 +147,8 @@ def advance_local(engine, database, outcome, planner, *, example="  ALICE ", nat
             assert outcome == 'interrupt' and len(tape.bodies) == 1
             return  # Leave the claimed request and controller receipt absent for recovery.
         assert outcome in {'pass', 'fail'} and len(tape.bodies) == len(tape.steps), (outcome, len(tape.bodies))
+        if replay_reads:
+            assert list((runtime.root/'attempt/context-sources').glob('*.json'))
         durable(cycle / 'lease-controller-result.json', b'{"restoration":{"restored":true},"simulated":true}')
 
     def advance(store, config, stop_event=None):

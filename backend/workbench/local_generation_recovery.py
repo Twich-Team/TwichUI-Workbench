@@ -84,6 +84,7 @@ def reconcile(engine, identity, *, expected_primary_sha256=None):
         not runtime.owns_recovery(grant)
         or execution.digest(grant["snapshot"]) != grant["binding"]
         or grant["snapshot"]["contract"]["provider"] != "local"
+        or grant["snapshot"]["runtime"].get("codex_selection")
         or not root.parent.name.startswith("task-lease-task-session-")
         or not runtime.recover_outcome(row, grant)
     ):

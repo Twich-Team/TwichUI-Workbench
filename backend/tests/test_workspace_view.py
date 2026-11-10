@@ -119,8 +119,9 @@ def test_future_work_cannot_smuggle_execution_or_provider_permission(client, hea
     ('checked', 'failed', 'failed-candidate', 'failed', True),
     ('recovering', None, None, 'interrupted', False),
 ])
+@pytest.mark.parametrize('current_task',[True,False])
 def test_execution_projection_does_not_promote_partial_or_unchecked_output(client, headers, store, monkeypatch,
-        stage, verification, candidate, expected, result):
+        stage, verification, candidate, expected, result,current_task):
     from test_intake import research
     from workbench.db import backlog_items
     from workbench import workspace_view
@@ -137,11 +138,12 @@ def test_execution_projection_does_not_promote_partial_or_unchecked_output(clien
             c.execute(backlog_items.update().where(backlog_items.c.id==task['id']).values(kind='finding'))
     monkeypatch.setattr(workspace_view.task_execution, 'context', lambda *a:dict(
         stage=stage, run_budget=None, current_approval=True, session=None,
-        runs=[dict(id=str(uuid4()),current_task=True,status=stage,verification=verification,candidate_id=candidate)]))
+        runs=[dict(id=str(uuid4()),current_task=current_task,status=stage,verification=verification,candidate_id=candidate)]))
     monkeypatch.setattr(workspace_view, 'later_review', lambda *a:None)
     row=index(client)['items'][0]
-    assert row['state']==expected
-    assert bool(row['result_id'])==result
+    assert row['state']==('held' if not current_task and stage=='checked' else expected)
+    assert bool(row['result_id'])==(result and current_task)
+    assert row['active']==(row['state'] in workspace_view.ACTIVE)
 
 def test_expired_execution_permission_is_visible_as_attention_without_reviving_it(client, headers, store, monkeypatch):
     from test_intake import research

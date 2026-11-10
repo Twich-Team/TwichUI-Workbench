@@ -100,3 +100,43 @@ full-final-candidate-suites.log. Final transport/recovery108 and delegated nativ
 separate-process local rehearsal pass; four desktop/phone browser regressions
 pass. The inventory-only follow-up has42 focused checks; unaffected full suites
 are reused rather than misreported as rerun on changed inventory code.
+
+## Installed88 and the next real edit/test cycle
+
+Installed e963f01/deployment88 passes exact history copy, both network listeners,
+browser protections and normal reads. All six prior checked real results were
+canonically revalidated without model replay. Express sourcec71b75c5 was recorded
+as owner-instruction recovery decisionc09059f4, expressly not a browser action.
+Every earlier browser decision remains byte-identical.
+
+Real-Qwen execution5b6ce29f received source and made four further scoped edits.
+Native focused checks failed, and it revised code/tests from that feedback.
+Responses now completed with cached prefixes (e.g.182output tokens in8.12seconds),
+with no old reader/cancellation failure. It then hit the hard context reserve
+before request15:14complete receipts, no uncertain new turn, no qualifying result.
+The known two-file patch is retained; grant revoked, session failed, normal model
+restored. This is real edit/test feedback, not successful vendor acceptance.
+
+Connected correction now keeps the original instructions/approval and recent
+failures/edits visible, archives older exact source privately before replacing
+it with range/hash references, and recounts the actual input before dispatch.
+Focused rereads remain usable and are counted against the same distinct-source
+allowance. Loop detection tracks source actually visible after compaction;
+request/usage limits are never reset. The next bound continuation receives the
+actual previous failing-check locations and exact prior MODEL-authored diff,
+marked unverified, so it can revise its own incorrect additions while preserving
+original committed tests. Literal native assertion requirements are explicit;
+the independent gate has not been relaxed to accept arbitrary helper errors.
+The actual original-task continuation context was reconstructed read-only with
+no provider call and exact diff binding.
+
+A separate actual dashboard defect showed active new preparation as held because
+older runs were no longer current. The read model now lets the current session
+own that state, while older checked results still cannot complete a newer task.
+Regression tests cover both current and historical-run projections. The change
+will be installed after verification; no healthy run was interrupted for it.
+
+Controlled integrated checks and native separate API/worker/browser rehearsal
+force the context overflow/archival/reread path and pass. Next remains verified
+activation, real-Qwen continuation on ORIGINAL task, meaningful independent bug
+acceptance and durable installed result. No additional owner renewal is needed.

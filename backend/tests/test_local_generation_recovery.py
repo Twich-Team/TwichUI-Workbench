@@ -157,6 +157,7 @@ def test_terminated_epoch_discharge_preserves_unknown_usage_original_failure_and
         "code_changed",
         "edit_uncertain",
         "successful_request",
+        "codex_provider",
     ],
 )
 def test_no_release_when_termination_or_exact_failed_call_is_unproven(
@@ -186,6 +187,12 @@ def test_no_release_when_termination_or_exact_failed_call_is_unproven(
     if fault == "successful_request":
         with write_transaction(t.store) as c:
             c.execute(execution.requests.update().values(status="checked"))
+    if fault == "codex_provider":
+        with write_transaction(t.store) as c:
+            grant=dict(c.execute(select(execution.grants)).mappings().one())
+            snapshot=grant['snapshot']
+            snapshot['runtime']['codex_selection']={'model':'controlled-codex'}
+            c.execute(execution.grants.update().values(snapshot=snapshot,binding=execution.digest(snapshot)))
     before = t.primary.read_bytes()
     with pytest.raises(ValueError):
         recovery.reconcile(

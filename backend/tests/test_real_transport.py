@@ -107,7 +107,8 @@ def scripted_http(tmp_path, monkeypatch):
         def read(self, req, *args, **kwargs):
             if req.full_url.endswith("/input_tokens"):
                 t.counts.append(json.loads(req.data))
-                return json.dumps(dict(input_tokens=t.count)).encode()
+                value=t.count(t.counts[-1]) if callable(t.count) else t.count
+                return json.dumps(dict(input_tokens=value)).encode()
             t.observed.set()
             return b'[{"id":0,"id_task":42,"is_processing":true,"next_token":[{"n_decoded":3}]}]'
 

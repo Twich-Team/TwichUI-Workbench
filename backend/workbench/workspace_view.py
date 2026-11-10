@@ -131,7 +131,7 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                     if offer.get('preparation_resource'):
                         preparation_message = offer['message']
                     phase = 'needs_approval' if offer.get('available') else ('preparing' if any(j['status']=='running' for j in current_jobs) else 'queued') if offer.get('preparing') else 'held'
-                if context['runs'] and not relevant:
+                if context['runs'] and not relevant and context['stage'] in {'checked','completed'}:
                     phase = 'held'  # An earlier checked run is not completion of the current plan.
                 if context['stage']=='preparing' and (context.get('session') or {}).get('status')=='pending':
                     phase = 'queued'

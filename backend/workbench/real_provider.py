@@ -7,7 +7,7 @@ import urllib.request
 from workbench.planning_transport import LocalHTTP
 from workbench.real_execution import LIMITS, DECODING, WORKFLOW
 from workbench.real_feedback import RepairFeedback
-from workbench.implementation_context import ReadProgress
+from workbench.implementation_context import ReadProgress, compact_source
 from workbench.real_tool_contract import (READ_PARAMETERS, READ_DESCRIPTION, READ_INSTRUCTION,
     invoke, ToolInputError, ToolBudgetExceeded, CHECK_NAMES)
 
@@ -168,10 +168,16 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
         if transport is LocalHTTP and hasattr(ownership, 'count_input_tokens'):
             counted = ownership.count_input_tokens(body, min(end, time.monotonic()+3))
             if counted+body['max_tokens'] > 32768:
-                raise BudgetError('Tokenized context reserve exhausted; no generation request sent')
+                while counted > 24576 and compact_source(messages, runtime):
+                    source_progress.rebuild_visible(messages)
+                    counted = ownership.count_input_tokens(body, min(end, time.monotonic()+3))
+                if counted+body['max_tokens'] > 32768:
+                    raise BudgetError('Tokenized context reserve exhausted; no generation request sent')
         elif len(json.dumps(messages).encode())+body['max_tokens'] > 32768:
             # Conservative fallback for non-production scripted transports only.
             raise BudgetError('Context reserve exhausted; no request sent')
+        if not permitted() or (stop_event and stop_event.is_set()):
+            raise BudgetError('Grant changed during context assembly; no request sent')
         request = urllib.request.Request('http://127.0.0.1:8080/v1/chat/completions',
             data=json.dumps(body).encode(), headers={'Content-Type': 'application/json',
                                                     'Authorization': 'Bearer '+secret}, method='POST')
