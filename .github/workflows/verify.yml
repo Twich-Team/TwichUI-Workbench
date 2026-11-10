@@ -19,6 +19,8 @@ jobs:
       - run: .venv/bin/pip install -r requirements.lock
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Install the Lua test runtime
+        run: sudo apt-get install -y lua5.1 lua-bitop
       - run: npm run verify
       - run: git diff --exit-code -- frontend/openapi.json frontend/src/api.generated.ts
       - uses: actions/upload-artifact@v4
