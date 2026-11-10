@@ -5,8 +5,8 @@ files were verified before starting the worker. All four roles and network/TLS,
 browser and internal boundary probes passed. The latest database and its restore
 matched 584 rows before activation; post-start comparison retained each of those
 rows and recorded the authorized new session. All 50 intake views and six earlier
-checked real results remain readable. Desktop and phone reload passed. Final
-settled-model installation closeout waits for the live vendor run to settle.
+checked real results remain readable. Desktop and phone reload passed. The
+final installation closeout passed after the model returned to normal access.
 The initial cutover caught two late, legitimately saved worker rows (one offer,
 one continuing decision). Rebased on the stopped source, verified both backup
 copies, then checked strict equality again before starting the new worker.
@@ -43,9 +43,14 @@ The 20-minute operation ended with 17 complete responses (465574 prompt,
 10221 completion) and an interrupted 18th request. Exact native termination
 proof was recorded automatically; final usage remains unknown and no partial
 tools were dispatched. The worker saved a continuation during the cutover.
-The new build admitted **d4906757** exactly once. It passed the fresh full-suite
-readiness run and sent its first local request. Inspect actual live state before
-taking action. Do not restart or duplicate active work.
+The new build admitted **d4906757/041899a3** exactly once. It passed the fresh
+full-suite readiness and focused checks but repeatedly revisited a superseded
+setup error. It made no new edits or candidate checks. A supported engineering
+yield preserved the owner authorization, ten complete responses and the
+unavailable final usage; normal model access restored. This was not an owner
+cancel. Final deployment100 checks and history reads have passed. Reconcile
+the exact terminated generation after installing changed recovery code, then
+continue the same task through trusted ingress only if it is not queued.
 
 The installed correction registers the exact failed differential log in the current
 attempt, explains when the original unexpectedly passes, and carries the checker
@@ -55,6 +60,14 @@ and integrity violations still deny. 165 affected tests, final static, and nativ
 normal browser/API/worker rehearsal pass. Verify this feedback on the real
 operation. Original permission persists; the worker may automatically resume
 when an operation settles. No accepted vendor result exists yet.
+
+The next build omits failures resolved by the same check and workspace, and
+finds the latest candidate comparison through unchanged saved patches if an
+intermediate operation never reached the check. The actual vendor history
+replay confirmed only the open original comparison remains in the brief. The
+first prospective cutover stopped before changing services: a release-number
+text substitution had altered the expected service UID. Correct the private
+generator without relaxing the service identity check.
 
 When a candidate qualifies, run private independent five vendor criteria against
 its exact frozen result. Require original discrimination and full suite; do not

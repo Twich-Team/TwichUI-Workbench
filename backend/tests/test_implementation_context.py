@@ -61,6 +61,25 @@ def test_continuation_remembers_that_a_passing_original_test_failed_to_discrimin
     assert json.loads(raw.read_text())['status']=='pass'
 
 
+def test_comparison_carries_across_a_stopped_attempt_only_for_the_same_patch(tmp_path):
+    from workbench.implementation_context import prior_failures
+    tested, stopped, fresh = [tmp_path/name for name in ('tested', 'stopped', 'fresh')]
+    working = tested/'working-checks/00'
+    working.mkdir(parents=True)
+    patch = 'a'*64
+    (working/'manifest.json').write_text(json.dumps(dict(patch_sha256=patch)))
+    (working/'outcome.json').write_text(json.dumps(dict(status='fail', failed_check_name='original-with-new-tests',
+        original_test_differential={'status':'fail'})))
+    (working/'original-with-new-tests.json').write_text(json.dumps(dict(status='pass', rc=0)))
+    for dest, source in [(stopped, tested), (fresh, stopped)]:
+        dest.mkdir()
+        (dest/'repair-resume.json').write_text(json.dumps(dict(root=str(source), patch_sha256=patch)))
+    runtime = SimpleNamespace(root=fresh, read_paths=['tests/test_fixture.lua'])
+    assert 'also passed against unchanged original' in prior_failures(runtime)[0]['diagnostic']
+    (fresh/'repair-resume.json').write_text(json.dumps(dict(root=str(stopped), patch_sha256='b'*64)))
+    assert prior_failures(runtime) == []
+
+
 def test_read_progress_recognizes_empty_reads_even_when_start_line_changes():
     progress = ReadProgress()
     value = json.dumps(dict(already_shown_or_empty=True, replayed_spans=[dict(text='current source')]))

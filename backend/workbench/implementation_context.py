@@ -33,22 +33,42 @@ def prior_failures(runtime):
     # A passing test against original code can be the main unresolved failure
     # even though its raw log is green. Carry the checker verdict, not a plan
     # or a partial tool call, into the fresh operation.
-    for folder in reversed(sorted((previous/'working-checks').glob('[0-9][0-9]'))):
-        path=folder/'outcome.json'
-        if not path.is_file():
-            continue
-        verdict=private_json(path)
-        if verdict.get('status')!='fail' or verdict.get('failed_check_name')!='original-with-new-tests':
-            break
+    folder = previous_candidate_check(previous, resume.get('patch_sha256'))
+    if folder:
+        verdict=private_json(folder/'outcome.json')
         raw=folder/'original-with-new-tests.json'
-        if raw.is_file() and (verdict.get('original_test_differential') or {}).get('status')=='fail':
+        if (verdict.get('status')=='fail' and verdict.get('failed_check_name')=='original-with-new-tests'
+                and raw.is_file() and (verdict.get('original_test_differential') or {}).get('status')=='fail'):
             observed.append(dict(status='fail',diagnostic=original_check_summary(private_json(raw)),context_hint=None))
-        break
     failed = [s for s in latest.values() if s.get('result', {}).get('status') == 'fail']
     for saved in failed[-2:]:
         summary = feedback.record(saved['result'], saved['check_id'])
         observed.append({k: summary[k] for k in ('status', 'diagnostic', 'context_hint')})
     return observed
+
+
+def previous_candidate_check(root, patch_sha256):
+    """Find the newest candidate verdict across unchanged retained work only."""
+    from workbench.repair_continuation import private_json
+    visited = set()
+    for _ in range(64):  # Bound evidence reads, independent of the task lifetime.
+        if root in visited:
+            break
+        visited.add(root)
+        for folder in reversed(sorted((root/'working-checks').glob('[0-9][0-9]'))):
+            if not (folder/'outcome.json').is_file():
+                continue
+            manifest = folder/'manifest.json'
+            if not patch_sha256 or (manifest.is_file() and private_json(manifest).get('patch_sha256') == patch_sha256):
+                return folder
+        resume = root/'repair-resume.json'
+        if not patch_sha256 or not resume.is_file():
+            break
+        prior = private_json(resume)
+        if prior.get('patch_sha256') != patch_sha256:
+            break
+        root = Path(prior['root'])
+    return None
 
 
 def retained_work(runtime, *, compact=False):
