@@ -202,6 +202,7 @@ class NamedStream:
             # A received usage receipt survives a later framing/cleanup failure.
             # Caller validates identity/counts; incomplete work remains a failure.
             error.stream_response = result if result.get('usage') is not None else None
+            error.stream_partial_response = result
             if report['stream_error'] is None:
                 report['stream_error'] = ('request_deadline' if time.monotonic() >= deadline-5
                                           else 'transport_or_protocol_failure')

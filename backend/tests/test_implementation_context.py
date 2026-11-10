@@ -137,6 +137,47 @@ def current_fixture(tmp_path):
     return path,Tools(runtime,lambda:True),CurrentSource(runtime,messages)
 
 
+@pytest.mark.parametrize('name',['tests/test_large.lua','production.lua'])
+def test_large_test_context_focus_preserves_setup_changes_recent_requested_code_and_exact_cached_rereads(tmp_path,name):
+    from workbench.implementation_context import CurrentSource
+    workspace=tmp_path/'workspace'
+    workspace.mkdir()
+    path=workspace/name
+    path.parent.mkdir(parents=True,exist_ok=True)
+    original=''.join(f'local value_{i} = {i}\n' for i in range(1,701))
+    path.write_text(original)
+    runtime=SimpleNamespace(root=tmp_path,workspace=workspace,paths=[name],read_paths=[name],
+        source_read_limit=45000,enforce_storage=lambda:None,
+        recipe=dict(source_context=[{}],read_budget_policy='distinct-lines-v1'))
+    tools=Tools(runtime,lambda:True)
+    messages=[dict(role='system',content='POLICY'),dict(role='user',content='APPROVED scope')]
+    view=CurrentSource(runtime,messages)
+    view.prefill(tools)
+    def shown():return view.message['content']
+    assert len(view.files[name]['lines'])==700 and tools.read==len(original)
+    assert 'local value_1 = 1\n' in shown() and 'local value_700 = 700\n' in shown()
+    assert ('local value_350 = 350\n' in shown()) is (name=='production.lua')
+    used=tools.read
+    for start,end in [(350,370),(500,510),(200,205)]:
+        raw=tools.handle('read_file',dict(path=name,start=start,end=end))
+        view.read(raw)
+        assert f'local value_{start} = {start}\n' in shown()
+    assert tools.read==used and len(view.files[name]['lines'])==700
+    if name.startswith('tests/'):
+        assert 'local value_350 = 350\n' not in shown()  # Old focus is cached, not accumulated in every prompt.
+        assert 'local value_500 = 500\n' in shown() and 'local value_200 = 200\n' in shown()
+    # A model edit in the middle must stay visible after future reads, even when
+    # it is far from setup/tail. Original tests are never removed from the cache.
+    path.write_text(original.replace('local value_360 = 360\n','local value_360 = 361\n'))
+    keys=view.edited(name,tools)
+    assert 'local value_360 = 361\n' in shown()
+    assert any(key[1]==360 for key in keys)
+    view.read(tools.handle('read_file',dict(path=name,start=420,end=425)))
+    view.read(tools.handle('read_file',dict(path=name,start=460,end=465)))
+    assert 'local value_360 = 361\n' in shown()
+    assert len(view.files[name]['lines'])==700
+
+
 def test_small_working_set_is_read_through_real_tools_and_refreshed_after_line_insertion(tmp_path):
     path,tools,view=current_fixture(tmp_path)
     view.prefill(tools)

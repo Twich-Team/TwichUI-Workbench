@@ -36,6 +36,31 @@ class BudgetError(RuntimeError):
     pass
 
 
+def retain_response(runtime, turn, response, completed):
+    """Private terminal evidence before output validation can reject its content.
+
+    This is never approval, tool dispatch, or an accounting substitute. Incomplete
+    receipts remain incomplete even when some content or usage was received.
+    """
+    if runtime is None or not getattr(runtime, 'root', None):
+        return
+    raw = json.dumps(response, ensure_ascii=True).encode()
+    if len(raw) > 2 * 1024 * 1024:
+        raise BudgetError('Provider response exceeds private evidence bound')
+    from workbench.real_workspace import durable
+    if hasattr(runtime, 'enforce_storage'):
+        runtime.enforce_storage()
+    target=runtime.root/'attempt'/f'response-{turn:02}.json'
+    if target.is_symlink() or target.parent.is_symlink():
+        raise BudgetError('Private response evidence path changed')
+    durable(target, json.dumps(dict(
+        kind='private-provider-response-v1', turn=turn, transport_completed=completed,
+        request_record=f'request-{turn:02}.json', response=response), ensure_ascii=True).encode())
+    target.chmod(0o600)  # Parent evidence root is private; never change process umask in a thread.
+    if hasattr(runtime, 'enforce_storage'):
+        runtime.enforce_storage()
+
+
 def reviewed_instruction(runtime):
     """Render reviewed observations as result data for the exact same call."""
     linked = getattr(runtime, 'workflow_task', None) or {}
@@ -105,7 +130,8 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                 f['description']='Run one fixed check from the name enum, or candidate for independent oracle and complete-suite checks. No shell.'
                 f['parameters']['properties']['name']['enum']=[*runtime.tool_commands(),'candidate']
     messages = [dict(role='system', content='Use only the supplied bounded tools. No shell or publication. '
-                     'Finish with a plain report. Keep responses concise; prefer small exact replacements, '
+                     'Use edit tools for code changes; never paste a patch or replacement file in the final report. '
+                     'Finish with a plain report under500 characters. Keep responses concise; prefer small exact replacements, '
                      'not whole-file rewrites. After focused reads, implement then check; avoid exhaustive rereads. '
                      'At most two safe input corrections total are shared by read_file argument errors and '
                      'replace_text exact-match errors; a third terminates. Never assume a rejected edit changed content. '
@@ -122,6 +148,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
     completion = prompt = 0
     corrections = read_errors = tool_errors = 0
     rejected_constraints=set()
+    rejected_output_states=set()
     reads_done = 0
     edits_done = 0
     refresh = editing_announced = False
@@ -129,6 +156,11 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
     from workbench.continuing_repair import allows, operational_controls
     continuing = allows(runtime)
     controls=operational_controls(runtime)
+    tool_cycle=bool(controls and (getattr(runtime,'recipe',None) or {}).get('repair_cycle'))
+    if tool_cycle:
+        messages[0]['content']+=(' Continue through the tools, not a prose implementation. '
+            'Use run_check with name candidate when ready for independent verification. '
+            'Workbench finishes after that passes; no long final report is needed.')
     request_seconds=controls['request_seconds'] if controls else 120
     source_progress = ReadProgress(lifetime=continuing)
     from workbench.implementation_context import CurrentSource
@@ -136,6 +168,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
     from workbench.implementation_context import WorkingCheck
     current_check=WorkingCheck(source_view) if source_view else None
     last_checked_content = repair.writable_content() if repair else None
+    candidate_success_content=None
     if continuing and getattr(runtime, 'root', None) and (runtime.root/'repair-resume.json').is_file():
         if not permitted() or (stop_event and stop_event.is_set()):
             raise BudgetError('Current permission required before checking retained work')
@@ -194,9 +227,10 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             body.pop('reasoning_effort',None)
             body.update(controls['decoding'])
             body['reasoning_budget_tokens']=min(controls['reasoning_tokens'],max(0,body['max_tokens']-256))
-        if first_edit or force_edit:
+        if first_edit or force_edit or tool_cycle:
             # Installed llama.cpp accepts the string form, not a named-function
-            # object. A genuine no-progress correction advertises one edit tool.
+            # object. The continued scoped cycle keeps ALL guarded tools; it
+            # requires an actionable call instead of a long unexecuted patch.
             body['tool_choice'] = 'required'
         counted = None
         if transport is LocalHTTP and hasattr(ownership, 'count_input_tokens'):
@@ -280,13 +314,19 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                     response = json.loads(client.read(request, 262144, timeout=min(request_seconds, max(.01, end-time.monotonic()))))
         except Exception as error:
             receipt = getattr(error, 'stream_response', None)
+            partial = getattr(error, 'stream_partial_response', receipt)
             if isinstance(receipt, dict) and receipt.get('usage') is not None:
                 observe_usage(receipt, False)
+            if isinstance(partial, dict):
+                retain_response(runtime, turn, partial, False)
             raise
         finally:
             finished.set()
             monitor.join(timeout=.2)
-        usage, used, input_tokens, usage_valid = observe_usage(response, True)
+        try:
+            usage, used, input_tokens, usage_valid = observe_usage(response, True)
+        finally:
+            retain_response(runtime, turn, response, True)
         if not permitted() or canceled.is_set() or (stop_event and stop_event.is_set()):
             raise BudgetError('Grant changed while receiving output; no tool or result accepted')
         if not usage_valid:
@@ -297,6 +337,27 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             raise BudgetError('Actual provider model identity differs')
         choice = response['choices'][0]
         message = choice['message']
+        if choice['finish_reason']=='length' and continuing:
+            # Terminal transport/known usage is distinct from a usable tool
+            # response. Dispatch NONE of a cut-off batch. Ask for a smaller
+            # complete operation under the same continuing permission, without
+            # importing partial text as a plan, edit or successful result.
+            state=repair.writable_content() if repair else ()
+            if state in rejected_output_states:
+                raise BudgetError('Repeated truncated output on unchanged work; saved evidence requires a changed response strategy')
+            rejected_output_states.add(state)
+            if source_view:
+                source_view.completed_input()
+                source_view.retain(dict(kind='settled-output-repair',turn=turn,
+                    rejected_finish_reason='length',partial_tools_dispatched=False,
+                    response_record=f'response-{turn:02}.json'))
+            messages.append(dict(role='user',content=(
+                'Your previous response reached the output ceiling and was rejected. No tool from it ran, '
+                'and no text from it changed the workspace. Its private response and actual usage are saved. '
+                'Use one SMALL complete replace_text call for a change, then run_check. Split a large edit '
+                'into small independent replacements. Do not paste code or a patch in a report. If finished, '
+                'give a plain report under500 characters; independent checks still decide success.')))
+            continue
         if choice['finish_reason'] not in ('stop', 'tool_calls'):
             raise BudgetError('Truncated/incomplete result; no additional turn or retry')
         calls = message.get('tool_calls', [])
@@ -366,6 +427,10 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                             result = json.dumps(feedback, ensure_ascii=True)
                             if events[0]['check'] in {'focused','candidate'}:
                                 last_checked_content = repair.writable_content()
+                            if feedback['status']!='pass':
+                                candidate_success_content=None
+                            elif events[0]['check']=='candidate':
+                                candidate_success_content=repair.writable_content()
                         if current_check:
                             current_check.set(feedback,events[0]['check'])
             except ToolInputError as error:
@@ -409,6 +474,13 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             clipped = raw[:8100].decode('utf-8', 'replace')+'\n[Tool output truncated at 8 KiB.]' if len(raw)>8192 else result
             messages.append(dict(role='tool', tool_call_id=call['id'], content=clipped))
             tool_results.append((name, progress_result))
+        if (tool_cycle and candidate_success_content is not None and repair
+                and candidate_success_content==repair.writable_content() and permitted()):
+            # All calls in the batch have settled. A later edit or failed check
+            # invalidates this shortcut; the frozen-result owner checks again.
+            return dict(log=log,completion_tokens=completion,prompt_tokens=prompt,
+                correction_count=corrections,read_input_errors=read_errors,tool_input_errors=tool_errors,
+                final_message='',completion_reason='independent-candidate-checks-passed')
         guidance = source_progress.turn(tool_results)
         if (continuing and repair and edits_done and source_progress.repeated==2
                 and repair.writable_content()!=last_checked_content):

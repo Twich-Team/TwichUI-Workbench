@@ -71,6 +71,140 @@ def test_bound_reasoning_is_used_and_its_actual_total_usage_is_still_accounted(t
     assert result['prompt_tokens']==reply['usage']['prompt_tokens']
 
 
+def test_settled_truncated_output_is_saved_but_never_dispatched_and_can_request_a_smaller_complete_operation(tmp_path):
+    value=approval()
+    runtime=SimpleNamespace(root=tmp_path,workflow_task=dict(approval=value),recipe={},enforce_storage=lambda:None)
+    class NoTools:
+        def __init__(self):self.runtime=runtime
+        def handle(self,*args):pytest.fail('A truncated tool batch must never dispatch')
+    partial=answer(2496)
+    partial['choices'][0].update(finish_reason='length',message=dict(content='CONTROLLED incomplete output',
+        reasoning_content='CONTROLLED private thinking',tool_calls=[dict(id='complete-but-rejected',
+            function=dict(name='read_file',arguments=json.dumps(dict(path='ignored.lua')))),dict(id='partial',
+            function=dict(name='replace_text',arguments='{"path":'))]))
+    Transport.responses=[partial,answer(30)]
+    Transport.bodies=[]
+    observations=[]
+    result=implement(NoTools(),'Controlled ongoing work','NEVER-ACTUAL-SECRET','controlled',lambda:True,
+        transport=Transport,on_turn=observations.append)
+    saved=json.loads((tmp_path/'attempt/response-00.json').read_text())
+    assert saved['transport_completed'] and saved['response']==partial
+    assert 'NEVER-ACTUAL-SECRET' not in (tmp_path/'attempt/response-00.json').read_text()
+    assert (tmp_path/'attempt/response-00.json').stat().st_mode & 0o077 == 0
+    assert result['completion_tokens']==2526
+    assert observations[0]['response_completed'] and observations[0]['finish_reason']=='length'
+    assert 'No tool from it ran' in Transport.bodies[1]['messages'][-1]['content']
+    assert all('CONTROLLED incomplete output' not in str(m) for m in Transport.bodies[1]['messages'])
+
+
+def test_repeated_cutoff_without_a_workspace_change_stops_for_diagnosis_without_fabricating_completion(tmp_path):
+    value=approval()
+    runtime=SimpleNamespace(root=tmp_path,workflow_task=dict(approval=value),recipe={},enforce_storage=lambda:None)
+    tools=SimpleNamespace(runtime=runtime)
+    partial=answer(2496)
+    partial['choices'][0]['finish_reason']='length'
+    Transport.responses=[partial,partial]
+    Transport.bodies=[]
+    observed=[]
+    with pytest.raises(BudgetError,match='Repeated truncated output'):
+        implement(tools,'Controlled ongoing work','','controlled',lambda:True,transport=Transport,on_turn=observed.append)
+    assert len(observed)==2 and all(x['usage_validated'] for x in observed)
+    assert (tmp_path/'attempt/response-01.json').exists()
+    assert len(Transport.bodies)==2
+
+
+def test_uncertain_partial_response_is_retained_without_a_final_usage_claim_or_replay(tmp_path):
+    runtime=SimpleNamespace(root=tmp_path,workflow_task=dict(approval=approval()),recipe={},enforce_storage=lambda:None)
+    class Broken:
+        def __init__(self,*args):self.ends_at=float('inf')
+        def __enter__(self):return self
+        def __exit__(self,*args):pass
+        def read(self,*args,**kwargs):
+            error=OSError('CONTROLLED disconnect')
+            error.stream_partial_response=dict(choices=[dict(message=dict(content='partial'))])
+            raise error
+    observed=[]
+    with pytest.raises(OSError,match='disconnect'):
+        implement(SimpleNamespace(runtime=runtime),'Controlled ongoing work','','controlled',lambda:True,
+            transport=Broken,on_turn=observed.append)
+    saved=json.loads((tmp_path/'attempt/response-00.json').read_text())
+    assert saved['transport_completed'] is False and 'usage' not in saved['response']
+    assert observed==[]  # No usage receipt is invented; the execution owner records unknown.
+
+
+@pytest.mark.parametrize('later',['none','edit','failed-check'])
+def test_reasoned_scoped_cycle_keeps_all_tools_and_finishes_only_after_last_unchanged_independent_pass(tmp_path,later):
+    value=approval()
+    value['payload']['execution_continuation']['operational_controls']=dict(continuing.CONTROLS)
+    value['binding']=digest(value['payload'])
+    workspace=tmp_path/'workspace'
+    workspace.mkdir()
+    file=workspace/'source.lua'
+    file.write_text('return 1\n')
+    runtime=SimpleNamespace(root=tmp_path,workflow_task=dict(approval=value),workspace=workspace,
+        paths=['source.lua'],read_paths=['source.lua'],enforce_storage=lambda:None,
+        recipe=dict(repair_cycle='scoped-repair-v1',verification_profile='CONTROLLED'),
+        tool_commands=lambda:{'focused':['CONTROLLED']})
+    events=[]
+    class WorkingTools:
+        def __init__(self):self.runtime=runtime
+        def handle(self,name,args):
+            events.append((name,args))
+            if name=='read_file':
+                return json.dumps(dict(path='source.lua',total_lines=1,spans=[dict(start=1,end=1,text=file.read_text())]))
+            if name=='replace_text':
+                file.write_text('return 2\n')
+                return 'CONTROLLED edit'
+            assert name=='run_check'
+            return json.dumps(dict(status='pass' if args['name']=='candidate' else 'fail',
+                diagnostic='CONTROLLED observation',rc=0 if args['name']=='candidate' else 1))
+    first=response('run_check',dict(name='candidate'),0)
+    if later!='none':
+        extra=(response('replace_text',dict(path='source.lua',old='return 1',new='return 2'),1) if later=='edit'
+            else response('run_check',dict(name='focused'),1))
+        first['choices'][0]['message']['tool_calls']+=extra['choices'][0]['message']['tool_calls']
+    Transport.responses=[first]+([response('run_check',dict(name='candidate'),2)] if later!='none' else [])
+    Transport.bodies=[]
+    result=implement(WorkingTools(),'Controlled scoped repair','','controlled',lambda:True,
+        transport=Transport,on_finish=lambda:pytest.fail('No extra generation/final callback after independently checked tools'))
+    assert result['completion_reason']=='independent-candidate-checks-passed'
+    assert len(Transport.bodies)==(1 if later=='none' else 2)
+    assert all(body['tool_choice']=='required' for body in Transport.bodies)
+    assert {t['function']['name'] for t in Transport.bodies[0]['tools']} >= {'read_file','find_text','replace_text','run_check'}
+    assert sum(n=='run_check' and a['name']=='candidate' for n,a in events)==(1 if later=='none' else 2)
+
+
+def test_usage_receipt_survives_private_response_storage_failure(tmp_path,monkeypatch):
+    import workbench.real_provider as provider
+    runtime=SimpleNamespace(root=tmp_path,workflow_task=dict(approval=approval()),recipe={},enforce_storage=lambda:None)
+    Transport.responses=[answer(17)]
+    Transport.bodies=[]
+    monkeypatch.setattr(provider,'retain_response',lambda *args:(_ for _ in ()).throw(OSError('CONTROLLED evidence disk failure')))
+    observed=[]
+    with pytest.raises(OSError,match='disk failure'):
+        implement(SimpleNamespace(runtime=runtime),'Controlled work','','controlled',lambda:True,
+            transport=Transport,on_turn=observed.append)
+    assert len(observed)==1 and observed[0]['usage_validated'] and observed[0]['usage']['completion_tokens']==17
+
+
+def test_private_response_evidence_cannot_follow_a_symlink_or_overwrite_another_response(tmp_path):
+    from workbench.real_provider import retain_response
+    runtime=SimpleNamespace(root=tmp_path,enforce_storage=lambda:None)
+    folder=tmp_path/'attempt'
+    folder.mkdir()
+    other=tmp_path/'unrelated'
+    other.write_text('preserve')
+    target=folder/'response-00.json'
+    target.symlink_to(other)
+    with pytest.raises(BudgetError,match='path changed'):
+        retain_response(runtime,0,answer(),True)
+    assert other.read_text()=='preserve'
+    target.unlink()
+    retain_response(runtime,0,answer(),True)
+    with pytest.raises(ValueError,match='immutable'):
+        retain_response(runtime,0,answer(29),True)
+
+
 def test_new_grant_binds_recorded_operational_controls_without_changing_baseline_or_old_decision(store,monkeypatch,owner):
     from test_real_execution import ControlledRuntime
     from workbench import real_execution,task_execution,task_budget
