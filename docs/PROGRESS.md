@@ -7678,3 +7678,14 @@ passes only the newest verdict per check and workspace into the model brief.
 Its controlled regression, 111 affected tests and native rehearsal passed.
 Read-only replay of the actual saved vendor logs yielded only the still-failing
 original comparison, without new model calls or saved task mutations.
+
+Installed 1fc940e after 112 affected checks and the separate native rehearsal
+passed. Fixed the private installer’s release-number substitution and moved the
+cutover fingerprint after worker stop. All 589 rows matched across cutover and
+offline restore, all 50 intake views and six earlier real results read back, and
+desktop/phone review showed the corrected permission wording. Reconciled the
+engineering-stopped generation without changing unknown usage or replaying
+partial output. The replacement Qwen operation reached the original comparison
+and received its exact registered log; the original still passed, so there is
+no accepted vendor result. The owner’s November 10 product direction is recorded
+in the addendum and roadmap, with no current permission or execution changes.

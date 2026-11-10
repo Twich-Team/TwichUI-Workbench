@@ -1,13 +1,10 @@
 # Active vendor recovery — November 10, 2026
 
-Actual running build **cb3369a**, private loopback/LAN preview9487. The sealed
-files were verified before starting the worker. All four roles and network/TLS,
-browser and internal boundary probes passed. The latest database and its restore
-matched 584 rows before activation; post-start comparison retained each of those
-rows and recorded the authorized new session. All 50 intake views and six earlier
-checked real results remain readable. Desktop and phone reload passed. The
-final installation closeout passed after the model returned to normal access.
-The initial cutover caught two late, legitimately saved worker rows (one offer,
+Actual installed **1fc940e/deployment101**, private loopback/LAN preview9487.
+All four roles and network/TLS, browser and internal boundary probes passed.
+The stopped source, copied active database and offline restore matched 589 rows.
+All 50 intake views and six earlier checked real results remain readable. The
+previous deployment100 initially caught two late, legitimate worker rows (one offer,
 one continuing decision). Rebased on the stopped source, verified both backup
 copies, then checked strict equality again before starting the new worker.
 Use the stopped-worker snapshot as the final cutover baseline; distinguish
@@ -48,9 +45,14 @@ full-suite readiness and focused checks but repeatedly revisited a superseded
 setup error. It made no new edits or candidate checks. A supported engineering
 yield preserved the owner authorization, ten complete responses and the
 unavailable final usage; normal model access restored. This was not an owner
-cancel. Final deployment100 checks and history reads have passed. Reconcile
-the exact terminated generation after installing changed recovery code, then
-continue the same task through trusted ingress only if it is not queued.
+cancel. After verified installation101, exact native termination evidence
+reconciled 041899a3 without dispatching any partial result or changing usage.
+The trusted owner-instruction ingress admitted **72438c71/1d99ee80** once.
+It reused the exact verified baseline and is active at latest inspection.
+The real model requested a fresh candidate comparison; the focused and
+independent checks passed, but unchanged original production still passed.
+The app returned the registered comparison log working-00-05 and the precise
+reason for withholding a result. Do not duplicate or interrupt this operation.
 
 The installed correction registers the exact failed differential log in the current
 attempt, explains when the original unexpectedly passes, and carries the checker
@@ -61,13 +63,13 @@ normal browser/API/worker rehearsal pass. Verify this feedback on the real
 operation. Original permission persists; the worker may automatically resume
 when an operation settles. No accepted vendor result exists yet.
 
-The next build omits failures resolved by the same check and workspace, and
+The installed build omits failures resolved by the same check and workspace, and
 finds the latest candidate comparison through unchanged saved patches if an
 intermediate operation never reached the check. The actual vendor history
 replay confirmed only the open original comparison remains in the brief. The
 first prospective cutover stopped before changing services: a release-number
-text substitution had altered the expected service UID. Correct the private
-generator without relaxing the service identity check.
+text substitution had altered the expected service UID. The private generator
+now bounds numeric substitutions and the named identity check passed unchanged.
 
 When a candidate qualifies, run private independent five vendor criteria against
 its exact frozen result. Require original discrimination and full suite; do not
