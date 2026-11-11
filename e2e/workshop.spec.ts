@@ -185,7 +185,7 @@ test('result outcome, real draft title and next step stay ahead of expandable ev
   const link=page.getByRole('link',{name:'Review the draft PR on GitHub'});
   await expect(link).toHaveAttribute('href',delivery.url);
   await expect(page.getByText(delivery.preview.title,{exact:true}).first()).toBeVisible();
-  await expect(page.getByText(/Next: review the draft and decide/)).toBeVisible();
+  await expect(page.getByText(/Next: review the draft on GitHub/)).toBeVisible();
   await expect(page.getByText('Not verified',{exact:true})).toBeVisible();
   await overflow(page);
   await capture(page,info,`result-outcome-${width}-${font}`,{keepInCompact:true});
@@ -209,11 +209,13 @@ test('backlog combines request description, work type and state filters across r
  await page.getByLabel('Title Optional').fill('Vendor rows');
  await page.getByLabel('Description',{exact:true}).fill('Names arrive late after the vendor window opens.');
  await page.getByRole('button',{name:'Submit request',exact:true}).click();
+ await expect(page).toHaveURL(/\/intake\/[a-f0-9-]{36}/);
  await page.goto('/intake/new');
  await page.getByLabel('Type of work').selectOption('inspection');
  await page.getByLabel('Title Optional').fill('Inspect startup');
  await page.getByLabel('Description',{exact:true}).fill('Inspect startup for repeated work.');
  await page.getByRole('button',{name:'Save for later',exact:true}).click();
+ await expect(page).toHaveURL(/\/intake\/[a-f0-9-]{36}/);
  await page.goto('/backlog');
  await page.getByLabel('Type of work').selectOption('bug');
  await page.getByRole('searchbox',{name:'Find a task'}).fill('arrive late');
@@ -231,6 +233,8 @@ test('backlog combines request description, work type and state filters across r
 
 test('simple settings persist a real policy and preserve pause while showing honest capacity limits',async({page},info)=>{
  await page.goto('/settings');
+ await page.getByRole('button',{name:'Pause new work',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Resume work',exact:true})).toBeVisible();
  const session=await page.request.get('/api/session').then(r=>r.json());
  const overview=await page.request.get('/api/models').then(r=>r.json());
  const policy={...overview.policy,pause_new_work:true,providers:{...overview.policy.providers,
@@ -238,15 +242,15 @@ test('simple settings persist a real policy and preserve pause while showing hon
   codex:{...overview.policy.providers.codex,model:'fixture-codex',enabled:true}}};
  const response=await page.request.put('/api/models/policy',{headers:{origin:'http://127.0.0.1:5380','x-csrf-token':session.csrf_token},data:policy});
  expect(response.ok()).toBeTruthy();await page.reload();
- await page.getByLabel('Preferred provider',{exact:true}).selectOption('codex');
- await page.getByLabel('Fallback for new task decisions').selectOption('codex-to-qwen');
+ await page.getByRole('combobox',{name:'Preferred provider',exact:true}).selectOption('codex');
+ await page.getByRole('combobox',{name:'Fallback for new task decisions',exact:true}).selectOption('codex-to-qwen');
  await page.getByRole('button',{name:'Save task model preferences',exact:true}).click();
  await expect(page.getByText('Model preferences saved for new task decisions. Existing work keeps its approved provider.')).toBeVisible();
  const saved=await page.request.get('/api/models').then(r=>r.json());
  expect(saved.policy).toMatchObject({preferred:'codex',substitution:'configured_fallback_only',test_fallback:'codex-to-qwen',pause_new_work:true});
  await page.reload();
- await expect(page.getByLabel('Preferred provider',{exact:true})).toHaveValue('codex');
- await expect(page.getByLabel('Fallback for new task decisions')).toHaveValue('codex-to-qwen');
+ await expect(page.getByRole('combobox',{name:'Preferred provider',exact:true})).toHaveValue('codex');
+ await expect(page.getByRole('combobox',{name:'Fallback for new task decisions',exact:true})).toHaveValue('codex-to-qwen');
  await expect(page.getByText(/No live subscription balance is shown here/)).toBeVisible();
  for(const [width,font] of [[1440,16],[390,16],[320,32]]){
   await page.setViewportSize({width,height:844});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);

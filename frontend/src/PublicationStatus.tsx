@@ -15,17 +15,17 @@ export function PublicationStatus({identity,checked}:{identity:string;checked:bo
   }
   const data=query.data;
   return <section className="task-publication" aria-label="Draft PR delivery">
-    <h3>{data.published?'Draft pull request submitted':data.source==='controlled'?'Controlled delivery result':data.status==='held'?'PR delivery needs attention':'Preparing draft PR delivery'}</h3>
+    <h3 aria-live="polite">{data.published?'Draft pull request submitted':data.source==='controlled'?'Controlled delivery result':data.status==='held'?'PR delivery needs attention':'Preparing draft PR delivery'}</h3>
     <p className="draft-title">{data.preview.title}</p>
-    <p role="status">{data.message}</p>
+    {!data.published&&<p role="status">{data.message}</p>}
     {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded delivery record.</p>}
     {data.published&&data.url&&/^https:\/\/github\.com\/Twich-Team\/TwichUI\/pull\/[1-9][0-9]{0,9}$/.test(data.url)&&
       <Button asChild><a href={data.url} target="_blank" rel="noreferrer">Review the draft PR on GitHub</a></Button>}
-    {data.published&&<p>Next: review the draft and decide whether it is ready to merge. The saved delivery record does not establish a merge or game installation.</p>}
+    {data.published&&<p>Next: review the draft on GitHub. You decide whether to merge.</p>}
     {!data.published&&data.source!=='controlled'&&<p>{data.status==='held'?'Next: open the task and review the delivery issue. The checked changes remain saved.':'Workbench is preparing delivery. You can leave this page; the request remains saved.'}</p>}
     {!data.current_eligible&&<p className="soft-callout">Historical delivery evidence. {data.current_message}</p>}
     {data.source==='controlled'&&<p>No real PR was created.</p>}
-    <details><summary>PR summary and destination</summary><p>{data.repository} · {data.base_branch} · {data.preview.category}</p><h4>{data.preview.title}</h4><pre className="candidate-diff" tabIndex={0}>{data.preview.body}</pre></details>
+    <details><summary>PR summary and destination</summary>{data.published&&<p>{data.message} This saved record confirms draft submission only.</p>}<p>{data.repository} · {data.base_branch} · {data.preview.category}</p><h4>{data.preview.title}</h4><pre className="candidate-diff" tabIndex={0}>{data.preview.body}</pre></details>
   </section>;
 }
 

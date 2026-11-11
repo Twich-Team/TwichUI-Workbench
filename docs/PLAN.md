@@ -1,3 +1,7 @@
+# Overnight campaign delivery — November 10, 2026 (Mountain time)
+
+The owner has explicitly authorized continued delivery across all four campaign milestones. The supported Phase A bug/test-to-draft workflow is already demonstrated and its real Qwen/Codex/fallback evidence is retained. New results/dashboard clarity, combined task filters and simple primary/fallback settings are implemented and under final browser/hosted/private-installation verification. Optional technical task fields are secondary; deliberate saved provider selection uses the existing consent and routing owners. Full code, checks, usage and recovery history remain available. Current source/installation receipts and remaining evidence limits are in CONTINUATION and CURRENT_STATUS. This campaign adds no billing, merge, game installation or progress-triggered fallback authority.
+
 # Delivered initial workflow and prepared Phase B — November 10, 2026
 
 Current checkpoint is installed a8c43cb/deployment 105. The vendor repair is

@@ -445,7 +445,10 @@ test('expired local approval holds the task without starting a run', async ({pag
   await expect(page.getByRole('button',{name:'Approve local run',exact:true})).toHaveCount(0);
   await page.goto('/');
   await expect(page.getByRole('heading',{name:'Needs your attention'})).toBeVisible();
-  await expect(page.locator('.workshop-panel').filter({has:page.getByRole('heading',{name:'Needs your attention',exact:true})}).locator(`a[href="${task}"]`)).toBeVisible();
+  await expect(page.locator('.workshop-panel').filter({has:page.getByRole('heading',{name:'Needs your attention',exact:true})}).locator(`a[href="${task}"]`)).toHaveCount(0);
+  await page.goto('/backlog?state=held');
+  await expect(page.locator(`a[href="${task}"]`)).toBeVisible();
+  await expect(page.getByText('The earlier run permission expired. Open the task to review the next step.')).toBeVisible();
 });
 
 test('everyday intake completes two different local tasks in one saved history',async({page})=>{

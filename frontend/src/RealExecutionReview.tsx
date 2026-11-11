@@ -53,14 +53,14 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
   const workflow=row.workflow_task;
   return <div className={embedded?"inline-result":"intake-page result-page"}>
     {!embedded&&<Link className="back-link" to={workflow?'/intake/'+encodeURIComponent(workflow.intake_id):'/executions'}>{workflow?'Back to the task':'All run results'}</Link>}
-    {!embedded&&<div className="page-heading"><div><img className="heading-art" src="/art/workshop/history.png" alt=""/><p className="eyebrow">RUN RESULT</p><h1>{row.title}</h1></div></div>}
+    {!embedded&&<div className="page-heading"><div><img className="heading-art" src="/art/workshop/history.png" alt=""/><h1>{row.title}</h1></div></div>}
     <section className="panel candidate-review real-execution-review" aria-label="Run result and checks">
       {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded result.</p>}
       {row.current_task===false&&<p className="soft-callout">This result belongs to an earlier plan. The current task still needs its own review and checks.</p>}
       <div className="result-outcome-heading"><p className="eyebrow">{checked?'READY TO REVIEW':'SAVED OUTCOME'}</p>
       <h2>{row.later_review?(row.later_review.state==='rejected'?'Later review rejected this patch':'Later review needs attention'):row.recovery_pending?'Waiting for safe recovery':checked?`${outcome} — automated checks passed`:row.status==='checked'?'Run result saved':runStage[row.status]||'Recorded result'}</h2>
       {embedded&&<p className="result-request">{row.title}</p>}
-      {checked?<p className="result-lead">{testOnly?'New tests check the reviewed behavior and help catch it changing in a future update.':hasChanges?'Workbench prepared changes intended to resolve the reviewed addon issue.':'The saved result passed its recorded automated checks.'}</p>
+      {checked?<p className="result-lead">{testOnly?'Added tests for the reviewed behavior.':hasChanges?'A fix is ready for your review.':'The saved result passed its recorded automated checks.'}</p>
         :<p>{row.later_review?'A later check found a problem with this patch. Review that finding before relying on these changes.':row.message}</p>}
       {checked&&<p className="result-limit">Offline checks only · Not installed or tested in game</p>}
       </div>
@@ -70,13 +70,13 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
         <div><dt>Game installation</dt><dd>Not performed by this run</dd></div>
         <div><dt>In-game testing</dt><dd>Not verified</dd></div>
       </dl>
-      {checked&&Boolean(row.intended_behavior?.length)&&<div className="result-intent"><strong>Intended improvement</strong><ul>{row.intended_behavior!.map((item,i)=><li key={i}>{item}</li>)}</ul></div>}
       {checked&&<>
         <section className="result-next-step" aria-label="Game verification"><h3>Before relying on it in game</h3><p>This run did not install the change or test it in World of Warcraft. After the change is available in a suitable test build, check the original behavior in game.</p></section>
         {row.behavior_reproduced&&<p>The reviewed check reproduced the bug in the original code and passed with this patch.</p>}
         {Boolean(row.behavior_checked?.length) && <details><summary>Behavior checked</summary><ul>{row.behavior_checked?.map((behavior,i)=><li key={i}>{behavior}</li>)}</ul></details>}
       </>}
       {row.later_review&&<><p className="soft-callout">The original check results and usage are retained below. This review does not authorize another run or publication.</p><details><summary>Why the later review stopped this result</summary><p>{row.later_review.reason}</p></details></>}
+      {checked&&Boolean(row.intended_behavior?.length)&&<details><summary>Reviewed behavior and intended improvement</summary><ul>{row.intended_behavior!.map((item,i)=><li key={i}>{item}</li>)}</ul></details>}
       {row.recovery_pending?<p>Workbench is waiting to confirm cleanup. It will keep the evidence and will not run the work again.</p>
         :!checked&&!active&&<p>Review the saved reason and checks below.{workflow&&' Open the task to see its current status and any available next step.'}</p>}
       {result?.inference_ran===false && !active && !checked && !result.authorship && <p>No model implementation ran.</p>}
