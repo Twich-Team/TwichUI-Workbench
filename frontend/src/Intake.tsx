@@ -13,6 +13,7 @@ import { TaskJourney, TaskOverview } from './TaskOverview';
 import { TaskExample } from './TaskExample';
 import { minutes, providerOutcome } from './taskProgress';
 import { ExactRunLimits, RunLimits } from './RunLimits';
+import {savedTaskRoute} from './modelPreferences';
 
 type Input = components['schemas']['IntakeInput'];
 type Intake = components['schemas']['IntakeView'];
@@ -98,6 +99,8 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
 
   const localWork=useQuery({queryKey:['local-work'],queryFn:()=>request<components['schemas']['LocalWorkStatus']>('/api/local-work'),refetchInterval:5000});
   const bugWork=kind==='issue'&&Boolean(localWork.data?.bug_investigation)&&!body.supported_task;
+  const modelPreferences=useQuery({queryKey:['models'],queryFn:()=>request<components['schemas']['ModelOverview']>('/api/models'),enabled:Boolean(localWork.data?.enabled&&(regression||bugWork))});
+  const savedRoute=modelPreferences.data?savedTaskRoute(modelPreferences.data.policy):null;
   const supported=useQuery({queryKey:['supported-tasks'],queryFn:()=>request<{items:{id:string;title:string;purpose:string}[]}>('/api/supported-tasks')});
   async function submit(event:React.FormEvent) {
     event.preventDefault(); setError('');
@@ -121,7 +124,7 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
   {unified&&<><label htmlFor="request-kind">Type of work</label><select id="request-kind" value={chosen} onChange={e=>changeWork(e.target.value as WorkChoice)}>{workChoices.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></>}
   {future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)&&<div className="soft-callout"><strong>Saved for later, without starting work.</strong><p>This kind of task is part of the product plan, but cannot run in this release. You can keep your description in the backlog. No model request or execution approval will be created.</p></div>}
   {localWork.data?.enabled&&!future&&<p className="task-support-note">Available now: supported offline Lua bugs and existing-test coverage. Work happens in a protected copy; the installed addon is not changed.</p>}
-  <details className="request-options" open={!unified || kind==='issue' || Boolean(localWork.data?.enabled || regression || body.supported_task) || undefined}>
+  <details className="request-options" open={!unified || Boolean(regression || body.supported_task) || undefined}>
   <summary>Task options</summary>
   {kind==='feature' && <>
     <label className="check-label"><input type="checkbox" checked={Boolean(regression)} onChange={e=>setBody({
@@ -159,6 +162,7 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
   {kind==='issue' && <><label className="check-label"><input type="checkbox" checked={lua} onChange={e=>{setLua(e.target.checked);if(!e.target.checked)setBody({...body,lua_error:''});}}/>Add a Lua error <span>Optional</span></label>{lua && <><label htmlFor="lua-error">Lua error <span>Plain text · never executed</span></label><textarea className="code-input" id="lua-error" maxLength={6000} rows={6} value={body.lua_error || ''} onChange={e=>setBody({...body,lua_error:e.target.value})}/></>}</>}</details>
   <label htmlFor="request-interface">Does this change how the addon looks?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:bugWork||e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.{bugWork&&' Read-only bug investigation can start before this is decided; repair permission is separate.'}</p>
   {localWork.data?.enabled&&(regression||bugWork)&&<div role="group" aria-label="Planning provider">
+    {savedRoute&&<div className="saved-model-choice"><p>Saved preference: {savedRoute.startsWith('qwen-')?'Local Qwen':'Codex'} · {savedRoute.includes('fallback')?'Fallback allowed before planning starts':'Fallback off'}. Review the provider consent below before submitting.</p><Button type="button" variant="secondary" disabled={modelPreferences.isError||(!bugWork&&body.visual_requirement!=='nonvisual')} onClick={()=>setBody({...body,local_planning:savedRoute})}>Use saved provider choice</Button></div>}
     <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('qwen-')||false} disabled={!bugWork&&body.visual_requirement!=='nonvisual'}
       onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>{bugWork?'Allow local Qwen to investigate this report':'Allow one local Qwen request to plan this task'}</span></label>
     {localWork.data.codex_configured ? <>

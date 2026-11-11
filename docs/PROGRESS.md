@@ -7852,3 +7852,8 @@ pending for the supported workflow. The owner retains merging.
 ## November 10 overnight — outcome-first Results and truthful attention
 
 Following the Project Working Philosophy, reused the already demonstrated supported Phase A workflow and real Qwen/vendor/map evidence. Results now distinguish checked fixes, tests, empty checked records, failures and later rejection; actual draft title/link and next action precede expandable technical evidence. Game installation/testing remain explicitly unverified. Desktop/phone screenshots, enlarged text, keyboard access, reload and error recovery pass. Expired permissions stay held without attention notifications; stale dashboard refresh does not claim current work. Initial 114 affected backend/43 frontend/five browser checks pass. Full verification and subsequent milestones continue. Running build remains a8c43cb until a verified cutover is recorded.
+
+
+## November 10 overnight — practical task filters and saved model choices
+
+Backlog type/status/description filters share actual API counts and preserve request identity, reload and clear-filter behavior. The first focused filter check caught a local variable shadowing the type parameter; corrected and all30 workspace checks pass. Simple model controls save the existing policy, preserve pause/configuration, retain drafts on conflict and explain the actual pre-generation fallback boundary. Explicitly applying the saved preference uses existing per-task consent/routing. All46 frontend checks and static/contracts/build pass; full browser/hosted checks and deployment continue. Existing provider demonstrations, original data and advanced functions are preserved.

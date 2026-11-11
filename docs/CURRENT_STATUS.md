@@ -6,4 +6,6 @@ The new Results design explains the outcome, actual draft title/link, next actio
 
 Controlled checks cover provider selection, pre-generation fallback and recovery. Full verification, hosted checks and installation of the new build are in progress. No new provider demonstration was needed or repeated.
 
-Next: finish verification, improve Backlog and simple model settings, then install the checked milestone with history and rollback preserved. No owner decision is pending. The owner retains merging and game installation.
+Backlog filtering and simple model settings are implemented and pass focused checks. New requests can explicitly apply saved provider preferences. Advanced controls remain available.
+
+Next: finish browser and hosted verification, then install the checked milestone with history and rollback preserved. No owner decision is pending. The owner retains merging and game installation.

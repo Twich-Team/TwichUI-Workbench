@@ -25,8 +25,9 @@ it('idle dashboard has no false activity or unanswered decision and uses GET onl
 it('recorded decisions remain distinct in backlog and filtering uses the actual API',async()=>{
  const calls=open(<WorkspaceBacklog/>);await screen.findByRole('link',{name:/Decision recorded/});
  expect(screen.getByText(task.message)).toBeVisible();
+ fireEvent.change(screen.getByLabelText('Type of work'),{target:{value:'bug'}});
  fireEvent.change(screen.getByRole('searchbox',{name:'Find a task'}),{target:{value:'route'}});
- await vi.waitFor(()=>expect(calls.mock.calls.some(([url])=>url.includes('search=route'))).toBe(true));
+ await vi.waitFor(()=>expect(calls.mock.calls.some(([url])=>url.includes('search=route')&&url.includes('kind=bug'))).toBe(true));
 });
 it('results explain local patch boundaries and link a real result identifier',async()=>{
  const data:typeof base={...base,items:[{...task,state:'completed',stage:'Ready to review',result_id:'saved-result',result_kind:'patch'}]};

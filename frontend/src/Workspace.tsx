@@ -12,8 +12,8 @@ export type WorkspaceTask=components['schemas']['WorkspaceTask'];
 const kinds:Record<string,string>={bug:'Bug fix',coverage:'Test coverage',feature:'Feature',inspection:'Inspection',simulation:'Simulator',data:'Data update',other:'Other work'};
 const icons:Record<string,typeof Wrench>={bug:Wrench,coverage:ListChecks,feature:Sparkles,inspection:Search,simulation:FlaskConical,data:FileCheck2};
 export const taskKind=(kind:string)=>kinds[kind]||'Task';
-export function useWorkspace(page=1,state='all',search=''){
- return useQuery({queryKey:['workspace',page,state,search],queryFn:()=>request<Page>(`/api/workspace?page=${page}&state=${encodeURIComponent(state)}&search=${encodeURIComponent(search)}`),refetchInterval:5000});
+export function useWorkspace(page=1,state='all',search='',kind='all'){
+ return useQuery({queryKey:['workspace',page,state,search,kind],queryFn:()=>request<Page>(`/api/workspace?page=${page}&state=${encodeURIComponent(state)}&search=${encodeURIComponent(search)}&kind=${encodeURIComponent(kind)}`),refetchInterval:5000});
 }
 export function WorkshopPanel({title,icon,children,action,className=''}:{title:string;icon?:ReactNode;children:ReactNode;action?:ReactNode;className?:string}){
  return <section className={`panel workshop-panel ${className}`}><div className="leather-section-heading"><h2>{icon}{title}</h2>{action}</div><div className="panel-content">{children}</div></section>;
@@ -61,13 +61,15 @@ export function Dashboard(){
  </aside></div></div>;
 }
 export function WorkspaceBacklog(){
- const [params,setParams]=useSearchParams();const state=params.get('state')||'all',search=params.get('search')||'',page=Math.max(1,Number(params.get('page'))||1);
- const query=useWorkspace(page,state,search);const data=query.data;
+ const [params,setParams]=useSearchParams();const state=params.get('state')||'all',search=params.get('search')||'',kind=params.get('kind')||'all',page=Math.max(1,Number(params.get('page'))||1);
+ const query=useWorkspace(page,state,search,kind);const data=query.data;
  const update=(values:Record<string,string>)=>setParams({...Object.fromEntries(params),...values,page:'1'});
  return <div className="backlog-page"><div className="page-heading"><div><h1>Backlog</h1><p>Everything you want Workbench to tackle.</p></div></div>
  {data?.work_paused&&<p role="status">New work is paused. <Link to="/settings">Resume work in Settings</Link></p>}
  <div className="backlog-toolbar"><label className="task-search"><Search size={19}/><span className="sr-only">Find a task</span><input type="search" value={search} maxLength={160} placeholder="Find a task" onChange={e=>update({search:e.target.value})}/></label><div className="filter-tabs" aria-label="Task filters">{[['all','All tasks'],['needs_you','Needs you'],['completed','Completed']].map(([value,label])=><Button key={value} variant={state===value?'default':'secondary'} aria-pressed={state===value} onClick={()=>update({state:value})}>{label}{data&&<span>{data.counts[value]||0}</span>}</Button>)}</div></div>
- <label className="status-filter">Status <select aria-label="Task status" value={state} onChange={e=>update({state:e.target.value})}>{[['all','All statuses'],['active','Working or checking'],['needs_you','Needs you'],['queued','Queued'],['preparing','Preparing reviewed work'],['needs_input','Needs input'],['needs_approval','Needs approval'],['decision_pending','Decision recorded'],['completed','Completed'],['held','On hold'],['failed','Could not finish'],['interrupted','Interrupted'],['stopped','Stopped'],['paused','Paused'],['unavailable','Saved for later']].map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+ <div className="backlog-filters"><label className="status-filter">Status <select aria-label="Task status" value={state} onChange={e=>update({state:e.target.value})}>{[['all','All statuses'],['active','Working or checking'],['needs_you','Needs you'],['queued','Queued'],['preparing','Preparing reviewed work'],['needs_input','Needs input'],['needs_approval','Needs approval'],['decision_pending','Decision recorded'],['completed','Completed'],['held','On hold'],['failed','Could not finish'],['interrupted','Interrupted'],['stopped','Stopped'],['paused','Paused'],['unavailable','Saved for later']].map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+ <label className="status-filter">Type of work <select value={kind} onChange={e=>update({kind:e.target.value})}><option value="all">All types</option>{Object.entries(kinds).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+ {(search||state!=='all'||kind!=='all')&&<Button variant="ghost" onClick={()=>setParams({})}>Clear filters</Button>}</div>
  {!data?<Waiting failed={query.isError} retry={()=>void query.refetch()}/>:<><RefreshState failed={query.isError} at={data.observed_at}/><WorkshopPanel title="Tasks" action={<span>{data.total} matching {data.total===1?'request':'requests'} · {data.all_total} saved</span>}><div className="task-table-heading" aria-hidden="true"><span>Task</span><span>Type and status</span></div>{data.items.length?data.items.map(task=><TaskRow key={task.id} task={task}/>):<div className="calm-empty"><Search size={28}/><p>{search?'No saved tasks match this search.':'No tasks have this status.'}</p></div>}</WorkshopPanel><Pages data={data} go={next=>setParams({...Object.fromEntries(params),page:String(next)})}/></>}
  <p className="advanced-records-link"><Link to="/backlog?source=fixture">Advanced records and older workspace history <ArrowRight size={14}/></Link></p></div>;
 }

@@ -38,6 +38,18 @@ def test_counts_search_pagination_and_read_only_state(client, headers, store):
         assert [dict(r) for r in c.execute(select(planning_jobs)).mappings()] == before
 
 
+def test_kind_description_and_state_filters_share_counts_without_duplicate_requests(client,headers,store):
+    first,_=submit(client,headers,kind='issue',title='Vendor rows',description='Names arrive late after opening the window.')
+    submit(client,headers,kind='feature',title='Inspect startup',requested_work='inspection')
+    submit(client,headers,kind='issue',title='Map zoom',description='Zoom resets when changing maps.')
+    page=index(client,kind='bug',search='arrive late',state='queued')
+    assert page['all_total']==3 and page['total']==page['counts']['all']==1
+    assert page['items'][0]['id']==first['id'] and not page['items'][0]['active']
+    assert index(client,kind='bug',search='arrive late',state='failed')['counts']==page['counts']
+    assert index(client,kind='inspection')['items'][0]['title']=='Inspect startup'
+    assert client.get('/api/workspace?kind=invented').status_code==422
+
+
 @pytest.mark.parametrize('phase',['waiting','yielding','reconciling','reserved'])
 def test_waiting_revision_task_and_dashboard_share_model_state_without_inflating_work(
     client,headers,store,monkeypatch,phase,

@@ -8,7 +8,11 @@ The new Results hierarchy leads with fix/test/checked outcome, automated checks,
 
 Initial focused evidence: 114 backend checks, 43 frontend checks, four delivery/responsive browser checks and the new outcome/browser recovery case pass. A complete backend/frontend run and broader browser/hosted checks are underway. First browser recovery test removed its own display handler; corrected the fixture and reran successfully without changing product behavior. Existing installed history and model services are untouched.
 
-Next: finish the full verification, complete useful Backlog/model-setting improvements, push verified checkpoints and install through the existing sealed-release mechanism with preserved history and rollback. No owner decision is required for this authorized work.
+Backlog now combines type, status and description search, keeps filters through reload, and clears them explicitly. Counts share the actual filter scope; original request identity remains the row owner. The existing retry/history records are retained within each task. New task entry keeps optional technical options closed unless needed.
+
+Simple Settings edits the existing provider policy with conflict handling and preserves pause, provider/model configuration and task bindings. A deliberate Use saved provider choice control applies that saved primary/fallback to a supported request; existing per-task consent and server routing checks remain. No API billing, inferred quota, progress-triggered fallback or uncertain replay is added. Advanced model identifiers, effort, routing, records and monitoring remain available. Thirty workspace and 46 frontend checks pass. Full local/hosted/browser verification and the sealed installation continue.
+
+Next: finish full verification, push the connected checkpoint, inspect rendered Backlog/settings, and install through the existing sealed-release mechanism with preserved history and rollback. No owner decision is required for this authorized work.
 
 ---
 

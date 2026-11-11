@@ -78,7 +78,7 @@ def indexed(rows, key='intake_id'):
     return grouped
 
 
-def listing(engine, *, page=1, search='', state='all', page_size=12):
+def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12):
     """Counts and rows share one filter scope. Requests, not provider attempts, count."""
     with engine.connect() as c:
         c.exec_driver_sql('BEGIN')
@@ -169,7 +169,7 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
         timestamps = [original['created_at'], *[j['finished_at'] or j['created_at'] for j in current_jobs],
                       *[d['finished_at'] or d['created_at'] for d in current_choices],
                       *[p['finished_at'] or p['started_at'] for p in providers[identity]]]
-        kind = body.get('requested_work') or ('coverage' if body.get('regression_tests') else 'bug' if body['kind']=='issue' else 'feature')
+        task_kind = body.get('requested_work') or ('coverage' if body.get('regression_tests') else 'bug' if body['kind']=='issue' else 'feature')
         if work_paused and phase == 'queued':
             phase = 'paused'
         label, message = LABELS[phase]
@@ -191,12 +191,16 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                            if local_model['state']=='working' else local_model['message'])
             elif waiting_job and waiting_job['message'].startswith('Waiting for '):
                 message = waiting_job['message']
-        rows.append(dict(id=identity, title=body['title'], kind=kind, state=phase, stage=label, message=message,
+        rows.append(dict(id=identity, title=body['title'], kind=task_kind, state=phase, stage=label, message=message,
                          created_at=original['created_at'], updated_at=max(timestamps), active=phase in ACTIVE,
                          needs_you=phase in NEEDS, result_id=result_id, result_kind=result_kind,
                          draft_pr_submitted=draft_pr_submitted or None, provider=providers[identity][-1]['backend'] if providers[identity] else None))
     query = search.strip().casefold()
-    matching = [r for r in rows if not query or query in (r['title']+' '+r['stage']+' '+r['kind']).casefold()]
+    if kind not in {'all', 'bug', 'coverage', 'feature', 'inspection', 'simulation', 'data', 'other'}:
+        raise HTTPException(422, 'Choose an available type of work.')
+    descriptions = {r['id']:r['payload'].get('description','') for r in originals}
+    matching = [r for r in rows if (kind=='all' or r['kind']==kind) and (not query or query in
+                (r['title']+' '+r['stage']+' '+r['kind']+' '+descriptions[r['id']]).casefold())]
     counts = Counter(r['state'] for r in matching)
     counts.update(all=len(matching), active=sum(r['active'] for r in matching), needs_you=sum(r['needs_you'] for r in matching),
                   results=sum(bool(r['result_id']) or r['result_kind']=='findings' for r in matching))

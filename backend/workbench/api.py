@@ -343,9 +343,10 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     def everyday_workspace(page: int = Query(default=1, ge=1, le=10000),
                            search: str = Query(default='', max_length=160),
                            state: str = Query(default='all', max_length=40),
+                           kind: str = Query(default='all', max_length=40),
                            page_size: int = Query(default=12, ge=1, le=100)):
         from workbench.workspace_view import listing
-        return listing(app.state.engine, page=page, search=search, state=state, page_size=page_size)
+        return listing(app.state.engine, page=page, search=search, state=state, kind=kind, page_size=page_size)
 
     @app.get('/api/supported-tasks')
     def supported_task_catalog():
