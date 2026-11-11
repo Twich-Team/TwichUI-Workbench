@@ -1,6 +1,7 @@
 """One explicitly granted real task. Existing worker/transaction/accounting ownership."""
 from datetime import datetime, timedelta, timezone
 import hashlib
+import copy
 import json
 import os
 from pathlib import Path
@@ -78,6 +79,20 @@ def issue(engine, authorization, provenance, activation, *, task=None):
                     grant_deadline=deadline.isoformat() if deadline else None)
     if hasattr(activation, 'recovery_identity'):
         snapshot['recovery'] = activation.recovery_identity()
+    checked_input = getattr(activation, 'feature_input', None)
+    prepared_task = None
+    if checked_input is not None:
+        if not isinstance(checked_input, dict) or task is None:
+            raise ValueError('A checked feature input requires its current task and explicit execution budget.')
+        checked_input = copy.deepcopy(checked_input)
+        from workbench import task_execution
+        with engine.connect() as c:
+            prepared_task = task_execution.snapshot(c, **task)
+            reason = task_execution.prerequisite_reason(c, prepared_task, checked_input)
+        if (reason or chosen['source'] != checked_input.get('source')
+                or chosen['base'] != checked_input.get('commit')):
+            raise ValueError(reason or 'Execution source differs from the checked feature input.')
+        snapshot['feature_input'] = checked_input
     binding = digest(snapshot)
     row = dict(id=str(uuid4()), snapshot=snapshot, binding=binding,
                issued_at=issued.isoformat(), expires_at=expires.isoformat())
@@ -85,6 +100,8 @@ def issue(engine, authorization, provenance, activation, *, task=None):
         if task is not None:
             from workbench.task_execution import snapshot as task_snapshot
             snapshot['workflow_task'] = task_snapshot(c, task['intake_id'], task['task_id'], task['approval_id'])
+            if prepared_task is not None and snapshot['workflow_task'] != prepared_task:
+                raise ValueError('The task changed after checked-source validation. No grant was issued.')
             from workbench.continuing_repair import controls_for
             controls=controls_for(snapshot['workflow_task']['approval'])
             if controls:
@@ -92,18 +109,24 @@ def issue(engine, authorization, provenance, activation, *, task=None):
                 # grant separately binds the engineering settings in the newly
                 # recorded continuing decision; old grants are never upgraded.
                 snapshot['operational_controls']=controls
-            if snapshot['workflow_task']['approval']['payload'].get('run_budget'):
+            if (snapshot['workflow_task']['approval']['payload'].get('run_budget')
+                    or snapshot['workflow_task']['approval']['payload'].get('feature_run')):
                 from workbench.task_budget import permission
                 from workbench.db import proposal_decisions
                 approval = c.execute(select(proposal_decisions).where(proposal_decisions.c.id==task['approval_id'])).mappings().one()
-                snapshot['task_budget'] = permission(c, approval)
+                selected = (dict(task_id=task['task_id'], offer_id=getattr(activation, 'feature_offer_id', None))
+                    if approval['payload'].get('feature_run') else {})
+                snapshot['task_budget'] = permission(c, approval, **selected)
                 if snapshot['task_budget']['offer']['snapshot']['specification']['contract'] != snapshot['contract']:
                     raise ValueError('Prepared runtime and approved recipe differ')
             if chosen != contract() and not snapshot.get('task_budget'):
                 raise ValueError('The new recipe requires an explicit task budget')
             row['binding'] = digest(snapshot)
         if snapshot.get('task_budget'):
-            prior = c.execute(select(grants).where(grants.c.snapshot['task_budget']['decision_id'].as_string()==snapshot['task_budget']['decision_id'])).mappings().first()
+            query = select(grants).where(grants.c.snapshot['task_budget']['decision_id'].as_string()==snapshot['task_budget']['decision_id'])
+            if snapshot['task_budget'].get('feature_task_id'):
+                query = query.where(grants.c.snapshot['task_budget']['offer']['id'].as_string()==snapshot['task_budget']['offer']['id'])
+            prior = c.execute(query).mappings().first()
             if prior:
                 if prior['snapshot'] != snapshot:
                     raise ValueError('This task budget already owns one execution grant; no replacement')

@@ -639,6 +639,11 @@ def clarify_in(connection, identity, body):
 def validate_approval(connection, receipt):
     continuation = receipt['payload'].get('execution_continuation')
     binding = receipt['binding']
+    if continuation and receipt['payload'].get('feature_run'):
+        from workbench.feature_permission import validate
+        validate(connection, receipt, active=False)
+        parent = require(connection, proposal_decisions, continuation['scope_approval_id'])
+        return validate_approval(connection, parent)
     if continuation:
         # A new execution-budget decision references, never rewrites, its original
         # scope decision. Its unique binding includes budget and owner provenance.

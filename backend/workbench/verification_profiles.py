@@ -14,7 +14,16 @@ from workbench.visual_scope import digest
 
 REGRESSION = 'lua-regression-tests-v1'
 BUGFIX = 'lua-offline-bugfix-v1'
+FEATURE = 'lua-feature-step-v1'
 PROFILES = {
+    FEATURE: {
+        'controls': {'original': 'fail'},
+        'requirements': [
+            'The exact parent-approved feature step and checked predecessor determine source and write scope.',
+            'New assertions expose missing behavior against unchanged production, and pass on the frozen step candidate with syntax, focused checks and the full existing suite.',
+            'A checked step does not certify the combined feature or permit publication.',
+        ],
+    },
     REGRESSION: {
         'controls': {'original': 'fail', 'known-good-oracle-control': 'pass',
                      'vacuous': 'fail', 'wrong-behavior': 'fail'},

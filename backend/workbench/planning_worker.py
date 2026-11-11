@@ -18,7 +18,9 @@ from workbench.service import now
 
 def apply_one(engine, fail_before_commit=False, command_id=None):
     with write_transaction(engine) as connection:
-        receipt = connection.execute(select(proposal_decisions).where(proposal_decisions.c.status == 'pending', *([proposal_decisions.c.id == command_id] if command_id else []))
+        receipt = connection.execute(select(proposal_decisions).where(proposal_decisions.c.status == 'pending',
+            proposal_decisions.c.payload['feature_run'].as_string().is_(None),
+            *([proposal_decisions.c.id == command_id] if command_id else []))
             .order_by(proposal_decisions.c.created_at, proposal_decisions.c.id).limit(1)).mappings().first()
         if not receipt:
             return False

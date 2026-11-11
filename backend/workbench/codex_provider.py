@@ -1304,6 +1304,9 @@ class Planner:
         feature_schema = schema is FeatureDecomposition or packet.get('original', {}).get('feature_planning')
         if feature_schema:
             instructions = FEATURE_INSTRUCTIONS
+        from workbench.feature_steps import StepScope, INSTRUCTIONS as STEP_INSTRUCTIONS
+        if schema is StepScope:
+            instructions = STEP_INSTRUCTIONS
         if schema is IntentResponse:
             from workbench.bug_intent import INSTRUCTIONS
             instructions = INSTRUCTIONS

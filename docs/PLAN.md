@@ -1,3 +1,11 @@
+# November 11 — continue connected feature delivery
+
+FW1/FW2 installed114/044f521; the same real Qwen map-zoom request has5valid
+dependent steps,0checked. Current FW3 controlled two-step worker/source path
+passes; it is not installed or complete. Finish bounded failure recovery and
+parent run controls, then exact full verification/deployment and actual Qwen
+implementation, followed by FW4–FW7. Continue without routine renewal.
+
 # Active FW2 delivery checkpoint — November 11, 2026
 
 FW1 is installed and accepted at7c2073e/deployment111. Grounded feature intake,

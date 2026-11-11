@@ -266,6 +266,9 @@ def certified_offer_current(c, row):
 
 def preparation_inputs(c, selected):
     """Runtime preparation consumes offer data without a supported-task template."""
+    if selected['snapshot'].get('feature_step'):
+        from workbench.feature_steps import preparation_inputs as feature_inputs
+        return feature_inputs(c, selected)
     if (selected['fingerprint'] != digest(selected['snapshot'])
             or offer(c, selected['proposal_id']) != selected):
         raise ValueError('Certified offer inputs changed')
@@ -312,7 +315,10 @@ def validate_selection(c, proposal_id, budget, *, admitting=False):
     return selected
 
 
-def permission(c, approval, *, require_current=True, admitting=False):
+def permission(c, approval, *, require_current=True, admitting=False, task_id=None, offer_id=None):
+    if approval['payload'].get('feature_run'):
+        from workbench.feature_steps import permission as feature_policy
+        return feature_policy(c, approval, task_id, offer_id=offer_id, require_current=require_current)
     raw = approval["payload"].get("run_budget")
     if not raw:
         return None
@@ -655,7 +661,8 @@ def authorize_one(engine, runtime):
         if not approval:
             return False
         try:
-            policy = permission(c, approval)
+            policy = permission(c, approval, task_id=selected['task_id'],
+                offer_id=getattr(runtime, 'feature_offer_id', None))
             if not policy:
                 return False
             from workbench.task_execution import snapshot
@@ -663,9 +670,14 @@ def authorize_one(engine, runtime):
             linked = snapshot(
                 c, selected["intake_id"], selected["task_id"], selected["approval_id"]
             )
-            if linked["dependencies"]:
+            feature = bool(policy.get('feature_task_id'))
+            if feature:
+                from workbench.task_execution import prerequisite_reason
+                if prerequisite_reason(c, linked, getattr(runtime, 'feature_input', None)):
+                    return False
+            elif linked["dependencies"]:
                 return False
-            if (
+            if not feature and (
                 len(
                     c.execute(
                         select(backlog_items.c.id).where(
@@ -677,12 +689,13 @@ def authorize_one(engine, runtime):
                 != 1
             ):
                 return False
-            if c.execute(
-                select(real_execution_grants.c.id).where(
+            prior_query = select(real_execution_grants.c.id).where(
                     real_execution_grants.c.snapshot["task_budget"]["decision_id"].as_string()
                     == approval["id"]
                 )
-            ).first():
+            if feature:
+                prior_query = prior_query.where(real_execution_grants.c.snapshot['task_budget']['offer']['id'].as_string()==policy['offer']['id'])
+            if c.execute(prior_query).first():
                 return False
             contract = getattr(runtime, "execution_contract", execution.contract())
             if (

@@ -1,3 +1,15 @@
+# November 11 — finite feature execution ownership (uninstalled development)
+
+A feature run is one actual parent proposal_decision and one existing task_session
+whose ID is that decision and task_id is the existing request root. Immutable
+per-step packages are slots within that finite session; none is a generated human
+approval or another session/database/scheduler. Existing worker, model reservation,
+provider/controller, grants, source freezer, usage and checks remain authoritative.
+Completed children leave the parent pending until distinct combined verification.
+Private local checked-source commits never publish. Failed/uncertain output is
+retained and cannot become a predecessor. Current installation has no feature-run
+capability flag or exposed run command; development guards grant no live authority.
+
 # Feature step correction owner — November 11, 2026
 
 Settled feature decomposition corrections remain in the same planning_jobs row,

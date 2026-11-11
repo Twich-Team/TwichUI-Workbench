@@ -171,7 +171,8 @@ class CodexRuntime(Runtime):
         self.implementation_deadline = time.monotonic() + job.LIMITS['implementation_s']
         tools = Tools(self, permitted)
         from workbench.verification_profiles import BUGFIX
-        bug = self.recipe and self.recipe.get('verification_profile') == BUGFIX
+        from workbench.verification_profiles import FEATURE
+        bug = self.recipe and self.recipe.get('verification_profile') in {BUGFIX, FEATURE}
         if self._context_sha or (bug and not self.controls_valid()):
             raise ValueError('Codex needs a clean, independently prepared task.')
         if bug:

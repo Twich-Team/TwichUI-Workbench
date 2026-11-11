@@ -220,6 +220,11 @@ def _legacy_controls(runtime, template):
 def preparation_template(c, linked, budget, engine):
     """Resolve the existing offer owner before loading any per-task template."""
     offered = budget['offer']
+    if offered['snapshot'].get('feature_step'):
+        selected = offered['snapshot']['feature_step']['scope']
+        if selected['decision_id'] != linked['approval']['id'] or selected['task_id'] != linked['task']['id']:
+            raise ValueError('Feature preparation belongs to another parent or step.')
+        return task_budget.preparation_inputs(c, offered)
     if offered['snapshot'].get('certified_preparation') or offered['snapshot'].get('ready_preparation'):
         selected = offered['snapshot']['reviewed_task']['ref']
         continuation = linked['approval']['payload'].get('execution_continuation', {})
@@ -234,11 +239,14 @@ def preparation_template(c, linked, budget, engine):
     return {**template, 'recipe': offered['snapshot']['specification']}
 
 
-def close_selected(engine, decision_id):
+def close_selected(engine, decision_id, *, offer_id=None):
     """Close ONLY this session's execution permission; history/delivery stay intact."""
     with write_transaction(engine) as c:
+        query = execution.grants.update()
+        if offer_id:
+            query = query.where(execution.grants.c.snapshot['task_budget']['offer']['id'].as_string() == offer_id)
         c.execute(
-            execution.grants.update()
+            query
             .where(
                 execution.grants.c.snapshot["task_budget"]["decision_id"].as_string()
                 == decision_id,
@@ -255,7 +263,7 @@ def finish(engine, config, status, message):
         if json.loads(marker.read_text())["task"] != config["task"]:
             raise ValueError("Conflicting session outcome")
         return False
-    close_selected(engine, config["task"]["approval_id"])
+    close_selected(engine, config["task"]["approval_id"], offer_id=config.get('feature_offer_id'))
     if status == "published":
         with engine.connect() as c:
             publication = (
@@ -332,6 +340,7 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
             approval,
             require_current=not (Path(config["run_root"]) / "session-claimed.json").exists(),
             admitting=True,
+            task_id=ref['task_id'], offer_id=config.get('feature_offer_id'),
         )
         if everyday.enabled() and not (Path(config['run_root']) / 'session-claimed.json').exists():
             codex_route = provider_routes.run_selection(c, linked)
@@ -447,6 +456,8 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
                     started + 2400, datetime.fromisoformat(config["deadline"]).timestamp()
                 ),
             )
+            if config.get('feature_offer_id'):
+                link['feature_offer_id'] = config['feature_offer_id']
             if link["run_deadline"] - started != 2400:
                 raise ValueError("Full acceptance clock does not fit; no lease")
             durable(root / "workflow-link.json", json.dumps(link).encode())
@@ -560,7 +571,8 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
                 .join(execution.grants, execution.requests.c.grant_id == execution.grants.c.id)
                 .where(
                     execution.grants.c.snapshot["task_budget"]["decision_id"].as_string()
-                    == ref["approval_id"]
+                    == ref["approval_id"],
+                    execution.grants.c.snapshot['task_budget']['offer']['id'].as_string() == budget['offer']['id'],
                 )
             )
             .mappings()

@@ -16,19 +16,21 @@ import tempfile
 
 
 def enabled(spec):
-    return isinstance(spec,dict) and spec.get('repair_cycle')=='scoped-repair-v1'
+    return isinstance(spec,dict) and spec.get('repair_cycle') in {'scoped-repair-v1','scoped-feature-v1'}
 
 
-def oracle(focused_test, api_contracts=None):
+def oracle(focused_test, api_contracts=None, *, behavior_id='bug-reproducer'):
     if not re.fullmatch(r'tests/test_[A-Za-z0-9_-]+\.lua',focused_test):
         raise ValueError('An existing focused Lua test is required')
+    if behavior_id not in {'bug-reproducer','feature-step'}:
+        raise ValueError('Unsupported fixed assertion runner identity')
     # A real generic assertion runner, not a prewritten addon reproducer/solution.
     # It gains task-specific assertions only when the coding agent adds them.
     from workbench.api_mock_contract import guard
     return ((guard(api_contracts) if api_contracts is not None else '')+
             "local ok, failure = xpcall(function() dofile("+json.dumps(Path(focused_test).name)+") end, debug.traceback)\n"
             "if not ok then io.write(tostring(failure), '\\n') end\n"
-            "io.write('WB_BEHAVIOR bug-reproducer ', ok and 'PASS' or 'FAIL', '\\n')\n"
+            "io.write('WB_BEHAVIOR "+behavior_id+" ', ok and 'PASS' or 'FAIL', '\\n')\n"
             "if not ok then os.exit(1) end\n")
 
 
@@ -42,13 +44,13 @@ def readiness(runtime):
     require_safe_check(baseline)
     for check in boundary.get('checks',{}).values():
         require_safe_check(check)
-    expected=dict(kind='scoped-repair-readiness-v1',verification='not_run',
+    expected=dict(kind=('scoped-feature-readiness-v1' if runtime.recipe.get('repair_cycle')=='scoped-feature-v1' else 'scoped-repair-readiness-v1'),verification='not_run',
         recipe_sha256=sha((runtime.root/'recipe.json').read_bytes()),
         base_manifest_sha256=sha(runtime.initial.read_bytes()),
         baseline_sha256=sha((runtime.root/'fresh-baseline-suite.json').read_bytes()),
         boundary_sha256=sha((runtime.root/'boundary-proof.json').read_bytes()))
     if (value!=expected or not enabled(runtime.recipe)
-            or runtime.oracle_source.read_text()!=oracle(runtime.recipe['focused_test'], runtime.recipe.get('api_contracts'))
+            or runtime.oracle_source.read_text()!=oracle(runtime.recipe['focused_test'], runtime.recipe.get('api_contracts'),behavior_id=runtime.recipe['behavior']['id'])
             or not suite_inventory(baseline,runtime.expected_suite())
             or not boundary.get('checks')
             or any(c.get('status')!='pass' or c.get('rc')!=0 or c.get('usage',{}).get('cgroup_removed') is not True
@@ -60,7 +62,7 @@ def readiness(runtime):
 def record_readiness(runtime,boundary):
     from workbench.real_workspace import durable,sha
     durable(runtime.root/'boundary-proof.json',Path(boundary).read_bytes())
-    value=dict(kind='scoped-repair-readiness-v1',verification='not_run',
+    value=dict(kind=('scoped-feature-readiness-v1' if runtime.recipe.get('repair_cycle')=='scoped-feature-v1' else 'scoped-repair-readiness-v1'),verification='not_run',
         recipe_sha256=sha((runtime.root/'recipe.json').read_bytes()),
         base_manifest_sha256=sha(runtime.initial.read_bytes()),
         baseline_sha256=sha((runtime.root/'fresh-baseline-suite.json').read_bytes()),
@@ -69,10 +71,10 @@ def record_readiness(runtime,boundary):
     return readiness(runtime)
 
 
-def new_assertion_failure(result,path,original,candidate):
+def new_assertion_failure(result,path,original,candidate,*,behavior_id='bug-reproducer'):
     """Syntax, missing fixtures and unrelated crashes are not original-bug proof."""
     from workbench.verification_profiles import behavioral_outcome
-    if behavioral_outcome(result,'bug-reproducer')!='fail':
+    if behavioral_outcome(result,behavior_id)!='fail':
         return False
     added=set()
     for tag,_,_,start,end in difflib.SequenceMatcher(None,original.splitlines(),candidate.splitlines(),autojunk=False).get_opcodes():
@@ -128,7 +130,7 @@ def original_with_new_tests(runtime,folder,permitted):
         durable(folder/'original-with-new-tests.json',json.dumps(result,sort_keys=True).encode())
         old=git(clone,'show',runtime.base+':'+focused)
         fresh=(clone/focused).read_text()
-        reproduced=new_assertion_failure(result,focused,old,fresh)
+        reproduced=new_assertion_failure(result,focused,old,fresh,behavior_id=runtime.recipe['behavior']['id'])
         proof=dict(status='pass' if reproduced else 'fail',
             reason='New regression assertions expose the original behavior.' if reproduced else
                 'The new test must expose an assertion failure in unchanged original production; syntax, fixture errors and already-passing tests do not qualify.',
@@ -164,7 +166,7 @@ def verify_result(runtime,result):
                    for path,value in tests.items())):
         return False
     return new_assertion_failure(original,focused,git(Path(runtime.source),'show',runtime.base+':'+focused),
-        (frozen/focused).read_text())
+        (frozen/focused).read_text(),behavior_id=runtime.recipe['behavior']['id'])
 
 
 def reuse_baseline(runtime,source):

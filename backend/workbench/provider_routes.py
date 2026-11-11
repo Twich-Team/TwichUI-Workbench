@@ -143,6 +143,16 @@ def run_selection(c, linked):
     from workbench.db import intakes
 
     selected = approved(c, intake.require(c, intakes, linked['intake_id']))
+    if linked['approval']['payload'].get('feature_run'):
+        from workbench.feature_steps import parent
+        _, permission = parent(c, linked['approval']['id'])
+        if permission['scope']['route'] != selected:
+            raise ValueError('The feature saved model route changed.')
+        if permission['scope']['provider'] == 'local':
+            if selected['model'] != everyday.MODEL:
+                raise ValueError('The installed local model differs from the feature permission.')
+            return None
+        return {k:v for k,v in selected.items() if k in {'model','effort','policy_revision'}}
     grounding = (linked['proposal_review'].get('task_contract') or {}).get('scenario_grounding') or {}
     basis = grounding.get('basis')
     reason = grounding.get('fallback_reason')

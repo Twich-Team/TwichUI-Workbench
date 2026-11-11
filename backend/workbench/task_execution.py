@@ -75,7 +75,7 @@ def snapshot(c, intake_id, task_id, approval_id):
             or parent["proposal_id"] != approval["proposal_id"]
             or parent["binding"] != continuation.get("scope_binding")
             or parent["snapshot"] != review
-            or not approval["payload"].get("run_budget")
+            or not (approval["payload"].get("run_budget") or approval["payload"].get("feature_run"))
             or not isinstance(continuation.get("owner_provenance"), dict)
         ):
             raise Waiting(
@@ -191,7 +191,7 @@ def current(c, linked):
         return False
 
 
-def prerequisite_reason(c, linked):
+def prerequisite_reason(c, linked, feature_input=None):
     """A checked result is evidence, not acceptance. Require matching current task provenance."""
     for identity in linked["dependencies"]:
         rows = c.execute(
@@ -225,6 +225,18 @@ def prerequisite_reason(c, linked):
                 break
         if not good:
             return "Waiting for a prerequisite task to finish with current independently checked changes."
+    if feature_input is not None:
+        try:
+            from workbench import feature_source
+            from workbench.trusted_preparation import configuration
+            if not linked['original'].get('feature_planning'):
+                raise ValueError('Only a Feature Workshop task can use a checked feature input.')
+            carried = feature_source.prerequisite_tasks(c, feature_input, linked, configuration(c.engine))
+            if not set(linked['dependencies']) <= carried:
+                raise ValueError('Required predecessor changes are missing from this checked input.')
+        except (ValueError, OSError, KeyError, TypeError, HTTPException):
+            return 'The checked predecessor source is unavailable, stale, or does not carry every required change.'
+        return None
     if linked["dependencies"]:
         return (
             "Prerequisite checks passed, but their changes are not part of this pinned base. "
@@ -243,13 +255,19 @@ def validate(c, grant, prerequisites=True):
         from workbench.task_budget import permission
 
         try:
-            actual = permission(c, require(c, proposal_decisions, linked["approval"]["id"]))
+            actual = permission(c, require(c, proposal_decisions, linked["approval"]["id"]),
+                task_id=linked['task']['id'], offer_id=grant['snapshot']['task_budget']['offer']['id'])
         except ValueError, HTTPException:
             raise Waiting("The explicit task budget expired or changed.") from None
         if actual != grant["snapshot"]["task_budget"]:
             raise Waiting("The explicit task budget changed or expired.")
     if prerequisites:
-        reason = prerequisite_reason(c, linked)
+        feature_input = grant['snapshot'].get('feature_input')
+        reason = prerequisite_reason(c, linked, feature_input)
+        if not reason and feature_input and (
+                grant['snapshot']['contract']['source'] != feature_input['source']
+                or grant['snapshot']['contract']['base'] != feature_input['commit']):
+            reason = 'The execution source does not match the checked predecessor input.'
         if reason:
             raise Waiting(reason)
 

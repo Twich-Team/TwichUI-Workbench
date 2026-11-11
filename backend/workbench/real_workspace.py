@@ -102,6 +102,8 @@ class Runtime:
         self.execution_contract = self.recipe['contract'] if self.recipe else job.contract()
         self.base = self.execution_contract['base']
         self.source = self.execution_contract['source']
+        if self.recipe and self.recipe.get('repair_cycle') == 'scoped-feature-v1':
+            self.feature_input = self.recipe['approved_feature_scope']['feature_input']
         self.paths = tuple(self.execution_contract['paths'])
         self.source_read_limit = self.execution_contract['limits']['read_chars']
         self.read_paths = tuple(self.recipe.get('read_paths', self.paths)) if self.recipe else self.paths
@@ -163,6 +165,10 @@ class Runtime:
             value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes()) for name in ['real_recipes.py','task_budget.py','verification_process.py']})
             if self.recipe.get('repair_cycle'):
                 value['helper_sha256']['repair_cycle.py']=sha(Path(__file__).with_name('repair_cycle.py').read_bytes())
+            if self.recipe.get('repair_cycle') == 'scoped-feature-v1':
+                value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes())
+                    for name in ('feature_steps.py','feature_permission.py','feature_source.py','provider_routes.py',
+                        'feature_sessions.py','feature_execution.py','feature_preparation.py','schemas.py')})
             if self.recipe.get('verification_profile'):
                 value['helper_sha256']['verification_profiles.py'] = sha(Path(__file__).with_name('verification_profiles.py').read_bytes())
                 certificate = self.root/'controls-passed.json'

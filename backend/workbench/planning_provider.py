@@ -306,6 +306,9 @@ class LocalProvider:
         from workbench.feature_planning import FeatureDecomposition, INSTRUCTIONS as FEATURE_INSTRUCTIONS
         if schema is FeatureDecomposition or json.loads(encoded).get('original', {}).get('feature_planning'):
             instructions = FEATURE_INSTRUCTIONS
+        from workbench.feature_steps import StepScope, INSTRUCTIONS as STEP_INSTRUCTIONS
+        if schema is StepScope:
+            instructions = STEP_INSTRUCTIONS
         if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse):
             from workbench.bug_investigation import INSTRUCTIONS
             instructions = INSTRUCTIONS

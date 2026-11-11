@@ -64,11 +64,14 @@ def main():
         linked = task_execution.snapshot(c, **ref)
         route = provider_routes.run_selection(c, linked)
         approval = task_execution.require(c, proposal_decisions, ref['approval_id'])
-        policy = task_budget.permission(c, approval, admitting=True)
+        policy = task_budget.permission(c, approval, admitting=True, task_id=ref['task_id'],
+            offer_id=link.get('feature_offer_id'))
         if not route or real_execution.digest(policy) != link['task_budget_fingerprint']:
             raise ValueError('Approved Codex route or budget changed.')
     runtime = CodexRuntime(root / 'real-run', route, stopped)
     runtime.task_ref = ref
+    if link.get('feature_offer_id'):
+        runtime.feature_offer_id = link['feature_offer_id']
     package = package_for(root)
     if package is None:
         raise ValueError('An existing task-wide reservation is required.')

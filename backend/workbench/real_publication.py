@@ -99,7 +99,8 @@ def current(c, row, grant):
         .one()
     )
     try:
-        policy = task_budget.permission(c, approval)
+        policy = task_budget.permission(c, approval, task_id=linked['task']['id'],
+            offer_id=grant['snapshot']['task_budget']['offer']['id'])
     except ValueError, HTTPException:
         raise DeliveryHeld("The explicit task and delivery budget expired or changed.") from None
     if (
@@ -250,6 +251,8 @@ def _saved_policy(c, row, grant):
     """The earlier run supplies evidence only. Its publication hold remains intact."""
     _checked(c, row, grant)
     saved = grant["snapshot"].get("task_budget") or {}
+    if saved.get('feature_task_id'):
+        raise DeliveryHeld('Feature steps are delivered together after combined verification, never as separate drafts.')
     linked = grant["snapshot"]["workflow_task"]
     approval = c.execute(
         select(proposal_decisions).where(proposal_decisions.c.id == linked["approval"]["id"])

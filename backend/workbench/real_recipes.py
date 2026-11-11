@@ -76,7 +76,10 @@ def validate(spec):
     if 'verification_profile' in spec:
         from workbench.verification_profiles import validate_recipe
         validate_recipe(spec)
-        if 'repair_cycle' in spec:
+        if spec.get('repair_cycle') == 'scoped-feature-v1':
+            from workbench.feature_steps import validate_spec
+            validate_spec(spec)
+        elif 'repair_cycle' in spec:
             from workbench import bug_intent
             from workbench.repair_cycle import enabled,oracle
             intent=bug_intent.Intent.model_validate(spec.get('approved_intent'))

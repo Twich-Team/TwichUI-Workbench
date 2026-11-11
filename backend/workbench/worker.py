@@ -14,6 +14,7 @@ from workbench.db import applications, commands, engine_for, tasks, write_transa
 from workbench.service import now, version
 from workbench import (
     planning_worker,
+    feature_execution,
     verification,
     admission,
     implementation,
@@ -91,7 +92,8 @@ def process_one(engine, crash=None):
     return True
 
 
-def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, planning_adapter=None):
+def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, planning_adapter=None,
+         *, feature_provision=None, session_adapter=None):
     """One production worker iteration; injectable controlled adapters are internal only."""
     if stop_event is not None and stop_event.is_set():
         return False
@@ -99,8 +101,9 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
     if recover_one(engine):
         return True
     from workbench.work_controls import read as work_status
+    session_options = dict(advance=session_adapter) if session_adapter is not None else {}
     if work_status(engine).paused:
-        return task_sessions.process_one(engine, stop_event=stop_event, resume_only=True)
+        return task_sessions.process_one(engine, stop_event=stop_event, resume_only=True, **session_options)
     from workbench.preparation_resources import process_one as recover_storage
     if recover_storage(engine):
         return True
@@ -115,8 +118,11 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
         or draft_delivery.advance(engine, stop_event=stop_event)
         or task_sessions.queue_one(engine)
         or recover_local_repair(engine)
-        or task_sessions.process_one(engine, stop_event=stop_event)
+        or task_sessions.process_one(engine, stop_event=stop_event, **session_options)
         or real_execution.process_one(engine, runtime=runtime, stop_event=stop_event)
+        or feature_execution.apply_one(engine)
+        or feature_execution.advance(engine, adapter=planning_adapter,
+            provision=feature_provision, stop_event=stop_event)
         or planning_worker.apply_one(engine)
         or planning_worker.process_one(engine, stop_event=stop_event, adapter=planning_adapter)
         or trusted_preparation.process_one(engine, stop_event=stop_event)

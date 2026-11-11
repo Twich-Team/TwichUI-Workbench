@@ -67,11 +67,12 @@ def store(root):
                 raise ValueError('Connected task store requires existing0010/0011/0012/0013/0014; never migrate it here')
             ref = linked['task']
             pinned = snapshot(c, ref['intake_id'],ref['task_id'],ref['approval_id'])
-            if pinned['approval']['payload'].get('run_budget'):
+            if pinned['approval']['payload'].get('run_budget') or pinned['approval']['payload'].get('feature_run'):
                 from workbench.task_budget import permission
                 from workbench.db import proposal_decisions
                 approved = c.execute(select(proposal_decisions).where(proposal_decisions.c.id==ref['approval_id'])).mappings().one()
-                budget = permission(c, approved, admitting=True)
+                budget = permission(c, approved, admitting=True, task_id=ref['task_id'],
+                    offer_id=linked.get('feature_offer_id'))
                 if job.digest(budget)!=linked.get('task_budget_fingerprint'):
                     raise ValueError('Selected task budget differs from the workflow link')
             elif pinned['decomposition']['payload']['owner_provenance']['authorization_sha256'] != linked['authorization_sha256']:
@@ -232,10 +233,15 @@ def attempt(root, private, instruction, stop_event=None):
         if linked and runtime.recipe:
             from workbench import task_budget
             runtime.task_ref = linked['task']
+            if linked.get('feature_offer_id'):
+                runtime.feature_offer_id = linked['feature_offer_id']
             if not task_budget.authorize_one(engine,runtime):
                 raise ValueError('Current explicit task budget did not authorize the selected runtime')
             with engine.connect() as c:
-                grant = dict(c.execute(select(job.grants).where(job.grants.c.snapshot['task_budget']['decision_id'].as_string()==linked['task']['approval_id'])).mappings().one())
+                query = select(job.grants).where(job.grants.c.snapshot['task_budget']['decision_id'].as_string()==linked['task']['approval_id'])
+                if linked.get('feature_offer_id'):
+                    query = query.where(job.grants.c.snapshot['task_budget']['offer']['id'].as_string()==linked['feature_offer_id'])
+                grant = dict(c.execute(query).mappings().one())
         else:
             grant = job.issue(engine, instruction.read_text(), str(instruction.resolve()), runtime,
                               **({'task':linked['task']} if linked else {}))

@@ -17,7 +17,8 @@ import stat
 import tempfile
 import time
 
-from sqlalchemy import select
+from sqlalchemy import select, or_, and_
+from fastapi import HTTPException
 
 from workbench.db import (intakes, planning_jobs, model_attempts, task_sessions,
                           real_execution_requests, write_transaction)
@@ -300,9 +301,24 @@ def planning_demand(engine, *, eligible=False):
             intakes.c.payload['local_planning'].as_string().in_(
                 ['qwen-once','qwen-with-codex-fallback','codex-with-local-fallback']),
             intakes.c.payload['supported_task'].as_string().is_(None))).mappings().all()
-        return [r['id'] for r in rows if not eligible or r['status']=='running' or
+        demand = [r['id'] for r in rows if not eligible or r['status']=='running' or
             (r['kind']=='decomposition' and r['job_revision']==r['revision'] and r['payload'].get('feature_base')) or
             (r['job_revision']>r['revision'] and r['payload'].get('local_planning_receipt'))]
+        from workbench.db import proposal_decisions
+        from workbench.feature_permission import validate
+        for job in c.execute(select(planning_jobs).where(planning_jobs.c.kind=='feature_execution',
+                planning_jobs.c.status.in_(['queued','running']))).mappings():
+            if job['payload'].get('phase') not in {'prepare_scopes','preparing_scope'}:
+                continue
+            approval=c.execute(select(proposal_decisions).where(
+                proposal_decisions.c.id==job['payload'].get('feature_decision_id'))).mappings().first()
+            try:
+                permission=validate(c,approval)
+                if permission['scope']['provider']=='local':
+                    demand.append(job['intake_id'])
+            except (ValueError,OSError,KeyError,TypeError,HTTPException):
+                pass
+        return list(dict.fromkeys(demand))
 
 
 def reconcile(engine):
@@ -314,7 +330,10 @@ def reconcile(engine):
     demand = planning_demand(engine,eligible=True)
     with engine.connect() as c:
         execution_pending = c.execute(select(task_sessions.c.id).where(
-            task_sessions.c.status.in_(['pending','active','waiting_recovery']))).first()
+            task_sessions.c.status.in_(['pending','active','waiting_recovery']),
+            or_(task_sessions.c.snapshot['feature_parent'].as_boolean().is_not(True),
+                and_(task_sessions.c.state['feature_slot'].as_string().is_not(None),
+                    task_sessions.c.state['feature_slot_result'].as_string().is_(None))))).first()
         execution_pending = execution_pending or c.execute(select(real_execution_requests.c.id).where(
             real_execution_requests.c.status.in_(['pending','running','checking','cancel_requested']))).first()
     if execution_pending:

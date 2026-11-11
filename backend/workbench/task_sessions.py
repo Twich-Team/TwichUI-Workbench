@@ -15,7 +15,7 @@ import subprocess
 from uuid import UUID
 
 from fastapi import HTTPException
-from sqlalchemy import select, inspect
+from sqlalchemy import select, inspect, or_, and_
 from workbench.db import (
     task_sessions as sessions,
     proposal_decisions,
@@ -187,6 +187,7 @@ def _config(engine, row):
             or value["task_budget_fingerprint"] != row["snapshot"]["budget_fingerprint"]
             or value["started_at"] != row["snapshot"]["started_at"]
             or value["deadline"] != row["snapshot"]["deadline"]
+            or value.get('feature_offer_id') != row['snapshot'].get('feature_offer_id')
         ):
             raise ValueError("Saved session identity differs from its original decision")
         return (
@@ -207,7 +208,8 @@ def _config(engine, row):
             .mappings()
             .one()
         )
-        policy = task_budget.permission(c, approval)
+        policy = task_budget.permission(c, approval, task_id=ref['task_id'],
+            offer_id=row['snapshot'].get('feature_offer_id'))
         task_execution.snapshot(c, **ref)
     if execution.digest(policy) != row["snapshot"]["budget_fingerprint"]:
         raise ValueError("The approved task budget changed")
@@ -236,7 +238,7 @@ def _config(engine, row):
     durable(package_root / "BUDGET_BASELINE.json", json.dumps(budget, sort_keys=True).encode())
     instruction = dict(
         source="Actual saved owner scope-and-run command in Workbench, not generated chat text",
-        decision_id=row["id"],
+        decision_id=ref['approval_id'],
         payload=approval["payload"],
         scope=approval["snapshot"],
     )
@@ -270,6 +272,8 @@ def _config(engine, row):
         total_limit_proof_sha256=config["total_limit_proof_sha256"],
         allow_publication=policy["budget"]["publication"] == "draft-pr",
     )
+    if policy.get('feature_task_id'):
+        value['feature_offer_id'] = policy['offer']['id']
     target = package_root / "session.json"
     durable(target, json.dumps(value, sort_keys=True).encode())
     target.chmod(0o600)
@@ -277,6 +281,9 @@ def _config(engine, row):
 
 
 def _result(engine, row, status, message, state):
+    if row.get('_feature_parent_id'):
+        from workbench.feature_sessions import record_result
+        return record_result(engine, row, status, message, state)
     with write_transaction(engine) as c:
         actual = c.execute(select(sessions).where(sessions.c.id == row["id"])).mappings().one()
         if actual["state"].get("owner") != row["state"].get("owner"):
@@ -402,6 +409,9 @@ def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
             c.execute(
                 select(sessions)
                 .where(sessions.c.status.in_(ACTIVE - {"pending"} if resume_only else ACTIVE))
+                .where(or_(sessions.c.snapshot['feature_parent'].as_boolean().is_not(True),
+                    and_(sessions.c.state['feature_slot'].as_string().is_not(None),
+                        sessions.c.state['feature_slot_result'].as_string().is_(None))))
                 .order_by(sessions.c.created_at, sessions.c.id)
                 .limit(1)
             )
@@ -432,6 +442,11 @@ def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
                     message="Preparing an isolated workspace and running readiness checks.",
                 )
             )
+    lifecycle_id = row['id']
+    if row['snapshot'].get('feature_parent'):
+        from workbench.feature_sessions import projection
+        row = projection(row)
+        state = dict(row['state'])
     cancelled = threading.Event()
     done = threading.Event()
 
@@ -442,7 +457,7 @@ def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
                 return
             with engine.connect() as c:
                 value = c.execute(
-                    select(sessions.c.state).where(sessions.c.id == row["id"])
+                    select(sessions.c.state).where(sessions.c.id == lifecycle_id)
                 ).scalar()
             if value.get("cancel_requested"):
                 cancelled.set()
@@ -456,7 +471,7 @@ def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
         value = json.loads(cfg.read_text())
         root = Path(value["run_root"])
         if row["state"].get("cancel_requested"):
-            _propagate_stop(engine, row["id"], row["state"]["stop_command"])
+            _propagate_stop(engine, lifecycle_id, row["state"]["stop_command"])
         # A restarted worker waits for the original trusted preparation child.
         # Its log is a durable launch intent; never launch a duplicate if child
         # ownership is still being recorded. Failed readiness grants no inference.
@@ -588,7 +603,14 @@ def public_view(c, task_id):
         .first()
     )
     if not row:
-        return None
+        item = c.execute(select(backlog_items).where(backlog_items.c.id == task_id)).mappings().first()
+        if item:
+            parent = c.execute(select(sessions).where(sessions.c.task_id == 'intake-'+item['intake_id'],
+                sessions.c.snapshot['feature_parent'].as_boolean().is_(True))).mappings().first()
+            if parent and parent['state'].get('feature_slot',{}).get('task_id') == task_id:
+                row = parent
+        if not row:
+            return None
     return dict(
         id=row["id"],
         status=row["status"],
@@ -633,16 +655,17 @@ def cancel(engine, identity, command_id):
 def _propagate_stop(engine, decision_id, command_id):
     """Stop only this session's existing request, including after worker restart."""
     with engine.connect() as c:
+        session = c.execute(select(sessions).where(sessions.c.id == decision_id)).mappings().first()
+        offer_id = session['snapshot'].get('feature_offer_id') if session else None
+        actual_decision = session['snapshot']['task']['approval_id'] if offer_id else decision_id
+        query = select(execution.requests.c.id).join(execution.grants,
+            execution.requests.c.grant_id == execution.grants.c.id).where(
+            execution.grants.c.snapshot['task_budget']['decision_id'].as_string() == actual_decision,
+            execution.requests.c.status.in_(['pending','running','checking']))
+        if offer_id:
+            query = query.where(execution.grants.c.snapshot['task_budget']['offer']['id'].as_string() == offer_id)
         selected = (
-            c.execute(
-                select(execution.requests.c.id)
-                .join(execution.grants, execution.requests.c.grant_id == execution.grants.c.id)
-                .where(
-                    execution.grants.c.snapshot["task_budget"]["decision_id"].as_string()
-                    == decision_id,
-                    execution.requests.c.status.in_(["pending", "running", "checking"]),
-                )
-            )
+            c.execute(query)
             .scalars()
             .all()
         )

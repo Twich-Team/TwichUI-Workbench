@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator, model_validator
 from workbench.bug_evidence import BugEvidence
 from workbench.bug_intent import Intent as BugIntent
 from workbench.regression_evidence import BehavioralPreparation
@@ -379,6 +379,61 @@ class TaskBudget(StrictModel):
 
 
 
+class FeatureBudget(StrictModel):
+    version: Literal[1] = 1
+    overall_seconds: Literal[21600] = 21600
+    max_steps: Literal[6] = 6
+    scope_attempts_per_step: Literal[3] = 3
+    scope_request_seconds: Literal[120] = 120
+    scope_completion_tokens: Literal[2600] = 2600
+    implementation_attempts_per_step: Literal[3] = 3
+    per_attempt_seconds: Literal[5400] = 5400
+    per_attempt_tokens: Literal[24000] = 24000
+    per_attempt_turns: Literal[20] = 20
+    child_publication: Literal['hold'] = 'hold'
+    implementation_fallback: Literal[False] = False
+
+
+class FeatureRunInput(StrictModel):
+    command_id: UUID
+    binding: str = Field(pattern=r'^[a-f0-9]{64}$')
+
+
+
+class FeatureGraphBinding(StrictModel):
+    task_id: str = Field(min_length=1, max_length=240)
+    binding: str = Field(pattern=r'^[a-f0-9]{64}$')
+    dependencies: list[str] = Field(max_length=6)
+
+
+class FeatureScopeBinding(StrictModel):
+    intake_id: UUID
+    proposal_id: UUID
+    scope_approval_id: UUID
+    scope_binding: str = Field(pattern=r'^[a-f0-9]{64}$')
+    original_binding: str = Field(pattern=r'^[a-f0-9]{64}$')
+    revision: int = Field(ge=1)
+    scope_revision: int = Field(ge=0)
+    feature_base: str = Field(pattern=r'^[a-f0-9]{40}$')
+    plan_binding: str = Field(pattern=r'^[a-f0-9]{64}$')
+    graph: list[FeatureGraphBinding] = Field(min_length=1, max_length=6)
+    provider: Literal['local', 'codex']
+    route: dict[str, JsonValue]
+
+
+class FeatureRunPermission(StrictModel):
+    scope: FeatureScopeBinding
+    budget: FeatureBudget
+    maximum_generated_tokens: int = Field(ge=1, le=478800)
+    expires_at: str = Field(max_length=64)
+
+
+class BrowserFeatureProvenance(StrictModel):
+    actor: Literal['owner']
+    purpose: Literal['browser-feature-run-v1']
+    command_id: UUID
+
+
 class TaskRunApprovalInput(StrictModel):
     command_id: UUID
     scope_approval_id: UUID
@@ -428,12 +483,14 @@ class ExecutionContinuationView(StrictModel):
     authoring_mode: Literal['explicit-current-session'] | None = Field(default=None, exclude_if=lambda value: value is None)
     scope_approval_id: UUID
     scope_binding: str = Field(pattern=r'^[a-f0-9]{64}$')
-    owner_provenance: OwnerInstructionProvenance | BrowserApprovalProvenance
+    owner_provenance: OwnerInstructionProvenance | BrowserApprovalProvenance | BrowserFeatureProvenance
     continuation_id: str = Field(default='', max_length=200)
     operational_controls: LocalRepairControls | None = Field(default=None, exclude_if=lambda value: value is None)
 
 
 class StoredProposalDecisionPayload(ProposalDecisionInput):
+    feature_browser_command: FeatureRunInput | None = Field(default=None, exclude_if=lambda value: value is None)
+    feature_run: FeatureRunPermission | None = Field(default=None, exclude_if=lambda value: value is None)
     # Output only. Public commands still use ProposalDecisionInput and reject it.
     execution_continuation: ExecutionContinuationView | None = Field(default=None, exclude_if=lambda value: value is None)
 
@@ -545,7 +602,7 @@ class PlanningJobView(StrictModel):
     operation_kind: Literal['scope_binding'] | None = Field(default=None, exclude_if=lambda value: value is None)
     diagnostics: dict[str, str | int | float] = {}
     id: str
-    kind: Literal['planning', 'decomposition', 'behavioral_preparation']
+    kind: Literal['planning', 'decomposition', 'behavioral_preparation', 'feature_execution']
     revision: int
     status: Literal['queued', 'running', 'completed', 'failed']
     attempts: int
