@@ -61,3 +61,19 @@ This uses the runner's [existing mirror configuration](https://github.com/action
 and APT's [documented priority metadata](https://manpages.ubuntu.com/manpages/noble/man1/apt-transport-mirror.1.html).
 No Workbench-host network, administrator or model policy was changed. A successful
 exact-source hosted run remains required before private installation.
+
+The official-archive preference attempt43040222333 also failed setup with DNS
+failure for archive.ubuntu.com. Final CI setup prefers [MIT's Ubuntu mirror](https://mirrors.mit.edu/),
+first verifying its Noble InRelease with the runner's existing Ubuntu archive
+keyring, then using normal signed APT acquisition with official archives as
+fallbacks. Local retrieval/signature verification passed; security-pocket GET200.
+No new trust key, unsigned package allowance, host DNS or system policy change.
+
+Final responsive review keeps the overview after core workflow in DOM and phone
+focus order. Desktop uses the ordinary aligned grid and a calm equal-height idle
+attention panel. Three focused browser checks include actual Tab order as well as
+320px/200% title width. Actual pixels and all12visual comparisons are checked again.
+
+The final focus-order layout also passes the copied real-store walkthrough with
+all12desktop/phone/enlarged-text geometry cases, no writes/errors and unchanged
+saved AI policy. Final frontend54 and visual12 checks pass.

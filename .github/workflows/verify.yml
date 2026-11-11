@@ -18,15 +18,20 @@ jobs:
       - run: python -m venv .venv
       - run: .venv/bin/pip install -r requirements.lock
       - run: npm ci
-      - name: Use official Ubuntu HTTPS archives for runner dependencies
-        # The image's Azure-first mirror failed DNS resolution on fresh runners.
-        # Retain apt signature verification, suites and keys; only prefer the
-        # existing official HTTPS mirrors inside this disposable CI machine.
+      - name: Use signed Ubuntu mirrors for runner dependencies
+        # Ubuntu's archive domains failed DNS resolution on fresh runners.
+        # Verify the mirror with the existing Ubuntu archive keyring, then keep
+        # apt's signatures, suites, keys and dependency requirements unchanged.
         run: |
+          mirror_release="${RUNNER_TEMP}/workbench-ubuntu-InRelease"
+          curl --fail --location --retry 2 --connect-timeout 10 --max-time 30 \
+            https://mirrors.mit.edu/ubuntu/dists/noble/InRelease -o "$mirror_release"
+          gpgv --keyring /usr/share/keyrings/ubuntu-archive-keyring.gpg "$mirror_release"
           test -f /etc/apt/apt-mirrors.txt
           sudo tee /etc/apt/apt-mirrors.txt > /dev/null <<'MIRRORS'
-          https://archive.ubuntu.com/ubuntu/	priority:1
-          https://security.ubuntu.com/ubuntu/	priority:2
+          https://mirrors.mit.edu/ubuntu/	priority:1
+          https://archive.ubuntu.com/ubuntu/	priority:2
+          https://security.ubuntu.com/ubuntu/	priority:3
           MIRRORS
       - run: npx playwright install --with-deps chromium
       - name: Install the Lua test runtime and reference fonts
