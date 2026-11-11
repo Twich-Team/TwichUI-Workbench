@@ -90,3 +90,22 @@ pass/failure and refuse a receipt for another checkout. No application test or
 expected screenshot was changed. The initial reporter syntax error was found
 before tests started and corrected; actual shard execution and JSON reporting
 then passed. Hosted timing is pending; no speedup is claimed before measurement.
+
+## First hosted measurement and exposed test race
+
+Run43071395042 completed in7m46s but **failed** release acceptance: all2253backend
+checks (11existing skips),58frontend checks and128browser checks (3existing skips)
+passed; one of12visual checks failed. Its captured page already showed the empty
+workspace when the test tried to click Try again. Removing the failed route allowed
+the real1500ms background poll to recover before that manual action. This is a
+test synchronization race, not a screenshot difference or an application failure.
+The final verify job correctly failed and emitted no release acceptance artifact.
+This failed run is not included in a successful-run performance median.
+
+The repair installs Playwright's browser clock before navigation, pauses polling
+while the failed-state screenshot and recovery fixture are prepared, then resumes
+immediately after the original Try again click. Original loading/error/empty
+assertions, screenshot expectations, timeouts and retries remain unchanged. Three
+fresh local repetitions and the full12-check visual suite passed. Static, generated
+contracts, build and schema checks also passed. Updated full hosted verification
+must pass before this checkpoint is accepted.

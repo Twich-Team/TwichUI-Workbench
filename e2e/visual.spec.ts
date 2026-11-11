@@ -27,6 +27,7 @@ for (const width of [1440, 1024, 768, 390, 320]) {
 }
 
 test('loading, failed and empty states', async ({ page }, info) => {
+  await page.clock.install();
   let release: () => void = () => {};
   const hold = new Promise<void>(resolve => { release = resolve; });
   await page.route('**/api/tasks', async route => { await hold; await route.continue(); });
@@ -39,10 +40,14 @@ test('loading, failed and empty states', async ({ page }, info) => {
   await page.route('**/api/tasks', route => route.abort('failed'));
   await page.reload();
   await expect(page.getByText('Your work couldn’t be loaded.')).toBeVisible();
+  // Hold automatic polling while preparing manual recovery. Otherwise a poll
+  // can recover as soon as the failed route is removed, before Try again clicks.
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
   await capture(page, info, 'failed');
   await page.unroute('**/api/tasks');
   fixture('empty');
   await page.getByRole('button', { name: 'Try again' }).click();
+  await page.clock.resume();
   await expect(page.getByText('All clear for now.')).toBeVisible();
   await capture(page, info, 'empty'); await overflow(page);
 });
