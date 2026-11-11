@@ -1,13 +1,15 @@
-Last updated November 10, 2026.
+Last updated November 11, 2026.
 
-The private app runs a8c43cb. Supported Lua bug and test requests can reach checked changes and authorized draft pull requests.
+Following the Project Working Philosophy, the supported Lua repair/test workflow now reaches checked changes and authorized draft pull requests.
 
-The real-Qwen vendor repair is draft PR 10. The saved map coverage result was submitted from the browser as draft PR 11. Both contain the exact checked changes. [Vendor repair](https://github.com/Twich-Team/TwichUI/pull/10), [map coverage](https://github.com/Twich-Team/TwichUI/pull/11).
+The private app runs a8c43cb. Results show the vendor repair as draft PR 10 and map coverage as draft PR 11. Both reuse saved real-Qwen results and contain the exact checked changes. Vendor delivery used the app’s delivery command. Map coverage was submitted from the installed browser. [Vendor repair](https://github.com/Twich-Team/TwichUI/pull/10), [map coverage](https://github.com/Twich-Team/TwichUI/pull/11).
 
-Desktop and phone Results show the actual PR links. Pause holds new work while already-running work can finish safely. Reload, restart and an independent restore preserved the complete history. Work is resumed.
+Pause/resume is installed. Started work may finish safely during pause. Work is resumed. Desktop/phone layouts, reload, restart and independent history restore passed.
 
-Lost-response recovery, stale-result refusal, automatic new-result delivery and in-flight pause recovery passed controlled tests. The browser publication used real GitHub.
+The installed release and updated tests passed full hosted verification. Draft delivery, Results links, pause/resume and test changes are committed and pushed.
 
-In-game behavior and physical phone/Safari operation remain unverified. Broader features remain on the roadmap. Next is the prepared Phase B Results hierarchy milestone.
+Lost-response recovery, stale-result refusal, automatic new-result delivery and in-flight pause recovery have controlled-test evidence.
 
-The installed release passed full hosted verification. Test-only concurrency hardening is being checked separately. No owner decision is needed for the supported workflow. The owner retains merging.
+Physical phone/Safari and in-game behavior remain unverified. Broader capabilities remain on the roadmap. Next is the prepared Phase B Results hierarchy milestone, preserving the approved theme.
+
+No blocker or owner decision is pending for the supported workflow. Both PRs remain drafts. The owner retains merging.

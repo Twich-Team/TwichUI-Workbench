@@ -1,4 +1,4 @@
-# Installed browser draft delivery and pause — November 10, 2026
+# Installed browser draft delivery and pause — November 11, 2026
 
 Following the Project Working Philosophy, the requested supported bug/test
 request-to-draft workflow is demonstrated. The private preview runs
@@ -78,8 +78,19 @@ a bounded SQLite lock refusal as unexpected. A held-writer fault reproduced
 the baseline failure. The test now retries only busy/locked errors within a
 fixed deadline, forces one actual contention event and retains exactly-one
 command/application and revision assertions. All 50 review/recovery/contention
-checks pass. Production lock deadlines are unchanged. The test checkpoint is
-being verified separately from the already verified installed release.
+checks pass. Production lock deadlines are unchanged. Final test checkpoint
+**a4a4f8a** passed full hosted verification
+[run 42949183821](https://github.com/Twich-Team/TwichUI-Workbench/actions/runs/42949183821),
+with 2194 backend checks (11 skipped), 40 frontend checks, 117 Chromium checks
+(three skipped), and 12 visual comparisons. Its application code matches the
+installed a8c43cb release. Later closeout edits are documentation only.
+
+Final read-only checks confirmed all four enabled services active, all 633
+rows unchanged, work resumed, and both exact PRs still open drafts. The worker
+normally lives in its delegated `/main` child cgroup. The administrative
+exact-parent process probe refuses that child. Direct PID/UID/cgroup checks,
+unit state and inherited parent network filters verify the actual worker.
+No service or administrative safeguard was changed for this observation.
 
 The screenshot references changed for the truthful footer and draft-publication
 copy. Actual desktop diff and phone images were reviewed. The same reviewed

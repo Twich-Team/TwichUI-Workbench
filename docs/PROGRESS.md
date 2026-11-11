@@ -7825,3 +7825,25 @@ and a single revision increment. The product's transaction deadline is
 unchanged. All50review/recovery/contention tests and lint pass. This checkpoint
 changes tests and documentation only, requiring no new installed application.
 Private concurrent-baseline fault/log/proof retain the reproduction.
+
+
+## November 11 — supported workflow verified and closeout recorded
+
+Following the Project Working Philosophy, installed a8c43cb/deployment 105
+and final test checkpoint a4a4f8a both passed complete hosted verification.
+Final run 42949183821 passed 2194 backend checks with 11 skips, 40 frontend,
+117 Chromium with three skips, and all 12 visual comparisons. Application
+paths are identical between the installed release and that test checkpoint.
+The later closeout changes documentation only.
+
+Read-only closeout confirmed the same 633-row history, resumed work, four
+active enabled services and both exact open draft PRs. The delegated worker's
+expected /main child is verified directly with inherited parent filters after
+the administrative exact-parent process probe refused it. No boundary changed.
+Both existing Qwen results remain intact and publication used zero new model
+calls. Original run approvals and holds remain historical records. Both PRs
+are attached to the owner chat. Current Status, Phase A assessment and the
+prepared Phase B Results hierarchy retain the actual acceptance boundaries.
+Game behavior, physical phone/Safari, automatic fresh-result publication and
+in-flight pause retain their recorded evidence limits. No owner decision is
+pending for the supported workflow. The owner retains merging.
