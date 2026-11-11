@@ -1,22 +1,30 @@
-# Active CI performance optimization — November 11, 2026
+# CI performance delivered; next separate product milestone — November 11, 2026
 
 Following the Project Working Philosophy, UI/cleanup delivery remains complete
 at private1e848a7/deployment110. The final documentation checkpointcfec47e also
 passed full hosted43064461091; both release and closeout are verified. The owner
 then supplied the additional CI performance assignment (attached request), now
-recorded in [measured investigation](CI_PERFORMANCE_20261111.md). No live service,
+completed in [measured investigation](CI_PERFORMANCE_20261111.md). No live service,
 legacy scheduling, authorization or saved data change is involved.
 
-Initial measured successes take approximately29minutes, mostly serial backend
-and browser tests, not Chromium setup. First increment implements isolated
-backend2/browser4hosted partitions, cached locked setup, one shared build, better
-reports and a strict finalverifyreceipt requiring every suite. Local checks,
-CI safety tests, complete collection unions and a real browser shard pass.
-Next: push/measure updated full hosted verification, compare coverage/counts and
-actual wall/runner time, repair genuine failures, then add fast documentation
-feedback that never authorizes release and measure another comparable full run.
-Keep current private110and all recovery stores untouched. No owner action needed.
-Do not launch Feature Workshop or legacy cutover during this engineering request.
+Implemented isolated backend2/browser4hosted partitions, cached locked setup,
+one shared build, better reports and a strict finalverifyreceipt requiring every
+suite. Full43073228929at362b84e passed8m38s and43074816594at9850c40passed7m19s;
+median7m59s versus29m21s. Both2253backend/11existing skips,58frontend,
+128browser/3existing skips and12visual passed. Downloaded backend artifacts prove
+all127files/2264unique cases once;18added CI safety checks preserve full acceptance.
+The exposed automatic-refresh/manual-retry visual race was repaired with controlled
+browser time, retaining assertions/screenshots/retries. Failed43071395042never
+received acceptance and is excluded from successful medians. Aggregate runner time
+increases about22%; there is no spending/billing or new infrastructure change.
+
+Known report-only pushes now get fast documentation feedback; all unknown paths,
+authority documents, PRs and manual full runs retain complete checks. Fast feedback
+cannot authorize installation of its commit. The final report-only checkpoint
+uses that path; full9850c40acceptance remains distinct. No application cutover for
+CI-only changes: keep private110at1e848a7and all recovery stores untouched.
+No owner action needed. Feature Workshop is next as a separate product milestone;
+legacy replacement/cutover remains a separately verified authorized roadmap item.
 
 ---
 

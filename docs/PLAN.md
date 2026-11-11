@@ -1,14 +1,16 @@
-# Current engineering milestone: faster trustworthy CI — November 11, 2026
+# Delivered engineering milestone: faster trustworthy CI — November 11, 2026
 
 UI/cleanup/private110delivery and its full source/closeout checks are complete.
-Implement the owner's connected CI performance request: measure recent successes,
-failures/retries; safely parallelize isolated suites; retain locked/signed setup,
-full coverage and fail-closed release gates; compare hosted durations/counts;
-provide fast feedback separately from mandatory full milestone acceptance.
-First implementation is ready for hosted measurement. Target5–10minutes where
-safe, never weaken checks to meet the target. Preserve private110and all data.
-[Baseline and implementation](CI_PERFORMANCE_20261111.md). Continue the campaign
-through verification/reporting; Feature Workshop and legacy cutover remain later.
+The owner's connected CI performance request is complete. Isolated backend/browser
+partitions, cached locked setup, one build and a strict full gate reduce the
+successful median from29m21s to7m59s across two accepted runs. Every original check,
+signed dependency protection and independent fixture migration remains;18CI safety
+tests are added. Fast report feedback cannot substitute for full acceptance.
+[Measured comparison, cost tradeoff and evidence](CI_PERFORMANCE_20261111.md).
+Private110/1e848a7and all data/rollback are unchanged; no app deployment is needed
+for CI-only changes. Finish report-only feedback, then close this assignment.
+Feature Workshop remains the next separate product milestone; do not begin a broad
+Feature Workshop or legacy-cutover campaign merely to continue generating work.
 
 ---
 

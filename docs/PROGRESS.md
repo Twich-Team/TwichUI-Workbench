@@ -1,3 +1,28 @@
+## November 11, 2026 — CI performance delivered
+
+Full hosted43073228929/362b84e and43074816594/9850c40passed in8m38s/7m19s;
+two-sample median7m59s versus three-sample baseline29m21s. All2253backend checks
+(11existing skips),58frontend,128browser (3existing skips),12visual and finalverify
+passed. The18extra backend cases protect partition completeness and fail-closed
+exact-commit acceptance. Downloaded backend artifacts prove127files/2264unique cases
+exactly once; ZIP digests and acceptance inventory match hosted metadata.
+
+Parallel VM isolation retains serial workers and original fixtures/migrations.
+Cached locked setup and one build remain; package signature/integrity checks stay.
+The first parallel run's visual retry/poll race was diagnosed from its snapshot
+and trace, repaired with controlled browser time and retested3times plus all12
+visual checks. Assertions/screenshots/timeouts/retries are preserved. Its failed
+gate emitted no acceptance and its time is not used in successful medians.
+
+Report-only pushes get a distinct6-second documentation job; PRs/manual full runs,
+unknown paths and authority documents still receive all checks. Fast feedback cannot
+approve installation. Full-suite aggregate runner median rises from29m18s to35m44s
+(about22%) while wall time falls about73%; no new infrastructure or billing change.
+See [stage timings and sample limits](CI_PERFORMANCE_20261111.md). Private110/1e848,
+all saved data, rollback and live model/legacy services are unchanged. No new model
+task or consequential publication occurred. No owner action; Feature Workshop next
+as a separate product milestone, legacy retirement only after authorized cutover.
+
 ## November 11, 2026 — CI performance first increment
 
 The owner added measured CI optimization after private110delivery. Latest release

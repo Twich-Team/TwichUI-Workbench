@@ -6,6 +6,11 @@ work changes development verification, not the installed app or legacy services.
 Keep every required test, assertion, independent check, isolation rule and full
 release decision. No paid model request, new runner service or billing change.
 
+**Completed:** full hosted verification passed at362b84e and9850c40. The two
+successful optimized runs have a7m59s median, compared with29m21s previously.
+The detailed comparison and limits are below. Private build1e848a7/deployment110
+remains installed; CI-only changes do not require an application cutover.
+
 ## Measured baseline
 
 Three comparable recent successful runs (43057614742,43049281501,43042759499) took
@@ -54,7 +59,8 @@ Private raw run/job/step timestamps and logs are retained under.local/ci-perform
   ports and resets cannot interfere across runners. Visual checks run separately.
 - Preserve complete source-based test inventories. Local collection proves the
   backend partitions form an exact disjoint union; browser partitions cover all
-  131cases exactly once. No test, assertion, expected screenshot or retry changed.
+  131cases exactly once. No test removed, assertion weakened, expected screenshot
+  changed or retry added.
 - Keep the existing final `verify` check as a fail-closed aggregate. Any failed,
   cancelled, missing or skipped required group prevents a full-release receipt.
   Fast/partial feedback cannot authorize deployment. Every matrix member matters.
@@ -86,7 +92,7 @@ across different source/merge inputs. Current private110stays unchanged.
 Local first-increment checks passed: static/contracts/build/schema,18CI gate tests,
 exact backend/browser collection unions and one real browser shard (42passed,
 2existing skips). The added CI tests also exercise a real controlled subprocess
-pass/failure and refuse a receipt for another checkout. No application test or
+pass/failure and refuse a receipt for another checkout. No application assertion or
 expected screenshot was changed. The initial reporter syntax error was found
 before tests started and corrected; actual shard execution and JSON reporting
 then passed. Hosted timing is pending; no speedup is claimed before measurement.
@@ -141,3 +147,60 @@ Creation17:58:14 to final job completion18:06:52 is **8m38s**. This is the first
 successful optimized sample; the next checkpoint measures another complete run
 before reporting a median. The slower backend partition is now the critical path;
 neither browser setup nor screenshots dominate. Private110remains unchanged.
+
+## Accepted comparison
+
+| Full successful run | Commit | Creation → final gate | Aggregate runner time |
+| --- | --- | --- | --- |
+| [43073228929](https://github.com/Twich-Team/TwichUI-Workbench/actions/runs/43073228929) | 362b84e | 8m38s | 36m56s |
+| [43074816594](https://github.com/Twich-Team/TwichUI-Workbench/actions/runs/43074816594) | 9850c40 | 7m19s | 34m32s |
+| Optimized median, two samples | | **7m59s** | **35m44s** |
+| Baseline median, three samples | | **29m21s** | **29m18s** |
+
+Wall time is workflow creation to the final job's completion, rather than GitHub's
+later metadata update. Initial runner queue was3seconds in each optimized run;
+dependent jobs generally started2–3seconds after creation. Final aggregation adds
+8–11seconds. Both complete runs passed2253backend checks with11existing skips,
+58frontend checks,128browser checks with3existing skips, and12visual checks.
+The backend increase is18new CI safety checks; all original cases remain.
+
+| Stage | Baseline median | Optimized median | Interpretation |
+| --- | --- | --- | --- |
+| Build/contracts/schema | 13s | 13s | Same checks and one transferred build |
+| Backend command | 11m18s, including frontend | 5m54s, slowest backend partition | Frontend now runs separately in9s |
+| Browser command | 15m50s | 4m24s, slowest browser shard | Four isolated serial workers |
+| Full visual comparison | 46s | 46s | All12checks and original screenshots |
+| Artifact upload | 10s, one job | 1–5s per job | Uploads overlap; same14-day evidence retention |
+
+These stages overlap, so their savings must not be added. Overall median wait fell
+by21m23s, approximately73%. Parallelism increases aggregate runner time by about
+6m26s/22%; this is a latency improvement, not a claim of lower billed usage. No
+larger/self-hosted runner, paid model call, billing setting or infrastructure service
+was added. This small sample demonstrates the target, not a guaranteed service level.
+
+Both pip and npm download caches hit on the accepted runs. Locked environment
+creation and installation still run every time. Total setup was25s for checks,
+30–53s for backend runners and44–85s for browser/visual runners, including their OS
+packages. Browser binary caching is still not justified by those measurements.
+The existing signed mirror protection remains. The earlier failed parallel run
+is excluded from the successful median and its error/trace evidence is preserved.
+
+Downloaded first-success backend artifacts independently prove an exact disjoint
+127-file union,2264unique cases and2253passes/11skips. Their ZIP digests match the
+GitHub artifact metadata. The full acceptance receipt matches the exact checkout
+and inventory hash; the second full gate records the same inventory and its own
+exact commit. Original browser collection partitions also cover all131cases once.
+No new skip, weakened assertion, snapshot update or automatic test retry was added.
+
+Backend fixture/setup and real controlled workflow tests now dominate the critical
+path; the slowest recorded individual cases were ordinary-request orchestration
+checks around12–13seconds. Keep their migrations, recovery checks and isolation.
+The target is met without database-template caching, shared browser workers or a
+timing-weighted scheduling layer. Further complexity is not justified now.
+
+The checks job provides full build/frontend feedback in55–57seconds. The new
+documentation workflow passed on the mixed checkpoint in6seconds of job time.
+A final report-only push verifies its selection without launching another full
+suite. That feedback never changes the full9850c40acceptance decision and cannot
+authorize deployment of a different commit. Current private110and rollback109,
+all saved history, credentials, model policy and live legacy scheduling stay intact.
