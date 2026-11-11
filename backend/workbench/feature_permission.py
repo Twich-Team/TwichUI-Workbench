@@ -82,27 +82,65 @@ def offer(engine, identity):
             +budget['implementation_attempts_per_step']*budget['per_attempt_tokens']))
 
 
+def stop(engine, identity, decision_id, command_id):
+    """Stop the actual parent, including its brief pending-admission window."""
+    from workbench.db import task_sessions as sessions
+    with write_transaction(engine) as c:
+        row = intake.require(c, proposal_decisions, decision_id)
+        if row['intake_id'] != identity or not row['payload'].get('feature_run'):
+            raise HTTPException(404, 'Feature run not found.')
+        job = c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'feature_execution',
+            planning_jobs.c.payload['feature_decision_id'].as_string() == decision_id)).mappings().one()
+        previous = job['payload'].get('feature_stop_command')
+        if previous:
+            if previous != command_id:
+                raise HTTPException(409, 'Another stop request is already saved.')
+            return dict(id=decision_id, status='cancelled')
+        if row['status'] == 'pending':
+            message = 'Feature stopped before admission. No implementation started.'
+            c.execute(proposal_decisions.update().where(proposal_decisions.c.id == decision_id).values(
+                status='rejected', finished_at=intake.now(), message=message))
+            c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
+                status='failed', finished_at=intake.now(), message=message,
+                payload={**job['payload'], 'phase':'held', 'feature_stop_command':command_id}))
+            return dict(id=decision_id, status='cancelled')
+        if not c.execute(select(sessions.c.id).where(sessions.c.id == decision_id)).first():
+            raise HTTPException(409, 'This run has finished. Its saved history remains available.')
+    return task_sessions.cancel(engine, decision_id, command_id)
+
+
+def _prior(c, identity, command):
+    prior = c.execute(select(proposal_decisions).where(proposal_decisions.c.id == command['command_id'])).mappings().first()
+    if prior:
+        if prior['intake_id'] != identity or prior['payload'].get('feature_browser_command') != command:
+            raise HTTPException(409, 'This command is already saved for different work.')
+        return intake.receipt_view(prior)
+    return None
+
+
 def request(engine, identity, body):
     """Future browser ingress; inactive until the finite feature capability is installed."""
     command = dict(command_id=str(body.command_id),binding=body.binding)
     with engine.connect() as c:
-        prior = c.execute(select(proposal_decisions).where(proposal_decisions.c.id == command['command_id'])).mappings().first()
+        prior = _prior(c, identity, command)
         if prior:
-            if prior['intake_id'] != identity or prior['payload'].get('feature_browser_command') != command:
-                raise HTTPException(409, 'This command is already saved for different work.')
-            return intake.receipt_view(prior)
+            return prior
     try:
         selected = offer(engine, identity)
     except (ValueError, OSError):
+        # An identical overlapping command may commit between the first read
+        # and offer's competing-parent guard. Return only that exact receipt.
+        with engine.connect() as c:
+            prior = _prior(c, identity, command)
+            if prior:
+                return prior
         raise HTTPException(409, 'Feature implementation is unavailable or this plan changed. Refresh the feature before allowing work.') from None
     if selected['binding'] != body.binding:
         raise HTTPException(409, 'The feature scope, graph or saved AI changed. Refresh the complete feature before allowing work.')
     with write_transaction(engine) as c:
-        prior = c.execute(select(proposal_decisions).where(proposal_decisions.c.id == command['command_id'])).mappings().first()
+        prior = _prior(c, identity, command)
         if prior:
-            if prior['intake_id'] != identity or prior['payload'].get('feature_browser_command') != command:
-                raise HTTPException(409, 'This command is already saved for different work.')
-            return intake.receipt_view(prior)
+            return prior
         try:
             current = scope(c, identity)
         except (ValueError, HTTPException):

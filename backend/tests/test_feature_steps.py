@@ -17,12 +17,18 @@ from test_everyday import installed as installed
 from test_verification_profiles import PRODUCTION, TEST
 
 
-def prepared_parent(client, headers, store, **changes):
+def prepared_parent(client, headers, store, *, browser=False, **changes):
     identity, _ = ready(client, headers, store, **changes)
     enable()
     selected = feature_permission.offer(store, identity)
     body = request(selected)
-    feature_permission.request(store, identity, body)
+    if browser:
+        public = client.get('/api/features/'+identity+'/run-offer').json()['offer']
+        assert public['binding'] == body.binding
+        response = client.post('/api/features/'+identity+'/run', headers=headers, json=body.model_dump(mode='json'))
+        assert response.status_code == 200, response.text
+    else:
+        feature_permission.request(store, identity, body)
     assert feature_execution.apply_one(store)
     first = next(t['task_id'] for t in selected['scope']['graph'] if not t['dependencies'])
     second = next(t['task_id'] for t in selected['scope']['graph'] if t['dependencies'])

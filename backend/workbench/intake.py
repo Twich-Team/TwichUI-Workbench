@@ -641,7 +641,10 @@ def validate_approval(connection, receipt):
     binding = receipt['binding']
     if continuation and receipt['payload'].get('feature_run'):
         from workbench.feature_permission import validate
-        validate(connection, receipt, active=False)
+        try:
+            validate(connection, receipt, active=False)
+        except (ValueError, KeyError, TypeError):
+            raise HTTPException(409, 'The feature run is pending, stopped, or differs from its approved scope.') from None
         parent = require(connection, proposal_decisions, continuation['scope_approval_id'])
         return validate_approval(connection, parent)
     if continuation:

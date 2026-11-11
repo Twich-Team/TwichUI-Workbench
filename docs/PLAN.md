@@ -1,3 +1,13 @@
+# November 11 — continue from tested parent execution into combined result
+
+The uninstalled parent API/browser sequence and settled failure renewal now work
+with controlled coding/telemetry and actual Lua checks. Finish affected checks and
+a corrected exact hosted gate; earlier67full gate failed a now-repaired duplicate
+command race. Keep installed114and the real713-row store unchanged. Next connect
+independent original-source feature checks, the complete combined patch and one
+coherent delivery through existing owners, then protected references/simulator/
+visual acceptance and actual installed Qwen demonstration. Continue after saving.
+
 # November 11 — continue connected feature delivery
 
 FW1/FW2 installed114/044f521; the same real Qwen map-zoom request has5valid

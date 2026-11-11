@@ -44,6 +44,50 @@ test('Feature Workshop grounded intake automatically plans connected steps',asyn
  const rows=await page.request.get('/api/intake').then(r=>r.json());expect(rows.total).toBe(1);
 });
 
+test('one browser feature decision runs two dependent steps and Stop prevents more work',async({page},info)=>{
+ test.setTimeout(90000);
+ test.skip(process.env.WORKBENCH_E2E_EVERYDAY!=='1','Uses the dedicated controlled everyday installation.');
+ fixture('feature-workshop-build-setup');
+ await page.goto('/features');
+ await page.getByRole('link',{name:'Describe a feature',exact:true}).click();
+ await page.getByLabel('Description',{exact:true}).fill('Return nil for an absent name and anonymous for an empty name. Keep existing trimming and lowercase behavior for other names.');
+ await page.getByLabel('Title Optional').fill('Handle absent and blank names safely');
+ await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
+ await page.getByRole('button',{name:'Use my preferred AI settings',exact:true}).click();
+ await page.getByRole('button',{name:'Plan feature',exact:true}).click();
+ await expect(page).toHaveURL(/\/features\/[a-f0-9-]{36}/);
+ const identity=new URL(page.url()).pathname.split('/').at(-1)!;
+ fixture('feature-workshop-build-tick');fixture('feature-workshop-build-tick');
+ await page.reload();await page.getByRole('link',{name:'Review plan or question',exact:true}).click();
+ await page.getByRole('button',{name:'Approve plan',exact:true}).click();
+ fixture('feature-workshop-build-tick');
+ await page.goto('/features/'+identity);
+ const consent=page.getByLabel('Build this reviewed feature within these limits.');
+ await expect(consent).toBeVisible();
+ await expect(page.getByRole('button',{name:'Build reviewed feature',exact:true})).toBeDisabled();
+ await consent.check();await page.getByRole('button',{name:'Build reviewed feature',exact:true}).dblclick();
+ await expect(page.getByRole('button',{name:'Stop this feature',exact:true})).toBeVisible();
+ await page.reload();await expect(page.getByRole('button',{name:'Stop this feature',exact:true})).toBeVisible();
+ fixture('feature-workshop-run-tick'); // Admit the one actual parent.
+ for(let step=0;step<2;step++){
+  for(let phase=0;phase<5;phase++)fixture('feature-workshop-run-tick');
+  await page.reload();await expect(page.getByText(`${step+1} of 2 checked`,{exact:true})).toBeVisible();
+ }
+ for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
+  await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await overflow(page);await capture(page,info,`feature-connected-steps-${width}-${font}`,{keepInCompact:true});
+ }
+ const result=await page.request.get('/api/features/'+identity).then(r=>r.json());
+ expect(result.completed_steps).toBe(2);expect(result.integrated_verification).toBe('not_recorded');
+ expect(result.intake.decisions).toHaveLength(2);expect(result.steps[1].task.dependencies).toEqual([result.steps[0].task.id]);
+ expect(result.steps.every((step:{verified:boolean})=>step.verified)).toBeTruthy();
+ expect(result.state).not.toBe('completed');
+ await page.getByRole('button',{name:'Stop this feature',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Feature stopped or stopping',exact:true})).toBeVisible();
+ await page.reload();await expect(page.getByRole('button',{name:'Stop this feature',exact:true})).toHaveCount(0);
+ expect((await page.request.get('/api/features/'+identity).then(r=>r.json())).run.cancel_requested).toBeTruthy();
+});
+
 test('Feature Workshop retains its parent plan and real worker decomposition through reload',async({page},info)=>{
  await page.goto('/intake/new?kind=feature');
  await page.getByLabel('Description',{exact:true}).fill('Preserve my guide selection when I reload the addon.');

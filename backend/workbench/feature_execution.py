@@ -86,6 +86,8 @@ def _prepared(engine, job, *, provision=None, stop_event=None):
     if everyday.enabled():
         everyday.require_room(everyday.configuration(engine))
     saved = job['payload']['current_step_scope']
+    attempt = job['payload'].get('current_attempt', 1)
+    recovery = job['payload'].get('current_recovery')
     policy = trusted_preparation.configuration(engine)
     with engine.connect() as c:
         spec, oracle = feature_steps.recipe(c, saved, policy['identity'])
@@ -98,11 +100,12 @@ def _prepared(engine, job, *, provision=None, stop_event=None):
         if not (root/'preparation-completed.json').is_file():
             return _hold(engine, job, 'Step readiness was interrupted. Partial evidence remains; no model or duplicate checks will start without recovery.')
     else:
-        root = Path(policy['output_root'])/'feature-steps'/saved['decision_id']/digest(saved['task_id'])[:24]/'attempt-01'
+        root = Path(policy['output_root'])/'feature-steps'/saved['decision_id']/digest(saved['task_id'])[:24]/f'attempt-{attempt:02}'
         if root.exists():
             return _hold(engine, job, 'Step preparation output exists without its original journal claim. Retained evidence needs recovery; nothing was overwritten.')
         claim = dict(root=str(root), owner=real_execution.owner_identity(),
-            scope_binding=saved['scope_binding'], policy_binding=digest(policy))
+            scope_binding=saved['scope_binding'], policy_binding=digest(policy),
+            attempt=attempt, recovery_binding=recovery['binding'] if recovery else None)
         with write_transaction(engine) as c:
             feature_steps.validate_scope(c, saved)
             current = intake.require(c, planning_jobs, job['id'])
@@ -116,13 +119,18 @@ def _prepared(engine, job, *, provision=None, stop_event=None):
         root.chmod(0o700)
         durable(root/'recipe.json', json.dumps(spec,sort_keys=True).encode())
         durable(root/'recipe-oracle.lua', oracle.encode())
+        if recovery:
+            durable(root/'feature-recovery.json', json.dumps(recovery,sort_keys=True).encode())
+            (root/'feature-recovery.json').chmod(0o600)
         runtime = Runtime(root, stop_event=stop_event)
         (provision or task_session.provision)(runtime, dict(control_patches={}))
     runtime = Runtime(root)
     if (claim['scope_binding'] != saved['scope_binding'] or claim['policy_binding'] != digest(policy)
+            or claim.get('attempt',1) != attempt
+            or claim.get('recovery_binding') != (recovery['binding'] if recovery else None)
             or runtime.recipe != spec):
         raise ValueError('Feature preparation policy, source or scope changed.')
-    offered = feature_steps.register_offer(engine, runtime)
+    offered = feature_steps.register_offer(engine, runtime, attempt=attempt, recovery=recovery)
     with write_transaction(engine) as c:
         current = intake.require(c, planning_jobs, job['id'])
         feature_steps.validate_scope(c, saved)
@@ -132,6 +140,51 @@ def _prepared(engine, job, *, provision=None, stop_event=None):
             status='queued', payload={**current['payload'], 'phase':'queue_step', 'current_offer_id':offered['id']},
             message='Step readiness passed. Waiting for its existing protected implementation session.'))
     return True
+
+
+def resume_failed_step(engine):
+    """One fresh bounded slot after proof; never rerun the old grant or edits."""
+    from workbench import feature_attempts, feature_steps
+    from workbench.db import task_run_offers, task_sessions
+    from sqlalchemy.exc import NoResultFound, MultipleResultsFound
+    with engine.connect() as c:
+        jobs = list(c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'feature_execution',
+            planning_jobs.c.status == 'failed',
+            planning_jobs.c.payload['current_offer_id'].as_string().is_not(None))
+            .order_by(planning_jobs.c.created_at).limit(8)).mappings())
+    for job in jobs:
+        try:
+            with engine.connect() as c:
+                offered = dict(intake.require(c, task_run_offers, job['payload']['current_offer_id']))
+                feature_steps._offer(c, offered, active=True)
+                proof = feature_attempts.settled(c, offered)
+            with write_transaction(engine) as c:
+                current = intake.require(c, planning_jobs, job['id'])
+                approval, _ = feature_steps.parent(c, proof['decision_id'])
+                feature_attempts.validate(c, proof, offered['snapshot']['feature_step']['scope'],active=False)
+                parent = intake.require(c, task_sessions, approval['id'])
+                if (current['status'] != 'failed' or current['payload'] != job['payload']
+                        or parent['status'] != 'failed'
+                        or parent['state']['feature_slot']['snapshot']['feature_offer_id'] != offered['id']):
+                    continue
+                state = {**parent['state'], 'feature_history':parent['state'].get('feature_history',[])+[
+                    dict(slot=parent['state']['feature_slot'],result=parent['state']['feature_slot_result'],recovery=proof)]}
+                for key in ('feature_slot','feature_slot_result','feature_slot_state'):
+                    state.pop(key,None)
+                payload = {**current['payload'], 'phase':'scope_ready', 'current_attempt':proof['next_attempt'],
+                    'current_recovery':proof,'recovery_history':current['payload'].get('recovery_history',[])+[proof]}
+                for key in ('current_offer_id','feature_preparation_claim'):
+                    payload.pop(key,None)
+                c.execute(task_sessions.update().where(task_sessions.c.id == parent['id']).values(
+                    status='pending',finished_at=None,state=state,
+                    message='The previous attempt is safely settled. Preparing a fresh attempt from the last checked source.'))
+                c.execute(planning_jobs.update().where(planning_jobs.c.id == current['id']).values(
+                    status='queued',finished_at=None,payload=payload,
+                    message='A fresh bounded step attempt will use the last checked source. The failed edits and usage remain saved.'))
+            return True
+        except (ValueError,OSError,HTTPException,KeyError,TypeError,NoResultFound,MultipleResultsFound):
+            continue  # Keep unsettled/exhausted work inspectable; no grant, replay or fabricated outcome.
+    return False
 
 
 def advance(engine, *, adapter=None, provision=None, stop_event=None):
@@ -145,6 +198,8 @@ def advance(engine, *, adapter=None, provision=None, stop_event=None):
     except (ValueError, OSError):
         return False
     if feature_preparation.recover_one(engine):
+        return True
+    if resume_failed_step(engine):
         return True
     with engine.connect() as c:
         row = c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'feature_execution',
@@ -227,6 +282,8 @@ def advance(engine, *, adapter=None, provision=None, stop_event=None):
                     'completed_steps':current['payload'].get('completed_steps',[])+[record]}
                 for key in ('current_offer_id','current_step_scope','feature_preparation_claim','feature_scope_claim'):
                     payload.pop(key,None)
+                payload.pop('current_attempt',None)
+                payload.pop('current_recovery',None)
                 state = {**actual['state'], 'feature_history':actual['state'].get('feature_history',[])+[
                     dict(slot=slot, result=outcome, checked=record)]}
                 for key in ('feature_slot','feature_slot_result','feature_slot_state'):

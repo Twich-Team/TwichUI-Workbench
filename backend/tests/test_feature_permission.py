@@ -81,6 +81,26 @@ def test_parent_command_is_explicit_idempotent_and_never_forges_step_approvals(
         assert not c.execute(select(real_execution_requests)).first()
 
 
+def test_identical_command_committed_between_initial_read_and_offer_returns_its_receipt(
+    client, headers, store, installed, monkeypatch,
+):
+    identity, _ = ready(client, headers, store)
+    enable()
+    original = feature_permission.offer
+    body = request(original(store, identity))
+    receipts = []
+    def overlap(engine, identity):
+        monkeypatch.setattr(feature_permission, 'offer', original)
+        receipts.append(feature_permission.request(engine, identity, body))
+        return original(engine, identity)  # The competing-parent guard now rejects.
+    monkeypatch.setattr(feature_permission, 'offer', overlap)
+    assert feature_permission.request(store, identity, body) == receipts[0]
+    with store.connect() as c:
+        assert len(c.execute(select(proposal_decisions)).all()) == 2
+        assert len(c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'feature_execution')).all()) == 1
+        assert not c.execute(select(real_execution_grants)).first()
+
+
 @pytest.mark.parametrize('fault',['tokens','fallback','expiry','graph','owner','snapshot'])
 def test_changed_parent_permission_cannot_be_admitted(client,headers,store,installed,fault):
     identity,_ = ready(client,headers,store)

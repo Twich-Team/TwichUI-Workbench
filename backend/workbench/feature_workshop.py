@@ -6,8 +6,8 @@ from pydantic import BaseModel
 from sqlalchemy import select
 
 from workbench import intake, task_execution, feature_recovery
-from workbench.db import intakes, proposals, planning_jobs
-from workbench.schemas import IntakeView, PlannedTaskView
+from workbench.db import intakes, proposals, planning_jobs, proposal_decisions, task_sessions
+from workbench.schemas import IntakeView, PlannedTaskView, FeatureBudget
 from workbench.feature_recovery import CorrectionOffer
 from workbench.service import now
 
@@ -21,6 +21,30 @@ class FeatureStep(BaseModel):
     message: str
     verified: bool = False
     execution: task_execution.TaskExecutionContext
+
+
+class FeatureRunOffer(BaseModel):
+    binding: str
+    budget: FeatureBudget
+    step_count: int
+    maximum_generated_tokens: int
+    provider: str
+    model: str
+
+
+class FeatureRunAvailability(BaseModel):
+    offer: FeatureRunOffer | None = None
+    message: str
+
+
+class FeatureRunView(BaseModel):
+    id: str
+    status: str
+    phase: str
+    message: str
+    can_stop: bool
+    cancel_requested: bool = False
+    expires_at: str
 
 
 class FeatureView(BaseModel):
@@ -40,6 +64,7 @@ class FeatureView(BaseModel):
     steps: list[FeatureStep]
     observed_at: str
     correction: CorrectionOffer | None = None
+    run: FeatureRunView | None = None
 
 
 class FeaturePage(BaseModel):
@@ -107,6 +132,7 @@ def view_in(c, identity):
     running = next((j for j in jobs if j['id'] in live_leases), None)
     pending = next((d for d in data['decisions'] if d['status'] == 'pending'), None)
     active_step = next((s for s in steps if s['state'] in {'working', 'checking', 'preparing'}), None)
+    actual_activity = bool(active_step or running)
     next_step = next((s for s in steps if not s['verified'] and s is not active_step), None)
     state, message, needs_owner = 'held', 'This feature is saved. Implementation has not started.', False
     if status == 'waiting_for_information':
@@ -138,16 +164,66 @@ def view_in(c, identity):
         waiting = next((j for j in reversed(jobs) if j['status']=='queued' and j['message'].startswith('Waiting for ')), None)
         if waiting:
             state, message = 'held', waiting['message']
+    parent = c.execute(select(proposal_decisions).where(proposal_decisions.c.intake_id == identity,
+        proposal_decisions.c.proposal_id == latest,
+        proposal_decisions.c.payload['feature_run'].as_string().is_not(None))).mappings().first()
+    run = None
+    if parent:
+        journal = c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'feature_execution',
+            planning_jobs.c.payload['feature_decision_id'].as_string() == parent['id'])).mappings().first()
+        session = c.execute(select(task_sessions).where(task_sessions.c.id == parent['id'])).mappings().first()
+        stopped = bool(session and session['state'].get('cancel_requested') or
+            journal and journal['payload'].get('feature_stop_command'))
+        from workbench.task_sessions import ACTIVE
+        run = dict(id=parent['id'], status=session['status'] if session else parent['status'],
+            phase=journal['payload'].get('phase','pending') if journal else 'held',
+            message=(session or journal or parent)['message'], cancel_requested=stopped,
+            can_stop=not stopped and (parent['status'] == 'pending' or bool(session and session['status'] in ACTIVE | {'held','failed'})),
+            expires_at=parent['payload']['feature_run']['expires_at'])
+        state, message, needs_owner = 'held', run['message'], False
+        if parent['status'] == 'pending':
+            message = 'Your feature run decision is saved and waiting to apply.'
+        elif active_step:
+            state = 'checking' if active_step['state'] == 'checking' else 'working'
+        elif running:
+            state = 'working'
+        elif session and session['status'] in ACTIVE and not stopped:
+            state = 'ready'
+        current_scope = journal['payload'].get('current_step_scope') if journal else None
+        if journal and journal['status'] == 'running' and run['phase'] == 'preparing_runtime':
+            from workbench.real_execution import alive
+            owner = (journal['payload'].get('feature_preparation_claim') or {}).get('owner')
+            if owner and alive(owner):
+                actual_activity, state = True, 'checking'
+        if not active_step and current_scope and not stopped:
+            active_step = next((s for s in steps if s['task']['id'] == current_scope['task_id']), None)
+            next_step = next((s for s in steps if not s['verified'] and s is not active_step), None)
     correction = feature_recovery.offer(c, row)
     if correction:
         message = 'The plan is saved, but its proposed steps did not pass the checks. Prepare corrected steps to continue.'
     return dict(id=identity, title=row['payload']['title'], objective=row['payload']['description'],
-        state=state, message=message, active=bool(active_step or running), needs_owner=needs_owner,
+        state=state, message=message, active=actual_activity, needs_owner=needs_owner,
         completed_steps=sum(s['verified'] for s in steps), total_steps=len(steps),
         current_step=active_step['task']['id'] if active_step else None,
         next_step=next_step['task']['id'] if next_step else None,
         intake=data, steps=steps, observed_at=now(),
-        correction=correction)
+        correction=correction, run=run)
+
+
+def run_offer(engine, identity):
+    from workbench import feature_permission
+    with engine.connect() as c:
+        row = intake.require(c, intakes, identity)
+        if not is_feature(row['payload']):
+            raise HTTPException(404, 'Feature not found.')
+    try:
+        selected = feature_permission.offer(engine, identity)
+        return dict(offer=dict(binding=selected['binding'], budget=selected['budget'],
+            step_count=selected['step_count'], maximum_generated_tokens=selected['maximum_generated_tokens'],
+            provider=selected['scope']['provider'], model=selected['scope']['route']['model']),
+            message='Build the reviewed steps in order using the saved AI. Checked work stays with this feature.')
+    except (ValueError, OSError, HTTPException):
+        return dict(offer=None, message='The feature has no available run decision. Its plan and saved work remain available.')
 
 
 def view(engine, identity):

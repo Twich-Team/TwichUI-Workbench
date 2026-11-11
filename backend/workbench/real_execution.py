@@ -119,6 +119,10 @@ def issue(engine, authorization, provenance, activation, *, task=None):
                 snapshot['task_budget'] = permission(c, approval, **selected)
                 if snapshot['task_budget']['offer']['snapshot']['specification']['contract'] != snapshot['contract']:
                     raise ValueError('Prepared runtime and approved recipe differ')
+                if snapshot['task_budget'].get('feature_task_id'):
+                    from workbench import feature_attempts
+                    feature_attempts.context(activation,
+                        snapshot['task_budget']['offer']['snapshot']['feature_step'].get('recovery'))
             if chosen != contract() and not snapshot.get('task_budget'):
                 raise ValueError('The new recipe requires an explicit task budget')
             row['binding'] = digest(snapshot)

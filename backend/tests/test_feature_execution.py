@@ -55,6 +55,7 @@ class ControlledCodingRuntime(Runtime):
         # Deterministic fixture coding responses, never app code or a real-addon
         # solution. The second response requires the first actual checked edit.
         if not self.feature_input:
+            assert 'return false end' not in text  # Failed attempt edits never become this input.
             text = text.replace('function(s) ', 'function(s) if s == nil then return nil end; ')
             addition = 'local ok, observed = pcall(normalize, nil)\nassert(ok and observed == nil)\n'
         else:
@@ -82,6 +83,9 @@ def controlled_slot(engine, config_path, stop_event=None):
     root.mkdir()
     durable(root/'recipe.json', json.dumps(template['recipe']).encode())
     durable(root/'recipe-oracle.lua', template['oracle'].encode())
+    if template.get('feature_recovery'):
+        durable(root/'feature-recovery.json', json.dumps(template['feature_recovery'],sort_keys=True).encode())
+        (root/'feature-recovery.json').chmod(0o600)
     runtime = ControlledCodingRuntime(root)
     controlled_readiness(runtime, template)
     runtime.task_ref = ref
@@ -96,31 +100,38 @@ def controlled_slot(engine, config_path, stop_event=None):
     task_session.finish(engine, config, 'verified', 'Controlled fixture has actual passing Lua checks.')
 
 
+def missing_names_plan(result, schema):
+    from workbench.schemas import PlanningOutput
+    if schema is PlanningOutput:
+        plan = result['proposal']
+        plan.update(summary='Handle absent and blank names without changing normal name cleanup.',
+            scope=['Return nil for an absent name without throwing.',
+                'Use anonymous for blank names while preserving normal cleanup and missing-input behavior.'],
+            behavior=['Absent names return nil.', 'Blank names return anonymous.',
+                'Other names retain whitespace trimming and lowercase normalization.'],
+            acceptance=['Absent input returns nil without an error.',
+                'Blank input returns anonymous and ordinary names retain existing normalization.'])
+    else:
+        result['tasks'][0].update(title='Handle missing input', purpose='Return nil safely for an absent name.',
+            acceptance=['Absent input returns nil without throwing and normal cleanup remains unchanged.'])
+        result['tasks'][1].update(title='Restore the blank-name default',
+            purpose='Return anonymous for blank names using the checked missing-input implementation.',
+            acceptance=['Blank input returns anonymous, missing input still returns nil, and normal cleanup remains unchanged.'])
+
+
+def missing_names_parent(client, headers, store):
+    from test_feature_planning import ControlledFeaturePlanner
+    return prepared_parent(client, headers, store,
+        browser=True,
+        planner=ControlledFeaturePlanner(mutate=missing_names_plan), title='Handle absent and blank names safely',
+        description='Return nil for an absent name and anonymous for an empty name. Keep existing trimming and lowercase behavior for other names.')
+
+
 def test_two_dependent_steps_use_one_parent_and_real_checked_source_with_no_child_prs(
     client, headers, store, installed, monkeypatch,
 ):
     monkeypatch.setattr(Runtime, 'check', controlled_check)
-    from test_feature_planning import ControlledFeaturePlanner
-    from workbench.schemas import PlanningOutput
-    def proposed_feature(result, schema):
-        if schema is PlanningOutput:
-            plan = result['proposal']
-            plan.update(summary='Handle absent and blank names without changing normal name cleanup.',
-                scope=['Return nil for an absent name without throwing.',
-                    'Use anonymous for blank names while preserving normal cleanup and missing-input behavior.'],
-                behavior=['Absent names return nil.', 'Blank names return anonymous.',
-                    'Other names retain whitespace trimming and lowercase normalization.'],
-                acceptance=['Absent input returns nil without an error.',
-                    'Blank input returns anonymous and ordinary names retain existing normalization.'])
-        else:
-            result['tasks'][0].update(title='Handle missing input', purpose='Return nil safely for an absent name.',
-                acceptance=['Absent input returns nil without throwing and normal cleanup remains unchanged.'])
-            result['tasks'][1].update(title='Restore the blank-name default',
-                purpose='Return anonymous for blank names using the checked missing-input implementation.',
-                acceptance=['Blank input returns anonymous, missing input still returns nil, and normal cleanup remains unchanged.'])
-    _, decision, first, second = prepared_parent(client, headers, store,
-        planner=ControlledFeaturePlanner(mutate=proposed_feature), title='Handle absent and blank names safely',
-        description='Return nil for an absent name and anonymous for an empty name. Keep existing trimming and lowercase behavior for other names.')
+    _, decision, first, second = missing_names_parent(client, headers, store)
     from workbench.regression_preparation import repository, git
     original, base, _ = repository()
     original_bytes = (original/PRODUCTION).read_bytes()

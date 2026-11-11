@@ -392,6 +392,9 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
         durable(real / "recipe-oracle.lua", oracle.encode())
         if template.get('repair_resume'):
             durable(real/'repair-resume.json',json.dumps(template['repair_resume'],sort_keys=True).encode())
+        if template.get('feature_recovery'):
+            durable(real/'feature-recovery.json',json.dumps(template['feature_recovery'],sort_keys=True).encode())
+            (real/'feature-recovery.json').chmod(0o600)
         runtime = Runtime(real)
         db = Path(engine.url.database)
         stat = db.stat()

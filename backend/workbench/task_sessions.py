@@ -631,10 +631,11 @@ def cancel(engine, identity, command_id):
             if state["stop_command"] != command_id:
                 raise HTTPException(409, "Another stop request is already saved")
             return dict(id=identity, status=row["status"])
-        if row["status"] not in ACTIVE:
+        feature_held = row['snapshot'].get('feature_parent') and row['status'] in {'held', 'failed'}
+        if row["status"] not in ACTIVE and not feature_held:
             raise HTTPException(409, "This task session has finished; its history is retained")
         state.update(cancel_requested=True, stop_command=command_id)
-        queued = row["status"] == "pending"
+        queued = row["status"] == "pending" or feature_held
         c.execute(
             sessions.update()
             .where(sessions.c.id == identity)
@@ -642,7 +643,8 @@ def cancel(engine, identity, command_id):
                 state=state,
                 status="cancelled" if queued else row["status"],
                 finished_at=execution.now() if queued else None,
-                message="Stopped before preparation. No model started."
+                message=("Feature stopped. Earlier work and usage are saved; no further step will start."
+                    if row['snapshot'].get('feature_parent') else "Stopped before preparation. No model started.")
                 if queued
                 else "Stopping this task. Waiting for owned work to settle and the server to be restored.",
             )

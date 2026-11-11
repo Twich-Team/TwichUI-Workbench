@@ -22,7 +22,7 @@ from workbench.real_execution import RunPage, StopRequest
 from workbench.task_execution import TaskExecutionContext
 from workbench.workspace_view import WorkspacePage
 from workbench import work_controls
-from workbench import feature_workshop, feature_recovery
+from workbench import feature_workshop, feature_recovery, feature_permission
 
 # Exact authorities only. The dedicated HTTPS service admits the configured home subnet.
 AUTHORITIES = {"127.0.0.1:8787", "localhost:8787", "127.0.0.1:5180", "localhost:5180",
@@ -115,6 +115,18 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     def correct_feature_steps(identity: str, body: feature_recovery.CorrectionInput):
         feature_recovery.request(app.state.engine, identity, body)
         return feature_workshop.view(app.state.engine, identity)
+
+    @app.get('/api/features/{identity}/run-offer', response_model=feature_workshop.FeatureRunAvailability)
+    def feature_run_offer(identity: str):
+        return feature_workshop.run_offer(app.state.engine, identity)
+
+    @app.post('/api/features/{identity}/run', response_model=ProposalReceipt, responses=errors)
+    def run_feature(identity: str, body: feature_permission.FeatureRunInput):
+        return feature_permission.request(app.state.engine, identity, body)
+
+    @app.post('/api/features/{identity}/runs/{decision_id}/stop', responses=errors)
+    def stop_feature(identity: str, decision_id: str, body: StopRequest):
+        return feature_permission.stop(app.state.engine, identity, decision_id, str(body.command_id))
 
     @app.post('/api/intake', response_model=IntakeView, responses=errors)
     def intake_submit(body: IntakeInput):

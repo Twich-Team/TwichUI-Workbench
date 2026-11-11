@@ -62,6 +62,7 @@ def main():
         "action",
         choices=[
             'feature-workshop-setup', 'feature-workshop-tick', 'feature-workshop-invalid-steps',
+            'feature-workshop-build-setup', 'feature-workshop-build-tick', 'feature-workshop-run-tick',
             "regression-planning",
             "reviewed-offer-setup", "reviewed-offer-plan", "reviewed-offer-prepare",
             "reviewed-offer-controller", "reviewed-offer-stale",
@@ -126,16 +127,37 @@ def main():
         if os.environ.get('WORKBENCH_E2E_EVERYDAY') != '1':
             raise SystemExit('Feature planning needs the explicitly controlled everyday browser fixture.')
         everyday_config(path)
-        if args.action == 'feature-workshop-setup':
+        if args.action in {'feature-workshop-setup','feature-workshop-build-setup'}:
             setup(path)
             advance(engine, path, 'automatic-setup')
             save_local_policy(engine, model=everyday.MODEL)
             policy = model_policy.read(engine)
             policy.test_fallback = 'off'
             model_policy.save(engine, policy, model_policy.CapabilityReport(executors=[]))
+            if args.action == 'feature-workshop-build-setup':
+                from test_feature_permission import enable
+                from workbench import task_sessions, task_session
+                task_sessions.ROOT = path.parent/'controlled-session-owner'
+                task_session.ROOT = task_sessions.ROOT
+                enable()
         else:
             os.environ['WORKBENCH_RESEARCH_ROOT'] = str(path.parent / 'reviewed-research/source')
             planner = ControlledFeaturePlanner()
+            if args.action in {'feature-workshop-build-tick','feature-workshop-run-tick'}:
+                from test_feature_execution import missing_names_plan, controlled_readiness, controlled_slot, controlled_check
+                from test_feature_preparation import ScopePlanner
+                from workbench import task_sessions, task_session
+                from workbench.real_workspace import Runtime
+                from unittest.mock import patch
+                task_sessions.ROOT = path.parent/'controlled-session-owner'
+                task_session.ROOT = task_sessions.ROOT
+                os.environ['WORKBENCH_PREPARATION_CONFIG'] = str(path.parent/'automatic-workflow/preparation.json')
+                if args.action == 'feature-workshop-run-tick':
+                    with patch.object(Runtime,'check',controlled_check):
+                        assert worker.tick(engine,planning_adapter=ScopePlanner(),
+                            feature_provision=controlled_readiness,session_adapter=controlled_slot)
+                    return
+                planner.mutate = missing_names_plan
             if args.action == 'feature-workshop-invalid-steps':
                 def incomplete(result, schema):
                     result['tasks'] = result['tasks'][:1]

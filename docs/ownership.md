@@ -1,3 +1,14 @@
+# November 11 — feature run ingress and fresh failed slots
+
+Public feature run commands bind the exact reviewed offer and create the existing
+parent decision/journal, never child approvals. Existing task_sessions owns Stop,
+including held/failed feature parents before renewal; a pending run stops atomically
+in its existing command/journal before a session exists. All original scope/run
+payloads remain immutable. feature_attempts verifies terminal native evidence,
+ledger/grant/kernel/controller cleanup before one fresh bounded slot. Old work and
+usage remain; only checked input crosses slots. No new store, scheduler or schema.
+Installation still has no feature-run capability; these are development owners.
+
 # November 11 — finite feature execution ownership (uninstalled development)
 
 A feature run is one actual parent proposal_decision and one existing task_session

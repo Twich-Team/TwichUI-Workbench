@@ -215,7 +215,16 @@ def _offer(c, row, *, active):
     if (saved['proposal_id'] != approval['proposal_id']
             or detail['parent_budget_binding'] != digest(permission)):
         raise ValueError('Feature offer belongs to a different parent budget.')
+    recovery = detail.get('recovery')
+    from workbench import feature_attempts
+    if recovery:
+        feature_attempts.validate(c, recovery, scope, active=active)
+        if detail['attempt'] != recovery['next_attempt']:
+            raise ValueError('Feature attempt slot differs from its settled recovery.')
+    elif detail['attempt'] != 1:
+        raise ValueError('Further feature attempts require a settled recovery record.')
     runtime = Runtime(saved['ready_preparation']['root'])
+    feature_attempts.context(runtime, recovery)
     if (runtime.recipe != saved['specification']
             or readiness(runtime) != saved['ready_preparation']['readiness']
             or runtime.recipe['approved_feature_scope'] != scope):
@@ -227,7 +236,7 @@ def _offer(c, row, *, active):
     return dict(row)
 
 
-def register_offer(engine, runtime, *, attempt=1):
+def register_offer(engine, runtime, *, attempt=1, recovery=None):
     """Worker-only preparation; one immutable offer per parent/task/attempt."""
     from workbench.real_workspace import Runtime
     from workbench.repair_cycle import readiness
@@ -247,6 +256,13 @@ def register_offer(engine, runtime, *, attempt=1):
         saved = dict(proposal_id=row['proposal_id'], specification=actual,
             ready_preparation=prepared, feature_step=dict(scope=scope, attempt=attempt,
                 parent_budget_binding=digest(permission)))
+        if recovery:
+            from workbench import feature_attempts
+            feature_attempts.validate(c, recovery, scope)
+            if attempt != recovery['next_attempt']:
+                raise ValueError('The fresh attempt differs from its settled recovery record.')
+            feature_attempts.context(runtime, recovery)
+            saved['feature_step']['recovery'] = recovery
         fingerprint = digest(saved)
         prior = c.execute(select(task_run_offers).where(
             task_run_offers.c.snapshot['feature_step']['scope']['decision_id'].as_string() == row['id'],
@@ -258,7 +274,7 @@ def register_offer(engine, runtime, *, attempt=1):
             return _offer(c, prior, active=True)
         # No skipped attempt slots; a failed prior attempt requires reconciliation
         # by the coordinator before the next slot is prepared.
-        if attempt != 1:
+        if attempt != 1 and not recovery:
             raise ValueError('Further feature attempts require a settled recovery record.')
         offered = dict(id=str(uuid4()), proposal_id=row['proposal_id'], fingerprint=fingerprint,
             snapshot=saved, created_at=intake.now())
@@ -285,10 +301,12 @@ def permission(c, approval, task_id, *, offer_id=None, require_current=True):
         raise ValueError('The exact feature task preparation is unavailable or ambiguous.')
     selected = _offer(c, rows[0], active=require_current)
     if require_current:
-        session = c.execute(select(task_sessions).where(
-            task_sessions.c.snapshot['feature_offer_id'].as_string() == selected['id'])).mappings().first()
+        session = c.execute(select(task_sessions).where(task_sessions.c.id == approval['id'])).mappings().first()
         if session and (session['state'].get('cancel_requested') or session['status'] in {'cancelled','expired'}):
             raise ValueError('This feature step was stopped or expired. Its saved outcome cannot be replayed.')
+        slot = (session or {}).get('state',{}).get('feature_slot')
+        if slot and slot['snapshot']['feature_offer_id'] != selected['id']:
+            raise ValueError('Another feature attempt owns the current parent slot; old inputs cannot dispatch.')
     end = min(datetime.fromisoformat(parent_permission['expires_at']),
         datetime.fromisoformat(selected['created_at']) + timedelta(seconds=parent_permission['budget']['per_attempt_seconds']))
     if require_current and datetime.now(timezone.utc) >= end:
@@ -310,6 +328,7 @@ def preparation_inputs(c, offered):
     root = owned(saved['ready_preparation']['root'])
     return dict(recipe=saved['specification'], oracle=(root/'recipe-oracle.lua').read_text(),
         baseline_source=str(root), control_patches={},
+        **(dict(feature_recovery=saved['feature_step']['recovery']) if saved['feature_step'].get('recovery') else {}),
         feature_input=saved['feature_step']['scope']['feature_input'])
 
 

@@ -1,3 +1,43 @@
+# November 11 — public parent decision, verified failed-step renewal (not installed)
+
+The development path now exposes one exact feature run offer/command and a single
+Stop control, using the existing decision, journal and session owners. Stop works
+before admission, before the first read-only scope, during owned work and while a
+failed/held parent could otherwise renew. Original scope approval and the run
+remain separate; no per-child human decisions are created. Immutable original run
+limits and saved primary AI are shown; fallback and child publication stay held.
+
+A fresh failed-step attempt requires actual terminal request/ledger/native outcome,
+revoked original grant, original process exit/no descendants, restored controller
+access, settled usage, unchanged evidence and remaining original parent limits.
+It starts from the original/last checked input, never failed edits. The new offer
+and runtime bind an exact retained recovery receipt; checker diagnostics are
+untrusted feedback. Unknown usage is preserved/reserved, never invented as zero.
+An owner Stop prevents later automatic renewal. No new schema or privilege grant.
+
+The ordinary browser journey passed with controlled model/confinement telemetry:
+request → source plan → actual scope review → one run decision → two dependent
+actual-Lua checked implementations → reload → Stop. Desktop1440/390phone/320with
+200% text screenshots inspected; evidence browser-bFJ4lO, fw3-public-browser-test.log
+in the private campaign root. This is NOT real Qwen/addon/game completion.
+58frontend tests and static/contracts/build/schema checks pass.32focused public/
+recovery/legacy-stop cases pass; all170affected feature/legacy-session/continuing-
+repair/delivery cases also pass (fw3-public-complete-affected-tests.log).
+
+The earlier67f26e65 full hosted43116187826 FAILED Backend1/2 and finalverify;
+other7jobs passed. Its concurrency test exposed an identical-command race between
+initial read and offer. Fixed by rereading only the exact saved command on offer
+rejection, with a deterministic overlap regression. Pending/rejected feature
+permissions now become canonical HTTP409 scope holds instead of crashing readers.
+Do not install67 or call its hosted run accepted. A corrected exact full gate is
+required for any later release.
+
+Installed remains114/044f521 and the real mapzoom feature remains5steps/0checked.
+No public run capability is enabled there. Current source still holds verification/
+delivery roles; connected combined independent checks and one coherent delivery
+remain the next engineering work. FW3 and the whole campaign are NOT complete.
+Continue without a routine owner renewal; preserve all original local doc edits.
+
 # November 11 — final cancellation guards before foundation checkpoint
 
 72focused cases pass after late-scope cancellation and stale-claim guards, including
