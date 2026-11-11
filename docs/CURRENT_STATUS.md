@@ -1,13 +1,13 @@
 Last updated November 11, 2026 (UTC).
 
-Private preview: https://10.0.0.9:9487. Installed build b3cb3f0, deployment 107.
+Private preview: https://10.0.0.9:9487. Installed build ef05eff, deployment 108.
 
-Two real Qwen requests reached checked results and draft PRs #10 and #11. Neither change is merged, installed or game-tested. These results and all 633 original records remain preserved.
+Phase B1–B6 are complete: crafted leather and bronze shell, clearer Dashboard, outcome-first Results, organized Backlog and task history, simpler task creation, and approachable AI Settings. Precise model, reasoning, fallback, frozen task preferences, technical evidence and usage charts remain available.
 
-Phase B is implemented in source: crafted leather shell, clearer Dashboard, outcome-first Results cards, organized Backlog, simpler task creation and approachable AI Settings. Model, reasoning, fallback, saved task preferences and interactive usage charts remain. Preview installation and final acceptance are still pending.
+Two real Qwen requests previously reached checked results and draft PRs #10 and #11. Neither addon change is merged, installed or game-tested. Phase B added no model calls or addon publications. Task creation and routing were verified with controlled tests; installed browser acceptance used saved records and unsent edits.
 
-Full local backend, frontend, browser and visual checks pass. Final outcome/reflow corrections have focused checks; hosted verification continues. Copied historical reconciliation preserves every original record and adds 41 evidence-bound history links, giving 11 coherent requests. It is not installed yet.
+All 633 original records are preserved. The schema marker was updated and supported historical grouping adds 41 history links, presenting 11 requests while retaining 38 failed or interrupted attempts.
 
-Next outcome: complete full local/hosted verification, install the checked Phase B build privately, and verify browser use, restart, restore and rollback. No owner decision is needed now. The administrator update works under its unchanged session and November 13 expiry.
+Local backend, frontend, browser and visual checks passed. Hosted verification passed for the installed source. Installed desktop, phone, keyboard and enlarged-text checks passed. Restart, independent restore, actual rollback to deployment 107 and return to 108 passed. The private preview and recovery stores are preserved.
 
-Feature Workshop, attachments, simulator comparisons and operation modes remain future work. Merging and in-game testing remain owner actions.
+Nothing blocks this delivery and no owner decision is needed. Next complete outcome: Feature Workshop parent features and dependent tasks with integrated verification, under a separate assignment. Attachments, simulator comparisons and advanced operation modes remain future work.

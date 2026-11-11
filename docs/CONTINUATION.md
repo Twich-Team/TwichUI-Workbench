@@ -1,3 +1,38 @@
+# Phase B installed and accepted — November 11, 2026
+
+Following the Project Working Philosophy, B1–B6 are complete in the running private
+preview https://10.0.0.9:9487: ef05eff / deployment108. Exact hosted run43021634726
+passed (b034a12/run43016774285 and ab7aa54/run43019863413 also passed). See
+[acceptance and recovery evidence](PHASE_B_ACCEPTANCE.md) and [Current Status](CURRENT_STATUS.md).
+Older pending-install/helper/campaign paragraphs below are historical checkpoints.
+
+Actual installed and post-restart browser walkthroughs pass, with no writes or
+model calls, unchanged policy, real PR10/11 links, optional model/effort, code/
+usage controls and36desktop/phone/enlarged-text geometry checks. The four services,
+private listeners, network guards, normal model access and port8765 remain verified.
+The campaign's temporary read-only9187 server is stopped.
+
+Supported copied-store migration/reconciliation is installed: schema0013,674rows,
+41links and11requests. All633original rows (27domain tables plus schema marker)
+are preserved; only the schema marker changes and41links are added. All51original
+intakes and38unsuccessful/interrupted history members remain accessible. Both app
+versions read all51originals from an independent installed-store restore unchanged.
+
+Actual rollback restored b3cb3f0/deployment107 with the original633-row fingerprint;
+return/restart restored108 with its exact674-row fingerprint. Both stores retained.
+Private receipts: ~/.local/share/TwichUI-Workbench/phase-b-20261111/outcome-ef05eff;
+browser captures/receipts: sibling installed108 and returned108 directories.
+The established rollback/return scripts require settled work and the existing
+session78 grant; recheck the current grant before any future transition. Do not
+rerun the helper upgrade, alter the session binding or reuse expired authority.
+
+No addon merge, game installation, paid request or extra publication occurred.
+Next product outcome is Feature Workshop parent/dependent tasks with integrated
+verification, under a separate assignment; do not launch another campaign now.
+Unrelated local administrative documentation edits and dependency links remain.
+
+---
+
 # Phase B final review checkpoint — November 11, 2026
 
 Following the Project Working Philosophy, the actual copied-store browser walk

@@ -1,3 +1,35 @@
+## November 11, 2026 — Phase B installed acceptance and recovery
+
+Following the Project Working Philosophy, completed B1–B6 at ef05eff/deployment108.
+The material shell, work/attention composition, outcome-first review, organized
+requests and progressive task/AI settings are visible in the installed application.
+Final exact hosted43021634726 passed; earlier43016774285/43019863413 passed.
+Local full2219backend/8skips,50frontend,125browser/3skips,12visual and2additional
+controlled bug/scope journeys passed; final corrections have focused and exact
+hosted coverage. Hosted final backend2217/11skips reflects its platform conditions.
+
+Installed108 and post-return108 browser walks pass with zero writes/errors,
+unchanged AI policy, both real draft PR links, technical/usage controls and36
+geometry checks each, including320px at200% text. Actual screenshots compared
+against baseline and approved reference. Wide desktop uses a separate attention
+column; phone stacks, and browser fonts differ from raster mockup lettering.
+
+The supported0013copied-store grouping is now installed. Every original domain
+row remains identical; original633rows retained,41links added,674rows total.
+11requests retain51original intakes and38failed/interrupted history members.
+Actual107rollback/108return, independent installed-store restore and old/current
+readers passed with unchanged fingerprints. Normal model access, four services,
+private network boundary and8765 remain. No grant/policy change or helper rerun.
+
+Retained failures: rollback's final seal check rejected a noncanonical path after
+restoration; canonicalizing the exact existing path completed proof without guard
+changes. Initial immediate post-restart browser response lacked workspace fields;
+subsequent directHTTP200 and the complete unmodified walkthrough passed. A private
+restore-reader script used attribute access on a dict; corrected access then both
+readers verified all51intakes. No application expectation or test guard was weakened.
+No new provider calls, addon publications, merges or game changes. Future Feature
+Workshop remains separately scoped. Full [acceptance](PHASE_B_ACCEPTANCE.md).
+
 ## November 11, 2026 — Phase B implementation checkpoint
 
 Following the Project Working Philosophy, replaced the broad operational layout
