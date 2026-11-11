@@ -9,7 +9,7 @@ import hashlib
 import json
 import re
 import time
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import uuid4
 
 from fastapi import HTTPException
@@ -33,7 +33,9 @@ INSTRUCTIONS = (
     'Do not invent files or APIs. Missing relevant code remains an explicit uncertainty. '
     'For decomposition, give coherent actionable steps covering the proposed scope, '
     'with concise titles, acceptance criteria and source_ids from supplied evidence. '
-    'Use stable task keys; hierarchy and dependency edges are separate. Related steps '
+    'Return flat actionable kind=task steps with parent=null; the saved feature is '
+    'their organizational parent. Verification and delivery are actionable steps too, '
+    'not milestone containers. Use stable task keys; dependency edges are separate. Related steps '
     'normally lead to one combined candidate, integrated checks and one draft PR, '
     'each subject to separate execution and publication authority. '
     'Use at most six actionable steps, with necessary dependency edges and no cycles. '
@@ -46,13 +48,15 @@ INSTRUCTIONS = (
 
 
 class FeatureTask(TaskSpec):
+    kind: Literal['task']
+    parent: None
     source_ids: Annotated[list[str], Field(min_length=1, max_length=12)]
     scope_indices: Annotated[list[int], Field(min_length=1, max_length=12,
         description='Zero-based proposal.scope indexes. Cover every index across actionable tasks, including preservation constraints.')]
 
 
 class FeatureDecomposition(StrictModel):
-    tasks: Annotated[list[FeatureTask], Field(min_length=1, max_length=16)]
+    tasks: Annotated[list[FeatureTask], Field(min_length=1, max_length=6)]
 
 
 def research(original, feedback=''):

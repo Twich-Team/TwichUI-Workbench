@@ -1,3 +1,93 @@
+## November 11 — real hierarchy error diagnosed; constrained step format ready
+
+Installed113/60dd4fe is fully accepted and preserved. Two supported same-parent
+corrections finished with complete local usage but both produced Empty milestone;
+zero tasks accepted. New bounded private responses are retained (unlike the initial
+unretained coverage response). No implementation or publication ran. Stop unchanged
+retries: model used a standalone verification milestone while the canonical graph
+requires milestone containers to have children.
+
+Fresh source restricts FeatureDecomposition to up to6 actionable kind=task steps,
+parent=null: the existing durable feature is their parent. Verification/delivery
+are actionable steps, not empty organizational containers. Typed provider grammar
+now matches this supported presentation and existing declared six-step prompt.
+All canonical scope/dependency/hierarchy checks remain; no output is normalized or
+manually repaired.38focused cases including wire-contract regression, static/
+contracts/schema/build and the ordinary rejected-response→same-parent correction
+browser journey pass. UI source/assets are unchanged. Checkpoint/push ONLY this
+format repair, excluding unfinished FW3 source; require exact full hosted acceptance.
+
+FW3 source remains in active checkout and private fw3-source-checkpoint (five new
+files plus tracked bridge diff). It is not part of this repair or installed113.
+Prior full2321backend/8skip+58frontend pass, final69guard cases pass. Parent
+permission/admission and checked source transfer are groundwork, not execution.
+Preserve all starting local document patches. Next install the format repair with
+fresh latest-store baseline and restore/rollback proof, then correct real5d62e6bc
+once through ordinary UI and continue FW3–FW7. Zero full Feature Workshop outcomes.
+
+## November 11 — repair installed113; real same-parent correction running
+
+Exact60dd4fe/full hosted43094955367attempt2 passed all9checks/finalverify after
+attempt1 failed GetSignedArtifactURL before tests ran. Kept failed receipts. Fresh
+frontend ZIP07feadb5 verified all26 prepared files; acceptance ZIPdb8dafc1 verified
+exactcommit. Installed113 seal54390b3a1f54af9238e6705b420d5d90575091d75a9bed661a7f06c41fa8870f.
+All697rows/52requests at4c7956aba486ad1cf1c64be26c1cd6bfa4f9eb6537d96613278aa5cf439290e6
+preserved. Both readers, independent restore, four-role restart, installed/returned
+1440/390/320px200% reads/reload/keyboard/no mutations and actual113→112→113 pass.
+Actual desktop viewport and phone inspected. Network/TLS/guards/normal model/8765pass.
+Current real source still matches its saved base. Used normal “Prepare steps again”
+once on5d62e6bc; same-parent correction is RUNNING, no completion claimed. Keep its
+newer store; old rollback fingerprint applies only before this correction.
+
+Separate UNCOMMITTED FW3 source now includes feature_permission.py, feature_execution.py,
+feature_source.py plus intake/planning_worker/worker/task_execution/real_execution
+bridges and tests. One parent command with fixed aggregate bounds, source/graph/AI
+binding and explicit capability; ordinary worker admits it without replanning,
+fake child approvals or model dispatch. Parent history survives expiry/capwithdrawal;
+actual activation remains held. Checked-source ancestry/real frozen proof/local-only
+Git gates are in place. Full local2321backend/8skip +58frontend pass. Subsequent
+malformed/foreign/active-journal defensive guards pass69focused cases. No runtime
+scope compiler, per-step feature offers/sessions, automatic implementation or parent
+integration/delivery exists yet. Source is NOT installed, and old authorizer gates
+remain. Do not call FW3 done. Private fw3-design-notes.txt updated; FW4 may use
+canonical immutable input metadata plus existing private artifacts without a new
+schema (investigate fw4-schema-free-option.txt; never misuse jobs as blob storage).
+
+Next: verify real correction, usage/model restoration and persistence; then finish
+FW3–FW7 under standing authority. Zero completed Feature Workshop implementations.
+
+## November 11 — hosted repair held; FW3 source handoff component underway
+
+Repair60dd4fe/full hosted43094955367 remains unaccepted: build steps through
+Complete job report success, but job conclusion remains null and seven backend/
+browser/visual groups remain queued; no finalverify receipt. Artifact13889179837
+has advertised digest7db68ca31ba3f0fa4f7bba21eb0eb0e04d29b59a6c3e192df05a7c582a451524,
+but CLI downloads returned502 and the connector timed out. Do not install, cancel
+this required full run or reuse4b5b8fe acceptance. Exact dormant60stage is prepared,
+610tracked files verified. Rehearsal reads all52saved requests and offers correction
+for real5d62e6bc without mutation. Fresh prior112 history697rows/schema0014/hash
+4c7956aba486ad1cf1c64be26c1cd6bfa4f9eb6537d96613278aa5cf439290e6.
+Normal model access verified after the real failure. Read-only installed112 browser
+still preserves original request/plan at1440/390/320px200%,reload,keyboard,no writes.
+New scripts installed-feature-current.cjs and correct-real-feature.cjs are prepared;
+correction has NOT been sent. Original planning consent may expire; the new correction
+command supplies its own distinct120s permission and never rewrites old consent.
+
+Independent FW3 engineering now has UNCOMMITTED feature_source.py and tests, plus
+changes to task_execution.py and real_execution.py. It assembles exact checked
+patches into isolated local commits using existing local commit reconciliation,
+with a credential-free fixed Git adapter, current frozen completion/ledger/scope
+validation, predecessor ancestry, exclusive writer and explicit integrated NOT RUN.
+Grant issuance can bind a validated feature_input; execution checks its exact
+source/base and every required ancestor. Old authorizer still refuses multiple/
+dependent tasks; there is NO parent coordinator, feature budget or active executor.
+75affected controlled source/bridge/handoff cases pass; clone tests demonstrate two
+source steps, not real feature implementation. Do NOT include this incomplete
+component in the sealed60dd4fe repair stage. Finish parent permission and sequential
+session ownership/independent checks before calling FW3 implemented. Detailed next
+engineering notes are private fw3-design-notes.txt. All starting local patches
+remain preserved. No new addon publication/game/legacy action or owner decision.
+
 ## November 11 — same-feature correction source ready for hosted acceptance
 
 The real plan is saved; its first step response failed coverage and remains held

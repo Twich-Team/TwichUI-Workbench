@@ -41,6 +41,28 @@ class ControlledFeaturePlanner:
         return result, expected_model, 'demo'
 
 
+def test_feature_wire_contract_requires_actionable_flat_steps_and_rejects_empty_containers():
+    from workbench.planning_response import wire_schema
+    schema = wire_schema(feature_planning.FeatureDecomposition)
+    task = schema['$defs']['FeatureTask']['properties']
+    assert task['kind']['const'] == 'task'
+    assert task['parent']['type'] == 'null'
+    assert schema['properties']['tasks']['maxItems'] == 6
+    # The real provider repeatedly used an empty milestone as a checking step.
+    # Constrain generation to supported steps; never silently convert that output
+    # or bypass the canonical hierarchy/coverage validator.
+    value = dict(tasks=[dict(key='verify', kind='milestone', parent=None,
+        title='Verify the requested behavior', purpose='Check the combined result.',
+        acceptance=['The requested behavior passes independent checks.'],
+        depends_on=[], scope_indices=[0], source_ids=['source-1'])])
+    with pytest.raises(ValueError):
+        feature_planning.FeatureDecomposition.model_validate(value)
+    value['tasks'][0]['kind'] = 'task'
+    parsed = feature_planning.validate_response(value,feature_planning.FeatureDecomposition,
+        dict(evidence=[dict(id='source-1')],proposal=dict(scope=['Verify the requested behavior.'])))
+    assert parsed['decomposition']['tasks'][0]['kind'] == 'task'
+
+
 def submit(client, headers, **changes):
     body = dict(request_id=str(uuid4()), kind='feature', requested_work='feature', feature_planning=True,
                 title='Remember the normalization preference', description='Save my chosen normalization setting and restore it on the next session.',
