@@ -21,6 +21,7 @@ from workbench.service import get_task, submit, task_view
 from workbench.real_execution import RunPage, StopRequest
 from workbench.task_execution import TaskExecutionContext
 from workbench.workspace_view import WorkspacePage
+from workbench import work_controls
 
 # Exact authorities only. The dedicated HTTPS service admits the configured home subnet.
 AUTHORITIES = {"127.0.0.1:8787", "localhost:8787", "127.0.0.1:5180", "localhost:5180",
@@ -232,6 +233,14 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
             raise HTTPException(422, 'Choose 1, 24 or 168 hours.')
         return monitoring.resources(app.state.resources_path, hours, source)
 
+    @app.get('/api/work-controls', response_model=work_controls.WorkControl)
+    def work_status():
+        return work_controls.read(app.state.engine)
+
+    @app.put('/api/work-controls', response_model=work_controls.WorkControl, responses=errors)
+    def save_work_status(body: work_controls.WorkControlInput):
+        return work_controls.save(app.state.engine, body)
+
     @app.get('/api/operating-policy', response_model=Policy)
     def operating_policy():
         return monitoring.policy(app.state.policy_path)
@@ -342,6 +351,19 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     def supported_task_catalog():
         from workbench.supported_tasks import catalog
         return catalog(app.state.engine)
+
+    from workbench import draft_delivery
+
+    @app.get('/api/real-executions/{identity}/draft-review')
+    def checked_draft_review(identity: str):
+        return draft_delivery.review(app.state.engine, identity)
+
+    @app.post('/api/real-executions/{identity}/draft-delivery', responses=errors)
+    def request_checked_draft(identity: str, body: draft_delivery.DraftRequest):
+        try:
+            return draft_delivery.request(app.state.engine, identity, body.binding)
+        except ValueError as error:
+            raise HTTPException(409, str(error)) from None
 
     @app.get('/api/real-executions/{identity}/delivery')
     def delivery_history(identity: str):

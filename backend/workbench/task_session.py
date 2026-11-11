@@ -613,6 +613,10 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
     )
     durable(directory / "activation.json", json.dumps(activation, sort_keys=True).encode())
     (directory / "activation.json").chmod(0o600)
+    if everyday.enabled():
+        from workbench import draft_delivery
+        real_publication.enqueue_one(engine, row["id"])
+        return draft_delivery.send(row["id"], stop_event)
     previous = os.environ.get("WORKBENCH_PUBLICATION_ROOT")
     try:
         os.environ["WORKBENCH_PUBLICATION_ROOT"] = str(directory)

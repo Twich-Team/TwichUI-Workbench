@@ -468,13 +468,22 @@ class PilotGitHub:
                     "--limit",
                     "2",
                     "--json",
-                    "url,isDraft,baseRefName,headRefName,headRefOid,state,body,isCrossRepository",
+                    "number,url,isDraft,baseRefName,headRefName,headRefOid,state,body,isCrossRepository",
                 ]
             )
         )
         if len(rows) > 1:
             raise DeliveryHeld("Multiple PRs found for this branch; no new PR.")
-        return rows[0] if rows else None
+        if not rows:
+            return None
+        number = rows[0].get("number")
+        if type(number) is not int or not 1 <= number <= 9999999999:
+            raise DeliveryHeld("The returned PR identity is invalid.")
+        rows[0]["baseRefOid"] = self._call([
+            "gh", "api", "repos/" + snapshot["repository"] + "/pulls/" + str(number),
+            "--jq", ".base.sha",
+        ])
+        return rows[0]
 
     def create_pr(self, snapshot, commit):
         body = self.root / ("body-" + snapshot["execution_id"] + ".md")
@@ -511,6 +520,7 @@ class PilotGitHub:
             and value.get("isCrossRepository") is False
             and value.get("state") == "OPEN"
             and value.get("baseRefName") == snapshot["base_branch"]
+            and value.get("baseRefOid") == snapshot["base"]
             and value.get("headRefName") == snapshot["branch"]
             and value.get("headRefOid") == commit
             and value.get("body") == snapshot["preview"]["body"]

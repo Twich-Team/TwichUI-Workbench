@@ -60,6 +60,22 @@ PR, merge or live addon changes. Keep task write scope separate from read-only
 investigation. Existing owner decisions remain valid without duplicate approval.
 Ask only for genuine product/access/spending/consequential boundaries.
 
+### Installed browser delivery and pause
+
+The installed work controls pause new admission and preserve queued requests.
+Already-running operations may finish safely. Resume requires its current saved
+revision. Model preference edits preserve the pause state.
+
+The owner standing draft direction is recorded in a private installation-bound
+`artifacts/draft-authority.json`. It contains the fixed repository/base branch,
+database identity, owner-instruction digest and automatic-delivery start time.
+It contains no credentials. Qualifying later checked results can queue draft
+delivery automatically. An earlier eligible held result can use Submit draft
+pull request from its Results page. The browser sends its exact review binding.
+The existing system worker asks the existing private connector to advance one
+canonical delivery step. This operation makes no model request. The source,
+approval, candidate, base and remote-identity checks remain mandatory.
+
 ### Separately approved delivery of an already-checked result
 
 For an installed release, use its Python environment and set `PYTHONPATH` to

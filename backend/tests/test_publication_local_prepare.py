@@ -122,3 +122,17 @@ def test_unrelated_partial_work_is_held_without_reset(prepared):
     with pytest.raises(DeliveryHeld, match="unrelated or partial"):
         adapter.prepare(snapshot, result)
     assert extra.read_text() == "keep me"
+
+
+def test_confirmed_draft_requires_the_checked_base_and_same_repository(prepared):
+    adapter, snapshot, _ = prepared
+    snapshot["preview"]["body"] = "Checked review summary"
+    commit = "c" * 40
+    value = dict(
+        isDraft=True, state="OPEN", isCrossRepository=False, baseRefName="main",
+        baseRefOid=snapshot["base"], headRefName=snapshot["branch"], headRefOid=commit,
+        body=snapshot["preview"]["body"], url="https://github.com/Twich-Team/TwichUI/pull/123",
+    )
+    assert adapter.valid_pr(snapshot, commit, value)
+    assert not adapter.valid_pr(snapshot, commit, {**value, "baseRefOid": "d" * 40})
+    assert not adapter.valid_pr(snapshot, commit, {**value, "isCrossRepository": True})

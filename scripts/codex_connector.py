@@ -126,6 +126,18 @@ def handle(connection, binary, credential, runtime, evidence_root=None):
         request = json.loads(raw)
         if not isinstance(request, dict):
             raise codex.Hold('protocol')
+        if request.get("operation") == "draft-delivery":
+            if (set(request) != {"operation", "execution_id"} or len(raw) > 256
+                    or not group.is_relative_to("/system.slice/workbench-everyday-worker.service")):
+                raise codex.Hold("protocol")
+            from workbench import draft_delivery
+            from sqlalchemy.exc import SQLAlchemyError
+            try:
+                worked = draft_delivery.handle(connection, request["execution_id"])
+            except (SQLAlchemyError, RuntimeError):
+                worked = False
+            connection.sendall(json.dumps({"worked": worked}).encode() + b"\n")
+            return
         request_seconds = request.pop('request_seconds', codex.SECONDS)
         if (set(request) != {'model','effort','prompt','schema'}
                 or type(request_seconds) is not int or request_seconds not in (codex.SECONDS,codex.BUG_SECONDS)

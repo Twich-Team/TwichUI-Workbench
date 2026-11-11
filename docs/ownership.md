@@ -1655,3 +1655,28 @@ to reconciliation by the exact remote ref and open draft identity. The original
 patch, task and usage history stay intact. An unavailable or conflicting remote
 leaves the delivery held for review. Neither path grants merge, release or game
 installation.
+
+
+## Pause and ordinary draft delivery
+
+The existing append-only execution policy owns the global pause preference.
+Its dedicated endpoint updates that preference with revision-conflict detection
+and response-loss reconciliation. Model edits preserve it. The worker holds new
+admission and scheduled recovery attempts while paused. Already-claimed task
+sessions may finish and settle safely. A queued session retains its identity
+and permission through resume. Workspace pause labels are a read projection.
+
+The existing private connector now accepts one additional fixed operation from
+the system Workbench worker. It advances the existing draft-delivery owner for
+one named execution. The connector's public-egress restrictions, peer checks,
+credential isolation and lack of an IP listener remain in place. Draft delivery
+does not start Codex or create model usage.
+
+A private installation-bound authority file records the owner's standing draft
+direction and its instruction digest. Browser requests bind the exact checked
+draft review. Automatic delivery applies to qualifying held-publication results
+finished after the configured activation time. Earlier held results can receive
+an explicit browser delivery request under that standing authority. Original
+run approvals stay immutable. Withdrawal or alteration of the standing policy
+prevents subsequent publication operations. Browser-approved draft runs retain
+their finite original activation and delivery limits.

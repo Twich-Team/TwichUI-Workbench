@@ -421,3 +421,34 @@ def test_delegated_launch_has_only_owned_non_secret_inputs(monkeypatch):
     assert launched[-6:] == ["WORKBENCH_RESEARCH_ROOT=/fixture",
                             "WORKBENCH_PREPARATION_CONFIG=/policy", "TMPDIR=/scratch with spaces", *command]
     assert all("CONTROLLED_PRIVATE_MARKER" not in part for part in launched)
+
+
+def test_pause_leaves_pending_session_and_allows_started_session_to_finish(
+    store, owned_template, installed,
+):
+    from workbench import work_controls
+    key = approved(store, owned_template)
+    assert sessions.queue_one(store)
+    paused = work_controls.save(store, work_controls.WorkControlInput(revision=0, paused=True))
+    calls = []
+
+    def advance(engine, cfg, stop_event):
+        calls.append(str(cfg))
+        value = json.loads(cfg.read_text())
+        if len(calls) == 2:
+            (Path(value["run_root"]) / "session-finished.json").write_text(json.dumps(
+                dict(task=value["task"], status="verified", message="NON-MODEL saved result")
+            ))
+
+    assert not sessions.process_one(store, advance=advance, resume_only=True)
+    assert not calls
+    with store.connect() as c:
+        assert c.execute(select(rows.c.status).where(rows.c.id == key)).scalar() == "pending"
+    work_controls.save(store, work_controls.WorkControlInput(revision=paused.revision, paused=False))
+    assert sessions.process_one(store, advance=advance)
+    current = work_controls.read(store)
+    work_controls.save(store, work_controls.WorkControlInput(revision=current.revision, paused=True))
+    assert sessions.process_one(store, advance=advance, resume_only=True)
+    assert len(calls) == 2 and calls[0] == calls[1]
+    with store.connect() as c:
+        assert c.execute(select(rows.c.status).where(rows.c.id == key)).scalar() == "completed"

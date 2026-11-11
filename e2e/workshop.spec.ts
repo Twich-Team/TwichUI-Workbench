@@ -139,3 +139,33 @@ test('saved ordinary bug starts investigation without recreating the task or app
  expect(new URL(page.url()).pathname).toBe(path);expect(item.decisions).toHaveLength(0);
  await page.setViewportSize({width:390,height:844});await overflow(page);await capture(page,info,'saved-report-investigation-recorded',{keepInCompact:true});
 });
+
+test('pause keeps a new request queued and resume starts that same saved request',async({page},info)=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/settings');
+ await page.getByRole('button',{name:'Pause new work',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Resume work',exact:true})).toBeVisible();
+ await expect(page.getByRole('region',{name:'Work controls'})).toContainText('Work already running can finish safely.');
+ await page.reload();
+ await expect(page.getByRole('button',{name:'Resume work',exact:true})).toBeVisible();
+ await page.goto('/intake/new?kind=issue');
+ await page.getByLabel('Title Optional').fill('A saved request while paused');
+ await page.getByLabel('Description',{exact:true}).fill('Controlled browser request. Keep the selected guide step after a reload.');
+ await page.getByRole('button',{name:'Submit request',exact:true}).click();
+ fixture('task-pr-step');
+ const saved=await page.request.get('/api/intake').then(r=>r.json());
+ const request=saved.items.find((item:{original:{title:string}})=>item.original.title==='A saved request while paused');
+ expect(request.jobs).toHaveLength(1);expect(request.jobs[0].status).toBe('queued');
+ await page.goto('/backlog?state=paused');
+ await expect(page.getByRole('link',{name:/A saved request while paused/})).toBeVisible();
+ await page.getByRole('link',{name:'Resume work in Settings'}).click();
+ await page.getByRole('button',{name:'Resume work',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Pause new work',exact:true})).toBeVisible();
+ fixture('planning');
+ await page.goto('/intake/'+request.id);
+ await expect(page.getByText('Findings ready',{exact:true})).toBeVisible();
+ await page.goto('/settings');
+ await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+ await overflow(page);
+ await capture(page,info,'work-control-phone',{keepInCompact:true});
+});

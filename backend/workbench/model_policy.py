@@ -42,6 +42,7 @@ class ExecutionPolicy(StrictModel):
     test_fallback: Literal['off', 'qwen-to-codex', 'codex-to-qwen', 'both'] | None = Field(
         default=None, exclude_if=lambda value: value is None)
     when_unavailable: Literal['wait', 'block'] = 'wait'
+    pause_new_work: bool | None = Field(default=None, exclude_if=lambda value:not value)
 
     @model_validator(mode='after')
     def bounded(self):
@@ -135,6 +136,9 @@ def save(engine, body, report):
             raise HTTPException(422, 'Choose an effort verified for this model and executor, or leave effort unspecified. Unknown model identifiers may be saved as not verified.')
     with write_transaction(engine) as connection:
         current = read_connection(connection)
+        # Model edits preserve the work control. Only its dedicated endpoint
+        # changes admission, including for older clients that omit this field.
+        body = body.model_copy(update={'pause_new_work': current.pause_new_work})
         values = body.model_dump()
         if body.revision == current.revision - 1 and {**values, 'revision': current.revision} == current.model_dump():
             return current

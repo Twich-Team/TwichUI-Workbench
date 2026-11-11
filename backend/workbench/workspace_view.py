@@ -58,6 +58,7 @@ class WorkspaceTask(BaseModel):
 
 
 class WorkspacePage(BaseModel):
+    work_paused: bool | None = Field(default=None,exclude_if=lambda value:value is None)
     local_model: LocalModelPriorityView | None = Field(default=None,exclude_if=lambda value:value is None)
     items: list[WorkspaceTask]
     total: int
@@ -90,6 +91,8 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                                       .order_by(model_attempts.c.started_at)).mappings(), 'task_id')
         from workbench.local_model_priority import snapshot as model_priority
         local_model = model_priority(c)
+        from workbench.model_policy import read_connection
+        work_paused = bool(read_connection(c).pause_new_work)
     rows = []
     for original in originals:
         preparation_message = None
@@ -167,6 +170,8 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                       *[d['finished_at'] or d['created_at'] for d in current_choices],
                       *[p['finished_at'] or p['started_at'] for p in providers[identity]]]
         kind = body.get('requested_work') or ('coverage' if body.get('regression_tests') else 'bug' if body['kind']=='issue' else 'feature')
+        if work_paused and phase == 'queued':
+            phase = 'paused'
         label, message = LABELS[phase]
         if fresh_run_decision:
             label, message = 'Ready for a new run decision', 'The previous run ended. Review the saved work and limits before allowing another attempt.'
@@ -209,7 +214,8 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
             return bool(row['result_id']) or row['result_kind']=='findings'
         return row['state']==state
     selected = [r for r in matching if included(r)]
-    return dict(**({'local_model':local_model} if local_model else {}),items=selected[(page-1)*page_size:page*page_size], total=len(selected), all_total=len(rows),
+    return dict(**({'local_model':local_model} if local_model else {}),
+                **({'work_paused':True} if work_paused else {}),items=selected[(page-1)*page_size:page*page_size], total=len(selected), all_total=len(rows),
                 page=page, page_size=page_size, counts=dict(counts), mode=configured_mode(),
                 highlights=dict(active=[r for r in matching if r['active']][:2],
                                 waiting=[r for r in matching if r['state']=='queued'][:3],

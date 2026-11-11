@@ -45,7 +45,7 @@ export function App() {
       <Route path="/intake" element={<IntakeList/>}/><Route path="/intake/new" element={<IntakeForm/>}/><Route path="/intake/:identity" element={<IntakeDetail/>}/>
       <Route path="/history" element={<History/>}/><Route path="/monitoring" element={<Monitoring/>}/><Route path="/settings" element={<Settings/>}/><Route path="/models/*" element={<Models/>}/>
       <Route path="/records/:source/:recordId" element={<RecordDetail/>}/><Route path="/tasks/:taskId/*" element={<TaskPage/>}/><Route path="*" element={<Notice title="That page has wandered off." text="Return to your dashboard to find the current task."/>}/>
-    </Routes></main><footer><span>TwichUI Workbench</span><span>Checked changes stay local. Publishing needs separate permission.</span></footer></div>
+    </Routes></main><footer><span>TwichUI Workbench</span><span>Publishing follows your saved permissions.</span></footer></div>
   </div>;
 }
 

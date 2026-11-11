@@ -46,3 +46,29 @@ it('puts a confirmed draft link before technical evidence and removes the local-
   expect(link.compareDocumentPosition(screen.getByText('Technical results and run details'))&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   client.clear();
 });
+
+it('submits an exact checked draft through the saved review binding',async()=>{
+  const writes:unknown[]=[];
+  let submitted=false;
+  vi.stubGlobal('fetch',vi.fn(async(path:string,init?:RequestInit)=>{
+    if(path==='/api/session')return {ok:true,json:async()=>({csrf_token:'controlled'})};
+    if(init?.method==='POST'){
+      writes.push(JSON.parse(String(init.body)));submitted=true;
+      return {ok:true,json:async()=>({status:'pending'})};
+    }
+    return {ok:true,json:async()=>path.endsWith('/draft-review')?{
+      available:true,binding:'a'.repeat(64),preview:{title:'Historical repair',body:'Checked changes only.'},
+    }:path.endsWith('/delivery')?(submitted?{
+      status:'pending',message:'Waiting for authorized delivery.',published:false,source:null,url:null,
+      repository:'Twich-Team/TwichUI',base_branch:'main',current_eligible:true,current_message:'',
+      preview:{title:'Historical repair',body:'Checked changes only.',category:'Bug fix'},
+    }:null):native};
+  }));
+  const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
+  render(<QueryClientProvider client={client}><MemoryRouter initialEntries={['/executions/result']}><Routes><Route path="/executions/:identity" element={<RealExecutionReview/>}/></Routes></MemoryRouter></QueryClientProvider>);
+  const {default:userEvent}=await import('@testing-library/user-event');
+  await userEvent.click(await screen.findByRole('button',{name:'Submit draft pull request'}));
+  await screen.findByRole('heading',{name:'Preparing draft PR delivery'});
+  expect(writes).toEqual([{binding:'a'.repeat(64)}]);
+  client.clear();
+});

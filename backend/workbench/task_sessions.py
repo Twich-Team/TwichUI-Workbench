@@ -393,7 +393,7 @@ def reconcile_controller(root):
         )
 
 
-def process_one(engine, stop_event=None, advance=None):
+def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
     """Called by the existing worker. No service work occurs without a queued command."""
     if not inspect(engine).has_table(sessions.name):
         return False
@@ -401,7 +401,7 @@ def process_one(engine, stop_event=None, advance=None):
         row = (
             c.execute(
                 select(sessions)
-                .where(sessions.c.status.in_(ACTIVE))
+                .where(sessions.c.status.in_(ACTIVE - {"pending"} if resume_only else ACTIVE))
                 .order_by(sessions.c.created_at, sessions.c.id)
                 .limit(1)
             )

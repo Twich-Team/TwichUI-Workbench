@@ -295,13 +295,20 @@ def _checked_approval(root, snapshot):
     approval = json.loads(path.read_text())
     if (
         not isinstance(approval, dict)
-        or set(approval) != {"execution_id", "binding", "owner_instruction_sha256"}
+        or set(approval) not in (
+            {"execution_id", "binding", "owner_instruction_sha256"},
+            {"execution_id", "binding", "owner_instruction_sha256", "standing_policy_sha256"},
+        )
         or approval["execution_id"] != snapshot["execution_id"]
         or approval["binding"] != digest(snapshot)
         or not isinstance(approval["owner_instruction_sha256"], str)
         or not re.fullmatch("[0-9a-f]{64}", approval["owner_instruction_sha256"])
     ):
         raise DeliveryHeld("The publication approval does not match the exact saved draft.")
+    if "standing_policy_sha256" in approval:
+        from workbench.draft_delivery import approval_current
+        if not approval_current(root, approval):
+            raise DeliveryHeld("The standing publication policy changed or was withdrawn.")
     return approval
 
 
@@ -687,6 +694,12 @@ def deliver_checked(engine, identity, root, stopped):
     import shutil
     from workbench.publication_adapter import PilotGitHub
 
+    existing = view(engine, identity)
+    if existing and existing["published"]:
+        return existing
+    from workbench.work_controls import read as work_status
+    if work_status(engine).paused:
+        raise DeliveryHeld("New work is paused. Resume work before starting draft delivery.")
     # Preserve the production disk reserve and bound this one staging copy.
     if shutil.disk_usage(root).free < 5 << 30:
         raise DeliveryHeld("Insufficient free space for isolated draft preparation.")
