@@ -1,15 +1,15 @@
 Last updated November 11, 2026 (Mountain time).
 
-Private preview: https://10.0.0.9:9487. Installed build 60dd4fe, deployment 113.
+Private preview: https://10.0.0.9:9487. Installed build 044f521, deployment 114.
 
-Feature Workshop keeps an ordinary feature request, saved AI choice, source-based plan, related steps, progress, references and technical evidence together. It now offers safe correction when a finished model response produces invalid steps. Existing tasks and controls remain available.
+Feature Workshop keeps an ordinary feature request, saved AI choice, source-based plan, dependent steps, progress and evidence together. It can safely correct invalid steps without replacing the request or plan. Existing tasks and controls remain available.
 
 Two earlier real Qwen bug/test workflows reached checked results and PRs #10/#11. Zero Feature Workshop features have completed from request to finished result.
 
-FW1 is installed. FW2 planning and recovery passed controlled checks and exact full hosted verification. The first hosted attempt failed while downloading GitHub artifacts; a fresh complete attempt passed every required group. Desktop, phone, enlarged text, reload, restart, independent restore and actual rollback to 112 and return to 113 passed. All 697 saved rows and 52 requests survived unchanged before the new correction.
+FW1 and FW2 are installed. A real Qwen request, “Remember map zoom while playing,” now has its original saved plan and five valid steps, including dependent implementation, verification and delivery. Earlier failed responses and usage remain recorded. All five steps are uncompleted; no addon implementation has run.
 
-The real Qwen demonstration, “Remember map zoom while playing,” produced a saved plan but its first step list failed scope coverage. Two same-parent corrections finished but used invalid empty milestones, so zero steps were accepted. Their responses and usage are saved. A tighter output format passed focused and browser checks and is being prepared for release. No addon implementation has run.
+The exact installed build passed all nine hosted release jobs. Desktop, phone, enlarged text, reload, restart, independent restore and actual rollback to 113 and return to 114 passed. All 690 original rows remain unchanged; the current store has 713 rows and 52 requests. Normal model authentication and private access were verified.
 
-FW3 parent permission and checked-source transfer components pass controlled checks and the broader local suite. They are not installed or a working feature executor. Automatic dependent implementation, combined verification/PR delivery, broader attachments/reference addons and simulator comparison remain unfinished.
+FW3 parent permission, checked-source transfer and bounded step preparation are in development. Parent permission and source transfer passed controlled checks and the broader local suite; the executor is not installed or complete. Automatic dependent implementation, combined verification/PR delivery, attachments/reference addons and simulator comparison remain unfinished.
 
-The next complete outcome is the real corrected plan with durable dependent steps, followed by connected implementation. No owner decision is needed for current engineering work. No new addon publication, legacy schedule change or game-file change has been made.
+The next complete outcome is connected implementation of the reviewed dependent steps, followed by combined checks and one coherent delivery result. No owner decision is needed for current engineering work. No new addon publication, legacy schedule change or game-file change has been made.

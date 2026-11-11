@@ -1,3 +1,34 @@
+# November 11 — FW2 real grounded graph accepted on installed114
+
+Commit044f521a0e487cc0d8d4379fa30c4dbe733e67ed passed all9 required jobs in
+full hosted43103781575, including finalverify. Both frontend and acceptance ZIPs
+matched advertised SHA256, frontend26files equal prepared bytes. Source seal
+32ddfad217c42fdb7dac31413fe55fba6c3c84fe1393ecf1b36ed7def17466c4. Installed114
+through unchanged named grants. Both60dd and044 readers read all52 restored
+requests; actual114→113→114 and four-role restart preserved699rows unchanged.
+Installed/returned desktop1440/phone390/enlarged320 keyboard/reload checks pass.
+
+Ordinary Prepare steps again button on SAME real feature5d62e6bc-1aa8-48f4-a3e1-
+4d05ade2d480 made one fresh read-only Qwen call; finished38.217s,5684prompt/
+619completion tokens, recorded actualusage. Result is5canonical actionabletasks,
+4with dependencies: session state→zoom-change hook→map-open restore→verification
+→delivery. Original request/proposalID/content unchanged; no manual graph repair,
+no implementation, no scope/run/publication permission invented. All5remain0checked.
+Complete store713rows/52requests fingerprintbd691d4c3d391b6fadb326e885b216eb6b12b7559811e5859f17735d3aba17f3;
+all690original rows compared by primarykey and unchanged. Graph survives another
+four-role restart; normal model/auth restored. Actual screenshots inspected desktop
+andphone. Browser restart proof under private real-map-zoom-flat-correction.
+FW2 real planning/decomposition is demonstrated; NOT full feature completion.
+
+FW3 WIP remains UNINSTALLED. Existing parent/source guards pass controlled69cases
+and earlier wider2321backend+58frontend suite. Newly developing typed per-step
+source/check scopes and honest feature verification profile; next connect bounded
+read-only preparation, immutable task/attempt budgets, SAME existing sessions/
+controller, checked dependent source, cancellation/recovery, combined checks and
+single parent draft. No API/Build button until the connected executor is safe.
+All earlier preexisting doc edits, source, legacy service, gamefiles and8765preserved.
+Private evidence root: /home/rich/.local/share/TwichUI-Workbench/feature-workshop-20261111.
+
 # November 11 — real hierarchy error diagnosed; constrained step format ready
 
 Installed113/60dd4fe is fully accepted and preserved. Two supported same-parent
