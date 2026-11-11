@@ -7739,3 +7739,27 @@ and phone reload. Both real results read back; model authentication restored;
 the final 629-row offline restore matched exactly. No publication, live addon
 change or in-game testing. Hosted e02a4f0 passed static checks, 2174 backend
 tests, frontend unit checks, 116 Chromium cases and all12 visual checks.
+
+
+## November 10 — checked vendor repair delivered as real draft PR 10
+
+Following the Project Working Philosophy, installed daff8df/deployment103
+preserves the prior vendor result and submits its exact candidate through
+Workbench's existing durable publication worker under a separate new owner
+approval. The owner permits project pushes/PRs and retains merging.
+GitHub draft10/commit483f51d has the exact two modified file hashes, one parent
+atdf07bb432, and the saved title/body. Same-delivery retry returns the same URL.
+
+All629existing rows,51requests and11savedcheckedresults survived cutover.
+Four-role restart and independent offline restore match630rows. Actual1440/390
+Results/task/detail/reload,200%phone text,checks/diffs and link passed. No new
+Qwen calls, merge, release or live-addon change. Actual game testing remains
+unproven. Host journal I/O delayed stop as on prior builds. One busy-read503
+cleared with bounded read-only retry, preserving every row.
+
+Static/contracts/build/lint/schema,52affectedbackend,10frontend and5actual
+browser/API/worker controlled delivery cases pass. Full local verification runs
+separately. The first hostedf2f298c needs daff8df's existing unit-copy assertion
+correction. PhaseAassessment and explicit PhaseBResults requirements are recorded.
+Next complete outcome is global pause/resume of new work. Browser-only standing
+publication setup remains future work. Private proofs are under outcome-daff8df.

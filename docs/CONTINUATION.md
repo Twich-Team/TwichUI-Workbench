@@ -1,3 +1,68 @@
+# Real vendor draft PR delivered — November 10, 2026
+
+Following the Project Working Philosophy, the original vendor request now has
+a real reviewable [draft PR 10](https://github.com/Twich-Team/TwichUI/pull/10).
+The private preview runs **daff8df / deployment 103**. Its source seal is
+`5d2d9fcab95270b71b9c39fce0cf462ad19c9201aa503ee3451c63a19cdc2868`.
+Development remains on `codex/everyday-workbench`.
+
+The owner replied to the exact publication request with permission for project
+pushes and PRs, while retaining merging. See
+[publication authority](OWNER_DRAFT_PUBLICATION_AUTHORITY_20261110.md).
+The earlier vendor run and its publication hold are unchanged. The separate
+approval binds the checked execution, candidate, base, branch and exact draft
+summary. The app's targeted host delivery command uses the existing publication
+worker and durable state machine. The API and everyday worker keep their
+loopback-only egress protections. Browser-only standing-publication setup remains
+future work.
+
+## Verified publication outcome
+
+- Execution `0bde345b-d8c8-53ce-be78-8fd0661d7418`, candidate
+  `8b824589a7b96dd71de88466c5ac327a9673b43835e5670351b1aa1241e7eaa5`.
+- GitHub commit `483f51d757b71339ef8194aee6ce90d3247b1e38` has exactly one
+  parent, the checked base `df07bb432c260998f001edad3979152b2d533aae`.
+  The two modified files match the frozen candidate hashes exactly.
+  The draft title and body match the saved preview. Main still matches the base.
+- Exactly one open draft exists for
+  `maintenance/workbench-0bde345bd8c853cebe78`. Retrying the same delivery
+  returned the same URL. Merge, release and game installation were not performed.
+- Desktop 1440px and phone 390px Results, result detail and original task show
+  the actual link. Reload and enlarged phone text passed. Technical records stay
+  expandable. Actual screenshots were inspected.
+- Four-service restart preserved the exact **630-row** logical store. The
+  independent offline restore has the same fingerprint. Both private addresses,
+  TLS, assets and ingress/CSRF checks passed. All 629 preexisting rows, 51
+  requests and 11 saved checked results were retained. Original vendor and map
+  result seals remain valid. No model execution was repeated.
+- Restart encountered the previously observed host journal/disk delay. The
+  guarded stop finished. One post-restart read received temporary SQLite-busy
+  503. Bounded read-only retry passed with identical stored history.
+- Static/contracts/build/lint/schema, 52 affected backend checks, 10 affected
+  frontend checks and five browser/API/worker delivery/history cases passed.
+  A full local and hosted verification is ongoing. The first hosted f2f298c
+  needs the already committed Results unit-assertion correction in daff8df.
+
+Private receipts are in
+`delivery-campaign-7b5963a/outcome-daff8df`, including
+`github-exact-candidate-proof.json`, `published-before-restart.json`,
+`published-after-restart.json`, restart/restore fingerprints and network proofs.
+The exact approval is privately retained under `outcome-f2f298c`.
+The rollback source and pre-cutover store remain preserved.
+
+## Continue Phase A
+
+The [assessment](PHASE_A_ASSESSMENT_20261110.md) covers every requested initial
+capability and distinguishes controlled, real-provider and installed evidence.
+Phase A remains incomplete. Global pause/resume is the next complete outcome.
+Use safe-point treatment of already-running work and preserve pending decisions,
+history and task permission. Browser-only publication policy configuration and
+broader task types remain future work. Phase B's Results acceptance requirement
+is recorded in PLAN. Full visual redesign remains deferred. Phase C and Claude/
+Smart Model Allocation remain on the roadmap.
+
+---
+
 # Checked vendor and browser coverage results — November 11, 2026
 
 The private loopback and LAN preview runs **17ee233 / deployment 102** on port
