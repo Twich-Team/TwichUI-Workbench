@@ -7718,3 +7718,15 @@ backend, frontend unit and 116 Chromium cases (three skips). Six hosted visual
 comparisons differ while all 12 local visual cases pass. A test-only font
 setup with the reviewed DejaVu files and system rendering rules passes all 12
 local images without changing the application or reference snapshots.
+
+Original vendor request checked on installed17ee233: execution 0bde345b,
+candidate 8b824589a7b9. Qwen authored the retained patch, and the final
+operation asked for verification in its first response. The direct assertions
+failed on unchanged production and passed with the repair; all178 addon
+tests passed. Separate exact frozen candidate checks passed five vendor
+criteria. The earlier failed explorer suite remains saved. Actual desktop
+and phone result and diffs passed reload and restart, with all610 saved rows
+preserved and normal model access verified. Local draft preparation and
+interrupted-apply recovery passed with no remote action, publication or live
+addon change. A fresh ordinary browser request for map test coverage was
+submitted separately; Workbench asked for an example and resumed planning.
