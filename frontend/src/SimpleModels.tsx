@@ -38,7 +38,7 @@ export function SimpleModels(){
   const readyConfig=(backend:Choice)=>policy.providers[backend].enabled&&Boolean(policy.providers[backend].model);
   const missing=(['local','codex'] as Choice[]).filter(b=>(b===policy.preferred||(mode!=='off'))&&!readyConfig(b));
   async function save(event:React.FormEvent){
-    event.preventDefault();if(!draft)return;
+    event.preventDefault();if(!draft||!query.data)return;
     setBusy(true);setMessage('');
     try{
       const value=await mutate<Policy>('/api/models/policy',draft,'PUT');
@@ -54,8 +54,8 @@ export function SimpleModels(){
   }
   return <section className="panel simple-models" aria-label="Model preferences"><h2>Models for your tasks</h2>
     <p>Prefer local Qwen for addon work, or deliberately choose Codex. Each request confirms which provider may investigate it.</p>
-    {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded preferences; saving is held.</p>}
-    <form onSubmit={event=>void save(event)}><fieldset disabled={busy||query.isError}>
+    {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded preferences; saving is held. <Button variant="secondary" onClick={()=>void query.refetch()}>Retry model preferences</Button></p>}
+    <form onSubmit={event=>void save(event)}><fieldset disabled={busy||query.isError||!saved}>
       <label>Preferred provider<select value={policy.preferred} onChange={e=>change(e.target.value as Choice,mode==='off'?'off':mode==='both'?'both':e.target.value==='local'?'qwen-to-codex':'codex-to-qwen')}>
         <option value="local">Local Qwen</option><option value="codex">Codex</option>{policy.preferred==='claude'&&<option value="claude" disabled>Claude · advanced settings</option>}
       </select></label>

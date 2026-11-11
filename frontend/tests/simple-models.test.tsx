@@ -62,3 +62,21 @@ it('keeps unsaved preferences on a revision conflict and requires a fresh policy
  expect(screen.getByLabelText('Preferred provider')).toHaveValue('local');
  client.clear();
 });
+it('holds a restored draft until the complete saved policy loads',async()=>{
+ sessionStorage.setItem('model-policy-draft',JSON.stringify({...policy,preferred:'codex',fallback:['local']}));
+ let finish!:(value:unknown)=>void;
+ const pending=new Promise(resolve=>{finish=resolve;});
+ const writes:unknown[]=[];
+ vi.stubGlobal('fetch',vi.fn(async(path:string,init?:RequestInit)=>{
+  if(init?.method)writes.push(init.method);
+  return {ok:true,json:async()=>path==='/api/local-work'?{ready:true}:pending};
+ }));
+ const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
+ render(<QueryClientProvider client={client}><MemoryRouter><SimpleModels/></MemoryRouter></QueryClientProvider>);
+ expect(await screen.findByRole('button',{name:'Save task model preferences'})).toBeDisabled();
+ expect(screen.getByLabelText('Preferred provider')).toHaveValue('codex');
+ finish({policy,capabilities:{executors:[]},observations:[]});
+ await vi.waitFor(()=>expect(screen.getByRole('button',{name:'Save task model preferences'})).toBeEnabled());
+ expect(writes).toEqual([]);
+ client.clear();
+});
