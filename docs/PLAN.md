@@ -1,3 +1,9 @@
+# Active Feature Workshop campaign — November 11, 2026
+
+The owner now authorizes FW1–FW7 in [the campaign request](OWNER_FEATURE_WORKSHOP_CAMPAIGN_20261111.md), using the supplied Food Buff Reminder image as the primary visual reference. Earlier separate-assignment deferrals below are historical. Reuse the existing intake, proposal, backlog, worker, execution and publication owners. Deliver sequential verified vertical slices, preserve unrelated local edits and all installed history, and continue after checkpoints. FW1 connects durable feature identity and plan/progress presentation; FW2 grounds automatic decomposition; FW3 carries verified dependent changes; FW4 adds protected references; FW5 checks and delivers the combined feature; FW6 adds supported visual comparison; FW7 proves the connected journey. No new billing, game installation, legacy cutover, privileged policy replacement or public exposure.
+
+---
+
 # Delivered engineering milestone: faster trustworthy CI — November 11, 2026
 
 UI/cleanup/private110delivery and its full source/closeout checks are complete.

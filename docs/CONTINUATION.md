@@ -1,3 +1,38 @@
+# Feature Workshop campaign in progress — November 11, 2026
+
+Following the Project Working Philosophy, the owner now authorizes the connected
+FW1–FW7 campaign in OWNER_FEATURE_WORKSHOP_CAMPAIGN_20261111.md. Previous deferrals
+below are historical. Starting source is 13576bd on codex/everyday-workbench;
+private preview is independently confirmed at 1e848a7 / deployment110, four services
+active. A fresh read found690 total saved rows (including newer organization data),
+so do not reuse the older674-row closeout as the new preservation baseline.
+Original checkout edits, five preexisting local document edits and dependency
+links are preserved; their exact starting copies/diff are private in
+~/.local/share/TwichUI-Workbench/feature-workshop-20261111.
+
+FW1 source now adds /features and /api/features over existing intake/proposal/
+backlog/task execution owners. No new schema/store/scheduler or execution authority.
+The approved reference hierarchy uses shared materials, a durable parent identity,
+current-revision subtasks/dependencies, checked-step progress, actual activity,
+references, meaningful owner decisions and expandable evidence/history. Existing
+request/detail controls remain linked. Current API/worker controlled acceptance
+proves exact input/restart/idempotency/conflicts, decomposition persistence,
+expired planning leases, rejected/stale result exclusion and refusal to call a
+parent complete solely from checked subtasks. All43 initial affected checks pass;
+latest five feature cases pass. Desktop1440/phone390/320px with200% text fit; actual
+screenshots inspected. Browser creation/plan/decomposition/reload/keyboard passes.
+Two test observers were corrected: await saved navigation before reading the ID;
+enter keyboard modality before testing :focus-visible. No product checks weakened.
+
+Full local verification is running; FW1 is NOT installed or fully accepted yet.
+Real dependent execution, grounded feature planning, general references, combined
+verification/delivery and simulator comparison remain unfinished. Zero Feature
+Workshop features have completed request-to-finished-result. No new provider call,
+addon publication or game change. Continue verification, checkpoint/push/exact
+hosted checks and sealed private delivery, then FW2/FW3; no routine renewal needed.
+
+---
+
 # CI performance delivered; next separate product milestone — November 11, 2026
 
 Following the Project Working Philosophy, UI/cleanup delivery remains complete

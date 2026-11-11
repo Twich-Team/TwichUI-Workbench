@@ -1,3 +1,24 @@
+## November 11, 2026 — Feature Workshop first connected slice
+
+Current owner campaign supersedes older deferrals. Preserved preexisting document
+patches and original checkout. Fresh private110 store has690rows, versus674at the
+old closeout; its current input must drive preservation checks. Four services are
+active. Added feature read API/UI over the canonical intake, proposal, backlog and
+execution tables, without migration or another scheduler. Extracted context_in so
+parent and step projections share one consistent read transaction. Counts require
+current checked matching results; later rejection/unavailable review and stale
+scope exclude completion; expired planner leases do not imply activity. All-checked
+subtasks still do not certify integrated verification or parent completion.
+
+Built and contract/schema/static checks pass. Controlled API/worker/restart/conflict
+checks pass, with43initial affected checks and5final feature cases. Browser saved
+request→proposal→applied decision→decomposition→reload/keyboard succeeds. Inspected
+actual1440/390screenshots and320px/200%reflow. Full local/visual verification is in
+progress, so source is not installed or called complete. Earlier browser failures
+were observer URL/focus-modality errors, corrected with the same assertions.
+FW2–FW7 remain, with zero real Feature Workshop completions and no model call.
+Private evidence: feature-workshop-20261111. Continue connected delivery.
+
 ## November 11, 2026 — CI performance delivered
 
 Full hosted43073228929/362b84e and43074816594/9850c40passed in8m38s/7m19s;

@@ -3,6 +3,41 @@ import {fixture,overflow,capture} from './helpers';
 
 test.beforeEach(()=>fixture('reset'));
 
+test('Feature Workshop retains its parent plan and real worker decomposition through reload',async({page},info)=>{
+ await page.goto('/intake/new?kind=feature');
+ await page.getByLabel('Description',{exact:true}).fill('Preserve my guide selection when I reload the addon.');
+ await page.getByLabel('Title Optional').fill('Remember my guide selection');
+ await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
+ await page.getByRole('button',{name:'Submit request',exact:true}).click();
+ await expect(page).toHaveURL(/\/intake\/[a-f0-9-]{36}/);
+ const identity=new URL(page.url()).pathname.split('/').at(-1)!;
+ fixture('nonvisual-planning');
+ await page.goto('/features/'+identity);
+ await expect(page.getByRole('heading',{name:'Remember my guide selection',exact:true})).toBeVisible();
+ await expect(page.getByText('Needs your review',{exact:true})).toBeVisible();
+ const intake=await page.request.get('/api/intake/'+identity).then(r=>r.json());
+ const proposal=intake.proposals[0];const session=await page.request.get('/api/session').then(r=>r.json());
+ const saved=await page.request.post('/api/intake/'+identity+'/decisions',{headers:{origin:'http://127.0.0.1:5380','x-csrf-token':session.csrf_token},data:{command_id:crypto.randomUUID(),proposal_id:proposal.id,binding:proposal.binding,scope_revision:proposal.scope_revision,action:'approve',note:'Controlled browser acceptance only'}});
+ expect(saved.ok()).toBeTruthy();fixture('apply-planning');fixture('planning');
+ await page.reload();
+ await expect(page.getByRole('list',{name:'Feature steps'})).toBeVisible();
+ await expect(page.getByRole('progressbar',{name:'Verified feature steps'})).toHaveAttribute('value','0');
+ await expect(page.getByText('0 of 1 checked',{exact:true})).toBeVisible();
+ await page.getByText('What Workbench understands',{exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Player-facing behavior'})).toBeVisible();
+ for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
+  await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await overflow(page);await capture(page,info,`feature-plan-${width}-${font}`,{keepInCompact:true});
+ }
+ const disclosure=page.getByText('Evidence and verification',{exact:true});await page.keyboard.press('Tab');await disclosure.focus();
+ expect(await disclosure.evaluate(el=>getComputedStyle(el).outlineStyle)).not.toBe('none');
+ await disclosure.press('Enter');await expect(page.getByText('Combined feature verification: Not yet recorded.',{exact:true})).toBeVisible();
+ await page.reload();await expect(page.getByRole('list',{name:'Feature steps'})).toBeVisible();
+ await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Feature Workshop',exact:true}).click();
+ await page.getByRole('link',{name:/Remember my guide selection/}).click();
+ await expect(page).toHaveURL('/features/'+identity);
+});
+
 test('everyday entry preserves descriptions and saves unavailable work without starting a model',async({page},info)=>{
  await page.goto('/');await expect(page.getByRole('heading',{name:'Dashboard',exact:true})).toBeVisible();
  await expect(page.getByText('No work running')).toBeVisible();

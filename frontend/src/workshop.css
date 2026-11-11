@@ -328,3 +328,63 @@ h2,h3{overflow-wrap:anywhere;min-width:0;}
 .backlog-page .workshop-panel:has(.cleanup-task-row)>.leather-section-heading{border-radius:.4rem .4rem 0 0;}
 .model-access-note>div{min-width:0;flex:1;overflow-wrap:anywhere;}.model-access-note>svg{flex-shrink:0;}
 .result-archive-filter{flex-wrap:wrap;}.result-archive-filter select{min-width:0;max-width:100%;}
+
+/* Feature Workshop uses the shared materials and existing application shell. */
+.feature-layout {display:grid;grid-template-columns:minmax(0,1.8fr) minmax(17rem,1fr);gap:1.4rem;align-items:start;}
+.feature-main,.feature-side {min-width:0;}
+.feature-identity {display:flex;align-items:flex-start;gap:1.2rem;padding:1.35rem;}
+.feature-emblem {display:grid;place-items:center;flex-shrink:0;width:4.2rem;height:4.2rem;color:#d8b776;border:1px solid #80613d;border-radius:.4rem;background:linear-gradient(145deg,#503322,#17120e);box-shadow:inset 0 1px #d3aa6630,0 2px 6px #0005;}
+.feature-title {display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;}
+.feature-title h2 {margin:0;font-size:1.65rem;line-height:1.3;overflow-wrap:anywhere;}
+.feature-identity p {margin:.65rem 0 0;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;}
+.feature-provider {display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-size:.85rem;color:#c9b68f;}
+.feature-provider a {margin-left:.3rem;text-decoration:underline;}
+.feature-understanding {color:#c4b69f;font-size:.9rem;}
+.feature-state {display:inline-flex;align-items:center;gap:.4rem;border:1px solid #756148;border-radius:.3rem;background:#292117;color:#e3d0ad;padding:.3rem .5rem;font-size:.78rem;line-height:1.3;max-width:100%;}
+.feature-state svg {flex-shrink:0;}
+.feature-state-verified,.feature-state-completed {color:#c7df9f;border-color:#52633e;background:#25301d;}
+.feature-state-working,.feature-state-checking,.feature-state-preparing {color:#f1cf84;border-color:#95723a;background:#49351d;}
+.feature-state-failed {color:#ecc2b5;border-color:#8b5948;background:#41271f;}
+.feature-state-needs_owner_action,.feature-state-needs_clarification {color:#f1d9a4;border-color:#957548;}
+.feature-steps {list-style:none;margin:1rem 0;padding:0;}
+.feature-step {display:grid;grid-template-columns:2.2rem minmax(0,1fr) auto;align-items:start;column-gap:.9rem;position:relative;padding:1rem .7rem;border-bottom:1px solid #604a3280;}
+.feature-step:last-child {border-bottom:0;}
+.feature-step:not(:last-child)::before {content:'';position:absolute;left:1.48rem;top:3rem;bottom:-.5rem;width:2px;background:#6c5738;}
+.feature-step-verified:not(:last-child)::before {background:#657c40;}
+.feature-step-mark {position:relative;z-index:1;color:#c4ac83;background:#251c14;display:flex;justify-content:center;}
+.feature-step-verified .feature-step-mark {color:#a5c26d;}
+.feature-step h3 {font-size:1.12rem;margin:0 0 .3rem;line-height:1.4;overflow-wrap:anywhere;}
+.feature-step p {font-size:.9rem;line-height:1.6;margin:.25rem 0;overflow-wrap:anywhere;}
+.feature-step details {font-size:.87rem;}
+.feature-step summary {font-size:.83rem;min-height:2.75rem;}
+.feature-step>.feature-state {margin-top:.25rem;}
+.feature-step-working,.feature-step-checking,.feature-step-preparing {border:1px solid #a57c39;border-radius:.4rem;background:linear-gradient(110deg,#78542840,#4c341620);box-shadow:inset 0 1px #e1b96925;}
+.feature-plan-empty {padding:1.4rem .5rem;color:#ccb992;}
+.feature-plan-empty h3 {margin:.7rem 0;}
+.feature-plan-notes {margin:.5rem .15rem;}
+.feature-progress {display:block;width:100%;height:1.15rem;appearance:none;border:1px solid #635039;border-radius:1rem;overflow:hidden;background:#30271f;margin:1.1rem 0;}
+.feature-progress::-webkit-progress-bar {background:#30271f;}
+.feature-progress::-webkit-progress-value {background:linear-gradient(#b2cb89,#789c57);border-radius:1rem;}
+.feature-progress::-moz-progress-bar {background:linear-gradient(#b2cb89,#789c57);border-radius:1rem;}
+.feature-current,.feature-next {padding:1rem .4rem;border-top:1px solid #604a3280;}
+.feature-current h3 {font-size:1.05rem;margin:.5rem 0;}
+.feature-current p,.feature-next p {font-size:.9rem;line-height:1.6;margin:.4rem 0;overflow-wrap:anywhere;}
+.feature-side .button {width:100%;margin:.5rem 0 1rem;}
+.feature-references {list-style:none;padding:0;}
+.feature-references li+li {border-top:1px solid #604a3280;}
+.feature-references a {display:flex;align-items:center;gap:.8rem;min-height:3.5rem;padding:.6rem 0;}
+.feature-references a>span {flex:1;min-width:0;overflow-wrap:anywhere;}
+.feature-references small {display:block;color:#c2ae8c;line-height:1.5;}
+.feature-references svg {flex-shrink:0;color:#bea174;}
+.feature-evidence>summary {font:600 1.2rem/1.5 Georgia,serif;}
+.feature-evidence p {line-height:1.65;overflow-wrap:anywhere;}
+.feature-list-actions {display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+.feature-list-actions label {display:flex;align-items:center;gap:.65rem;}
+.feature-list-card {display:flex;align-items:center;gap:1rem;text-decoration:none;}
+.feature-list-card>span:first-of-type {flex:1;min-width:0;}
+.feature-list-card h2 {font-size:1.3rem;margin:0 0 .5rem;overflow-wrap:anywhere;}
+.feature-list-card p {white-space:pre-wrap;overflow-wrap:anywhere;}
+.feature-list-card>svg {flex-shrink:0;color:#c3a36d;}
+.feature-list-card small {color:#c4b397;line-height:1.5;}
+@media(max-width:1100px) {.feature-layout {grid-template-columns:minmax(0,1fr);} .feature-side {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;} .feature-side>section:first-child {grid-column:1/-1;}}
+@media(max-width:650px) {.feature-side {display:block;} .feature-identity {gap:.8rem;padding:1rem;} .feature-emblem {width:2.8rem;height:2.8rem;} .feature-emblem svg {width:1.6rem;} .feature-title h2 {font-size:1.4rem;} .feature-step {grid-template-columns:1.7rem minmax(0,1fr);padding:.9rem .25rem;gap:.6rem;} .feature-step>.feature-state {grid-column:2;justify-self:start;} .feature-step:not(:last-child)::before {left:1rem;} .feature-list-card {flex-wrap:wrap;} .feature-list-card>span:first-of-type {flex-basis:65%;} .feature-list-card>.feature-state {margin-left:2.6rem;}}

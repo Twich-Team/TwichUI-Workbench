@@ -1,3 +1,18 @@
+# Feature Workshop read ownership — November 11, 2026
+
+Feature Workshop uses the existing intake ID as durable parent identity. Proposal
+revisions, backlog hierarchy/dependency edges, model choices, artifacts, decisions,
+execution attempts and publication records keep their current owners. The new
+read API projects one consistent database transaction through intake.view_in and
+task_execution.context_in. It creates no queue, scheduler, permission or result.
+Only current matching independently checked steps count; uncertain recovery and
+later rejected/unverifiable reviews cannot count. All checked steps alone never
+certify combined verification or parent completion. Existing scope/run/publication
+controls remain authoritative. FW2–FW7 are unfinished; the new campaign supersedes
+historical Feature Workshop deferrals, not preserved access/safety boundaries.
+
+---
+
 # Installed cleanup ownership verified — November 11, 2026
 
 Private110/source 1e848a7uses the existing authoritative store with additive 0014

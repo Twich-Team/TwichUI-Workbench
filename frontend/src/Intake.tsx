@@ -255,6 +255,7 @@ export function IntakeDetail() {
     <CleanupReview choice={cleanupChoice} setChoice={setCleanupChoice}/>
     {data.archived_at&&<p className="soft-callout">This task is archived. Its request, results and history are preserved. Restore it before changing or starting work.</p>}
     <div className="detail-cleanup-actions"><TaskActions id={data.id} title={data.original.title} archived={!!data.archived_at} choose={setCleanupChoice}/></div>
+    {data.original.kind==='feature'&&!data.original.regression_tests&&!data.original.supported_task&&(!data.original.requested_work||data.original.requested_work==='feature')&&<p><Link className="back-link" to={'/features/'+data.id}>Open in Feature Workshop <ArrowRight size={15}/></Link></p>}
     {data.project_source?.stale&&<section className="panel"><h2>This investigation used older addon code</h2>
       <p>The saved investigation used revision {data.project_source.inspected_base.slice(0,7)}. The current project snapshot is {data.project_source.current_base.slice(0,7)}. Earlier evidence and usage remain saved. The older proposal cannot authorize a repair of the new code.</p>
       {data.project_source.refresh_binding&&<><p>Refresh the project source and start a fresh read-only investigation with your saved provider. This does not approve a plan, addon changes, or publication.</p>

@@ -329,226 +329,231 @@ class TaskExecutionContext(BaseModel):
 
 
 def context(engine, intake_id, task_id):
+    with engine.connect() as c:
+        c.exec_driver_sql("BEGIN")
+        return context_in(c, intake_id, task_id)
+
+
+def context_in(c, intake_id, task_id):
+    """Project a task inside the caller's consistent read transaction."""
     from workbench import real_execution as execution
     from workbench.task_sessions import public_view, capability
 
     configured = bool(os.environ.get("WORKBENCH_REAL_EXECUTION_ROOT"))
-    one_off = capability(engine) is not None
-    with engine.connect() as c:
-        c.exec_driver_sql("BEGIN")
-        task = intake.require(c, backlog_items, task_id)
-        if task["intake_id"] != intake_id or task["kind"] != "task":
-            raise HTTPException(404, "Task not found for this request.")
-        linked = None
-        reason = "The current plan needs an applied implementation approval."
-        approval = (
-            c.execute(
-                select(proposal_decisions)
-                .where(
-                    proposal_decisions.c.proposal_id == task["proposal_id"],
-                    proposal_decisions.c.status == "applied",
-                    proposal_decisions.c.payload["action"].as_string() == "approve",
+    one_off = capability(c.engine) is not None
+    task = intake.require(c, backlog_items, task_id)
+    if task["intake_id"] != intake_id or task["kind"] != "task":
+        raise HTTPException(404, "Task not found for this request.")
+    linked = None
+    reason = "The current plan needs an applied implementation approval."
+    approval = (
+        c.execute(
+            select(proposal_decisions)
+            .where(
+                proposal_decisions.c.proposal_id == task["proposal_id"],
+                proposal_decisions.c.status == "applied",
+                proposal_decisions.c.payload["action"].as_string() == "approve",
+            )
+            .order_by(proposal_decisions.c.created_at.desc())
+            .limit(1)
+        )
+        .mappings()
+        .first()
+    )
+    if approval:
+        try:
+            linked = snapshot(c, intake_id, task_id, approval["id"])
+            reason = "Waiting for separate execution permission. Plan approval alone starts no implementation."
+        except Waiting as error:
+            reason = str(error)
+    available = inspect(c).has_table(requests.name)
+    records = (
+        c.execute(
+            select(
+                requests.c.id,
+                requests.c.status,
+                func.substr(requests.c.message, 1, 1000).label("message"),
+                requests.c.result["verification"].as_string().label("verification"),
+                requests.c.result["candidate_id"].as_string().label("candidate_id"),
+                requests.c.result["delivery"]["state"].as_string().label("recovery_state"),
+                requests.c.result["owner"].label("execution_owner"),
+                grants.c.snapshot.label("grant_snapshot"),
+            )
+            .join(grants, requests.c.grant_id == grants.c.id)
+            .where(
+                grants.c.snapshot["workflow_task"]["intake_id"].as_string() == intake_id,
+                grants.c.snapshot["workflow_task"]["task"]["id"].as_string() == task_id,
+            )
+            .order_by(requests.c.created_at.desc(), requests.c.id.desc())
+            .limit(10)
+        )
+        .mappings()
+        .all()
+        if available
+        else []
+    )
+    publications = {}
+    if records and inspect(c).has_table(real_publications.name):
+        for publication in c.execute(
+            select(real_publications).where(
+                real_publications.c.execution_id.in_([r["id"] for r in records])
+            )
+        ).mappings():
+            url = publication["state"].get("url")
+            real = (
+                publication["state"].get("source") == "github"
+                and isinstance(url, str)
+                and re.fullmatch(
+                    r"https://github.com/Twich-Team/TwichUI/pull/[1-9][0-9]{0,9}", url
                 )
-                .order_by(proposal_decisions.c.created_at.desc())
+            )
+            publications[publication["execution_id"]] = dict(
+                status=publication["status"],
+                message=publication["message"],
+                url=url if real else None,
+                published=bool(real and publication["status"] == "published"),
+            )
+    runs = []
+    for row in records:
+        recovering, notice = execution.recovery_notice(
+            row["status"],
+            dict(owner=row["execution_owner"], delivery=dict(state=row["recovery_state"])),
+        )
+        runs.append(
+            dict(
+                id=row["id"],
+                publication=publications.get(row["id"]),
+                status=row["status"],
+                message=notice or row["message"],
+                verification=row["verification"],
+                candidate_id=row["candidate_id"],
+                recovery_pending=recovering,
+                current_task=linked is not None
+                and linked == row["grant_snapshot"].get("workflow_task"),
+            )
+        )
+    runs.sort(key=lambda r: not r["current_task"])
+    stage = "waiting"
+    if linked is not None and available:
+        grant = (
+            c.execute(
+                select(grants)
+                .where(
+                    grants.c.snapshot["workflow_task"]["task"]["id"].as_string() == task_id,
+                    grants.c.snapshot["workflow_task"]["intake_id"].as_string() == intake_id,
+                    grants.c.revoked_at.is_(None),
+                    grants.c.expires_at > execution.now(),
+                )
+                .order_by(grants.c.issued_at.desc(), grants.c.id.desc())
                 .limit(1)
             )
             .mappings()
             .first()
         )
-        if approval:
-            try:
-                linked = snapshot(c, intake_id, task_id, approval["id"])
-                reason = "Waiting for separate execution permission. Plan approval alone starts no implementation."
-            except Waiting as error:
-                reason = str(error)
-        available = inspect(c).has_table(requests.name)
-        records = (
-            c.execute(
-                select(
-                    requests.c.id,
-                    requests.c.status,
-                    func.substr(requests.c.message, 1, 1000).label("message"),
-                    requests.c.result["verification"].as_string().label("verification"),
-                    requests.c.result["candidate_id"].as_string().label("candidate_id"),
-                    requests.c.result["delivery"]["state"].as_string().label("recovery_state"),
-                    requests.c.result["owner"].label("execution_owner"),
-                    grants.c.snapshot.label("grant_snapshot"),
-                )
-                .join(grants, requests.c.grant_id == grants.c.id)
-                .where(
-                    grants.c.snapshot["workflow_task"]["intake_id"].as_string() == intake_id,
-                    grants.c.snapshot["workflow_task"]["task"]["id"].as_string() == task_id,
-                )
-                .order_by(requests.c.created_at.desc(), requests.c.id.desc())
-                .limit(10)
+        if (
+            grant
+            and execution.valid(grant)
+            and grant["snapshot"].get("workflow_task") == linked
+        ):
+            reason = prerequisite_reason(c, linked) or (
+                "Waiting for the worker to pick up this task."
+                if configured or one_off
+                else "Execution is disabled here. The task is saved; no model will be invoked."
             )
-            .mappings()
-            .all()
-            if available
-            else []
-        )
-        publications = {}
-        if records and inspect(c).has_table(real_publications.name):
-            for publication in c.execute(
-                select(real_publications).where(
-                    real_publications.c.execution_id.in_([r["id"] for r in records])
-                )
-            ).mappings():
-                url = publication["state"].get("url")
-                real = (
-                    publication["state"].get("source") == "github"
-                    and isinstance(url, str)
-                    and re.fullmatch(
-                        r"https://github.com/Twich-Team/TwichUI/pull/[1-9][0-9]{0,9}", url
-                    )
-                )
-                publications[publication["execution_id"]] = dict(
-                    status=publication["status"],
-                    message=publication["message"],
-                    url=url if real else None,
-                    published=bool(real and publication["status"] == "published"),
-                )
-        runs = []
-        for row in records:
-            recovering, notice = execution.recovery_notice(
-                row["status"],
-                dict(owner=row["execution_owner"], delivery=dict(state=row["recovery_state"])),
-            )
-            runs.append(
-                dict(
-                    id=row["id"],
-                    publication=publications.get(row["id"]),
-                    status=row["status"],
-                    message=notice or row["message"],
-                    verification=row["verification"],
-                    candidate_id=row["candidate_id"],
-                    recovery_pending=recovering,
-                    current_task=linked is not None
-                    and linked == row["grant_snapshot"].get("workflow_task"),
-                )
-            )
-        runs.sort(key=lambda r: not r["current_task"])
-        stage = "waiting"
-        if linked is not None and available:
-            grant = (
+    if runs:
+        relevant = next((r for r in runs if r["current_task"]), runs[0])
+        stage = relevant["status"]
+        reason = result_message(relevant)
+        if relevant["recovery_pending"]:
+            stage = "recovering"
+        if stage == "pending":
+            pending_grant = (
                 c.execute(
                     select(grants)
-                    .where(
-                        grants.c.snapshot["workflow_task"]["task"]["id"].as_string() == task_id,
-                        grants.c.snapshot["workflow_task"]["intake_id"].as_string() == intake_id,
-                        grants.c.revoked_at.is_(None),
-                        grants.c.expires_at > execution.now(),
-                    )
-                    .order_by(grants.c.issued_at.desc(), grants.c.id.desc())
-                    .limit(1)
+                    .join(requests, requests.c.grant_id == grants.c.id)
+                    .where(requests.c.id == relevant["id"])
                 )
                 .mappings()
-                .first()
+                .one()
             )
-            if (
-                grant
-                and execution.valid(grant)
-                and grant["snapshot"].get("workflow_task") == linked
-            ):
-                reason = prerequisite_reason(c, linked) or (
-                    "Waiting for the worker to pick up this task."
-                    if configured or one_off
-                    else "Execution is disabled here. The task is saved; no model will be invoked."
+            if not execution.valid(pending_grant):
+                reason = (
+                    "Execution permission is no longer current. The saved request cannot start."
                 )
-        if runs:
-            relevant = next((r for r in runs if r["current_task"]), runs[0])
-            stage = relevant["status"]
-            reason = result_message(relevant)
-            if relevant["recovery_pending"]:
-                stage = "recovering"
-            if stage == "pending":
-                pending_grant = (
-                    c.execute(
-                        select(grants)
-                        .join(requests, requests.c.grant_id == grants.c.id)
-                        .where(requests.c.id == relevant["id"])
-                    )
-                    .mappings()
-                    .one()
+            elif not relevant["current_task"]:
+                reason = (
+                    "Task inputs changed. The saved request cannot use the earlier permission."
                 )
-                if not execution.valid(pending_grant):
-                    reason = (
-                        "Execution permission is no longer current. The saved request cannot start."
-                    )
-                elif not relevant["current_task"]:
-                    reason = (
-                        "Task inputs changed. The saved request cannot use the earlier permission."
-                    )
-                elif not (configured or one_off):
-                    reason = "Execution is disabled here. The saved request is waiting; no model will start."
-        if not available:
-            reason = (
-                "Task execution records are unavailable in this store version. No work starts here."
-            )
-        budget_status = None
-        if approval and approval["payload"].get("run_budget"):
-            from workbench.task_budget import permission
-            from datetime import datetime, timezone
-
-            try:
-                approved_budget = permission(c, approval, require_current=False)
-                budget_status = dict(
-                    expires_at=approved_budget["expires_at"],
-                    publication=approved_budget["budget"]["publication"],
-                    current=datetime.now(timezone.utc)
-                    < datetime.fromisoformat(approved_budget["expires_at"]),
-                )
-                if stage == "waiting":
-                    reason = (
-                        ("Approval applied. Waiting for the worker to prepare the approved task."
-                         if configured or one_off else
-                         "Approved task budget is saved. Execution is disabled here.")
-                        if budget_status["current"]
-                        else "The approved task budget expired. Saved work remains; no execution or publication will start."
-                    )
-            except ValueError, HTTPException:
-                if stage == "waiting":
-                    reason = "The saved task budget or supported recipe changed. Review is required; no execution starts."
-        operation = public_view(c, task_id)
-        if operation and operation["status"] == "waiting_recovery":
-            stage, reason = "recovering", operation["message"]
-        elif operation and operation["status"] == "active" and any(
-            r["current_task"] and r["status"] == "checked" for r in runs
-        ):
-            stage, reason = "settling", "Checks passed. Waiting for the worker to finish cleanup."
-        elif operation and operation["status"] in {
-            "pending",
-            "active",
-            "held",
-            "cancelled",
-            "expired",
-            "ended-before-result",
-        }:
-            if not any(
-                r["current_task"]
-                and r["status"] in {"running", "checking", "checked", "cancel_requested"}
-                for r in runs
-            ):
-                stage = (
-                    "preparing"
-                    if operation["status"] in {"pending", "active"}
-                    else "held" if operation["status"] in {"expired", "ended-before-result"}
-                    else operation["status"]
-                )
-                reason = operation["message"]
-        return dict(
-            session=operation,
-            run_budget=budget_status,
-            intake_id=intake_id,
-            task_id=task_id,
-            stage=stage,
-            message=reason,
-            current_approval=linked is not None,
-            execution_configured=configured or one_off,
-            runs=runs,
-            publication_allowed=False,
-            accepted=False,
+            elif not (configured or one_off):
+                reason = "Execution is disabled here. The saved request is waiting; no model will start."
+    if not available:
+        reason = (
+            "Task execution records are unavailable in this store version. No work starts here."
         )
+    budget_status = None
+    if approval and approval["payload"].get("run_budget"):
+        from workbench.task_budget import permission
+        from datetime import datetime, timezone
+
+        try:
+            approved_budget = permission(c, approval, require_current=False)
+            budget_status = dict(
+                expires_at=approved_budget["expires_at"],
+                publication=approved_budget["budget"]["publication"],
+                current=datetime.now(timezone.utc)
+                < datetime.fromisoformat(approved_budget["expires_at"]),
+            )
+            if stage == "waiting":
+                reason = (
+                    ("Approval applied. Waiting for the worker to prepare the approved task."
+                     if configured or one_off else
+                     "Approved task budget is saved. Execution is disabled here.")
+                    if budget_status["current"]
+                    else "The approved task budget expired. Saved work remains; no execution or publication will start."
+                )
+        except ValueError, HTTPException:
+            if stage == "waiting":
+                reason = "The saved task budget or supported recipe changed. Review is required; no execution starts."
+    operation = public_view(c, task_id)
+    if operation and operation["status"] == "waiting_recovery":
+        stage, reason = "recovering", operation["message"]
+    elif operation and operation["status"] == "active" and any(
+        r["current_task"] and r["status"] == "checked" for r in runs
+    ):
+        stage, reason = "settling", "Checks passed. Waiting for the worker to finish cleanup."
+    elif operation and operation["status"] in {
+        "pending",
+        "active",
+        "held",
+        "cancelled",
+        "expired",
+        "ended-before-result",
+    }:
+        if not any(
+            r["current_task"]
+            and r["status"] in {"running", "checking", "checked", "cancel_requested"}
+            for r in runs
+        ):
+            stage = (
+                "preparing"
+                if operation["status"] in {"pending", "active"}
+                else "held" if operation["status"] in {"expired", "ended-before-result"}
+                else operation["status"]
+            )
+            reason = operation["message"]
+    return dict(
+        session=operation,
+        run_budget=budget_status,
+        intake_id=intake_id,
+        task_id=task_id,
+        stage=stage,
+        message=reason,
+        current_approval=linked is not None,
+        execution_configured=configured or one_off,
+        runs=runs,
+        publication_allowed=False,
+        accepted=False,
+    )
 
 
 def result_message(run):

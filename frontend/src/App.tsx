@@ -1,4 +1,5 @@
 import {Dashboard,WorkspaceBacklog,WorkspaceResults} from './Workspace';
+import {FeatureWorkshop} from './FeatureWorkshop';
 import {ExecutionRuns} from './ExecutionRuns';
 import {RealExecutionReview} from './RealExecutionReview';
 import { useEffect, useRef, useState } from 'react';
@@ -33,6 +34,7 @@ export function App() {
   const links=[{title:'Dashboard',to:'/',icon:Home,art:'overview',active:path==='/'||path==='/intake/new'},
     {title:'Backlog',to:'/backlog',icon:ListTodo,art:'backlog',active:path.startsWith('/backlog')||(path.startsWith('/intake')&&path!='/intake/new')||path.startsWith('/records')},
     {title:'Results',to:'/results',icon:ScrollText,art:'history',active:path.startsWith('/results')||path.startsWith('/executions')||path.startsWith('/history')},
+    {title:'Feature Workshop',to:'/features',icon:SettingsIcon,art:'feature-requests',active:path.startsWith('/features')},
     {title:'Settings',to:'/settings',icon:SettingsIcon,art:'settings',active:path.startsWith('/settings')||path.startsWith('/models')||path.startsWith('/monitoring')||path.startsWith('/usage')}];
   const create=<Button asChild><Link to="/intake/new"><Plus size={18}/>Create a task</Link></Button>;
   return <div className="app-shell styled-workbench">
@@ -44,6 +46,7 @@ export function App() {
       <Route path="/backlog" element={new URLSearchParams(location.search).has('source')||new URLSearchParams(location.search).has('focus')?<Backlog/>:<WorkspaceBacklog/>}/>
       <Route path="/results" element={<WorkspaceResults/>}/><Route path="/executions" element={<ExecutionRuns/>}/><Route path="/executions/:identity" element={<RealExecutionReview/>}/>
       <Route path="/intake" element={<IntakeList/>}/><Route path="/intake/new" element={<IntakeForm/>}/><Route path="/intake/:identity" element={<IntakeDetail/>}/>
+      <Route path="/features" element={<FeatureWorkshop/>}/><Route path="/features/:featureId" element={<FeatureWorkshop/>}/>
       <Route path="/usage" element={<Usage/>}/><Route path="/history" element={<History/>}/><Route path="/monitoring" element={<Monitoring/>}/><Route path="/settings" element={<Settings/>}/><Route path="/models/*" element={<Models/>}/>
       <Route path="/records/:source/:recordId" element={<RecordDetail/>}/><Route path="/tasks/:taskId/*" element={<TaskPage/>}/><Route path="*" element={<Notice title="That page has wandered off." text="Return to your dashboard to find the current task."/>}/>
     </Routes></main><footer><span>TwichUI Workbench</span><span>Publishing follows your saved permissions.</span></footer></div>
