@@ -7934,3 +7934,43 @@ upgrade script are concrete;49admin/schema checks pass. The owner was asked to r
 that script once, while independent verification continues. No privilege or schema
 stamp bypass was attempted. Broader tests/hosted confirmation remain in progress;
 these changes are not installed yet. Private evidence is feature-campaign-20261111.
+
+## November 11 — observed usage and compatible delivery path
+
+Added /usage using all Workbench-owned records in7/30/90UTC-date windows, with
+interactive locally bundled ECharts, provider filtering, exact reading tables,
+phone scrolling/zoom controls, stale/unavailable/empty/partial states and recorded
+pre-generation fallback links. The normal Settings view links to this overview.
+Tokens remain reported subtotals, with unreported operations counted separately;
+unknown model identity is never replaced by the requested model. Subscription
+allowance/reset and separately billed API spending remain explicitly unavailable.
+No allocation policy, spending or provider request was introduced.
+
+Actual history inspection found3current-session authored records: they explicitly
+say no independently measurable model receipt exists. They are excluded from model
+operation counts and explained separately. The first display inspection exposed
+unreadably compressed phone table columns; contained horizontal tables now retain
+readable model names. Known-zero versus missing dates, partial accounting, source
+attribution, complete-history aggregation beyond100rows, date boundaries and exact
+fallback receipts are tested. Independent SQL over actual copied history checks the
+totals; private receipts retain the original intermediate projection as well.
+
+The full initial local run had2210passes/8skips and2old-schema migration failures
+from the before-fix process; both affected cases and prior0006restore pass after the
+compatibility correction. Complete browser121/3skips and visual12pass without any
+reference changes. Hostedfeb9ee0 had2209passes/11skips and one new admin-test fixture
+failure because GitHub's UID differs from Rich's. Production ownership checks remain
+unchanged;7085818binds only that disposable fixture to its actual runner and asserts
+wrong-owner refusal. Its hosted run is in progress. Latest affected backend58,
+frontend49and6broader model/settings/usage browser checks pass; final visual underway.
+
+Supported alternative to blocking all delivery: exact task model choices and usage
+operate on unchanged schema0012. Controlled tests now exercise frozen choices,
+worker execution and usage/workspace reads on both0012and0013. Deploy those valuable
+capabilities without activating the ownership migration; leave633records untouched
+and old-schema rollback usable. Historical grouping stays pending the explicit root
+helper update. This does not relabel or bypass an unsupported schema. Prepare/push
+this combined source, confirm hosted checks and install using the existing sealed
+private mechanism. Full Feature Workshop remains unimplemented; dependent tasks
+currently require a new verified-base handoff. Existing simulator documentation/pins
+were inspected; no game files, lab semantics or simulator screenshots were changed.

@@ -25,8 +25,17 @@ def settings(provider='codex',model='capable-codex',effort='high',fallback=None)
     return dict(primary=dict(provider=provider,model=model,effort=effort),fallback=fallback)
 
 
-def test_exact_override_applied_by_worker_and_frozen_across_global_change(store,client,headers,installed,catalog,monkeypatch):
+@pytest.mark.parametrize('schema', ['0012','0013'])
+def test_exact_override_applied_by_worker_and_frozen_across_global_change(store,client,headers,installed,catalog,monkeypatch,schema):
     from workbench import codex_provider
+    if schema=='0012':
+        from alembic import command
+        from alembic.config import Config
+        with store.connect() as c:
+            config=Config('alembic.ini')
+            config.attributes['connection']=c
+            command.downgrade(config,'0012')
+            c.commit()
     save_codex_policy(store)
     request={**body(),'local_planning':'codex-once','ai_settings':settings()}
     response=client.post('/api/intake',headers=headers,json=request)
@@ -46,6 +55,8 @@ def test_exact_override_applied_by_worker_and_frozen_across_global_change(store,
     assert worker.tick(store)
     assert calls==[('capable-codex','high')]
     assert not worker.tick(store)
+    assert client.get('/api/usage').status_code==200
+    assert client.get('/api/workspace').status_code==200
     detail=client.get('/api/intake/'+identity).json()
     assert detail['original']['ai_settings']==request['ai_settings']
     attempt=detail['provider_activity'][0]

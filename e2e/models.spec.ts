@@ -196,3 +196,50 @@ test('specific task models and effort remain optional and use supported choices'
  expect((await pending).postDataJSON()).toMatchObject({local_planning:'codex-with-local-fallback',ai_settings:{primary:{provider:'codex',model:'fixture-capable',effort:'high'},fallback:{provider:'local',model:'pilot-qwen38-27b',effort:null}}});
  await expect(page.getByText('Controlled submission captured; no provider work started.')).toBeVisible();
 });
+
+test('AI usage charts retain partial amounts, missing dates and readable phone controls',async({page})=>{
+ const now=new Date(),start=new Date(now);start.setUTCDate(now.getUTCDate()-6);start.setUTCHours(0,0,0,0);
+ const day=start.toISOString().slice(0,10);
+ const report={days:7,start:start.toISOString(),observed_at:now.toISOString(),operations:4,tasks:2,reported_tokens:1700,reported_operations:3,unreported_operations:1,partial_operations:1,undated_operations:0,
+  providers:[{backend:'local',model:'Fixture Qwen',operations:2,completed:2,running:0,other:0,reported_tokens:1000,unreported_operations:0,partial_operations:0},
+   {backend:'codex',model:'Fixture Codex',operations:2,completed:1,running:0,other:1,reported_tokens:700,unreported_operations:1,partial_operations:1}],
+  timeline:[{day,backend:'local',model:'Fixture Qwen',operations:2,reported_tokens:1000,unreported_operations:0},
+   {day,backend:'codex',model:'Fixture Codex',operations:2,reported_tokens:700,unreported_operations:1}],
+  fallbacks:[],subscription_allowance:'unavailable',api_spending:'unavailable',message:'Controlled browser fixture. No provider request.'};
+ let unavailable=false;
+ await page.route('**/api/usage?*',r=>r.fulfill(unavailable?{status:503,json:{detail:'Controlled refresh failure'}}:{json:report}));
+ await page.goto('/usage');
+ await expect(page.getByRole('heading',{name:'AI usage',exact:true})).toBeVisible();
+ await expect(page.getByText('1 partial reports are included; the total may be incomplete.')).toBeVisible();
+ await expect(page.getByText('Subscription allowance is unavailable')).toBeVisible();
+ await expect(page.locator('[data-chart-ready=true]')).toHaveCount(1);
+ await page.getByText('Read daily values · keyboard and touch',{exact:true}).click();
+ await expect(page.getByRole('table').first()).toContainText('1,000');
+ await page.getByLabel('Show provider',{exact:true}).selectOption('codex');
+ await expect(page.getByRole('table').first()).toContainText('Fixture Codex');
+ await expect(page.getByRole('table').first()).not.toContainText('Fixture Qwen');
+ await page.getByRole('button',{name:'Zoom in',exact:true}).click();
+ await page.getByRole('button',{name:'Follow latest / reset',exact:true}).click();
+ for(const width of [1440,390]){
+  await page.setViewportSize({width,height:1000});await overflow(page);await shot(page,`usage-populated-${width}`);
+ }
+ await page.evaluate(()=>document.documentElement.style.fontSize='200%');await overflow(page);
+ unavailable=true;await page.getByRole('button',{name:'Refresh activity',exact:true}).click();
+ await expect(page.getByText(/Refresh failed. These are the last loaded figures/)).toBeVisible();
+ await expect(page.getByText('1,700',{exact:true})).toBeVisible();
+});
+
+test('AI usage empty, unavailable and unreported states never invent a balance',async({page})=>{
+ await page.goto('/usage');
+ await expect(page.getByText('No recorded AI work in this range')).toBeVisible();
+ await expect(page.getByText('Subscription allowance is unavailable')).toBeVisible();
+ await expect(page.locator('.usage-totals')).toContainText('Not reported');
+ await page.getByLabel('Activity range',{exact:true}).selectOption('30');
+ await expect(page).toHaveURL(/days=30/);
+ await page.reload();await expect(page.getByLabel('Activity range',{exact:true})).toHaveValue('30');
+ await page.route('**/api/usage?*',r=>r.fulfill({status:503,json:{detail:'Controlled unavailable history'}}));
+ await page.goto('/usage?days=90');
+ await expect(page.getByText('AI activity could not be loaded')).toBeVisible();
+ await expect(page.getByRole('button',{name:'Refresh activity',exact:true})).toBeVisible();
+ await overflow(page);
+});

@@ -8,6 +8,7 @@ import { formatTime } from './Catalog';
 import { usePreferences } from './Monitoring';
 import {WorkControls} from './WorkControls';
 import {SimpleModels} from './SimpleModels';
+import {UsageSummary} from './Usage';
 
 type Preferences = components['schemas']['DisplaySettings'];
 type Policy = components['schemas']['Policy'];
@@ -34,7 +35,7 @@ export function Settings() {
     } catch (err) {setMessage(err instanceof Error ? err.message : 'Save could not be confirmed. Your edits are kept.'); if (err instanceof ApiError && err.status === 409) setConflict(true);}
     finally {setSaving(false);}
   }
-  return <><div className="page-heading"><div><h1>Settings</h1><p>Models, work permissions and your workspace preferences.</p></div></div><SimpleModels/>
+  return <><div className="page-heading"><div><h1>Settings</h1><p>Models, work permissions and your workspace preferences.</p></div></div><SimpleModels/><UsageSummary/>
  <WorkControls/>
  <details className="panel settings-panel"><summary>Display and monitoring preferences</summary><h2>Resource display</h2><p className="detail-copy">These application-owned preferences are shared by this local Workbench. Display refresh reads observations; it does not run models or change worker scheduling.</p>
     {!current ? <p role="status">{query.isError ? 'Display preferences unavailable.' : 'Loading display preferences…'}</p> : <form onSubmit={event => void save(event)}><label>Default chart time range<select aria-label="Default chart time range" disabled={saving} value={current.resource_hours} onChange={event => {setDraft({...current,resource_hours:Number(event.target.value) as Preferences['resource_hours']});setMessage('');}}><option value={1}>Past hour</option><option value={24}>Past 24 hours</option><option value={168}>Past 7 days</option></select></label><label>Display refresh<select aria-label="Display refresh" disabled={saving} value={current.refresh_seconds} onChange={event=>{setDraft({...current,refresh_seconds:Number(event.target.value) as Preferences['refresh_seconds']});setMessage('');}}><option value={15}>Every 15 seconds</option><option value={30}>Every 30 seconds</option><option value={60}>Every 60 seconds</option></select></label><div className="settings-actions"><Button disabled={!dirty || saving || conflict} type="submit">{saving ? 'Saving…' : 'Save display preferences'}</Button>{dirty && <Button variant="ghost" type="button" disabled={saving} onClick={async()=>{const result=await query.refetch(); if(result.data) {setDraft(null);setConflict(false);setMessage('Saved values reloaded.');}}}>Discard edits and reload</Button>}</div><p className="detail-copy">{dirty ? 'Unsaved edits are kept during navigation and refresh.' : 'Saved. Preferences apply immediately.'}</p></form>}

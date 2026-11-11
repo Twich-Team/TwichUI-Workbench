@@ -71,6 +71,6 @@ export function SimpleModels(){
     </fieldset></form>
     <p role="status">{message||(draft?'Unsaved model preferences are kept during navigation.':'Showing saved model preferences.')}</p>
     <p className="small-text">No live subscription balance is shown here. Workbench records activity separately from subscription allowance and API spending. It does not buy credits or enable paid API billing.</p>
-    <Link to="/models/configure">Advanced model identifiers, effort and routing</Link> · <Link to="/models">Provider availability and activity</Link>
+    <Link to="/usage">AI usage and activity</Link> · <Link to="/models/configure">Advanced model identifiers, effort and routing</Link> · <Link to="/models">Provider availability and activity</Link>
   </section>;
 }

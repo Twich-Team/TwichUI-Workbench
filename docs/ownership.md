@@ -1713,3 +1713,15 @@ checks. The tested owner-terminal upgrade script preserves the previous helper a
 verifies both hashes; its installation requires root access outside the current
 named helper grant. Until that exact compatibility update is installed and verified,
 the campaign leaves deployment106 running and does not bypass the schema refusal.
+
+`usage_view` is a read-only projection of existing model_attempts and planning_jobs.
+It aggregates the entire requested UTC window, not the100-row diagnostic detail
+page. Its operation dates are recorded start dates, not invented provider-call
+intervals; fallback dates are explicitly planning-operation creation times. Partial
+reported subtotals and unknown usage remain distinct. Existing session-authored
+records are not provider operations and have a separate count. Subscription/API
+balances are unavailable. Charts reuse the bundled ECharts/ChartView and retain
+accessible values. This projection owns no scheduling, billing, provider access,
+model policy or task transition. It works on schema0012 without applying0013;
+request ownership uses installed links only. That compatibility permits useful
+model/usage delivery while the root-helper schema update is pending.

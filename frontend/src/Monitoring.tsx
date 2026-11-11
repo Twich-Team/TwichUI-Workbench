@@ -19,7 +19,7 @@ export function value(value: number | null | undefined, unit: '%'|'GiB') {
   if (unit === 'GiB' && scaled > 0 && scaled < .001) return '<0.001 GiB';
   return `${scaled.toFixed(unit === 'GiB' && scaled > 0 && scaled < .1 ? 3 : 1)} ${unit}`;
 }
-function ChartView({ option, title, windowRange }: {option: ChartOption; title: string; windowRange?: WindowRange}) {
+export function ChartView({ option, title, windowRange }: {option: ChartOption; title: string; windowRange?: WindowRange}) {
   const element = useRef<HTMLDivElement>(null);
   const chart = useRef<Chart | null>(null);
   const latestOption = useRef(option); latestOption.current = option;

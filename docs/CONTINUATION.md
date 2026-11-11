@@ -1,3 +1,32 @@
+# Current source extension — November 11, 2026
+
+Milestone1 sourcefeb9ee0 and portable admin-fixture correction7085818 are pushed.
+The first hosted run failed only on the new fixture's fixed UID; production owner
+checks were not weakened.7085818hosted verification is running. New source also
+adds the independent /usage outcome: all-record UTC activity/token aggregation,
+interactive model charts, missing/partial accounting, actual pre-generation switch
+history and no invented subscription balance. Latest focused58backend,49frontend
+and6model/usage/settings browser checks pass. Complete prior browser121and visual12
+passed without changing references. Full local pre-fix run retained2210passes and
+two old-schema failures; both affected migration cases pass after the fix.
+
+The root-helper owner-terminal request remains pending. A supported partial
+installation is possible: model settings and usage run on unchanged schema0012,
+proven by controlled worker tests on both0012/0013. Stage and install the verified
+new code WITHOUT migration/reconciliation if the helper is still unchanged. This
+preserves all633rows and existing rollback. Do not claim installed historical
+consolidation:41attempts remain separate until the helper accepts0013and a later
+copied-store migration/reconciliation is installed. The shadow0013store remains
+for review only. No new real provider/addon publication occurred.
+
+Next: complete source/hosted checks, actual history totals and screenshot review;
+then seal/cut over the compatible0012release with the existing tested rollback.
+Do not stop solely at the source checkpoint. Feature Workshop dependencies still
+need verified-base composition; attachments/concepts and simulator comparison
+remain unimplemented. The simulator's existing tools/pins were inspected only.
+
+---
+
 # Feature campaign — November 11, 2026: Milestone 1 source checkpoint
 
 Active checkout/branch are unchanged. Starting c3bff84 matches remote and passed

@@ -212,6 +212,14 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
                               purpose: Literal['planning','decomposition','summary','implementation','other'] = 'planning'):
         return model_policy.preview(model_policy.read(app.state.engine), model_policy.capabilities(app.state.capabilities_path), case, purpose)
 
+    from workbench import usage_view
+
+    @app.get('/api/usage', response_model=usage_view.UsageOverview)
+    def usage(days: int = Query(default=7,ge=7,le=90)):
+        if days not in {7,30,90}:
+            raise HTTPException(422, 'Choose 7, 30 or 90 days.')
+        return usage_view.read(app.state.engine, days)
+
     @app.get('/api/models/activity', response_model=model_accounting.Accounting)
     def model_activity(source: Literal['observed','demo'] = 'observed'):
         if source == 'demo':
