@@ -87,7 +87,7 @@ def result_matches(row, view):
     change = result and checked and row['result_kind'] in {'patch', 'tests'}
     return result and {
         'all': True, 'checked': change,
-        'draft': checked and bool(row.get('draft_pr_submitted')),
+        'draft': bool(row.get('draft_pr_submitted')),
         'local': change and not row.get('draft_pr_submitted'),
         'findings': checked and row['result_kind'] == 'findings',
         'incomplete': not checked,

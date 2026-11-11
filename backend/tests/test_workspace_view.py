@@ -235,3 +235,7 @@ def test_result_summaries_keep_failed_findings_and_publication_boundaries():
     assert not result_matches(rows[3], 'checked')
     assert not result_matches(rows[2], 'checked')
     assert not result_matches(rows[3], 'local')
+    # A later failed review does not erase an already-recorded draft submission.
+    rejected = row('failed', 'patch', draft=True)
+    assert result_matches(rejected, 'draft') and result_matches(rejected, 'incomplete')
+    assert not result_matches(rejected, 'checked') and not result_matches(rejected, 'local')
