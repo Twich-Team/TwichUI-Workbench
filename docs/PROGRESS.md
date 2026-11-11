@@ -7730,3 +7730,12 @@ preserved and normal model access verified. Local draft preparation and
 interrupted-apply recovery passed with no remote action, publication or live
 addon change. A fresh ordinary browser request for map test coverage was
 submitted separately; Workbench asked for an example and resumed planning.
+
+The fresh map zoom coverage request completed through the ordinary browser.
+Qwen prepared the reviewed example and changed only the approved test file.
+All four preparation controls, the candidate behavior check and all178 addon
+tests passed. Checked execution 3c27896b/candidate c3c6931adb16 survives desktop
+and phone reload. Both real results read back; model authentication restored;
+the final 629-row offline restore matched exactly. No publication, live addon
+change or in-game testing. Hosted e02a4f0 passed static checks, 2174 backend
+tests, frontend unit checks, 116 Chromium cases and all12 visual checks.

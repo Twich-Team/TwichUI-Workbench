@@ -1,5 +1,12 @@
 # Recovery inventory and delivery order — November 10, 2026
 
+November 11 checkpoint: the original vendor repair and a fresh browser
+coverage request are checked in the installed app. Local draft preparation,
+history and restart passed. Actual addon draft PR submission remains
+conditional on applicable publication authorization. Use the
+[current handoff](CONTINUATION.md) for the verified state; the table below
+records the starting gap inventory.
+
 Verified starting state: development branch codex/everyday-workbench7b7f714,
 installed deployment97, private loopback/LAN preview9487; main/origin main f0314d6.
 Dependency links are untracked; original checkout edits remain untouched.

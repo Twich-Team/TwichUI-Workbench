@@ -1,4 +1,4 @@
-# Checked vendor result and next live proof — November 11, 2026
+# Checked vendor and browser coverage results — November 11, 2026
 
 The private loopback and LAN preview runs **17ee233 / deployment 102** on port
 9487. Seal 5b19458e02f5db2203a0b10b25688ac07cbfcb14fce33cdd4d652986441f853e.
@@ -40,16 +40,28 @@ Private proof: `vendor-completion-20261110/recovery-17ee233-vendor-*`,
 in `delivery-campaign-7b5963a/outcome-17ee233` under the private Workbench data
 directory. Do not replay accepted work or disclose private logs.
 
-## Next approved proof
+## Fresh ordinary browser coverage proof
 
 A separate ordinary browser request to add coverage for wide-map zoom has been
 submitted after vendor verification. Workbench asked for the concrete example;
-the browser provided it and planning is active. See
-`vendor-completion-20261110/ordinary-self-check-events.jsonl` for the saved
-identity and exact stage. Do not duplicate the request. This is local Qwen,
-test-only, fallback Off, publication held. It needs its own scope, verified
-example, run decision and independent checked result. Preserve the vendor
-result and report what the new request actually achieves.
+the browser supplied it. Real local Qwen prepared the plan, and the browser
+saved the reviewed scope decision under the owner's existing delegation.
+Intake `e85649da-30ba-4677-8df3-507d03cb0128`, task suffix
+`2-implementation`. All four independent controls passed. The browser saved
+the separate test-only approval. Real local Qwen added coverage in
+`tests/test_map_viewmath_view.lua` only. The application independently verified
+the reviewed zoom example and the full addon inventory: **178 passed, 0 failed**.
+Checked execution `3c27896b-152a-55b4-8487-8f697a153436`;
+candidate `c3c6931adb1663965641fc88bb423db3e5694cd967fde23a9dd1d4f45479e29d`.
+Desktop and phone result reload passed. Fallback was Off and publication held.
+No per-task recipe, source edit outside the app, or duplicate request was used.
+The private `vendor-completion-20261110/ordinary-self-check-*` files hold the
+browser decisions and exact checked evidence. Both real results read back
+afterward; normal model authentication was restored and the offline restore
+matched the complete 629-row store.
+
+The ordinary local workflow is demonstrated. A real addon draft PR has not
+been submitted; applicable publication authorization remains the next boundary.
 
 The [owner product direction](OWNER_PRODUCT_DIRECTION_20261110.md) and
 [roadmap](PLAN.md) record future automatic features, eligible fallback and draft
@@ -59,8 +71,8 @@ publication, new spending, source disclosure, or Phase C implementation.
 
 Recent fixes preserve exact recovery, scoped history, usable check logs, and an
 unchanged full-suite rerun after a failed suite. 168 affected tests, static and
-native browser/worker rehearsal passed. Hosted c20b1b2 passed 2171 backend,
-frontend unit and 116 Chromium cases (three skips); hosted visuals differed.
-All 12 local visual checks also passed using the test-only reference-font setup;
-the hosted run for that change is pending. Historical failed operations and
-accounting remain in earlier versions of this handoff and the receipts.
+native browser/worker rehearsal passed. Hosted e02a4f0 passed static checks,
+2174 backend tests (11 skips), the frontend unit suite, 116 Chromium checks
+(three skips) and all 12 visual checks using the test-only reference-font setup.
+Historical failed operations and accounting remain in earlier versions of this
+handoff and the receipts.
