@@ -5,9 +5,10 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from workbench import intake, task_execution
+from workbench import intake, task_execution, feature_recovery
 from workbench.db import intakes, proposals, planning_jobs
 from workbench.schemas import IntakeView, PlannedTaskView
+from workbench.feature_recovery import CorrectionOffer
 from workbench.service import now
 
 FeatureState = Literal['understanding', 'planning', 'needs_clarification', 'ready', 'working',
@@ -38,6 +39,7 @@ class FeatureView(BaseModel):
     intake: IntakeView
     steps: list[FeatureStep]
     observed_at: str
+    correction: CorrectionOffer | None = None
 
 
 class FeaturePage(BaseModel):
@@ -136,12 +138,16 @@ def view_in(c, identity):
         waiting = next((j for j in reversed(jobs) if j['status']=='queued' and j['message'].startswith('Waiting for ')), None)
         if waiting:
             state, message = 'held', waiting['message']
+    correction = feature_recovery.offer(c, row)
+    if correction:
+        message = 'The plan is saved, but its proposed steps did not pass the checks. Prepare corrected steps to continue.'
     return dict(id=identity, title=row['payload']['title'], objective=row['payload']['description'],
         state=state, message=message, active=bool(active_step or running), needs_owner=needs_owner,
         completed_steps=sum(s['verified'] for s in steps), total_steps=len(steps),
         current_step=active_step['task']['id'] if active_step else None,
         next_step=next_step['task']['id'] if next_step else None,
-        intake=data, steps=steps, observed_at=now())
+        intake=data, steps=steps, observed_at=now(),
+        correction=correction)
 
 
 def view(engine, identity):

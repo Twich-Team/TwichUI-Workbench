@@ -37,12 +37,18 @@ INSTRUCTIONS = (
     'normally lead to one combined candidate, integrated checks and one draft PR, '
     'each subject to separate execution and publication authority. '
     'Use at most six actionable steps, with necessary dependency edges and no cycles. '
+    'scope_indices are ZERO-BASED indexes into proposal.scope. Every scope index, '
+    'including defaults and preservation constraints, must be covered by at least one '
+    'actionable kind=task. A milestone alone does not cover scope. Do not omit constraints '
+    'because they do not require a separate edit; map them to the relevant task. '
     'Keep all lists and descriptions concise.'
 )
 
 
 class FeatureTask(TaskSpec):
     source_ids: Annotated[list[str], Field(min_length=1, max_length=12)]
+    scope_indices: Annotated[list[int], Field(min_length=1, max_length=12,
+        description='Zero-based proposal.scope indexes. Cover every index across actionable tasks, including preservation constraints.')]
 
 
 class FeatureDecomposition(StrictModel):
@@ -134,6 +140,10 @@ def validate_response(raw, schema, packet):
     if any(not set(t.source_ids) <= known for t in parsed.tasks):
         raise ValueError('A feature step cites uninspected source.')
     canonical = dict(tasks=[t.model_dump(exclude={'source_ids'}) for t in parsed.tasks])
+    covered = {i for t in parsed.tasks if t.kind == 'task' for i in t.scope_indices}
+    missing = set(range(len(packet['proposal']['scope']))) - covered
+    if missing:
+        raise ValueError('Missing actionable coverage for zero-based scope indexes: '+', '.join(map(str, sorted(missing))))
     validate_decomposition(canonical, packet['proposal'])
     return dict(decomposition=canonical, source_context={t.key:t.source_ids for t in parsed.tasks})
 
@@ -268,7 +278,7 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
                 planning_jobs.c.kind == 'planning', planning_jobs.c.revision <= job['revision'])
             .order_by(planning_jobs.c.revision)).scalars() if p.get('feedback')))
         try:
-            everyday.check_planning(c, row)
+            everyday.check_planning(c, row, job)
             route = provider_routes.approved(c, row)
             if job['payload'].get('scope_revision') != intake.human_scope(c, row['id'])['revision']:
                 raise ValueError('Feature scope changed before planning.')
@@ -301,6 +311,7 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
     used = adapter
     model = basis = None
     result = None
+    evidence = None
     try:
         if everyday.enabled():
             everyday.require_room(everyday.configuration(engine))
@@ -311,6 +322,12 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
             if proposal['revision'] != row['revision'] or packet['base'] != job['payload']['feature_base']:
                 raise ValueError('Source or feature plan changed before decomposition.')
             packet['proposal'] = proposal['content']
+            packet['indexed_scope'] = [dict(index=i, requirement=text)
+                for i, text in enumerate(proposal['content']['scope'])]
+            recovery = job['payload'].get('feature_recovery')
+            if recovery:
+                packet['correction'] = dict(previous_validation_failure=recovery['previous_failure'],
+                    instruction='Correct the step graph for this same saved plan. Cover every indexed scope requirement with actionable tasks. Source and requirements are unchanged.')
         schema = PlanningOutput if job['kind'] == 'planning' else FeatureDecomposition
         if used is None:
             if backend == 'codex':
@@ -319,6 +336,9 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
                 used.bind_source(packet)
             else:
                 used = LocalProvider(stop_event, ends_at=time.monotonic()+120)
+        from workbench.planning_response import create_evidence
+        evidence = create_evidence(lease, schema, files=packet['files'])
+        used.response_evidence = evidence
         if stop_event is not None and stop_event.is_set():
             raise PlanningUnavailable('Feature planning stopped before dispatch.', 'cancelled')
         try:
@@ -358,15 +378,24 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
                 used.bind_source(packet)
             else:
                 used = LocalProvider(stop_event, ends_at=time.monotonic()+120)
+            if evidence:
+                evidence.close()
+            evidence = create_evidence(next_lease, schema, files=packet['files'])
+            used.response_evidence = evidence
             raw, model, basis = used.generate(packet, schema, expected_model=selected)
+        if evidence:
+            evidence.snapshot('proposed-plan', raw)
         if model != selected or basis not in {'demo', 'local', 'codex'}:
             raise ValueError('Feature planning attribution does not match the saved AI choice.')
         result = validate_response(raw, schema, packet)
-        if research(original, feedback) != {k:v for k,v in packet.items() if k != 'proposal'}:
+        if research(original, feedback) != {k:v for k,v in packet.items() if k not in {'proposal','indexed_scope','correction'}}:
             raise ValueError('Committed source changed while the feature was being planned.')
     except (OSError, ValueError, HTTPException, PlanningUnavailable, KeyError, TypeError) as error:
         failure = 'Feature planning could not finish. The request and earlier evidence are preserved. ' + (
             str(error)[:400] if not isinstance(error, HTTPException) else 'The saved request or plan changed.')
+    finally:
+        if evidence:
+            evidence.close()
     with write_transaction(engine) as c:
         active = intake.require(c, planning_jobs, job['id'])
         current = intake.require(c, intakes, row['id'])
@@ -391,6 +420,8 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
         if scope_changed:
             failure = 'Feature requirements changed during planning. The late response cannot replace the current plan.'
         diagnostics = getattr(used, 'diagnostics', {})
+        if evidence:
+            payload['response_evidence_id'] = evidence.identifier
         payload = {**payload, 'diagnostics':{k:v for k,v in diagnostics.items() if isinstance(v, (str, int, float, bool))}}
         state = 'failed' if failure else 'completed'
         if not failure:

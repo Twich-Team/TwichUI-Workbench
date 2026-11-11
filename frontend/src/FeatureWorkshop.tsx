@@ -1,8 +1,9 @@
 import {useQuery} from '@tanstack/react-query';
+import {useState} from 'react';
 import {Link,useParams,useSearchParams} from 'react-router-dom';
 import {CheckCircle2,ChevronRight,Circle,ClipboardCheck,Clock3,Eye,FolderOpen,Image,Settings2,ShieldCheck,Sparkles,Wrench} from 'lucide-react';
 import type {components} from './api.generated';
-import {request} from './api';
+import {request,mutate} from './api';
 import {Button} from './components/ui/button';
 import {WorkshopPanel} from './Workspace';
 
@@ -23,12 +24,21 @@ function FeatureList(){
  </>;
 }
 function FeatureDetail({identity}:{identity:string}){
+ const [correcting,setCorrecting]=useState(false);const [correctionError,setCorrectionError]=useState('');
+ const [correctionCommand,setCorrectionCommand]=useState<components['schemas']['CorrectionInput']|null>(null);
  const query=useQuery({queryKey:['feature',identity],queryFn:()=>request<Feature>('/api/features/'+identity),refetchInterval:5000});
  if(!query.data)return <Opening error={query.isError} retry={()=>void query.refetch()}/>;
  const feature=query.data;const original=feature.intake;const proposal=original.proposals.find(p=>p.revision===original.revision);const plan=proposal?.content;
  const active=feature.steps.find(s=>s.task.id===feature.current_step);const next=feature.steps.find(s=>s.task.id===feature.next_step);
  const preferences=original.original.ai_settings;const provider=preferences?.primary.provider||(original.original.local_planning?.startsWith('codex')?'codex':original.original.local_planning?'local':null);
  const attachments=proposal?.artifacts||[];
+ async function correctSteps(){
+  if(!feature.correction)return;
+  const command=correctionCommand||{command_id:crypto.randomUUID(),binding:feature.correction.binding};
+  setCorrectionCommand(command);setCorrecting(true);setCorrectionError('');
+  try{await mutate<Feature>('/api/features/'+identity+'/correct-steps',command);setCorrectionCommand(null);await query.refetch();}
+  catch(error){setCorrectionError((error as Error).message);}finally{setCorrecting(false);}
+ }
  return <><Link className="back-link" to="/features">All features</Link>{query.isError&&<p className="form-error" role="alert">Refresh unavailable. These are the last loaded records; activity may have changed.</p>}
  {original.archived_at&&<p className="soft-callout">Archived feature · Its full plan and history are preserved.</p>}
  <div className="feature-layout"><div className="feature-main"><section className="panel feature-identity"><span className="feature-emblem"><Sparkles size={34}/></span><div><div className="feature-title"><h2>{feature.title}</h2><State state={feature.state}/></div><p>{feature.objective}</p>{provider&&<p className="feature-provider"><span><Settings2 size={16}/>Preferred AI: {provider==='local'?'Local Qwen':'Codex'}</span><Link to={'/intake/'+identity}>View saved choices</Link></p>}{plan&&<p className="feature-understanding">{plan.summary}</p>}</div></section>
@@ -39,6 +49,7 @@ function FeatureDetail({identity}:{identity:string}){
  <aside className="feature-side"><WorkshopPanel title="Progress" icon={<ClipboardCheck size={21}/>} action={<span>{feature.completed_steps} of {feature.total_steps} checked</span>}>
  <progress className="feature-progress" aria-label="Verified feature steps" value={feature.completed_steps} max={feature.total_steps||1}/><div className="feature-current"><strong>{active?'Current step':'Where things stand'}</strong>{active&&<h3>{active.task.title}</h3>}<p>{feature.message}</p></div><div className="feature-next"><strong>What happens next</strong><p>{next?next.task.title:feature.total_steps?'Combined feature verification is required before a finished result.':'A source-grounded plan and related steps are needed before implementation.'}</p></div><p className="small-text">Progress counts checked steps. It does not estimate time remaining or certify the combined feature.</p></WorkshopPanel>
  <WorkshopPanel title="References" icon={<Image size={21}/>} action={<span>{attachments.length} {attachments.length===1?'attachment':'attachments'}</span>}>{attachments.length?<ul className="feature-references">{attachments.map(a=><li key={a.id}><a href={'/api/planning-artifacts/'+a.id} target="_blank" rel="noreferrer"><Image size={22}/><span><strong>{a.label}</strong><small>{a.role==='mockup'?'Design reference':'Supporting reference'} · {a.media_type}</small></span><Eye size={17}/></a></li>)}</ul>:<p>No references attached to this plan.</p>}</WorkshopPanel>
+ {feature.correction&&<WorkshopPanel title="Prepare corrected steps" icon={<Wrench size={21}/>}><p>{feature.correction.message}</p>{correctionError&&<p role="alert" className="form-error">{correctionError}</p>}<Button disabled={correcting} onClick={()=>void correctSteps()}>{correcting?'Saving…':'Prepare steps again'}</Button></WorkshopPanel>}
  <WorkshopPanel title={feature.needs_owner?'Your input is needed':feature.active?'No owner input needed':'Saved work is preserved'} icon={<ShieldCheck size={21}/>}><p>{feature.needs_owner?feature.message:feature.active?'Workbench has what it needs for the current step.':'Open the request for available decisions and task controls.'}</p><Button asChild><Link to={'/intake/'+identity}><Eye size={17}/>{feature.needs_owner?'Review plan or question':'Open request'}</Link></Button></WorkshopPanel>
  </aside></div>
  <details className="panel feature-evidence"><summary>Evidence and verification</summary><p>Combined feature verification: {feature.integrated_verification==='not_recorded'?'Not yet recorded':feature.integrated_verification}.</p><p>Checked steps do not establish in-game behavior, a combined result, or publication.</p>{feature.steps.map(s=><div key={s.task.id}><h3>{s.task.title}</h3><p>{s.message}</p>{s.execution.runs.map(run=><p key={run.id}><Link to={'/executions/'+run.id}>View saved attempt and checks</Link>{run.publication?.published&&run.publication.url&&<> · <a href={run.publication.url} target="_blank" rel="noreferrer">Open draft PR</a></>}</p>)}</div>)}<details><summary>Plan revisions and research</summary><p>{original.proposals.length} saved plan revisions. {original.evidence.length} retained research references.</p>{original.evidence.map(e=><p key={e.id}>{e.label}{e.source_revision?' · '+e.source_revision:''}</p>)}<Link to={'/intake/'+identity}>Complete request history and technical records</Link></details></details>

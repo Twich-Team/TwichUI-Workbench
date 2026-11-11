@@ -61,7 +61,7 @@ def main():
     parser.add_argument(
         "action",
         choices=[
-            'feature-workshop-setup', 'feature-workshop-tick',
+            'feature-workshop-setup', 'feature-workshop-tick', 'feature-workshop-invalid-steps',
             "regression-planning",
             "reviewed-offer-setup", "reviewed-offer-plan", "reviewed-offer-prepare",
             "reviewed-offer-controller", "reviewed-offer-stale",
@@ -135,7 +135,14 @@ def main():
             model_policy.save(engine, policy, model_policy.CapabilityReport(executors=[]))
         else:
             os.environ['WORKBENCH_RESEARCH_ROOT'] = str(path.parent / 'reviewed-research/source')
-            assert worker.tick(engine, planning_adapter=ControlledFeaturePlanner())
+            planner = ControlledFeaturePlanner()
+            if args.action == 'feature-workshop-invalid-steps':
+                def incomplete(result, schema):
+                    result['tasks'] = result['tasks'][:1]
+                planner.mutate = incomplete
+                planner.diagnostics.update(accounting_state='complete',
+                    usage=dict(status='complete', total_tokens=200))
+            assert worker.tick(engine, planning_adapter=planner)
         return
     if args.action.startswith('reviewed-offer-'):
         from reviewed_offer_fixture import setup, advance

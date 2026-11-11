@@ -1,3 +1,71 @@
+## November 11 — same-feature correction source ready for hosted acceptance
+
+The real plan is saved; its first step response failed coverage and remains held
+in installed112. Local model normal access was verified after both known-finished
+calls. New source adds exact one-operation correction consent and durable bounded
+response evidence without changing the original request, plan, consent or ledger.
+12final correction cases pass (concurrent duplicate commands, retained raw rejected
+response/plan/usage, source movement including during admission, expired permission,
+uncertain/unfinished/missing-usage, changed scope, declined/superseded and archived
+features, historical command replay). Earlier170affected backend and55combined
+feature/CI checks pass;58frontend, static/contracts/schema/build and12unchanged visual
+scenarios pass. The real browser creation→rejected graph→explicit correction→two
+durable dependent tasks passes;1440/390/320px200%screenshots inspected. Three extra
+runs with delayed model preferences pass after the observer waits for the actual
+correction POST response before ticking the fixture worker. Retain the earlier
+observer failures; no product assertions were weakened. Final one-run journey also
+passes after plain-English failure presentation. No additional real generation yet.
+
+Checkpoint/push this repair, require full exact hosted acceptance, preserve the
+newer installed52-request store, install and verify restore/rollback, then use the
+ordinary correction button once for real5d62e6bc. Continue FW3–FW7, not a new task
+or hand-prepared subtasks. Zero complete Feature Workshop implementations.
+
+## November 11 — real decomposition rejected; same-feature repair in progress
+
+Installed112 real task5d62e6bc completed plan generation in42.275s (4703prompt,
+816completion) and decomposition generation in28.25s (5432prompt,592completion),
+both localpilot-qwen38-27b with complete usage. The second response failed the
+unchanged actionable scope-coverage check; zero subtasks accepted. The plan and
+original request remain. No implementation/publication authority or addon change.
+Do not claim real decomposition or FW2 acceptance complete from the plan alone.
+Normal model access must be checked again after settling the reservation.
+
+Source repair explicitly describes zero-based scope indexes including constraints,
+retains bounded private provider/rejected data via the established planning evidence
+owner, and adds one explicit same-feature decomposition-correction command. It
+requires confirmed finished generation/usage, unchanged plan/source/scope/provider,
+retains old claims/consent/usage, fences uncertain/active/declined/stale outcomes,
+and permits only one new120s read-only request. Original consent is not enlarged.
+Controlled34initial feature/lifecycle/correction cases pass; expanded backend,
+ordinary correction browser and static checks run next. This repair is NOT yet
+installed; preserve112 and its NEWER52-request store. Continue correction release,
+real same-parent proof, then FW3–FW7 under standing authority.
+
+## November 11 — FW2 installed112; real planning demonstration running
+
+Exact4b5b8fe/full hosted43090678570 passed all9groups including finalverify and
+the dedicated grounded browser journey. Acceptance ZIP digestf84faa2e verified;
+frontend ZIP digest90614989 verified and all26 release files equal hosted bytes.
+Installed112 source seal75eb5032b3f0bc4b6685e8f1bb8032cdc0431d86f79ab1e9b97da538ffb9ce32.
+Named existing helper/session78 unchanged; schema0014. All690earlier rows/hash
+91bf5ef0954f196e72d8d60533ab14662754ead08845ba59798eebadcdd6e179 preserved.
+Four-role restart, independent installed-store restore, both previous/current51
+original readers and actual112→111→112 pass. Installed/returned1440/390/320px200%
+reads/reload/keyboard pass with zero writes/errors; actual images inspected.
+TLS,private routes,filters,model auth and8765verified. Failed969was never installed.
+
+Real Qwen ordinary browser submission5d62e6bc-1aa8-48f4-a3e1-4d05ade2d480 now
+investigates “Remember map zoom while playing”: same-login zoom memory, preserve
+initial default/controls, reset on reload/logout, no settings/persistent save.
+Local provider selected explicitly, fallbackOff. Existing worker/planning journal
+owns requests; no hand-prepared subtasks or external addon edits. Planning still
+running, no plan/model completion claimed. Private evidence real-map-zoom-planning;
+operations outcome-4b5b8fe, captures installed112/returned112. Actual rollback was
+performed before this new request; preserve its newer store and never erase it
+by rolling back to the earlier690-row copy. Continue real plan verification and
+FW3–FW7; zero complete Feature Workshop implementations, no routine owner decision.
+
 ## November 11 — corrected FW2 candidate after actual failures
 
 Candidate969422c was pushed but NOT installed. Hosted43088212573 passed every

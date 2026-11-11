@@ -22,7 +22,7 @@ from workbench.real_execution import RunPage, StopRequest
 from workbench.task_execution import TaskExecutionContext
 from workbench.workspace_view import WorkspacePage
 from workbench import work_controls
-from workbench import feature_workshop
+from workbench import feature_workshop, feature_recovery
 
 # Exact authorities only. The dedicated HTTPS service admits the configured home subnet.
 AUTHORITIES = {"127.0.0.1:8787", "localhost:8787", "127.0.0.1:5180", "localhost:5180",
@@ -109,6 +109,11 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
 
     @app.get('/api/features/{identity}', response_model=feature_workshop.FeatureView)
     def feature_detail(identity: str):
+        return feature_workshop.view(app.state.engine, identity)
+
+    @app.post('/api/features/{identity}/correct-steps', response_model=feature_workshop.FeatureView, responses=errors)
+    def correct_feature_steps(identity: str, body: feature_recovery.CorrectionInput):
+        feature_recovery.request(app.state.engine, identity, body)
         return feature_workshop.view(app.state.engine, identity)
 
     @app.post('/api/intake', response_model=IntakeView, responses=errors)

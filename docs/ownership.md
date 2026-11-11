@@ -1,3 +1,19 @@
+# Feature step correction owner — November 11, 2026
+
+Settled feature decomposition corrections remain in the same planning_jobs row,
+with append-only model_attempts and existing private planning-response evidence.
+A separate exact browser command records one new120s read-only permission after
+confirmed finished generation/accounting. It binds original request, saved plan,
+source, human scope, previous failure, provider route and command identity. Old
+consent is unchanged. Earlier claims/diagnostics/response identities and correction
+commands remain in job history; stale or uncertain/active work cannot be renewed.
+Duplicate commands return the saved state without another generation. The ordinary
+worker, source access and model reservation owners remain authoritative. This
+mechanism grants no implementation, publication, provider switch beyond the saved
+pre-generation fallback, schema migration, or legacy scheduling authority.
+
+---
+
 # Grounded feature planning ownership — November 11, 2026
 
 Optional intake.feature_planning records read-only feature consent with the exact

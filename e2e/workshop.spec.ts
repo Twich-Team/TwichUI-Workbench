@@ -6,6 +6,8 @@ test.beforeEach(()=>fixture('reset'));
 test('Feature Workshop grounded intake automatically plans connected steps',async({page},info)=>{
  test.skip(process.env.WORKBENCH_E2E_EVERYDAY!=='1','Uses the dedicated controlled everyday installation.');
  fixture('feature-workshop-setup');
+ // Saved model preferences may arrive after the owner starts typing.
+ await page.route('**/api/models',async route=>{await new Promise(resolve=>setTimeout(resolve,300));await route.continue();});
  await page.goto('/features');
  await page.getByRole('link',{name:'Describe a feature',exact:true}).click();
  await page.getByLabel('Description',{exact:true}).fill('Save my normalization preference for each character and restore it when I return.');
@@ -14,7 +16,19 @@ test('Feature Workshop grounded intake automatically plans connected steps',asyn
  await page.getByRole('button',{name:'Plan feature',exact:true}).dblclick();
  await expect(page).toHaveURL(/\/features\/[a-f0-9-]{36}/);
  const identity=new URL(page.url()).pathname.split('/').at(-1)!;
- fixture('feature-workshop-tick');fixture('feature-workshop-tick');
+ fixture('feature-workshop-tick');fixture('feature-workshop-invalid-steps');
+ await page.reload();await expect(page.getByText('Could not finish',{exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Prepare steps again',exact:true})).toBeVisible();
+ for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
+  await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await overflow(page);await capture(page,info,`grounded-feature-correction-${width}`,{keepInCompact:true});
+ }
+ await page.setViewportSize({width:390,height:844});await page.evaluate(()=>document.documentElement.style.fontSize='16px');
+ const correctionSaved=page.waitForResponse(response=>response.url().endsWith('/api/features/'+identity+'/correct-steps')&&response.request().method()==='POST');
+ await page.getByRole('button',{name:'Prepare steps again',exact:true}).dblclick();
+ expect((await correctionSaved).ok()).toBeTruthy();
+ await expect(page.getByRole('button',{name:'Prepare steps again',exact:true})).toHaveCount(0);
+ fixture('feature-workshop-tick');
  await page.reload();await expect(page.getByRole('heading',{name:'Save the preference',exact:true})).toBeVisible();
  await expect(page.getByRole('heading',{name:'Restore the preference',exact:true})).toBeVisible();
  await expect(page.getByText('0 of 2 checked',{exact:true})).toBeVisible();

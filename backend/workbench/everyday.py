@@ -253,6 +253,10 @@ def planning_receipt(original, created_at):
 
 
 def check_planning(c, original, job=None):
+    if original['payload'].get('feature_planning') and job and job['payload'].get('feature_recovery'):
+        from workbench.feature_recovery import validate
+        validate(c, original, job)
+        return
     from workbench.db import planning_jobs
     rows = c.execute(select(planning_jobs.c.id,planning_jobs.c.payload).where(
         planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')).mappings().all()
