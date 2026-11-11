@@ -1,3 +1,26 @@
+# November 11 — corrected FW2 candidate after actual failures
+
+Candidate969422c was pushed but NOT installed. Hosted43088212573 passed every
+application group except Browser1/4: the dedicated grep was anchored before the
+Playwright project/file prefix, so discovered zero tests; finalverify correctly
+failed. Removed that anchor and added actual discovery verification of exactly
+one intended journey, with its required everyday environment and partition.
+All19 CI checks pass. Full settled-source local browser run had128passes/4skips
+and one real phone Results visibility failure. Corrected five-item navigation
+width arithmetic; unchanged focused Results/navigation/enlarged/Workshop checks
+all4pass, dedicated grounded journey1pass,58frontend pass. All12 visual scenarios
+pass after reviewing seven expected phone-only baseline changes; desktop remains
+unchanged. Final static/contracts/schema/build checks pass. Earlier mixed-source
+run was23import failures PLUS this layout failure, not24import failures.
+
+690saved rows/51original requests remain in installed111/7c2073e. No real feature
+model call yet. Prepare a new exact candidate, full hosted acceptance and safe
+private installation; never reuse969422c acceptance. Then demonstrate bounded
+real grounded planning and continue FW3–FW7. Zero complete Feature Workshop
+implementations; no routine owner decision needed.
+
+---
+
 # FW2 grounded planning source checkpoint — November 11, 2026
 
 FW1 remains installed7c2073e/private111 with verified restore/rollback. Uncommitted
@@ -40,8 +63,9 @@ hosted build. Source seal e5f8e06995237d90557a3505681a19bb5405dc1452f6067989931b
 All44 affected checks and5 feature API/worker/restart cases pass. Local full backend
 2261/8skips and58frontend pass. All12 visual scenarios passed after reviewed nav-only
 baseline updates. The separate long local browser run was invalidated by starting
-FW2 edits before its subprocesses finished reading source:24 import failures during
-the temporary missing-module interval,105passed/3skips. Do not claim that mixed run
+FW2 edits before its subprocesses finished reading source:23 import failures during
+the temporary missing-module interval plus one phone Results visibility failure,
+105passed/3skips. Do not claim that mixed run
 as full FW1 acceptance. Exact hosted FW1 passed independently. Rerun the complete
 browser suite on settled FW2 source, retaining the failed local receipt.
 

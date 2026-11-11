@@ -1,3 +1,24 @@
+## November 11 — corrected FW2 candidate after actual failures
+
+Candidate969422c was pushed but NOT installed. Hosted43088212573 passed every
+application group except Browser1/4: the dedicated grep was anchored before the
+Playwright project/file prefix, so discovered zero tests; finalverify correctly
+failed. Removed that anchor and added actual discovery verification of exactly
+one intended journey, with its required everyday environment and partition.
+All19 CI checks pass. Full settled-source local browser run had128passes/4skips
+and one real phone Results visibility failure. Corrected five-item navigation
+width arithmetic; unchanged focused Results/navigation/enlarged/Workshop checks
+all4pass, dedicated grounded journey1pass,58frontend pass. All12 visual scenarios
+pass after reviewing seven expected phone-only baseline changes; desktop remains
+unchanged. Final static/contracts/schema/build checks pass. Earlier mixed-source
+run was23import failures PLUS this layout failure, not24import failures.
+
+690saved rows/51original requests remain in installed111/7c2073e. No real feature
+model call yet. Prepare a new exact candidate, full hosted acceptance and safe
+private installation; never reuse969422c acceptance. Then demonstrate bounded
+real grounded planning and continue FW3–FW7. Zero complete Feature Workshop
+implementations; no routine owner decision needed.
+
 ## November 11 — grounded feature planning ready for full acceptance
 
 FW2 extends the existing intake/job/backlog/worker owners with explicit feature
@@ -31,8 +52,8 @@ requests, with matching current/previous readers. Private listeners/TLS/guards,
 model authentication, four roles and8765 pass. No new generation/publication/game
 or legacy action. No parent feature is claimed complete from its checked child.
 
-The extra local browser run overlapped early FW2 file writes:24temporary import
-failures,105passes/3skips. Exact hosted source7c2073e independently passed all cases;
+The extra local browser run overlapped early FW2 file writes:23temporary import
+failures plus one phone Results visibility failure,105passes/3skips. Exact hosted source7c2073e independently passed all cases;
 retain the failed mixed-source run and repeat the whole browser suite after FW2
 settles. This was an avoidable verification-order mistake, not an installed defect.
 FW2 initial9controlled cases pass for grounded persisted source/steps, graph faults,

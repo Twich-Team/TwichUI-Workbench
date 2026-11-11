@@ -89,7 +89,7 @@ jobs:
         if: matrix.shard == '1/4'
         env:
           WORKBENCH_E2E_EVERYDAY: '1'
-        run: npm run test-e2e -- --grep '^Feature Workshop grounded intake'
+        run: npm run test-e2e -- --grep 'Feature Workshop grounded intake'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

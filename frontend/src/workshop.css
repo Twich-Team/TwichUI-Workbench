@@ -187,7 +187,7 @@ h2,h3{overflow-wrap:anywhere;min-width:0;}
 .settings-panel label{max-width:min(100%,22.5rem);}
 .settings-panel select{width:100%;min-width:0;}
 .planned-task:has(.inline-result)>h2:first-child{margin:0 0 .9rem;padding:.5rem .75rem;}
-@media(max-width:640px){.styled-workbench .primary-nav{display:flex;flex-wrap:wrap;}.styled-workbench .nav-item{flex:1 0 max(20%,6em);overflow-wrap:normal;}}
+@media(max-width:640px){.styled-workbench .primary-nav{display:flex;flex-wrap:wrap;}.styled-workbench .nav-item{flex:1 0 max(calc((100% - 1rem) / 5),5.5em);overflow-wrap:normal;}}
 @media(min-width:641px) and (max-height:700px){.sidebar-create{order:-1;margin-top:0;padding-top:0;}.sidebar-caption{display:none;}}
 @media(max-width:640px){.styled-workbench .primary-nav{flex-direction:row;}}
 .button-primary:hover:not(:disabled){color:#271709;}
