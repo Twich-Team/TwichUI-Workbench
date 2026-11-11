@@ -21,6 +21,7 @@ PLANNING_MINUTES = 30
 
 
 class LocalWorkStatus(StrictModel):
+    feature_planning: bool = False
     enabled: bool
     ready: bool
     message: str
@@ -148,7 +149,7 @@ def status(engine):
     except (OSError, ValueError, RuntimeError):
         return LocalWorkStatus(enabled=True, ready=False, message='Workbench could not measure storage capacity.')
     from workbench.codex_provider import connector_path
-    return LocalWorkStatus(enabled=True, ready=True, headroom_bytes=remaining,
+    return LocalWorkStatus(enabled=True, ready=True, headroom_bytes=remaining, feature_planning=True,
                            bug_investigation='lua-offline-bugfix' in prepared['allowed_classes'],
                            codex_configured=bool(os.environ.get('WORKBENCH_CODEX_SOCKET')),
                            codex_available=connector_path() is not None,
@@ -240,6 +241,10 @@ def planning_receipt(original, created_at):
     from workbench.bug_investigation import INVESTIGATION_SECONDS, INVESTIGATION_REQUESTS, INVESTIGATION_REQUEST_SECONDS, requested
     return dict(binding=digest(original), expires_at=(
         datetime.fromisoformat(created_at) + timedelta(minutes=45 if requested(original) else PLANNING_MINUTES)).isoformat(),
+        **(dict(feature_planning_version=1, feature_phases=['planning','decomposition'],
+                generation_requests_per_phase=1, request_deadline_seconds=120,
+                fallback='before-generation-only', source_writes=False,
+                execution_dispatch=False, publication=False) if original.get('feature_planning') else {}),
         **(dict(investigation_version=10, max_local_requests=INVESTIGATION_REQUESTS, max_codex_requests=INVESTIGATION_REQUESTS,
                 max_total_model_requests=INVESTIGATION_REQUESTS, codex_request_deadline_seconds=300,
                 max_local_completion_tokens=6144,

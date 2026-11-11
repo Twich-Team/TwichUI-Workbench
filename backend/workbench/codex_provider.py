@@ -1300,6 +1300,10 @@ class Planner:
         from workbench.bug_intent import Response as IntentResponse
 
         bug_schema = schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse)
+        from workbench.feature_planning import FeatureDecomposition, INSTRUCTIONS as FEATURE_INSTRUCTIONS
+        feature_schema = schema is FeatureDecomposition or packet.get('original', {}).get('feature_planning')
+        if feature_schema:
+            instructions = FEATURE_INSTRUCTIONS
         if schema is IntentResponse:
             from workbench.bug_intent import INSTRUCTIONS
             instructions = INSTRUCTIONS
@@ -1319,7 +1323,7 @@ class Planner:
             instructions = INSTRUCTIONS
         model = self.selection["model"]
         self.diagnostics = dict(generation_state="not_started")
-        if bug_schema:
+        if bug_schema or feature_schema:
             self.validate_source(packet)
         if expected_model is not None and model != expected_model:
             raise Hold("model_identity")

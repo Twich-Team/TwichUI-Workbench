@@ -113,6 +113,8 @@ def view_in(c, identity):
         state, message = 'failed', next((j['message'] for j in reversed(jobs) if j['status'] == 'failed'), 'This feature could not finish. Saved work is preserved.')
     elif status == 'scope_review_required':
         state, message, needs_owner = 'needs_owner_action', 'The feature scope changed. Review the current plan.', True
+    elif status == 'declined':
+        message = 'This feature was declined. Its original request and saved plan remain available.'
     elif pending:
         message = 'Your decision is saved and waiting to apply.'
     elif active_step:
@@ -131,6 +133,9 @@ def view_in(c, identity):
             message = 'All steps have checked results. Combined feature verification is still required.'
     elif status in {'queued', 'approved'}:
         state, message = 'planning', 'Feature planning is queued. No model is currently recorded as working.'
+        waiting = next((j for j in reversed(jobs) if j['status']=='queued' and j['message'].startswith('Waiting for ')), None)
+        if waiting:
+            state, message = 'held', waiting['message']
     return dict(id=identity, title=row['payload']['title'], objective=row['payload']['description'],
         state=state, message=message, active=bool(active_step or running), needs_owner=needs_owner,
         completed_steps=sum(s['verified'] for s in steps), total_steps=len(steps),

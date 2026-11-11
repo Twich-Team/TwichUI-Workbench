@@ -90,9 +90,12 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
                     planning_jobs.c.revision == proposal['revision'],
                     planning_jobs.c.status == 'completed').limit(1)).scalar() or {}
                 provenance = source_payload.get('owner_provenance')
-                intake.enqueue(connection, row['id'], 'decomposition', proposal['revision'],
-                    {'proposal_id':proposal['id'], 'approval_id':receipt['id'], 'binding':receipt['binding'],
-                     **({'owner_provenance':provenance} if provenance else {})})
+                from workbench.feature_planning import bind_reviewed_decomposition
+                if not (row['payload'].get('feature_planning') and bind_reviewed_decomposition(
+                        connection, row, proposal, receipt)):
+                    intake.enqueue(connection, row['id'], 'decomposition', proposal['revision'],
+                        {'proposal_id':proposal['id'], 'approval_id':receipt['id'], 'binding':receipt['binding'],
+                         **({'owner_provenance':provenance} if provenance else {})})
             elif action == 'changes' and not read_only_changes:
                 intake.enqueue(connection, row['id'], 'planning', proposal['revision']+1,
                     {'feedback':receipt['payload']['note'], 'previous_proposal':proposal['content']})
@@ -168,6 +171,7 @@ def claim(engine):
             and_(planning_jobs.c.status == 'running', planning_jobs.c.lease_until < now())))
             .join(intakes, planning_jobs.c.intake_id == intakes.c.id)
             .where(intakes.c.payload['regression_tests'].as_string().is_(None))
+            .where(intakes.c.payload['feature_planning'].as_boolean().is_not(True))
             .where(~((intakes.c.payload['kind'].as_string() == 'issue')
                 & intakes.c.payload['local_planning'].as_string().is_not(None)
                 & intakes.c.payload['supported_task'].as_string().is_(None)))
@@ -218,6 +222,10 @@ def claim(engine):
 
 
 def process_one(engine, adapter=None, fail_before_commit=False, stop_event=None, *, scenario_response=None):
+    from workbench import feature_planning
+    if feature_planning.process_one(engine, adapter=adapter, stop_event=stop_event,
+                                    fail_before_commit=fail_before_commit):
+        return True
     from workbench import regression_preparation
     if regression_preparation.process_one(engine, fail_before_commit=fail_before_commit,
                                           scenario_response=scenario_response, adapter=adapter, stop_event=stop_event):

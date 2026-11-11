@@ -388,3 +388,5 @@ h2,h3{overflow-wrap:anywhere;min-width:0;}
 .feature-list-card small {color:#c4b397;line-height:1.5;}
 @media(max-width:1100px) {.feature-layout {grid-template-columns:minmax(0,1fr);} .feature-side {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;} .feature-side>section:first-child {grid-column:1/-1;}}
 @media(max-width:650px) {.feature-side {display:block;} .feature-identity {gap:.8rem;padding:1rem;} .feature-emblem {width:2.8rem;height:2.8rem;} .feature-emblem svg {width:1.6rem;} .feature-title h2 {font-size:1.4rem;} .feature-step {grid-template-columns:1.7rem minmax(0,1fr);padding:.9rem .25rem;gap:.6rem;} .feature-step>.feature-state {grid-column:2;justify-self:start;} .feature-step:not(:last-child)::before {left:1rem;} .feature-list-card {flex-wrap:wrap;} .feature-list-card>span:first-of-type {flex-basis:65%;} .feature-list-card>.feature-state {margin-left:2.6rem;}}
+
+.feature-provider>span {display:inline-flex;align-items:center;gap:.5rem;}

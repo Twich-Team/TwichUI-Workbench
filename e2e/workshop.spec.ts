@@ -3,6 +3,33 @@ import {fixture,overflow,capture} from './helpers';
 
 test.beforeEach(()=>fixture('reset'));
 
+test('Feature Workshop grounded intake automatically plans connected steps',async({page},info)=>{
+ test.skip(process.env.WORKBENCH_E2E_EVERYDAY!=='1','Uses the dedicated controlled everyday installation.');
+ fixture('feature-workshop-setup');
+ await page.goto('/features');
+ await page.getByRole('link',{name:'Describe a feature',exact:true}).click();
+ await page.getByLabel('Description',{exact:true}).fill('Save my normalization preference for each character and restore it when I return.');
+ await page.getByLabel('Title Optional').fill('Remember my normalization preference');
+ await expect(page.getByRole('button',{name:'Plan feature',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Plan feature',exact:true}).dblclick();
+ await expect(page).toHaveURL(/\/features\/[a-f0-9-]{36}/);
+ const identity=new URL(page.url()).pathname.split('/').at(-1)!;
+ fixture('feature-workshop-tick');fixture('feature-workshop-tick');
+ await page.reload();await expect(page.getByRole('heading',{name:'Save the preference',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Restore the preference',exact:true})).toBeVisible();
+ await expect(page.getByText('0 of 2 checked',{exact:true})).toBeVisible();
+ const record=await page.request.get('/api/features/'+identity).then(r=>r.json());
+ expect(record.intake.original.ai_settings.primary.provider).toBe('local');
+ expect(record.steps[1].task.dependencies).toEqual([record.steps[0].task.id]);
+ expect(record.intake.original.description).toBe('Save my normalization preference for each character and restore it when I return.');
+ for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
+  await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await overflow(page);await capture(page,info,`grounded-feature-plan-${width}-${font}`,{keepInCompact:true});
+ }
+ await page.reload();await expect(page.getByText('0 of 2 checked',{exact:true})).toBeVisible();
+ const rows=await page.request.get('/api/intake').then(r=>r.json());expect(rows.total).toBe(1);
+});
+
 test('Feature Workshop retains its parent plan and real worker decomposition through reload',async({page},info)=>{
  await page.goto('/intake/new?kind=feature');
  await page.getByLabel('Description',{exact:true}).fill('Preserve my guide selection when I reload the addon.');

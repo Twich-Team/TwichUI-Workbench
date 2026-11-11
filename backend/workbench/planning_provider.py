@@ -303,6 +303,9 @@ class LocalProvider:
         )
         instructions = loaded_client if schema is LoadedClientResponse else (
             scenario if issubclass(schema, ScenarioResponse) else planning)
+        from workbench.feature_planning import FeatureDecomposition, INSTRUCTIONS as FEATURE_INSTRUCTIONS
+        if schema is FeatureDecomposition or json.loads(encoded).get('original', {}).get('feature_planning'):
+            instructions = FEATURE_INSTRUCTIONS
         if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse):
             from workbench.bug_investigation import INSTRUCTIONS
             instructions = INSTRUCTIONS

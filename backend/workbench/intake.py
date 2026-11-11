@@ -50,9 +50,13 @@ def submit(engine, body, *, owner_provenance=None):
     from workbench import bug_investigation, everyday
 
     original = body.model_dump(mode='json')
+    feature = body.feature_planning
+    if feature and (body.kind != 'feature' or body.requested_work not in (None, 'feature')
+                    or body.supported_task or body.regression_tests or not body.local_planning):
+        raise HTTPException(422, 'Feature planning needs a feature description and an explicit AI choice.')
     if body.ai_settings and not body.local_planning:
         raise HTTPException(422, 'Task AI settings require matching provider consent.')
-    if body.requested_work and (body.kind != 'feature' or body.local_planning or body.supported_task or body.regression_tests):
+    if body.requested_work and (body.kind != 'feature' or (body.local_planning and not feature) or body.supported_task or body.regression_tests):
         raise HTTPException(422, 'This kind of work can be saved for later, but cannot authorize a model or repair in this release.')
     if body.supported_task is None:
         original.pop('supported_task', None)
@@ -63,7 +67,7 @@ def submit(engine, body, *, owner_provenance=None):
         if not load(body.supported_task):
             raise HTTPException(409, 'This supported task is unavailable.')
     bug = bug_investigation.requested(original)
-    if body.local_planning and ((not body.regression_tests and not bug) or (not bug and body.visual_requirement != 'nonvisual')):
+    if body.local_planning and not feature and ((not body.regression_tests and not bug) or (not bug and body.visual_requirement != 'nonvisual')):
         raise HTTPException(422, 'Model investigation is available for eligible offline bug fixes and test coverage.')
     if body.kind == 'feature' and body.lua_error:
         raise HTTPException(422, 'Lua errors belong to issue reports.')
@@ -108,12 +112,12 @@ def submit(engine, body, *, owner_provenance=None):
                     raise HTTPException(409, str(error)) from None
                 planning['local_planning_receipt'] = receipt
             needs_permission = everyday.enabled() and body.kind == 'issue' and not body.local_planning and not body.supported_task
-            connection.execute(intakes.insert().values(id=identity, payload=original, status='unavailable' if body.requested_work else 'waiting_for_information' if needs_permission else 'queued',
+            connection.execute(intakes.insert().values(id=identity, payload=original, status='unavailable' if body.requested_work and not feature else 'waiting_for_information' if needs_permission else 'queued',
                 revision=0, created_at=at, priority_override=None))
             connection.execute(intake_scopes.insert().values(intake_id=identity, revision=1, command_id=identity,
                 visual_requirement=body.visual_requirement, stage='implementation', origin='human',
                 note='Recorded with the original request.', change_payload=original, created_at=now()))
-            if not body.requested_work and not needs_permission:
+            if (not body.requested_work or feature) and not needs_permission:
                 enqueue(connection, identity, 'planning', 1, planning)
     return view(engine, identity)
 
@@ -360,6 +364,13 @@ def receipt_view(row):
 
 
 def decide(engine, identity, body):
+    if body.action == 'approve':
+        from workbench.feature_planning import validate_plan_source
+        with engine.connect() as existing:
+            recorded = existing.execute(select(proposal_decisions.c.id).where(
+                proposal_decisions.c.id == str(body.command_id))).first()
+        if not recorded:
+            validate_plan_source(engine, identity, str(body.proposal_id))
     if body.run_budget is not None and body.run_budget.turns is None:
         raise HTTPException(409, 'Continuing repair needs its distinct trusted owner instruction; a plan approval cannot create it')
     payload = body.model_dump(mode='json')
@@ -488,6 +499,8 @@ def retry(engine, identity, job_id, *, preparation=None):
         row = require(connection, intakes, identity)
         if job['intake_id'] != identity:
             raise HTTPException(404, 'Job not found for this request.')
+        if row['payload'].get('feature_planning'):
+            raise HTTPException(409, 'This feature keeps its provider claims and saved plans. A generic retry cannot replay planning; update the current requirements after reviewing the saved outcome.')
         if preparation and preparation.resume_before_generation:
             from workbench.investigation_start import resume_in
             resume_in(connection,row,job,preparation)

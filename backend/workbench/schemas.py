@@ -291,6 +291,7 @@ class TaskAISettings(StrictModel):
 
 
 class IntakeInput(StrictModel):
+    feature_planning: bool | None = Field(default=None, strict=True, exclude_if=lambda value: value is None)
     ai_settings: TaskAISettings | None = Field(default=None, exclude_if=lambda value: value is None)
     requested_work: Literal['feature', 'inspection', 'simulation', 'data', 'other'] | None = Field(default=None, exclude_if=lambda value: value is None)
     visual_requirement: VisualRequirement = 'unclassified'
@@ -532,7 +533,7 @@ class ProposalView(StrictModel):
     revision: int
     content: ProposalContent
     model: str
-    basis: Literal['demo', 'local', 'owner', 'template', 'preparation']
+    basis: Literal['demo', 'local', 'codex', 'owner', 'template', 'preparation']
     created_at: str
     artifacts: list[ArtifactView]
     binding: str

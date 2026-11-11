@@ -1,3 +1,75 @@
+# FW2 grounded planning source checkpoint — November 11, 2026
+
+FW1 remains installed7c2073e/private111 with verified restore/rollback. Uncommitted
+FW2 source now accepts ordinary feature descriptions with saved provider/model
+consent, inspects committed Lua, persists source-bound plans, automatically creates
+validated dependent subtasks, and retains per-step source references. It reuses
+planning_jobs/backlog/worker/model reservations; no migration, new store/scheduler,
+execution grant or publication permission is added. Review before/during/after
+preparing steps binds the actual scope decision without a second model request.
+Expired/changed source, invalid graphs, declined requirements, stale late output,
+dead owners, disabled planning, storage waits and pre-generation-only fallback are
+covered. Source refresh uses the existing fixed credential-free download component;
+no source moves while an existing model claim remains active. Generic retry cannot
+replay feature provider uncertainty. Original requests and prior revisions stay saved.
+
+20feature lifecycle/safety cases plus5Feature Workshop cases pass. A broader258
+backend set (with the earlier18feature cases),18CI checks, static/contracts/schema/
+build and the real source-disclosure binder pass. The dedicated controlled browser
+creates one feature via ordinary entry, uses the saved exact AI choice, persists a
+grounded two-step dependency graph, and verifies reload,desktop/phone/200%text.
+Actual1440/390screenshots inspected. That journey is added explicitly to hosted
+browser1/4 using the dedicated disposable everyday configuration. Existing suites
+remain intact. Settled-source complete browser/frontend/visual checks are running;
+keep source files unchanged during those checks. No real provider has run yet.
+
+Next: finish checks, checkpoint/push, exact full hosted acceptance and safe private
+installation, then one bounded source-grounded real planning demonstration. Continue
+FW3–FW7 afterwards; no routine renewal. Zero complete Feature Workshop implementations
+exist. Preserve the installed690rows/51requests, original main checkout and five
+unrelated document patches. All private receipts remain feature-workshop-20261111.
+
+---
+
+# FW1 installed; continue grounded planning — November 11, 2026
+
+Following the Project Working Philosophy, FW1 is installed at7c2073e/deployment111.
+Exact full hosted43079956630 passed every group and finalverify; downloaded receipt
+and frontend ZIP digests match, and all26 installed frontend files equal the exact
+hosted build. Source seal e5f8e06995237d90557a3505681a19bb5405dc1452f6067989931b4ac983f1a7.
+All44 affected checks and5 feature API/worker/restart cases pass. Local full backend
+2261/8skips and58frontend pass. All12 visual scenarios passed after reviewed nav-only
+baseline updates. The separate long local browser run was invalidated by starting
+FW2 edits before its subprocesses finished reading source:24 import failures during
+the temporary missing-module interval,105passed/3skips. Do not claim that mixed run
+as full FW1 acceptance. Exact hosted FW1 passed independently. Rerun the complete
+browser suite on settled FW2 source, retaining the failed local receipt.
+
+Installed and returned browser reads pass1440/390/320px200%text, parent identity
+reload, keyboard disclosure and no writes/errors; actual screenshots inspected.
+Four services/private listeners/TLS/ingress/kernel filters/model authentication
+and8765 verified. Actual111→110→111 rollback/return and independent restore retain
+identical690rows/schema0014/hash91bf5ef0954f196e72d8d60533ab14662754ead08845ba59798eebadcdd6e179.
+Both old/new readers validate all51 original requests unchanged. Current features
+are empty;2archived historical feature requests remain accessible. No owner rows,
+model request, addon PR/merge/game file or legacy service were changed.
+
+Continue FW2 under the same campaign authority; no renewal is needed. Uncommitted
+source now adds feature-planning consent to existing intake, grounded committed
+source packets, existing planning/decomposition jobs, provider/source binding,
+pre-generation-only fallback, task source context and graph validation. Prepared
+steps gain their exact scope decision without another model call. Existing worker
+and local-model reservation owners remain; no schema/store/scheduler is added.
+Nine initial controlled cases and27 broader feature/receipt cases pass; lint/build
+and additional consent/revision/fallback/browser checks continue. FW2 is not installed.
+Zero Feature Workshop features have completed end to end; FW3–FW7 remain.
+
+Private receipts: ~/.local/share/TwichUI-Workbench/feature-workshop-20261111;
+installed/rollback operations:outcome-7c2073e; inspected captures:installed111/returned111.
+Preserve the five unrelated starting document patches and dependency links.
+
+---
+
 # Feature Workshop campaign in progress — November 11, 2026
 
 Following the Project Working Philosophy, the owner now authorizes the connected

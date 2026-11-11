@@ -1,3 +1,25 @@
+# Grounded feature planning ownership — November 11, 2026
+
+Optional intake.feature_planning records read-only feature consent with the exact
+original request and saved AI route. The existing planning_jobs journal owns one
+planning and one decomposition phase per revision. The same worker and model
+reservation owner advance both; no execution grant, offer, candidate or publication
+record is created. Proposed task/source mappings live in the decomposition payload;
+backlog_items/backlog_dependencies retain hierarchy and prerequisite ownership.
+
+Committed Lua excerpts are app-read, revision/hash bound and rechecked after each
+response. External Codex disclosure uses its existing exact source manifest and
+excerpt checks. Plans cannot cite unknown references; step graphs must cover scope
+and reject cycles, missing/duplicate keys and unknown source IDs. The existing
+scope review binds to already prepared steps, before/during/after decomposition,
+without another provider call. Changed/declined requirements fence late output.
+Resource waits and disabled planning create no model claim. Dead claims preserve
+unknown outcome/usage and cannot automatically replay. Only proved pre-generation
+failure may use the already permitted fallback, with separate attempt accounting.
+The new capability does not authorize edits, implementation, spending or publishing.
+
+---
+
 # Feature Workshop read ownership — November 11, 2026
 
 Feature Workshop uses the existing intake ID as durable parent identity. Proposal

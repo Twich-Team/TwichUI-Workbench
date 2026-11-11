@@ -292,12 +292,16 @@ def connection(source):
 def planning_demand(engine, *, eligible=False):
     with connection(engine) as c:
         rows = c.execute(select(intakes.c.id,intakes.c.revision,planning_jobs.c.revision.label('job_revision'),
+            planning_jobs.c.kind,
             planning_jobs.c.status,planning_jobs.c.payload).join(planning_jobs,planning_jobs.c.intake_id==intakes.c.id).where(
-            planning_jobs.c.kind=='planning',planning_jobs.c.status.in_(['queued','running']),
+            ((planning_jobs.c.kind=='planning') | ((planning_jobs.c.kind=='decomposition')
+                & intakes.c.payload['feature_planning'].as_boolean().is_(True))),
+            planning_jobs.c.status.in_(['queued','running']),
             intakes.c.payload['local_planning'].as_string().in_(
                 ['qwen-once','qwen-with-codex-fallback','codex-with-local-fallback']),
             intakes.c.payload['supported_task'].as_string().is_(None))).mappings().all()
         return [r['id'] for r in rows if not eligible or r['status']=='running' or
+            (r['kind']=='decomposition' and r['job_revision']==r['revision'] and r['payload'].get('feature_base')) or
             (r['job_revision']>r['revision'] and r['payload'].get('local_planning_receipt'))]
 
 
@@ -330,7 +334,7 @@ def reconcile(engine):
         state = snapshot(engine) or {}
         with write_transaction(engine) as c:
             for job in c.execute(select(planning_jobs).where(planning_jobs.c.intake_id.in_(demand),
-                    planning_jobs.c.kind=='planning',planning_jobs.c.status=='queued')).mappings():
+                    planning_jobs.c.kind.in_(['planning','decomposition']),planning_jobs.c.status=='queued')).mappings():
                 message = state.get('message','Waiting for local Qwen. Workbench is reconciling model access; your saved request remains scheduled.')
                 if job['message'] != message:
                     c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(message=message))

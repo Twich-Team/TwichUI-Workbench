@@ -1,3 +1,15 @@
+# Active FW2 delivery checkpoint — November 11, 2026
+
+FW1 is installed and accepted at7c2073e/deployment111. Grounded feature intake,
+source planning, automatic persistent decomposition and safe review/recovery now
+have controlled API/worker/browser evidence. Finish the settled-source browser,
+frontend/visual and exact hosted checks, install the verified checkpoint with
+preserved stores/rollback, and demonstrate bounded real-provider planning where
+needed. Then continue FW3 verified shared-base dependent execution. Do not claim
+an implemented feature from a plan, graph, checked isolated child or simulated run.
+
+---
+
 # Active Feature Workshop campaign — November 11, 2026
 
 The owner now authorizes FW1–FW7 in [the campaign request](OWNER_FEATURE_WORKSHOP_CAMPAIGN_20261111.md), using the supplied Food Buff Reminder image as the primary visual reference. Earlier separate-assignment deferrals below are historical. Reuse the existing intake, proposal, backlog, worker, execution and publication owners. Deliver sequential verified vertical slices, preserve unrelated local edits and all installed history, and continue after checkpoints. FW1 connects durable feature identity and plan/progress presentation; FW2 grounds automatic decomposition; FW3 carries verified dependent changes; FW4 adds protected references; FW5 checks and delivers the combined feature; FW6 adds supported visual comparison; FW7 proves the connected journey. No new billing, game installation, legacy cutover, privileged policy replacement or public exposure.

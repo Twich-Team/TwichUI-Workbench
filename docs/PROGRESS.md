@@ -1,3 +1,46 @@
+## November 11 — grounded feature planning ready for full acceptance
+
+FW2 extends the existing intake/job/backlog/worker owners with explicit feature
+planning consent, frozen AI choices, actual revision/hash-bound Lua research,
+validated plans and automatic source-linked dependent steps. Hierarchy remains
+separate from prerequisite edges. Applied scope decisions bind queued, running or
+finished decomposition without extra model calls. No migration or execution grant.
+
+20feature cases and5Workshop cases pass; earlier broad258backend and18CI checks
+pass, as do contracts/build/schema/lint and the actual Codex disclosure binder.
+A controlled ordinary browser creation→source plan→two dependent steps→reload
+journey passes at1440/390/320px200%text; desktop/phone images inspected. Hosted
+browser1/4 now explicitly runs that dedicated everyday fixture. Full settled-source
+browser/frontend/visual checks are running; source stays fixed until they finish.
+
+Resource/source refresh precedes claims; old uncertain claims settle first and
+never replay automatically. Pre-generation fallback alone may switch providers;
+separate attempts retain accounting. Claimed, queued, declined, stale and disabled
+states remain distinct. Original request/plan histories are preserved. No real
+model, addon publication or game changes; FW2 is source-only, private111 remains.
+
+## November 11 — FW1 installed, checked, restored; FW2 underway
+
+Installed7c2073e/private111 after exact full hosted43079956630 and strict finalverify.
+The hosted acceptance/asset ZIP digests and all26 frontend bytes match the release.
+44affected backend,2261full local backend/8skips,58frontend,controlled browser journey
+and12reviewed visual scenarios pass. Installed/returned desktop/phone/200%text and
+keyboard/reload reads pass with zero mutations/errors; actual pixels inspected.
+Actual111→110→111 and independent restore retain every690rows and all51 original
+requests, with matching current/previous readers. Private listeners/TLS/guards,
+model authentication, four roles and8765 pass. No new generation/publication/game
+or legacy action. No parent feature is claimed complete from its checked child.
+
+The extra local browser run overlapped early FW2 file writes:24temporary import
+failures,105passes/3skips. Exact hosted source7c2073e independently passed all cases;
+retain the failed mixed-source run and repeat the whole browser suite after FW2
+settles. This was an avoidable verification-order mistake, not an installed defect.
+FW2 initial9controlled cases pass for grounded persisted source/steps, graph faults,
+clarification, restart, fenced late responses and uncertain interruption;27feature/
+receipt cases pass after fallback/routing work. Existing model reservation demand
+now includes authorized feature decomposition. No new schema or competing queue.
+FW2build/contracts and further safety/browser checks continue; it is not installed.
+
 ## November 11, 2026 — Feature Workshop first connected slice
 
 Current owner campaign supersedes older deferrals. Preserved preexisting document

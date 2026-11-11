@@ -68,7 +68,7 @@ export function IntakeForm() {
   return <IntakeFormBody key={kind} kind={kind} work={work} description={description} chooseWork={(next,input)=>{
     setDescription({title:input.title,description:input.description});setWork(next);
     try{localStorage.setItem('intake-work-kind',JSON.stringify(next));}catch{/* Keep selection in memory. */}
-  }} unified={!params.has('kind')}/>;
+  }} unified={params.has('workshop')||!params.has('kind')}/>;
 }
 function IntakeFormBody({kind,work,description,chooseWork,unified}:{
  kind:'feature'|'issue';work:WorkChoice;description?:Pick<Input,'title'|'description'>;
@@ -90,21 +90,23 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
   const regression=body.regression_tests;
   const example=regression?.text_example;
   const chosen:WorkChoice=regression?'coverage':kind==='issue'?'bug':body.requested_work||work;
-  const future=chosen!=='bug'&&chosen!=='coverage'&&!body.supported_task;
   useEffect(()=>{if(!sent&&!busy){try{localStorage.setItem(key,JSON.stringify(body));}catch{/* Keep the draft in memory. */}}},[body,key,sent,busy]);
   function changeWork(next:WorkChoice){
     chooseWork(next,body);
     if((next==='bug')===(kind==='issue'))setBody({...body,requested_work:next==='bug'||next==='coverage'?null:next,
-      supported_task:null,local_planning:null,lua_error:next==='bug'?body.lua_error:'',
+      supported_task:null,local_planning:null,feature_planning:null,lua_error:next==='bug'?body.lua_error:'',
       regression_tests:next==='coverage'?{acceptance:regressionAcceptance.split('\n').filter(s=>s.trim()),test_paths:[]}:null});
   }
 
   const localWork=useQuery({queryKey:['local-work'],queryFn:()=>request<components['schemas']['LocalWorkStatus']>('/api/local-work'),refetchInterval:5000});
   const bugWork=kind==='issue'&&Boolean(localWork.data?.bug_investigation)&&!body.supported_task;
-  const modelPreferences=useQuery({queryKey:['models'],queryFn:()=>request<components['schemas']['ModelOverview']>('/api/models'),enabled:Boolean(localWork.data?.enabled&&(regression||bugWork))});
+  const featureWork=chosen==='feature'&&!body.supported_task&&Boolean(localWork.data?.feature_planning&&localWork.data.ready);
+  const future=chosen!=='bug'&&chosen!=='coverage'&&!body.supported_task&&!featureWork&&!body.feature_planning;
+  const modelPreferences=useQuery({queryKey:['models'],queryFn:()=>request<components['schemas']['ModelOverview']>('/api/models'),enabled:Boolean(localWork.data?.enabled&&(regression||bugWork||featureWork))});
   const savedRoute=modelPreferences.data?savedTaskRoute(modelPreferences.data.policy):null;
   const [customAI,setCustomAI]=useState(Boolean(body.ai_settings));
   const taskAI=body.ai_settings||(modelPreferences.data?savedTaskAI(modelPreferences.data.policy):null);
+  useEffect(()=>{if(featureWork&&modelPreferences.data&&savedRoute&&!body.local_planning&&!customAI&&!sent){const settings=savedTaskAI(modelPreferences.data.policy);if(settings)setBody(previous=>({...previous,ai_settings:settings,local_planning:savedRoute}));}},[featureWork,modelPreferences.data,savedRoute,body.local_planning,customAI,sent]);
   function changeAI(settings:components['schemas']['TaskAISettings']){setBody({...body,ai_settings:settings,local_planning:taskAIRoute(settings)});}
   const supported=useQuery({queryKey:['supported-tasks'],queryFn:()=>request<{items:{id:string;title:string;purpose:string}[]}>('/api/supported-tasks')});
   async function submit(event:React.FormEvent) {
@@ -114,10 +116,10 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
       return;
     }
     try {
-      const submitted:Input={...body,title:body.title.trim()?body.title:body.description.trim().split('\n')[0].slice(0,160),...((body.requested_work||(future&&(unified||localWork.data?.enabled)))?{requested_work:chosen as Input['requested_work']}:{} )};
+      const submitted:Input={...body,...(featureWork&&body.local_planning?{feature_planning:true,requested_work:'feature' as const}:{}),title:body.title.trim()?body.title:body.description.trim().split('\n')[0].slice(0,160),...((body.requested_work||(future&&(unified||localWork.data?.enabled)))?{requested_work:chosen as Input['requested_work']}:{} )};
       setBody(submitted);localStorage.setItem(key, JSON.stringify(submitted)); setSent(true); setBusy(true);
       const saved = await mutate<Intake>('/api/intake',submitted);
-      localStorage.removeItem(key);localStorage.removeItem('intake-work-kind'); void navigate(`/intake/${saved.id}?received=1`);
+      localStorage.removeItem(key);localStorage.removeItem('intake-work-kind'); void navigate(`${submitted.feature_planning?'/features':'/intake'}/${saved.id}?received=1`);
     } catch (e) {setError((e as Error).message);} finally {setBusy(false);}
   }
   return <div className="intake-page task-create"><Link to="/backlog" className="back-link"><ArrowLeft size={15}/>All tasks</Link><div className="page-heading"><div><img className="heading-art" src={`/art/workshop/${kind==='issue'?'issues':'feature-requests'}.png`} alt=""/><h1>{unified?'Create a task':kind==='issue'?'Report an issue':'Request a feature'}</h1><p>{kind==='issue'?'Tell us what happened and what you expected. A report starts an investigation.':'Describe what you want to improve, inspect or test. You’ll see a plan before any changes are approved.'}</p></div></div>
@@ -126,14 +128,15 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
   <textarea id="request-description" aria-label="Description" required maxLength={6000} rows={5} placeholder="For example: Some vendor items show a number instead of their name. Can you look into it?" value={body.description} onChange={e=>setBody({...body,description:e.target.value})}/>
   <div className="request-basics"><div><label htmlFor="request-title">Title <span>Optional · A short name for this task</span></label>
   <input id="request-title" maxLength={160} value={body.title} onChange={e=>setBody({...body,title:e.target.value})} placeholder="Leave blank to use the first line of your description"/>
-  </div>{unified&&<div><label htmlFor="request-kind">Type of work</label><select id="request-kind" value={chosen} onChange={e=>changeWork(e.target.value as WorkChoice)}>{workChoices.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></div>}</div>
+  </div>{unified&&<div><label htmlFor="request-kind">Type of work</label><select id="request-kind" value={chosen} onChange={e=>changeWork(e.target.value as WorkChoice)}>{workChoices.map(([value,label])=><option key={value} value={value}>{value==='feature'&&featureWork?'Build a feature · Planning available':label}</option>)}</select></div>}</div>
   {future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)&&<div className="soft-callout"><strong>Saved for later, without starting work.</strong><p>This kind of task is part of the product plan, but cannot run in this release. You can keep your description in the backlog. No model request or execution approval will be created.</p></div>}
-  {localWork.data?.enabled&&!future&&<p className="task-support-note">Available now: supported offline Lua bugs and existing-test coverage. Work happens in a protected copy; the installed addon is not changed.</p>}
+  {featureWork&&<div className="soft-callout"><strong>Investigate and plan this feature</strong><p>{body.local_planning?.startsWith('codex')?'Codex receives this request and the selected committed addon source through your signed-in connection.':'Local Qwen reads the relevant committed addon source on this computer.'} Workbench will save a grounded plan and related steps. Implementation and draft delivery remain separate.</p></div>}
+  {localWork.data?.enabled&&!future&&!featureWork&&<p className="task-support-note">Available now: supported offline Lua bugs and existing-test coverage. Work happens in a protected copy; the installed addon is not changed.</p>}
   <details className="request-options" open={!unified || Boolean(regression || body.supported_task) || undefined}>
   <summary>Task options</summary>
   {kind==='feature' && <>
     <label className="check-label"><input type="checkbox" checked={Boolean(regression)} onChange={e=>setBody({
-      ...body,requested_work:e.target.checked?null:'feature',supported_task:null,local_planning:null,regression_tests:e.target.checked?{
+      ...body,feature_planning:null,requested_work:e.target.checked?null:'feature',supported_task:null,local_planning:null,regression_tests:e.target.checked?{
         acceptance:regressionAcceptance.split('\n').filter(s=>s.trim()),
         test_paths:regressionPaths.split(/[\s,]+/).filter(Boolean),
       }:null,
@@ -163,11 +166,11 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
       </>}</details>
     </>}
   </>}
-  {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,supported_task:item?.id||null,local_planning:null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Use my description</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Use a ready-made task with a fixed plan. Your comments stay with the request. The fixed scope sets what can run.</p></>}
+  {Boolean(supported.data?.items.length)&&<><label htmlFor="supported-task">Supported task <span>Optional · Fixed reviewed scope</span></label><select id="supported-task" value={body.supported_task||''} disabled={Boolean(body.regression_tests)} onChange={e=>{const item=supported.data?.items.find(i=>i.id===e.target.value);setBody({...body,feature_planning:null,supported_task:item?.id||null,local_planning:null,title:body.title||item?.title||'',description:body.description||item?.purpose||''});}}><option value="">Use my description</option>{supported.data!.items.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><p className="small-text">Use a ready-made task with a fixed plan. Your comments stay with the request. The fixed scope sets what can run.</p></>}
   {kind==='issue' && <><label className="check-label"><input type="checkbox" checked={lua} onChange={e=>{setLua(e.target.checked);if(!e.target.checked)setBody({...body,lua_error:''});}}/>Add a Lua error <span>Optional</span></label>{lua && <><label htmlFor="lua-error">Lua error <span>Plain text · never executed</span></label><textarea className="code-input" id="lua-error" maxLength={6000} rows={6} value={body.lua_error || ''} onChange={e=>setBody({...body,lua_error:e.target.value})}/></>}</>}</details>
   <label htmlFor="request-interface">Does this change how the addon looks?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:bugWork||e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.{bugWork&&' Read-only bug investigation can start before this is decided; repair permission is separate.'}</p>
-  {localWork.data?.enabled&&(regression||bugWork)&&<div role="group" aria-label="Planning provider">
-    {savedRoute&&<div className="saved-model-choice"><div><span className="eyebrow">YOUR PREFERRED AI</span><h3>{savedRoute.startsWith('qwen-')?'Local Qwen':'Codex'}</h3><p>{savedRoute.startsWith('qwen-')?'Your report and relevant addon source stay on this computer.':'Your report, replies and relevant committed addon source are sent to OpenAI through your signed-in Codex connection.'} Using your settings allows read-only investigation or planning. Changes need a separate review.</p></div><Button type="button" variant="secondary" disabled={modelPreferences.isError||(!bugWork&&body.visual_requirement!=='nonvisual')} onClick={()=>{setCustomAI(false);setBody({...body,ai_settings:savedTaskAI(modelPreferences.data!.policy),local_planning:savedRoute});}}>Use my preferred AI settings</Button></div>}
+  {localWork.data?.enabled&&(regression||bugWork||featureWork)&&<div role="group" aria-label="Planning provider">
+    {savedRoute&&<div className="saved-model-choice"><div><span className="eyebrow">YOUR PREFERRED AI</span><h3>{savedRoute.startsWith('qwen-')?'Local Qwen':'Codex'}</h3><p>{savedRoute.startsWith('qwen-')?'Your report and relevant addon source stay on this computer.':'Your report, replies and relevant committed addon source are sent to OpenAI through your signed-in Codex connection.'} Using your settings allows read-only investigation or planning. Changes need a separate review.</p></div><Button type="button" variant="secondary" disabled={modelPreferences.isError||(!bugWork&&!featureWork&&body.visual_requirement!=='nonvisual')} onClick={()=>{setCustomAI(false);setBody({...body,ai_settings:savedTaskAI(modelPreferences.data!.policy),local_planning:savedRoute});}}>Use my preferred AI settings</Button></div>}
     {taskAI&&<><label className="check-label"><input type="checkbox" checked={customAI} onChange={e=>{setCustomAI(e.target.checked);if(e.target.checked)changeAI(taskAI);else setBody({...body,ai_settings:null,local_planning:null});}}/>Choose a different AI for this task</label>
     {customAI&&<div className="task-ai-options"><p className="small-text">{taskAI.primary.provider==='codex'?'Codex receives your report, replies and relevant committed addon source through OpenAI. Included access and source-disclosure permission are checked before use.':'Local Qwen keeps the report and relevant source on this computer.'}</p><label>Task provider<select aria-label="Task provider" value={taskAI.primary.provider} onChange={e=>{const provider=e.target.value as 'local'|'codex';const config=modelPreferences.data?.policy.providers?.[provider];changeAI({primary:{provider,model:config?.model||'',effort:config?.effort},fallback:null});}}><option value="local">Local Qwen</option><option value="codex">Codex</option></select></label>
     <ModelChoiceFields label="Task" value={taskAI.primary} report={modelPreferences.data?.capabilities} onChange={primary=>changeAI({...taskAI,primary})}/>
@@ -175,7 +178,7 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
     {taskAI.fallback&&<ModelChoiceFields label="Task fallback" value={taskAI.fallback} report={modelPreferences.data?.capabilities} onChange={fallback=>changeAI({...taskAI,fallback})}/>}
     <p className="small-text">These choices stay with this task. Global fallback permission, source disclosure, included access and separate run approval still apply.</p></div>}</>}
     {body.local_planning&&<p className="selected-ai-permission" role="status">{body.local_planning.startsWith('qwen-')?'Local Qwen':'Codex'} selected for investigation or planning · {body.local_planning.includes('fallback')?'Pre-generation fallback allowed':'Fallback off'}. Your choices will be saved with this request.</p>}
-    <details className="provider-permissions"><summary>Provider permissions and investigation limits</summary>
+    {!featureWork&&<details className="provider-permissions"><summary>Provider permissions and investigation limits</summary>
     <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('qwen-')||false} disabled={!bugWork&&body.visual_requirement!=='nonvisual'}
       onChange={e=>setBody({...body,ai_settings:null,local_planning:e.target.checked?'qwen-once':null})}/><span>{bugWork?'Allow local Qwen to investigate this report':'Allow one local Qwen request to plan this task'}</span></label>
     {localWork.data.codex_configured ? <>
@@ -195,10 +198,10 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
     </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
     {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. Each operation permits up to sixteen requests to inspect source and prepare a scope. Earlier operations and usage remain recorded; this is not a subscription allowance. Each phase has a thirty-minute timeout; each request has a five-minute timeout. It cannot edit files or publish. If a real-world detail is missing, Workbench may ask for information and separate permission to continue with the same provider.</p>}
     <p className="detail-copy">{!bugWork&&'Choose “Behavior or data only” to enable this permission. '}Your selected provider receives this report, your replies and relevant committed source. {bugWork?'Permission expires after 45 minutes; the investigation runs for at most 30 minutes.':'Permission expires after 30 minutes.'} Fallback applies only to planning before generation starts. Failed, partial or uncertain generation stops for review. Review the plan and approve the run separately. The run keeps the provider that made the plan.</p>
-    </details>
+    </details>}
   </div>}
 </fieldset>
-  <p className="detail-copy">{future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)?'Your idea will be saved in the backlog. No work will start.':localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':(bugWork?'Your report will be saved. Model investigation needs your permission.':'Your request will be saved. Model planning requires the test coverage option and your permission.')):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)?'Save for later':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
+  <p className="detail-copy">{featureWork&&body.local_planning?'Your request and saved AI choices will be used to investigate the source and prepare connected feature steps. No addon changes start at this stage.':future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)?'Your idea will be saved in the backlog. No work will start.':localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':(bugWork?'Your report will be saved. Model investigation needs your permission.':'Your request will be saved. Model planning requires the test coverage option and your permission.')):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':body.feature_planning&&body.local_planning?'Retry feature planning':featureWork&&body.local_planning?'Plan feature':(featureWork||future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled))?'Save for later':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
 }
 
 export function IntakeDetail() {

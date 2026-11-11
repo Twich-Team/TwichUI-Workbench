@@ -61,6 +61,7 @@ def main():
     parser.add_argument(
         "action",
         choices=[
+            'feature-workshop-setup', 'feature-workshop-tick',
             "regression-planning",
             "reviewed-offer-setup", "reviewed-offer-plan", "reviewed-offer-prepare",
             "reviewed-offer-controller", "reviewed-offer-stale",
@@ -117,6 +118,25 @@ def main():
             )
         return
     engine = engine_for(path)
+    if args.action.startswith('feature-workshop-'):
+        from reviewed_offer_fixture import everyday_config, setup, advance
+        from test_grounded_workflow import save_local_policy
+        from test_feature_planning import ControlledFeaturePlanner
+        from workbench import worker, model_policy, everyday
+        if os.environ.get('WORKBENCH_E2E_EVERYDAY') != '1':
+            raise SystemExit('Feature planning needs the explicitly controlled everyday browser fixture.')
+        everyday_config(path)
+        if args.action == 'feature-workshop-setup':
+            setup(path)
+            advance(engine, path, 'automatic-setup')
+            save_local_policy(engine, model=everyday.MODEL)
+            policy = model_policy.read(engine)
+            policy.test_fallback = 'off'
+            model_policy.save(engine, policy, model_policy.CapabilityReport(executors=[]))
+        else:
+            os.environ['WORKBENCH_RESEARCH_ROOT'] = str(path.parent / 'reviewed-research/source')
+            assert worker.tick(engine, planning_adapter=ControlledFeaturePlanner())
+        return
     if args.action.startswith('reviewed-offer-'):
         from reviewed_offer_fixture import setup, advance
         action = args.action.removeprefix('reviewed-offer-')
