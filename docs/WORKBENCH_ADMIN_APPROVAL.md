@@ -1,3 +1,21 @@
+# Schema0014compatibility verified — November 11, 2026
+
+The owner installed the separately reviewed0014compatibility helper. Its exact
+SHA 72ceb24137afba5ebab832a4bc15d3784f49090f7c3e67998d4a800ac6b0e0a4,
+root:root0755/link1, original session 78/cgroup and1794612571expiry were independently
+verified through the existing approved executor. The first attempt refused a 0664
+source input before backup/replacement; owner-controlled source permissions were
+corrected to 0644, without relaxing the root check, and the owner completed the same
+reviewed command. All four services and674records stayed unchanged by the update.
+Do not rerun0013or0014upgrade scripts, replace the session binding, extend the grant
+or use broader sudo. No further owner action is needed. Full private110install,
+network/isolation/model checks and actual109rollback/110return subsequently passed.
+[Exact completed helper action](WORKBENCH_ADMIN_SCHEMA0014.md) and
+[cleanup acceptance](BACKLOG_CLEANUP_20261111.md) are current; earlier holds below
+are retained historical checkpoints. Unrelated local administrative edits remain.
+
+---
+
 # Workbench administrator approval
 
 **Decision requested.** Install the reviewed helper for the current Workbench repair and acceptance effort on `llm`. One interactive sudo authentication in the server terminal sets it up. The grant lasts up to seven days from bootstrap and is tied to the current Codex login session and boot. It survives routine retries and individual trial failures. It ends early on revocation, reboot, or loss of that session. Renewing or changing the grant requires the owner.

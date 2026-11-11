@@ -1,3 +1,19 @@
+# Delivered cleanup; remaining roadmap — November 11, 2026
+
+Overview refinement and connected Backlog cleanup are complete in private110at
+1e848a7, with exact full hosted43057614742, installed/restarted browser acceptance,
+independent restore and actual109rollback/110return. All original domain rows remain unchanged; the store still has674rows;
+no owner record was archived/deleted. Roothelper compatibility is verified and no
+owner decision remains for this milestone. [Evidence](BACKLOG_CLEANUP_20261111.md).
+Next separate product milestone: Feature Workshop parent features, dependent work
+and integrated verification; optional attachments remain future functionality.
+The owner-directed legacy replacement inventory/capability matrix, single-owner
+maintenance migration and verified reversible cutover remain on the roadmap as
+recorded below. Keep current legacy scheduling/execution and Qwen unchanged until
+separate cutover authorization. Do not launch a broad new campaign in this pass.
+
+---
+
 # Legacy replacement direction recorded — November 11, 2026
 
 The current Backlog cleanup milestone continues. The owner has now specified

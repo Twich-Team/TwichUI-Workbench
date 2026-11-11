@@ -37,3 +37,19 @@ approved executor/services/store, then complete the exact verified private build
 copy/migrate/seal/install/browser/restore/rollback sequence. Migration operates on
 a fresh copied store; the prior109store remains intact for rollback. No owner task
 is archived or deleted as part of deployment acceptance.
+
+## Verified installation
+
+The owner completed the copy on November11. Its initial attempt correctly refused
+the source file's0664mode before creating any backup or replacing the helper.
+Codex corrected the owner-controlled source permissions to 0644, retained the exact
+hashes and checks, and the owner completed the same reviewed command successfully.
+Codex then independently verified the installed72ceb241…hash, root:root0755/link1,
+normal status from the original session 78executor and the identical1794612571expiry.
+All four Workbench services stayed active and the674-row store remained unchanged.
+
+The exact verified Workbench build1e848a7/deployment110was subsequently installed
+through the existing named mechanism, with successful schema 0014settlement,
+private-network/isolation checks and actual109rollback/110return. No grant binding,
+authorization rule, expiry or network policy was expanded. No further owner action
+is required. The command above is a completed historical action; do not rerun it.

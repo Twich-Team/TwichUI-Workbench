@@ -1,3 +1,29 @@
+## November 11, 2026 — cleanup installed and accepted
+
+Following the Project Working Philosophy, delivered source 1e848a7 / private 110.
+Exact hosted run 43057614742 passed2235backend/11 skips,58 frontend,128 browser/3 skips,
+12 visual; local full and final focused checks also passed. Actual installed12page/
+size checks,3 vendor cleanup reviews,36 advanced-control geometry checks and returned
+110checks passed without writes/errors/policy changes. Disposable Undo protects a
+newer archive decision. All original domain rows remain unchanged; the store still has674rows and new lifecycle/receipt
+tables stay empty in the owner's store. Current/previous readers each read all51
+original requests from an independent installed restore unchanged. Actual109
+rollback/110return preserved both exact stores. Old109has an existing8px enlarged
+maintenance-notice overflow;110fixes it, and current complete size checks pass.
+
+Owner 0014helper copy is verified 72ceb241…root:root0755 with the same session 78/
+expiry 1794612571. Initial source 0664permission refusal was repaired without weakening
+checks. Preflight detected generated old-reader caches and an operation receipt's
+wide mode; retained exact caches outside the old release, restored its original
+seal, tightened receipt modes and reran full preflight successfully before cutover.
+Use -B/PYTHONDONTWRITEBYTECODE=1 and umask 077 for sealed reads/private receipts.
+No new model/task/publication/merge/game action occurred. Fresh GitHub now shows PR #10
+merged and PR #11 open/draft; immutable submitted-draft receipts remain unchanged.
+The owner legacy-replacement direction is recorded with initial dependencies and
+acceptance gates. Legacy worker, timer and Qwen stay unchanged; no cutover now.
+See [complete delivery/evidence](BACKLOG_CLEANUP_20261111.md). No owner action remains;
+Feature Workshop is the next separate product milestone.
+
 ## November 11, 2026 — Backlog cleanup implementation
 
 Following the Project Working Philosophy, finished overview delivery 109 first, then

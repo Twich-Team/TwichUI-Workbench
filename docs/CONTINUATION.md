@@ -1,3 +1,34 @@
+# Cleanup delivered; next Feature Workshop — November 11, 2026
+
+Following the Project Working Philosophy, overview refinement and Backlog cleanup
+are installed and accepted at 1e848a7 / deployment 110. Exact hosted run 43057614742 passed;
+see [cleanup delivery and evidence](BACKLOG_CLEANUP_20261111.md) and Current Status.
+Actual110browser12+3cleanup reviews and36advanced controls passed, as did returned
+110read-only checks, independent installed-store51-intake reads by current/old code,
+and actual109rollback/110return with exact preserved674-row stores. The old109
+320px/200% maintenance notice has a known8px baseline overflow fixed in110; its
+service/network/data rollback passed. No owner task was archived or deleted for tests.
+
+Root helper 0014compatibility is now installed and verified 72ceb241…with original
+session 78and expiry 1794612571. No more owner action; do not rerun the upgrade or
+change its grant. All four Workbench services plus legacy worker/model remain active.
+Use -B/PYTHONDONTWRITEBYTECODE=1 for all sealed-release readers; generated caches
+from an earlier reader were preserved separately and the original old seal restored.
+Use umask 077 for private operational receipts; the complete final preflight passed.
+R=~/.local/share/TwichUI-Workbench/cleanup-20261111/outcome-1e848a7 contains deployment,
+hosted, installed/restore and rollback receipts; dormant source and both stores remain.
+
+Fresh GitHub read: vendor PR #10 merged; map PR #11 open/draft, both original heads unchanged.
+Workbench receipt totals remain historical submissions, not a live merge tracker.
+No new model request, publication, merge or game change was made by this campaign.
+Next separate product milestone: Feature Workshop. Follow the authoritative
+[legacy replacement roadmap](OWNER_LEGACY_REPLACEMENT_DIRECTION_20261111.md) without
+changing live legacy scheduling/owners before separately verified authorized cutover.
+Preserve unrelated local document edits below. Earlier pending helper/cleanup notes
+are historical checkpoints. No further implementation is required for this pass.
+
+---
+
 # Backlog cleanup source and verification — November 11, 2026
 
 Following the Project Working Philosophy, overview 38206c3/deployment 109 is installed

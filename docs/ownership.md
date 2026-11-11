@@ -1,3 +1,17 @@
+# Installed cleanup ownership verified — November 11, 2026
+
+Private110/source 1e848a7uses the existing authoritative store with additive 0014
+organization/receipt tables. All saved work (674 store rows) and original execution/publication
+bindings remain unchanged; no owner record was archived/deleted in acceptance.
+Exact hosted and installed/restore/rollback evidence passed. The separately reviewed
+root helper now accepts 0014 under its unchanged session 78grant/expiry and original
+service/network/authentication checks. No competing scheduler/storage/publication
+owner was introduced. [Delivery evidence](BACKLOG_CLEANUP_20261111.md).
+The legacy replacement direction below remains authoritative future architecture;
+current legacy owners/schedules and the Qwen inference service remain unchanged.
+
+---
+
 # Owner-directed legacy replacement — November 11, 2026
 
 The owner's [replacement direction](OWNER_LEGACY_REPLACEMENT_DIRECTION_20261111.md)
