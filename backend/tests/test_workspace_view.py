@@ -145,7 +145,7 @@ def test_execution_projection_does_not_promote_partial_or_unchecked_output(clien
     assert bool(row['result_id'])==(result and current_task)
     assert row['active']==(row['state'] in workspace_view.ACTIVE)
 
-def test_expired_execution_permission_is_visible_as_attention_without_reviving_it(client, headers, store, monkeypatch):
+def test_expired_execution_permission_stays_held_without_a_false_attention_request(client, headers, store, monkeypatch):
     from test_intake import research
     from workbench.db import backlog_items
     from workbench import workspace_view
@@ -161,6 +161,8 @@ def test_expired_execution_permission_is_visible_as_attention_without_reviving_i
             c.execute(backlog_items.update().where(backlog_items.c.id==task['id']).values(kind='finding'))
     monkeypatch.setattr(workspace_view.task_execution,'context',lambda *a:dict(
         stage='held',run_budget={'current':False},current_approval=True,session=None,runs=[]))
-    row=index(client,state='needs_you')['items'][0]
-    assert row['state']=='held' and row['needs_you'] and not row['active']
-    assert 'expired' in row['message'] and index(client)['counts']['needs_you']==1
+    row=index(client,state='held')['items'][0]
+    assert row['state']=='held' and not row['needs_you'] and not row['active']
+    assert 'expired' in row['message'] and index(client)['counts']['needs_you']==0
+    assert not index(client,state='needs_you')['items']
+    assert not index(client)['highlights']['needs_you']

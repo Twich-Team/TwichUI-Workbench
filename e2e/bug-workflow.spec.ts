@@ -98,7 +98,7 @@ test('ordinary bug report reaches a checked local patch through separate browser
 
   await page.getByRole('link',{name:'Review changes and checks'}).click();
   const result=page.getByRole('region',{name:'Run result and checks'});
-  await expect(result.getByRole('heading',{name:'Changes checked'})).toBeVisible();
+  await expect(result.getByRole('heading',{name:/(Fix prepared|Result checked) — automated checks passed/})).toBeVisible();
   await expect(result.getByText(/reproduced the bug in the original/)).toBeVisible();
   await result.getByText('See the changes in code').click();
   await expect(result.getByText(/:lower\(\)/)).toBeVisible();
@@ -109,7 +109,7 @@ test('ordinary bug report reaches a checked local patch through separate browser
     await capture(page,info,`bug-result-${width}`,{keepInCompact:true});
   }
   await page.reload();
-  await expect(result.getByRole('heading',{name:'Changes checked'})).toBeVisible();
+  await expect(result.getByRole('heading',{name:/(Fix prepared|Result checked) — automated checks passed/})).toBeVisible();
   const history=await page.request.get('/api/real-executions').then(r=>r.json());
   expect(history.total).toBe(1);
 });

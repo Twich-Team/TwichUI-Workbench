@@ -20,7 +20,7 @@ for(const {width,hold} of [{width:1440,hold:false},{width:390,hold:false},{width
   fixture('task-pr-step');fixture('task-pr-step');await page.reload();
   fixture('task-pr-step');fixture('task-pr-step');await page.reload();
   await page.getByRole('link',{name:'Review changes and checks',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Changes checked',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:/(Fix prepared|Result checked) — automated checks passed/,exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Preparing draft PR delivery'})).toBeVisible();
   await page.screenshot({path:artifactPath(`task-to-pr/waiting-${width}.png`),fullPage:false});
   if(hold){fixture('task-pr-hold');await page.reload();await expect(page.getByRole('heading',{name:'PR delivery needs attention'})).toBeVisible();await expect(page.getByText('The target base moved.',{exact:false})).toBeVisible();await page.screenshot({path:artifactPath('task-to-pr/held-desktop.png')});return;}

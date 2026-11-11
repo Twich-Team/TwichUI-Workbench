@@ -1,3 +1,17 @@
+# Overnight usability campaign — November 10, 2026 (Mountain time)
+
+Active checkout and branch remain `/home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench`, `codex/everyday-workbench`. Starting HEAD was 15ed24e. Installed build remains a8c43cb/deployment 105 until the checked cutover below is recorded. All four services are active; the retained real vendor result still passes and its original source/evidence is preserved. No completed addon work or provider call is being repeated.
+
+Phase A reconciliation confirms the supported offline Lua bug/test workflow is already demonstrated. Controlled routing/receipt/recovery tests cover saved model selections, deliberate Codex selection and the supported pre-generation fallback boundary. Progress-triggered fallback and broader task types remain future work. Two existing real Qwen outcomes and draft PRs 10/11 are preserved.
+
+The new Results hierarchy leads with fix/test/checked outcome, automated checks, actual draft title/link, next action, and explicit game-installation/testing limits. Reviewed intent remains distinct from proven behavior. Check details, complete code differences, usage and execution identities remain expandable. Empty checked results cannot become claimed fixes. Later rejections retain their original evidence. Desktop/phone screenshots were inspected, 200% text and keyboard disclosure/reload/error recovery passed. A failed background refresh no longer labels the dashboard currently working. Expired run permission stays held, visible in Backlog, without a false new approval notification.
+
+Initial focused evidence: 114 backend checks, 43 frontend checks, four delivery/responsive browser checks and the new outcome/browser recovery case pass. A complete backend/frontend run and broader browser/hosted checks are underway. First browser recovery test removed its own display handler; corrected the fixture and reran successfully without changing product behavior. Existing installed history and model services are untouched.
+
+Next: finish the full verification, complete useful Backlog/model-setting improvements, push verified checkpoints and install through the existing sealed-release mechanism with preserved history and rollback. No owner decision is required for this authorized work.
+
+---
+
 # Installed browser draft delivery and pause — November 11, 2026
 
 Following the Project Working Philosophy, the requested supported bug/test

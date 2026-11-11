@@ -7847,3 +7847,8 @@ prepared Phase B Results hierarchy retain the actual acceptance boundaries.
 Game behavior, physical phone/Safari, automatic fresh-result publication and
 in-flight pause retain their recorded evidence limits. No owner decision is
 pending for the supported workflow. The owner retains merging.
+
+
+## November 10 overnight — outcome-first Results and truthful attention
+
+Following the Project Working Philosophy, reused the already demonstrated supported Phase A workflow and real Qwen/vendor/map evidence. Results now distinguish checked fixes, tests, empty checked records, failures and later rejection; actual draft title/link and next action precede expandable technical evidence. Game installation/testing remain explicitly unverified. Desktop/phone screenshots, enlarged text, keyboard access, reload and error recovery pass. Expired permissions stay held without attention notifications; stale dashboard refresh does not claim current work. Initial 114 affected backend/43 frontend/five browser checks pass. Full verification and subsequent milestones continue. Running build remains a8c43cb until a verified cutover is recorded.

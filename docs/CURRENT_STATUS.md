@@ -1,15 +1,9 @@
-Last updated November 11, 2026.
+Last updated November 10, 2026 (Mountain time).
 
-Following the Project Working Philosophy, the supported Lua repair/test workflow now reaches checked changes and authorized draft pull requests.
+The running private app remains a8c43cb. Two real Qwen requests reached checked changes and draft PRs: vendor repair 10 and map coverage 11. Neither has been installed or tested in World of Warcraft.
 
-The private app runs a8c43cb. Results show the vendor repair as draft PR 10 and map coverage as draft PR 11. Both reuse saved real-Qwen results and contain the exact checked changes. Vendor delivery used the app’s delivery command. Map coverage was submitted from the installed browser. [Vendor repair](https://github.com/Twich-Team/TwichUI/pull/10), [map coverage](https://github.com/Twich-Team/TwichUI/pull/11).
+The new Results design explains the outcome, actual draft title/link, next action and game-testing limits before expandable code/check records. Desktop/phone, enlarged text, keyboard access, reload and error recovery passed on the development build. Expired permissions no longer create false attention items, and a failed dashboard refresh no longer claims current activity.
 
-Pause/resume is installed. Started work may finish safely during pause. Work is resumed. Desktop/phone layouts, reload, restart and independent history restore passed.
+Controlled checks cover provider selection, pre-generation fallback and recovery. Full verification, hosted checks and installation of the new build are in progress. No new provider demonstration was needed or repeated.
 
-The installed release and updated tests passed full hosted verification. Draft delivery, Results links, pause/resume and test changes are committed and pushed.
-
-Lost-response recovery, stale-result refusal, automatic new-result delivery and in-flight pause recovery have controlled-test evidence.
-
-Physical phone/Safari and in-game behavior remain unverified. Broader capabilities remain on the roadmap. Next is the prepared Phase B Results hierarchy milestone, preserving the approved theme.
-
-No blocker or owner decision is pending for the supported workflow. Both PRs remain drafts. The owner retains merging.
+Next: finish verification, improve Backlog and simple model settings, then install the checked milestone with history and rollback preserved. No owner decision is pending. The owner retains merging and game installation.

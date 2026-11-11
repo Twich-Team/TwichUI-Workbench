@@ -12,6 +12,7 @@ type View={id:string;title:string;status:string;message:string;base:string;curre
   recovery_pending?:boolean;
   grant_id:string;expires_at:string;publication_allowed:false;source:'real';
   behavior_checked?:string[];
+  intended_behavior?:string[];
   behavior_reproduced?:boolean;
   later_review?:{state:'rejected'|'unavailable';reason:string}|null;
   workflow_task?:{intake_id:string;task_id:string;binding:string}|null;current_task?:boolean|null;
@@ -46,7 +47,9 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
   const row=query.data,result=row.result;
   const checked=row.status==='checked'&&result?.verification==='passed'&&!row.later_review;
   const active=['pending','running','checking','cancel_requested'].includes(row.status);
-  const testOnly=Boolean(result?.files?.length&&result.files.every(file=>file.path.startsWith('tests/')&&(!file.old_path||file.old_path.startsWith('tests/'))));
+  const hasChanges=Boolean(result?.files?.length);
+  const testOnly=Boolean(hasChanges&&result!.files!.every(file=>file.path.startsWith('tests/')&&(!file.old_path||file.old_path.startsWith('tests/'))));
+  const outcome=checked?(testOnly?'Test coverage added':hasChanges?'Fix prepared':'Result checked'):null;
   const workflow=row.workflow_task;
   return <div className={embedded?"inline-result":"intake-page result-page"}>
     {!embedded&&<Link className="back-link" to={workflow?'/intake/'+encodeURIComponent(workflow.intake_id):'/executions'}>{workflow?'Back to the task':'All run results'}</Link>}
@@ -54,12 +57,22 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
     <section className="panel candidate-review real-execution-review" aria-label="Run result and checks">
       {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded result.</p>}
       {row.current_task===false&&<p className="soft-callout">This result belongs to an earlier plan. The current task still needs its own review and checks.</p>}
-      <h2>{row.later_review?(row.later_review.state==='rejected'?'Later review rejected this patch':'Later review needs attention'):row.recovery_pending?'Waiting for safe recovery':checked?(testOnly?'Test changes checked':'Changes checked'):row.status==='checked'?'Run result saved':runStage[row.status]||'Recorded result'}</h2>
-      {checked?<p className="result-lead">{testOnly?'Workbench added test coverage and the automated checks passed.':'Workbench prepared a fix and the automated checks passed.'}</p>
+      <div className="result-outcome-heading"><p className="eyebrow">{checked?'READY TO REVIEW':'SAVED OUTCOME'}</p>
+      <h2>{row.later_review?(row.later_review.state==='rejected'?'Later review rejected this patch':'Later review needs attention'):row.recovery_pending?'Waiting for safe recovery':checked?`${outcome} — automated checks passed`:row.status==='checked'?'Run result saved':runStage[row.status]||'Recorded result'}</h2>
+      {embedded&&<p className="result-request">{row.title}</p>}
+      {checked?<p className="result-lead">{testOnly?'New tests check the reviewed behavior and help catch it changing in a future update.':hasChanges?'Workbench prepared changes intended to resolve the reviewed addon issue.':'The saved result passed its recorded automated checks.'}</p>
         :<p>{row.later_review?'A later check found a problem with this patch. Review that finding before relying on these changes.':row.message}</p>}
+      {checked&&<p className="result-limit">Offline checks only · Not installed or tested in game</p>}
+      </div>
       <PublicationStatus identity={row.id} checked={checked}/>
+      <dl className="result-milestones" aria-label="Result progress">
+        <div><dt>Automated checks</dt><dd>{checked?'Passed':active?'Not finished':row.later_review?'Later review needs attention':result?.verification==='failed'?'Failed':'No accepted result'}</dd></div>
+        <div><dt>Game installation</dt><dd>Not performed by this run</dd></div>
+        <div><dt>In-game testing</dt><dd>Not verified</dd></div>
+      </dl>
+      {checked&&Boolean(row.intended_behavior?.length)&&<div className="result-intent"><strong>Intended improvement</strong><ul>{row.intended_behavior!.map((item,i)=><li key={i}>{item}</li>)}</ul></div>}
       {checked&&<>
-        <p className="soft-callout">This run did not install the change or test it in World of Warcraft.</p>
+        <section className="result-next-step" aria-label="Game verification"><h3>Before relying on it in game</h3><p>This run did not install the change or test it in World of Warcraft. After the change is available in a suitable test build, check the original behavior in game.</p></section>
         {row.behavior_reproduced&&<p>The reviewed check reproduced the bug in the original code and passed with this patch.</p>}
         {Boolean(row.behavior_checked?.length) && <details><summary>Behavior checked</summary><ul>{row.behavior_checked?.map((behavior,i)=><li key={i}>{behavior}</li>)}</ul></details>}
       </>}
@@ -77,10 +90,10 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
       {result?.checks?.length?<details><summary>Check details</summary><ul className="check-summary">{result.checks.map((c,i)=><li key={i}>
         <strong>{checkName(c.command,i)}</strong><StateBadge value={c.status==='pass'&&c.rc===0?'Passed':c.status==='fail'||(c.rc!==null&&c.rc!==0)?'Failed':'Outcome unavailable'}/>
       </li>)}</ul></details>:<p>{active?'Checks are still pending or have yet to report.':'No completed checks are recorded for this run.'}</p>}
-      <h3>What changed</h3>
-      {result?.files?.length ? <><ul>{result.files.map(file=><li key={file.path}>{file.path}</li>)}</ul>
-        <details><summary>See the changes in code</summary>{result.files.map(file=><DiffFile key={file.path} file={file}/>)}</details></>
+      <details className="result-code"><summary>See the changes in code{hasChanges?` · ${result!.files!.length} ${result!.files!.length===1?'file':'files'}`:''}</summary>
+      {hasChanges ? <>{result!.files!.map(file=><DiffFile key={file.path} file={file}/>)}</>
         :<p>No changes were saved for review.</p>}
+      </details>
       <details><summary>Technical results and run details</summary>
         <p>Exact base {row.base}</p><p>Grant {row.grant_id} · expires {row.expires_at} · {row.current_grant?'Current':'Historical'}</p>
         <p>Candidate {result?.candidate_id||'Unavailable'}</p><p>Task {workflow?.task_id||'Standalone authorized task'}</p><p>Task snapshot {workflow?.binding||'Standalone grant'}</p>

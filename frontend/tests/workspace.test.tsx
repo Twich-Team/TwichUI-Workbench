@@ -39,6 +39,8 @@ it('a failed background refresh retains loaded records and explicitly marks the 
  calls.mockImplementation(async()=>{throw Error('Controlled connection loss');});
  await clients.at(-1)!.invalidateQueries({queryKey:['workspace']});
  await screen.findByText('Refresh unavailable. These are the last loaded records. Decisions need a fresh view.');
+ expect(screen.getByText('Status unavailable')).toBeVisible();
+ expect(screen.getByRole('heading',{name:'Last known work'})).toBeVisible();
  expect(screen.getByText('Ready when you are')).toBeVisible();
 });
 

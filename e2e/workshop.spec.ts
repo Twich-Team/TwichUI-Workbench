@@ -169,3 +169,37 @@ test('pause keeps a new request queued and resume starts that same saved request
  await overflow(page);
  await capture(page,info,'work-control-phone',{keepInCompact:true});
 });
+
+test('result outcome, real draft title and next step stay ahead of expandable evidence',async({page},info)=>{
+ // Controlled presentation only. No provider, GitHub write or stored result is created.
+ const result={id:'display-result',title:'Vendor items show a number instead of a name',status:'checked',message:'Original checks passed.',base:'base',current_grant:false,grant_id:'grant',expires_at:'2026-11-09T00:00:00Z',publication_allowed:false,source:'real',current_task:true,
+  result:{verification:'passed',files:[{path:'addon/items.lua',kind:'modified',truncated:false,diff:'@@ -1 +1 @@\n-old\n+new'}],checks:[{status:'pass',rc:0,out:'Checks passed.'}]}};
+ const delivery={status:'published',published:true,source:'github',url:'https://github.com/Twich-Team/TwichUI/pull/10',message:'Draft PR created and confirmed.',repository:'Twich-Team/TwichUI',base_branch:'main',current_eligible:true,current_message:'',preview:{title:'Refresh vendor names when item data arrives',body:'The exact checked changes.',category:'Bug fix'}};
+ await page.route('**/api/real-executions/display-result',r=>r.fulfill({json:result}));
+ await page.route('**/api/real-executions/display-result/delivery',r=>r.fulfill({json:delivery}));
+ for(const [width,font] of [[1440,16],[390,16],[320,32]]){
+  await page.setViewportSize({width,height:width<500?844:1000});
+  await page.goto('/executions/display-result');
+  await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await expect(page.getByRole('heading',{name:'Fix prepared — automated checks passed'})).toBeVisible();
+  const link=page.getByRole('link',{name:'Review the draft PR on GitHub'});
+  await expect(link).toHaveAttribute('href',delivery.url);
+  await expect(page.getByText(delivery.preview.title,{exact:true}).first()).toBeVisible();
+  await expect(page.getByText(/Next: review the draft and decide/)).toBeVisible();
+  await expect(page.getByText('Not verified',{exact:true})).toBeVisible();
+  await overflow(page);
+  await capture(page,info,`result-outcome-${width}-${font}`,{keepInCompact:true});
+  if(font===16){const bounds=await link.boundingBox();expect(bounds!.y+bounds!.height).toBeLessThan(width<500?844:1000);}
+  const changes=page.getByText(/See the changes in code/);
+  await changes.focus();await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading',{name:'addon/items.lua'})).toBeVisible();
+  await page.reload();await expect(page.getByRole('heading',{name:'Fix prepared — automated checks passed'})).toBeVisible();
+ }
+ await page.route('**/api/real-executions/display-result',r=>r.abort());
+ await page.reload();
+ await expect(page.getByRole('button',{name:'Try again',exact:true})).toBeVisible();
+ await page.unroute('**/api/real-executions/display-result');
+ await page.route('**/api/real-executions/display-result',r=>r.fulfill({json:result}));
+ await page.getByRole('button',{name:'Try again',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Fix prepared — automated checks passed'})).toBeVisible();
+});

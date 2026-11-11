@@ -193,7 +193,7 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                 message = waiting_job['message']
         rows.append(dict(id=identity, title=body['title'], kind=kind, state=phase, stage=label, message=message,
                          created_at=original['created_at'], updated_at=max(timestamps), active=phase in ACTIVE,
-                         needs_you=phase in NEEDS or expired_permission, result_id=result_id, result_kind=result_kind,
+                         needs_you=phase in NEEDS, result_id=result_id, result_kind=result_kind,
                          draft_pr_submitted=draft_pr_submitted or None, provider=providers[identity][-1]['backend'] if providers[identity] else None))
     query = search.strip().casefold()
     matching = [r for r in rows if not query or query in (r['title']+' '+r['stage']+' '+r['kind']).casefold()]

@@ -365,7 +365,7 @@ for(const width of [1440,390])test(`durable real runs are reachable from Work an
   const result=page.getByRole('region',{name:'Run result and checks'});
   for(const reload of [false,true]){
     if(reload) await page.reload();
-    await expect(result.getByRole('heading',{name:'Changes checked',exact:true})).toBeVisible();
+    await expect(result.getByRole('heading',{name:/(Fix prepared|Result checked) — automated checks passed/,exact:true})).toBeVisible();
     await result.getByText('Technical results and run details',{exact:true}).click();
     await expect(result.getByText(completed.message,{exact:true})).toBeVisible();
   }
