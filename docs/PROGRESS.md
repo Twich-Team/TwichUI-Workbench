@@ -1,3 +1,22 @@
+## November 11, 2026 — CI performance first increment
+
+The owner added measured CI optimization after private110delivery. Latest release
+CI43057614742and documentationCI43064461091both passed. Three comparable recent
+runs have29m21s median workflow wall time; package/browser setup is under a minute
+in normal runs, while backend/frontend takes approximately11minutes and browser
+workflows approximately16minutes. Three earlier DNS setup failures consumed about
+31runner-minutes before any app check. Preserve the existing signed mirror fix.
+
+Implemented two serial backend partitions and four serial Playwright shards on
+separate standard hosted VMs, a separate visual job, cached package downloads,
+one frontend build and a strict finalverifygate. Matrix/receipt share one shard
+source; incomplete/failed/skipped/cancelled/wrong-checkout results cannot approve
+release. Added JUnit/durations and browser JSON evidence without dropping tests,
+assertions, migrations, screenshots, isolation or failure reporting. Local static
+checks,18CI guard tests, exact collection coverage and42browser tests/2skips pass.
+Hosted measurement is next; no unmeasured speedup claim. Private110, model/legacy
+services, saved history and unrelated local documents remain unchanged.
+
 ## November 11, 2026 — cleanup installed and accepted
 
 Following the Project Working Philosophy, delivered source 1e848a7 / private 110.

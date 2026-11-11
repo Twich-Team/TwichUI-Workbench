@@ -1,3 +1,25 @@
+# Active CI performance optimization — November 11, 2026
+
+Following the Project Working Philosophy, UI/cleanup delivery remains complete
+at private1e848a7/deployment110. The final documentation checkpointcfec47e also
+passed full hosted43064461091; both release and closeout are verified. The owner
+then supplied the additional CI performance assignment (attached request), now
+recorded in [measured investigation](CI_PERFORMANCE_20261111.md). No live service,
+legacy scheduling, authorization or saved data change is involved.
+
+Initial measured successes take approximately29minutes, mostly serial backend
+and browser tests, not Chromium setup. First increment implements isolated
+backend2/browser4hosted partitions, cached locked setup, one shared build, better
+reports and a strict finalverifyreceipt requiring every suite. Local checks,
+CI safety tests, complete collection unions and a real browser shard pass.
+Next: push/measure updated full hosted verification, compare coverage/counts and
+actual wall/runner time, repair genuine failures, then add fast documentation
+feedback that never authorizes release and measure another comparable full run.
+Keep current private110and all recovery stores untouched. No owner action needed.
+Do not launch Feature Workshop or legacy cutover during this engineering request.
+
+---
+
 # Cleanup delivered; next Feature Workshop — November 11, 2026
 
 Following the Project Working Philosophy, overview refinement and Backlog cleanup

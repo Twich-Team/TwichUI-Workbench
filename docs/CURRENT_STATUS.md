@@ -11,3 +11,5 @@ All saved work and history are preserved; the upgraded store still contains 674 
 Local and exact hosted checks passed. Installed desktop, phone, enlarged-text, advanced controls and post-restart walkthroughs passed. Actual rollback to 109 and return to 110 preserved both stores. Independent current/previous readers recovered all 51 original requests unchanged. The narrow administrator compatibility update is verified with its original session, expiry and safeguards.
 
 No owner action is needed. Feature Workshop is the next separate product milestone. The owner also directed Workbench to replace the legacy maintenance coordinator after verified capability migration and a separately authorized reversible cutover. The local Qwen service remains; no legacy scheduling or service was changed.
+
+The additional CI performance request is in progress. Recent comparable hosted runs have a median near 29 minutes; sequential tests dominate. Isolated test partitions and cached setup are implemented for hosted measurement, with every full release check still required. The installed application and services remain unchanged.

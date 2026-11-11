@@ -1,3 +1,17 @@
+# Current engineering milestone: faster trustworthy CI — November 11, 2026
+
+UI/cleanup/private110delivery and its full source/closeout checks are complete.
+Implement the owner's connected CI performance request: measure recent successes,
+failures/retries; safely parallelize isolated suites; retain locked/signed setup,
+full coverage and fail-closed release gates; compare hosted durations/counts;
+provide fast feedback separately from mandatory full milestone acceptance.
+First implementation is ready for hosted measurement. Target5–10minutes where
+safe, never weaken checks to meet the target. Preserve private110and all data.
+[Baseline and implementation](CI_PERFORMANCE_20261111.md). Continue the campaign
+through verification/reporting; Feature Workshop and legacy cutover remain later.
+
+---
+
 # Delivered cleanup; remaining roadmap — November 11, 2026
 
 Overview refinement and connected Backlog cleanup are complete in private110at

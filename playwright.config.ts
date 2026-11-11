@@ -1,15 +1,17 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, type ReporterDescription } from '@playwright/test';
 import {createRunOutput} from './e2e/output';
 import {join} from 'node:path';
 
 const runRoot=createRunOutput(process.cwd());
 process.env.WORKBENCH_E2E_RUN=runRoot;
 const compactEvidence = process.env.WORKBENCH_E2E_COMPACT === '1';
+const reporters:ReporterDescription[]=compactEvidence ? [['line']] : [['list'],['html',{open:'never',outputFolder:join(runRoot,'report')}]];
+if(process.env.CI&&!compactEvidence)reporters.push(['json',{outputFile:join(runRoot,'results.json')}]);
 
 export default defineConfig({
   testDir: './e2e', fullyParallel: false, workers: 1, timeout: 30000,
   expect: { timeout: 7000 },
-  reporter: compactEvidence ? [['line']] : [['list'], ['html', { open: 'never', outputFolder: join(runRoot,'report') }]],
+  reporter: reporters,
   outputDir: join(runRoot,'results'),
   use: {
     baseURL: 'http://127.0.0.1:5380',

@@ -1,45 +1,100 @@
 name: Verify fixture application
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  verify:
+  checks:
+    name: Build, contracts, schema and frontend tests
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 15
+    outputs:
+      build_artifact: ${{ steps.bundle.outputs.name }}
+      backend_matrix: ${{ steps.matrix.outputs.backend }}
+      browser_matrix: ${{ steps.matrix.outputs.browser }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup
         with:
-          python-version: '3.14'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-      - run: python -m venv .venv
-      - run: .venv/bin/pip install -r requirements.lock
-      - run: npm ci
-      - name: Use signed Ubuntu mirrors for runner dependencies
-        # Ubuntu's archive domains failed DNS resolution on fresh runners.
-        # Verify the mirror with the existing Ubuntu archive keyring, then keep
-        # apt's signatures, suites, keys and dependency requirements unchanged.
-        run: |
-          mirror_release="${RUNNER_TEMP}/workbench-ubuntu-InRelease"
-          curl --fail --location --retry 2 --connect-timeout 10 --max-time 30 \
-            https://mirrors.mit.edu/ubuntu/dists/noble/InRelease -o "$mirror_release"
-          gpgv --keyring /usr/share/keyrings/ubuntu-archive-keyring.gpg "$mirror_release"
-          test -f /etc/apt/apt-mirrors.txt
-          sudo tee /etc/apt/apt-mirrors.txt > /dev/null <<'MIRRORS'
-          https://mirrors.mit.edu/ubuntu/	priority:1
-          https://archive.ubuntu.com/ubuntu/	priority:2
-          https://security.ubuntu.com/ubuntu/	priority:3
-          MIRRORS
-      - run: npx playwright install --with-deps chromium
-      - name: Install the Lua test runtime and reference fonts
-        run: sudo apt-get install -y lua5.1 lua-bitop fonts-dejavu-core fonts-dejavu-mono
+          lua: 'false'
+      - id: matrix
+        run: python scripts/ci.py matrix >> "$GITHUB_OUTPUT"
       - run: npm run check
       - run: git diff --exit-code -- frontend/openapi.json frontend/src/api.generated.ts
-      - run: npm test
-      - run: npm run test-e2e
+      - run: npx vitest run --config frontend/vite.config.ts
+      - id: bundle
+        shell: bash
+        run: echo "name=frontend-build-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.bundle.outputs.name }}
+          path: frontend/dist
+          if-no-files-found: error
+          retention-days: 14
+  backend:
+    name: Backend ${{ matrix.shard }}
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.checks.outputs.backend_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.checks.outputs.build_artifact }}
+          path: frontend/dist
+      - run: .venv/bin/python scripts/ci.py backend --shard ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-${{ matrix.label }}-attempt-${{ github.run_attempt }}
+          path: artifacts/ci
+          if-no-files-found: error
+          retention-days: 14
+  browser:
+    name: Browser ${{ matrix.shard }}
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.checks.outputs.browser_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          browser: 'true'
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.checks.outputs.build_artifact }}
+          path: frontend/dist
+      - run: npm run test-e2e -- --shard=${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-${{ matrix.label }}-attempt-${{ github.run_attempt }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+  visual:
+    name: Visual regression
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          browser: 'true'
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.checks.outputs.build_artifact }}
+          path: frontend/dist
       - name: Compare screenshots using the reviewed Linux fonts
         run: |
           visual_config=$(mktemp -d "${RUNNER_TEMP}/workbench-fonts.XXXXXX")
@@ -52,9 +107,28 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: browser-evidence
-          path: |
-            artifacts/
-            test-results/
-            playwright-report/
+          name: visual-attempt-${{ github.run_attempt }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+  verify:
+    name: verify
+    if: always()
+    needs: [checks, backend, browser, visual]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Require complete release acceptance
+        env:
+          CI_RESULTS: ${{ toJSON(needs) }}
+        run: python scripts/ci.py acceptance
+      - uses: actions/upload-artifact@v4
+        with:
+          name: full-release-acceptance-attempt-${{ github.run_attempt }}
+          path: artifacts/ci/full-release-acceptance.json
+          if-no-files-found: error
           retention-days: 14
