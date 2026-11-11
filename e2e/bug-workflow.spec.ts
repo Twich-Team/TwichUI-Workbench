@@ -65,6 +65,7 @@ test('ordinary bug report reaches a checked local patch through separate browser
   await page.getByLabel('Title Optional').fill('Name normalization leaves uppercase letters');
   await page.getByLabel('Description', {exact:true}).fill('Entering ALICE with surrounding spaces returns ALICE. It should return alice.');
   await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
+  await page.getByText('Provider permissions and investigation limits',{exact:true}).click();
   await page.getByLabel('Allow local Qwen to investigate this report').check();
   await page.getByRole('button',{name:'Submit request',exact:true}).click();
   await expect(page.getByText('Request received and saved.',{exact:false})).toBeVisible();

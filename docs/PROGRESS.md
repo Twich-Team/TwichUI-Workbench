@@ -1,3 +1,19 @@
+## November 11, 2026 — Phase B implementation checkpoint
+
+Following the Project Working Philosophy, replaced the broad operational layout
+with crafted shared materials, small supplied navigation icons, companion work/
+decision composition, result review cards, aligned request rows with real priority/
+activity order, a task narrative and progressive AI/permission controls. Original
+art, exact model policy/consent owners, usage charts and all advanced routes remain.
+No new provider generation or addon publication. The live preview is still107.
+
+Fresh copied0013migration and supported receipt-bound reconciliation preserve
+every original domain row and41links;11coherent requests retain37failed attempts
+and all deep links. Source/static50frontend126affectedbackend/admin and controlled
+bug/task browser checks pass. Actual before/after desktop/phone rendering inspected;
+full local/hosted verification and sealed private cutover continue. Older local
+documentation edits and dependency links are preserved outside this checkpoint.
+
 ## Verified current — source-read and fresh-run recovery installed
 
 November10,2026 UTC: installed28b8c87/deployment87 corrects repeated source delivery,

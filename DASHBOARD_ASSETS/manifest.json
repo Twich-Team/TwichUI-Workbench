@@ -54,5 +54,20 @@
     ],
     "png": "DASHBOARD_MOCKUP_VISUAL_DIRECTION_CLEAN.png",
     "png_role": "Lossless decoded copy of supplied JPEG, not a recovered original PNG"
+  },
+  {
+    "role": "HEADER_LEATHER_PHASE_B",
+    "source": "DASHBOARD_ASSETS/supplied-originals/2-Pasted-Image-2.jpg",
+    "source_sha256": "23b85630f1451b4cab5617a4b93020e7e5f2aff04ba1abaa90e1be81e66b16e7",
+    "pixels": [
+      1254,
+      1254
+    ],
+    "png": "DASHBOARD_ASSETS/HEADER_LEATHER.png",
+    "png_role": "Lossless decoded copy of supplied JPEG, not a recovered original PNG",
+    "web": "frontend/public/art/dashboard/header_grain.webp",
+    "web_bytes": 236958,
+    "derivative": "768px source mirrored to1536px matching-edge tile, WebP quality88; originals unchanged; no generated content",
+    "web_sha256": "dde11c5cc20ce668c12e337a65eba2eb1674dc05fd956a3688e8406dcbfca290"
   }
 ]

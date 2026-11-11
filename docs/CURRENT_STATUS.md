@@ -2,12 +2,12 @@ Last updated November 11, 2026 (UTC).
 
 Private preview: https://10.0.0.9:9487. Installed build b3cb3f0, deployment 107.
 
-Installed: specific global and per-task AI models and reasoning, precise fallback choices, frozen task preferences, requested-versus-reported details, and interactive AI activity/token charts. Missing usage and unavailable subscription allowance remain explicit. Qwen is still the default.
+Two real Qwen requests reached checked results and draft PRs #10 and #11. Neither change is merged, installed or game-tested. These results and all 633 original records remain preserved.
 
-Two earlier real Qwen requests reached checked results and draft PRs #10 and #11. Both remain open; neither addon change was installed or tested in World of Warcraft. New routing behavior was verified through controlled worker tests; no expensive real-model demonstration was repeated. Usage totals match actual saved history and independent SQL.
+Phase B is implemented in source: crafted leather shell, clearer Dashboard, outcome-first Results cards, organized Backlog, simpler task creation and approachable AI Settings. Model, reasoning, fallback, saved task preferences and interactive usage charts remain. Preview installation and final acceptance are still pending.
 
-Full hosted checks passed. Installed desktop/phone views, task model selection, result links, restart and independent restore passed. All 633 saved records survived unchanged, with the previous release retained for rollback.
+Focused backend, frontend and browser checks pass. Copied historical reconciliation preserves every original record and adds 41 evidence-bound history links, giving 11 coherent requests. It is not installed yet.
 
-Milestone 5 is complete. Milestone 1 is partial: historical grouping of 41 campaign attempts is tested on a copy but awaits the root-owned helper update. Feature Workshop, attachments, simulator comparisons and additional operation modes remain unfinished.
+Next outcome: complete full local/hosted verification, install the checked Phase B build privately, and verify browser use, restart, restore and rollback. No owner decision is needed now. The administrator update works under its unchanged session and November 13 expiry.
 
-Next complete outcome: install historical reconciliation, then build Feature Workshop. Owner action: run ops/upgrade_workbench_admin_schema0013.sh once in the server terminal. The installed helper rejects the new schema. No routine engineering renewal is needed. Merging and game installation remain owner actions.
+Feature Workshop, attachments, simulator comparisons and operation modes remain future work. Merging and in-game testing remain owner actions.

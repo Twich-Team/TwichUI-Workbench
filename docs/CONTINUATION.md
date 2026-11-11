@@ -1,3 +1,34 @@
+# Phase B source checkpoint — November 11, 2026
+
+Following the Project Working Philosophy, implemented the shared crafted shell,
+companion Dashboard, outcome cards/result summaries, aligned Backlog and real
+priority/activity sorting, readable task narrative, simpler intake and preferred/
+fallback AI settings. Exact model/effort controls and evidence remain reachable.
+The new header grain derives only from supplied material; original artwork remains.
+See [implementation/acceptance](PHASE_B_ACCEPTANCE.md). This is a source checkpoint,
+not an installed-completion claim: private preview remains b3cb3f0/deployment107.
+
+Recovered original633rows/schema0012/hash7c61a77c… and verified the unchanged
+session78 administrator grant. No upgrade rerun or policy alteration. Fresh copied
+migration plus the existing receipt-bound identity reconciliation adds41links and
+yields11coherent requests; every original domain row is byte-for-byte unchanged.
+The old two campaign approvals disappear correctly inside completed task history.
+Full saved attempts/failures/deep links remain. Installation is still pending.
+
+Static/contracts/schema/build,50frontend,126affected backend/admin and controlled
+UI/workflow checks pass. Actual desktop/phone baseline and new-page captures use
+real saved records with zero browser writes; separate controlled states cover
+waiting, failures, decisions, keyboard and enlarged text. Full local/hosted checks,
+sealed deployment, installed acceptance and restart/rollback/restore remain next.
+No real model generation, addon publication, merge or game installation repeated.
+Preserved unrelated checkout/document edits and dependency links.
+
+Continue through B6 under the same authority. Next product milestone afterward
+is coherent Feature Workshop parent/dependent work with integrated verification;
+do not launch that separate campaign during this UI assignment.
+
+---
+
 # Installed feature-campaign checkpoint — November 11, 2026 (UTC)
 
 Following the Project Working Philosophy, the private app now runs **b3cb3f0 /

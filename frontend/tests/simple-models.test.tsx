@@ -92,6 +92,7 @@ it('edits specific supported primary and fallback models and effort through the 
  const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
  render(<QueryClientProvider client={client}><MemoryRouter><SimpleModels/></MemoryRouter></QueryClientProvider>);
  const user=userEvent.setup();
+ await user.click(await screen.findByText('Choose specific models and reasoning'));
  await user.selectOptions(await screen.findByLabelText('Codex model'),'capable-codex');
  await user.selectOptions(screen.getByLabelText('Codex reasoning effort'),'high');
  expect(screen.queryByLabelText('Local Qwen reasoning effort')).toBeNull();

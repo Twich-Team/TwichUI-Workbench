@@ -1,3 +1,4 @@
+import {CheckCircle2,AlertCircle,FileCheck2,Gamepad2,ScrollText} from 'lucide-react';
 import {useQuery} from '@tanstack/react-query';
 import {Link,useParams} from 'react-router-dom';
 import {request} from './api';
@@ -42,6 +43,7 @@ export function RealExecutionReview(){
 export function ExecutionResult({identity,embedded=false}:{identity:string;embedded?:boolean}){
   const query=useQuery({queryKey:['real-execution',identity],
     queryFn:()=>request<View>('/api/real-executions/'+encodeURIComponent(identity)),refetchInterval:3000});
+  const requestQuery=useQuery({queryKey:['result-request',query.data?.workflow_task?.intake_id],queryFn:()=>request<{original:{requested_work?:string;description:string}}>('/api/intake/'+encodeURIComponent(query.data!.workflow_task!.intake_id)),enabled:Boolean(query.data?.workflow_task)});
   if(query.isPending)return <section className="panel" aria-busy="true">Opening the run result…</section>;
   if(!query.data)return <section className="panel" role="alert">The result could not be loaded. <Button variant="secondary" onClick={()=>void query.refetch()}>Try again</Button></section>;
   const row=query.data,result=row.result;
@@ -49,7 +51,7 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
   const active=['pending','running','checking','cancel_requested'].includes(row.status);
   const hasChanges=Boolean(result?.files?.length);
   const testOnly=Boolean(hasChanges&&result!.files!.every(file=>file.path.startsWith('tests/')&&(!file.old_path||file.old_path.startsWith('tests/'))));
-  const outcome=checked?(testOnly?'Test coverage added':hasChanges?'Fix prepared':'Result checked'):null;
+  const outcome=checked?(testOnly?'Test coverage added':hasChanges?(requestQuery.data?.original.requested_work==='feature'?'Feature prepared':'Fix prepared'):'Result checked'):null;
   const workflow=row.workflow_task;
   return <div className={embedded?"inline-result":"intake-page result-page"}>
     {!embedded&&<Link className="back-link" to={workflow?'/intake/'+encodeURIComponent(workflow.intake_id):'/executions'}>{workflow?'Back to the task':'All run results'}</Link>}
@@ -57,20 +59,21 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
     <section className="panel candidate-review real-execution-review" aria-label="Run result and checks">
       {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded result.</p>}
       {row.current_task===false&&<p className="soft-callout">This result belongs to an earlier plan. The current task still needs its own review and checks.</p>}
-      <div className="result-outcome-heading"><p className="eyebrow">{checked?'READY TO REVIEW':'SAVED OUTCOME'}</p>
+      <div className={"result-outcome-heading outcome-"+(checked?"checked":"incomplete")}><span className="result-seal" aria-hidden="true">{checked?<CheckCircle2 size={30}/>:<AlertCircle size={30}/>}</span><div className="result-headline"><p className="eyebrow">{checked?'READY TO REVIEW':'SAVED OUTCOME'}</p>
       <h2>{row.later_review?(row.later_review.state==='rejected'?'Later review rejected this patch':'Later review needs attention'):row.recovery_pending?'Waiting for safe recovery':checked?`${outcome} — automated checks passed`:row.status==='checked'?'Run result saved':runStage[row.status]||'Recorded result'}</h2>
       {embedded&&<p className="result-request">{row.title}</p>}
-      {checked?<p className="result-lead">{testOnly?'Added tests for the reviewed behavior.':hasChanges?'A fix is ready for your review.':'The saved result passed its recorded automated checks.'}</p>
+      {checked?<p className="result-lead">{testOnly?'Workbench added automated tests for this request. The proposed changes are in test files; addon source behavior is unchanged.':hasChanges?'Workbench prepared code changes for this request. The proposed change passed the available automated checks.':'The saved result passed its recorded automated checks.'}</p>
         :<p>{row.later_review?'A later check found a problem with this patch. Review that finding before relying on these changes.':row.message}</p>}
       {checked&&<p className="result-limit">Offline checks only · Not installed or tested in game</p>}
-      </div>
+      </div></div>
       <PublicationStatus identity={row.id} checked={checked}/>
       <dl className="result-milestones" aria-label="Result progress">
-        <div><dt>Automated checks</dt><dd>{checked?'Passed':active?'Not finished':row.later_review?'Later review needs attention':result?.verification==='failed'?'Failed':'No accepted result'}</dd></div>
-        <div><dt>Game installation</dt><dd>Not performed by this run</dd></div>
-        <div><dt>In-game testing</dt><dd>Not verified</dd></div>
+        <div><dt><FileCheck2 size={17}/>Automated checks</dt><dd>{checked?'Passed':active?'Not finished':row.later_review?'Later review needs attention':result?.verification==='failed'?'Failed':'No accepted result'}</dd></div>
+        <div><dt><Gamepad2 size={17}/>Game installation</dt><dd>Not performed by this run</dd></div>
+        <div><dt><ScrollText size={17}/>In-game testing</dt><dd>Not verified</dd></div>
       </dl>
       {checked&&<>
+        {Boolean(row.intended_behavior?.length)&&<section className="result-behavior" aria-label="Improvement checked"><h3>{testOnly?'What the new coverage checks':'What the repair was checked to do'}</h3><p>{(row.behavior_checked?.length?row.behavior_checked:row.intended_behavior)![0]}</p></section>}
         <section className="result-next-step" aria-label="Game verification"><h3>Before relying on it in game</h3><p>This run did not install the change or test it in World of Warcraft. After the change is available in a suitable test build, check the original behavior in game.</p></section>
         {row.behavior_reproduced&&<p>The reviewed check reproduced the bug in the original code and passed with this patch.</p>}
         {Boolean(row.behavior_checked?.length) && <details><summary>Behavior checked</summary><ul>{row.behavior_checked?.map((behavior,i)=><li key={i}>{behavior}</li>)}</ul></details>}

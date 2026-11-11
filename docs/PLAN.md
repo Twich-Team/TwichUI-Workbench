@@ -1,3 +1,16 @@
+# Active Phase B plan — November 11, 2026
+
+The owner's current Phase B assignment supersedes the earlier Feature Workshop
+campaign ordering below. Deliver B1shared materials/shell, B2Dashboard, B3Results,
+B4Backlog/task narrative, B5intake/Settings and B6integrated installed acceptance.
+Continue connected implementation/checks/Git/hosted/private deployment without
+routine renewal. Preserve existing security, billing, disclosure, execution,
+publication, saved-history and rollback owners. Historical reconciliation uses
+its own additive copied-store path and is not a visual-development prerequisite.
+Implementation and final evidence: [Phase B acceptance](PHASE_B_ACCEPTANCE.md).
+
+---
+
 # Active autonomous feature campaign — November 11, 2026
 
 The current owner assignment authorizes connected implementation, verification,

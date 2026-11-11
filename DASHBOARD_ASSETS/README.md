@@ -20,3 +20,9 @@ reference artwork is not used as a screenshot background for interactive control
 Provenance: supplied by Rich for this private Workbench assignment. No claim is
 made about third-party authorship or a transferable license. No external font or
 CDN is used. Existing branding and icon license records remain applicable.
+
+Phase B adds `header_grain.webp`: the same supplied header source resized to768px,
+mirrored to1536px, WebP quality88. It retains more grain at the768px CSS scale.
+Source files are unchanged. Shared CSS supplies bevels and restrained light;
+quieter existing panel/page tiles remain. Desktop/phone inspection and fallback
+checks belong to the Phase B acceptance record.

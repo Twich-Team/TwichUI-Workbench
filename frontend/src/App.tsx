@@ -30,15 +30,15 @@ export function taskDisplayState(task: Task) {
 export function App() {
   const location=useLocation();
   const path=location.pathname;
-  const links=[{title:'Dashboard',to:'/',icon:Home,active:path==='/'||path==='/intake/new'},
-    {title:'Backlog',to:'/backlog',icon:ListTodo,active:path.startsWith('/backlog')||(path.startsWith('/intake')&&path!='/intake/new')||path.startsWith('/records')},
-    {title:'Results',to:'/results',icon:ScrollText,active:path.startsWith('/results')||path.startsWith('/executions')||path.startsWith('/history')},
-    {title:'Settings',to:'/settings',icon:SettingsIcon,active:path.startsWith('/settings')||path.startsWith('/models')||path.startsWith('/monitoring')||path.startsWith('/usage')}];
+  const links=[{title:'Dashboard',to:'/',icon:Home,art:'overview',active:path==='/'||path==='/intake/new'},
+    {title:'Backlog',to:'/backlog',icon:ListTodo,art:'backlog',active:path.startsWith('/backlog')||(path.startsWith('/intake')&&path!='/intake/new')||path.startsWith('/records')},
+    {title:'Results',to:'/results',icon:ScrollText,art:'history',active:path.startsWith('/results')||path.startsWith('/executions')||path.startsWith('/history')},
+    {title:'Settings',to:'/settings',icon:SettingsIcon,art:'settings',active:path.startsWith('/settings')||path.startsWith('/models')||path.startsWith('/monitoring')||path.startsWith('/usage')}];
   const create=<Button asChild><Link to="/intake/new"><Plus size={18}/>Create a task</Link></Button>;
   return <div className="app-shell styled-workbench">
     <a className="skip-link" href="#main">Skip to content</a>
     <header className="identity-bar"><Link to="/" className="brand" aria-label="TwichUI Workbench home"><img className="brand-logo" src="/art/branding/twichui-launcher-transparent-edited.png" alt=""/><span>TwichUI Workbench</span></Link><span className="identity-note"><ShieldCheck size={15}/>Private workshop</span><div className="mobile-create">{create}</div></header>
-    <aside className="sidebar"><nav className="primary-nav" aria-label="Main navigation">{links.map(({title,to,icon:Icon,active})=><Link key={title} to={to} aria-current={active?'page':undefined} className={'nav-item'+(active?' active':'')}><Icon size={21}/><span>{title}</span></Link>)}</nav><div className="sidebar-create">{create}</div><p className="sidebar-caption">Your addon.<br/>Your decisions.</p></aside>
+    <aside className="sidebar"><nav className="primary-nav" aria-label="Main navigation">{links.map(({title,to,art,active})=><Link key={title} to={to} aria-current={active?'page':undefined} className={'nav-item'+(active?' active':'')}><img className="navigation-art" src={`/art/workshop/${art}.png`} alt=""/><span>{title}</span></Link>)}</nav><div className="sidebar-create">{create}</div><p className="sidebar-caption">Your addon.<br/>Your decisions.</p></aside>
     <div className="workspace"><main id="main"><Routes>
       <Route path="/" element={new URLSearchParams(location.search).has('source')?<TaskList/>:<Dashboard/>}/>
       <Route path="/backlog" element={new URLSearchParams(location.search).has('source')||new URLSearchParams(location.search).has('focus')?<Backlog/>:<WorkspaceBacklog/>}/>

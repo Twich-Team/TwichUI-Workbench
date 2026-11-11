@@ -75,7 +75,7 @@ test('isolated UI state fixtures show activity only for active records and retai
  }
  await page.route('**/art/dashboard/*',r=>r.abort());await page.goto('/intake/new');
  await expect(page.getByLabel('Description',{exact:true})).toBeVisible();
- expect(await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(22, 15, 11)');
+ expect(await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(18, 14, 11)');
  await overflow(page);await capture(page,info,'workshop-no-texture',{keepInCompact:true});
 });
 
@@ -256,4 +256,47 @@ test('simple settings persist a real policy and preserve pause while showing hon
   await page.setViewportSize({width,height:844});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
   await overflow(page);await capture(page,info,`simple-models-${width}-${font}`,{keepInCompact:true});
  }
+});
+
+test('companion dashboard distinguishes working, waiting, attention and retained failures',async({page},info)=>{
+ const now=new Date().toISOString();
+ const row={id:'controlled-request',title:'Keep the map at the chosen zoom',kind:'bug',state:'working',stage:'Working on the change',message:'Working in a protected copy.',active:true,needs_you:false,created_at:now,updated_at:now,result_id:null,result_kind:null,provider:'local',priority_manual:false};
+ let current:any;
+ await page.route('**/api/workspace?*',r=>r.fulfill({json:current}));
+ const cases=[
+  ['working','Working on the change',true,false],['checking','Checking the change',true,false],
+  ['queued','Waiting for local Qwen',false,false],['paused','Paused',false,false],
+  ['interrupted','Waiting for recovery',false,false],['failed','Could not finish',false,false],
+  ['needs_input','Needs your input',false,true],['needs_approval','Needs approval',false,true],
+ ];
+ for(const [state,stage,active,needs] of cases){
+  const task={...row,state,stage,active,needs_you:needs};
+  current={items:[task],total:1,all_total:1,page:1,page_size:12,counts:{all:1,active:active?1:0,queued:state==='queued'?1:0,needs_you:needs?1:0,completed:0},mode:'demo',observed_at:now,work_paused:state==='paused',highlights:{active:active?[task]:[],waiting:state==='queued'?[task]:[],needs_you:needs?[task]:[],completed:[],outcomes:state==='failed'?[task]:[]}};
+  await page.goto('/');await expect(page.getByRole('heading',{name:'Dashboard',exact:true})).toBeVisible();
+  await expect(page.getByRole('link',{name:`${active?1:0} Working`,exact:true})).toBeVisible();
+  await expect(page.getByRole('link',{name:`${needs?1:0} Need you`,exact:true})).toBeVisible();
+  await expect(page.locator('.journey-rail')).toHaveCount(active?1:0);
+  if(needs)await expect(page.getByRole('link',{name:/Keep the map at the chosen zoom/})).toContainText(state==='needs_input'?'Answer question':'Review next step');
+  await expect(page.locator('.recent-panel')).not.toContainText('Keep the map at the chosen zoom');
+  await overflow(page);
+ }
+ await page.setViewportSize({width:390,height:844});await page.reload();await overflow(page);
+ await capture(page,info,'companion-attention-phone',{keepInCompact:true});
+ await page.evaluate(()=>document.documentElement.style.fontSize='200%');await overflow(page);
+ await page.getByRole('link',{name:/Keep the map at the chosen zoom/}).focus();
+ await page.keyboard.press('Enter');await expect(page).toHaveURL(/intake\/controlled-request/);
+});
+
+test('backlog ordering stays in the URL and uses the full filtered API scope',async({page})=>{
+ await page.goto('/intake/new');await page.getByLabel('Description',{exact:true}).fill('Inspect the map’s initial zoom.');
+ await page.getByLabel('Type of work').selectOption('inspection');await page.getByRole('button',{name:'Save for later',exact:true}).click();
+ await expect(page).toHaveURL(/intake\/[a-f0-9-]{36}/);
+ await page.goto('/backlog');await page.getByLabel('Order by').selectOption('priority');
+ await expect(page).toHaveURL(/sort=priority/);await page.reload();
+ await expect(page.getByLabel('Order by')).toHaveValue('priority');
+ await expect(page.getByRole('link',{name:/Inspect the map’s initial zoom/})).toContainText('Suggested priority');
+ await page.getByRole('button',{name:/Working/}).click();
+ await expect(page.getByText('No tasks have this status.')).toBeVisible();
+ await page.getByRole('button',{name:'Clear filters',exact:true}).click();
+ await expect(page.getByRole('link',{name:/Inspect the map’s initial zoom/})).toBeVisible();
 });

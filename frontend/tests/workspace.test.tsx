@@ -6,7 +6,7 @@ import {MemoryRouter} from 'react-router-dom';
 import {afterEach,expect,it,vi} from 'vitest';
 import {Dashboard,WorkspaceBacklog,WorkspaceResults} from '../src/Workspace';
 
-const task:components['schemas']['WorkspaceTask']={id:'request',title:'Remember the selected route',kind:'bug',state:'decision_pending',stage:'Decision recorded',message:'Your choice is saved and waiting to apply.',active:false,needs_you:false,created_at:'2026-11-09T00:00:00Z',updated_at:'2026-11-09T00:00:00Z',result_id:null,result_kind:null,provider:null};
+const task:components['schemas']['WorkspaceTask']={id:'request',title:'Remember the selected route',kind:'bug',state:'decision_pending',stage:'Decision recorded',message:'Your choice is saved and waiting to apply.',active:false,needs_you:false,priority_manual:false,created_at:'2026-11-09T00:00:00Z',updated_at:'2026-11-09T00:00:00Z',result_id:null,result_kind:null,provider:null};
 const base:components['schemas']['WorkspacePage']={items:[task],total:1,all_total:1,page:1,page_size:12,counts:{all:1,active:0,queued:0,needs_you:0,completed:0},observed_at:'2026-11-09T00:00:00Z',mode:'everyday',highlights:{active:[],needs_you:[],completed:[]}};
 const clients:QueryClient[]=[];
 afterEach(()=>{clients.forEach(c=>c.clear());vi.unstubAllGlobals();});
@@ -64,4 +64,12 @@ it('maintenance is described separately while addon work counts remain zero',asy
  open(<Dashboard/>,data);await screen.findByText('Model used by maintenance');
  expect(screen.getByRole('region',{name:'Local model status'})).toHaveTextContent('verified maintenance');
  expect(screen.getByRole('link',{name:/0 Working/})).toBeVisible();
+});
+
+it('an unfinished outcome never appears among recently completed tasks',async()=>{
+ const stopped={...task,state:'failed' as const,stage:'Could not finish',message:'The independent checks failed.'};
+ open(<Dashboard/>,{...base,items:[stopped],highlights:{...base.highlights,outcomes:[stopped]}});
+ await screen.findByText('No work running');
+ expect(screen.getByText('Checked results will appear here when work finishes.')).toBeVisible();
+ expect(screen.queryByText(stopped.title)).not.toBeInTheDocument();
 });

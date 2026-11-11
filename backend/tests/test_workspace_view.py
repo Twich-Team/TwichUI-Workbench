@@ -178,3 +178,24 @@ def test_expired_execution_permission_stays_held_without_a_false_attention_reque
     assert 'expired' in row['message'] and index(client)['counts']['needs_you']==0
     assert not index(client,state='needs_you')['items']
     assert not index(client)['highlights']['needs_you']
+
+
+def test_priority_and_activity_orders_keep_filters_counts_and_originals(client, headers, store):
+    ids = [submit(client, headers, kind='issue', title=title)[0]['id']
+           for title in ['First report', 'Second report', 'Third report']]
+    with write_transaction(store) as c:
+        for i, identity in enumerate(ids):
+            c.execute(intakes.update().where(intakes.c.id == identity).values(
+                created_at=f'2026-01-0{i+1}T00:00:00+00:00', priority_override=3-i))
+    newest = index(client)
+    assert [r['id'] for r in newest['items']] == list(reversed(ids))
+    assert [r['id'] for r in index(client, sort='oldest')['items']] == ids
+    ranked = index(client, sort='priority')
+    assert [r['priority'] for r in ranked['items']] == [1, 2, 3]
+    assert all(r['priority_manual'] for r in ranked['items'])
+    assert ranked['counts'] == newest['counts'] == index(client, sort='updated')['counts']
+    assert all(r['description'] for r in ranked['items'])
+    assert client.get('/api/workspace?sort=invented').status_code == 422
+    with store.connect() as c:
+        assert [r for r in c.execute(select(intakes.c.id, intakes.c.priority_override)
+                .order_by(intakes.c.created_at))] == list(zip(ids, [3, 2, 1]))

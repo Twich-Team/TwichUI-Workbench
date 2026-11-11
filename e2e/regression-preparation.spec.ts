@@ -393,8 +393,8 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
       await review.screenshot({path:artifactPath(`local-browser/result-${width}.png`)});
     }
     await page.goto('/');
-    const recent=page.locator('.workshop-panel').filter({has:page.getByRole('heading',{name:'Recent outcomes',exact:true})});
-    await expect(recent.getByRole('link',{name:/Cover lowercase name normalization.*Ready to review/})).toBeVisible();
+    const recent=page.locator('.workshop-panel').filter({has:page.getByRole('heading',{name:'Recently completed',exact:true})});
+    await expect(recent.getByRole('link',{name:/Cover lowercase name normalization.*Automated checks passed/})).toBeVisible();
     for(const width of [1440,390]){
       await page.setViewportSize({width,height:1000});
       await overflow(page);
@@ -532,6 +532,7 @@ test('planning provider consent shows both fallback directions on desktop and ph
     await page.getByLabel('Add a check for existing behavior').check();
     await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
     const providers=page.getByRole('group',{name:'Planning provider'});
+    await providers.getByText('Provider permissions and investigation limits',{exact:true}).click();
     const qwen=providers.getByLabel('Allow one local Qwen request to plan this task');
     const codex=providers.getByLabel('Allow one signed-in Codex turn to plan this task');
     const toCodex=providers.getByLabel(/Allow one switch to signed-in Codex/);

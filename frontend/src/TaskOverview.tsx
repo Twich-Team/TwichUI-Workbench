@@ -64,7 +64,7 @@ export function TaskJourney({item}: {item: Intake}) {
     enabled: Boolean(task && (item.original.regression_tests || item.original.local_planning) && needsRunOffer(execution.data)),
     refetchInterval: 3000});
   const progress = summary(item, execution.isError ? undefined : execution.data, approval.isError ? undefined : approval.data);
-  return <section className="panel task-journey" aria-label="Task progress">
+  return <section className="panel task-journey" aria-label="Task progress"><h2>Your task’s journey</h2>
     <ol className="journey-steps">{['Understand', 'Review plan', 'Do the work', 'Check', 'Result'].map((step, i) =>
       <li key={step} aria-current={i === progress.step ? 'step' : undefined}><span>{i + 1}</span>{step}</li>)}</ol>
     {(!execution.data || execution.data.stage==='waiting' ||
