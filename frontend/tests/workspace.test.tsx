@@ -32,7 +32,7 @@ it('results explain local patch boundaries and link a real result identifier',as
  const data:typeof base={...base,items:[{...task,state:'completed',stage:'Ready to review',result_id:'saved-result',result_kind:'patch'}]};
  open(<WorkspaceResults/>,data);await screen.findByText('Local patch · Not installed in game');
  expect(screen.getByRole('link',{name:/Remember the selected route/})).toHaveAttribute('href','/executions/saved-result');
- expect(screen.getByText(/not been installed into your game/)).toBeVisible();
+ expect(screen.getByText(/see whether Workbench submitted a draft pull request/)).toBeVisible();
 });
 it('a failed background refresh retains loaded records and explicitly marks the display stale',async()=>{
  const calls=open(<Dashboard/>);await screen.findByText('No work running');
