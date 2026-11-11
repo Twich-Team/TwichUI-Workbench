@@ -7763,3 +7763,48 @@ separately. The first hostedf2f298c needs daff8df's existing unit-copy assertion
 correction. PhaseAassessment and explicit PhaseBResults requirements are recorded.
 Next complete outcome is global pause/resume of new work. Browser-only standing
 publication setup remains future work. Private proofs are under outcome-daff8df.
+
+
+## November 10 — ordinary browser delivery and durable pause installed
+
+2005b6d/deployment104 added a fixed draft operation to the existing private
+connector, separate standing publication policy, normal Results action,
+automatic qualifying-new-result admission and global pause/resume. The owner
+permits project pushes/PRs and retains merging. Actual browser POST submitted
+the existing checked map result once as draftPR11/commit0cc1984. PR10/vendor
+and PR11/map exact remote files, parent/base and summary match saved checks.
+Both remain open drafts. No new model calls or original approval changes.
+
+Actual desktop/390px, enlarged text, Results/task/diffs, pause/reload/restart and
+resumed state pass. All633rows survive independent restore. Prior630rows remain
+with only one publication and two work-control policy additions. The original
+51requests/11savedcheckedrecords and protected network/model state remain.
+
+Finala8c43cb/deployment105 adds physical recovery reserve before scratch
+allocation and shared installed scratch for finite-session publisher cleanup.
+17affectedactualGit/safety checks pass. Major implementation passed257affected
+backend,40frontend,117Chromium(3skips),12visual; oldfullbackend2183/8skips.
+Final hosted verification is running. Snapshot changes were inspected and
+cover truthful footer/publication text. CurrentStatus and PhaseAassessment
+record the supported workflow's real boundary. PhaseBResults outcome is
+prepared; full redesign remains deferred. Private receipts in outcome-2005b6d
+and outcome-a8c43cb retain browser, GitHub, store, restart and source proofs.
+
+
+## November 10 — hosted recovery-test observer corrected
+
+Hosted2005b6d finished2191backendchecks and failed one continuous-recovery test
+after its observer thread raised SQLite-busy while connecting. The observer
+then never sent its stop signal, so the parent reached15seconds. The exact test
+was unchanged since17ee233. Injecting one expected busy read reproduced the
+baseline observer timeout while the actual worker still delivered its failed
+outcome once and retained partial usage11 in its single execution ledger.
+
+The observer now retries only SQLite-busy and always sends its stop signal.
+The same8second observation and15second parent deadline remain. Assertions
+still require one execution, exactly three failed delivery writes, finalfailed
+state and preserved usage11; a deterministic observer-busy assertion is added.
+46recovery/contention checks pass. This is a test-harness correction; running
+a8c43cb application code and both real draft outcomes remain verified.
+Final hosted rerun follows the checkpoint. Private baseline fault and row proof
+are in outcome-a8c43cb/observer-baseline-*.

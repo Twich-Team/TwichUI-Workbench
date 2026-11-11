@@ -21,3 +21,7 @@ The verified source is candidate
 `8b824589a7b96dd71de88466c5ac327a9673b43835e5670351b1aa1241e7eaa5`
 from execution `0bde345b-d8c8-53ce-be78-8fd0661d7418`, against main at
 `df07bb432c260998f001edad3979152b2d533aae`.
+
+The checked map coverage result was subsequently submitted through the installed
+browser as [draft PR 11](https://github.com/Twich-Team/TwichUI/pull/11) under
+this same owner direction. Its original held run decision is preserved.

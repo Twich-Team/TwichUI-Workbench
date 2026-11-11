@@ -1,3 +1,109 @@
+# Installed browser draft delivery and pause — November 10, 2026
+
+Following the Project Working Philosophy, the requested supported bug/test
+request-to-draft workflow is demonstrated. The private preview runs
+**a8c43cb / deployment 105**. Its seal is
+`0467918804a7d76f595e61e36be95aba6f6fab1d8a54b7166753386102f5cb91`.
+All work remains on `codex/everyday-workbench`. Original main and local edits
+are preserved. Full Phase B visual redesign remains deferred.
+
+## Actual owner-visible outcomes
+
+- The original real-Qwen vendor repair is open
+  [draft PR 10](https://github.com/Twich-Team/TwichUI/pull/10), GitHub commit
+  `483f51d757b71339ef8194aee6ce90d3247b1e38`. The exact checked candidate is
+  `8b824589a7b96dd71de88466c5ac327a9673b43835e5670351b1aa1241e7eaa5`.
+- The retained real-Qwen map coverage result was submitted from the installed
+  browser with exactly one POST. It is open
+  [draft PR 11](https://github.com/Twich-Team/TwichUI/pull/11), commit
+  `0cc1984cd89d1c300f0983ca2c1d0ab9d10ae37e`, candidate
+  `c3c6931adb1663965641fc88bb423db3e5694cd967fde23a9dd1d4f45479e29d`.
+- Both commits have the single checked parent
+  `df07bb432c260998f001edad3979152b2d533aae`. GitHub files and draft summaries
+  match the exact saved outputs. Each branch has exactly one PR. Main still
+  matches that base. Merge and game installation remain owner actions.
+- Desktop 1440px and phone 390px Results, original task and actual links pass
+  reload. Enlarged phone text fits. Technical checks and code stay expandable.
+  Screenshots were inspected.
+- Pause/resume is installed. Pause holds new admission and retains pending
+  requests/decisions. Already-claimed work may finish safely. Controlled
+  browser/worker checks prove the same queued request resumes and an already
+  started session can settle. Installed pause persisted through process restart.
+  Final work state is **resumed**.
+- All **633 saved rows**, 51 requests and 11 checked saved records survived the
+  final cutover, four-service restart and independent restore. Publication
+  verification compared actual remote file hashes. Original model attempts,
+  execution records and approvals match the prior store exactly. No new model
+  calls were used for these publication operations.
+- Both approved private listeners, TLS, assets, ingress/CSRF and kernel/network
+  checks passed. Model access was verified after restart. Port 8765 is preserved.
+  Physical game/client and physical phone/Safari behavior remain unverified.
+
+## Delivery and authority
+
+The owner permits project pushes and PRs and retains merging. Read
+[publication authority](OWNER_DRAFT_PUBLICATION_AUTHORITY_20261110.md).
+Historical held run decisions retain their original meaning. A separate
+installation-bound standing policy now covers exact checked draft delivery.
+Qualifying newly finished results can queue automatically. Earlier eligible
+held results can use Submit draft pull request from Results.
+
+The ordinary system worker asks the existing private connector to advance one
+fixed draft operation. The API/worker network protections and connector peer
+boundary remain. Publication uses the existing canonical row, fenced local
+preparation and durable remote intent. It makes no Codex model request.
+
+The final correction reserves physical recovery room before clone allocation
+and uses the same installed scratch directory for finite-session publication
+and cleanup. Actual isolated Git preparation/cleanup and low-space refusal pass.
+The app's targeted host command remains available for scoped recovery.
+
+## Verification and receipts
+
+Static/contracts/build/lint/schema passed. The major implementation passed
+257 affected backend checks, all 40 frontend checks, all 117 Chromium checks
+(three skipped), and all 12 visual comparisons. The final storage/cleanup
+correction passed 17 affected checks. An earlier full local backend run passed
+2183 tests with eight skips. Final hosted verification is in progress. Hosted2005b6d exposed an unchanged
+test observer that died on SQLite-busy and left its child waiting. The baseline
+fault reproduced while the actual worker correctly recovered once. The observer
+now retries only busy reads and guarantees its stop signal. Original deadlines,
+one-execution/three-write-failure and partial-usage assertions remain. A fixed
+observer-busy fault is asserted. All46recovery/contention checks pass. This
+test-only correction requires no change to the installed application.
+
+The screenshot references changed for the truthful footer and draft-publication
+copy. Actual desktop diff and phone images were reviewed. The same reviewed
+Linux font setup passes comparison without changing application fonts.
+
+Private receipts are under
+`delivery-campaign-7b5963a/outcome-2005b6d` for browser submission, pause/restart,
+exact GitHub candidates and history proof, and `outcome-a8c43cb` for the final
+sealed installation, restart, restored store and final GitHub proof.
+Standing policy lives in the private stage's `artifacts/draft-authority.json`.
+When installing a subsequent release, preserve its owner-instruction digest
+and original automatic-delivery start time and bind it to the copied store's
+actual identity. Keep the prior source, history and recovery copies.
+
+## Next milestone
+
+The [Phase A assessment](PHASE_A_ASSESSMENT_20261110.md) distinguishes installed,
+controlled, live-provider and live-publication evidence for every requested
+area. The initial eligible offline Lua repair/test path now reaches a draft PR.
+Automatic publication of a freshly finished provider result and in-flight
+pause recovery currently have controlled evidence. General feature execution,
+broad inspection, external simulators and progress-triggered fallback remain
+future capabilities.
+
+The [prepared Phase B outcome](PLAN.md) focuses Results on attempted work,
+outcome type, passed/unverified checks, exact delivery state, next action and
+the actual draft link. Keep attempts within one task and technical evidence
+secondary. Preserve the complete Phase C roadmap, Claude and Smart Model
+Allocation. No new owner engineering decision is required for the supported
+workflow. The owner decides when to merge.
+
+---
+
 # Real vendor draft PR delivered — November 10, 2026
 
 Following the Project Working Philosophy, the original vendor request now has

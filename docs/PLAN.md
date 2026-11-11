@@ -1,11 +1,16 @@
-# Recovery inventory and delivery order — November 10, 2026
+# Delivered initial workflow and prepared Phase B — November 10, 2026
 
-November 11 checkpoint: the original vendor repair and a fresh browser
-coverage request are checked in the installed app. Local draft preparation,
-history and restart passed. Actual addon draft PR submission remains
-conditional on applicable publication authorization. Use the
-[current handoff](CONTINUATION.md) for the verified state; the table below
-records the starting gap inventory.
+Current checkpoint is installed a8c43cb/deployment 105. The vendor repair is
+draft PR 10, and the checked map test result was submitted from the installed
+browser as draft PR 11. Pause/resume and restart/restore passed. The supported
+offline Lua bug/test request-to-draft path is demonstrated. Full Phase B visual
+redesign remains deferred, with its Results hierarchy outcome prepared below.
+Use the [current handoff](CONTINUATION.md) and
+[Phase A assessment](PHASE_A_ASSESSMENT_20261110.md) for evidence boundaries.
+
+The starting inventory and implementation sequence below are historical.
+Their authorization checkpoint predates the owner's later publication grant
+and the completed PR delivery.
 
 Verified starting state: development branch codex/everyday-workbench7b7f714,
 installed deployment97, private loopback/LAN preview9487; main/origin main f0314d6.
@@ -43,10 +48,10 @@ The [November 10 product direction addendum](OWNER_PRODUCT_DIRECTION_20261110.md
 records the owner's approved direction. These are future requirements; the
 original vendor result and ordinary real browser workflow remain first.
 
-1. **Finish Phase A.** Demonstrate the checked bug result and recovery in the
-   installed browser. Keep local Qwen as primary, deliberate Codex selection,
-   and a simple configurable fallback. Exercise draft delivery only under
-   applicable publication authorization.
+1. **Retain the initial acceptance.** Keep checked bug/test results, real draft
+   links, private operation and recovery available. Retain local Qwen primary,
+   deliberate Codex selection and configurable pre-generation fallback. Preserve
+   the actual provider evidence and exact publication authority.
 2. **Extend the proven workflow.** Automate supported feature requests within
    permission. Once safe settlement, eligibility, and spending checks are
    proven, add preauthorized Codex fallback when Qwen cannot make progress.
@@ -71,6 +76,32 @@ original vendor result and ordinary real browser workflow remain first.
    reserved, and unallocated capacity, using only supported allowance data.
    Then add interactive usage, allowance, trends, success, and fallback charts.
    Keep observed usage, subscription allowance, and API spending distinct.
+
+## Prepared Phase B outcome
+
+Make the everyday Results page understandable at a glance using the approved
+materials and typography. The current publication milestone supplies truthful
+status and an actual draft link. The next visual milestone should refine that
+hierarchy across fixes, test additions, findings and unsuccessful outcomes.
+
+The first screen should contain the task's ordinary description, the kind of
+outcome, a concise check summary, remaining verification, the saved delivery
+state and any next action. A submitted draft gets its real GitHub link as the
+primary action. Local-only results explain their next available action.
+Merged and installed states require their own recorded evidence.
+
+Keep code, hashes, usage, individual check logs and internal recovery attempts
+in secondary disclosures within the same user task. Preserve the original
+request, approved scope, failed attempts and exact evidence through navigation
+and reload. Findings and test reports retain their own outcome language.
+
+Acceptance includes populated and empty results, held delivery, failed checks,
+lost connection, stale data and interrupted work. Check desktop and phone,
+200% text, keyboard access and reduced motion. Keep labels understandable
+without relying on color. Preserve the chestnut leather, espresso, bronze and
+ivory direction. The complete Phase B visual redesign remains outside this
+publication milestone.
+
 
 ---
 The earlier plan below is historical context; use current continuation and receipts.

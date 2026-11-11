@@ -576,19 +576,32 @@ def transient(c,cur,statement,parameters,context,many):
  if statement.startswith('UPDATE real_execution_requests') and parameters and parameters[0]=='failed' and len(outages)<3:
   outages.append(1);err=sqlite3.OperationalError('NON-MODEL busy');err.sqlite_errorcode=5
   raise job.OperationalError(statement,{},err)
+observer_outages=[]
+@event.listens_for(e,'before_cursor_execute')
+def monitor_busy(c,cur,statement,parameters,context,many):
+ if threading.current_thread().name=='recovery-observer' and statement.startswith('SELECT') and not observer_outages:
+  observer_outages.append(1)
+  err=sqlite3.OperationalError('NON-MODEL expected observer read busy');err.sqlite_errorcode=5
+  raise job.OperationalError(statement,{},err)
 worker.engine_for=lambda:e
 finished=[]
 def observe():
- end=time.monotonic()+8
- while time.monotonic()<end:
-  with e.connect() as c:
-   if c.scalar(select(job.requests.c.status).where(job.requests.c.grant_id==grant_id))=='failed':
-    finished.append(1);break
-  time.sleep(.05)
- os.kill(os.getpid(),signal.SIGTERM)
-threading.Thread(target=observe,daemon=True).start()
+ try:
+  end=time.monotonic()+8
+  while time.monotonic()<end:
+   try:
+    with e.connect() as c:
+     if c.scalar(select(job.requests.c.status).where(job.requests.c.grant_id==grant_id))=='failed':
+      finished.append(1);break
+   except job.OperationalError as error:
+    if getattr(error.orig,'sqlite_errorcode',0)&0xff!=sqlite3.SQLITE_BUSY:
+     raise
+   time.sleep(.05)
+ finally:
+  os.kill(os.getpid(),signal.SIGTERM)
+threading.Thread(target=observe,name='recovery-observer',daemon=True).start()
 sys.argv=['worker'];worker.main()
-assert len(calls)==1 and len(outages)==3 and finished,(calls,outages,finished)
+assert len(calls)==1 and len(outages)==3 and len(observer_outages)==1 and finished,(calls,outages,observer_outages,finished)
 print('NON-MODEL continuous worker: one execution, three delivery failures, automatic atomic result/ledger recovery')
 """
     env = {

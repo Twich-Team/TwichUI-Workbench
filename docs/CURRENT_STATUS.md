@@ -1,13 +1,13 @@
 Last updated November 10, 2026.
 
-The private app runs build daff8df. It accepts supported Lua bug reports and test requests, investigates and plans with Qwen or deliberately selected Codex, checks the work, and saves reviewable results.
+The private app runs a8c43cb. Supported Lua bug and test requests can reach checked changes and authorized draft pull requests.
 
-The original vendor repair completed through real Qwen and independent checks, then Workbench submitted draft PR 10 at https://github.com/Twich-Team/TwichUI/pull/10. GitHub has the exact checked two-file patch. All 178 addon tests and five separate vendor checks passed. The map coverage request also completed through real Qwen.
+The real-Qwen vendor repair is draft PR 10. The saved map coverage result was submitted from the browser as draft PR 11. Both contain the exact checked changes. [Vendor repair](https://github.com/Twich-Team/TwichUI/pull/10), [map coverage](https://github.com/Twich-Team/TwichUI/pull/11).
 
-The actual draft link appears in Results and the original task on desktop and phone. Reload, process restart and an independent restore preserved all saved history. Publication failures and lost-response retries passed controlled tests.
+Desktop and phone Results show the actual PR links. Pause holds new work while already-running work can finish safely. Reload, restart and an independent restore preserved the complete history. Work is resumed.
 
-The repair remains untested in World of Warcraft. Phase A is still incomplete. Global pause/resume and browser-only standing-publication setup remain unfinished. Full release verification is running.
+Lost-response recovery, stale-result refusal, automatic new-result delivery and in-flight pause recovery passed controlled tests. The browser publication used real GitHub.
 
-Next complete outcome is a clear pause/resume control for new work with safe handling of already-running work.
+In-game behavior and physical phone/Safari operation remain unverified. Broader features remain on the roadmap. Next is the prepared Phase B Results hierarchy milestone.
 
-The owner authorized project pushes and PRs and retained merging. No new owner decision is needed for the next engineering work.
+Hosted verification is finishing. No owner decision is needed for the supported workflow. The owner retains merging.
