@@ -64,13 +64,22 @@ Static/contracts/build/lint/schema passed. The major implementation passed
 257 affected backend checks, all 40 frontend checks, all 117 Chromium checks
 (three skipped), and all 12 visual comparisons. The final storage/cleanup
 correction passed 17 affected checks. An earlier full local backend run passed
-2183 tests with eight skips. Final hosted verification is in progress. Hosted2005b6d exposed an unchanged
-test observer that died on SQLite-busy and left its child waiting. The baseline
+2183 tests with eight skips. Installed a8c43cb passed full hosted verification
+[run 42944230316](https://github.com/Twich-Team/TwichUI-Workbench/actions/runs/42944230316),
+including 2194 backend, 40 frontend, 117 Chromium and 12 visual checks.
+Hosted2005b6d exposed an unchanged test observer that died on SQLite-busy and left its child waiting. The baseline
 fault reproduced while the actual worker correctly recovered once. The observer
 now retries only busy reads and guarantees its stop signal. Original deadlines,
 one-execution/three-write-failure and partial-usage assertions remain. A fixed
 observer-busy fault is asserted. All46recovery/contention checks pass. This
 test-only correction requires no change to the installed application.
+The later checkpoint exposed a second unchanged concurrency test that treated
+a bounded SQLite lock refusal as unexpected. A held-writer fault reproduced
+the baseline failure. The test now retries only busy/locked errors within a
+fixed deadline, forces one actual contention event and retains exactly-one
+command/application and revision assertions. All 50 review/recovery/contention
+checks pass. Production lock deadlines are unchanged. The test checkpoint is
+being verified separately from the already verified installed release.
 
 The screenshot references changed for the truthful footer and draft-publication
 copy. Actual desktop diff and phone images were reviewed. The same reviewed

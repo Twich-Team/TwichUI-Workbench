@@ -10,4 +10,4 @@ Lost-response recovery, stale-result refusal, automatic new-result delivery and 
 
 In-game behavior and physical phone/Safari operation remain unverified. Broader features remain on the roadmap. Next is the prepared Phase B Results hierarchy milestone.
 
-Hosted verification is finishing. No owner decision is needed for the supported workflow. The owner retains merging.
+The installed release passed full hosted verification. Test-only concurrency hardening is being checked separately. No owner decision is needed for the supported workflow. The owner retains merging.

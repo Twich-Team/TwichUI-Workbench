@@ -4,12 +4,14 @@ from pathlib import Path
 import sqlite3
 import subprocess
 import sys
+from threading import Event
 import time
 from uuid import uuid4
 
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import func, select
+from sqlalchemy import event, func, select
+from sqlalchemy.exc import OperationalError
 from workbench.db import applications, commands, tasks, write_transaction
 from workbench.schemas import Decision
 from workbench.service import submit
@@ -149,12 +151,44 @@ def test_short_contention_can_clear_within_timeout(client, headers, store):
 
 def test_concurrent_duplicate_submission_and_workers(client, store):
     body = Decision(**decision(client))
+    busy_observed = Event()
+
+    def retry_busy(operation):
+        deadline = time.monotonic() + 8
+        while True:
+            try:
+                return operation()
+            except OperationalError as error:
+                if (getattr(error.orig, "sqlite_errorcode", 0) & 0xFF not in {5, 6}
+                        or time.monotonic() >= deadline):
+                    raise
+                busy_observed.set()
+                time.sleep(.02)
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
-        results = list(pool.map(lambda _: submit(store, TASK, body), range(2)))
+        results = list(pool.map(lambda _: retry_busy(lambda: submit(store, TASK, body)), range(2)))
     assert results[0]["id"] == results[1]["id"]
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
-        assert sum(pool.map(lambda _: process_one(store), range(2))) == 1
-    assert count(store, applications) == 1
+    busy_observed.clear()
+    lock_held = Event()
+
+    def hold_first_writer(connection, cursor, statement, parameters, context, executemany):
+        if statement.startswith("SELECT commands") and not lock_held.is_set():
+            lock_held.set()
+            # Exercise the same bounded busy retry used by the continuous worker.
+            assert busy_observed.wait(5)
+
+    event.listen(store, "before_cursor_execute", hold_first_writer)
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+            first = pool.submit(retry_busy, lambda: process_one(store))
+            assert lock_held.wait(5)
+            second = pool.submit(retry_busy, lambda: process_one(store))
+            assert sum((first.result(timeout=10), second.result(timeout=10))) == 1
+    finally:
+        event.remove(store, "before_cursor_execute", hold_first_writer)
+    assert busy_observed.is_set()
+    assert count(store, commands) == count(store, applications) == 1
+    assert client.get(f"/api/tasks/{TASK}").json()["revision"] == 2
 
 
 def worker_process(store, *arguments):

@@ -1664,7 +1664,8 @@ Its dedicated endpoint updates that preference with revision-conflict detection
 and response-loss reconciliation. Model edits preserve it. The worker holds new
 admission and scheduled recovery attempts while paused. Already-claimed task
 sessions may finish and settle safely. A queued session retains its identity
-and permission through resume. Workspace pause labels are a read projection.
+and approval record through resume, subject to its actual scope and limits.
+Workspace pause labels are a read projection.
 
 The existing private connector now accepts one additional fixed operation from
 the system Workbench worker. It advances the existing draft-delivery owner for

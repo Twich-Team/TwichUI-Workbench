@@ -7808,3 +7808,20 @@ state and preserved usage11; a deterministic observer-busy assertion is added.
 a8c43cb application code and both real draft outcomes remain verified.
 Final hosted rerun follows the checkpoint. Private baseline fault and row proof
 are in outcome-a8c43cb/observer-baseline-*.
+
+
+## November 10 — verified release and bounded-contention test correction
+
+Installed a8c43cb passed hosted run42944230316 with 2194 backend, 40 frontend,
+117 Chromium and 12 visual checks. Both real draft PRs remain the delivered
+outcomes. Checkpoint863f694 later failed one unchanged duplicate-worker test
+when SQLite's intentional one-second acquisition bound was reached under load.
+The same test and worker operation are unchanged since17ee233. A controlled
+held-writer fault reproduced the raw busy error on that baseline.
+
+The test now uses bounded busy/locked retries, forces a real contention event
+and still requires matching duplicate receipts, one command, one application
+and a single revision increment. The product's transaction deadline is
+unchanged. All50review/recovery/contention tests and lint pass. This checkpoint
+changes tests and documentation only, requiring no new installed application.
+Private concurrent-baseline fault/log/proof retain the reproduction.
