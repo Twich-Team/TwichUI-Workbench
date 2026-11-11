@@ -325,6 +325,7 @@ test('compact overviews count saved requests and remain usable with enlarged pho
    await page.goto(path);await expect(page.locator('main h1').first()).toBeVisible();
    if(width===320)await page.evaluate(()=>document.documentElement.style.fontSize='200%');
    await expect(page.getByText('Opening your workspace…',{exact:true})).toHaveCount(0);
+   if(path==='/'){await page.getByRole('link',{name:'All results',exact:true}).focus();await page.keyboard.press('Tab');await expect(page.getByRole('link',{name:'All requests',exact:true})).toBeFocused();}
    if(width===320&&path==='/backlog'){const title=page.locator('.task-row-copy>strong').first();expect((await title.boundingBox())!.width).toBeGreaterThan(150);}
    await overflow(page);await capture(page,info,`overview-${path.replaceAll('/','')||'dashboard'}-${width}`,{keepInCompact:true});
   }
