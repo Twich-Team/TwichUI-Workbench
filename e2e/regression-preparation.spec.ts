@@ -375,7 +375,7 @@ for(const outcome of ['pass','fail','interrupt'] as const)test(`browser local-on
   expect(execution.publication_requested).toBe(false);
   expect(await page.request.get(executionPath+'/delivery').then(r=>r.json())).toBeNull();
   if(outcome==='pass'){
-    await expect(review.getByRole('heading',{name:'Test changes checked'})).toBeVisible();
+    await expect(review.getByRole('heading',{name:'Test coverage added — automated checks passed'})).toBeVisible();
     await review.getByText('See the changes in code',{exact:true}).click();
     await review.getByText('Check details',{exact:true}).click();
     await expect(review.getByLabel('Unified diff for tests/test_normalize.lua')).toContainText('assert(normalize("  ALICE ") == "alice")');
@@ -504,15 +504,15 @@ test('everyday intake completes two different local tasks in one saved history',
     await expect(activity.getByText(/Explicit one-task owner grant; fallback disabled/)).toBeVisible();
     await page.getByRole('link',{name:'Review changes and checks'}).click();
     const result=page.getByRole('region',{name:'Run result and checks'});
-    await expect(result.getByRole('heading',{name:'Test changes checked'})).toBeVisible();
+    await expect(result.getByRole('heading',{name:'Test coverage added — automated checks passed'})).toBeVisible();
     await overflow(page);
     await result.screenshot({path:artifactPath(`everyday/result-${width}.png`)});
     await page.reload();
-    await expect(result.getByRole('heading',{name:'Test changes checked'})).toBeVisible();
+    await expect(result.getByRole('heading',{name:'Test coverage added — automated checks passed'})).toBeVisible();
     results.push(page.url());
   }
   await page.goto(results[0]);
-  await expect(page.getByRole('heading',{name:'Test changes checked'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Test coverage added — automated checks passed'})).toBeVisible();
   const history=await page.request.get('/api/real-executions').then(r=>r.json());
   expect(history.total).toBe(2);
 });

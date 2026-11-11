@@ -463,7 +463,7 @@ for(const width of [1440,390])test(`unattended recovery explains the held lane a
   row.message='Failure outcome recovered. Evidence and known usage retained; no attempt will restart.';
   await page.reload();
   await expect(box.getByRole('heading',{name:'Work could not finish',exact:true})).toBeVisible();
-  await expect(box.locator(':scope > p').and(box.getByText(row.message,{exact:true}))).toBeVisible();
+  await expect(box.locator('.result-outcome-heading').getByText(row.message,{exact:true})).toBeVisible();
   await box.getByText('Technical results and run details',{exact:true}).click();
   await expect(box.getByText('<script>controlled failure</script>',{exact:true})).toBeVisible();
   const failedCheck=box.getByRole('region',{name:'Last failed check'});

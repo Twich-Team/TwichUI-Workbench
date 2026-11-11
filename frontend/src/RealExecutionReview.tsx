@@ -90,10 +90,9 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
       {result?.checks?.length?<details><summary>Check details</summary><ul className="check-summary">{result.checks.map((c,i)=><li key={i}>
         <strong>{checkName(c.command,i)}</strong><StateBadge value={c.status==='pass'&&c.rc===0?'Passed':c.status==='fail'||(c.rc!==null&&c.rc!==0)?'Failed':'Outcome unavailable'}/>
       </li>)}</ul></details>:<p>{active?'Checks are still pending or have yet to report.':'No completed checks are recorded for this run.'}</p>}
-      <details className="result-code"><summary>See the changes in code{hasChanges?` · ${result!.files!.length} ${result!.files!.length===1?'file':'files'}`:''}</summary>
-      {hasChanges ? <>{result!.files!.map(file=><DiffFile key={file.path} file={file}/>)}</>
-        :<p>No changes were saved for review.</p>}
-      </details>
+      {hasChanges?<details className="result-code"><summary>See the changes in code</summary>
+        {result!.files!.map(file=><DiffFile key={file.path} file={file}/>)}
+      </details>:<p>No changes were saved for review.</p>}
       <details><summary>Technical results and run details</summary>
         <p>Exact base {row.base}</p><p>Grant {row.grant_id} · expires {row.expires_at} · {row.current_grant?'Current':'Historical'}</p>
         <p>Candidate {result?.candidate_id||'Unavailable'}</p><p>Task {workflow?.task_id||'Standalone authorized task'}</p><p>Task snapshot {workflow?.binding||'Standalone grant'}</p>

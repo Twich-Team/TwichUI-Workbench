@@ -7857,3 +7857,8 @@ Following the Project Working Philosophy, reused the already demonstrated suppor
 ## November 10 overnight — practical task filters and saved model choices
 
 Backlog type/status/description filters share actual API counts and preserve request identity, reload and clear-filter behavior. The first focused filter check caught a local variable shadowing the type parameter; corrected and all30 workspace checks pass. Simple model controls save the existing policy, preserve pause/configuration, retain drafts on conflict and explain the actual pre-generation fallback boundary. Explicitly applying the saved preference uses existing per-task consent/routing. All46 frontend checks and static/contracts/build pass; full browser/hosted checks and deployment continue. Existing provider demonstrations, original data and advanced functions are preserved.
+
+
+## November 10 overnight — preserve empty outcomes and accessible evidence
+
+Broad browser checks identified that the new code disclosure hid the empty-result explanation and changed an existing label. Empty runs again show their no-change explanation directly, and the code disclosure retains its stable keyboard label. Recovery assertions now check the failure reason in the prominent outcome section; test-only headings use their new precise outcome text. No verification assertion, output escaping or read-only guard was removed. The original installed build independently read a restored633-row store on isolated read-only9187, refused writes and left the fingerprint unchanged. Original live services and633-row history remain unchanged pending final verification/cutover.
