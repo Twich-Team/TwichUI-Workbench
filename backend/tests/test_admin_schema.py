@@ -1,6 +1,7 @@
 """The schema extension keeps every existing privileged settlement refusal."""
 from pathlib import Path
 import sqlite3
+import os
 import pytest
 from ops import workbench_admin as admin
 
@@ -14,6 +15,12 @@ def test_schema13_is_organizational_and_unknown_or_unsettled_stores_remain_refus
         source.backup(target)
     dest.chmod(0o600)
     monkeypatch.setattr(admin,'rich_stage',lambda _:stage)
+    # The installed helper targets Rich; this disposable fixture belongs to the
+    # actual test runner (GitHub uses a different UID). Keep ownership checks real.
+    monkeypatch.setattr(admin,'UID',os.getuid()+1)
+    with pytest.raises(admin.Refused,match='path or mode'):
+        admin.settled_check('everyday-test',False)
+    monkeypatch.setattr(admin,'UID',os.getuid())
     admin.settled_check('everyday-test',False)
     with sqlite3.connect(dest) as c:
         c.execute("UPDATE alembic_version SET version_num='unknown'")
