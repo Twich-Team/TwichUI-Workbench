@@ -481,13 +481,27 @@ class Runtime:
             return dict(status='fail', reason='No implementation changes yet; implement before finishing.')
         changed, patch = self.scope()  # Scope/security violations never become test feedback.
         previous = getattr(self, '_last_candidate_check', None)
+        retry_of = None
         if previous and previous['tree'] == current:
-            return previous['feedback']
+            if not (self.recipe and self.recipe.get('repair_cycle')
+                    and previous['feedback'].get('failed_check_name') == 'complete-suite'):
+                return previous['feedback']
+            # An isolated, unchanged rerun can distinguish a transient suite
+            # failure from a repeatable regression. Keep the failed observation
+            # and require every check again. Never rerun an infrastructure hold.
+            retried = getattr(self, '_suite_retried_patches', set())
+            patch_hash = sha(patch.encode())
+            if patch_hash in retried:
+                return previous['feedback']
+            self._suite_retried_patches = retried | {patch_hash}
+            retry_of = previous['evidence']
         index = len(list((self.root/'working-checks').glob('*/manifest.json')))
         folder = self.root/'working-checks'/f'{index:02}'
         manifest = dict(request_id=self._request_id, fence=self._fence, base=self.base,
                         tree=current, patch_sha256=sha(patch.encode()),
                         oracle_sha256=sha(self.oracle_source.read_bytes()), completion_context_sha256=self._context_sha)
+        if retry_of:
+            manifest['unchanged_suite_retry_of'] = retry_of
         if profiled:
             manifest['scope_ready_sha256' if self.recipe.get('repair_cycle') else 'profile_certificate_sha256'] = sha((self.root/'controls-passed.json').read_bytes())
         durable(folder/'manifest.json', json.dumps(manifest, sort_keys=True).encode())
@@ -546,6 +560,8 @@ class Runtime:
         feedback = dict(status='pass' if passed else 'fail', check_round=index,
                         completed_checks=len(checks), required_checks=len(expected),
                         note='Trusted independent checks; failure permits bounded repair in this same attempt.')
+        if retry_of:
+            feedback['unchanged_suite_retry_of'] = retry_of
         if original_evidence is not None:
             # Keep the exact output in the independent receipt and pageable
             # log, rather than duplicating it in the bounded tool response.
@@ -567,6 +583,10 @@ class Runtime:
             # existing8KiB tool result limit even for adversarial escaped text.
             details = self.feedback.record(checks[-1], f'working-{index:02}-{len(checks):02}')
             feedback.update(details)
+            if (self.recipe and self.recipe.get('repair_cycle') and feedback['failed_check_name']=='complete-suite'
+                    and manifest['patch_sha256'] not in getattr(self,'_suite_retried_patches',set())):
+                feedback['note'] += (' One full rerun on this exact unchanged patch is available; '
+                    'the failed run stays in history and every check must pass.')
         durable(folder/'outcome.json', json.dumps(feedback, sort_keys=True).encode())
         self._last_candidate_check = dict(tree=current, checks=checks, feedback=feedback,
                                          evidence=str(folder.relative_to(self.root)))

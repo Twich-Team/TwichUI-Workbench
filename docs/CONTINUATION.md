@@ -1,4 +1,4 @@
-# Active vendor recovery — November 10, 2026
+# Active vendor recovery — November 11, 2026
 
 Actual installed **1fc940e/deployment101**, private loopback/LAN preview9487.
 All four roles and network/TLS, browser and internal boundary probes passed.
@@ -48,11 +48,28 @@ unavailable final usage; normal model access restored. This was not an owner
 cancel. After verified installation101, exact native termination evidence
 reconciled 041899a3 without dispatching any partial result or changing usage.
 The trusted owner-instruction ingress admitted **72438c71/1d99ee80** once.
-It reused the exact verified baseline and is active at latest inspection.
+It reused the exact verified baseline.
 The real model requested a fresh candidate comparison; the focused and
 independent checks passed, but unchanged original production still passed.
 The app returned the registered comparison log working-00-05 and the precise
-reason for withholding a result. Do not duplicate or interrupt this operation.
+reason for withholding a result. Qwen read that exact log, fixed a setup error,
+and changed the new tests to direct native assertions. Working comparison03
+passed its original-with-new-tests gate and four preceding checks. Full suite
+timed out after48.4s at the operation deadline; there is no checked result.
+All18 model responses were complete (489039 prompt,12903 completion tokens);
+no uncertain inference remains from that run. The worker automatically started
+**210a2141/a66b147c** on the exact retained patch. It is active at last inspection;
+do not duplicate or interrupt it.
+
+210a2141 passed the same original discrimination again. Its full addon suite
+finished at 256.1s with 177 passes and one explorer packed-size assertion failure
+(test_explorer.lua:426). The pinned baseline's recorded suite passed all178.
+Standalone read-only confinement ran 12 original and 12 exact-candidate
+explorer tests, all passing; this does not establish the cause or waive the
+full suite. The active model has made no new edit at latest inspection.
+Keep the failed suite and require a clean full suite on the exact candidate.
+The prospective recovery adds one unchanged full rerun with original failed
+evidence retained and all existing checks repeated; it is not installed.
 
 The installed correction registers the exact failed differential log in the current
 attempt, explains when the original unexpectedly passes, and carries the checker

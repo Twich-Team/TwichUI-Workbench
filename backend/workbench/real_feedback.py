@@ -49,7 +49,7 @@ class CheckFeedback:
             (i, line)
             for i, line in enumerate(lines)
             if re.search(
-                r"FAILED|AssertionError|assertion failed|Error:|error:|lua5?\.1:|Traceback|expected|actual|WB_LOCAL_CONTEXT",
+                r"\bFAIL(?:ED)?\b|AssertionError|assertion failed|Error:|error:|lua5?\.1:|Traceback|expected|actual|WB_LOCAL_CONTEXT",
                 line,
                 re.I,
             )

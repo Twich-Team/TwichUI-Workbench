@@ -7696,3 +7696,15 @@ preparation wording no longer displayed. Tests now use the current checkout
 and the actual preparation region, while still requiring blocked access,
 correct progress, stale-offer refusal and zero execution. All six affected
 cases passed across the focused run and the final stale-offer rerun.
+
+Real Qwen revised the vendor test into direct Lua assertions. The original
+comparison passed twice: the new test failed on original production and passed
+with the repair. The first full suite timed out; all 18 model responses were
+fully accounted for. The next full suite finished with 177 pass and one
+explorer packed-size assertion failure. Two kinds of independent comparison
+passed on both original and candidate (12 targeted each and two prefix runs
+each); the cause remains unconfirmed and no suite failure is waived.
+Prospective recovery summarizes the exact interrupted check, exposes a failed
+test among green suite output, and permits one unchanged full rerun without
+discarding the failed evidence or allowing a check to be skipped.
+168 affected tests, static checks, and the native process rehearsal passed.

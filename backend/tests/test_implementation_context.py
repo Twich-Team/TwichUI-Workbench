@@ -80,6 +80,36 @@ def test_comparison_carries_across_a_stopped_attempt_only_for_the_same_patch(tmp
     assert prior_failures(runtime) == []
 
 
+def test_retained_candidate_reports_a_settled_full_suite_timeout_without_claiming_success(tmp_path):
+    from hashlib import sha256
+    from workbench.implementation_context import prior_failures
+    old, fresh = tmp_path/'old', tmp_path/'fresh'
+    folder = old/'working-checks/00'
+    folder.mkdir(parents=True)
+    patch = 'a'*64
+    (folder/'manifest.json').write_text(json.dumps(dict(patch_sha256=patch)))
+    for i in range(1, 5):
+        (folder/f'check-{i:02}.json').write_text(json.dumps(dict(status='pass', rc=0)))
+    suite = folder/'check-05.json'
+    result = dict(command=['bash', 'tests/run.sh'], status='timeout', rc=None,
+                  usage=dict(cgroup_removed=True, leaked_after_kill=False))
+    suite.write_text(json.dumps(result))
+    raw = folder/'original-with-new-tests.json'
+    raw.write_text(json.dumps(dict(status='fail', rc=1), sort_keys=True))
+    (folder/'original-test-differential.json').write_text(json.dumps(dict(
+        status='pass', original_production_unchanged=True, result_sha256=sha256(raw.read_bytes()).hexdigest())))
+    fresh.mkdir()
+    (fresh/'repair-resume.json').write_text(json.dumps(dict(root=str(old), patch_sha256=patch)))
+    runtime = SimpleNamespace(root=fresh, read_paths=['tests/test_fixture.lua'])
+    observed = prior_failures(runtime)
+    assert observed[0]['status'] == 'incomplete'
+    assert 'Run the candidate check on these unchanged edits first' in observed[0]['diagnostic']
+    assert 'no verified result was saved' in observed[0]['diagnostic']
+    result['usage']['cgroup_removed'] = False
+    suite.write_text(json.dumps(result))
+    assert prior_failures(runtime) == []
+
+
 def test_read_progress_recognizes_empty_reads_even_when_start_line_changes():
     progress = ReadProgress()
     value = json.dumps(dict(already_shown_or_empty=True, replayed_spans=[dict(text='current source')]))

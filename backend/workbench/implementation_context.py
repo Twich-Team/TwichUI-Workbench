@@ -33,8 +33,13 @@ def prior_failures(runtime):
     # A passing test against original code can be the main unresolved failure
     # even though its raw log is green. Carry the checker verdict, not a plan
     # or a partial tool call, into the fresh operation.
-    folder = previous_candidate_check(previous, resume.get('patch_sha256'))
-    if folder:
+    folder, interrupted = previous_candidate_check(previous, resume.get('patch_sha256'))
+    if interrupted:
+        observed.append(dict(status='incomplete', context_hint=None,
+            diagnostic='The retained patch passed its focused checks and reproduced the bug on unchanged original production. '
+            'Only the full addon suite timed out. Run the candidate check on these unchanged edits first; '
+            'no verified result was saved.'))
+    elif folder:
         verdict=private_json(folder/'outcome.json')
         raw=folder/'original-with-new-tests.json'
         if (verdict.get('status')=='fail' and verdict.get('failed_check_name')=='original-with-new-tests'
@@ -56,11 +61,12 @@ def previous_candidate_check(root, patch_sha256):
             break
         visited.add(root)
         for folder in reversed(sorted((root/'working-checks').glob('[0-9][0-9]'))):
-            if not (folder/'outcome.json').is_file():
-                continue
             manifest = folder/'manifest.json'
-            if not patch_sha256 or (manifest.is_file() and private_json(manifest).get('patch_sha256') == patch_sha256):
-                return folder
+            bound = patch_sha256 and manifest.is_file() and private_json(manifest).get('patch_sha256') == patch_sha256
+            if (not patch_sha256 or bound) and (folder/'outcome.json').is_file():
+                return folder, False
+            if bound and interrupted_suite(folder):
+                return folder, True
         resume = root/'repair-resume.json'
         if not patch_sha256 or not resume.is_file():
             break
@@ -68,7 +74,28 @@ def previous_candidate_check(root, patch_sha256):
         if prior.get('patch_sha256') != patch_sha256:
             break
         root = Path(prior['root'])
-    return None
+    return None, False
+
+
+def interrupted_suite(folder):
+    """Use the checker's exact saved observations; this never certifies a candidate."""
+    from workbench.repair_continuation import private_json
+    receipt, raw = folder/'original-test-differential.json', folder/'original-with-new-tests.json'
+    paths = sorted(folder.glob('check-[0-9][0-9].json'))
+    if len(paths) < 2 or not receipt.is_file() or not raw.is_file():
+        return False
+    final = private_json(paths[-1])
+    usage = final.get('usage') or {}
+    if (final.get('command') != ['bash', 'tests/run.sh'] or final.get('status') != 'timeout'
+            or usage.get('cgroup_removed') is not True or usage.get('leaked_after_kill')):
+        return False
+    proof, original = private_json(receipt), private_json(raw)
+    if (proof.get('status') != 'pass' or proof.get('original_production_unchanged') is not True
+            or original.get('status') != 'fail' or original.get('rc') != 1
+            or proof.get('result_sha256') != hashlib.sha256(json.dumps(original, sort_keys=True).encode()).hexdigest()):
+        return False
+    return all((result := private_json(path)).get('status') == 'pass' and result.get('rc') == 0
+               for path in paths[:-1])
 
 
 def retained_work(runtime, *, compact=False):

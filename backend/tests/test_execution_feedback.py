@@ -45,6 +45,18 @@ def test_untrusted_unicode_controls_and_large_diagnostics_stay_bounded(tmp_path)
         f.read(dict(check_id="fixed-000", start=True))
 
 
+def test_complete_suite_summary_keeps_the_failing_test_among_many_passes(tmp_path):
+    feedback = CheckFeedback(tmp_path, ["tests/test_vendor.lua"])
+    output = ("ok   test_other.lua\n" * 25 + "FAIL test_explorer.lua\n"
+              "\ttest_explorer.lua:426: in main chunk\n" + "ok   test_other.lua\n" * 140
+              + "177 passed, 1 failed\n")
+    result = feedback.record(dict(status="fail", rc=1, out=output), "working-00-05")
+    assert "FAIL test_explorer.lua" in result["diagnostic"]
+    assert "test_explorer.lua:426" in result["diagnostic"]
+    assert "177 passed, 1 failed" in result["diagnostic"]
+    assert result["context_hint"] is None  # A failed check does not expand approved read paths.
+
+
 def distinct(tmp_path):
     p = tmp_path / PATHS[0]
     p.parent.mkdir(parents=True)
@@ -240,8 +252,12 @@ def test_candidate_feedback_does_not_duplicate_escaped_diagnostic_past_wire_boun
     assert json.loads(reply)["check_id"] == "working-00-01"
 
 
-@pytest.mark.parametrize('original_pass,suite_pass',[(False,True),(True,False),(True,True)])
-def test_original_discrimination_runs_after_edit_checks_before_complete_suite(tmp_path,monkeypatch,original_pass,suite_pass):
+@pytest.mark.parametrize('original_pass,suite_pass,retry_pass',[
+    (False, True, None), (True, True, None), (True, False, False), (True, False, True),
+])
+def test_original_discrimination_runs_after_edit_checks_before_complete_suite(
+    tmp_path, monkeypatch, original_pass, suite_pass, retry_pass
+):
     from workbench.real_workspace import Runtime
     import workbench.real_workspace as module
     import workbench.repair_cycle as cycle
@@ -271,7 +287,7 @@ def test_original_discrimination_runs_after_edit_checks_before_complete_suite(tm
     order=[]
     def check(argv,*args,**kwargs):
         order.append(argv[0])
-        ok=argv[0]!='complete-suite' or suite_pass
+        ok=argv[0]!='complete-suite' or (suite_pass if order.count('complete-suite') == 1 else retry_pass)
         return dict(status='pass' if ok else 'fail',rc=0 if ok else 1,out='CONTROLLED suite observation',
             usage=dict(cgroup_removed=True,leaked_after_kill=False))
     rt.check=check
@@ -295,6 +311,17 @@ def test_original_discrimination_runs_after_edit_checks_before_complete_suite(tm
         assert page['lines'][0]['text']=='CONTROLLED original test also passed\n'
     elif not suite_pass:
         assert result['failed_check_name']=='complete-suite'
+        assert 'One full rerun' in result['note']
+        with pytest.raises(ToolDenied):
+            rt.candidate_feedback(lambda: False)
+        rerun=rt.candidate_feedback(lambda:True)
+        assert rerun['status']==('pass' if retry_pass else 'fail')
+        assert rerun['unchanged_suite_retry_of']=='working-checks/00'
+        assert order==2*(names[:-1]+['original-with-new-tests','complete-suite'])
+        saved=json.loads((tmp_path/'working-checks/00/outcome.json').read_text())
+        assert saved==result and saved['status']=='fail'
+        assert rt.candidate_feedback(lambda:True)==rerun
+        assert order.count('complete-suite')==2
 
 
 def test_literal_symbol_search_is_bounded_scoped_and_deduplicated(tmp_path):
