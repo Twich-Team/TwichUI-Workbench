@@ -1,3 +1,18 @@
+## November 11, 2026 — overview milestone109 accepted; cleanup authorized
+
+Following the Project Working Philosophy, installed38206c3/deployment109 after
+exact full hosted43042759499passed (2219backend/11skips,54front,126browser/3skips,
+12visual). Full local2222backend/8skips and final focused checks passed. Ubuntu
+mirror DNS failures were repaired only in ephemeral CI with a verified signed
+mirror; no host network/admin/model policy change. Actual installed and returned
+browser walks, advanced controls/PRs/code/usage,108rollback/109return and an
+independent674-row restore with old/current51-intake readers passed. All saved
+records remain unchanged, normal model access and private scope intact.
+
+The owner added Backlog cleanup during verification, explicitly after this
+milestone. It is recorded and authorized next; no owner task was archived/deleted.
+See [requirement](OWNER_TASK_CLEANUP_20261111.md) and [installed evidence](OVERVIEW_REFINEMENT_20261111.md).
+
 ## November 11, 2026 — overview refinement source checkpoint
 
 Following the Project Working Philosophy, preserved Phase B and added read-only

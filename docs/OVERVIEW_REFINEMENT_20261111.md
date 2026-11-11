@@ -77,3 +77,26 @@ attention panel. Three focused browser checks include actual Tab order as well a
 The final focus-order layout also passes the copied real-store walkthrough with
 all12desktop/phone/enlarged-text geometry cases, no writes/errors and unchanged
 saved AI policy. Final frontend54 and visual12 checks pass.
+
+## Installed milestone — completed November 11, 2026
+
+Running **38206c3b70be27c34e6065c6e0c2b073f508588e / deployment109**.
+[Exact full hosted verification passed](https://github.com/Twich-Team/TwichUI-Workbench/actions/runs/43042759499):
+2219backend/11skips,54frontend,126browser/3skips,12visual. Earlier setup failures
+remain retained; MIT's signed mirror setup passed without weakening any checks.
+
+Private receipt `outcome-38206c3/deployment-109-verified.json` binds source/seal,
+network, normal model authentication and the exact preserved674-row schema0013
+fingerprint2d6183ed…. Installed109 and returned109 browser receipts each prove
+12geometry cases, whole-scope counts/filters, no writes/errors and unchanged AI
+policy. The full advanced walk also checks36geometry cases, both real PR links,
+model/effort, technical/code and interactive usage controls. Actual desktop/phone
+screenshots inspected. The temporary9187 source preview is stopped.
+
+Actual108rollback and109return passed with both original/store fingerprints
+unchanged. Independent installed-store restore matches exactly; current and
+previous readers each read all51original intakes unchanged. Old108source/store,
+new109store and recovery copies remain. No task, approval, provider policy,
+addon source, publication or game data was changed. Port8765 and private scope
+remain verified. Next connected work is [owner-requested Backlog cleanup](OWNER_TASK_CLEANUP_20261111.md),
+which is not implemented by this overview milestone.

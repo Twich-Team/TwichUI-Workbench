@@ -1,3 +1,16 @@
+# Active next checkpoint: Backlog cleanup — November 11, 2026
+
+The overview refinement is installed and accepted at38206c3/deployment109.
+Implement the owner's [connected cleanup requirement](OWNER_TASK_CLEANUP_20261111.md):
+canonical archive/restore metadata, consistent views/counts, practical bulk archive,
+strict permanent-deletion eligibility/confirmation and preserved relationships.
+Verify API permissions, concurrency, persistence/restart/restore and actual UI;
+commit/push, exact hosted verification and approved private delivery. All mutation
+acceptance uses disposable fixtures. Existing owner records remain untouched.
+Feature Workshop is later; earlier active overview plans below are history.
+
+---
+
 # Active overview refinement — November 11, 2026
 
 The owner's focused follow-up preserves Phase B and adds compact saved-data

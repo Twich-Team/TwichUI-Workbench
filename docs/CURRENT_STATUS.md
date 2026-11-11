@@ -1,13 +1,11 @@
-Last updated November 11, 2026 (UTC).
+Last updated November 11, 2026 (Mountain time).
 
-Private preview: https://10.0.0.9:9487. Installed build ef05eff, deployment 108.
+Private preview: https://10.0.0.9:9487. Installed build 38206c3, deployment 109.
 
-Phase B1–B6 are complete: crafted leather and bronze shell, clearer Dashboard, outcome-first Results, organized Backlog and task history, simpler task creation, and approachable AI Settings. Precise model, reasoning, fallback, frozen task preferences, technical evidence and usage charts remain available.
+The overview refinement is installed: Dashboard request-state/type bars, Results totals and delivery filters, clearer Backlog rows, and saved AI settings/provider-activity previews. The approved leather/bronze design and precise model, reasoning, fallback, frozen task preferences and evidence controls remain.
 
-Two real Qwen requests previously reached checked results and draft PRs #10 and #11. Neither addon change is merged, installed or game-tested. Phase B added no model calls or addon publications. Task creation and routing were verified with controlled tests; installed browser acceptance used saved records and unsent edits.
+Saved data shows 11 grouped requests, 9 checked outcomes, 3 recorded draft submissions and 6 locally saved changes. These totals do not establish merging, installation or game testing. Two earlier real Qwen requests reached checked results and draft PRs #10 and #11, which remain open drafts. No new model requests or addon publications were made for this refinement.
 
-All 633 original records are preserved. The schema marker was updated and supported historical grouping adds 41 history links, presenting 11 requests while retaining 38 failed or interrupted attempts.
+All 674 saved records remain unchanged, including the original records and 41 history links. Local and exact hosted checks passed. Installed desktop/phone/enlarged-text and advanced-control walkthroughs passed. Actual rollback to 108, return to 109 and independent restore/readability checks passed.
 
-Local backend, frontend, browser and visual checks passed. Hosted verification passed for the installed source. Installed desktop, phone, keyboard and enlarged-text checks passed. Restart, independent restore, actual rollback to deployment 107 and return to 108 passed. The private preview and recovery stores are preserved.
-
-A focused overview refinement is implemented in source: compact task-state/type bars, Results totals and filters, clearer Backlog rows and saved AI/activity previews. All local checks passed. Hosted setup hit a runner package-mirror DNS failure; a CI-only repair is being verified before installation. Deployment 108 remains running. No owner decision is needed. Next complete outcome: Feature Workshop parent features and dependent tasks with integrated verification, under a separate assignment. Attachments, simulator comparisons and advanced operation modes remain future work.
+The next authorized outcome is Backlog cleanup: archive, restore, archived views, bulk cleanup and safe confirmed deletion. It is recorded and implementation is starting; no existing task has been archived or deleted. No owner action is needed for the installed overview milestone. Feature Workshop remains a later, separate assignment.

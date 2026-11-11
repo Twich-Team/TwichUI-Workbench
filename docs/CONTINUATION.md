@@ -1,3 +1,21 @@
+# Overview refinement installed; Backlog cleanup next — November 11, 2026
+
+Following the Project Working Philosophy, the requested overview milestone is
+complete at38206c3/deployment109. Exact full hosted43042759499passed. Installed
+browser, actual108rollback/109return and independent674-row restore/current+old
+readers passed; all51intakes,41links and original evidence remain unchanged.
+See [accepted refinement](OVERVIEW_REFINEMENT_20261111.md) and [Current Status](CURRENT_STATUS.md).
+
+The owner then explicitly added [Backlog cleanup](OWNER_TASK_CLEANUP_20261111.md).
+Continue archive/restore/archived views/bulk support and safe confirmed deletion
+under existing authority. Use disposable fixtures only for mutations; never
+archive/delete owner records for acceptance. Preserve execution, pending decisions,
+publication/audit/recovery evidence and relationships. No Feature Workshop now.
+Private109operations/receipts: ~/.local/share/TwichUI-Workbench/overview-20261111/outcome-38206c3.
+Earlier active/pending overview instructions below are historical checkpoints.
+
+---
+
 # Active Dashboard and overview refinement — November 11, 2026
 
 Following the Project Working Philosophy, the focused follow-up preserves Phase B
