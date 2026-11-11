@@ -1,7 +1,7 @@
 # Installed feature-campaign checkpoint — November 11, 2026 (UTC)
 
 Following the Project Working Philosophy, the private app now runs **b3cb3f0 /
-deployment107**, seal `c16a6bbfb25de97b1a491d7b06acfbb69ec5b38b138b932e44ed2ad5752c5d74`.
+deployment 107**, seal `c16a6bbfb25de97b1a491d7b06acfbb69ec5b38b138b932e44ed2ad5752c5d74`.
 Active checkout remains `/home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench`,
 branch `codex/everyday-workbench`. Original main checkout edits and the untracked
 .venv/node_modules dependency links are preserved. Preview: https://10.0.0.9:9487.
@@ -13,62 +13,62 @@ branch `codex/everyday-workbench`. Original main checkout edits and the untracke
   worker, scope/run review and execution owners. Requested and reported identities
   are separate; unreported effort stays unreported. Qwen remains the saved default.
   Codex remains deliberate and subject to live connector/account/disclosure checks.
-- /usage charts all recorded model operations in7/30/90UTC-date windows, with model
+- /usage charts all recorded model operations in 7/30/90 UTC date windows, with model
   filtering, slider/keyboard controls, reading tables and genuine missing/partial
   states. Subscription allowance/reset/API spending remain unavailable. Source data
-  and independent SQL agree:141operations,14,607,832reported tokens,82reported and
-  59unreported operations in the current seven-date window;3separately authored
+  and independent SQL agree:141 operations, 14,607,832 reported tokens, 82 reported and
+  59 unreported operations in the current seven-date window;3 separately authored
   session records are excluded. Two actual pre-generation switch records remain.
 - Complete exact hosted [run42966743948](https://github.com/Twich-Team/TwichUI-Workbench/actions/runs/42966743948)
-  passed static/contracts/schema,2216backend/11skips,49frontend,123Chromium/3skips,
-  and12visual checks. No visual references/thresholds were changed. Prior7085818
-  also passed hosted42966089483. Initialfeb9ee0's new admin-fixture UID failure was
+  passed static/contracts/schema,2216 backend / 11 skips, 49 frontend, 123 Chromium / 3 skips,
+  and 12 visual checks. No visual references/thresholds were changed. Prior 7085818
+  also passed hosted42966089483. Initial feb9ee0's new admin-fixture UID failure was
   repaired without changing production ownership checks. Local pre-fix full run
-  retained2210passes/8skips and two migration failures; both affected old-schema
-  cases pass after compatibility reads were corrected. Latest affected58backend,
-  49frontend,6browser and12visual checks pass.
-- Installed desktop1440/phone390Dashboard,Backlog,Settings,Usage and both original
+  retained 2210 passes / 8 skips and two migration failures; both affected old-schema
+  cases pass after compatibility reads were corrected. Latest affected 58 backend,
+  49frontend,6browser and 12 visual checks pass.
+- Installed desktop 1440 / phone 390 Dashboard, Backlog, Settings, Usage and both original
   result/draft pages were inspected. Optional task Codex gpt-6.1-sol/High selection,
   reload, enlarged text and accessible chart values passed with zero browser writes.
   Override/application/fallback/unsupported/restart cases have controlled worker
-  evidence on both0012and0013. No new real model generation was repeated.
+  evidence on both 0012 and 0013. No new real model generation was repeated.
 - All four services are active/enabled. Installation, four-role restart and an
-  independent restore preserve the exact633rows/28tables/schema0012/hash
+  independent restore preserve the exact 633 rows / 28 tables / schema 0012 / hash
   `7c61a77cd51b42ec00c3c05c34bc8cc13ea0825ddf4243ea6442e7a976d02968`.
-  All51intakes,11native checked records, original holds/approvals/usage and draft
+  All 51 intakes, 11 native checked records, original holds/approvals/usage and draft
   authority digest/original start are retained. Rejection sidecars were copied.
   Both listeners, TLS/assets, host/origin/CSRF, effective network filters, normal
-  model authentication and8765passed. Priorb421e83and its exact store remain for
-  rollback; old code read all51requests from the independently restored store.
-- Original real Qwen vendor/map drafts10/11remain open with exact commits
-  483f51d757b71339ef8194aee6ce90d3247b1e38and0cc1984cd89d1c300f0983ca2c1d0ab9d10ae37e.
+  model authentication and 8765 passed. Prior b421e83 and its exact store remain for
+  rollback; old code read all 51 requests from the independently restored store.
+- Original real Qwen vendor/map drafts 10/11 remain open with exact commits
+  483f51d757b71339ef8194aee6ce90d3247b1e38 and 0cc1984cd89d1c300f0983ca2c1d0ab9d10ae37e.
   Neither addon change was merged, installed or game-tested. Physical-device/Safari
   and real-client acceptance remain unperformed.
 
 ## Honest milestone state and next work
 
-**Milestone5 is complete. Milestone1 is partial.** Its model configuration is
-installed. Historical task identity is built/tested but NOT installed: schema0013
-and `task_lineage` bind41flight-path intakes to their original retained dispatch
-receipts using exact payload/receipt hashes. The shadow copy has674rows and11logical
+**Milestone 5 is complete. Milestone 1 is partial.** Its model configuration is
+installed. Historical task identity is built/tested but NOT installed: schema 0013
+and `task_lineage` bind 41 flight-path intakes to their original retained dispatch
+receipts using exact payload/receipt hashes. The shadow copy has 674 rows and 11 logical
 request entries; all original domain rows and deep links remain unchanged. Idempotency,
 transaction rollback/conflicts, reversal, restart/restore and nonempty downgrade
 refusal pass. Live history still has separate campaign entries. Never describe the
 shadow grouping as an installed capability.
 
-The actual installed root helper1fd4a561… accepts only0012and refused the shadow
-0013store with “History schema is outside this grant.” The owner was asked to run
-`bash /home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench/ops/upgrade_workbench_admin_schema0013.sh`.
+The actual installed root helper 1fd4a561… accepts only 0012 and refused the shadow
+0013 store with “History schema is outside this grant.” The owner was asked to run
+`bash /home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench/ops/upgrade_workbench_admin_schema 0013.sh`.
 That script pins old/new hashes, retains the previous root-owned helper and adds
-only0013compatibility;49offline admin/schema checks pass. No bypass was attempted.
-The new model/usage release deliberately stays on supported0012, which was tested
+only 0013 compatibility; 49 offline admin/schema checks pass. No bypass was attempted.
+The new model/usage release deliberately stays on supported 0012, which was tested
 through the worker. No routine campaign/engineering renewal is needed.
 
 After the owner-terminal helper update, verify exact helper/current grant, make a
 fresh quiescent copied-store release, migrate/reconcile with the reviewed manifest
 and original receipt-root verification, preserve/copy rejection evidence, and install
 with exact domain-row/rollback/restart/restore proofs. Do not migrate the live store
-in place or merely change its schema marker. Then continue Milestone2 through the
+in place or merely change its schema marker. Then continue Milestone 2 through the
 existing planning/task/worker owners. Current refusal seams are task_execution's
 verified prerequisite-base handoff, real_recipes.from_review's no-dependency contract
 and task_budget.authorize_one's single-task boundary. Build the actual composite-base
@@ -76,7 +76,7 @@ and integrated-verification path; do not remove these gates just to claim featur
 
 Feature Workshop execution, attachments/concepts and continuous/idle/scheduled modes
 remain unimplemented. Simulator tools/pins/scenarios were inspected: trusted pilot
-sim_policy.jsonhas assets=0and explicitly says screenshots are NOT visual acceptance;
+sim_policy.json has assets=0 and explicitly says screenshots are NOT visual acceptance;
 no game client/assets are installed here. No simulator semantics, game files or lab
 policy were changed, and no before/after visual result was fabricated.
 
@@ -87,13 +87,13 @@ Deployment operations, seal, source proof, complete hosted log,633-row restart/r
 network/model receipts and rollback script are under `outcome-b3cb3f0`. Installed
 screenshots/zero-write browser receipts use installed107/restarted107. Identity-only
 shadow: `.local/m5-review/everyday-feature-identity-review`, never activated. All
-read-only review servers on9187are stopped. No development campaign is scheduled
+read-only review servers on 9187 are stopped. No development campaign is scheduled
 to continue automatically after this session.
 
 Preflight correctly held missing retained model-key hash, review-generated bytecode
 and overly permissive generated recipe file modes. The original key hash was copied;
 all added bytecode was hash-preserved outside both releases; source hashes were
-unchanged; recipe inputs were restricted to0600. Both seals then passed unchanged.
+unchanged; recipe inputs were restricted to 0600. Both seals then passed unchanged.
 The initial Results browser probe incorrectly expected external PRs on the list;
 the corrected probe opens the actual result pages and verifies their exact links.
 Failures remain retained. The root helper, credential contents, original data and
