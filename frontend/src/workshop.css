@@ -237,3 +237,11 @@ h2,h3{overflow-wrap:anywhere;min-width:0;}
 @media(max-width:640px){.task-journey>h2:first-child{margin:-1rem -1rem 1rem;}.task-create .page-heading{margin-bottom:1rem;}.task-create .page-heading h1{font-size:1.75rem;}.task-create .page-heading>div>p:last-child{font-size:.9rem;}}
 /* Let enlarged text reflow the count cards instead of squeezing their labels. */
 .dashboard-counts{grid-template-columns:repeat(auto-fit,minmax(min(100%,5.5rem),1fr));}
+
+.stopped-panel{margin-top:1.1rem;border-color:#8f6d54;}.stopped-panel .leather-section-heading h2 svg{color:#d1a181;}.task-publication .delivery-limits{font-size:.8rem;color:#c1b195;margin:.65rem 0;}
+/* Keep the welcome and status readable on a narrow screen at enlarged text sizes. */
+.work-status{max-width:100%;min-width:0;white-space:normal;}.work-status>span{flex-shrink:0;}
+.workshop-welcome{flex-wrap:wrap;}.workshop-welcome>div{flex:1 1 12rem;min-width:0;}.welcome-action{max-width:100%;}
+.task-row-copy>small,.attention-copy>span,.task-state{overflow-wrap:anywhere;}.task-state{min-width:0;max-width:100%;flex-wrap:wrap;}
+.stopped-panel .everyday-task-row{display:grid;grid-template-columns:1.5rem minmax(0,1fr) 1rem;gap:.5rem .8rem;align-items:start;}.stopped-panel .task-row-copy{grid-column:2;grid-row:1;}.stopped-panel .kind-tag{grid-column:2;grid-row:2;justify-self:start;}.stopped-panel .task-state{grid-column:2;grid-row:3;}.stopped-panel .row-arrow{grid-column:3;grid-row:1/4;align-self:center;}
+@media(max-width:640px){.stopped-panel .everyday-task-row{grid-template-columns:minmax(0,1fr) 1rem;}.stopped-panel .task-kind-icon{display:none;}.stopped-panel .task-row-copy,.stopped-panel .kind-tag,.stopped-panel .task-state{grid-column:1;}.stopped-panel .row-arrow{grid-column:2;}}

@@ -40,5 +40,20 @@ while the reference is more compact. No scene, outer frame or invented activity.
 
 Fresh copied-store reconciliation proves all632 original domain rows byte-for-byte
 unchanged plus the retained schema record;41 receipt-bound links yield674rows,
-11requests, zero unanswered decisions and37retained failures in grouped history.
+11requests, zero unanswered decisions and38retained failed/interrupted attempts in grouped history.
 This is copied-store proof until a verified cutover is recorded.
+
+Final review corrections: failed/held/interrupted work has a separate, non-urgent
+Work to revisit section; it cannot acquire a completed badge or unanswered approval.
+Draft submission explicitly does not establish live merge status. Narrow320px/200%
+review exposed a status badge overflow and clipped welcome copy; both now reflow.
+The copied-store browser walk passes with zero writes and unchanged model policy,
+real PR10/11 links, code disclosures, model/effort selection and accessible usage.
+The retained rejection sidecars establish38failed/interrupted history members,
+not the earlier37seen before copying those sidecars. An independent production
+projection confirms37failed plus1interrupted. No underlying row was changed.
+
+Full local2219backend/8skips,50frontend,125browser/3skips and12visual pass.
+Two additional controlled ordinary bug/scope journeys pass. Final small outcome/
+reflow changes have focused verification; exact hosted checks remain required before
+private installation. No screenshot thresholds or intended protections were lowered.

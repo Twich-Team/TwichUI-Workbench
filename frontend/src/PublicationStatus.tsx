@@ -21,7 +21,7 @@ export function PublicationStatus({identity,checked}:{identity:string;checked:bo
     {query.isError&&<p role="alert">Refresh unavailable. Showing the last loaded delivery record.</p>}
     {data.published&&data.url&&/^https:\/\/github\.com\/Twich-Team\/TwichUI\/pull\/[1-9][0-9]{0,9}$/.test(data.url)&&
       <Button asChild><a href={data.url} target="_blank" rel="noreferrer">Review the draft PR on GitHub</a></Button>}
-    {data.published&&<p>Next: review the draft on GitHub. You decide whether to merge.</p>}
+    {data.published&&<><p>Next: review the draft on GitHub. You decide whether to merge.</p><p className="delivery-limits">This records draft submission. Merge status is not tracked here; check GitHub for its current state.</p></>}
     {!data.published&&data.source!=='controlled'&&<p>{data.status==='held'?'Next: open the task and review the delivery issue. The checked changes remain saved.':'Workbench is preparing delivery. You can leave this page; the request remains saved.'}</p>}
     {!data.current_eligible&&<p className="soft-callout">Historical delivery evidence. {data.current_message}</p>}
     {data.source==='controlled'&&<p>No real PR was created.</p>}

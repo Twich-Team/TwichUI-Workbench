@@ -30,6 +30,8 @@ def test_counts_search_pagination_and_read_only_state(client, headers, store):
     assert index(client, search='ANOTHER')['items'][0]['id'] == ids[2]
     failed = index(client, state='failed')
     assert failed['total'] == 1 and failed['items'][0]['id'] == ids[1]
+    assert [r['id'] for r in failed['highlights']['stopped']] == [ids[1]]
+    assert not failed['highlights']['needs_you']
     assert failed['counts'] == page['counts']  # Tabs count the same search scope.
     assert len({index(client, page=n, page_size=1)['items'][0]['id'] for n in [1, 2, 3]}) == 3
     assert client.get('/api/workspace?state=invented').status_code == 422

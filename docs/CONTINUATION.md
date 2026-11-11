@@ -1,3 +1,28 @@
+# Phase B final review checkpoint — November 11, 2026
+
+Following the Project Working Philosophy, the actual copied-store browser walk
+verified model/effort selection, saved settings restoration, both real PR links,
+readable code evidence and usage controls with zero writes.320px/200% inspection
+found a real status-badge overflow and clipped welcome text; both now reflow.
+Failed/held/interrupted work remains visible in Work to revisit, separately from
+completed outcomes and genuine unanswered decisions. Draft submission explicitly
+does not claim a tracked merge status.
+
+Copied rejection sidecars correctly establish38failed/interrupted members in the
+41attempt history:37failed plus1interrupted, independently matched against the
+running old app. The earlier37figure preceded those sidecars and is superseded.
+Every original database row stays unchanged. Read-only review uses independent
+connection lifetimes after the older inspection-only in-memory pool crashed;
+production's file-store pool and live services were unaffected.
+
+Local full2219backend/8skips,50frontend,125browser/3skips and12visual pass;
+two controlled bug/scope journeys pass. The final visibility/reflow correction has
+focused checks. Source is pushed and hosted verification continues. Install only
+an exact passing release, then complete installed browser, restart/restore/rollback
+proofs and update Current Status. The private app remains107 until then.
+
+---
+
 # Phase B source checkpoint — November 11, 2026
 
 Following the Project Working Philosophy, implemented the shared crafted shell,

@@ -71,5 +71,7 @@ it('an unfinished outcome never appears among recently completed tasks',async()=
  open(<Dashboard/>,{...base,items:[stopped],highlights:{...base.highlights,outcomes:[stopped]}});
  await screen.findByText('No work running');
  expect(screen.getByText('Checked results will appear here when work finishes.')).toBeVisible();
- expect(screen.queryByText(stopped.title)).not.toBeInTheDocument();
+ expect(screen.getByRole('heading',{name:'Recently completed'}).closest('section')).not.toHaveTextContent(stopped.title);
+ expect(screen.getByRole('link',{name:new RegExp(stopped.title)})).toBeVisible();
+ expect(screen.getByRole('heading',{name:'Work to revisit'})).toBeVisible();
 });
