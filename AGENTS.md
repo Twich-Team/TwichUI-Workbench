@@ -32,6 +32,15 @@ Use `python3 scripts/wb.py dev --disposable` for an isolated fixture preview.
 Generate contracts with `npm run contracts`; never hand-edit generated types.
 Use disposable databases and inspect actual desktop/phone screenshots.
 
+Hosted release acceptance is the complete `Verify fixture application` workflow
+and its final `verify` check, bound to the exact candidate commit. Build/contracts,
+schema, frontend, every backend/browser partition and visual checks must pass.
+Known reporting-only pushes receive separate documentation feedback; all pull
+requests and manual full runs retain the complete suite. Fast documentation checks
+cannot authorize installation. If a reporting-only candidate needs installation,
+run full verification for that exact commit first. Never cancel a full run needed
+for a release decision or reuse results for a different source/merge commit.
+
 Preserve credentials, data, original source, unrelated work, important evidence,
 recovery copies, task bindings, independent checks, port 8765 and model authentication.
 Use existing authorized administrative/service mechanisms; do not bypass denied

@@ -1,6 +1,17 @@
 name: Verify fixture application
 on:
   push:
+    # Only known reporting paths get fast-only push feedback. Unknown files,
+    # authority documents and all pull requests still require the full suite.
+    paths:
+      - '**'
+      - '!README.md'
+      - '!docs/CURRENT_STATUS.md'
+      - '!docs/CONTINUATION.md'
+      - '!docs/PLAN.md'
+      - '!docs/PROGRESS.md'
+      - '!docs/CI_PERFORMANCE_20261111.md'
+      - '!docs/history/**'
   pull_request:
   workflow_dispatch:
 permissions:

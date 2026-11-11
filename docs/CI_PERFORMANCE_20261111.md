@@ -109,3 +109,35 @@ assertions, screenshot expectations, timeouts and retries remain unchanged. Thre
 fresh local repetitions and the full12-check visual suite passed. Static, generated
 contracts, build and schema checks also passed. Updated full hosted verification
 must pass before this checkpoint is accepted.
+
+## Second increment: useful fast feedback without partial acceptance
+
+The checks job already gives build/contracts/schema/frontend feedback before the
+longer suites finish. Reporting-only pushes now have a separate lightweight
+documentation workflow. Only explicitly listed README/status/continuation/plan/
+progress/performance/history paths qualify. Unknown paths, code, tests, assets,
+configuration and authority documents default to full verification. Every pull
+request still runs the full suite, avoiding a missing required verify check;
+workflow_dispatch also retains full acceptance for an exact candidate commit.
+Mixed code/report changes run both workflows. No existing release decision changes.
+
+The documentation job checks the whole changed range, not just the last commit,
+and clearly states that success cannot authorize installation. It cannot emit a
+full-release receipt. Only superseded documentation jobs can be automatically
+cancelled; full runs remain available for active release decisions. Installing a
+report-only commit still requires a full run for that exact commit. Passing results
+are never reused for a different PR merge/head input.
+
+Local workflow parsing checked complementary paths, complete PR/manual triggers
+and the strict final gate. The actual documentation shell passed disposable push,
+new-branch and PR fixtures and correctly rejected bad whitespace introduced earlier
+in a multi-commit range. All18CI partition/acceptance safety checks passed again.
+This change adds no package, runner service or mutable dependency environment.
+
+The repaired first full run43073228929 passed at362b84e:2253backend checks with
+11existing skips,58frontend,128browser with3existing skips, and12visual checks.
+The final verify gate passed and produced the exact-commit full acceptance receipt.
+Creation17:58:14 to final job completion18:06:52 is **8m38s**. This is the first
+successful optimized sample; the next checkpoint measures another complete run
+before reporting a median. The slower backend partition is now the critical path;
+neither browser setup nor screenshots dominate. Private110remains unchanged.

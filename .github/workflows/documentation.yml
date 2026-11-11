@@ -1,0 +1,48 @@
+name: Documentation feedback (not release acceptance)
+on:
+  push:
+    paths:
+      - README.md
+      - docs/CURRENT_STATUS.md
+      - docs/CONTINUATION.md
+      - docs/PLAN.md
+      - docs/PROGRESS.md
+      - docs/CI_PERFORMANCE_20261111.md
+      - docs/history/**
+  pull_request:
+    paths:
+      - README.md
+      - docs/CURRENT_STATUS.md
+      - docs/CONTINUATION.md
+      - docs/PLAN.md
+      - docs/PROGRESS.md
+      - docs/CI_PERFORMANCE_20261111.md
+      - docs/history/**
+permissions:
+  contents: read
+concurrency:
+  group: documentation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  documentation:
+    name: Documentation feedback only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check the complete changed documentation range
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          base="$BEFORE_SHA"
+          if [[ "$EVENT_NAME" == 'pull_request' ]]; then base="$PR_BASE_SHA"; fi
+          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+            base=$(git hash-object -t tree /dev/null)
+          fi
+          git diff --check "$base" "$GITHUB_SHA"
+          printf '%s\n' 'Documentation feedback only. This is not full release acceptance and cannot authorize installation.' >> "$GITHUB_STEP_SUMMARY"
