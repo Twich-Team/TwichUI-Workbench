@@ -24,7 +24,7 @@ export function TaskState({task}:{task:WorkspaceTask}){
 export function TaskRow({task,result=false}:{task:WorkspaceTask;result?:boolean}){
  const Icon=icons[task.kind]||Compass;
  const destination=result&&task.result_id?`/executions/${task.result_id}`:`/intake/${task.id}`;
- return <Link className="everyday-task-row" to={destination}><Icon className="task-kind-icon" size={23}/><span className="task-row-copy"><strong>{task.title}</strong><span className="task-row-meta"><span className={`kind-tag kind-${task.kind}`}>{taskKind(task.kind)}</span><TaskState task={task}/></span><small>{result&&task.state==='completed'?(task.result_kind==='patch'?'Local patch · Not installed in game':task.result_kind==='tests'?'Test changes · Saved locally':task.result_kind==='findings'?'Findings · No verified fix':'Saved record'):task.message}</small></span><ArrowRight className="row-arrow" size={18}/></Link>;
+ return <Link className="everyday-task-row" to={destination}><Icon className="task-kind-icon" size={23}/><span className="task-row-copy"><strong>{task.title}</strong><span className="task-row-meta"><span className={`kind-tag kind-${task.kind}`}>{taskKind(task.kind)}</span><TaskState task={task}/></span><small>{result&&task.state==='completed'?(task.draft_pr_submitted?'Draft pull request submitted':task.result_kind==='patch'?'Local patch · Not installed in game':task.result_kind==='tests'?'Test changes · Saved locally':task.result_kind==='findings'?'Findings · No verified fix':'Saved record'):task.message}</small></span><ArrowRight className="row-arrow" size={18}/></Link>;
 }
 function RefreshState({failed,at}:{failed:boolean;at:string}){
  return <p className={failed?'stale-display':'freshness-note'} role={failed?'alert':undefined}>{failed?'Refresh unavailable. These are the last loaded records. Decisions need a fresh view.':`View refreshed ${formatTime(at)}`}</p>;
@@ -77,7 +77,7 @@ function Pages({data,go}:{data:Page;go:(page:number)=>void}){
 export function WorkspaceResults(){
  const [params,setParams]=useSearchParams();const page=Math.max(1,Number(params.get('page'))||1);const query=useWorkspace(page,'results');const data=query.data;
  return <div className="results-page"><div className="page-heading"><div><h1>Results</h1><p>What finished, what changed, and what was checked.</p></div></div>
- <div className="soft-callout result-boundary"><FileCheck2 size={23}/><p>Results stay local. A checked patch has not been installed into your game or published as a pull request.</p></div>
+ <div className="soft-callout result-boundary"><FileCheck2 size={23}/><p>Open a result to review its checks and see whether Workbench submitted a draft pull request.</p></div>
  {!data?<Waiting failed={query.isError} retry={()=>void query.refetch()}/>:<><RefreshState failed={query.isError} at={data.observed_at}/><WorkshopPanel title="Saved outcomes">{data.items.length?data.items.map(task=><TaskRow key={task.id} task={task} result/>):<p className="quiet-empty">No results yet. Workbench will save changes, findings and check results here.</p>}</WorkshopPanel><Pages data={data} go={next=>setParams({page:String(next)})}/></>}
  <details className="advanced-records-link"><summary>Other history and evidence</summary><p><Link to="/executions">All recorded runs, including earlier attempts</Link></p><p><Link to="/history">Imported and sample workspace history</Link></p></details></div>;
 }

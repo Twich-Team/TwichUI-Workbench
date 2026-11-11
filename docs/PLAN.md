@@ -55,6 +55,15 @@ original vendor result and ordinary real browser workflow remain first.
 3. **Phase B.** Keep the everyday dashboard focused on current work, decisions,
    backlog, and results in the approved WoW-inspired style. Keep advanced
    controls secondary; reserve the usage charts for reliable data.
+   A Results page must immediately communicate what Workbench attempted, whether
+   it prepared a fix, added tests or produced findings, which checks passed and
+   what remains unverified, and whether the change is saved locally, submitted
+   as a draft, merged, or installed. Show the next action when one is needed
+   and a prominent link to the actual draft PR when available. Keep technical
+   records, model usage, Lua diffs, hashes and individual checks secondary or
+   expandable. Keep internal attempts and recovery history within one task.
+   For a checked local repair, say that the fix passed automated checks, is
+   awaiting a draft PR, and has yet to be installed or tested in World of Warcraft.
 4. **Phase C.** Add proactive low-risk discovery and implementation with
    continuous, idle-only, and scheduled operation, pause and resource guards,
    and grouping of related changes with urgent fixes separate. Add Smart Model

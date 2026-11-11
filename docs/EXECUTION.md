@@ -60,5 +60,20 @@ PR, merge or live addon changes. Keep task write scope separate from read-only
 investigation. Existing owner decisions remain valid without duplicate approval.
 Ask only for genuine product/access/spending/consequential boundaries.
 
+### Separately approved delivery of an already-checked result
+
+For an installed release, use its Python environment and set `PYTHONPATH` to
+the release's `backend` and `scripts` directories. Set `WORKBENCH_DB` to the
+existing private store. Run `python -m workbench.worker --review-checked EXECUTION`
+to inspect the exact draft offline. After explicit owner approval for that draft,
+record `execution_id`, the review's `binding`, and the
+`owner_instruction_sha256` in `checked-approval.json` (mode 0600) in a private
+owned directory (mode 0700). Run `python -m workbench.worker --deliver-checked
+EXECUTION --publication-approval-dir DIRECTORY` from the host. Workbench
+revalidates the sealed candidate and uses its existing durable delivery stages.
+The same invocation can resume an active delivery after interruption. An uncertain
+held record preserves the remote intent for investigation. It cannot replay the
+external write. The Results page shows the confirmed draft link.
+
 Historical contracts are preserved in `history/before-standing-reconciliation-20261107-EXECUTION.md`;
 their old milestone/campaign/renewal stops are not active instructions.

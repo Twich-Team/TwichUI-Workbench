@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import re
 import sys
+from subprocess import TimeoutExpired
 import tempfile
 import shutil
 
@@ -26,9 +27,10 @@ PILOT_SHA = "e8940795227e137530f1d13a51c1e790bf616f8942bd043f018a63358ab9ed5d"
 class PilotGitHub:
     real = True
 
-    def __init__(self, root, snapshot):
+    def __init__(self, root, snapshot, *, scratch_root=None):
         self.root = Path(root).resolve()
         self.snapshot = snapshot
+        self.scratch_root = Path(scratch_root or tempfile.gettempdir()).resolve()
         self.permitted = lambda: False
         self._module = None
         self.workspace = self.root / ("delivery-" + snapshot["execution_id"])
@@ -50,7 +52,7 @@ class PilotGitHub:
             legacy = self.root / ("delivery-" + self.snapshot["execution_id"])
             if legacy.exists():
                 raise DeliveryHeld("An earlier delivery checkout needs inspection; no overwrite.")
-            parent = Path(tempfile.mkdtemp(prefix=prefix))
+            parent = Path(tempfile.mkdtemp(prefix=prefix, dir=self.scratch_root))
             stat = parent.stat()
             record = dict(
                 execution_id=self.snapshot["execution_id"],
@@ -77,7 +79,7 @@ class PilotGitHub:
             or record.get("owner") != os.getuid()
             or workspace.name != "checkout"
             or not parent.name.startswith(prefix)
-            or parent.parent.resolve() != Path(tempfile.gettempdir()).resolve()
+            or parent.parent.resolve() != self.scratch_root
             or parent.is_symlink()
             or workspace.is_symlink()
         ):
@@ -221,19 +223,22 @@ class PilotGitHub:
             argv = ["git", *helper, "-c", "core.hooksPath=/dev/null", *argv[1:]]
         elif argv[0] == "git":
             argv = ["git", "-c", "core.hooksPath=/dev/null", *argv[1:]]
-        if raw:
-            result = self._module.subprocess.run(
-                argv,
-                cwd=str(cwd) if cwd else None,
-                stdout=self._module.subprocess.PIPE,
-                stderr=self._module.subprocess.DEVNULL,
-                timeout=60,
-                env=env,
-                check=False,
-            )
-            rc, out = result.returncode, result.stdout
-        else:
-            rc, out, _ = self._module.sh(argv, cwd=str(cwd) if cwd else None, timeout=60, env=env)
+        try:
+            if raw:
+                result = self._module.subprocess.run(
+                    argv,
+                    cwd=str(cwd) if cwd else None,
+                    stdout=self._module.subprocess.PIPE,
+                    stderr=self._module.subprocess.DEVNULL,
+                    timeout=60,
+                    env=env,
+                    check=False,
+                )
+                rc, out = result.returncode, result.stdout
+            else:
+                rc, out, _ = self._module.sh(argv, cwd=str(cwd) if cwd else None, timeout=60, env=env)
+        except TimeoutExpired:
+            raise RuntimeError("Publisher command timed out; its result is unconfirmed") from None
         # Never persist arbitrary Git/GH stderr, which may contain credentials.
         if rc or len(out if isinstance(out, bytes) else out.encode()) > 4 << 20:
             raise RuntimeError("Publisher command did not return a bounded successful response")
@@ -438,6 +443,7 @@ class PilotGitHub:
                 [
                     "git",
                     "push",
+                    "--force-with-lease=refs/heads/" + snapshot["branch"] + ":",
                     "origin",
                     "refs/heads/" + snapshot["branch"] + ":refs/heads/" + snapshot["branch"],
                 ],
@@ -462,7 +468,7 @@ class PilotGitHub:
                     "--limit",
                     "2",
                     "--json",
-                    "url,isDraft,baseRefName,headRefName,headRefOid,state,body",
+                    "url,isDraft,baseRefName,headRefName,headRefOid,state,body,isCrossRepository",
                 ]
             )
         )
@@ -502,6 +508,7 @@ class PilotGitHub:
     def valid_pr(self, snapshot, commit, value):
         return (
             value.get("isDraft") is True
+            and value.get("isCrossRepository") is False
             and value.get("state") == "OPEN"
             and value.get("baseRefName") == snapshot["base_branch"]
             and value.get("headRefName") == snapshot["branch"]

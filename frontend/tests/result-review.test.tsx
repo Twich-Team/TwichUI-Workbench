@@ -28,3 +28,21 @@ it.each([null,'rejected','unavailable'] as const)('shows %s later review without
   }
   client.clear();
 });
+
+it('puts a confirmed draft link before technical evidence and removes the local-only message',async()=>{
+  const url='https://github.com/Twich-Team/TwichUI/pull/123';
+  vi.stubGlobal('fetch',vi.fn(async(path:string)=>({ok:true,json:async()=>path.endsWith('/delivery')?{
+    status:'published',message:'Draft PR created and confirmed.',published:true,source:'github',url,
+    repository:'Twich-Team/TwichUI',base_branch:'main',current_eligible:true,current_message:'',
+    preview:{title:'Historical repair',body:'Reviewable summary',category:'Bug fix'},
+  }:native})));
+  const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
+  render(<QueryClientProvider client={client}><MemoryRouter initialEntries={['/executions/result']}><Routes><Route path="/executions/:identity" element={<RealExecutionReview/>}/></Routes></MemoryRouter></QueryClientProvider>);
+  const link=await screen.findByRole('link',{name:'Review the draft PR on GitHub'});
+  expect(link).toHaveAttribute('href',url);
+  expect(screen.getByText(/prepared a fix and the automated checks passed/)).toBeVisible();
+  expect(screen.getByText(/did not install the change or test it in World of Warcraft/)).toBeVisible();
+  expect(screen.queryByText(/has not been submitted/)).not.toBeInTheDocument();
+  expect(link.compareDocumentPosition(screen.getByText('Technical results and run details'))&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  client.clear();
+});

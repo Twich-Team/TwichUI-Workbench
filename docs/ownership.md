@@ -1634,3 +1634,24 @@ nor unavailable evidence changes native history/usage or creates execution/publi
 permission. Accounting-only evidence roots are not used as authority. The fixed private
 review directory belongs to the corresponding history store and must survive checked
 updates alongside database copies. Missing/malformed evidence never grants renewal.
+
+
+## Checked result to draft pull request
+
+The original run decision, checked result, independent completion seal and
+historical publication hold remain immutable. Separate owner approval can
+authorize delivery of one saved, checked candidate to the reviewed repository
+and base. The local publication review command binds the execution, candidate,
+base, deterministic branch and exact draft text. A private owned approval file
+records that binding and the owner instruction's digest. The browser reads the
+outcome; it cannot grant this host permission.
+
+The existing Workbench delivery worker owns staging, GitHub reconciliation and
+the sole delivery row. Its targeted host invocation handles the approved result
+while the installed API and everyday worker retain their network boundaries.
+A branch push can create the expected ref or reuse a confirmed exact ref.
+Push and PR intent are saved before each external write. A lost response leads
+to reconciliation by the exact remote ref and open draft identity. The original
+patch, task and usage history stay intact. An unavailable or conflicting remote
+leaves the delivery held for review. Neither path grants merge, release or game
+installation.

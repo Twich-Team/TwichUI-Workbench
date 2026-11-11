@@ -54,6 +54,7 @@ class WorkspaceTask(BaseModel):
     result_id: str | None = None
     result_kind: Literal['patch', 'tests', 'findings', 'plan'] | None = None
     provider: str | None = None
+    draft_pr_submitted: bool | None = Field(default=None,exclude_if=lambda value:value is None)
 
 
 class WorkspacePage(BaseModel):
@@ -101,6 +102,7 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                  'failed': 'failed', 'decomposition_failed': 'failed', 'declined': 'stopped',
                  'scope_review_required': 'needs_approval', 'unavailable': 'unavailable', 'paused': 'paused'}.get(original['status'], 'held')
         result_id, result_kind, expired_permission = None, None, False
+        draft_pr_submitted = False
         if original['status'] == 'completed':
             phase = 'needs_approval' if plan else 'completed'
             result_kind = None if plan else 'findings'
@@ -148,6 +150,7 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
                 if relevant:
                     if relevant.get('candidate_id') and phase not in ACTIVE | {'queued'}:
                         result_id = relevant['id']
+                        draft_pr_submitted = bool((relevant.get('publication') or {}).get('published'))
                         result_kind = 'tests' if body.get('regression_tests') else 'patch'
                     if phase == 'completed' and relevant.get('verification') != 'passed':
                         phase = 'failed'
@@ -186,7 +189,7 @@ def listing(engine, *, page=1, search='', state='all', page_size=12):
         rows.append(dict(id=identity, title=body['title'], kind=kind, state=phase, stage=label, message=message,
                          created_at=original['created_at'], updated_at=max(timestamps), active=phase in ACTIVE,
                          needs_you=phase in NEEDS or expired_permission, result_id=result_id, result_kind=result_kind,
-                         provider=providers[identity][-1]['backend'] if providers[identity] else None))
+                         draft_pr_submitted=draft_pr_submitted or None, provider=providers[identity][-1]['backend'] if providers[identity] else None))
     query = search.strip().casefold()
     matching = [r for r in rows if not query or query in (r['title']+' '+r['stage']+' '+r['kind']).casefold()]
     counts = Counter(r['state'] for r in matching)

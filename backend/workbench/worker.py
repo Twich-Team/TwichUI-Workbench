@@ -148,6 +148,51 @@ def preparation_recovery(job_id, binding):
     return 2 if receipt["status"] == "failed" else 0
 
 
+def checked_delivery(args):
+    """Use the same delivery state machine from a scoped host process.
+
+    The everyday API and persistent worker keep their existing loopback-only
+    network restrictions. This process can deliver only one named execution.
+    """
+    import json
+    import sys
+    from fastapi import HTTPException
+    from sqlalchemy import create_engine
+    from workbench import real_publication
+
+    os.umask(0o077)
+    path = Path(os.environ["WORKBENCH_DB"]).absolute()
+    engine = None
+    try:
+        if path.resolve() != path or not path.is_file() or path.stat().st_uid != os.getuid():
+            raise ValueError("An existing owned Workbench database is required.")
+        if args.review_checked:
+            engine = create_engine("sqlite:///" + path.as_uri() + "?mode=ro&uri=true")
+            print(json.dumps(real_publication.review_checked(engine, args.review_checked), indent=2))
+            return 0
+        engine = engine_for(path)
+        stopped = threading.Event()
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            signal.signal(sig, lambda *_: stopped.set())
+        timer = threading.Timer(600, stopped.set)
+        timer.start()
+        try:
+            result = real_publication.deliver_checked(
+                engine, args.deliver_checked, args.publication_approval_dir.absolute(), stopped
+            )
+        finally:
+            timer.cancel()
+        print(json.dumps({k: result[k] for k in ("status", "message", "published", "url")}))
+        return 0 if result["published"] else 2
+    except (ValueError, OSError, HTTPException, OperationalError) as error:
+        detail = error.detail if isinstance(error, HTTPException) else str(error)
+        print("Checked draft delivery held. " + detail[:600], file=sys.stderr)
+        return 2
+    finally:
+        if engine is not None:
+            engine.dispose()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--once", action="store_true")
@@ -163,7 +208,19 @@ def main():
     )
     parser.add_argument("--preparation-recovery", metavar="JOB_ID", help="Dispatch only one authorized preparation recovery")
     parser.add_argument("--authorize-review-binding", metavar="SHA256", help="Record authorization without dispatch")
+    delivery = parser.add_mutually_exclusive_group()
+    delivery.add_argument("--review-checked", metavar="EXECUTION", help="Show the exact checked draft proposal offline")
+    delivery.add_argument("--deliver-checked", metavar="EXECUTION", help="Publish the exact separately approved checked draft")
+    parser.add_argument("--publication-approval-dir", type=Path)
     args = parser.parse_args()
+    if args.review_checked or args.deliver_checked:
+        if (args.once or args.test_crash or args.session_config or args.preparation_recovery
+                or args.authorize_review_binding or not os.environ.get("WORKBENCH_DB")
+                or bool(args.deliver_checked) != bool(args.publication_approval_dir)):
+            parser.error("Checked delivery requires an explicit existing WORKBENCH_DB and an approval directory only for delivery")
+        return checked_delivery(args)
+    if args.publication_approval_dir is not None:
+        parser.error("--publication-approval-dir requires --deliver-checked")
     if args.preparation_recovery:
         if args.once or args.test_crash or args.session_config or not os.environ.get("WORKBENCH_DB"):
             parser.error("Targeted preparation recovery requires only the named job and explicit WORKBENCH_DB")

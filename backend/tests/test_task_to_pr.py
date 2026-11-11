@@ -664,3 +664,95 @@ def test_local_preparation_recovery_preserves_failure_clock_and_never_reexecutes
         )
     drain(store, runtime, remote)
     assert runtime.calls == remote.pushes == remote.creates == 1
+
+
+@pytest.fixture
+def checked_draft(client, headers, store, supported, tmp_path, monkeypatch):
+    """Held run through the normal decision, execution and sealed-result owners."""
+    from pathlib import Path
+
+    supported["decision"]["run_budget"]["publication"] = "hold"
+    _, runtime = approve(client, headers, store, supported, tmp_path)
+    execute = runtime.execute
+
+    def provider_tape(*args):
+        result = execute(*args)
+        # A controlled completed provider receipt. It never reaches GitHub.
+        result["inference_ran"] = True
+        frozen = runtime.root / "candidates" / result["candidate_id"] / "result.json"
+        frozen.write_text(json.dumps(result, sort_keys=True))
+        return result
+
+    monkeypatch.setattr(runtime, "execute", provider_tape)
+    assert execution.process_one(store, runtime)
+    with store.connect() as c:
+        row = dict(c.execute(select(requests)).mappings().one())
+    assert row["status"] == "checked"
+    review = delivery.review_checked(store, row["id"])
+    root = tmp_path / "checked-publication"
+    root.mkdir(mode=0o700)
+    approval = dict(
+        execution_id=row["id"], binding=review["binding"], owner_instruction_sha256="e" * 64
+    )
+    path = root / "checked-approval.json"
+    durable(path, json.dumps(approval).encode())
+    path.chmod(0o600)
+    return row, root, approval, Path(runtime.root)
+
+
+@pytest.mark.parametrize("lost", ["push", "pr"])
+def test_checked_delivery_approval_restarts_and_reconciles_once(
+    client, store, checked_draft, lost
+):
+    from workbench.db import engine_for
+
+    row, root, _, _ = checked_draft
+    remote = ControlledRemote()
+    remote.lose = lost
+    identity = row["id"]
+    assert not delivery.enqueue_one(store)
+    assert delivery.authorize_checked(store, identity, root)
+    assert not delivery.authorize_checked(store, identity, root)
+    assert not delivery.process_one(store, remote)
+    assert remote.prepares == remote.pushes == remote.creates == 0
+
+    for _ in range(12):
+        # Reopen the store across every step, including the lost response.
+        reopened = engine_for(store.url.database)
+        try:
+            delivery.process_one(reopened, remote, execution_id=identity, checked_root=root)
+        finally:
+            reopened.dispose()
+    assert remote.prepares == remote.pushes == remote.creates == 1
+    view = client.get(f"/api/real-executions/{identity}/delivery").json()
+    assert view["status"] == "published" and view["source"] == "controlled"
+    assert not view["published"] and view["url"] is None
+    with store.connect() as c:
+        assert dict(c.execute(select(requests)).mappings().one()) == row
+        assert c.execute(select(proposal_decisions)).mappings().one()["payload"]["run_budget"]["publication"] == "hold"
+
+
+@pytest.mark.parametrize("fault", ["wrong-approval", "changed-patch", "moved-base", "github-unavailable"])
+def test_checked_delivery_fails_closed_without_an_external_write(store, checked_draft, fault):
+    row, root, approval, evidence = checked_draft
+    identity = row["id"]
+    remote = ControlledRemote()
+    if fault == "wrong-approval":
+        (root / "checked-approval.json").write_text(json.dumps({**approval, "binding": "b" * 64}))
+        with pytest.raises(delivery.DeliveryHeld, match="exact saved draft"):
+            delivery.authorize_checked(store, identity, root)
+        assert delivery.view(store, identity) is None
+    else:
+        assert delivery.authorize_checked(store, identity, root)
+        if fault == "changed-patch":
+            (evidence / "candidates" / row["result"]["candidate_id"] / "changes.patch").write_text("different")
+        elif fault == "moved-base":
+            remote.base = "1" * 40
+        else:
+            def unavailable(_snapshot):
+                raise RuntimeError("Controlled GitHub access failure")
+            remote.base_head = unavailable
+        for _ in range(8):
+            delivery.process_one(store, remote, execution_id=identity, checked_root=root)
+        assert delivery.view(store, identity)["status"] == "held"
+    assert remote.prepares == remote.pushes == remote.creates == 0
