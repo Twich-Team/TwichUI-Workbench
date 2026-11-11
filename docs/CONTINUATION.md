@@ -1,10 +1,14 @@
 # Active vendor recovery — November 11, 2026
 
-Actual installed **1fc940e/deployment101**, private loopback/LAN preview9487.
+Actual installed **17ee233/deployment102**, private loopback/LAN preview9487.
 All four roles and network/TLS, browser and internal boundary probes passed.
-The stopped source, copied active database and offline restore matched 589 rows.
+The stopped source, copied active database and offline restore matched 605 rows.
 All 50 intake views and six earlier checked real results remain readable. The
-previous deployment100 initially caught two late, legitimate worker rows (one offer,
+worker saved the next offer and continuing decision just before shutdown. An
+audit copy with those two rows removed matched the exact earlier 603-row
+fingerprint; no authoritative data was changed. The new worker admitted the
+same saved session once. Deployment100 had caught the same kind of late worker
+addition (one offer,
 one continuing decision). Rebased on the stopped source, verified both backup
 copies, then checked strict equality again before starting the new worker.
 Use the stopped-worker snapshot as the final cutover baseline; distinguish
@@ -58,18 +62,21 @@ passed its original-with-new-tests gate and four preceding checks. Full suite
 timed out after48.4s at the operation deadline; there is no checked result.
 All18 model responses were complete (489039 prompt,12903 completion tokens);
 no uncertain inference remains from that run. The worker automatically started
-**210a2141/a66b147c** on the exact retained patch. It is active at last inspection;
-do not duplicate or interrupt it.
+**210a2141/a66b147c** on the exact retained patch.
 
 210a2141 passed the same original discrimination again. Its full addon suite
 finished at 256.1s with 177 passes and one explorer packed-size assertion failure
 (test_explorer.lua:426). The pinned baseline's recorded suite passed all178.
 Standalone read-only confinement ran 12 original and 12 exact-candidate
-explorer tests, all passing; this does not establish the cause or waive the
-full suite. The active model has made no new edit at latest inspection.
-Keep the failed suite and require a clean full suite on the exact candidate.
-The prospective recovery adds one unchanged full rerun with original failed
-evidence retained and all existing checks repeated; it is not installed.
+explorer tests, plus two suite-prefix runs each, all passing; the cause remains
+unconfirmed and the full suite is not waived. The model requested a candidate
+rerun, but the old app returned the same cached failure. It made no new edits.
+The operation ended at its limit after20 complete responses and one interrupted
+response; native proof ended the exact generation without dispatch and retained
+unknown final usage. Installed102 permits one unchanged full rerun after a
+complete-suite failure, with the first failure retained and all checks required.
+Session **35115579** is preparing the exact saved patch on installed102.
+Do not duplicate or interrupt it. Vendor has zero accepted results.
 
 The installed correction registers the exact failed differential log in the current
 attempt, explains when the original unexpectedly passes, and carries the checker

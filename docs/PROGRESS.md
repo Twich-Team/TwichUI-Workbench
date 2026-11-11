@@ -7708,3 +7708,13 @@ Prospective recovery summarizes the exact interrupted check, exposes a failed
 test among green suite output, and permits one unchanged full rerun without
 discarding the failed evidence or allowing a check to be skipped.
 168 affected tests, static checks, and the native process rehearsal passed.
+
+Installed 17ee233. Exact stopped history was 605 rows; an audit copy proved
+only the already authorized offer and decision had been added since preflight.
+Restored backup matched, all old rows and six real results read back, private
+LAN and desktop/phone reload passed, and the saved continuation started once.
+Fresh baseline and retained focused check passed. Hosted c20b1b2 passed 2171
+backend, frontend unit and 116 Chromium cases (three skips). Six hosted visual
+comparisons differ while all 12 local visual cases pass. A test-only font
+setup with the reviewed DejaVu files and system rendering rules passes all 12
+local images without changing the application or reference snapshots.
