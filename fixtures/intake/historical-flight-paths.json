@@ -1,0 +1,457 @@
+{
+  "canonical_id": "f3f45977-e4da-4563-b260-4cf565661273",
+  "title": "Learn the character\u2019s flight paths when visiting a flight master",
+  "members": [
+    {
+      "intake_id": "f3f45977-e4da-4563-b260-4cf565661273",
+      "payload_sha256": "e24f333b6eb6260029569c69fe90d8dea9d9b5c027c449940ce03265f338674a",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-campaign-cbddecf-bounded/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "26509693f7466fc7509a66f6b90c0876e70616f697fc180e3ffecc9c1c48b85d"
+        }
+      ]
+    },
+    {
+      "intake_id": "17929a4f-de42-49d7-9ce0-6282ef7b4856",
+      "payload_sha256": "87279fec7aabc5f4c69880afcc8d6535a1415868683e112770303af614d99df0",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-campaign-23981b8/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "c26c19c49c66d7337d190424d3b7d018c1d37d501e26891c6d6bfaa967fd9498"
+        }
+      ]
+    },
+    {
+      "intake_id": "864b1877-89f0-4150-89e7-10eb0d43f0f2",
+      "payload_sha256": "f57e75320edbfcf95ccda7471ee9438d63991426926386345af10eacba3395e6",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-campaign-a8e2004/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "e179896ebf730ca4311b1db082ef06660b1cdc8a7a8e572b3535f75ba7ee0427"
+        }
+      ]
+    },
+    {
+      "intake_id": "88923854-b90f-4560-8966-1bac1eb791e5",
+      "payload_sha256": "f2bf89b23d8254bdf8f21482fbe468a8a3b4c5e8e7052a98aa99d6c91ab1fd1d",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-6b48d87/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "a0983a3694b4f3eee3763b19170d59730384048980797b5b8d90f11b64ce6c3e"
+        }
+      ]
+    },
+    {
+      "intake_id": "12bd4cc8-626c-46d0-ba72-848e7e6b59fe",
+      "payload_sha256": "adcf510705f6ab9132fe9bb66133490316318dc50511947d59d1da777c4c7673",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-534ca9c/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "10ea6528cb1bb6186bb8e8f501d33c37864cd1822258f50d19035932603078ff"
+        }
+      ]
+    },
+    {
+      "intake_id": "0c93920a-4fd1-41b4-a76c-8fd6eb29dc93",
+      "payload_sha256": "ef45f66648a8afad9fc903dcadc18c8cadf1ea6b9359358a614ab83bd22aca1f",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-edc912c/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "72e93cf4e45188836ff70a32555549bb8d3467de0efefbc303bc52abc3038af3"
+        }
+      ]
+    },
+    {
+      "intake_id": "606011c2-68b7-4052-adbf-4f42878a2d40",
+      "payload_sha256": "932c4129dad57ec4cb1dd4710e79909bc3e9ebe45466958f42786c1e442dcc5e",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-183702c/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "c51d6fdf5384ad55f952c056d49973e61c7c4c9dcd158fd93fbe479ed4b7c8ed"
+        }
+      ]
+    },
+    {
+      "intake_id": "d9b9348c-1072-4ccb-8b4e-d07aa3e789a6",
+      "payload_sha256": "265b364f92e77d3505cb277a4e1941db0e54428bdac4dc90ecbee2a240063051",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-00d78ab/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "2cc12bbc15b70254b29ce21f39ab5d2b0851efe872ed7c3a789a60dad40a07c9"
+        }
+      ]
+    },
+    {
+      "intake_id": "8fcf02d6-2075-4b0a-8253-fb964ccbf28e",
+      "payload_sha256": "8dd970ab8cb27fa54c0d09e6739194e4f536fb6bec76857fba1e7506f9ae0372",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-9889377/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "a07395a655a3b91237254fca58d25f5f9ff658fe5973a395209fd3472da433f3"
+        }
+      ]
+    },
+    {
+      "intake_id": "210a06ba-9c37-4dee-9e11-54ca330720d8",
+      "payload_sha256": "daee10b8671a741e640837ca9a7945d961d626b3e872fff1b58c7ff2ed6183e1",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-9b0658c/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "8d9475d3587357e3a6bd96320f85426e24c3fca1021844dbe4f01f0ecfa906e0"
+        }
+      ]
+    },
+    {
+      "intake_id": "708fc58e-2b10-4486-8bed-7b1839e6fd97",
+      "payload_sha256": "fd4ba5e5d5e53631657b58410bd347dddc5ef2bc628b95056a725a3738e6f1fe",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-a271480/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "af1565772fb99e390660b289d71cc584e17acf4a42d93c48905d211bf58f4dd6"
+        }
+      ]
+    },
+    {
+      "intake_id": "78457c7d-d261-4bc2-9c35-53d8e241d6d4",
+      "payload_sha256": "905c3325a0a96a830595e478bc6b017fadbe1e0ae9a9177710fe1b612bd7f62d",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-9da8bce/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "45d2aa40b5fc224a07754cb4ad425a7a5c2863e95722416f3325c68f3141a331"
+        }
+      ]
+    },
+    {
+      "intake_id": "9fa60357-7184-44cf-b6de-bbda712f6bf8",
+      "payload_sha256": "805c9f747439d30b07b74b23f1fced2fa91e8565aa7eec4d7aa245470433db83",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-b7624e2/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "7cf8bea72a3abb5842a161eedbd5182a6c9e0d897e52556a512b20155e5d142f"
+        }
+      ]
+    },
+    {
+      "intake_id": "4dd5212e-31d8-47d5-8680-279031d43c34",
+      "payload_sha256": "f66115bba4294fab8f56df86af00804a95b87839c08ee7b62918a7cda8565219",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-5442405/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "8592be8205d8ed1fda206664cf86344d4d96adc4a44ff6b235905cc1108206d7"
+        }
+      ]
+    },
+    {
+      "intake_id": "c0ad4265-69f7-4496-bb89-5a81c1d0329c",
+      "payload_sha256": "271aec3e67d9f399c62fa99a56d3031b21d6b3870754995d5522a2d7b9b3e147",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-bda668f/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "31083c0f594f81c161566d81ea6828ebb990be5c71cf76e0611bb3d64094422b"
+        }
+      ]
+    },
+    {
+      "intake_id": "3caf9ef6-1ef9-48ad-a28e-773b013e5352",
+      "payload_sha256": "e1df079a2d73d311de186d712d99359a9e9f6de52853a80b5e97ab40715a47ca",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-2cb6482/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "7d50dfdb6408abf8020f996cedec1d5ea84a2551e58f8d036a5685f0d8e5b0d6"
+        }
+      ]
+    },
+    {
+      "intake_id": "84baabae-eec1-4fb1-97ba-bdf2d68a5f5d",
+      "payload_sha256": "f51906aa90e8f273ab35e4025c75971f7bb6c60cf36cfd06b2533fb002fe4868",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-9736533/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "eb52249562314fabdd5abf41330d6d803ae027f12300a5fe3ada2798b3b2f488"
+        }
+      ]
+    },
+    {
+      "intake_id": "6b297250-ccc9-47f7-8515-5f936fd7059b",
+      "payload_sha256": "3b79731248dc95267fb9361dc56753f54e70d26b9d6658fa0bbefda488d973c6",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-d4f4812/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "967f53b50aed94d94a645f577f72a390652c3d49b464991bdc6aa5c7acc3876a"
+        }
+      ]
+    },
+    {
+      "intake_id": "47be390f-783c-4d8e-806b-4e16ef0960ad",
+      "payload_sha256": "c756b668b49f151c0d9b59566b67694daa7a6189058348d6bf3a3118a2959c3b",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-1bc2f31/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "ffed869ee43b36c9772c669662c5e7ccded225577a647db2a5b76903d27e78c0"
+        }
+      ]
+    },
+    {
+      "intake_id": "5fc0598c-9d13-4e8a-848a-28dfc1109bec",
+      "payload_sha256": "cbac6eceae96d872793fba8165bc8b344a48369c93f1e84ab7fb300c1c3fb866",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-c98d42e/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "2ff029b82189f4d05d6177802b32a8d27d42e73b08a5f0f8b8ed049cfb0c85e7"
+        }
+      ]
+    },
+    {
+      "intake_id": "b69d6d74-23d7-423e-acd5-fa8b27af64b2",
+      "payload_sha256": "cdf68838b51b409275db903e8e8b282e3dbfb4d392ea7e28a291a40d09c2c7e7",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-bcaf738/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "fe4ae3bb333b192c2cb91b311314a0d0adc4ad08a36fd98fe48f5462f403dd35"
+        }
+      ]
+    },
+    {
+      "intake_id": "c0fd95f6-b79b-4964-ad01-96a50f6dc585",
+      "payload_sha256": "1fb7ef572a0241bd234438f7f854445b0624b475d5ca0dad20c677379b8e778a",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-81b713e/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "52ca35db3e71db1a9f13fef77017cb002c5578354b2872912333e3dbd2d5f308"
+        }
+      ]
+    },
+    {
+      "intake_id": "727d0411-563a-436a-89bb-0cf4d28a6544",
+      "payload_sha256": "e1626dbbfaa95f8aea80e91e787853e98ab7410d1c64099a789c105914ce8c8b",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-502c6f7/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "91d9e76cbcb7848234ceb99c604682f87d1fbd0feea8cda3c76235c84e66ee6b"
+        }
+      ]
+    },
+    {
+      "intake_id": "18392d91-f57a-4d5b-b13e-49a39a829ffc",
+      "payload_sha256": "5ab64940885124edb5bd017b8eecf95a34021bceb97ec13f3d0f60058f68cf16",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-3142999/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "120864178df507fdcc2595603796de764fecbbfe849ebe83e235df9be9de7f8e"
+        }
+      ]
+    },
+    {
+      "intake_id": "d5ebff85-5688-4579-b0d0-77a4f3c69c61",
+      "payload_sha256": "deeb4f83b92081082cd91038b155109ce1de134eaf2c8816f66a40f9ef2b66f7",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-a5929e6/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "4aa02c8788d151bc7116c51763e80f1b13fe086394b15baf287166e42f252f09"
+        }
+      ]
+    },
+    {
+      "intake_id": "55c28bbd-d071-4c86-b407-570881a75fb0",
+      "payload_sha256": "d8c5c5370cde969332abe25db877725bcf4d9f73a2942188459b296722a0237a",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-700e8b1/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "052fc2468b22c8de0374e1388f495b31f4f1cedcba778e6f9b6698848bbb0432"
+        }
+      ]
+    },
+    {
+      "intake_id": "d6373031-1a57-405c-adce-12a67368b414",
+      "payload_sha256": "5f775415eaf1924558dbe8c59e77338f8e90d672374bb5ce5ff8a736121974ee",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-7ef79cb/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "28bca15777c49eb2386a0ba64241bee64e59290fe6f5d23f6459b421b90d9812"
+        }
+      ]
+    },
+    {
+      "intake_id": "9961b8d4-5167-470d-85ff-9be02f8daff1",
+      "payload_sha256": "18b957043ea10f83b55e2ba3190cab114cdda49dbf585044367ae7aeceb8a124",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-52c54af/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "3a97aef6ea23c23761a12026f46067eca9492b5b5e740cf0ec499b85c0f9ba10"
+        }
+      ]
+    },
+    {
+      "intake_id": "e6823d64-5e8c-443b-9015-7eec02a009f1",
+      "payload_sha256": "65b5034fadd33b567e113ac1089950e57401383133f0abffe38bc4df3d6c807a",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-fb392be/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "7d58539d692a47b7c27564daab77ef07a1e61d03a5a1469832a7642d474e8366"
+        }
+      ]
+    },
+    {
+      "intake_id": "90e80b53-9ea2-4ab8-8cf3-39450dcb5af3",
+      "payload_sha256": "306a3dcbfdd6a132838720eaf595e8c2b0a43a167f09c7c592efb0bf3d32b8f5",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-0cb1432/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "5693dd5d2117396d812c09a79da52c23ac3ecd1a67fe14f4975c9bf4055c73c9"
+        }
+      ]
+    },
+    {
+      "intake_id": "d4134933-9ec0-4694-9fef-a9366fc6cbaa",
+      "payload_sha256": "9828dd1c820f75c6770072714b6fadd6ba7ae42e02d45bae68f30668622af164",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-b33097c/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "f614d511fabba7990b40bfc10742813a1fc527d58ddaa666931eea35b30758f6"
+        }
+      ]
+    },
+    {
+      "intake_id": "0330575a-9ae4-41b2-becf-08d68eaebcff",
+      "payload_sha256": "a5ad33e2fd92b85d5bc7f7cf7cb96a5f75194396e413bd2d04c90da8c6f6101e",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-c7d1f24/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "2bcf91d0cd27bab16156c87e2c20e293d68b088612428cf5b38c2f44dfbf9cec"
+        }
+      ]
+    },
+    {
+      "intake_id": "8b3e5ddc-d651-4cd2-a37a-978c94998ac7",
+      "payload_sha256": "85aa3d86d9792740587fd3a80f931d2ca35d891563ae9988beae9dfb86d5b297",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-7c7a806/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "d90c37b822e423c328de496f7423e0d9fa6ff4ce00595fda9952144eb7153cd6"
+        }
+      ]
+    },
+    {
+      "intake_id": "a43f10e5-1db3-41ab-b0a2-af0c74ca9a28",
+      "payload_sha256": "702895fb64c599addba53d70ab96b7da805d3f6026052ef6786f90109863f46f",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-13de1f7/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "4ec87f94470fc6a1d9ab311a56bb6c8de95b264c19719ad6940a6ff315f5be66"
+        }
+      ]
+    },
+    {
+      "intake_id": "51a06cb9-0a42-4f3c-9fbd-286d3728055f",
+      "payload_sha256": "cfffe03c5b65575a85bbcd66dac65edc8ce2373a68ec75d608308264aecf562f",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-c778e42/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "845cbd46f39272f22d4e0f11929586c30308f6583c6951d04b7c49c2015a7a08"
+        }
+      ]
+    },
+    {
+      "intake_id": "4c3ecd6e-2b39-451a-aba9-22fd0e2d468c",
+      "payload_sha256": "253d2564d1e5911fd865fa1c2f0ade932975fec96034f954ba4685e0aa6bf6ee",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-34669c8/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "a962b249b0e6f24cf094c9ec200f0fabb221c9cedcdadaeb19928b56e1b1f0c6"
+        }
+      ]
+    },
+    {
+      "intake_id": "1f27a185-dbef-424a-87ad-b99bbbd1a117",
+      "payload_sha256": "77b90ca4264bc88fcdac30d40774ae325c3000cdf3efd0c7d8f7c8989638d03d",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-635bdd9/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "a161633c89b4d3d3b1431e8485cb11600d1715b0ac7cdaa9624d0ac10785d775"
+        }
+      ]
+    },
+    {
+      "intake_id": "ee246737-a0ca-4ce4-bc13-cd00570e298a",
+      "payload_sha256": "208c20fa4ae7923bb33a2efcc08f6ca371438ca3d9f9c7d33a0ff41f97f1f5d1",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-6c4bae3/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "9018c591788764bf2fffa8deb9dadea2ef1ccb4df5d54f6574c61a1a80d75c0d"
+        }
+      ]
+    },
+    {
+      "intake_id": "cb69da85-c88d-4ecd-be63-bd1fceced841",
+      "payload_sha256": "c3f8f532e5a2a43007206b4476605daa6987768b113679981740a15c1e203001",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-37d88f2/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "0f7e77878d1bd669c8dca5ade20749a128dbb2cf0f31c8f7ed80237820391f90"
+        }
+      ]
+    },
+    {
+      "intake_id": "2efd507a-2812-4ab1-bfbe-cb40eccfde14",
+      "payload_sha256": "31ad749eb3f8f2d1bb9bf0b585fb848da068be9334607e7ba7b491eed0046b8b",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-8fe20f8/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "cc6fb6ce15815555b5e6a24449dd8178ece5e18c5f1ba0c304a6d60efa08ce21"
+        }
+      ]
+    },
+    {
+      "intake_id": "faa4726e-980f-454e-ba06-5eacbb3711f5",
+      "payload_sha256": "3e2e5438e628650fcec86a6f94e6fe4ac63197043f7c274fb33e01c04cf98205",
+      "relation": "retry",
+      "evidence": [
+        {
+          "source": "everyday-outcome-18605b9/artifacts/acceptance/bug-flight-paths.jsonl",
+          "sha256": "56a2b803ff412d6633da11e6d0b8c5106de0c1ac826ad8af2b3f3afb538770f3"
+        }
+      ]
+    }
+  ]
+}

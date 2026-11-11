@@ -80,3 +80,24 @@ it('holds a restored draft until the complete saved policy loads',async()=>{
  expect(writes).toEqual([]);
  client.clear();
 });
+it('edits specific supported primary and fallback models and effort through the shared saved policy',async()=>{
+ const writes:unknown[]=[];
+ const catalog={executors:[{backend:'local',models:[{model:'pilot-qwen38-27b',efforts:[]}],observed_at:new Date().toISOString(),source:'Controlled local adapter',limitation:'Fixed decoding'},
+  {backend:'codex',models:[{model:'included-codex',efforts:['low','high']},{model:'capable-codex',efforts:['high']}],observed_at:new Date().toISOString(),source:'Controlled cache',limitation:'Included access checked before use'}]};
+ vi.stubGlobal('fetch',vi.fn(async(path:string,init?:RequestInit)=>{
+  if(path==='/api/session')return {ok:true,json:async()=>({csrf_token:'controlled'})};
+  if(init?.method==='PUT'){const body=JSON.parse(String(init.body));writes.push(body);return {ok:true,json:async()=>({...body,revision:5})};}
+  return {ok:true,json:async()=>path==='/api/local-work'?{ready:true,codex_available:true}:{policy,capabilities:catalog}};
+ }));
+ const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
+ render(<QueryClientProvider client={client}><MemoryRouter><SimpleModels/></MemoryRouter></QueryClientProvider>);
+ const user=userEvent.setup();
+ await user.selectOptions(await screen.findByLabelText('Codex model'),'capable-codex');
+ await user.selectOptions(screen.getByLabelText('Codex reasoning effort'),'high');
+ expect(screen.queryByLabelText('Local Qwen reasoning effort')).toBeNull();
+ expect([...screen.getByLabelText('Codex reasoning effort').querySelectorAll('option')].map(o=>o.value)).toEqual(['','high']);
+ await user.click(screen.getByRole('button',{name:'Save task model preferences'}));
+ await screen.findByText('Model preferences saved for new task decisions. Existing work keeps its approved provider.');
+ expect(writes).toEqual([expect.objectContaining({providers:expect.objectContaining({codex:expect.objectContaining({model:'capable-codex',effort:'high'})}),pause_new_work:true})]);
+ client.clear();
+});

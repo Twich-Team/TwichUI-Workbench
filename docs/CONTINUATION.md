@@ -1,3 +1,62 @@
+# Feature campaign — November 11, 2026: Milestone 1 source checkpoint
+
+Active checkout/branch are unchanged. Starting c3bff84 matches remote and passed
+hosted42960014918. Installed b421e83/deployment106 remains active on all four
+services with633saved rows. No model generation, addon push/PR/merge or game
+installation was repeated. The current six-milestone owner assignment supersedes
+older future-work deferrals and routine campaign gates; see active PLAN.
+
+Implemented exact global/per-task supported model/effort controls, optional task
+fallback model, frozen existing planning receipts, requested/actual reporting and
+allowlisted installed Codex catalog discovery. Controlled tests exercise override
+and fallback through the actual planning/run-approval/implementation/check owners
+after global edits. Unsupported choices refuse before dispatch; actual effort stays
+unreported unless independently reported. Existing permissions and connector
+pre-generation checks remain.48frontend and49administrator/schema checks pass.
+
+Implemented schema0013 task_lineage, sourced from the original retained dispatch
+receipts for41flight-path intakes. The committed manifest contains exact original
+payload hashes and receipt hashes, never title-based grouping. Reconciliation is
+atomic/idempotent; conflicts, reversal, restart/restore, deep links and downgrade
+refusal are tested. Before cutover, apply with scripts/reconcile_task_identity.py
+using the standard private stage parent as --evidence-root. A migrated copy
+preserves every original domain row,51intakes and all saved results;41new links
+produce674total rows. Backlog/submitted tasks show11coherent requests, retained
+failure counts and full history. Copy acceptance/rejected-results alongside the
+store; database-only copies cannot preserve later rejection truth. Actual
+1440/390px screenshots were inspected with zero browser writes.
+
+**Deployment access blocker:** the installed root helper accepts only0012; a real
+settled-check against the shadow0013store refused “History schema is outside this
+grant.”49offline checks prove the one-line0013compatibility patch retains unknown
+schema/unsettled-work refusals and existing service/network behavior. Owner was
+asked asynchronously to run ops/upgrade_workbench_admin_schema0013.sh. It pins
+old/new hashes and preserves the root-owned previous helper. Do not bypass that
+gate or deploy a release the installed helper cannot subsequently settle/stop.
+The running app is unchanged while this action is pending.
+
+Static/contracts/build/schema and focused model/worker/identity checks pass.
+Broader local/backend/browser/visual checks are still running. Their initial old
+0007/0008 migration failures exposed new history reads before the additive table
+exists; compatibility reads were repaired and all affected migration cases pass.
+The first browser exact-label failure was repaired with explicit accessible names;
+the override browser now passes reload, precise submission and enlarged phone text.
+Keep failed evidence. New source is not yet a completed/installed milestone.
+
+Private evidence: /home/rich/.local/share/TwichUI-Workbench/feature-campaign-20261111.
+Shadow store: .local/m5-review/everyday-feature-identity-review (never activated).
+A temporary read-only review serves its copy on9187; stop it before another review.
+Live private preview remains https://10.0.0.9:9487.
+
+Next: finish local/hosted verification and push checkpoint; after owner helper
+installation verify exact hash/current grant, stage via the existing sealed mechanism,
+preserve all original rows/sidecars, migrate/reconcile only the new copied store,
+retain the old0012release/store for rollback, and verify installed/restarted/restore
+behavior. Then proceed through Feature Workshop and the remaining milestones.
+Continue independent useful work while concrete deployment access is pending.
+
+---
+
 # Installed overnight usability checkpoint — November 10, 2026 (Mountain time)
 
 Following the Project Working Philosophy, the private preview now runs **b421e83 / deployment 106**, seal `10e7ca6c8de8144f911a1e69fb6cb02f4bbd5e8f76214250599b8318e86ec8bd`. Active source remains `codex/everyday-workbench` in `/home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench`. All four services are active and enabled. Prior a8c43cb source/history and the original main checkout edits remain preserved. Both original exact draft PRs are still open; no new real model generation, addon publication, merge or game installation occurred.

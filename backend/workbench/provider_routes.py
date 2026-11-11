@@ -28,23 +28,71 @@ def configured_fallback(saved, backend, conditions):
     return allowed
 
 
-def planning_binding(c, choice):
+def planning_binding(c, choice, settings=None):
     saved = model_policy.read_connection(c)
+    if settings:
+        from workbench.schemas import TaskAISettings
+        settings = TaskAISettings.model_validate(settings)
+        expected = ('qwen' if settings.primary.provider == 'local' else 'codex') + (
+            '-with-' + ('codex' if settings.fallback.provider == 'codex' else 'local') + '-fallback'
+            if settings.fallback else '-once')
+        if choice != expected:
+            raise ValueError('The task model settings must match its provider consent.')
+        providers = dict(saved.providers)
+        for config in [settings.primary, *([settings.fallback] if settings.fallback else [])]:
+            if not providers[config.provider].enabled:
+                raise ValueError('This provider is disabled in Settings.')
+            validate_selection(config.provider, config.model, config.effort)
+            providers[config.provider] = providers[config.provider].model_copy(update={
+                'model': config.model, 'effort': config.effort})
+        # Task consent selects models, while global routing still limits fallback.
+        saved = saved.model_copy(update={'providers': providers})
     if choice in CODEX_CHOICES:
         route = codex_choice(saved)
         if choice == 'codex-with-local-fallback':
-            everyday.local_selection(c)
+            local_choice(saved)
             route['fallback'] = configured_fallback(saved, 'local', set(SAFE_CODEX_FALLBACK.values()))
+            if settings:
+                route['local'] = local_choice(saved)
         return 'codex_route', route
-    local = everyday.local_selection(c).model_dump()
+    local = local_choice(saved)
     if choice == 'qwen-with-codex-fallback':
         local['codex'] = {k: v for k, v in codex_choice(saved).items() if k != 'policy_revision'}
         local['fallback'] = configured_fallback(saved, 'codex', {'unavailable'})
     return 'local_route', local
 
 
+def validate_selection(backend, model, effort):
+    if backend == 'local':
+        if model != everyday.MODEL or effort is not None:
+            raise ValueError('Choose the installed Qwen model without reasoning effort.')
+    elif model_policy.support(model_policy.capabilities(), backend, model, effort) != 'verified':
+        raise ValueError('This model and effort need a current supported provider catalog. Refresh discovery before authorizing work.')
+
+
+def local_choice(saved):
+    config = saved.providers['local']
+    if not saved.revision or not config.enabled:
+        raise ValueError('Enable the installed local Qwen model in Settings.')
+    validate_selection('local', config.model, config.effort)
+    return dict(policy_revision=saved.revision, model=config.model)
+
+
 def approved(c, original):
     choice = original['payload'].get('local_planning')
+    if original['payload'].get('ai_settings'):
+        # The server receipt freezes this task's exact primary and fallback.
+        # Global edits cannot change an already authorized operation.
+        from workbench.intake import digest
+        key = 'codex_route' if choice in CODEX_CHOICES else 'local_route'
+        receipts = c.execute(select(planning_jobs.c.payload).where(
+            planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')
+            .order_by(planning_jobs.c.created_at)).scalars()
+        for receipt in receipts:
+            permission = receipt.get('local_planning_receipt', {})
+            if key in permission and permission.get('binding') == digest(original['payload']):
+                return permission[key]
+        raise ValueError('The frozen task model receipt is unavailable.')
     key, current = planning_binding(c, choice)
     receipts = c.execute(select(planning_jobs.c.payload).where(
         planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')).scalars()

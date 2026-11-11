@@ -449,7 +449,7 @@ def test_additive_migration_preserves_0006_and_backup_restore(tmp_path):
     with sqlite3.connect(tmp_path/'old.sqlite3') as source, sqlite3.connect(tmp_path/'backup.sqlite3') as backup:
         source.backup(backup)
         assert backup.execute('PRAGMA integrity_check').fetchone() == ('ok',)
-        assert backup.execute('SELECT version_num FROM alembic_version').fetchone() == ('0012',)
+        assert backup.execute('SELECT version_num FROM alembic_version').fetchone() == ('0013',)
 
 
 def test_terminal_receipt_survives_backup_without_reapplication(client, headers, store, tmp_path):

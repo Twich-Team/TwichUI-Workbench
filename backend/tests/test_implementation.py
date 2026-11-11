@@ -620,7 +620,7 @@ def test_populated_0007_upgrade_preserves_history_and_restore(tmp_path):
                 actual = [tuple(row[:-1]) for row in actual]
             assert actual == rows
         assert c.exec_driver_sql("PRAGMA foreign_key_check").all() == []
-        assert c.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "0012"
+        assert c.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "0013"
     with TestClient(create_app(engine)) as client:
         headers = {
             "origin": "http://testserver",

@@ -331,3 +331,11 @@ task_sessions = Table('task_sessions', metadata,
     Column('status', String, nullable=False), Column('message', String, nullable=False),
     Column('state', JSON, nullable=False), Column('created_at', String, nullable=False),
     Column('finished_at', String))
+
+# Organizational ownership only; never grants execution or changes original evidence.
+task_lineage = Table('task_lineage', metadata,
+    Column('intake_id', String, ForeignKey('intakes.id'), primary_key=True),
+    Column('canonical_id', String, ForeignKey('intakes.id'), nullable=False),
+    Column('title', String, nullable=False), Column('relation', String, nullable=False),
+    Column('evidence', JSON, nullable=False), Column('created_at', String, nullable=False))
+Index('ix_task_lineage_canonical', task_lineage.c.canonical_id)

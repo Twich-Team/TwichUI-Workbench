@@ -41,6 +41,9 @@ NEEDS = {'needs_input', 'needs_approval'}
 
 
 class WorkspaceTask(BaseModel):
+    history_count: int | None = Field(default=None, exclude_if=lambda value: value is None)
+    history_failures: int | None = Field(default=None, exclude_if=lambda value: value is None)
+    current_intake_id: str | None = Field(default=None, exclude_if=lambda value: value is None)
     id: str
     title: str
     kind: str
@@ -93,6 +96,8 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12)
         local_model = model_priority(c)
         from workbench.model_policy import read_connection
         work_paused = bool(read_connection(c).pause_new_work)
+        from workbench.task_identity import links as ownership_links
+        links = ownership_links(c)
     rows = []
     for original in originals:
         preparation_message = None
@@ -195,10 +200,27 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12)
                          created_at=original['created_at'], updated_at=max(timestamps), active=phase in ACTIVE,
                          needs_you=phase in NEEDS, result_id=result_id, result_kind=result_kind,
                          draft_pr_submitted=draft_pr_submitted or None, provider=providers[identity][-1]['backend'] if providers[identity] else None))
+    # Reconcile evidenced ownership, retaining every original and all deep links.
+    # The latest member supplies current status; older failures stay counted in history.
+    groups = indexed(links, 'canonical_id')
+    by_id = {r['id']: r for r in rows}
+    linked_ids = {r['intake_id'] for r in links}
+    grouped = []
+    for canonical, members in groups.items():
+        originals_for_task = [by_id[m['intake_id']] for m in members]
+        current = max(originals_for_task, key=lambda r: (r['active'], r['created_at'], r['id']))
+        grouped.append({**current, 'id': canonical, 'title': members[0]['title'],
+                        'current_intake_id': current['id'], 'history_count': len(members),
+                        'history_failures': sum(r['state'] in {'failed','interrupted'} for r in originals_for_task),
+                        'created_at': by_id[canonical]['created_at']})
+    rows = sorted([r for r in rows if r['id'] not in linked_ids] + grouped,
+                  key=lambda r: (r['created_at'], r['id']), reverse=True)
     query = search.strip().casefold()
     if kind not in {'all', 'bug', 'coverage', 'feature', 'inspection', 'simulation', 'data', 'other'}:
         raise HTTPException(422, 'Choose an available type of work.')
-    descriptions = {r['id']:r['payload'].get('description','') for r in originals}
+    descriptions = {r['id']:r['payload']['title']+' '+r['payload'].get('description','') for r in originals}
+    for canonical, members in groups.items():
+        descriptions[canonical] = ' '.join(descriptions[m['intake_id']] for m in members)
     matching = [r for r in rows if (kind=='all' or r['kind']==kind) and (not query or query in
                 (r['title']+' '+r['stage']+' '+r['kind']+' '+descriptions[r['id']]).casefold())]
     counts = Counter(r['state'] for r in matching)

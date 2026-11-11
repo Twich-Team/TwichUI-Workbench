@@ -90,12 +90,48 @@ def capabilities(path=None):
         try:
             file = Path(path)
             if file.is_absolute() and file.is_file() and file.stat().st_size <= 100_000:
-                return CapabilityReport.model_validate(json.loads(file.read_text()))
+                return installed_capabilities(CapabilityReport.model_validate(json.loads(file.read_text())))
         except (ValueError, OSError):
             pass
-    return CapabilityReport(executors=[ExecutorCapability(backend=b, executor=e, source='No discovery metadata configured',
+    return installed_capabilities(CapabilityReport(executors=[ExecutorCapability(backend=b, executor=e, source='No discovery metadata configured',
         limitation=('No recent model catalog is configured here. Availability and model support are unverified; actual task receipts report observed execution.' if b == 'local' else 'Installed CLI alone does not establish model access, capacity or permission.'))
-        for b, e in [('local', 'local llama.cpp'), ('codex', 'Codex CLI'), ('claude', 'Claude Code')]])
+        for b, e in [('local', 'local llama.cpp'), ('codex', 'Codex CLI'), ('claude', 'Claude Code')]]))
+
+
+def installed_capabilities(report):
+    from workbench import everyday
+    if everyday.enabled():
+        local = ExecutorCapability(backend='local', executor='Installed Workbench Qwen adapter',
+            source='Fixed supported everyday adapter model; availability checked before generation',
+            observed_at=now(), default_model=everyday.MODEL,
+            models=[ModelCapability(model=everyday.MODEL)],
+            limitation='Only the installed model is supported. Fixed decoding has no selectable reasoning effort. This is capability metadata, not live availability.')
+        others = [e for e in report.executors if e.backend != 'local']
+        # Read only allowlisted public model metadata from the installed CLI's
+        # existing cache. Never read auth, config, logs or perform inference here.
+        codex = next((e for e in others if e.backend == 'codex'), None)
+        if codex and not codex.models:
+            cached = cached_codex_capability()
+            if cached:
+                others = [cached if e.backend == 'codex' else e for e in others]
+        report = report.model_copy(update={'executors': [local, *others]})
+    return report
+
+
+def cached_codex_capability(path=None):
+    try:
+        path = Path(path or Path.home() / '.codex/models_cache.json')
+        if path.is_symlink() or not path.is_file() or path.stat().st_size > 2_000_000:
+            return None
+        data = json.loads(path.read_text())
+        return ExecutorCapability(backend='codex', executor='Installed Codex CLI',
+            source='Existing Codex model cache; allowlisted model and reasoning metadata only',
+            observed_at=data.get('fetched_at'), models=[ModelCapability(
+                model=m['slug'], efforts=[e['effort'] for e in m.get('supported_reasoning_levels', [])])
+                for m in data.get('models', [])[:64] if m.get('visibility') == 'list'],
+            limitation='Cached support is not account entitlement or subscription allowance. A current catalog is required for new task choices; the signed-in connector rechecks model, effort and included access before generation.')
+    except (ValueError, TypeError, KeyError, OSError):
+        return None
 
 
 def read_connection(connection):

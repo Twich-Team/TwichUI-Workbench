@@ -7896,3 +7896,41 @@ Recorded and linked the explicit global/per-task model/effort clarification and 
 Exact installedb421e83/deployment106 passed hosted42957291967: static/contracts/schema,2195backend(11skips),47frontend,120Chromium(3skips),12visual. Actual private desktop/phone results/draft titles/links, populated Backlog/Settings, saved-provider choice without submission, keyboard/enlarged/reload and post-restart read back pass. All633rows match the pre-cutover store and independent restore; original main edits, normal model authentication,8765, standing draft policy and both exact open draft PRs are preserved. Work is resumed; no new real generations or addon writes/merge/game installation occurred.
 
 This is a verified delivery checkpoint, not a claim that all four campaign milestones are finished. Initial supported PhaseA remains proven; Results/Dashboard delivery is installed. Backlog/model increments are installed, with historical task-lineage repair and extended per-task model/effort configuration explicitly open in order. New owner Feature Workshop requirements are authoritative recorded future direction. No new owner engineering decision is needed. CurrentStatus is the concise Perplexity report. Subsequent changes are documentation only, leaving tested runtime identityb421e83 unchanged.
+
+## November 11 feature campaign — Milestone 1 implementation and exact preservation
+
+Recovered actual branch c3bff84, remote match and successful hosted42960014918;
+installed b421e83/deployment106 has all four services active and exact633-row hash
+7c61a77cd51b42ec00c3c05c34bc8cc13ea0825ddf4243ea6442e7a976d02968.
+No provider generations or addon publications were repeated.
+
+Implemented schema0013 organizational ownership with a reviewed manifest binding
+41 flight-path campaign intakes to their original bug-flight-paths dispatch receipts.
+The earliest original owns the request; all later entries are evidenced retries.
+Other requests remain distinct. Atomic idempotent reconciliation, conflict refusal,
+reversal, restart/restore, original deep links, search and nonempty downgrade refusal
+are tested. A migrated copy of real history preserves all632 original domain rows
+plus the schema record;41 links produce674total rows. Exact backup/restore matches.
+Backlog/submitted requests present11coherent requests and full attempt history.
+Initial search testing exposed omitted original titles; the projection now searches
+them too. A migration test exposed missing-table reads on pre-upgrade0007 stores;
+read-only identity projections now preserve that compatibility, and affected tests pass.
+
+Settings and optional task controls select actual supported models/effort, with
+precise fallback models and frozen existing planning receipts. Safe installed Codex
+cache discovery reads only public catalog fields, never credentials/config/logs or
+inference. The existing connector validates access and exact support before execution.
+Controlled worker tests cover model/effort overrides through planning, run approval,
+implementation and independent checks after global changes, including permitted
+Qwen→Codex fallback and bad-output rejection. Unknown effort remains unknown.
+Browser selection/reload/submission tests pass; an initial exact label locator failed
+and controls now expose explicit accessible names. Actual desktop/phone migration
+screenshots were inspected. Rejection sidecars were copied into the review store
+before final result inspection; a database alone cannot preserve later rejection truth.
+
+Deployment is genuinely held: the installed root-owned helper rejects0013 with
+“History schema is outside this grant.” A minimal compatibility patch and owner
+upgrade script are concrete;49admin/schema checks pass. The owner was asked to run
+that script once, while independent verification continues. No privilege or schema
+stamp bypass was attempted. Broader tests/hosted confirmation remain in progress;
+these changes are not installed yet. Private evidence is feature-campaign-20261111.

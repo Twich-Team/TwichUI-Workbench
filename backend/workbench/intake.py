@@ -45,6 +45,8 @@ def submit(engine, body, *, owner_provenance=None):
     from workbench import bug_investigation, everyday
 
     original = body.model_dump(mode='json')
+    if body.ai_settings and not body.local_planning:
+        raise HTTPException(422, 'Task AI settings require matching provider consent.')
     if body.requested_work and (body.kind != 'feature' or body.local_planning or body.supported_task or body.regression_tests):
         raise HTTPException(422, 'This kind of work can be saved for later, but cannot authorize a model or repair in this release.')
     if body.supported_task is None:
@@ -91,7 +93,8 @@ def submit(engine, body, *, owner_provenance=None):
                 receipt = everyday.planning_receipt(original, at)
                 from workbench import provider_routes
                 try:
-                    key, binding = provider_routes.planning_binding(connection, body.local_planning)
+                    key, binding = provider_routes.planning_binding(connection, body.local_planning,
+                                                                   original.get('ai_settings'))
                     receipt[key] = binding
                 except ValueError as error:
                     raise HTTPException(409, str(error)) from None
@@ -280,6 +283,7 @@ def view_in(connection, identity):
         activity = connection.execute(select(
             model_attempts.c.id, model_attempts.c.purpose, model_attempts.c.backend,
             model_attempts.c.requested_model, model_attempts.c.actual_model,
+            model_attempts.c.requested_effort, model_attempts.c.actual_effort,
             model_attempts.c.outcome, model_attempts.c.routing_reason,
         ).where(model_attempts.c.task_id == identity, model_attempts.c.source == 'workbench',
                 model_attempts.c.backend.is_not(None))
@@ -296,7 +300,8 @@ def view_in(connection, identity):
     from workbench.local_model_priority import snapshot as model_priority
     from workbench.preparation_resources import automatic as automatic_storage_recovery
     local_model = model_priority(connection) if row['status'] in {'queued','investigating'} else None
-    return dict(**({'local_model':local_model} if local_model else {}),**({'scope_recovery':recovery} if recovery else {}),project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
+    from workbench.task_identity import history
+    return dict(task_history=history(connection, identity), **({'local_model':local_model} if local_model else {}),**({'scope_recovery':recovery} if recovery else {}),project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
         planning_start_binding=digest(row['payload']) if configured_mode()=='everyday' and row['payload']['kind']=='issue' and not row['payload'].get('local_planning') and not row['payload'].get('supported_task') and row['status'] in {'failed','waiting_for_information'} else None,
         provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
         created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, automatic_recovery=automatic_storage_recovery(j), **({'operation_kind':'scope_binding'} if j['payload'].get('operation_kind')=='scope_binding' else {}), diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],
@@ -313,8 +318,13 @@ def view_in(connection, identity):
 def listing(engine, page):
     with engine.connect() as connection:
         connection.exec_driver_sql('BEGIN')
-        ids = connection.execute(select(intakes.c.id).order_by(intakes.c.created_at.desc()).offset((page-1)*12).limit(12)).scalars()
-        return dict(items=[view_in(connection, i) for i in ids], total=connection.scalar(select(func.count()).select_from(intakes)),
+        from workbench.task_identity import links
+        owners = {r['intake_id']: r['canonical_id'] for r in links(connection)}
+        current = {}
+        for identity in connection.execute(select(intakes.c.id).order_by(intakes.c.created_at.desc(), intakes.c.id)).scalars():
+            current.setdefault(owners.get(identity, identity), identity)
+        ids = list(current.values())[(page-1)*12:page*12]
+        return dict(items=[view_in(connection, i) for i in ids], total=len(current),
                     page=page, planner=configured_mode())
 
 

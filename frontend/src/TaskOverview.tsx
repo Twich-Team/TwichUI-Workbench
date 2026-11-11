@@ -104,7 +104,7 @@ export function TaskOverview({preview = false, page = 1}: {preview?: boolean; pa
         <h2>{title}</h2>
         {matches.length ? matches.slice(0, preview ? 3 : matches.length).map(({item, progress, refreshError, result}) =>
           <Link className="record-link" to={result && progress.group==='results'?`/executions/${result.id}`:`/intake/${item.id}`} key={item.id}>
-            <span><strong>{item.original.title}</strong><small>{formatTime(item.created_at)}{refreshError && ' · Progress refresh unavailable'}</small></span>
+            <span><strong>{item.task_history?.title||item.original.title}</strong>{item.task_history&&<small>{item.task_history.members.length} saved attempts · Full history available</small>}<small>{formatTime(item.created_at)}{refreshError && ' · Progress refresh unavailable'}</small></span>
             <StateBadge value={progress.title}/><ArrowRight size={16} aria-hidden="true"/>
           </Link>) : <p className="muted">None among your latest requests.</p>}
       </section>;

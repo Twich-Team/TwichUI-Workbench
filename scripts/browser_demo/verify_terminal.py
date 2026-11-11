@@ -69,7 +69,7 @@ assert not (isolated / layout.ACTIVE).exists()
 with engine(database).connect() as current, engine(before).connect() as old:
     assert current.exec_driver_sql("PRAGMA integrity_check").scalar_one() == "ok"
     assert not current.exec_driver_sql("PRAGMA foreign_key_check").first()
-    assert current.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "0012"
+    assert current.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "0013"
     planning=select(model_attempts).where(model_attempts.c.purpose=="planning").order_by(model_attempts.c.id)
     assert not old.execute(planning).first()
     planned=list(current.execute(planning).mappings())

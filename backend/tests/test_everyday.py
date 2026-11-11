@@ -382,8 +382,9 @@ def test_fallback_cannot_start_after_the_shared_planning_deadline(
 
 
 @pytest.mark.parametrize('good_edit,via_qwen', [(True, False), (False, False), (True, True), (False, True)])
+@pytest.mark.parametrize('frozen_override', [False, True])
 def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
-    store, client, headers, installed, monkeypatch, good_edit, via_qwen,
+    store, client, headers, installed, monkeypatch, good_edit, via_qwen, frozen_override,
 ):
     from workbench import codex_provider, provider_routes, task_execution
     from workbench.codex_runtime import CodexRuntime
@@ -392,13 +393,27 @@ def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
     from test_regression_evidence import ControlledPreparer
 
     policy = save_codex_policy(store, both=via_qwen)
+    wanted_model, wanted_effort = policy.providers['codex'].model, None
+    task_settings = {}
+    if frozen_override:
+        from workbench import model_policy
+        from workbench.schemas import TaskAISettings, TaskModelChoice
+        wanted_model, wanted_effort = 'supported-override', 'high'
+        report = model_policy.CapabilityReport(executors=[model_policy.ExecutorCapability(
+            backend='codex', executor='Controlled', source='Fixture', observed_at=model_policy.now(),
+            models=[model_policy.ModelCapability(model=wanted_model, efforts=['high'])], limitation='No real use')])
+        monkeypatch.setattr(model_policy, 'capabilities', lambda: report)
+        codex = TaskModelChoice(provider='codex', model=wanted_model, effort=wanted_effort)
+        qwen = TaskModelChoice(provider='local', model=everyday.MODEL)
+        task_settings = dict(ai_settings=TaskAISettings(primary=qwen if via_qwen else codex,
+                             fallback=codex if via_qwen else None).model_dump())
     planner = ControlledPlanner()
     counted = dict(prompt_tokens=40, completion_tokens=10, reasoning_tokens=0, total_tokens=50)
     calls = []
     monkeypatch.setattr(codex_provider, 'connector_path', lambda: installed / 'simulated.sock')
 
     def generate(model, effort, prompt, schema, stop):
-        assert (model, effort) == (policy.providers['codex'].model, None) and not stop()
+        assert (model, effort) == (wanted_model, wanted_effort) and not stop()
         if 'Untrusted task data:\n' in prompt:
             calls.append('planning')
             value, _, _ = planner.generate(json.loads(prompt.split('Untrusted task data:\n')[1]), schema)
@@ -421,9 +436,14 @@ def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
         monkeypatch.setenv('WORKBENCH_LOCAL_KEY', '/fixture-only-unused')
     from contextlib import nullcontext
     monkeypatch.setattr('workbench.planning_provider.local_slot',lambda **kwargs:nullcontext())
-    saved = client.post('/api/intake', headers=headers, json={**body(), 'local_planning': choice})
+    saved = client.post('/api/intake', headers=headers, json={**body(), 'local_planning': choice, **task_settings})
     assert saved.status_code == 200, saved.text
     item = saved.json()
+    if frozen_override:
+        changed = model_policy.read(store)
+        changed.providers['codex'].model = 'later-global-choice'
+        model_policy.save(store, changed, model_policy.CapabilityReport(executors=[]))
+        store.dispose()
     assert worker.tick(store)
     if via_qwen:
         monkeypatch.delenv('WORKBENCH_LOCAL_KEY')
@@ -433,7 +453,8 @@ def test_codex_run_uses_the_certified_browser_approval_and_independent_checks(
     task, = (task for task in item['tasks'] if task['kind'] == 'task')
     path = f"/api/intake/{item['id']}/tasks/{task['id']}/run-approval"
     offer = client.get(path).json()
-    assert offer['available'] and offer['provider']['model'] == policy.providers['codex'].model
+    assert offer['available'] and offer['provider']['model'] == wanted_model
+    assert offer['provider']['effort'] == wanted_effort
     assert offer['provider']['fallback_reason'] == ('local_unreachable' if via_qwen else None)
     body_approval = dict(command_id=str(uuid4()), binding=offer['binding'],
                          scope_approval_id=offer['scope_approval_id'], run_budget=offer['offer']['budget'])

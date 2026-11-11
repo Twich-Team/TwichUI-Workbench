@@ -156,3 +156,43 @@ test('reloading saved policy locks fields and failed reload preserves edits',asy
   await expect(page.getByText('Saved preferences reloaded.',{exact:true})).toBeVisible();
   await page.getByLabel('Configure provider').selectOption('codex');await expect(page.getByLabel('Preferred model · Codex')).toHaveValue('');
 });
+
+test('specific task models and effort remain optional and use supported choices',async({page},info)=>{
+ // Controlled browser transport checks the exact submitted selection. Worker and
+ // persistence acceptance live in test_task_ai_settings and test_everyday.
+ await page.route('**/api/local-work',r=>r.fulfill({json:{enabled:true,ready:true,bug_investigation:true,codex_configured:true,codex_available:true}}));
+ await page.route('**/api/models',async r=>{
+  const response=await r.fetch();const data=await response.json();
+  data.policy={...data.policy,revision:4,preferred:'local',test_fallback:'both',fallback:['codex'],fallback_on:['unavailable'],substitution:'configured_fallback_only',
+   providers:{...data.policy.providers,local:{enabled:true,model:'pilot-qwen38-27b',effort:null,activated:false},codex:{enabled:true,model:'fixture-codex',effort:'low',activated:false}}};
+  data.capabilities.executors=[{backend:'local',models:[{model:'pilot-qwen38-27b',efforts:[]}],observed_at:new Date().toISOString(),source:'Controlled adapter',limitation:'No real provider call'},
+   {backend:'codex',models:[{model:'fixture-codex',efforts:['low','high']},{model:'fixture-capable',efforts:['high']}],observed_at:new Date().toISOString(),source:'Controlled catalog',limitation:'Included access checked before use'}];
+  await r.fulfill({response,json:data});
+ });
+ await page.goto('/intake/new?kind=issue');
+ await expect(page.getByRole('button',{name:'Use my preferred AI settings'})).toBeVisible();
+ await expect(page.getByLabel('Task provider',{exact:true})).toHaveCount(0);
+ await page.getByLabel('Description',{exact:true}).fill('Please keep the selected guide step after reloading.');
+ await page.getByRole('button',{name:'Use my preferred AI settings'}).click();
+ await expect(page.getByLabel('Allow local Qwen to investigate this report')).toBeChecked();
+ await page.getByLabel('Choose a different AI for this task').check();
+ await page.getByLabel('Task provider',{exact:true}).selectOption('codex');
+ await page.getByLabel('Task model',{exact:true}).selectOption('fixture-capable');
+ await page.getByLabel('Task reasoning effort',{exact:true}).selectOption('high');
+ await page.getByLabel('Allow the configured fallback before planning starts').check();
+ await expect(page.getByLabel('Task fallback model',{exact:true})).toHaveValue('pilot-qwen38-27b');
+ await expect(page.getByLabel('Task fallback reasoning effort')).toHaveCount(0);
+ await page.reload();
+ await expect(page.getByLabel('Task model',{exact:true})).toHaveValue('fixture-capable');
+ await expect(page.getByLabel('Task reasoning effort',{exact:true})).toHaveValue('high');
+ for(const width of [1440,390]){
+  await page.setViewportSize({width,height:1000});await overflow(page);
+  await shot(page,`task-model-override-${width}`,'.task-ai-options');
+ }
+ await page.evaluate(()=>document.documentElement.style.fontSize='200%');await overflow(page);
+ const pending=page.waitForRequest(r=>r.url().endsWith('/api/intake')&&r.method()==='POST');
+ await page.route('**/api/intake',r=>r.request().method()==='POST'?r.fulfill({status:409,json:{detail:'Controlled submission captured; no provider work started.'}}):r.continue());
+ await page.getByRole('button',{name:'Submit request',exact:true}).click();
+ expect((await pending).postDataJSON()).toMatchObject({local_planning:'codex-with-local-fallback',ai_settings:{primary:{provider:'codex',model:'fixture-capable',effort:'high'},fallback:{provider:'local',model:'pilot-qwen38-27b',effort:null}}});
+ await expect(page.getByText('Controlled submission captured; no provider work started.')).toBeVisible();
+});

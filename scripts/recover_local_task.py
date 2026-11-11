@@ -31,8 +31,8 @@ def main():
         parser.error("Existing owned task store required; no store is initialized")
     engine = engine_for(args.database)
     with engine.connect() as c:
-        if c.exec_driver_sql("SELECT version_num FROM alembic_version").scalar() != "0012":
-            parser.error("Current existing schema0012 required; this command never migrates")
+        if c.exec_driver_sql("SELECT version_num FROM alembic_version").scalar() not in {"0012", "0013"}:
+            parser.error("Current existing schema0012/0013 required; this command never migrates")
     ref = dict(intake_id=args.intake_id, task_id=args.task_id, approval_id=args.scope_approval_id)
     print(
         json.dumps(owner_task.recover_local(engine, ref, args.owner_instruction, args.owner_sha256,

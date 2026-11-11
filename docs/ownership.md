@@ -1681,3 +1681,35 @@ an explicit browser delivery request under that standing authority. Original
 run approvals stay immutable. Withdrawal or alteration of the standing policy
 prevents subsequent publication operations. Browser-approved draft runs retain
 their finite original activation and delivery limits.
+
+## November 11 feature campaign — task identity and model choices
+
+`task_lineage` (schema0013) owns organizational historical intake membership only.
+The reviewed manifest binds each original payload to its retained campaign dispatch
+receipt. `task_identity.reconcile` atomically records exact request/retry membership;
+conflicts refuse overwrite. Original intakes, scopes, planning jobs, task mappings,
+provider attempts, approvals, checked candidates and publication rows stay unchanged.
+Hierarchy is distinct from `backlog_dependencies`. Reversal affects only these
+explicit links and retains the manifest/export; nonempty schema downgrade refuses.
+Workspace and submitted-task projections show one request with navigable history,
+counts of retained failures and the current member. Deep links keep original IDs.
+
+Optional `IntakeInput.ai_settings` records exact requested primary/fallback models
+and effort. The existing planning receipt pins their validated route and original
+input digest. The existing `provider_routes.approved` reads that frozen receipt for
+planning, follow-up, preparation, run approval and execution; later global policy
+edits do not substitute another model. Legacy consent keeps its existing policy
+change refusal. Task settings cannot enable a disabled provider or expand global
+fallback conditions, disclosure, account access, budget or publication authority.
+The installed local adapter supports only its fixed Qwen identity and no selectable
+effort. Codex choices use current allowlisted installed catalog metadata; its
+connector independently validates model/effort and included access before generation.
+Task views separate saved requested choices from reported identities; absent actual
+effort remains unreported. Settings never activate execution.
+
+The existing root-owned administrator helper accepts only schema0012. A one-line
+schema0013 compatibility patch retains all original settlement and service/network
+checks. The tested owner-terminal upgrade script preserves the previous helper and
+verifies both hashes; its installation requires root access outside the current
+named helper grant. Until that exact compatibility update is installed and verified,
+the campaign leaves deployment106 running and does not bypass the schema refusal.

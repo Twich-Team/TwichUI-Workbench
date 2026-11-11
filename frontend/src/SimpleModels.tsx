@@ -4,6 +4,7 @@ import {useQuery,useQueryClient} from '@tanstack/react-query';
 import {ApiError,mutate,request} from './api';
 import type {components} from './api.generated';
 import {Button} from './components/ui/button';
+import {ModelChoiceFields} from './ModelChoiceFields';
 import {savedTaskRoute} from './modelPreferences';
 
 type Overview=components['schemas']['ModelOverview'];
@@ -64,7 +65,7 @@ export function SimpleModels(){
       </select></label>
       <p>{mode==='off'?'If the approved provider cannot start, the task waits with an explanation.':'Fallback requires the task’s consent, saved provider settings and available included access. It applies before planning generation starts. An uncertain or failed running attempt cannot trigger a duplicate.'}</p>
       {mode!=='off'&&!savedTaskRoute(policy)?.includes('fallback')&&<p>The preferred provider currently has no eligible fallback. Choose its matching direction or review the advanced model settings.</p>}
-      <div className="simple-model-cards">{(['local','codex'] as Choice[]).map(b=><div key={b}><h3>{names[b]}</h3><p>{policy.providers[b].model||'No model selected'}</p><p>{!readyConfig(b)?'Needs model setup':access.isError||!access.data?'Current access could not be checked':b==='codex'?(access.data.codex_available?'Connector available · allowance checked before use':'Connector unavailable'):(access.data.ready?'Local task service ready':'Local task service not ready')}</p></div>)}</div>
+      <div className="simple-model-cards">{(['local','codex'] as Choice[]).map(b=><div key={b}><ModelChoiceFields label={names[b]} value={{provider:b,model:policy.providers[b].model||'',effort:policy.providers[b].effort}} report={query.data?.capabilities} onChange={value=>{setDraft({...policy,providers:{...policy.providers,[b]:{...policy.providers[b],model:value.model,effort:value.effort}}});setMessage('');}}/><p>{!readyConfig(b)?'Needs model setup':access.isError||!access.data?'Current access could not be checked':b==='codex'?(access.data.codex_available?'Connector available · allowance checked before use':'Connector unavailable'):(access.data.ready?'Local task service ready':'Local task service not ready')}</p></div>)}</div>
       {missing.length>0&&<p>Choose and enable a model for {missing.map(b=>names[b]).join(' and ')} in <Link to="/models/configure">advanced model settings</Link> before saving this route.</p>}
       <div className="settings-actions"><Button type="submit" disabled={!draft||conflict||missing.length>0||policy.preferred==='claude'}>{busy?'Saving…':'Save task model preferences'}</Button>{draft&&<Button type="button" variant="ghost" onClick={()=>void reload()}>Discard model edits and reload</Button>}</div>
     </fieldset></form>

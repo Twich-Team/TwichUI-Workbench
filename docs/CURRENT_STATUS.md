@@ -1,11 +1,11 @@
-Last updated November 10, 2026 (Mountain time).
+Last updated November 11, 2026 (UTC).
 
-The private app runs b421e83, deployment 106. Two real Qwen requests reached checked results and draft PRs: [vendor repair 10](https://github.com/Twich-Team/TwichUI/pull/10) and [map coverage 11](https://github.com/Twich-Team/TwichUI/pull/11). Neither change was installed or tested in World of Warcraft.
+The private app still runs b421e83, deployment106: https://10.0.0.9:9487. Its633saved records and four active services are preserved. Two real Qwen requests previously reached checked results and draft PRs10/11; neither change was installed or tested in World of Warcraft. No new model demonstration was repeated.
 
-Installed: outcome-first Results, actual draft links and next steps, clearer Dashboard attention, combined Backlog filters, simpler task entry and primary/fallback settings. Advanced global model/effort controls remain available.
+New source adds specific global/task model and reasoning choices, precise fallback models, frozen task choices and requested-versus-reported details. It also links41proven flight-path campaign attempts under one request while retaining every original record and failure. A migrated copy shows11coherent requests and preserves all original data.
 
-Full hosted verification passed: 2,195 backend, 47 frontend, 120 browser and 12 visual checks. Installed desktop/phone reload, enlarged text, keyboard controls, restart and independent restore passed. All 633 saved records survived unchanged. Recovery/fallback edge cases retain controlled-test evidence; no new real model generation was needed.
+Controlled worker, fallback, restart/restore, unsupported-choice and browser tests pass. Desktop/phone screenshots were inspected. Broader local and hosted verification are still pending; this source is not installed yet.
 
-Milestones 3–4 remain open: historical campaign retries need verified links under one task; optional per-task model/effort selection and complete requested-versus-actual reporting are unfinished. Both new owner clarifications are recorded. Feature Workshop attachments, mockups, simulator comparisons and coherent feature delivery remain future requirements. Physical phone/Safari remains unverified.
+Progress is stopped at a real deployment access boundary: the root-owned service helper rejects the new database schema. A minimal tested compatibility patch is ready. The owner has been asked to run ops/upgrade_workbench_admin_schema0013.sh once in the server terminal.
 
-Next complete outcome: reconcile historical task identity, then finish the expanded model-settings milestone. No runtime blocker or owner engineering decision is pending. Merging and game installation remain owner actions.
+Next complete outcome: finish verification and privately install Milestone1 after that helper update, then continue Feature Workshop and the remaining campaign. No campaign milestone is fully complete yet. Feature subtasks, attachments, simulator comparisons and expanded usage charts remain unfinished. Merging and game installation remain owner actions.

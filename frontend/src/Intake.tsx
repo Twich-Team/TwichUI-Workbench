@@ -13,7 +13,8 @@ import { TaskJourney, TaskOverview } from './TaskOverview';
 import { TaskExample } from './TaskExample';
 import { minutes, providerOutcome } from './taskProgress';
 import { ExactRunLimits, RunLimits } from './RunLimits';
-import {savedTaskRoute} from './modelPreferences';
+import {savedTaskRoute,savedTaskAI,taskAIRoute} from './modelPreferences';
+import {ModelChoiceFields} from './ModelChoiceFields';
 
 type Input = components['schemas']['IntakeInput'];
 type Intake = components['schemas']['IntakeView'];
@@ -101,6 +102,9 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
   const bugWork=kind==='issue'&&Boolean(localWork.data?.bug_investigation)&&!body.supported_task;
   const modelPreferences=useQuery({queryKey:['models'],queryFn:()=>request<components['schemas']['ModelOverview']>('/api/models'),enabled:Boolean(localWork.data?.enabled&&(regression||bugWork))});
   const savedRoute=modelPreferences.data?savedTaskRoute(modelPreferences.data.policy):null;
+  const [customAI,setCustomAI]=useState(Boolean(body.ai_settings));
+  const taskAI=body.ai_settings||(modelPreferences.data?savedTaskAI(modelPreferences.data.policy):null);
+  function changeAI(settings:components['schemas']['TaskAISettings']){setBody({...body,ai_settings:settings,local_planning:taskAIRoute(settings)});}
   const supported=useQuery({queryKey:['supported-tasks'],queryFn:()=>request<{items:{id:string;title:string;purpose:string}[]}>('/api/supported-tasks')});
   async function submit(event:React.FormEvent) {
     event.preventDefault(); setError('');
@@ -162,22 +166,28 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
   {kind==='issue' && <><label className="check-label"><input type="checkbox" checked={lua} onChange={e=>{setLua(e.target.checked);if(!e.target.checked)setBody({...body,lua_error:''});}}/>Add a Lua error <span>Optional</span></label>{lua && <><label htmlFor="lua-error">Lua error <span>Plain text · never executed</span></label><textarea className="code-input" id="lua-error" maxLength={6000} rows={6} value={body.lua_error || ''} onChange={e=>setBody({...body,lua_error:e.target.value})}/></>}</>}</details>
   <label htmlFor="request-interface">Does this change how the addon looks?</label><select id="request-interface" value={body.visual_requirement} onChange={e=>setBody({...body,local_planning:bugWork||e.target.value==='nonvisual'?body.local_planning:null,visual_requirement:e.target.value as Input['visual_requirement']})}><ScopeOptions/></select><p className="small-text">Your scope choice stays with this request. Choose Not sure if you haven’t decided.{bugWork&&' Read-only bug investigation can start before this is decided; repair permission is separate.'}</p>
   {localWork.data?.enabled&&(regression||bugWork)&&<div role="group" aria-label="Planning provider">
-    {savedRoute&&<div className="saved-model-choice"><p>Saved preference: {savedRoute.startsWith('qwen-')?'Local Qwen':'Codex'} · {savedRoute.includes('fallback')?'Fallback allowed before planning starts':'Fallback off'}. Review the provider consent below before submitting.</p><Button type="button" variant="secondary" disabled={modelPreferences.isError||(!bugWork&&body.visual_requirement!=='nonvisual')} onClick={()=>setBody({...body,local_planning:savedRoute})}>Use saved provider choice</Button></div>}
+    {savedRoute&&<div className="saved-model-choice"><p>Saved preference: {savedRoute.startsWith('qwen-')?'Local Qwen':'Codex'} · {modelPreferences.data?.policy.providers?.[modelPreferences.data.policy.preferred||'local'].model} · {modelPreferences.data?.policy.providers?.[modelPreferences.data.policy.preferred||'local'].effort||'Provider default effort'} · {savedRoute.includes('fallback')?'Fallback allowed before planning starts':'Fallback off'}. Review the provider consent below before submitting.</p><Button type="button" variant="secondary" disabled={modelPreferences.isError||(!bugWork&&body.visual_requirement!=='nonvisual')} onClick={()=>{setCustomAI(false);setBody({...body,ai_settings:savedTaskAI(modelPreferences.data!.policy),local_planning:savedRoute});}}>Use my preferred AI settings</Button></div>}
+    {taskAI&&<><label className="check-label"><input type="checkbox" checked={customAI} onChange={e=>{setCustomAI(e.target.checked);if(e.target.checked)changeAI(taskAI);else setBody({...body,ai_settings:null,local_planning:null});}}/>Choose a different AI for this task</label>
+    {customAI&&<div className="task-ai-options"><label>Task provider<select aria-label="Task provider" value={taskAI.primary.provider} onChange={e=>{const provider=e.target.value as 'local'|'codex';const config=modelPreferences.data?.policy.providers?.[provider];changeAI({primary:{provider,model:config?.model||'',effort:config?.effort},fallback:null});}}><option value="local">Local Qwen</option><option value="codex">Codex</option></select></label>
+    <ModelChoiceFields label="Task" value={taskAI.primary} report={modelPreferences.data?.capabilities} onChange={primary=>changeAI({...taskAI,primary})}/>
+    <label className="check-label"><input type="checkbox" checked={Boolean(taskAI.fallback)} onChange={e=>{const provider=taskAI.primary.provider==='local'?'codex':'local';const config=modelPreferences.data?.policy.providers?.[provider];changeAI({...taskAI,fallback:e.target.checked?{provider,model:config?.model||'',effort:config?.effort}:null});}}/>Allow the configured fallback before planning starts</label>
+    {taskAI.fallback&&<ModelChoiceFields label="Task fallback" value={taskAI.fallback} report={modelPreferences.data?.capabilities} onChange={fallback=>changeAI({...taskAI,fallback})}/>}
+    <p className="small-text">These choices stay with this task. Global fallback permission, source disclosure, included access and separate run approval still apply.</p></div>}</>}
     <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('qwen-')||false} disabled={!bugWork&&body.visual_requirement!=='nonvisual'}
-      onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-once':null})}/><span>{bugWork?'Allow local Qwen to investigate this report':'Allow one local Qwen request to plan this task'}</span></label>
+      onChange={e=>setBody({...body,ai_settings:null,local_planning:e.target.checked?'qwen-once':null})}/><span>{bugWork?'Allow local Qwen to investigate this report':'Allow one local Qwen request to plan this task'}</span></label>
     {localWork.data.codex_configured ? <>
       {!localWork.data.codex_available&&<p className="detail-copy">The Codex connector is unavailable. If you choose Codex first, planning can proceed with Qwen only if you allow that switch.</p>}
       {body.local_planning?.startsWith('qwen-')&&<>
         <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning==='qwen-with-codex-fallback'}
-          onChange={e=>setBody({...body,local_planning:e.target.checked?'qwen-with-codex-fallback':'qwen-once'})}/><span>Allow one switch to signed-in Codex if Qwen cannot connect before generation</span></label>
+          onChange={e=>setBody({...body,ai_settings:null,local_planning:e.target.checked?'qwen-with-codex-fallback':'qwen-once'})}/><span>Allow one switch to signed-in Codex if Qwen cannot connect before generation</span></label>
         {body.local_planning==='qwen-with-codex-fallback'&&<p className="detail-copy">If Qwen cannot start and Models allows the switch, this permits sending your request, clarification and {bugWork?'relevant committed addon code and test excerpts':'relevant committed source excerpts'} to OpenAI after the account and included allowance are checked.</p>}
       </>}
       <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning?.startsWith('codex-')||false} disabled={!bugWork&&body.visual_requirement!=='nonvisual'}
-        onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-once':null})}/><span>{bugWork?'Allow signed-in Codex to investigate this report':'Allow one signed-in Codex turn to plan this task'}</span></label>
+        onChange={e=>setBody({...body,ai_settings:null,local_planning:e.target.checked?'codex-once':null})}/><span>{bugWork?'Allow signed-in Codex to investigate this report':'Allow one signed-in Codex turn to plan this task'}</span></label>
       {body.local_planning?.startsWith('codex-')&&<>
         <p className="detail-copy">{bugWork&&'Investigation permits a bounded read-only operation within 30 minutes, including source inspection and plan review. Each Codex turn has a five-minute timeout. Codex can retry internally; reported usage is checked after each turn, not guaranteed by a token ceiling. '}This sends the request, clarification and {bugWork?'relevant committed addon code and test excerpts':'relevant committed source excerpts'} to OpenAI through the configured ChatGPT sign-in. Workbench will check the saved model and included allowance before sending task content.</p>
         <label className="check-label planning-consent"><input type="checkbox" checked={body.local_planning==='codex-with-local-fallback'}
-          onChange={e=>setBody({...body,local_planning:e.target.checked?'codex-with-local-fallback':'codex-once'})}/><span>Allow one switch to local Qwen if Codex is unavailable or reaches its included allowance reserve before generation</span></label>
+          onChange={e=>setBody({...body,ai_settings:null,local_planning:e.target.checked?'codex-with-local-fallback':'codex-once'})}/><span>Allow one switch to local Qwen if Codex is unavailable or reaches its included allowance reserve before generation</span></label>
       </>}
     </> : <p className="detail-copy">Codex requires the installed signed-in connector.</p>}
     {bugWork&&<p className="detail-copy">Investigation reads the report and relevant committed files. Each operation permits up to sixteen requests to inspect source and prepare a scope. Earlier operations and usage remain recorded; this is not a subscription allowance. Each phase has a thirty-minute timeout; each request has a five-minute timeout. It cannot edit files or publish. If a real-world detail is missing, Workbench may ask for information and separate permission to continue with the same provider.</p>}
@@ -286,6 +296,8 @@ export function IntakeDetail() {
       </>}
     </section>}
     {waiting&&<p role="status" className="soft-callout">{waiting.message}</p>}
+    {data.task_history&&<section className="panel" aria-label="Request history"><h2>{data.task_history.title}</h2><p>One request · {data.task_history.members.length} saved attempts. Original plans, failures, decisions and results remain available.</p><details open={data.task_history.canonical_id===identity}><summary>Attempts and recovery history</summary><ol>{data.task_history.members.map((member,i)=><li key={member.intake_id}><Link to={`/intake/${member.intake_id}`}>{member.relation==='request'?'Original request':`Attempt ${i+1} · ${member.relation}`}</Link> · {member.status.replaceAll('_',' ')} · {formatTime(member.created_at)}{member.intake_id===identity&&' · Viewing this attempt'}</li>)}</ol></details></section>}
+    {data.original.ai_settings&&<section className="soft-callout" aria-label="Saved task AI settings"><h2>AI settings saved for this task</h2><p>Requested: {data.original.ai_settings.primary.provider==='local'?'Local Qwen':'Codex'} · {data.original.ai_settings.primary.model} · {data.original.ai_settings.primary.effort||'Provider default effort'}</p><p>Fallback: {data.original.ai_settings.fallback?`${data.original.ai_settings.fallback.provider} · ${data.original.ai_settings.fallback.model} · ${data.original.ai_settings.fallback.effort||'Provider default effort'}`:'Off'}</p><p>Later global preferences do not change this task’s saved choices. Actual reported models and effort are recorded below when available.</p></section>}
     {Boolean(data.provider_activity?.length)&&<details className="soft-callout" aria-label="Task model activity"><summary>Provider activity and earlier attempts</summary>
       <h2>Model activity for this task</h2>
       <ul>{data.provider_activity?.map(attempt=><li key={attempt.id}>
@@ -293,7 +305,7 @@ export function IntakeDetail() {
         {' · '}{attempt.backend==='local'?'Local Qwen':attempt.backend==='codex'?'Codex':attempt.backend}
         {' · '}{providerOutcome(attempt.outcome)}
         <p>{attempt.routing_reason}</p>
-        {(attempt.actual_model||attempt.requested_model)&&<p className="small-text">{attempt.actual_model?'Reported model':'Selected model'} {attempt.actual_model||attempt.requested_model}</p>}
+        <p className="small-text">Requested model: {attempt.requested_model||'Not recorded'} · Effort: {attempt.requested_effort||'Provider default'}</p><p className="small-text">Reported model: {attempt.actual_model||'Unknown'} · Reported effort: {attempt.actual_effort||'Not reported'}</p>
       </li>)}</ul>
     </details>}
     {data.scope_recovery&&<section className="panel" aria-label="Apply saved scope"><h2>Your scope choice is saved</h2>

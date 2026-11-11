@@ -1,3 +1,33 @@
+# Active autonomous feature campaign — November 11, 2026
+
+The current owner assignment authorizes connected implementation, verification,
+Workbench development pushes, hosted checks and existing private-preview delivery
+across six milestones. Earlier deferrals below are historical and superseded for
+this campaign. Actual billing, disclosure, authentication, publication, resource,
+recovery and game-installation protections remain.
+
+1. Reconcile proven historical retry ownership without changing original records;
+   finish supported global/task model and effort selection, frozen configuration,
+   truthful reporting and worker/restart/fallback acceptance. Deploy before step 2.
+2. Extend the existing persistent planning/task/worker owners into Feature Workshop:
+   natural intake, dependent subtasks, continuation, integrated verification.
+3. Optional protected attachments and visual feedback; generated concepts only if
+   an actually supported, authorized provider exists.
+4. One actual comparable simulator before/after scenario with provenance.
+5. Useful observed AI activity charts; subscription allowance stays unavailable
+   without authoritative provider data.
+6. Connected reliability/usability acceptance and a bounded operation-mode slice
+   where existing scheduling supports it.
+
+For each connected milestone: focused then appropriate broader checks, actual
+rendered desktop/phone review, recoverable commit/push, hosted confirmation,
+sealed private deployment and preserved-data/recovery proof. Do not repeat
+expensive real provider demonstrations already established. Continue after
+checkpoints. Latest implementation evidence belongs in CONTINUATION/PROGRESS;
+this plan makes no completion claim.
+
+---
+
 # Overnight campaign delivery — November 10, 2026 (Mountain time)
 
 The [owner’s model/effort clarification](OWNER_MODEL_CONFIGURATION_20261110.md) extends the existing model-settings milestone. Finish the active installed-build and hosted verification first; then account for global and optional per-task provider/model/effort choices, frozen task configuration, requested-versus-actual identity and supported-integration validation. The installed provider-only simplification does not complete that added requirement. No running work is restarted by this clarification.

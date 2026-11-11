@@ -273,7 +273,25 @@ class RegressionTestRequest(StrictModel):
         return value
 
 
+class TaskModelChoice(StrictModel):
+    provider: Literal['local', 'codex']
+    model: str = Field(min_length=1, max_length=160, pattern=r'^[A-Za-z0-9_.:/-]+$')
+    effort: str | None = Field(default=None, max_length=24, pattern=r'^[a-z0-9_-]+$')
+
+
+class TaskAISettings(StrictModel):
+    primary: TaskModelChoice
+    fallback: TaskModelChoice | None = None
+
+    @model_validator(mode='after')
+    def different_provider(self):
+        if self.fallback and self.fallback.provider == self.primary.provider:
+            raise ValueError('Fallback must use a different provider.')
+        return self
+
+
 class IntakeInput(StrictModel):
+    ai_settings: TaskAISettings | None = Field(default=None, exclude_if=lambda value: value is None)
     requested_work: Literal['feature', 'inspection', 'simulation', 'data', 'other'] | None = Field(default=None, exclude_if=lambda value: value is None)
     visual_requirement: VisualRequirement = 'unclassified'
     request_id: UUID
@@ -578,6 +596,8 @@ class ClarificationView(StrictModel):
 
 
 class TaskProviderActivity(StrictModel):
+    requested_effort: str | None = None
+    actual_effort: str | None = None
     id: str
     purpose: str
     backend: str
@@ -617,7 +637,22 @@ class LocalModelPriorityView(StrictModel):
     observed_at: str | None
 
 
+class TaskHistoryMember(StrictModel):
+    intake_id: str
+    relation: str
+    status: str
+    created_at: str
+    evidence: dict
+
+
+class TaskHistory(StrictModel):
+    canonical_id: str
+    title: str
+    members: list[TaskHistoryMember]
+
+
 class IntakeView(StrictModel):
+    task_history: TaskHistory | None = Field(default=None, exclude_if=lambda value: value is None)
     local_model: LocalModelPriorityView | None = Field(default=None, exclude_if=lambda value: value is None)
     scope_recovery: ScopeRecoveryView | None = Field(default=None, exclude_if=lambda value: value is None)
     project_source: ProjectSourceView | None = Field(default=None,exclude_if=lambda value:value is None)

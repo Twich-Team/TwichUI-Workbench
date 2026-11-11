@@ -545,7 +545,7 @@ def settled_check(release, review):
     with sqlite3.connect(path.as_uri() + '?mode=ro', uri=True, timeout=1) as db:
         db.execute('PRAGMA trusted_schema=OFF')
         db.execute('BEGIN')
-        require(db.execute('SELECT version_num FROM alembic_version').fetchall() == [('0012',)],
+        require(db.execute('SELECT version_num FROM alembic_version').fetchall() in ([('0012',)], [('0013',)]),
                 'History schema is outside this grant')
         for table, statuses in {
             'commands': ('pending',), 'proposal_decisions': ('pending',), 'planning_jobs': ('queued', 'running'),
