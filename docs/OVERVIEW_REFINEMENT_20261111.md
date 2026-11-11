@@ -47,3 +47,17 @@ The enlarged-text pixel review found that decorative icons consumed too much tit
 width at320px/200%. Narrow phone rows now give titles the full content column, and
 redundant result emblems are removed there. The browser checks title width as well
 as document overflow; recorded status/type text and all history stay visible.
+
+Full local verification passed:2222backend/8skips,54frontend,126browser/3skips,
+12visual. Only the two Dashboard references changed. Final review also ensures a
+later failed review cannot erase a recorded draft submission; the focused36checks
+cover overlapping draft/incomplete categories without asserting passed checks.
+
+Hosted43036133216 attempts1and2 failed before application checks while installing
+Chromium's Ubuntu font dependencies: temporary DNS failure for the Azure mirror.
+Logs are retained privately. The CI-only correction prefers the existing official
+HTTPS archives, preserving signatures, suites, keys, dependencies and all checks.
+This uses the runner's [existing mirror configuration](https://github.com/actions/runner-images/blob/main/images/ubuntu/scripts/build/configure-apt-sources.sh)
+and APT's [documented priority metadata](https://manpages.ubuntu.com/manpages/noble/man1/apt-transport-mirror.1.html).
+No Workbench-host network, administrator or model policy was changed. A successful
+exact-source hosted run remains required before private installation.
