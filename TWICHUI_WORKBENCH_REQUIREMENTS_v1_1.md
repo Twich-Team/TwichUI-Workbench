@@ -36,6 +36,15 @@ Document roles:
 - The latest verified handoff/results govern current implementation status.
 - CODEX_MODEL_REFERENCE.md governs recommendations for the Codex development model and reasoning setting, not access entitlements for Workbench providers.
 
+## Later explicit owner requirements — November 10, 2026
+
+The original v1.1 requirements below remain intact. The owner subsequently added these authoritative requirements:
+
+- [Global and per-task model/reasoning configuration](docs/OWNER_MODEL_CONFIGURATION_20261110.md): supported provider/model/effort for primary and fallback, optional task overrides, persisted resolved choices and requested-versus-actual reporting, with existing safeguards.
+- [Expanded Feature Workshop](docs/OWNER_FEATURE_WORKSHOP_20261110.md): optional preserved references, actual supported generated visual proposals, reliable simulator before/after comparisons, coherent dependent subtasks under one parent feature, integrated checking and feature-level draft delivery.
+
+The Feature Workshop requirements follow current Phase A/B work. Recording them does not authorize starting image generation, unapproved spending or a new feature orchestration framework during the active campaign. Neither addendum certifies implementation or changes an already-running task.
+
 # 1. Product experience and guiding principles
 
 Rich can describe a bug, feature, inspection, test-coverage request, simulator task, or other supported work in ordinary language. Workbench explains its plan, obtains meaningful decisions, does the work, checks it, and presents an appropriate result.

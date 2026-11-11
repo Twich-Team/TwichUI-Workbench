@@ -7877,3 +7877,22 @@ The final sealed application candidate is f2cfdd0. Read-only browser acceptance 
 ## November 10 overnight — settings recovery and final acceptance
 
 Restored unsaved model edits now wait for the complete saved policy before saving; failed refresh has an explicit retry. This avoids publishing an incomplete shared model view while preserving the saved draft and revision-conflict safeguards. All47 frontend checks and static/contracts/build pass. The dedicated everyday fixture requires BOTH WORKBENCH_E2E_EVERYDAY=1 and WORKBENCH_E2E_BUG=1: its three requested bug/refinement/two-task flows pass with controlled providers. An accidentally matched generic-feature intake test requires the standard demo fixture and was retained as a launcher-selection failure, not claimed as a provider failure. Standard full Chromium verification and hosted checks continue. Final local visual comparisons pass12/12 without threshold or font changes. All original633rows and both exact open drafts remain unchanged before cutover.
+
+
+## November 10 overnight — installed106, exact restore and remaining ownership/model requirements
+
+Installed b421e83 through the sealed helper. Both real drafts match their saved titles/commits and remain open. All633rows/51intakes/11native checked records survive cutover, four-role restart and independent restore unchanged; network/model authentication/8765 and standing policy lineage pass. Actual loaded screenshots and keyboard/enlarged/reload were inspected. Latest hosted backend/frontend pass; browser/visual remain in progress. New explicit owner model/effort requirements are recorded and linked in PLAN without interrupting any running work.
+
+Populated live Backlog inspection exposes an unmet Milestone3 requirement: old flight-path campaign attempts have separate immutable intakes and no persisted parent lineage. Earlier “one row per request” evidence proves only one row per intake, not semantic request consolidation; the private receipt is corrected. Preserve all rows and provenance, reconcile durable ownership, and keep this gap ahead of the extended per-task model/effort increment. No guessed data repair or title-based hiding was made. Current Status and Continuation distinguish delivered increments from these remaining outcomes.
+
+
+## November 10 — additional owner requirements recorded without changing active work
+
+Recorded and linked the explicit global/per-task model/effort clarification and future Feature Workshop requirements in the root requirements index, owner product addendum and roadmap. Feature Workshop retains optional preserved attachments, actual supported concept generation, comparable simulator evidence, coherent parent/subtask delivery and combined verification/PRs. No image generation or new orchestration framework was started. The active installed/hosted verification continues unchanged. Root v1.1 text is preserved with a clearly dated addenda index; this owner-requested index supersedes earlier private source checks that expected that file to remain byte-identical to its November7 attachment. Original source remains in Git and installed b421e83.
+
+
+## November 10 overnight — exact installed hosted acceptance and checkpoint
+
+Exact installedb421e83/deployment106 passed hosted42957291967: static/contracts/schema,2195backend(11skips),47frontend,120Chromium(3skips),12visual. Actual private desktop/phone results/draft titles/links, populated Backlog/Settings, saved-provider choice without submission, keyboard/enlarged/reload and post-restart read back pass. All633rows match the pre-cutover store and independent restore; original main edits, normal model authentication,8765, standing draft policy and both exact open draft PRs are preserved. Work is resumed; no new real generations or addon writes/merge/game installation occurred.
+
+This is a verified delivery checkpoint, not a claim that all four campaign milestones are finished. Initial supported PhaseA remains proven; Results/Dashboard delivery is installed. Backlog/model increments are installed, with historical task-lineage repair and extended per-task model/effort configuration explicitly open in order. New owner Feature Workshop requirements are authoritative recorded future direction. No new owner engineering decision is needed. CurrentStatus is the concise Perplexity report. Subsequent changes are documentation only, leaving tested runtime identityb421e83 unchanged.

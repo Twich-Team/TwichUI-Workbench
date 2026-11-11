@@ -88,3 +88,13 @@ diagnostics in advanced views. Follow the
   requires three independently managed buckets per provider and honest usage
   reporting. Actual supported allowance access, capacity measurement, reserve
   release and borrowing, and model eligibility still need verification.
+
+
+## Later model-configuration clarification
+
+The owner explicitly requires global and optional per-task provider, supported model and supported reasoning-effort selection, including fallback. Resolved task choices must persist independently of later global edits; requested and actual identities/effort and fallback reasons stay distinct. Read the [complete clarification](OWNER_MODEL_CONFIGURATION_20261110.md). It extends the model-settings milestone without interrupting active work or changing the campaign order. Existing disclosure, usage, spending and execution protections remain.
+
+
+## Later Feature Workshop requirements
+
+The [expanded Feature Workshop requirements](OWNER_FEATURE_WORKSHOP_20261110.md) are explicit owner direction: optional preserved visual/document references; real supported generated concept proposals and ordinary-language review; comparable real simulator screenshots when reliable; automatic coherent dependent subtasks under one parent feature; integrated acceptance and feature-level draft delivery. Proposed art, simulator captures and implemented/in-game results remain distinct. Current Phase A/B work stays first; do not start image generation or a new orchestration framework merely because this clarification was supplied, and introduce no unapproved charges.

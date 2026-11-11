@@ -1,6 +1,8 @@
 # Overnight campaign delivery — November 10, 2026 (Mountain time)
 
-The owner has explicitly authorized continued delivery across all four campaign milestones. The supported Phase A bug/test-to-draft workflow is already demonstrated and its real Qwen/Codex/fallback evidence is retained. New results/dashboard clarity, combined task filters and simple primary/fallback settings are implemented and under final browser/hosted/private-installation verification. Optional technical task fields are secondary; deliberate saved provider selection uses the existing consent and routing owners. Full code, checks, usage and recovery history remain available. Current source/installation receipts and remaining evidence limits are in CONTINUATION and CURRENT_STATUS. This campaign adds no billing, merge, game installation or progress-triggered fallback authority.
+The [owner’s model/effort clarification](OWNER_MODEL_CONFIGURATION_20261110.md) extends the existing model-settings milestone. Finish the active installed-build and hosted verification first; then account for global and optional per-task provider/model/effort choices, frozen task configuration, requested-versus-actual identity and supported-integration validation. The installed provider-only simplification does not complete that added requirement. No running work is restarted by this clarification.
+
+The owner has explicitly authorized continued delivery across all four campaign milestones. The supported Phase A bug/test-to-draft workflow is already demonstrated and its real Qwen/Codex/fallback evidence is retained. New results/dashboard clarity, combined task filters and simple primary/fallback settings are installed as b421e83/deployment106 with complete local/hosted/private verification. Optional technical task fields are secondary; deliberate saved provider selection uses the existing consent and routing owners. Full code, checks, usage and recovery history remain available. Current source/installation receipts and remaining evidence limits are in CONTINUATION and CURRENT_STATUS. This campaign adds no billing, merge, game installation or progress-triggered fallback authority.
 
 # Delivered initial workflow and prepared Phase B — November 10, 2026
 
@@ -163,3 +165,8 @@ scope/access/billing/network/publication boundaries and recovery options. Broade
 unmet capabilities remain explicit. Styling follows the functional gate, then
 requirements audit; neither is underway now. The former plan is preserved in
 `history/before-standing-reconciliation-20261107-PLAN.md`.
+
+
+## Expanded Feature Workshop after current Phase A/B milestones
+
+Carry the [explicit owner requirements](OWNER_FEATURE_WORKSHOP_20261110.md) into expanded feature development: optional preserved visual/document attachments, supported generated concept review/revision, comparable simulator before/after evidence where reliable, coherent dependency-aware subtasks with one parent feature, combined integration checks and related feature-level draft delivery. Preserve the distinction among proposed artwork, simulator captures and actual implemented/in-game behavior. Attachments and advanced visual planning remain optional. No new image-generation integration or feature orchestration framework starts in this overnight campaign merely from recording these requirements. Existing spending, disclosure and publication protections remain.

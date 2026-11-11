@@ -1,11 +1,11 @@
 Last updated November 10, 2026 (Mountain time).
 
-The running private app remains a8c43cb. Two real Qwen requests reached checked changes and draft PRs: vendor repair 10 and map coverage 11. Neither has been installed or tested in World of Warcraft.
+The private app runs b421e83, deployment 106. Two real Qwen requests reached checked results and draft PRs: [vendor repair 10](https://github.com/Twich-Team/TwichUI/pull/10) and [map coverage 11](https://github.com/Twich-Team/TwichUI/pull/11). Neither change was installed or tested in World of Warcraft.
 
-The new Results design explains the outcome, actual draft title/link, next action and game-testing limits before expandable code/check records. Desktop/phone, enlarged text, keyboard access, reload and error recovery passed on the development build. Expired permissions no longer create false attention items, and a failed dashboard refresh no longer claims current activity.
+Installed: outcome-first Results, actual draft links and next steps, clearer Dashboard attention, combined Backlog filters, simpler task entry and primary/fallback settings. Advanced global model/effort controls remain available.
 
-Controlled checks cover provider selection, pre-generation fallback and recovery. Full verification, hosted checks and installation of the new build are in progress. No new provider demonstration was needed or repeated.
+Full hosted verification passed: 2,195 backend, 47 frontend, 120 browser and 12 visual checks. Installed desktop/phone reload, enlarged text, keyboard controls, restart and independent restore passed. All 633 saved records survived unchanged. Recovery/fallback edge cases retain controlled-test evidence; no new real model generation was needed.
 
-Backlog filtering and simple model settings are implemented and pass focused checks. New requests can explicitly apply saved provider preferences. Advanced controls remain available.
+Milestones 3–4 remain open: historical campaign retries need verified links under one task; optional per-task model/effort selection and complete requested-versus-actual reporting are unfinished. Both new owner clarifications are recorded. Feature Workshop attachments, mockups, simulator comparisons and coherent feature delivery remain future requirements. Physical phone/Safari remains unverified.
 
-Next: finish browser and hosted verification, then install the checked milestone with history and rollback preserved. No owner decision is pending. The owner retains merging and game installation.
+Next complete outcome: reconcile historical task identity, then finish the expanded model-settings milestone. No runtime blocker or owner engineering decision is pending. Merging and game installation remain owner actions.

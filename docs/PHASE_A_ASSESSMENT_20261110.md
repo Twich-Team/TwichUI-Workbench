@@ -1,3 +1,9 @@
+# Later overnight usability delivery — November 10, 2026 (Mountain time)
+
+The supported Phase A workflow below remains demonstrated. The private app now runs b421e83/deployment106 with outcome-first Results, clearer Dashboard attention, Backlog filters, secondary task options and simple primary/fallback preferences. Complete hosted run42957291967 passed2195backend/47frontend/120browser/12visual checks. Installed reload, enlarged text, keyboard, four-role restart and independent633-row restore passed. Earlier real-provider/draft outcomes were reused without new generations. Full Phase B/task-model requirements are not all complete: historical campaign intake retries need canonical task lineage, and the new per-task model/effort requirement remains open. Future Feature Workshop requirements are recorded without starting image generation or a new orchestration framework. Current acceptance and next work are in CONTINUATION/CURRENT_STATUS; the earlier table retains its original evidence boundary.
+
+---
+
 # Phase A assessment — November 10, 2026
 
 Following the Project Working Philosophy, this assessment distinguishes useful
