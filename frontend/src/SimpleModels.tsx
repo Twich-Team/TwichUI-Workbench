@@ -74,3 +74,16 @@ export function SimpleModels(){
     <Link to="/usage">AI usage and activity</Link> · <Link to="/models/configure">Advanced model identifiers, effort and routing</Link> · <Link to="/models">Provider availability and activity</Link>
   </section>;
 }
+
+export function SavedSetup(){
+ const query=useQuery({queryKey:['models'],queryFn:()=>request<Overview>('/api/models')});
+ const policy=query.data?.policy;
+ if(!policy)return <p role="status">{query.isError?'Saved setup unavailable.':'Reading saved setup…'}</p>;
+ const primary=policy.providers?.[policy.preferred];
+ const route=savedTaskRoute(policy),other=policy.preferred==='local'?'codex':'local';
+ const alternate=policy.providers?.[other];
+ return <div className="saved-setup"><p className="small-text">Saved preferences for new task decisions. Unsaved edits are not included.</p>
+ {query.isError&&<p className="stale-display" role="alert">Refresh unavailable. This is the last loaded setup.</p>}
+ <dl><div><dt>Preferred AI</dt><dd>{names[policy.preferred]}</dd></div><div><dt>Model</dt><dd>{primary?.model||'Not configured'}</dd></div>{primary?.effort&&<div><dt>Reasoning</dt><dd>{primary.effort}</dd></div>}<div><dt>Fallback</dt><dd>{route?.includes('fallback')?`${names[other]} · ${alternate?.model||'Not configured'}${alternate?.effort?' · '+alternate.effort:''}`:fallback(policy as Policy)==='off'?'Off · keep the approved AI':'No eligible saved fallback'}</dd></div><div><dt>New work</dt><dd>{policy.pause_new_work?'Paused':'Allowed when task permissions are ready'}</dd></div></dl>
+ <Link to="/models/configure">Inspect precise model settings</Link></div>;
+}

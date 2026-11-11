@@ -1,3 +1,17 @@
+# Active Dashboard and overview refinement — November 11, 2026
+
+Following the Project Working Philosophy, the focused follow-up preserves Phase B
+and adds saved-data overviews to Dashboard/Results/Settings and clearer Backlog rows.
+The read-only aggregate/filter increment is checkpoint d7fdcc1. Actual source-copy
+browser and independent SQL checks agree; see [refinement acceptance](OVERVIEW_REFINEMENT_20261111.md).
+Installed preview remains ef05eff/deployment108 until final local/hosted checks and
+sealed cutover. No migration, new model task or addon publication is required.
+Original674rows,41history links, model policy and private recovery must stay intact.
+Existing unrelated administrative document edits remain local. Continue verification,
+private deployment, installed browser/restore/rollback evidence and final reporting.
+
+---
+
 # Phase B installed and accepted — November 11, 2026
 
 Following the Project Working Philosophy, B1–B6 are complete in the running private

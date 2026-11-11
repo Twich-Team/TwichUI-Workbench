@@ -1,3 +1,15 @@
+# Active overview refinement — November 11, 2026
+
+The owner's focused follow-up preserves Phase B and adds compact saved-data
+Dashboard/Results summaries, readable Backlog rows and clearer Settings panels.
+Use existing read projections only; preserve all execution, publication, data,
+model-policy and private-preview owners. Focused checks and actual screenshots,
+then full applicable local/hosted verification and sealed private delivery with
+preserved history and rollback. See [refinement acceptance](OVERVIEW_REFINEMENT_20261111.md).
+Earlier Feature Workshop ordering remains future work for a separate assignment.
+
+---
+
 # Phase B complete — November 11, 2026
 
 B1shared shell/materials, B2Dashboard, B3Results, B4Backlog/task details,

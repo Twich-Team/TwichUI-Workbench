@@ -75,3 +75,28 @@ it('an unfinished outcome never appears among recently completed tasks',async()=
  expect(screen.getByRole('link',{name:new RegExp(stopped.title)})).toBeVisible();
  expect(screen.getByRole('heading',{name:'Work to revisit'})).toBeVisible();
 });
+
+const summary:NonNullable<typeof base.summary>={states:{completed:9,held:2},kinds:{bug:2,coverage:6,feature:3},results:{all:9,checked:9,draft:2,local:7,findings:0,incomplete:0}};
+it('overview uses whole-scope counts and offers labelled keyboard links rather than page totals',async()=>{
+ open(<Dashboard/>,{...base,all_total:11,summary});
+ const states=await screen.findByRole('list',{name:'Requests by current state'});
+ expect(states).toHaveTextContent('Ready to review 9');expect(states).toHaveTextContent('On hold 2');
+ expect(screen.getByRole('link',{name:'On hold 2'})).toHaveAttribute('href','/backlog?state=held');
+ expect(screen.getByRole('list',{name:'Requests by type'})).toHaveTextContent('Test coverage 6');
+ expect(screen.queryByText('%')).not.toBeInTheDocument();
+});
+it('result summary counts remain global while delivery filters and pagination use the API',async()=>{
+ const calls=open(<WorkspaceResults/>,{...base,total:20,summary,items:[]});
+ await screen.findByRole('region',{name:'Result summary'});
+ expect(screen.getByRole('link',{name:/2 Draft PRs submitted/})).toHaveAttribute('href','/results?view=draft');
+ fireEvent.click(screen.getByRole('button',{name:'Draft PR submitted 2'}));
+ await vi.waitFor(()=>expect(calls.mock.calls.some(([url])=>url.includes('result_view=draft')&&url.includes('page=1'))).toBe(true));
+ fireEvent.click(await screen.findByRole('button',{name:'Next'}));
+ await vi.waitFor(()=>expect(calls.mock.calls.some(([url])=>url.includes('result_view=draft')&&url.includes('page=2'))).toBe(true));
+ expect(await screen.findByText('No saved outcomes match this filter.')).toBeVisible();
+});
+it('an empty overview explains the first request without drawing fabricated activity',async()=>{
+ open(<Dashboard/>,{...base,total:0,all_total:0,items:[],summary:{states:{},kinds:{},results:{all:0,checked:0,draft:0,local:0,findings:0,incomplete:0}}});
+ await screen.findByText('Your first request will start this overview. No work has been recorded yet.');
+ expect(screen.queryByRole('list',{name:'Requests by current state'})).toBeNull();
+});

@@ -1,3 +1,14 @@
+## November 11, 2026 — overview refinement source checkpoint
+
+Following the Project Working Philosophy, preserved Phase B and added read-only
+whole-request counts, small state/type bars, outcome/delivery summaries and filters,
+clearer Backlog hierarchy and saved AI/provider activity previews. The saved674-row
+copy remains unchanged;11requests/9results/3recorded draft submissions are bound to
+the real saved projections. No new model request or addon publication.36focused
+backend/54frontend checks, sparse browser and copied-store desktop/phone/200% text
+walkthrough pass; full local/hosted/visual and installed acceptance continue.
+See [evidence and data semantics](OVERVIEW_REFINEMENT_20261111.md).
+
 ## November 11, 2026 — Phase B installed acceptance and recovery
 
 Following the Project Working Philosophy, completed B1–B6 at ef05eff/deployment108.

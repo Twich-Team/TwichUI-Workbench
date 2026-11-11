@@ -1,3 +1,12 @@
+## November 11 overview refinement — read projections only
+
+Workspace summary counts use the existing projected/grouped request rows across
+the entire type/search scope before state/result filtering and pagination. Result
+filters use current result/verification and recorded-publication fields, never
+infer merge, installation or in-game status. Settings previews read existing saved
+model policy and usage aggregates; drafts remain form-local. No new persistent
+record, transition, scheduler, billing or permission owner is introduced.
+
 # Ownership and compatibility boundary
 
 Current authority: the root philosophy, requirements and standing owner direction

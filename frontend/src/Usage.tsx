@@ -8,6 +8,7 @@ import {Button} from './components/ui/button';
 import {ChartView} from './Monitoring';
 import type {ChartOption} from './charts';
 import {formatTime} from './Catalog';
+import {CompactBars} from './WorkshopOverview';
 
 type Report=components['schemas']['UsageOverview'];
 const provider=(name:string)=>name==='local'?'Local Qwen':name==='codex'?'Codex':name==='unknown'?'Unattributed':name;
@@ -59,4 +60,15 @@ export function Usage(){
    <details className="panel"><summary>What these figures measure</summary><p>{data.message}</p><p>{data.undated_operations} records have unavailable or future dates and are excluded from these charts.</p><Link to="/models">Detailed provider records</Link></details>
   </>}
  </div>;
+}
+
+export function UsagePreview(){
+ const query=useQuery({queryKey:['usage',7],queryFn:()=>request<Report>('/api/usage?days=7'),refetchInterval:60000});
+ const data=query.data;
+ if(!data)return <p role="status">{query.isError?'AI activity unavailable.':'Reading recorded AI activity…'} <Link to="/usage">Open AI usage</Link></p>;
+ const totals=new Map<string,number>();for(const row of data.providers)totals.set(row.backend,(totals.get(row.backend)||0)+row.operations);
+ return <div className="usage-preview">{query.isError&&<p className="stale-display" role="alert">Refresh failed. These are the last loaded figures.</p>}
+ <p className="preview-total"><strong>{data.operations.toLocaleString()}</strong> recorded AI operations<small>Past 7 UTC dates · Workbench history only</small></p>
+ {data.operations?<CompactBars label="Recorded AI operations by provider" rows={[...totals].map(([key,value])=>({key,label:provider(key),value}))}/>:<p>No recorded operations in this range. Missing history does not mean zero provider usage.</p>}
+ <p className="small-text">{data.unreported_operations.toLocaleString()} operations have unreported token usage. Operations are not completed addon improvements.</p><Link to="/usage">Explore model activity and tokens</Link></div>;
 }

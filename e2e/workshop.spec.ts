@@ -300,3 +300,37 @@ test('backlog ordering stays in the URL and uses the full filtered API scope',as
  await page.getByRole('button',{name:'Clear filters',exact:true}).click();
  await expect(page.getByRole('link',{name:/Inspect the map’s initial zoom/})).toBeVisible();
 });
+
+test('compact overviews count saved requests and remain usable with enlarged phone text',async({page},info)=>{
+ await page.goto('/');
+ await expect(page.getByText('Your first request will start this overview. No work has been recorded yet.')).toBeVisible();
+ for(const [kind,title] of [['inspection','Inspect guide startup'],['simulation','Compare map behavior']]){
+  await page.goto('/intake/new');
+  await page.getByLabel('Type of work').selectOption(kind);
+  await page.getByLabel('Description',{exact:true}).fill(title);
+  await page.getByRole('button',{name:'Save for later',exact:true}).click();
+  await expect(page).toHaveURL(/\/intake\/[a-f0-9-]{36}/);
+ }
+ const saved=await page.request.get('/api/workspace').then(r=>r.json());
+ expect(saved.summary.states).toEqual({unavailable:2});
+ expect(saved.summary.kinds).toEqual({simulation:1,inspection:1});
+ await page.goto('/');
+ await page.getByRole('link',{name:'Saved for later 2',exact:true}).focus();
+ await page.keyboard.press('Enter');
+ await expect(page).toHaveURL(/state=unavailable/);
+ await expect(page.getByText('2 matching requests · 2 saved')).toBeVisible();
+ for(const width of [1440,390,320]){
+  await page.setViewportSize({width,height:844});
+  for(const path of ['/','/results','/backlog','/settings']){
+   await page.goto(path);await expect(page.locator('main h1').first()).toBeVisible();
+   if(width===320)await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+   await expect(page.getByText('Opening your workspace…',{exact:true})).toHaveCount(0);
+   if(width===320&&path==='/backlog'){const title=page.locator('.task-row-copy>strong').first();expect((await title.boundingBox())!.width).toBeGreaterThan(150);}
+   await overflow(page);await capture(page,info,`overview-${path.replaceAll('/','')||'dashboard'}-${width}`,{keepInCompact:true});
+  }
+ }
+ await page.goto('/results?view=draft');
+ await expect(page.getByText('No saved outcomes match this filter.')).toBeVisible();
+ await page.getByRole('button',{name:'Show all results'}).click();
+ await expect(page.getByText('No results yet. Workbench will save changes, findings and check results here.')).toBeVisible();
+});
