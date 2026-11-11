@@ -6,6 +6,9 @@ and [TWICHUI_WORKBENCH_REQUIREMENTS_v1_1.md](TWICHUI_WORKBENCH_REQUIREMENTS_v1_1
 before assignments. These exact owner-supplied root documents are authoritative.
 Read the [November 10 product direction addendum](docs/OWNER_PRODUCT_DIRECTION_20261110.md)
 for later requirements and roadmap decisions. It grants no current task permission.
+Read the [November 11 legacy replacement direction](docs/OWNER_LEGACY_REPLACEMENT_DIRECTION_20261111.md):
+Workbench ultimately replaces the maintenance coordinator. Preserve current live
+owners until separately verified cutover is authorized; keep the local Qwen service.
 Follow [CONTINUATION](docs/CONTINUATION.md) and verified receipts for actual status.
 [Reference locations](docs/REFERENCE_DOCUMENTS.md) distinguish current from historical copies.
 

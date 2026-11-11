@@ -1,3 +1,19 @@
+# Backlog cleanup source and verification — November 11, 2026
+
+Following the Project Working Philosophy, overview 38206c3/deployment 109 is installed
+and accepted. The connected Backlog cleanup implementation now provides archive,
+restore, archived scopes, atomic bulk actions and protected confirmed deletion of
+untouched saved ideas only. See [cleanup behavior/evidence](BACKLOG_CLEANUP_20261111.md).
+No owner task has been archived or deleted. Schema 0014 adds empty organizational
+metadata/receipt tables; a copied674-row migration preserves every original row.
+Finish local/hosted checks and source checkpoint, then verified private delivery.
+The current root helper accepts only 0012/0013; [the prepared0014 compatibility copy](WORKBENCH_ADMIN_SCHEMA0014.md)
+needs actual owner root access outside its narrow grant. Keep109running until that
+copy is independently verified. Do not change grant/session/expiry or rerun0013.
+No Feature Workshop campaign now; preserve unrelated local document edits below.
+
+---
+
 # Overview refinement installed; Backlog cleanup next — November 11, 2026
 
 Following the Project Working Philosophy, the requested overview milestone is

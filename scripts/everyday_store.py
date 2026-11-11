@@ -13,7 +13,7 @@ from workbench.trusted_preparation import owned
 def fingerprint(connection):
     if (connection.execute("PRAGMA integrity_check").fetchall() != [('ok',)]
             or connection.execute("PRAGMA foreign_key_check").fetchone()
-            or connection.execute("SELECT version_num FROM alembic_version").fetchall() not in ([('0012',)], [('0013',)])):
+            or connection.execute("SELECT version_num FROM alembic_version").fetchall() not in ([('0012',)], [('0013',)], [('0014',)])):
         raise ValueError('Store integrity, foreign-key or schema check failed.')
     tables = connection.execute("SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchall()
     counts = {name: connection.execute('SELECT COUNT(*) FROM "' + name.replace('"', '""') + '"').fetchone()[0]

@@ -652,6 +652,7 @@ class TaskHistory(StrictModel):
 
 
 class IntakeView(StrictModel):
+    archived_at: str | None = Field(default=None, exclude_if=lambda value: value is None)
     task_history: TaskHistory | None = Field(default=None, exclude_if=lambda value: value is None)
     local_model: LocalModelPriorityView | None = Field(default=None, exclude_if=lambda value: value is None)
     scope_recovery: ScopeRecoveryView | None = Field(default=None, exclude_if=lambda value: value is None)

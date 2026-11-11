@@ -26,10 +26,15 @@ def require(connection, table, identity):
     row = connection.execute(select(table).where(table.c.id == identity)).mappings().first()
     if row is None:
         raise HTTPException(404, 'This local record was not found.')
+    if connection.info.get('workbench_writer') and table in (intakes, proposals, backlog_items, proposal_decisions):
+        from workbench.task_cleanup import require_current
+        require_current(connection, identity if table is intakes else row['intake_id'])
     return dict(row)
 
 
 def enqueue(connection, intake_id, kind, revision, payload=None):
+    from workbench.task_cleanup import require_current
+    require_current(connection, intake_id)
     old = connection.execute(select(planning_jobs.c.id).where(planning_jobs.c.intake_id == intake_id,
         planning_jobs.c.kind == kind, planning_jobs.c.revision == revision)).scalar()
     if old:
@@ -64,6 +69,9 @@ def submit(engine, body, *, owner_provenance=None):
         raise HTTPException(422, 'Lua errors belong to issue reports.')
     identity = str(body.request_id)
     with write_transaction(engine) as connection:
+        from workbench.task_cleanup import lifecycle
+        if (lifecycle(connection).get(identity) or {}).get('deleted_at'):
+            raise HTTPException(409, 'This request was permanently deleted. Create a new request with a new ID.')
         old = connection.execute(select(intakes).where(intakes.c.id == identity)).mappings().first()
         if old:
             from workbench.investigation_start import first
@@ -142,7 +150,11 @@ def pending_counts(engine):
         connection.exec_driver_sql('BEGIN')
         pending = connection.scalar(select(func.count()).select_from(proposal_decisions).where(proposal_decisions.c.status=='pending'))
         needs = 0
+        from workbench.task_cleanup import group, lifecycle
+        archived = {key for key,value in lifecycle(connection).items() if value['archived_at']}
         for row in connection.execute(select(intakes).where(intakes.c.status=='completed')).mappings():
+            if archived and group(connection, row['id'])[0] in archived:
+                continue
             if row['payload']['kind'] != 'feature':
                 continue
             proposal_id = connection.scalar(select(proposals.c.id).where(proposals.c.intake_id==row['id'], proposals.c.revision==row['revision']))
@@ -301,7 +313,10 @@ def view_in(connection, identity):
     from workbench.preparation_resources import automatic as automatic_storage_recovery
     local_model = model_priority(connection) if row['status'] in {'queued','investigating'} else None
     from workbench.task_identity import history
-    return dict(task_history=history(connection, identity), **({'local_model':local_model} if local_model else {}),**({'scope_recovery':recovery} if recovery else {}),project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
+    from workbench.task_cleanup import group, lifecycle
+    cleanup_root, _, _ = group(connection, identity)
+    archived_at = (lifecycle(connection).get(cleanup_root) or {}).get('archived_at')
+    return dict(**({'archived_at':archived_at} if archived_at else {}),task_history=history(connection, identity), **({'local_model':local_model} if local_model else {}),**({'scope_recovery':recovery} if recovery else {}),project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
         planning_start_binding=digest(row['payload']) if configured_mode()=='everyday' and row['payload']['kind']=='issue' and not row['payload'].get('local_planning') and not row['payload'].get('supported_task') and row['status'] in {'failed','waiting_for_information'} else None,
         provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
         created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, automatic_recovery=automatic_storage_recovery(j), **({'operation_kind':'scope_binding'} if j['payload'].get('operation_kind')=='scope_binding' else {}), diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],
@@ -320,8 +335,12 @@ def listing(engine, page):
         connection.exec_driver_sql('BEGIN')
         from workbench.task_identity import links
         owners = {r['intake_id']: r['canonical_id'] for r in links(connection)}
+        from workbench.task_cleanup import lifecycle
+        archived = {k for k,v in lifecycle(connection).items() if v['archived_at']}
         current = {}
         for identity in connection.execute(select(intakes.c.id).order_by(intakes.c.created_at.desc(), intakes.c.id)).scalars():
+            if owners.get(identity, identity) in archived:
+                continue
             current.setdefault(owners.get(identity, identity), identity)
         ids = list(current.values())[(page-1)*12:page*12]
         return dict(items=[view_in(connection, i) for i in ids], total=len(current),

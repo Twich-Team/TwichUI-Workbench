@@ -1,3 +1,31 @@
+# Legacy replacement direction recorded — November 11, 2026
+
+The current Backlog cleanup milestone continues. The owner has now specified
+[one Workbench coordinator as the end state](OWNER_LEGACY_REPLACEMENT_DIRECTION_20261111.md),
+replacing transitional legacy maintenance after verified capability migration.
+Feature Workshop remains the next separate product milestone. Add a dedicated
+legacy capability/dependency inventory, single-owner discovery/scheduling/resource
+migration, independent parity/recovery acceptance, copied-store cutover rehearsal,
+and separately authorized reversible live cutover to the remaining roadmap.
+Keep the inference service, legacy data and current schedules/owners intact now.
+
+---
+
+# Connected Backlog cleanup — November 11, 2026
+
+The overview milestone is installed and accepted at38206c3/deployment 109. Deliver
+the owner's [cleanup enhancement](OWNER_TASK_CLEANUP_20261111.md): preserve complete
+requests/history under archive/restore, offer archived search/results and bulk
+organization, and permit confirmed deletion only for unused safe saved ideas.
+Use disposable mutations only. Complete full source/hosted/browser checks and a
+reviewable checkpoint. Schema0014requires the narrowly prepared helper compatibility
+copy through real owner access; preserve its existing grant and private 109 until
+verified. Then copy/migrate/verify/seal/install, inspect installed browser, restart,
+independent restore and safe rollback/return. Preserve every owner record and all
+publication/provider controls. Feature Workshop remains later separate work.
+
+---
+
 # Active next checkpoint: Backlog cleanup — November 11, 2026
 
 The overview refinement is installed and accepted at38206c3/deployment109.

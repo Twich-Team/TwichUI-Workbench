@@ -15,6 +15,7 @@ import { minutes, providerOutcome } from './taskProgress';
 import { ExactRunLimits, RunLimits } from './RunLimits';
 import {savedTaskRoute,savedTaskAI,taskAIRoute} from './modelPreferences';
 import {ModelChoiceFields} from './ModelChoiceFields';
+import {CleanupReview,TaskActions,type CleanupChoice} from './TaskCleanup';
 
 type Input = components['schemas']['IntakeInput'];
 type Intake = components['schemas']['IntakeView'];
@@ -203,6 +204,7 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
 export function IntakeDetail() {
   const {identity=''} = useParams();
   const client = useQueryClient();
+  const [cleanupChoice,setCleanupChoice]=useState<CleanupChoice|null>(null);
   const [params] = useSearchParams();
   const query = useQuery({queryKey:['intake-detail',identity],queryFn:()=>request<Intake>(`/api/intake/${identity}`),refetchInterval:1200});
   const [error,setError] = useState('');
@@ -241,7 +243,7 @@ export function IntakeDetail() {
   const exampleNumber = data.original.regression_tests && clarification?.match(/^For expected result ([1-8])(?: \(|, no committed callable matches)/)?.[1];
   const suggestedFiles = clarification?.startsWith('Name an existing tests/test_*.lua file')
     ? data.proposals[0]?.task_contract?.path_candidates || [] : [];
-  const blocked = busy || query.isError;
+  const blocked = busy || query.isError || Boolean(data.archived_at);
   const bugInvestigation=data.original.kind==='issue'&&Boolean(data.original.local_planning)&&!data.original.supported_task;
   function sendAnswer(answer: string) {
     void act('clarification',{command_id:crypto.randomUUID(),revision:data.revision,text:answer,...(bugInvestigation?{continue_investigation:true,...(renewable||data.proposals[0]?.task_contract?.bug_workflow==='scope-then-checks-v1'?{renew_operation:true}:{})}:{})}).then(()=>setClarification('')).catch(()=>{});
@@ -250,6 +252,9 @@ export function IntakeDetail() {
   const currentTasks = data.tasks.filter(t => t.kind==='task' && (t.proposal_id===data.proposals[0]?.id || (!t.proposal_id && !p)) && !t.scope_review_required);
   return <div className="intake-page task-detail">
     <Link className="back-link" to="/backlog"><ArrowLeft size={15}/>All tasks</Link>
+    <CleanupReview choice={cleanupChoice} setChoice={setCleanupChoice}/>
+    {data.archived_at&&<p className="soft-callout">This task is archived. Its request, results and history are preserved. Restore it before changing or starting work.</p>}
+    <div className="detail-cleanup-actions"><TaskActions id={data.id} title={data.original.title} archived={!!data.archived_at} choose={setCleanupChoice}/></div>
     {data.project_source?.stale&&<section className="panel"><h2>This investigation used older addon code</h2>
       <p>The saved investigation used revision {data.project_source.inspected_base.slice(0,7)}. The current project snapshot is {data.project_source.current_base.slice(0,7)}. Earlier evidence and usage remain saved. The older proposal cannot authorize a repair of the new code.</p>
       {data.project_source.refresh_binding&&<><p>Refresh the project source and start a fresh read-only investigation with your saved provider. This does not approve a plan, addon changes, or publication.</p>

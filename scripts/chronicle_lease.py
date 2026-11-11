@@ -63,8 +63,8 @@ def store(root):
         from workbench.task_execution import snapshot
         engine = engine_for(Path(linked['database']))
         with engine.connect() as c:
-            if c.exec_driver_sql('SELECT version_num FROM alembic_version').scalar() not in ('0010','0011','0012','0013'):
-                raise ValueError('Connected task store requires existing0010/0011/0012/0013; never migrate it here')
+            if c.exec_driver_sql('SELECT version_num FROM alembic_version').scalar() not in ('0010','0011','0012','0013','0014'):
+                raise ValueError('Connected task store requires existing0010/0011/0012/0013/0014; never migrate it here')
             ref = linked['task']
             pinned = snapshot(c, ref['intake_id'],ref['task_id'],ref['approval_id'])
             if pinned['approval']['payload'].get('run_budget'):

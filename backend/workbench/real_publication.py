@@ -55,6 +55,11 @@ def _checked(c, row, grant):
     from workbench.session_authorship import usage_eligible
     from workbench.result_rejection import later_review
 
+    from workbench.task_cleanup import require_current
+    linked_task = grant['snapshot'].get('workflow_task') or {}
+    if linked_task.get('intake_id'):
+        require_current(c, linked_task['intake_id'])
+
     if later_review(c.connection.driver_connection, row['id']):
         raise DeliveryHeld('A later independent review prevents delivery of this patch. Resolve that review before requesting publication.')
 
@@ -210,6 +215,10 @@ def _enqueue(engine, row, grant, snapshot):
     identity = row["id"]
     with write_transaction(engine) as c:
         latest, latest_grant = _load(c, identity)
+        from workbench.task_cleanup import require_current
+        linked = latest_grant['snapshot'].get('workflow_task') or {}
+        if linked.get('intake_id'):
+            require_current(c, linked['intake_id'])
         if latest_grant != grant or digest(latest["result"]) != snapshot["result_digest"]:
             raise DeliveryHeld("The checked result changed before delivery was saved.")
         if "checked_approval" in snapshot:

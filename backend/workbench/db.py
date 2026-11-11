@@ -135,11 +135,14 @@ def write_transaction(engine):
                 busy_owners(engine, "begin", connection.connection)
                 time.sleep(min(0.02, max(0, deadline-time.monotonic())))
         try:
+            connection.info['workbench_writer'] = True
             yield connection
             connection.commit()
         except BaseException:
             connection.rollback()
             raise
+        finally:
+            connection.info.pop('workbench_writer', None)
 
 # Application-owned display preferences only; never consumed by a worker.
 display_settings = Table(
@@ -339,3 +342,13 @@ task_lineage = Table('task_lineage', metadata,
     Column('title', String, nullable=False), Column('relation', String, nullable=False),
     Column('evidence', JSON, nullable=False), Column('created_at', String, nullable=False))
 Index('ix_task_lineage_canonical', task_lineage.c.canonical_id)
+
+# The original request/execution owners remain unchanged. Tombstones retain only
+# identity and original-input hash after deletion of an eligible unused idea.
+intake_lifecycle = Table('intake_lifecycle', metadata,
+    Column('intake_id', String, primary_key=True), Column('revision', Integer, nullable=False),
+    Column('archived_at', String), Column('deleted_at', String),
+    Column('original_sha256', String, nullable=False))
+intake_cleanup_receipts = Table('intake_cleanup_receipts', metadata,
+    Column('id', String, primary_key=True), Column('payload', JSON, nullable=False),
+    Column('result', JSON, nullable=False), Column('created_at', String, nullable=False))

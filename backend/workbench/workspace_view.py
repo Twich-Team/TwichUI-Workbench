@@ -41,6 +41,7 @@ NEEDS = {'needs_input', 'needs_approval'}
 
 
 class WorkspaceTask(BaseModel):
+    archived_at: str | None = Field(default=None, exclude_if=lambda value: value is None)
     history_count: int | None = Field(default=None, exclude_if=lambda value: value is None)
     history_failures: int | None = Field(default=None, exclude_if=lambda value: value is None)
     current_intake_id: str | None = Field(default=None, exclude_if=lambda value: value is None)
@@ -104,6 +105,7 @@ def summarize(rows):
 
 
 class WorkspacePage(BaseModel):
+    archived_total: int = 0
     summary: WorkshopSummary | None = Field(default=None, exclude_if=lambda value: value is None)
     work_paused: bool | None = Field(default=None,exclude_if=lambda value:value is None)
     local_model: LocalModelPriorityView | None = Field(default=None,exclude_if=lambda value:value is None)
@@ -125,7 +127,7 @@ def indexed(rows, key='intake_id'):
     return grouped
 
 
-def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12, sort='newest', result_view='all'):
+def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12, sort='newest', result_view='all', archive_scope='current'):
     """Counts and rows share one filter scope. Requests, not provider attempts, count."""
     with engine.connect() as c:
         c.exec_driver_sql('BEGIN')
@@ -142,6 +144,8 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
         work_paused = bool(read_connection(c).pause_new_work)
         from workbench.task_identity import links as ownership_links
         links = ownership_links(c)
+        from workbench.task_cleanup import lifecycle
+        organization = lifecycle(c)
     rows = []
     for original in originals:
         preparation_message = None
@@ -261,6 +265,13 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
                         'created_at': by_id[canonical]['created_at']})
     rows = sorted([r for r in rows if r['id'] not in linked_ids] + grouped,
                   key=lambda r: (r['created_at'], r['id']), reverse=True)
+    if archive_scope not in {'current', 'archived', 'all'}:
+        raise HTTPException(422, 'Choose current or archived tasks.')
+    for row in rows:
+        if (organization.get(row['id']) or {}).get('archived_at'):
+            row['archived_at'] = organization[row['id']]['archived_at']
+    archived_total = sum(bool(row.get('archived_at')) for row in rows)
+    rows = [row for row in rows if archive_scope == 'all' or bool(row.get('archived_at')) == (archive_scope == 'archived')]
     if sort not in {'newest', 'oldest', 'updated', 'priority'}:
         raise HTTPException(422, 'Choose an available task order.')
     if sort=='oldest':
@@ -298,7 +309,7 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
     selected = [r for r in matching if included(r)]
     return dict(**({'local_model':local_model} if local_model else {}),
                 **({'work_paused':True} if work_paused else {}),items=selected[(page-1)*page_size:page*page_size], total=len(selected), all_total=len(rows),
-                page=page, page_size=page_size, counts=dict(counts), summary=summarize(matching), mode=configured_mode(),
+                archived_total=archived_total, page=page, page_size=page_size, counts=dict(counts), summary=summarize(matching), mode=configured_mode(),
                 highlights=dict(stopped=[r for r in matching if r['state'] in {'failed','stopped','interrupted'}][:2],
                                 active=[r for r in matching if r['active']][:2],
                                 waiting=[r for r in matching if r['state']=='queued'][:3],

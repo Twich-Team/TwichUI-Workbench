@@ -1,3 +1,38 @@
+# Owner-directed legacy replacement — November 11, 2026
+
+The owner's [replacement direction](OWNER_LEGACY_REPLACEMENT_DIRECTION_20261111.md)
+supersedes any interpretation that legacy maintenance is a permanent peer owner.
+Current protections and operating owners remain until independently demonstrated
+parity/recovery and a separately authorized reversible cutover. The target is one
+Workbench authority for requests, discovery, scheduling, approvals, resources,
+execution, verification, recovery, reviews and authorized draft delivery. Keep
+local Qwen as a provider; do not retire inference with the old coordinator. Reuse
+proven adapters without duplicate task queues, schedulers or publication authority.
+Current UI/cleanup work does not change live legacy execution or scheduling.
+
+---
+
+# Task cleanup ownership — November 11, 2026
+
+Schema 0014 adds intake_lifecycle and intake_cleanup_receipts within the existing
+application SQLite/SQLAlchemy owner. Organizational state never mutates intake
+status, scope approval, execution authority, frozen preferences or publication.
+Canonical groups archive together; cross-request parents/dependencies prevent
+orphaning. The shared write lock commits eligibility/context review, lifecycle and
+idempotent receipt atomically. Lost responses replay the exact command; stale or
+conflicting commands fail. Only an archived untouched never-started saved idea can
+lose its original intake and sole initial scope, after explicit confirmation.
+Minimal ID/hash tombstone and cleanup receipts survive; all actual work, decisions,
+checks, history, PRs, recovery/audit evidence and backups remain. Original submit and
+trusted ingress refuse tombstone reuse. Existing write/queue/publication owners
+require restoration before new work. Metadata remains separate from immutable
+execution bindings. No existing owner request is mutated in deployment acceptance.
+Root helper0014 compatibility requires its separately reviewed exact owner copy;
+no grant/session/expiry/network/authorization expansion. See
+[cleanup design/verification](BACKLOG_CLEANUP_20261111.md).
+
+---
+
 ## November 11 overview refinement — read projections only
 
 Workspace summary counts use the existing projected/grouped request rows across

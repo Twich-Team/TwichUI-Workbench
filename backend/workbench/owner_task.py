@@ -119,6 +119,9 @@ def record(engine, path, expected_hash):
         content,
     ).model_dump(mode="json")
     with write_transaction(engine) as c:
+        from workbench.task_cleanup import lifecycle
+        if (lifecycle(c).get(identity) or {}).get('deleted_at'):
+            raise ValueError('This request was permanently deleted; use a new task identity.')
         old = c.execute(select(intakes).where(intakes.c.id == identity)).mappings().first()
         if old:
             from workbench.task_execution import snapshot

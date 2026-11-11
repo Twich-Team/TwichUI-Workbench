@@ -354,9 +354,24 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
                            kind: str = Query(default='all', max_length=40),
                            sort: str = Query(default='newest', max_length=16),
                            result_view: str = Query(default='all', max_length=16),
+                           archive_scope: Literal['current', 'archived', 'all'] = 'current',
                            page_size: int = Query(default=12, ge=1, le=100)):
         from workbench.workspace_view import listing
-        return listing(app.state.engine, page=page, search=search, state=state, kind=kind, page_size=page_size, sort=sort, result_view=result_view)
+        return listing(app.state.engine, page=page, search=search, state=state, kind=kind, page_size=page_size, sort=sort, result_view=result_view, archive_scope=archive_scope)
+
+    from workbench import task_cleanup
+
+    @app.get('/api/intake/{identity}/cleanup', response_model=task_cleanup.CleanupContext)
+    def cleanup_review(identity: str):
+        return task_cleanup.context(app.state.engine, identity)
+
+    @app.post('/api/task-cleanup', response_model=task_cleanup.CleanupResult, responses=errors)
+    def cleanup_tasks(body: task_cleanup.CleanupCommand):
+        return task_cleanup.apply(app.state.engine, body)
+
+    @app.get('/api/task-cleanup/{identity}', response_model=task_cleanup.CleanupResult)
+    def cleanup_receipt(identity: str):
+        return task_cleanup.receipt(app.state.engine, identity)
 
     @app.get('/api/supported-tasks')
     def supported_task_catalog():

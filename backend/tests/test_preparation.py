@@ -360,7 +360,7 @@ def test_populated_0008_upgrade_preserves_every_original_row(tmp_path):
         command.upgrade(config,'head')
         c.commit()
         command.check(config)
-        assert c.exec_driver_sql('SELECT version_num FROM alembic_version').scalar_one()=='0013'
+        assert c.exec_driver_sql('SELECT version_num FROM alembic_version').scalar_one()=='0014'
         assert c.exec_driver_sql('PRAGMA foreign_key_check').all()==[]
         for name,rows in before.items():
             actual=c.exec_driver_sql('SELECT * FROM "'+name+'" ORDER BY rowid').all()

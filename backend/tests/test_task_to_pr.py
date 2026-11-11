@@ -252,6 +252,37 @@ def test_single_scope_budget_to_worker_seal_and_simulated_draft(
     )
 
 
+def test_cleanup_preserves_checked_publication_history_and_blocks_new_delivery(
+    client, headers, store, supported, tmp_path,
+):
+    from test_task_cleanup import apply, review, rows
+    from workbench import task_cleanup
+    _, runtime = approve(client, headers, store, supported, tmp_path)
+    remote = ControlledRemote()
+    # A saved decision and unused live grant cannot be tucked away mid-flight.
+    assert task_budget.authorize_one(store, runtime)
+    assert not review(client, supported['intake_id'])['can_archive']
+    drain(store, runtime, remote)
+    identity = rows(store, requests)[0]['id']
+    with write_transaction(store) as c:
+        c.execute(real_publications.update().values(state=dict(source='github',
+            url='https://github.com/Twich-Team/TwichUI/pull/123')))
+    # This is a disposable saved receipt, never an external publication.
+    before = {table.name: rows(store, table) for table in (grants, requests, model_attempts, real_publications)}
+    apply(client, headers, [supported['intake_id']])
+    assert not review(client, supported['intake_id'])['can_delete']
+    assert client.get('/api/workspace?state=results').json()['total'] == 0
+    archived = client.get('/api/workspace?state=results&archive_scope=archived').json()
+    assert archived['total'] == archived['summary']['results']['checked'] == archived['summary']['results']['draft'] == 1
+    result = delivery.view(store, identity)
+    assert result['published'] and result['url'].endswith('/123') and not result['current_eligible']
+    assert not delivery.enqueue_one(store)
+    assert not task_cleanup.context(store, supported['intake_id'])['can_delete']
+    assert before == {table.name: rows(store, table) for table in (grants, requests, model_attempts, real_publications)}
+    apply(client, headers, [supported['intake_id']], 'restore')
+    assert client.get('/api/workspace?state=results').json()['total'] == 1
+
+
 @pytest.mark.parametrize("lost", ["push", "pr"])
 def test_lost_external_response_is_reconciled_without_another_write(
     client, headers, store, supported, tmp_path, lost

@@ -25,7 +25,7 @@ def settings(provider='codex',model='capable-codex',effort='high',fallback=None)
     return dict(primary=dict(provider=provider,model=model,effort=effort),fallback=fallback)
 
 
-@pytest.mark.parametrize('schema', ['0012','0013'])
+@pytest.mark.parametrize('schema', ['0012','0013','0014'])
 def test_exact_override_applied_by_worker_and_frozen_across_global_change(store,client,headers,installed,catalog,monkeypatch,schema):
     from workbench import codex_provider
     if schema=='0012':

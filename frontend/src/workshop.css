@@ -313,3 +313,18 @@ h2,h3{overflow-wrap:anywhere;min-width:0;}
  .companion-dashboard:has(.workshop-welcome)>.attention-panel{align-self:stretch;display:flex;flex-direction:column;}
  .companion-dashboard:has(.workshop-welcome)>.attention-panel>.panel-content{flex:1;display:flex;flex-direction:column;justify-content:center;}
 }
+
+/* Cleanup belongs to the request, separate from its navigation and history. */
+.archive-views,.bulk-cleanup,.cleanup-notice,.cleanup-dialog-actions{display:flex;align-items:center;flex-wrap:wrap;gap:.7rem;margin-block:1rem;}
+.archive-views .button{gap:.6rem;}.archive-views .button span{font-variant-numeric:tabular-nums;color:var(--text-muted);}
+.bulk-cleanup{font-size:.88rem;color:var(--text-muted);}.cleanup-notice{padding:1rem;border:1px solid #80633f;border-radius:.4rem;background:linear-gradient(110deg,#49332377,#201914);}.cleanup-notice>span{flex:1;min-width:min(100%,15rem);}
+.cleanup-task-row{position:relative;display:flex;align-items:center;border-bottom:1px solid #7856334d;min-width:0;}.cleanup-task-row:last-child{border-bottom:0;}.cleanup-task-row>.everyday-task-row{flex:1;border:0;min-width:0;padding-right:3.3rem;}
+.task-actions-menu{position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:1;}.task-actions-menu[open]{z-index:5;}.task-actions-menu>summary{list-style:none;width:2.75rem;min-height:2.75rem;display:grid;place-items:center;cursor:pointer;color:#c9ae86;border:1px solid transparent;border-radius:.35rem;}.task-actions-menu>summary::-webkit-details-marker{display:none;}.task-actions-menu>summary:hover,.task-actions-menu[open]>summary{background:linear-gradient(#483326,#271e17);border-color:#705437;}
+.task-actions-popover{position:absolute;right:0;top:100%;min-width:11rem;padding:.4rem;background:linear-gradient(110deg,#37271e,#201812);border:1px solid #8c6b45;border-radius:.4rem;box-shadow:0 6px 20px #000a;}.task-actions-popover .button{width:100%;justify-content:flex-start;}
+.task-select{align-self:stretch;display:flex;align-items:center;justify-content:center;min-width:2.75rem;cursor:pointer;}.task-select input,.cleanup-confirm input{width:1.2rem;height:1.2rem;accent-color:#b99c66;flex-shrink:0;}.cleanup-review-list{list-style:none;padding:0;margin-block:1.5rem;}.cleanup-review-list>li{padding:1rem 0;border-bottom:1px solid #76583777;overflow-wrap:anywhere;}.cleanup-review-list strong{color:#efe2cd;}.cleanup-review-list p{line-height:1.6;color:#cdbb9f;}.cleanup-confirm{display:flex;gap:.8rem;align-items:flex-start;line-height:1.7;margin-block:1.5rem;}.detail-cleanup-actions{display:flex;justify-content:flex-end;}.detail-cleanup-actions>.task-actions-menu{position:relative;top:auto;transform:none;}.result-archive-filter{margin-block:1rem;}
+@media(max-width:720px){.cleanup-task-row>.everyday-task-row{padding-right:.2rem;padding-bottom:3.5rem;}.cleanup-task-row>.task-actions-menu{top:auto;bottom:.35rem;transform:none;}.task-select{align-self:flex-start;padding-top:.7rem;min-width:2.3rem;}.cleanup-dialog-actions .button{white-space:normal;}}
+/* Menus may extend beyond a short task well; retain rounded leather headings. */
+.backlog-page .workshop-panel:has(.cleanup-task-row){overflow:visible;}
+.backlog-page .workshop-panel:has(.cleanup-task-row)>.leather-section-heading{border-radius:.4rem .4rem 0 0;}
+.model-access-note>div{min-width:0;flex:1;overflow-wrap:anywhere;}.model-access-note>svg{flex-shrink:0;}
+.result-archive-filter{flex-wrap:wrap;}.result-archive-filter select{min-width:0;max-width:100%;}

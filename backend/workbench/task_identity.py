@@ -18,6 +18,8 @@ def reconcile(engine, manifest):
     with write_transaction(engine) as c:
         for member in members:
             identity = member['intake_id']
+            from workbench.task_cleanup import require_current
+            require_current(c, identity)
             row = c.execute(select(intakes).where(intakes.c.id == identity)).mappings().one()
             evidence = member['evidence']
             if (digest(row['payload']) != member['payload_sha256'] or not evidence
@@ -69,6 +71,8 @@ def reverse(engine, manifest):
     """Explicit organizational rollback; the caller retains the exported link receipt."""
     expected_ids = {m['intake_id'] for m in manifest['members']}
     with write_transaction(engine) as c:
+        from workbench.task_cleanup import require_current
+        require_current(c, manifest['canonical_id'])
         rows = [dict(r) for r in c.execute(select(task_lineage).where(
             task_lineage.c.canonical_id == manifest['canonical_id'])).mappings()]
         if not rows:

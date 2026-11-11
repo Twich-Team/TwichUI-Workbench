@@ -1,3 +1,21 @@
+## November 11, 2026 — Backlog cleanup implementation
+
+Following the Project Working Philosophy, finished overview delivery 109 first, then
+implemented canonical-request Archive/Restore, searchable Archived views, consistent
+Dashboard/Results scopes, page selection and atomic bulk actions, revision-bound
+undo, and confirmed deletion of untouched unused archived ideas only. Original
+work/approval/recovery/publication evidence never qualifies for deletion. Parents,
+subtasks and external dependencies stay protected. Existing queue/write/publication
+owners reject new work on archived requests; restoration grants no new permission.
+Additive schema 0014keeps every original row; copied migration: 674 rows / 31 tables has
+empty cleanup tables. Durable same-command receipts, deletion tombstones, strict
+confirmation and context bindings cover response loss/restart/concurrent updates.
+Full checks continue; source and actual copied-data desktop/phone inspection precede
+installation. A real root boundary remains: the installed helper's schema allowlist
+needs [the exact0014 compatibility copy](WORKBENCH_ADMIN_SCHEMA0014.md), with original
+session/expiry/policies unchanged. No live owner record was archived or deleted.
+See [implementation and evidence](BACKLOG_CLEANUP_20261111.md).
+
 ## November 11, 2026 — overview milestone109 accepted; cleanup authorized
 
 Following the Project Working Philosophy, installed38206c3/deployment109 after

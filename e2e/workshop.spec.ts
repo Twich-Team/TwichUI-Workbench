@@ -335,3 +335,60 @@ test('compact overviews count saved requests and remain usable with enlarged pho
  await page.getByRole('button',{name:'Show all results'}).click();
  await expect(page.getByText('No results yet. Workbench will save changes, findings and check results here.')).toBeVisible();
 });
+
+test('cleanup archives, restores, confirms deletion and retains history on desktop and phone',async({page},info)=>{
+ async function save(title:string){
+  await page.goto('/intake/new');await page.getByLabel('Type of work').selectOption('inspection');
+  await page.getByLabel('Description',{exact:true}).fill(title);
+  await page.getByRole('button',{name:'Save for later',exact:true}).click();await expect(page.getByRole('heading',{name:'Saved for later',exact:true})).toBeVisible();
+ }
+ await save('Inspect the vendor window for cleanup acceptance');
+ await save('Inspect the map labels for cleanup acceptance');
+ await page.goto('/backlog');
+ await page.getByRole('button',{name:'Select tasks',exact:true}).click();
+ for(const checkbox of await page.getByRole('checkbox',{name:/Select Inspect/}).all())await checkbox.check();
+ await page.getByRole('button',{name:'Archive selected',exact:true}).click();
+ await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('button',{name:'Archive 2 tasks',exact:true}).click();
+ await expect(page.getByRole('dialog')).not.toBeVisible();await expect(page.getByText('2 tasks archived. Their history is preserved.')).toBeVisible();
+ await expect(page.getByText('0 matching requests · 0 saved')).toBeVisible();
+ await page.reload();await page.getByRole('button',{name:/Archived\s*2/}).click();
+ await expect(page.locator('.cleanup-task-row')).toHaveCount(2);
+ await capture(page,info,'cleanup-archived-desktop',{keepInCompact:true});
+ await page.getByLabel('Actions for Inspect the vendor window for cleanup acceptance').click();
+ await page.getByRole('button',{name:'Restore',exact:true}).click();await page.getByRole('button',{name:'Restore task',exact:true}).click();
+ await expect(page.getByRole('dialog')).not.toBeVisible();await expect(page.locator('.cleanup-task-row')).toHaveCount(1);
+ await page.getByLabel('Actions for Inspect the map labels for cleanup acceptance').click();await page.getByRole('button',{name:'Delete…',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Delete permanently'})).toBeDisabled();
+ await expect(page.getByText(/Existing recovery backups are not erased/)).toBeVisible();
+ await page.getByRole('button',{name:'Cancel',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Backlog',exact:true})).toBeFocused();
+ for(const [width,height,font] of [[390,844,16],[320,700,32]]){
+  await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await overflow(page);await capture(page,info,`cleanup-archived-${width}-${font}`,{keepInCompact:true});
+  await page.getByLabel('Actions for Inspect the map labels for cleanup acceptance').focus();
+  await page.getByLabel('Actions for Inspect the map labels for cleanup acceptance').press('Enter');
+  await page.getByRole('button',{name:'Delete…',exact:true}).click();await overflow(page);
+  await capture(page,info,`cleanup-delete-${width}-${font}`,{keepInCompact:true});
+  await page.getByRole('button',{name:'Cancel',exact:true}).click();
+ }
+ await page.setViewportSize({width:1440,height:1000});await page.evaluate(()=>document.documentElement.style.fontSize='16px');
+ await page.getByLabel('Actions for Inspect the map labels for cleanup acceptance').click();await page.getByRole('button',{name:'Delete…',exact:true}).click();
+ await page.getByRole('checkbox',{name:/Permanently remove/}).check();await page.getByRole('button',{name:'Delete permanently'}).click();
+ await expect(page.getByRole('dialog')).not.toBeVisible();await expect(page.getByText('Unused request permanently deleted. This cannot be undone.')).toBeVisible();
+ await page.goto('/');await expect(page.getByRole('link',{name:'Saved for later 1'})).toBeVisible();
+ const data=await page.request.get('/api/workspace').then(r=>r.json());expect(data.total).toBe(1);expect(data.archived_total).toBe(0);
+});
+
+test('maintenance status and cleanup menus reflow with enlarged text',async({page},info)=>{
+ await page.route('**/api/workspace?*',async route=>{
+  const response=await route.fetch(),data=await response.json();
+  await route.fulfill({response,json:{...data,local_model:{state:'maintenance',message:'No addon work is running. The local model is reserved by a verified background maintenance cycle.',automatic:true,intake_ids:[],maintenance_active:true,reservation_owner_alive:true,reservation_locked:true,observed_at:null}}});
+ });
+ await page.setViewportSize({width:320,height:700});await page.goto('/');
+ await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+ await expect(page.getByRole('region',{name:'Local model status'})).toContainText('verified background maintenance');
+ await overflow(page);await capture(page,info,'cleanup-maintenance-320-200',{keepInCompact:true});
+ await page.goto('/results');await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+ await page.locator('.result-archive-filter select').selectOption('archived');await expect(page).toHaveURL(/archive=archived/);await overflow(page);
+ await capture(page,info,'cleanup-result-filter-320-200',{keepInCompact:true});
+});
