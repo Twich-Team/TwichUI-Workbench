@@ -83,7 +83,7 @@ def prepared(tmp_path):
     yield adapter, snapshot, result
     import shutil
 
-    if adapter.location.exists():
+    if adapter.location.exists() and not (adapter.root / "publication-scratch-cleaned.json").exists():
         owned = adapter._owned_checkout()
         shutil.rmtree(owned.parent)
 
@@ -136,3 +136,30 @@ def test_confirmed_draft_requires_the_checked_base_and_same_repository(prepared)
     assert adapter.valid_pr(snapshot, commit, value)
     assert not adapter.valid_pr(snapshot, commit, {**value, "baseRefOid": "d" * 40})
     assert not adapter.valid_pr(snapshot, commit, {**value, "isCrossRepository": True})
+
+
+def test_draft_preparation_keeps_physical_recovery_room(prepared, monkeypatch):
+    from types import SimpleNamespace
+    import workbench.publication_adapter as module
+
+    adapter, snapshot, result = prepared
+    monkeypatch.setattr(module.shutil, "disk_usage", lambda _path: SimpleNamespace(free=4 << 30))
+    with pytest.raises(DeliveryHeld, match="recovery room"):
+        adapter.prepare(snapshot, result)
+    assert not adapter.location.exists()
+
+
+def test_shared_installed_scratch_can_be_cleaned_after_connector_preparation(prepared, monkeypatch, tmp_path):
+    import tempfile
+
+    original, snapshot, result = prepared
+    shared = tmp_path / "installed-scratch"
+    shared.mkdir(mode=0o700)
+    adapter = LocalOnly(original.root, snapshot, scratch_root=shared)
+    adapter.permitted = lambda: True
+    commit = adapter.prepare(snapshot, result)
+    monkeypatch.setattr(tempfile, "tempdir", str(shared))
+    # The ordinary worker uses the installation's TMPDIR for the same owned copy.
+    recovered = LocalOnly(original.root, snapshot)
+    assert recovered.cleanup(commit)
+    assert not adapter.workspace.parent.exists()

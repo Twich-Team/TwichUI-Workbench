@@ -206,7 +206,14 @@ def handle(connection, identity):
         previous = os.environ.get("WORKBENCH_PUBLICATION_ROOT")
         try:
             os.environ["WORKBENCH_PUBLICATION_ROOT"] = str(root)
-            return publication.process_one(engine, execution_id=identity, stop_event=Stop())
+            from workbench.publication_adapter import PilotGitHub
+            scratch = ROOT.parent / "scratch"
+            if (scratch.resolve() != scratch or not scratch.is_dir()
+                    or scratch.stat().st_uid != os.getuid() or scratch.stat().st_mode & 0o077):
+                raise publication.DeliveryHeld("The installed publication scratch directory needs checking.")
+            publisher = PilotGitHub(root, row["snapshot"], scratch_root=scratch)
+            return publication.process_one(engine, publisher=publisher,
+                                           execution_id=identity, stop_event=Stop())
         finally:
             if previous is None:
                 os.environ.pop("WORKBENCH_PUBLICATION_ROOT", None)

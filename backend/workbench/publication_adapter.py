@@ -289,6 +289,9 @@ class PilotGitHub:
             raise DeliveryHeld(
                 "Pinned publication source does not fit the existing scratch ceiling."
             )
+        free = min(shutil.disk_usage(self.root).free, shutil.disk_usage(self.scratch_root).free)
+        if free < (4 << 30) + source_bytes + (1 << 20):
+            raise DeliveryHeld("Insufficient free space to prepare the isolated draft and retain recovery room.")
         self.workspace = self._owned_checkout(create=True)
         if not self.workspace.exists():
             self._call(
