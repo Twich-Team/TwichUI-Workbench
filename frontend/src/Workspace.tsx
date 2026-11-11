@@ -61,7 +61,7 @@ export function Dashboard(){
  if(!data)return <Waiting failed={query.isError} retry={()=>void query.refetch()}/>;
  const {counts,highlights}=data;const active=counts.active||0,needs=counts.needs_you||0,queued=counts.queued||0;
  const model=data.local_model;
- const stopped=highlights.stopped||(highlights.outcomes||[]).filter(task=>['failed','stopped','interrupted','held'].includes(task.state));
+ const stopped=highlights.stopped||(highlights.outcomes||[]).filter(task=>['failed','stopped','interrupted'].includes(task.state));
  return <div className="dashboard-page"><div className="page-heading"><div><p className="eyebrow">YOUR ADDON WORKSHOP</p><h1>Dashboard</h1><p>Your addon. Moving forward.</p></div><span className={`work-status ${active&&!query.isError?'is-working':''}`}><span/>{query.isError?'Status unavailable':active?'Working':data.work_paused?'Paused':queued?'Work waiting':model?.maintenance_active?'Model used by maintenance':'No work running'}</span></div>
  <RefreshState failed={query.isError} at={data.observed_at}/>
  {data.mode==='demo'&&<p className="soft-callout">Isolated sample workspace. These records are not real-provider acceptance.</p>}
