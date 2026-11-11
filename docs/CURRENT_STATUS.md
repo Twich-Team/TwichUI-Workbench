@@ -1,11 +1,13 @@
 Last updated November 11, 2026 (UTC).
 
-The private app still runs b421e83, deployment106: https://10.0.0.9:9487. All633saved records and four active services are preserved. Two real Qwen requests previously reached checked results and draft PRs10/11; neither was installed or tested in World of Warcraft. No new model demonstration was repeated.
+Private preview: https://10.0.0.9:9487. Installed build b3cb3f0, deployment107.
 
-Pushed source adds exact global/task model and reasoning choices, precise fallback models, frozen task choices and requested-versus-reported details. New source also adds interactive AI activity/token charts from all available records, preserving missing usage and unavailable subscription information. These capabilities are not installed yet.
+Installed: specific global and per-task AI models and reasoning, precise fallback choices, frozen task preferences, requested-versus-reported details, and interactive AI activity/token charts. Missing usage and unavailable subscription allowance remain explicit. Qwen is still the default.
 
-Historical ownership is implemented and tested on a copy:41proven flight-path retries form one request without changing original records. Installing that migration needs a root-owned helper compatibility update; the owner-terminal script is ready and pending.
+Two earlier real Qwen requests reached checked results and draft PRs10/11. Both remain open; neither addon change was installed or tested in World of Warcraft. New routing behavior was verified through controlled worker tests; no expensive real-model demonstration was repeated. Usage totals match actual saved history and independent SQL.
 
-Controlled worker/restart/fallback and browser checks pass. Desktop/phone screenshots were inspected. Hosted verification exposed a test-runner UID assumption; that fixture is corrected and verification continues.
+Full hosted checks passed. Installed desktop/phone views, task model selection, result links, restart and independent restore passed. All633saved records survived unchanged, with the previous release retained for rollback.
 
-Next complete outcome: verify and privately install model choices and usage on the unchanged existing schema, which is tested and keeps rollback available. Historical consolidation waits for the helper update. Feature Workshop, attachments and simulator comparisons remain unfinished. No campaign milestone is fully installed yet. Merging and game installation remain owner actions.
+Milestone5 is complete. Milestone1 is partial: historical grouping of41campaign attempts is tested on a copy but awaits the root-owned helper update. Feature Workshop, attachments, simulator comparisons and additional operation modes remain unfinished.
+
+Next complete outcome: install historical reconciliation, then build Feature Workshop. Owner action: run ops/upgrade_workbench_admin_schema0013.sh once in the server terminal. The installed helper rejects the new schema. No routine engineering renewal is needed. Merging and game installation remain owner actions.
