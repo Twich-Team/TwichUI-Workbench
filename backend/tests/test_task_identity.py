@@ -50,6 +50,8 @@ def test_idempotency_restart_restore_reversal_and_original_deep_links(client, he
     assert task_identity.reverse(restored, manifest)==links
     assert task_identity.reverse(restored, manifest)==[]
     assert workspace_view.listing(restored)['all_total']==3
+    assert sum(index['summary']['states'].values())==2
+    assert sum(index['summary']['kinds'].values())==2
     with restored.connect() as c:
         assert [dict(r) for r in c.execute(select(intakes)).mappings()] == originals
     restored.dispose()

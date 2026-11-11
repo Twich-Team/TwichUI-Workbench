@@ -201,3 +201,37 @@ def test_priority_and_activity_orders_keep_filters_counts_and_originals(client, 
     with store.connect() as c:
         assert [r for r in c.execute(select(intakes.c.id, intakes.c.priority_override)
                 .order_by(intakes.c.created_at))] == list(zip(ids, [3, 2, 1]))
+
+
+def test_overview_counts_entire_scope_not_page_and_empty_is_explicit(client, headers):
+    assert index(client)['summary'] == dict(states={}, kinds={}, results=dict(all=0, checked=0, draft=0, local=0, findings=0, incomplete=0))
+    for i in range(14):
+        submit(client, headers, kind='issue', title=f'Bug report {i}')
+    submit(client, headers, requested_work='inspection', title='Inspect saved behavior')
+    first = index(client, page_size=1)
+    last = index(client, page=15, page_size=1)
+    assert first['summary'] == last['summary']
+    assert first['summary']['states'] == {'queued': 14, 'unavailable': 1}
+    assert first['summary']['kinds'] == {'bug': 14, 'inspection': 1}
+    filtered = index(client, search='Bug report', kind='bug', page_size=1)
+    assert filtered['summary']['kinds'] == {'bug': 14}
+    assert sum(filtered['summary']['states'].values()) == filtered['counts']['all'] == 14
+    assert index(client, search='nothing matches')['summary']['states'] == {}
+    assert client.get('/api/workspace?result_view=draft').status_code == 422
+    assert client.get('/api/workspace?state=results&result_view=invented').status_code == 422
+
+
+def test_result_summaries_keep_failed_findings_and_publication_boundaries():
+    from workbench.workspace_view import summarize, result_matches
+    def row(state, kind, identity='result', draft=False):
+        return dict(state=state, kind='bug', result_kind=kind, result_id=identity, draft_pr_submitted=draft)
+    rows = [row('completed', 'patch', draft=True), row('completed', 'tests'),
+            row('completed', 'findings', None), row('failed', 'patch'),
+            row('checking', None, None), row('held', None, None)]
+    summary = summarize(rows)
+    assert summary['results'] == dict(all=4, checked=2, draft=1, local=1, findings=1, incomplete=1)
+    assert sum(summary['states'].values()) == sum(summary['kinds'].values()) == 6
+    assert [r for r in rows if result_matches(r, 'local')] == [rows[1]]
+    assert not result_matches(rows[3], 'checked')
+    assert not result_matches(rows[2], 'checked')
+    assert not result_matches(rows[3], 'local')

@@ -63,7 +63,48 @@ class WorkspaceTask(BaseModel):
     draft_pr_submitted: bool | None = Field(default=None,exclude_if=lambda value:value is None)
 
 
+ResultView = Literal['all', 'checked', 'draft', 'local', 'findings', 'incomplete']
+
+
+class ResultSummary(BaseModel):
+    all: int
+    checked: int
+    draft: int
+    local: int
+    findings: int
+    incomplete: int
+
+
+class WorkshopSummary(BaseModel):
+    states: dict[str, int]
+    kinds: dict[str, int]
+    results: ResultSummary
+
+
+def result_matches(row, view):
+    result = bool(row['result_id']) or row['result_kind'] == 'findings'
+    checked = row['state'] == 'completed'
+    change = result and checked and row['result_kind'] in {'patch', 'tests'}
+    return result and {
+        'all': True, 'checked': change,
+        'draft': checked and bool(row.get('draft_pr_submitted')),
+        'local': change and not row.get('draft_pr_submitted'),
+        'findings': checked and row['result_kind'] == 'findings',
+        'incomplete': not checked,
+    }[view]
+
+
+def summarize(rows):
+    # Whole filtered request scope, after evidenced grouping, before pagination.
+    # A recorded draft does not establish current merge or in-game test status.
+    return dict(states=dict(Counter(r['state'] for r in rows)),
+                kinds=dict(Counter(r['kind'] for r in rows)),
+                results={view: sum(bool(result_matches(r, view)) for r in rows)
+                         for view in ('all', 'checked', 'draft', 'local', 'findings', 'incomplete')})
+
+
 class WorkspacePage(BaseModel):
+    summary: WorkshopSummary | None = Field(default=None, exclude_if=lambda value: value is None)
     work_paused: bool | None = Field(default=None,exclude_if=lambda value:value is None)
     local_model: LocalModelPriorityView | None = Field(default=None,exclude_if=lambda value:value is None)
     items: list[WorkspaceTask]
@@ -84,7 +125,7 @@ def indexed(rows, key='intake_id'):
     return grouped
 
 
-def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12, sort='newest'):
+def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12, sort='newest', result_view='all'):
     """Counts and rows share one filter scope. Requests, not provider attempts, count."""
     with engine.connect() as c:
         c.exec_driver_sql('BEGIN')
@@ -242,6 +283,8 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
     allowed = {'all', 'active', 'needs_you', 'results', *LABELS}
     if state not in allowed:
         raise HTTPException(422, 'Choose an available task filter.')
+    if result_view not in {'all', 'checked', 'draft', 'local', 'findings', 'incomplete'} or (result_view != 'all' and state != 'results'):
+        raise HTTPException(422, 'Choose an available result filter on Results.')
     def included(row):
         if state=='all':
             return True
@@ -250,12 +293,12 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
         if state=='needs_you':
             return row['needs_you']
         if state=='results':
-            return bool(row['result_id']) or row['result_kind']=='findings'
+            return result_matches(row, result_view)
         return row['state']==state
     selected = [r for r in matching if included(r)]
     return dict(**({'local_model':local_model} if local_model else {}),
                 **({'work_paused':True} if work_paused else {}),items=selected[(page-1)*page_size:page*page_size], total=len(selected), all_total=len(rows),
-                page=page, page_size=page_size, counts=dict(counts), mode=configured_mode(),
+                page=page, page_size=page_size, counts=dict(counts), summary=summarize(matching), mode=configured_mode(),
                 highlights=dict(stopped=[r for r in matching if r['state'] in {'failed','stopped','interrupted'}][:2],
                                 active=[r for r in matching if r['active']][:2],
                                 waiting=[r for r in matching if r['state']=='queued'][:3],
