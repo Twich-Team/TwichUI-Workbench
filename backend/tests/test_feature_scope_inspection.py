@@ -19,6 +19,84 @@ def read_request():
     return dict(inspection=[dict(path=scope()["read_paths"][0], start=1, end=120)], limitation="")
 
 
+@pytest.mark.parametrize("has_test", [False, True])
+def test_local_request_really_transmits_inspected_scope_and_same_native_schema(tmp_path, has_test):
+    from uuid import uuid4
+    from workbench.planning_provider import LocalProvider
+    from workbench.planning_response import Evidence
+
+    model = "pilot-qwen38-27b"
+    files = [
+        dict(path="!!!TwichUI/View.lua", excerpts=[dict(line=1, text="local state = {}")]),
+        dict(
+            path="tests/test_actual.lua",
+            excerpts=[dict(line=1, text="local test = {}")] if has_test else [],
+        ),
+        dict(path="tests/test_metadata_only.lua", excerpts=[]),
+    ]
+    coverage = dict(focused_test_candidates=["tests/test_actual.lua"])
+    packet = dict(original=dict(title="A feature"), files=files, coverage=coverage)
+    recorded = Evidence(
+        tmp_path, str(uuid4()), feature_steps.StepScope, coverage=coverage, files=files
+    )
+    calls = []
+
+    class Transport:
+        seconds = 120
+
+        def models(self, _):
+            return model
+
+        def read(self, request, limit):
+            body = json.loads(request.data)
+            calls.append(body)
+            outgoing = body["response_format"]["json_schema"]["schema"]
+            assert outgoing == recorded.schema
+            assert json.loads(body["messages"][1]["content"]) == packet
+            complete = [branch for branch in outgoing["anyOf"] if "role" in branch["required"]]
+            if has_test:
+                assert complete[0]["properties"]["focused_test"]["enum"] == [
+                    "tests/test_actual.lua"
+                ]
+                assert complete[0]["properties"]["read_paths"]["items"]["enum"] == [
+                    "!!!TwichUI/View.lua",
+                    "tests/test_actual.lua",
+                ]
+            else:
+                assert not complete
+                read = next(
+                    branch for branch in outgoing["anyOf"] if branch["required"] == ["inspection"]
+                )
+                assert read["properties"]["inspection"]["items"]["properties"]["path"]["enum"] == [
+                    "tests/test_actual.lua"
+                ]
+            raw = dict(inspection=[dict(path="tests/test_actual.lua", start=1, end=80)])
+            return json.dumps(
+                dict(
+                    id="controlled-local-scope-wire",
+                    model=model,
+                    usage=dict(prompt_tokens=10, completion_tokens=5, total_tokens=15),
+                    choices=[dict(finish_reason="stop", message=dict(content=json.dumps(raw)))],
+                )
+            ).encode()
+
+    provider = LocalProvider()
+    provider.response_evidence = recorded
+    try:
+        result, actual, basis = provider._infer(
+            Transport(), "inert", feature_steps.StepScope, json.dumps(packet), expected_model=model
+        )
+        assert (
+            result["inspection"][0]["path"] == "tests/test_actual.lua"
+            and actual == model
+            and basis == "local"
+        )
+        assert len(calls) == 1
+        assert provider.diagnostics["usage"]["values"]["total_tokens"] == 15
+    finally:
+        recorded.close()
+
+
 def test_scope_wire_requires_an_outcome_and_only_inspected_existing_test_choices():
     from workbench.planning_response import wire_schema
 

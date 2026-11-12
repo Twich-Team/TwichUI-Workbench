@@ -190,7 +190,8 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
                 from workbench.codex_provider import Planner
                 used = Planner(route, stopped.is_set)
                 used.bind_source(current_packet)
-        evidence = create_evidence(lease, feature_steps.StepScope, files=current_packet['files'])
+        evidence = create_evidence(lease, feature_steps.StepScope,
+            coverage=current_packet.get('coverage'),files=current_packet['files'])
         used.response_evidence = evidence
         with engine.connect() as c:
             feature_steps.parent(c, decision_id)

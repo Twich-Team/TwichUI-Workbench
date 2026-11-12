@@ -56,7 +56,7 @@ function FeatureStop({feature,onSaved}:{feature:Feature;onSaved:()=>void}){
   catch(e){setError((e as Error).message);}finally{saving.current=false;setBusy(false);}
  }
  return <WorkshopPanel title={run.cancel_requested?'Feature stopped or stopping':'Feature run'} icon={<ShieldCheck size={21}/>}>
-  <p>{run.message}</p>{run.can_stop&&<Button variant="secondary" disabled={busy} onClick={()=>void stop()}>{busy?'Saving stop request…':'Stop this feature'}</Button>}
+  <p>{feature.scope_correction?feature.message:run.message}</p>{run.can_stop&&<Button variant="secondary" disabled={busy} onClick={()=>void stop()}>{busy?'Saving stop request…':'Stop this feature'}</Button>}
   {error&&<p role="alert" className="form-error">{error} Retrying keeps the same stop request.</p>}
  </WorkshopPanel>;
 }

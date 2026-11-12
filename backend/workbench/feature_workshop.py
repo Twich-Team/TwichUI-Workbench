@@ -258,6 +258,7 @@ def view_in(c, identity):
         if offered:
             scope_correction={k:v for k,v in offered.items() if k!='approved_inputs'}
             needs_owner=True
+            message='The next step needs more preparation. Your feature and completed work are saved.'
     return dict(id=identity, title=row['payload']['title'], objective=row['payload']['description'],
         state=state, message=message, active=actual_activity, needs_owner=needs_owner,
         completed_steps=sum(s['verified'] for s in steps), total_steps=len(steps),

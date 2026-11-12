@@ -133,6 +133,18 @@ test('one browser feature reaches independent combined checks and one coherent l
  await expect(page.getByText('Offline checks only · Not installed or tested in game',{exact:true})).toBeVisible();
  await overflow(page);
  await page.reload();await expect(page.getByText('Automated checks',{exact:true})).toBeVisible();
+ // Passive, explicitly controlled capture data: no simulator or model runs here.
+ fixture('feature-workshop-simulator-seed');await page.reload();
+ const comparison=page.getByRole('region',{name:'Simulator comparison'});
+ await expect(comparison).toBeVisible();
+ await expect(comparison.getByText('Controlled format test only; not simulator acceptance.',{exact:true})).toBeVisible();
+ await expect(comparison.getByRole('img',{name:'Original addon in the simulator'})).toBeVisible();
+ await expect(comparison.getByRole('img',{name:'Combined feature in the simulator'})).toBeVisible();
+ for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
+  await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await comparison.scrollIntoViewIfNeeded();await overflow(page);
+  await capture(page,info,`simulator-comparison-${width}-${font}`,{keepInCompact:true});
+ }
 });
 
 test('Feature Workshop retains its parent plan and real worker decomposition through reload',async({page},info)=>{

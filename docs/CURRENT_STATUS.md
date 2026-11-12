@@ -1,17 +1,15 @@
 Last updated November 12, 2026 (UTC).
 
-Private preview: https://10.0.0.9:9487. Installed build c897d48, deployment 118.
+Private preview: https://10.0.0.9:9487. Installed build 0b3d8ce, deployment 119.
 
-Feature Workshop offers grounded plans, one reviewed feature run, dependent implementation, Stop, combined offline checks and one coherent draft-delivery path. Optional PNG/text files and attributed addon references are installed. Original pictures can now be reused explicitly in a current plan. Captions and text excerpts reach planning; image pixels do not.
+Feature Workshop saves grounded plans, dependent steps, one reviewed run, Stop, combined offline checks and a coherent draft-delivery path. Optional PNG/text files, attributed addon references and explicit reuse of original pictures in a current plan are installed. Planning receives captions and text, not image pixels.
 
-Two earlier real Qwen bug/test workflows reached checked results and PRs #10/#11. Zero Feature Workshop features have completed from request to finished result. Controlled browser workflows reached two dependent Lua changes, combined checks and a local draft bundle; their model responses were controlled.
+Two earlier real Qwen bug/test workflows reached checked results and PRs #10/#11. Zero Feature Workshop features have completed from request to finished result. Controlled browser workflows reached two dependent Lua changes, combined checks and a local draft bundle.
 
-Build 118 passed all nine hosted release jobs. Installation, restart, independent restore and actual rollback to 117 and return to 118 preserved all 728 rows then present. Both readers read all 52 requests. All six reference files transferred exactly. Later source work brought the live store to 731 rows; retain this newer history with a compatible reader.
+Build 119 passed all nine hosted release jobs. Restart, independent restore and actual rollback to 118 and return preserved all 731 rows then present and all six reference files. Both readers read all 52 requests. Later work brought the live store to 734 rows; retain that newer history.
 
-The real map-zoom feature retains its original request, plan, five steps and parent run. Qwen requested an existing test, but an earlier repeated window made the app reject that whole reading batch. No addon edits began and zero steps have passed. Development now preserves fresh reads alongside repeated windows and requires reading an existing focused test before proposing an implementation scope. Its affected tests pass; it needs its own hosted gate and deployment.
+The real map-zoom feature retains its original request, plan, five steps, parent run and deadline. It remains held with zero addon edits and zero checked steps. The app rejected scopes that selected unread files. Development fixes the missing handoff of source constraints to the actual model request; its transport tests now verify the outgoing body. That repair needs its own hosted gate and installation.
 
-The installed browser uploaded the owner's PNG, read real GitHub metadata and a pinned README, and retained both through reload without starting a model. Explicit original-picture reuse passes controlled backend and browser checks. CurseForge remains unverified without supported API access.
+A reusable simulator comparison path is built and tested in development. Real isolated renders of a controlled notification change show 100 before and 120 after; the settings window repeats exactly. Map captures remain unreliable because of missing APIs and artwork. These are separate controls, not a finished feature or game-client acceptance. Comparison deployment, final usability checks and the real feature demonstration remain unfinished. Generated concepts remain a future integration.
 
-The simulator map probe encounters missing APIs and absent map artwork. It cannot provide reliable map comparison. A small reusable comparison path is in development; it has not passed acceptance or been installed. Final usability checks and the real dependent-addon demonstration remain unfinished.
-
-The next complete outcome is the same real feature passing dependent implementation and combined checks, then producing one coherent draft PR. No owner decision is needed for current engineering work. Legacy schedules, port 8765 and game files remain unchanged.
+The next complete outcome is the same real feature passing dependent implementation and combined checks, then producing one coherent draft PR. No owner decision is needed for current engineering. Legacy schedules, port 8765, model authentication and game files remain unchanged.

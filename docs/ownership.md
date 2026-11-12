@@ -1,3 +1,13 @@
+# Native simulator context and actual local scope schema — November 12, 2026
+
+Existing checked source/completion owners gate native operator capture. Passive
+PNG/log/JSON under feature-context/simulator-comparisons bind one exact result and
+transfer with other context. Private staging/cache are outside passive context and
+the checked run. The browser only reads verified passive evidence; no import,
+execution, approval, model, publication or second task/scheduler owner is added.
+The actual local StepScope request and native journal now share current files AND
+coverage. Prior mismatched schemas/attempts remain historical, never rewritten.
+
 # Mixed source-inspection batches — November 12, 2026
 
 Identical committed windows may be explicitly reused in a mixed inspection batch;

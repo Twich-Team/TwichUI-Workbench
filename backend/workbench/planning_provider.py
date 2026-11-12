@@ -328,7 +328,7 @@ class LocalProvider:
         if schema is InvestigationResponse:
             from workbench.bug_investigation_stage import INSTRUCTIONS as SOURCE_INSTRUCTIONS
             instructions = SOURCE_INSTRUCTIONS
-        context = json.loads(encoded) if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse, FeatureChecks, FeatureCheckReview) else {}
+        context = json.loads(encoded) if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse, FeatureChecks, FeatureCheckReview, StepScope) else {}
         if schema is IntentResponse:
             from workbench.bug_intent import INSTRUCTIONS as INTENT_INSTRUCTIONS
             instructions = INTENT_INSTRUCTIONS
@@ -347,6 +347,9 @@ class LocalProvider:
             from workbench.bug_program import INSTRUCTIONS as PROGRAM_INSTRUCTIONS
             instructions = PROGRAM_INSTRUCTIONS
         output_schema = planning_response.wire_schema(schema, context.get('coverage'), context.get('files'))
+        if schema is StepScope and self.response_evidence:
+            self.response_evidence.record('local-wire-schema',codec='inspected-feature-scope-v1',
+                schema_sha256=hashlib.sha256(json.dumps(output_schema,sort_keys=True).encode()).hexdigest())
         flat_local = schema in (InvestigationResponse, IntentResponse)
         if flat_local:
             from workbench.codex_wire import schema as explicit_schema, FLAT_NOTE, PLAN_NOTE

@@ -520,6 +520,20 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
         from workbench.real_execution import review
         return review(app.state.engine, identity)
 
+    from workbench.simulator_comparison import ComparisonView
+
+    @app.get('/api/real-executions/{identity}/simulator', response_model=ComparisonView)
+    def simulator_comparison(identity: str):
+        from workbench.simulator_comparison import view
+        return view(app.state.engine, identity)
+
+    @app.get('/api/real-executions/{identity}/simulator/{which}')
+    def simulator_capture(identity: str, which: Literal['before', 'after']):
+        from workbench.simulator_comparison import image
+        return Response(image(app.state.engine, identity, which), media_type='image/png',
+            headers={'X-Content-Type-Options':'nosniff', 'Cache-Control':'no-store',
+                     'Content-Security-Policy':"default-src 'none'; sandbox"})
+
     @app.post('/api/real-executions/{identity}/stop', responses=errors)
     def stop_real_execution(identity: str, body: StopRequest):
         from workbench.real_execution import cancel

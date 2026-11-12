@@ -643,3 +643,11 @@ th,td { text-align: left; padding: 10px; border-bottom: 1px solid #5e4a34; }
 .task-lane .record-link strong { font-size:1rem; line-height:1.4; }
 .task-lane .record-link small { font-size:.875rem; color:#cbbba4; }
 .task-lane .record-state { font-size:.875rem; }
+/* Native simulator captures keep their proportions and stack on phones. */
+.simulator-captures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.simulator-captures figure{margin:0;min-width:0}
+.simulator-captures img{display:block;width:100%;height:auto;border:1px solid var(--color-border);border-radius:.4rem}
+.simulator-captures figcaption{padding:.55rem 0;color:var(--color-muted)}
+.result-simulator{margin-block:1.25rem;padding-block:1rem;border-block:1px solid var(--color-border)}
+.result-simulator dd{margin:0 0 .65rem;overflow-wrap:anywhere}
+@media(max-width:700px){.simulator-captures{grid-template-columns:1fr}}

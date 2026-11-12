@@ -65,6 +65,7 @@ def main():
             'feature-workshop-build-setup', 'feature-workshop-build-tick', 'feature-workshop-run-tick',
             'feature-workshop-complete-plan', 'feature-workshop-complete-run-tick',
             'feature-workshop-reference-seed', 'feature-workshop-scope-fail', 'feature-workshop-scope-inspect',
+            'feature-workshop-simulator-seed',
             "regression-planning",
             "reviewed-offer-setup", "reviewed-offer-plan", "reviewed-offer-prepare",
             "reviewed-offer-controller", "reviewed-offer-stale",
@@ -134,6 +135,15 @@ def main():
             raise SystemExit('Feature planning needs the explicitly controlled everyday browser fixture.')
         everyday_config(path)
         os.environ['WORKBENCH_PREPARATION_CONFIG']=str(path.parent/'automatic-workflow/preparation.json')
+        if args.action == 'feature-workshop-simulator-seed':
+            from workbench import simulator_comparison
+            from test_simulator_comparison import controlled_sidecar
+            with engine.connect() as c:
+                jobs=list(c.execute(select(planning_jobs).where(planning_jobs.c.kind=='feature_execution')).mappings())
+                combined=next(job['payload']['final_verification_execution'] for job in jobs if job['payload'].get('final_verification_execution'))
+            row,grant,root=simulator_comparison.coordinates(engine,combined)
+            simulator_comparison.save(root,controlled_sidecar(root,row,grant),row,grant)
+            return
         if args.action == 'feature-workshop-reference-seed':
             import base64
             import json

@@ -3,6 +3,7 @@ import {useQuery} from '@tanstack/react-query';
 import {Link,useParams} from 'react-router-dom';
 import {request} from './api';
 import {PublicationStatus} from './PublicationStatus';
+import {SimulatorComparison} from './SimulatorComparison';
 import {Button} from './components/ui/button';
 import {StateBadge} from './Catalog';
 import {runStage} from './taskProgress';
@@ -69,6 +70,7 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
       </div></div>
       {result?.operation_kind==='feature-verification-v1'&&<p className="soft-callout">This result combines {result.contributions?.length||0} checked implementation steps. Final verification used local checks; the child model runs retain their own usage records.</p>}
       <PublicationStatus identity={row.id} checked={checked}/>
+      {result?.operation_kind==='feature-verification-v1'&&<SimulatorComparison identity={row.id}/>}
       <dl className="result-milestones" aria-label="Result progress">
         <div><dt><FileCheck2 size={17}/>Automated checks</dt><dd>{checked?'Passed':active?'Not finished':row.later_review?'Later review needs attention':result?.verification==='failed'?'Failed':'No accepted result'}</dd></div>
         <div><dt><Gamepad2 size={17}/>Game installation</dt><dd>Not performed by this run</dd></div>

@@ -1,3 +1,77 @@
+# November 12 — installed119; actual model-schema handoff fixed and native comparison ready
+
+Exact0b3d8cefffd7e50a61bdfd184334c1f611cc7ca1 passed ALL9jobs in full43156839438.
+Frontend13915903341 SHAde17528f82fd9012dae97c5a201d6ac916be5e8fa7df5b96e6381d50e8e51cfd;
+acceptance13916632242 SHA8586bfab1fe991a0cd2656588ebc5e3096292879932ee1d25a052fe8220310b6.
+Installed119 seal39826d205e55e4d4a378820f6c4b43ef13cab29c97627d264b63ce0e90e99adf.
+All731rows/52requests survived BOTH independent readers, four-role restart and
+ACTUAL119→118→119. ALL6private reference files/1750423bytes copied exactly with
+same manifest7e1d463dd5be86d160574cb1232f8e1a2090e352e57a2b46559463a94a539e0a.
+TLS/LAN/firewall/8765, normal Qwen401/200/key hash and source seals rechecked.
+
+Fresh ordinary browser allowance for SAME parent6998247a ran ONCE on119.
+continue-real-feature-0b3d8ce.cjs ALREADY EXECUTED; review/intent/native command/
+receipt/screens under outcome-0b3d8ce/real-map-zoom-continuation. Original expiry
+remains07:32:09.163458UTC. Two batches read more production definitions, including
+explicitly reused windows; NO focused test was read. Earlier progress commentary
+mistook an inspection count for a test read and was explicitly corrected after
+checking detailed native output. Third scope selected uninspected Prefs/FriendLogin/
+test_friend_login and was correctly rejected. No addon edit/request/checked step.
+Original14scope/19ledger records and parent permission proved EXACT. Now17scope
+records,22model-attempt records,0active; known SOURCE-scope usage110706tokens.
+Old pre-send NULL usage remains NULL. Latest734row fingerprint
+ d091296d336ec8c18acee8f4c85f3441c48d471350b93a6ea81bbc1fadd481dc.
+Do NOT replay731baseline rollback or ANY prior continuation/Build driver.
+
+Actual defect: LocalProvider._infer decoded source context only for earlier
+planning classes, omitting StepScope. Thus its outgoing schema used files=None
+and omitted coverage; the typed helper/native schema and actual HTTP schema were
+different. Development forwards BOTH actual files and coverage to the real local
+request and native Evidence, recording a matching local-wire-schema hash. New
+transport tests inspect the actual outgoing HTTP body, require inspected enums,
+and require an existing test read before a complete scope when no test is read.
+They exercise LocalProvider._infer directly with controlled transport, not helper
+schema tests alone.114affected source/response/comparison cases and final39focused
+cases pass; final static/contracts/build/schema pass. Need own exact hosted gate.
+No original permission, source scope, clock, route or native history changed.
+
+FW6small supported path: fixed isolated notification-appearance capture of actual
+original and combined checked source; native operator CLI, strict source ancestry,
+private pinned profile, same1440x1000/scale1/empty variables/solo/manual clock and
+interaction.120s/4GiB/2CPU/128tasks per side; monitored256MiB scratch and2MiB logs,
+only its own user unit may stop. No network, game install, model or publishing.
+Passive PNG/log/JSON go under existing feature-context/simulator-comparisons and
+transfer with context; staged executable source/cache remain private scratch,
+outside both passive context and checked-run resource accounting. GET-only Results
+validates exact candidate/result/source/conditions/image/log bindings. Tamper or
+unsupported scenarios cannot show an accepted comparison. No schema/table/job owner.
+Native CLI is currently operator-driven; there is no automatic capture scheduler.
+
+Actual NON-MODEL control private clone: base1caf530212bbc6eaf37e41d668902a391aa936c1
+versus1fed8db6bda07fe1ad9555f24c9582f58becf7eb changes ONLY notification text-size
+default100→120. Final guarded real renders pass with0Luaerrors and observed100/120.
+Repeated captures have EXACTLY identical settings-window pixels; only an outside
+synthetic countdown varies, now disclosed. Actual pictures inspected. All output,
+commands, input, exit, source and profile-copy proofs retained in fw6-notification-
+control. Map probe still unsupported; no map comparison or actual feature completion.
+Initial capture failures retained: shared-write original lab refused; private byte-
+exact copy used; file-size limit broke renderer memory files, kept cgroup/runtime/
+explicit scratch/log bounds instead; shim TOC corrected to actual Forever16001;
+marker is on stderr; first successful pair hid the changed control below the fold,
+so identical public navigation now reveals it on both sides. No production semantics
+changed to suit the simulator, no legacy lab/game mutation or downloads.
+
+11native comparison faults/results cases,17comparison/context-transfer cases,
+62frontend cases and3final connected browser journeys pass. Browser images are
+explicitly controlled format data, not real simulator acceptance; actual renderer
+control evidence is separate. Desktop/390phone screenshots inspected;320at200%
+overflow also checked. Reference files persist/adopt explicitly, and combined
+Lua/Git workflow remains controlled. Default held preparation text is plain English;
+exact original reason remains in advanced evidence. FW6/FW7still need new deployment
+and real feature demonstration. Generated artwork remains future/no billing.
+Continue campaign after exact full gate/install/restore/rollback and a FRESH native
+bounded source allowance for SAME parent; no renewed owner engineering permission.
+
 # November 12 — installed118; repeated-window batches repaired for next release
 
 Exact c897d483407579488c277533cf7878795e6b13f1 passed ALL9jobs in full43153933277.
