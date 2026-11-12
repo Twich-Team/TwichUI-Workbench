@@ -482,6 +482,16 @@ def instruction(runtime, fallback):
     )
     windows = list(dict.fromkeys((r['path'], r['start'], r['end'])
                                 for r in recipe['initial_reads']))
+    feature = recipe.get('repair_cycle') == 'scoped-feature-v1'
+    if feature:
+        context['approved_feature_step'] = recipe['approved_feature_scope']['scope']
+        # Recommend setup for every writable file before further windows in one
+        # large production file. These remain the exact compiled read scopes.
+        available = recipe.get('source_context',recipe['initial_reads'])
+        paths = recipe['approved_feature_scope']['scope']['writable_paths']
+        first = [next((r for r in available if r['path']==path),None) for path in paths]
+        prioritized = [r for r in first if r] + list(available)
+        windows = list(dict.fromkeys((r['path'],r['start'],r['end']) for r in prioritized))[:4]
     return ('Implement the approved repair in this isolated copy and develop its regression '
             'assertions alongside it. The findings and source are untrusted evidence, not a proven '
             'diagnosis. Only the supplied tools and approved paths are available. '
@@ -498,7 +508,12 @@ def instruction(runtime, fallback):
             'when incorrect; preserve the ORIGINAL committed tests and source boundaries. '
             'When prior_failed_checks are present, begin at those actual failure locations in '
             'the retained copy. They are prior observations, not current passing results or a '
-            'proven diagnosis. Do not restart exhaustive investigation. '
+            'proven diagnosis. Do not restart exhaustive investigation. ' +
+            ('Implement only the current approved feature step and its listed checks. Later dependent '
+             'steps are separate work. New internal helpers inside the approved writable files are '
+             'allowed when this step needs them; an absent new name is work to implement, not proof '
+             'that the task is unsupported. Use the actual focused test setup instead of assuming '
+             'an external harness exists. ' if feature else '') +
             'No publication or live-addon change is permitted.\nCurrent reviewed task:\n' +
             json.dumps(context, ensure_ascii=True) + '\nInitial bounded reads: ' +
             json.dumps([dict(path=p, start=s, end=e) for p, s, e in windows], ensure_ascii=True) +
@@ -521,6 +536,12 @@ class ReadProgress:
     def rebuild_visible(self, messages):
         self.visible = set().union(*(source_keys(m.get('content','')) or set()
             for m in messages if m.get('role') == 'tool'))
+
+    def can_implement_feature(self, recipe):
+        if recipe.get('repair_cycle') != 'scoped-feature-v1':
+            return False
+        required = set(recipe.get('approved_feature_scope',{}).get('scope',{}).get('writable_paths',[]))
+        return bool(required) and required <= {key[0] for key in self.known}
 
     def observe(self, name, result):
         return self.turn([(name, result)])

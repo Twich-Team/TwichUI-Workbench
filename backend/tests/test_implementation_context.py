@@ -459,3 +459,61 @@ def test_scoped_no_progress_forces_the_installed_string_tool_choice_without_weak
     assert Transport.bodies[2]['tool_choice']=='required'
     assert [t['function']['name'] for t in Transport.bodies[2]['tools']]==['replace_text']
     assert '= 2' in path.read_text()
+
+
+@pytest.mark.parametrize('test_source_shown',[True,False])
+def test_feature_empty_searches_require_an_edit_only_after_both_writable_files_are_shown(tmp_path,test_source_shown):
+    source,test='source.lua','tests/test_scope.lua'
+    for name in [source,test]:
+        path=tmp_path/name
+        path.parent.mkdir(parents=True,exist_ok=True)
+        path.write_text('local controlled = 1\n')
+    runtime=SimpleNamespace(workspace=tmp_path,read_paths=[source,test],paths=[source,test],
+        recipe=dict(source_context=[{}],verification_profile='lua-feature-step-v1',repair_cycle='scoped-feature-v1',
+            approved_feature_scope=dict(scope=dict(writable_paths=[source,test]))),
+        tool_commands=lambda:{'focused':['controlled-no-shell']})
+    class ControlledTools:
+        def __init__(self):self.runtime=runtime
+        def handle(self,name,args):
+            if name=='read_file':
+                return json.dumps(dict(path=args['path'],spans=[dict(start=1,end=1,text=(tmp_path/args['path']).read_text())]))
+            if name=='find_text':
+                return json.dumps(dict(path=args['path'],matches=[]))
+            assert name=='replace_text' and args['path']==source
+            path=tmp_path/source
+            path.write_text(path.read_text().replace(args['old'],args['new']))
+            return 'Edit saved in isolated workspace.'
+    calls=[response('read_file',dict(path=source),0)]
+    if test_source_shown:
+        calls.append(response('read_file',dict(path=test),1))
+    calls += [response('find_text',dict(path=test,query='absent-harness'),2),
+        response('find_text',dict(path=test,query='absent-harness'),3),
+        response('replace_text',dict(path=source,old='= 1',new='= 2'),4),answer()]
+    Transport.responses=calls
+    Transport.bodies=[]
+    implement(ControlledTools(),'Controlled current feature','','controlled',lambda:True,transport=Transport)
+    edit=Transport.bodies[-2]
+    if test_source_shown:
+        assert edit['tool_choice']=='required'
+        assert [t['function']['name']for t in edit['tools']]==['replace_text']
+    else:
+        assert 'find_text' in [t['function']['name']for t in edit['tools']]
+    assert '= 2' in (tmp_path/source).read_text()
+
+
+def test_current_feature_brief_preserves_compiled_checks_and_prioritizes_focused_test_setup():
+    linked=dict(task=dict(title='Current implementation step',acceptance=['Current behavior']),
+        original=dict(description='Whole parent feature'),approved_scope=['Current scope'],
+        proposal_review=dict(content=dict(behavior='Parent behavior',value='Actual source findings',
+            uncertainty=['Existing interface is proposed work'],exclusions=['No settings'])))
+    reads=[dict(path='source.lua',start=1,end=120),dict(path='source.lua',start=121,end=240),
+        dict(path='source.lua',start=241,end=360),dict(path='source.lua',start=361,end=480),
+        dict(path='tests/test_scope.lua',start=1,end=120)]
+    scope=dict(writable_paths=['source.lua','tests/test_scope.lua'],checks=[dict(observation='CONTROLLED compiled step observation')])
+    runtime=SimpleNamespace(recipe=dict(repair_cycle='scoped-feature-v1',instruction='{}',
+        initial_reads=reads[:4],source_context=reads,approved_feature_scope=dict(scope=scope)),workflow_task=linked)
+    value=instruction(runtime,'legacy fallback')
+    assert 'CONTROLLED compiled step observation' in value
+    assert 'Implement only the current approved feature step' in value
+    initial=json.JSONDecoder().raw_decode(value.split('Initial bounded reads: ',1)[1])[0]
+    assert initial[0]['path']=='source.lua' and initial[1]['path']=='tests/test_scope.lua'

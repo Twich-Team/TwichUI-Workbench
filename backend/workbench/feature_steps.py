@@ -288,7 +288,7 @@ def _offer(c, row, *, active):
     saved = row['snapshot']
     detail = saved['feature_step']
     scope = detail['scope']
-    if (row['fingerprint'] != digest(saved) or detail['attempt'] not in (1, 2, 3)
+    if (row['fingerprint'] != digest(saved) or detail['attempt'] not in (1, 2, 3, 4)
             or row['proposal_id'] != saved['proposal_id']):
         raise ValueError('Feature offer identity or bounded attempt changed.')
     validate_scope(c, scope, active=active)
@@ -308,7 +308,8 @@ def _offer(c, row, *, active):
     if preparation_recovery:
         from workbench.feature_preparation_recovery import validate
         validate(c, preparation_recovery, scope)
-        if detail.get('preparation_revision') != preparation_recovery['revision']:
+        if (detail.get('preparation_revision') != preparation_recovery['revision']
+                or detail['attempt'] != preparation_recovery['attempt']):
             raise ValueError('Preparation revision differs from its native proof.')
     elif detail.get('preparation_revision',0):
         raise ValueError('A preparation revision requires its original native proof.')
@@ -333,7 +334,7 @@ def register_offer(engine, runtime, *, attempt=1, recovery=None, preparation_rec
     runtime = Runtime(runtime.root)
     if any(g['status'] != 'passed' for g in runtime.static_preflight()):
         raise ValueError('Feature preparation requires a clean source, passing baseline and protected checks.')
-    if attempt not in (1, 2, 3) or type(attempt) is not int:
+    if attempt not in (1, 2, 3, 4) or type(attempt) is not int:
         raise ValueError('Feature implementation attempt budget exhausted.')
     prepared = dict(root=str(runtime.root), readiness=readiness(runtime))
     scope = runtime.recipe['approved_feature_scope']
@@ -355,6 +356,8 @@ def register_offer(engine, runtime, *, attempt=1, recovery=None, preparation_rec
         if preparation_recovery:
             from workbench.feature_preparation_recovery import validate
             validate(c, preparation_recovery, scope)
+            if attempt != preparation_recovery['attempt']:
+                raise ValueError('Preparation recovery belongs to a different coding ordinal.')
             saved['feature_step'].update(preparation_revision=preparation_recovery['revision'],
                 preparation_recovery=preparation_recovery)
         fingerprint = digest(saved)
@@ -403,6 +406,12 @@ def permission(c, approval, task_id, *, offer_id=None, require_current=True):
         slot = (session or {}).get('state',{}).get('feature_slot')
         if slot and slot['snapshot']['feature_offer_id'] != selected['id']:
             raise ValueError('Another feature attempt owns the current parent slot; old inputs cannot dispatch.')
+    if require_current:
+        from workbench.feature_attempts import coding_grants
+        issued = coding_grants(c,selected['snapshot']['feature_step']['scope'])
+        if (not any(g['snapshot']['task_budget']['offer']['id']==selected['id'] for g in issued)
+                and len(issued) >= parent_permission['budget']['implementation_attempts_per_step']):
+            raise ValueError('The approved coding-grant budget for this step is exhausted.')
     from workbench.feature_run_recovery import time_authority
     time_reference, allowed_end = time_authority(c,approval,parent_permission,at=selected['created_at'])
     end = min(datetime.fromisoformat(allowed_end),

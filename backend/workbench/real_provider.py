@@ -213,13 +213,20 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
             # Keep their template prefix stable across read/edit/check transitions;
             # changing it invalidates the local model's entire source prefix cache.
             names = {t['function']['name'] for t in definitions}
-        force_edit = bool(repair and repair.edit_required and not controls)
+        navigation_edit = bool(edits_done == 0 and source_progress.repeated >= 2
+            and source_progress.can_implement_feature(getattr(runtime,'recipe',None) or {}))
+        force_edit = navigation_edit or bool(repair and repair.edit_required and not controls)
         if force_edit:
             names = {'replace_text'}
             messages.append(dict(role='user', content=(
-                'The unchanged candidate is still rejected. Use replace_text with the exact current '
-                'text from the source window to repair the failure already shown. This turn requires '
-                'a real scoped edit before more checks or log reads.'
+                ('The approved feature files and test setup have been delivered. Repeated searches '
+                 'returned no new evidence. Use replace_text for a small implementation of the current '
+                 'step, including new internal helpers if required by its approved checks. Use exact '
+                 'current source; independent checks still gate correctness. This turn requires an edit.'
+                 if navigation_edit else
+                 'The unchanged candidate is still rejected. Use replace_text with the exact current '
+                 'text from the source window to repair the failure already shown. This turn requires '
+                 'a real scoped edit before more checks or log reads.')
             )))
         body = dict(model=model, messages=messages,
                     tools=[t for t in definitions if (scoped_cycle and not force_edit) or t['function']['name'] in names],

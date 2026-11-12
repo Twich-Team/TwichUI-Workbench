@@ -1,3 +1,15 @@
+# November 12 — coding capacity counts actual issued grants
+
+The original maximum3coding attempts per feature step is enforced by counting
+issued grant rows for that exact parent/task, including revoked and unknown grants
+in full. An unused preparation with no grant reserves no coding cycle. Its old
+ordinal/package/clock remains exact; it cannot silently consume a generation or
+reset one. New recovery proofs bind the immutable consumed grant prefix and next
+coding index. Historical normalizations are unchanged. Slot4 may therefore be the
+THIRD coding grant after the original unused slot; a fourth coding grant is refused.
+All per-grant24000token/20turn/time ceilings and parent expiry remain unchanged.
+Prior unknown usage remains reserved. No task/scope/provider/publication expansion.
+
 # November 12 — pre-grant readiness validation inside isolated controllers
 
 Preparation liveness checks read the original private owner/recipe identity and

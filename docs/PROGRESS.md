@@ -1,3 +1,46 @@
+# November 12 — first actual Qwen coding settled; navigation and grant accounting repaired
+
+Installed125 requeste911f1ce/fence511f4952 actually ran13complete provider responses:
+862generated/160831prompt/161693total tokens, all13validated receipts; no unavailable
+turns, no edits or working checks. It read actual production and focused-test setup,
+then repeatedly find_text queried absent harness in that same focused test. Native
+ReadProgress stopped unchanged navigation. Parent failed, feature held,0checkedsteps.
+Normal auth/config restored; temporaryepoch1262015/start91546665 gone, restorednormal
+1272611/start91562650. Old unknown request69393927 still reserved24000 unchanged.
+Actual request/ledger/transcripts retained outcome-fbf5ec4/native-first-qwen-read-loop.
+
+Repair: coding brief retains Qwen's compiled step checks, only current step, internal
+helper permission and actual focused-test setup; bounded initial-read suggestions
+prioritize every writable file before further windows in one production file.
+After2repeated source decisions and native-delivered source for BOTH writable files,
+only guarded replace_text is available for the next bounded implementation decision.
+All path/exact-match/correction/turn/token/time/independent-check guards remain.
+No manual addon source/test solution or new reasoning/provider preference supplied.
+
+An unused initial preparation wrongly exhausted the coding-attempt counter. New
+accounting counts ISSUED coding grants, including revoked/unknown grants in full.
+Native proof finds2grants (old unknown2 + known real3), so fresh immutable SLOT4 is
+CODING GRANT3 within the ORIGINAL3grant/72000reserved-token/20turn-per-grant ceiling.
+All historical slot ordinals, packages, old approvals/clock/unknown accounting stay
+exact. Recovery proof names the exact consumed grant prefix; active issuance counts
+all current grants and refuses a fourth coding grant. Initial unused slot1 had no
+cycle/grant and remains retained. Old normalizations stay unchanged. Failed edits
+are not carried. Original passed preparation may supply baseline only after exact
+recipe/base/checker/interpreter equality; fresh isolation and all candidate checks
+remain mandatory. Clear prior preparation-revision context when advancing to a
+fresh coding attempt. Parent14:15:43 window unchanged; no additional source, tokens,
+model or publication authority. Native read-only settled proof passes, nextslot4/
+grant3, all current live records unchanged.62related cases pass, including positive
+forced-edit after both sources, no forcing without test source, issued-unknown
+capacity counting and hard original3grant limit.
+
+Own engineering pause24unpaused→25paused via nativework_controls. Intent under
+outcome-fbf5ec4/coding-navigation-pause-intent.json. Restore ONLY this pause after
+exact next-source full CI/install/all-row readers/restart/actual rollback/browser
+checks. Never replay756oldbaseline after these newer records. Original unchanged
+request/plan/5steps/parent6998247a remains. Continue actual dependent implementation,
+independent combined checks and coherent draft PR. Zero real feature completions.
+
 # November 12 — installed125; FIRST actual feature coding request active
 
 Exactfbf5ec4f889942cb3f74f5bf05affbbb69509b4f ALL9 full43197382569 passed.

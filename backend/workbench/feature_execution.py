@@ -129,7 +129,7 @@ def _prepared(engine, job, *, provision=None, stop_event=None):
         (provision or task_session.provision)(runtime, dict(control_patches={},
             **({'baseline_source':preparation_recovery['baseline_source']} if preparation_recovery else {}),
             **({'baseline_source':recovery['baseline_source']}
-               if not preparation_recovery and recovery and recovery.get('kind') == 'never-dispatched-feature-slot-v1' else {})))
+               if not preparation_recovery and recovery and recovery.get('baseline_source') else {})))
     runtime = Runtime(root)
     if (claim['scope_binding'] != saved['scope_binding'] or claim['policy_binding'] != digest(policy)
             or claim.get('attempt',1) != attempt
@@ -180,7 +180,7 @@ def resume_failed_step(engine):
                     state.pop(key,None)
                 payload = {**current['payload'], 'phase':'scope_ready', 'current_attempt':proof['next_attempt'],
                     'current_recovery':proof,'recovery_history':current['payload'].get('recovery_history',[])+[proof]}
-                for key in ('current_offer_id','feature_preparation_claim'):
+                for key in ('current_offer_id','feature_preparation_claim','current_preparation_recovery'):
                     payload.pop(key,None)
                 c.execute(task_sessions.update().where(task_sessions.c.id == parent['id']).values(
                     status='pending',finished_at=None,state=state,

@@ -165,3 +165,43 @@ def test_uncertain_or_changed_prior_execution_cannot_open_a_fresh_slot(
         assert parent['status']==('cancelled' if fault=='owner_stop' else 'failed')
         assert len(c.execute(select(task_run_offers)).all())==1
         assert len(c.execute(select(real_execution_requests)).all())==1
+
+
+
+def test_issued_grants_enforce_original_budget_while_ungranted_preparations_do_not_count(
+    client,headers,store,installed,monkeypatch,
+):
+    import copy
+    from uuid import uuid4
+    from workbench.db import real_execution_grants
+    from workbench.intake import now
+    from workbench.visual_scope import digest
+    decision,first,offered,proof=failed_parent(client,headers,store,monkeypatch)
+    assert proof['coding_budget']['policy']=='issued-coding-grants-v1'
+    assert len(proof['coding_budget']['consumed'])==1 and proof['coding_budget']['next_index']==2
+    assert feature_execution.advance(store)
+    assert feature_execution.advance(store,provision=controlled_readiness)
+    assert feature_execution.advance(store)
+    with store.connect() as c:
+        scope=offered['snapshot']['feature_step']['scope']
+        assert len(feature_attempts.coding_grants(c,scope))==1
+        parent=c.execute(select(sessions).where(sessions.c.id==decision)).mappings().one()
+        selected=parent['state']['feature_slot']['snapshot']['feature_offer_id']
+        original=dict(c.execute(select(real_execution_grants)).mappings().one())
+    # Every issued capacity reservation counts, including an already revoked
+    # grant with unavailable request/usage. No missing usage becomes zero.
+    with write_transaction(store) as c:
+        for index in [2,3]:
+            snapshot=copy.deepcopy(original['snapshot'])
+            snapshot['runtime']['controlled_reservation']=index
+            snapshot['task_budget']['offer']['id']=str(uuid4())
+            c.execute(real_execution_grants.insert().values(id=str(uuid4()),snapshot=snapshot,
+                binding=digest(snapshot),issued_at=now(),expires_at=original['expires_at'],revoked_at=now()))
+    with store.connect() as c:
+        assert len(feature_attempts.coding_grants(c,scope))==3
+        approval=c.execute(select(proposal_decisions).where(proposal_decisions.c.id==decision)).mappings().one()
+        assert approval['payload']['feature_run']['budget']['implementation_attempts_per_step']==3
+        with pytest.raises(ValueError,match='coding-grant budget'):
+            task_budget.permission(c,approval,task_id=first,offer_id=selected)
+        with pytest.raises(ValueError,match='attempt budget is exhausted'):
+            feature_attempts.settled(c,offered)
