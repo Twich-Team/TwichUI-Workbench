@@ -1,3 +1,36 @@
+# November 12 — installed124; native preparation resumed under the same parent
+
+Exact d1d43d5be31a4effc42131ab34d7521a50f3be1a ALL9 full43191232135 passed.
+Frontend13929979666 SHA7921d647ec382d87210a81e4c9d34832af42db71716b1714226552d525fbafcf;
+acceptance13931402990 SHAe8bcf7c56e72f86bcc22659ffffb1172313e02fb88006c507d8f96c3df7630ac.
+Installed124 receipt seal781bf31369a7855d2157f36fa0b8582c19126e9c6586de7ed8bfbb64b264cf3f.
+Fresh752rows fingerprint84c3452d8cb70c80f60f0a3ef4aaf05a8bf5313e8a340944a82106595b34ff1a
+preserved with all52requests and6contextfiles/1750423bytes/manifest7e1d463d.
+Independent restore/feature reader, old/new readers, four-role restart, ACTUAL124→123→124,
+TLS/LAN/firewall/8765/model401/200/key hash/seals passed BEFORE new native writes.
+Old123 rollback correctly remained held ONLY for its known aggregate scratch guard;
+new124 is ready. Desktop1440,phone390,320at200%, keyboard/reload/default/advanced
+passed with zero mutations/errors; desktop and phone images actually inspected.
+26final feature recovery cases and31historical epoch cases pass; full hosted backend2
+artifact independently verified1250cases/zero failures/errors. All26frontend bytes
+match the exact hosted artifact. f7360e5 and4e9e05b are intermediate never-installed
+candidates, recoverably archived with source/ops/seal and no active DB references.
+Compressed, verified inactive browser/Python dependency inventories retained privately;
+current124, old123 and fallback122 dependencies remain available. No evidence/workspaces
+or original source were discarded. See native LATEST_NATIVE_FEATURE_DELIVERY.json.
+
+resume-after-install.py ALREADY EXECUTED ONCE. Original policy20unpaused→engineering21
+paused→22unpaused. Do NOT replay. Existing native worker resumed SAME parent6998247a,
+SAME current implementation ordinal3 and original Qwen-selected scope. Current phase
+preparing_runtime; no NEW coding request yet at this observation. Original approval/
+slot deadlines stay exact; fresh immutable preparation receives the UNUSED90minute
+coding reservation, bounded by the existing14:15:43 parent window. No extra generation
+attempt/token allowance or old-grant revival. Prior failed request69393927 and fence
+688d61e6 retain unknown usage/reserved24000 and native closed-epoch proof.
+NEVER replay752baseline rollback or old allowance/window drivers after these writes.
+Continue actual Qwen implementation, dependent checked steps, independent combined
+checks, coherent draft delivery; attach actual created PR. Zero real feature completions.
+
 # November 12 — unused coding reservation follows fresh preparation
 
 Release checks outlasted the old readiness slot's remaining full-run reserve.
