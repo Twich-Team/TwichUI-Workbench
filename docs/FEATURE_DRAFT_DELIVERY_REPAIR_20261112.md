@@ -73,8 +73,8 @@ retained under preflight_recovery. Any remote intent/uncertainty prevents reset.
 `!!!TwichUI` is the addon's actual committed directory, including its exclamation
 marks. `!!!TwichUI/map/View.lua` and `tests/test_map_explore.lua` are the two approved
 paths. The exact saved outgoing Markdown has no `View\\.lua` or other backslash
-escaping. Such text belongs to displayed checking/pattern representations, not the
-patch path or outgoing body. The saved body is retained unchanged.
+escaping. The reported escaped form is absent from the outgoing preview and Git paths.
+The saved body is retained unchanged.
 
 Real credential-free delivery preparation applied the exact frozen patch, produced
 one commit with parent7fd7be8, verified only those two paths changed and compared
@@ -110,3 +110,80 @@ acceptance and installed browser/history proof are ongoing.
 Deployment128/bca52b7 and its previous rollback remain retained until the replacement
 passes exact hosted verification and independent installation checks. Private
 receipts are under `/home/rich/.local/share/TwichUI-Workbench/feature-draft-repair-20261112`.
+
+## Actual current-main result: publication remains held
+
+Unchanged current main ran its complete196-file native inventory: **195 passed,
+1 failed**. `tests/test_reminder_gallery.py`, method
+`Rebuild.test_sample_pictures_are_what_the_tool_builds`, line174, regenerates
+`reminder-lion-shield.png` with bytes different from the committed PNG. A separate
+confined focused rerun reproduces the same assertion (8of9 gallery cases pass).
+All original frozen feature observations have their expected original outcomes.
+The compatibility candidate **did not run** because original main did not qualify.
+No compatibility success receipt exists. No PNG, addon source or test was modified.
+
+The supported exact checked submission recovered the old empty-state local-policy
+refusal, preserving its original status/message/time/state. One real delivery advance
+read remote main and correctly held before Git preparation or any remote write:
+"The target base moved. Renewed independent verification is required; no automatic rebase."
+The original publication snapshot/binding/approval are byte-identical. There is no
+new addon branch, PR or URL. The UI now shows the real base hold.
+
+All789 original rows remain byte-exact. Against the pre-task910-row backup, the
+only changes are one engineering-pause policy row and the canonical publication's
+retained-refusal/current-hold state. The paused store has911rows, schema0014,
+SHA256d4b354b59900d51fd5c6572b6ee3f14a4a379b54fef74e9201b9bcb24e06cff9.
+No implementation, verification, proposal decision or model-attempt row changed.
+The owner's resumed-work preference will be restored after installation checks.
+
+The complete decision audit, all compared saved/actual IDs/bindings/scopes/ancestry,
+native completion/file receipts, baseline suite and gallery diagnostic are retained
+privately in complete-decision-audit.json, safe-hold-history-proof.json,
+original-789-preserved.json and gallery-diagnostic/result.json under the evidence root.
+
+The full local serial run is **not a pass**. It encountered cascading failures/errors
+during low storage, then was stopped after41percent; its complete scratch was archived,
+all regular/hard-linked file hashes verified, and originals removed only afterward.
+The affected preparation module passes all6cases after storage recovery. Exact full
+hosted verification remains mandatory for installation. Local54delivery cases,
+65frontend,129standard browser and12visual checks pass, with actual desktop/phone
+images inspected. The separate current-main fixture is included in those54cases.
+
+## Installed repair and terminal boundary
+
+Build **139eed6 / deployment129** is installed. Hosted
+[43306252569](https://github.com/Twich-Team/TwichUI-Workbench/actions/runs/43306252569)
+passed all9required release jobs including finalverify: **2613backend cases passed,
+11skipped**,65frontend, all4standard browser partitions, connected feature browser
+acceptance and12visual comparisons. Exact receipt,161-file backend inventory,
+frontend/full-release artifact ZIP digests and26frontend file bytes were verified.
+All tracked source and exact root owner documents match the installed commit.
+
+Seal: `6838bd6a3c41c0136ae87c0a4fce89ca89ec5370dd5aed5085193b0617a772d5`.
+All4services are active/enabled. Both approved listeners/TLS/assets/filters/browser
+boundaries and preserved8765pass; normal model authentication401/200and unchanged
+key pass. The owner resumed-work setting is restored at policy72; other provider
+preferences remain exact. Deployments128and126and the comparison stage remain retained.
+
+After four-service restart, current history and the independent restore match
+**912rows /31tables /schema0014 /
+af3980782c5f3de597feaa447a67d240946375a24c86dd72360a9988d907bb30**.
+All789original rows,52original requests, original task permissions/decisions,
+implementation/verification rows and model attempts remain exact. The independent
+restore also passes native checked-draft validation with the original36383352binding.
+Actual1440desktop/390phone feature/result images, reload and enlarged phone text
+were inspected. The saved feature/two children remain checked, the current-base hold
+is visible, and there are zero false PR links, page errors, browser writes or overflow.
+The initial browser harness compared volatile whole-view readiness data; its final
+assertions compare immutable saved result/status fields and exact native eligibility.
+
+**No feature draft PR or remote feature branch was created.** No addon source,
+artwork/test, model history, original verification hash, merge, release or game
+installation changed. Full requested draft delivery remains blocked by the separate
+current-main gallery-check mismatch; resolving that failure requires a separate
+owner scope decision. No compatibility pass or publication was fabricated.
+
+The final private installation proof is deployment/final-installed-proof.json;
+installed browser proof and screenshots are adjacent. The current delivery pointer
+was updated with its old128version retained. The final documentation-only checkpoint
+does not replace the installed139eed6runtime or reuse CI for different application code.

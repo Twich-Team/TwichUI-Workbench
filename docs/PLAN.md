@@ -1,3 +1,15 @@
+# November 12 — repair release complete; draft delivery blocked by current-main qualification
+
+The false integrity refusal is repaired and verified139eed6/deployment129 is installed.
+All9hosted release checks, installed restart/restore and actual desktop/phone saved
+result/hold checks pass. Original implementation/verification/permissions and prior
+128/126are preserved. The feature draft PR is not created: separately authorized
+current-main qualification fails its original gallery PNG reproducibility check
+(195pass/1fail), before feature candidate dispatch. Keep the publication hold.
+Stop at this boundary. A separate gallery-check investigation/repair is an owner
+scope decision; do not waive checks, merge/release, change the saved feature or start
+a new model/feature campaign. CURRENT_STATUS and CONTINUATION carry actual receipts.
+
 # November 12 — owner-authorized separate current-main compatibility
 
 The owner answered "Allow separate compatibility checks" to the exact request to

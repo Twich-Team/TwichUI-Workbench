@@ -1,3 +1,99 @@
+# November 12 — INSTALLED129; original integrity defect fixed; addon publication safely held
+
+This is the current operational state. Following the Project Working Philosophy,
+the authorized Workbench repair/release is installed and independently verified.
+The requested addon draft PR was NOT created because the separately authorized
+current-main baseline check fails. Do not weaken it or start an unrelated repair.
+See [exact diagnosis/evidence/release report](FEATURE_DRAFT_DELIVERY_REPAIR_20261112.md).
+
+Installed139eed6bc1b45764887fe55a906c14cf1815ef4f/deployment129 on the existing
+codex/everyday-workbench branch. Hosted43306252569 passed all9required jobs/finalverify:
+2613backend passes/11skips,65frontend, all standard/connected browser partitions and
+12visual checks. Complete release receipt,161-file backend inventory and both hosted
+ZIP digests verified; all26frontend files byte-match. Seal
+6838bd6a3c41c0136ae87c0a4fce89ca89ec5370dd5aed5085193b0617a772d5.
+The documentation closeout does not change the installed runtime.
+
+All4services active/enabled. Both approved listeners/TLS/sealed assets/ingress/CSRF/
+inherited filters and untouched8765pass. Model access401/200 with unchanged normal
+key passed. Owner work is resumed at policy72; other preferences are unchanged.
+Four-service restart and independently restored store match912rows/31tables/schema0014/
+af3980782c5f3de597feaa447a67d240946375a24c86dd72360a9988d907bb30.
+All789original rows/52requests remain exact; all implementation, verification,
+proposal decision and model rows match the pre-task store. No new generation.
+Original128/bca52b7,127/ade9295 and rollback126/3d93225source/history/seals are retained.
+Do not restore an older store over the current912-row history.
+
+Actual1440desktop/390phone result/feature screenshots inspected; reload preserves
+both children, ac9781fc candidate,8requirement summaries and original36383352draft
+review binding. No false PR link, browser error/write or page overflow. Enlarged
+phone text was inspected. Original Qwen5d62e6bc remains5planned/0checked, permissions
+unchanged. Original comparison8a11c7e1/combined3050529d is still checked locally.
+
+Original canonical publicationc7d99d7e snapshot/binding/approval remain exact. Its
+initial missing-policy refusal is retained in preflight_recovery. Supported exact
+submission recovered only its original empty-state preflight hold. One real advance
+read remote main and held before any commit/push/PR intent: target base moved.
+Currentmaind09e6dc is43commits ahead; both touched input files remain identical.
+Separate native qualification on unchanged main gives195pass/1fail. The gallery
+Rebuild.test_sample_pictures_are_what_the_tool_builds assertion at test_reminder_gallery.py:174
+reproduces PNG byte differences for reminder-lion-shield.png. Candidate checks did
+NOT run; no compatibility success receipt exists. No artwork/source/test changed.
+No remote addon branch/PR/URL, merge, release or game installation occurred.
+
+Private evidence: /home/rich/.local/share/TwichUI-Workbench/feature-draft-repair-20261112.
+Start with deployment/final-installed-proof.json, complete-decision-audit.json,
+installed129-browser-proof.json and publication-safe-hold.json. Current stage:
+/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-139eed6.
+The existing feature-workshop LATEST_NATIVE_FEATURE_DELIVERY pointer now reflects129.
+Retain the original comparison stage and immutable task artifacts/bundles absolutely.
+Native setup/storage refusals and interrupted local serial run remain retained;
+hash-verified closed fixture archives were made before cleanup. No acceptance guard
+was waived. Do not replay completed native/check/host-advance/install/restart scripts.
+
+Stop at this boundary. Further gallery-check investigation/repair is separate work;
+current main must qualify before the preserved feature can be safely published.
+No model request, implementation replay, Qwen optimization or new campaign is queued.
+Unrelated WORKBENCH_ADMIN_APPROVAL edits and dependency links remain intact.
+
+# November 12 — connector repair checked; newer-main baseline blocks addon publication
+
+Code139eed6 is pushed; dormant sealed stage everyday-outcome-139eed6 is ready.
+Hosted43306252569 has7passed jobs; Backend2/2 and finalverify still pending. Do not
+install until all9pass for exact139eed6. Installed128 and rollback126remain active/
+retained. Local54delivery,6preparation,65frontend,129browser and12visual checks pass.
+The resource-affected local serial run was interrupted at41percent, not a full pass;
+its scratch/hash-verified archive and all failures remain private. Follow the exact
+hosted acceptance gate.
+
+Separate owner-authorized current-main compatibility is HELD: unchangedd09e6dc has
+195passed/1failed native files. test_reminder_gallery.py line174 regenerates
+reminder-lion-shield.png differently. Focused native rerun reproduces; no candidate
+checks ran and no success receipt exists. No artwork/source/test was altered.
+This new main baseline failure cannot be waived to publish the old checked feature.
+
+The host used the supported original exact checked permission and recovered only
+the old empty-state preflight refusal. One real delivery advance read main and held
+before any commit/push/PR intent. Original refusal is retained in preflight_recovery;
+original snapshot/approval/binding, both checked children and combinedac9781fc remain
+unchanged. Current UI hold: target base moved; renewed independent checking required.
+No addon PR/branch/URL was published. All789original rows remain byte-exact; paused
+current store911rows/d4b354b59900d51fd5c6572b6ee3f14a4a379b54fef74e9201b9bcb24e06cff9.
+Only one pause policy row and canonical publication state changed since910-row backup.
+
+Continue the authorized Workbench release only: confirm exact full hosted acceptance,
+install via prepared private script, independently verify services/source/network/
+model authentication/history restore and actual desktop/phone saved result + correct
+hold. Restore the owner's pre-engineering resumed-work setting, update reporting,
+push the documentation closeout, and stop. Do not start an unrelated gallery repair
+or waive the failing baseline. Existing public main must qualify before this preserved
+feature can safely reach a draft PR. No further model request, implementation replay,
+merge, addon release or game write.
+
+Private evidence/scripts: /home/rich/.local/share/TwichUI-Workbench/feature-draft-repair-20261112.
+Prepared installation script has NOT run. Do not replay already completed native
+compatibility/refusal/host-advance scripts. Read their receipts and current services.
+
 # November 12 — preserved feature draft delivery repair in progress
 
 The owner attachment ebb8eae5 supersedes the prior review stop for this one milestone.

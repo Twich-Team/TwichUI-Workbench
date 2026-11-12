@@ -1,3 +1,45 @@
+# November 12 — installed129 and verified hold; no feature PR
+
+Installed139eed6 /129 with all9hosted43306252569 release jobs passed.2613backend
+passes/11skips;65frontend, complete browser partitions/connected feature cases and
+12visual checks. Exact artifact/inventory/frontend/source/seal checks pass. Four
+services/restart, LAN/TLS/filters/ingress/CSRF/model401/200/unchanged key/8765pass.
+Desktop/phone/reload/enlarged text inspected: same original checked feature and
+36383352review binding, correct current-base hold, zero false links/errors/writes.
+History and independent native restore match912rows/af3980782c5f3de597feaa447a67d240946375a24c86dd72360a9988d907bb30.
+All789original rows and original implementation/verification/permission/model rows
+remain exact. Owner resumed-work setting restored; other model preferences unchanged.
+
+No addon PR/remote branch was created. Current main's original196-test inventory
+has195pass/1gallery PNG reproducibility failure; focused native reproduction confirms
+reminder-lion-shield.png byte mismatch at test_reminder_gallery.py:174. Candidate
+compatibility checks did not start; no success receipt was manufactured. Original
+ac9781fc, two checked children and178/178suite evidence remain intact. The original
+false-integrity refusal is retained and the same publication now honestly holds on
+moved main before commit or remote intent. See detailed report and private receipts.
+
+The full local serial run was interrupted after resource-related failures/errors,
+not claimed as full acceptance.54focused delivery cases,6preparation cases,65frontend,
+129standard browser and12visual pass locally. Exact hosted full verification is
+independent and complete. Failed scratch archives were content/hash-verified before
+cleanup. Original128 and rollback126 remain sealed/preserved. Stop: resolving the
+separate gallery-check mismatch is the next owner scope decision; no unrelated work
+or model campaign is queued. Unrelated administrative edits remain uncommitted.
+
+# November 12 — exact saved feature intact; independent current-main baseline fails
+
+See FEATURE_DRAFT_DELIVERY_REPAIR_20261112.md for exact refusal, identities and native
+results. Code139eed6 is pushed and its dormant stage sealed. Hosted release is pending.
+The new main fails gallery PNG reproducibility before candidate dispatch (195/1).
+No override, addon edit or publication occurred. Supported host delivery now records
+the correct base hold while retaining the original false-integrity refusal. All789
+original rows, original Qwen/model/permission rows and exact checked feature remain.
+Engineering pause is temporary; restore prior resumed state after checked installation.
+Local serial41percent is interrupted/failed, not full acceptance; original scratch
+archives were hash-verified before cleanup.54focused delivery+6preparation,65frontend,
+129browser and12visual pass. Full exact hosted gate and installed restore/browser
+proof remain. Stop afterward with publication held pending a qualified current main.
+
 # November 12 — owner-authorized separate current-main compatibility
 
 The owner answered "Allow separate compatibility checks" to the exact request to

@@ -1,11 +1,13 @@
 Last updated November 12, 2026.
 
-The private app still runs build bca52b7, deployment 128. The owner has resumed new work.
+The private app runs build 139eed6, deployment 129. Work is resumed. Deployment 128 and rollback 126 are preserved.
 
-The remembered-map-zoom feature has a finished, independently checked local result, but its draft PR is still held. This feature has not yet completed delivery from request to draft PR. Earlier bug/test draft deliveries remain saved.
+The false feature-integrity refusal is repaired. The publication connector was missing local configuration; the saved feature, both Codex contributions, original Qwen permissions and verification hashes were intact and remain unchanged.
 
-The saved implementations, verification, files and publication permission are intact. The refusal came from missing local configuration in the publication connector. The correction and refusal/recovery tests are implemented; installation is pending full release acceptance. No saved verification hash or original Qwen permission changed, and no new model request was made.
+The map-zoom feature has a finished local review result, with its original and combined 178-test suites passed. It has not completed request-to-draft delivery: no feature PR or remote branch was published. Successful publication through the repaired feature path is proven in controlled tests only. Earlier real bug/test draft deliveries remain saved.
 
-Current TwichUI main has advanced 43 commits. The owner authorized separate compatibility checks using the exact preserved patch. Those checks and the full Workbench release checks are in progress. Publication still requires all evidence and destination checks to pass.
+All nine hosted Workbench release checks passed. Restart, independent history restore, desktop/phone reload and the correct publication hold passed. The 912-row history retains all 789 original rows unchanged. No new model generation occurred. Actual WoW behavior remains untested.
 
-The next complete outcome is one verified draft feature PR, linked in the installed app, with the original result/history preserved. Nothing has been merged, released or installed in WoW. No additional owner decision is currently needed.
+Publication is blocked by separate compatibility checking: unchanged current main passes 195 tests and fails its gallery artwork reproducibility test because reminder-lion-shield.png rebuilds with different bytes. The feature patch was not applied to that failed baseline.
+
+The next complete outcome is resolving that separate check failure, qualifying the preserved feature on current main, and publishing one draft PR. Owner decision: whether to authorize that separate gallery-check investigation/repair. No further campaign is queued; nothing was merged or released.
