@@ -1,15 +1,11 @@
 Last updated November 12, 2026.
 
-The private app runs build 139eed6, deployment 129. Work is resumed. Deployment 128 and rollback 126 are preserved. No live settings changed during this connectivity work.
+Private Workbench HTTPS now works at workbench.twich.gg. Build 1409209 is installed. Work is resumed; previous build 139eed6 and rollback 126 are preserved.
 
-Earlier real bug/test requests completed through draft delivery. The map-zoom feature is checked locally with both 178-test suites passed, but has no feature PR or remote branch. Its publication repair works in controlled tests only; the false integrity refusal is repaired. Original contributions and permissions remain intact. Actual WoW behavior is untested.
+Portal alone gained backend access alongside the original trusted subnet. The domain accepts only the original 10.0.0.0/24 client network. Backend TLS verifies against the Workbench LAN CA. Exact host/origin and CSRF protections remain; forwarded headers are ignored. Other firewall rules, shared Traefik settings, authentication and administrator session controls are preserved.
 
-All nine hosted release checks, installed restart, independent history restore and desktop/phone reload passed. The 912-row history preserves all 789 original rows. No new model generation occurred.
+All nine hosted release checks and 99 focused safety checks passed. The actual domain served the exact app and assets after restart. Desktop and phone browser views, reload and security refusals passed. All 924 rows present at cutover survived installation, restart and independent restore. Newer planning activity remains live and was not interrupted.
 
-Feature publication remains held: unchanged current main passes 195 tests and fails gallery PNG-byte reproducibility despite identical decoded pixels. Separate gallery correction needs its own owner decision. Nothing was merged or released.
+Earlier real bug/test requests reached draft delivery. Zero new tasks were run from request to finished result for this proxy verification. The map-zoom feature remains checked locally; its separate draft delivery is still held by the current-main gallery reproducibility failure. Actual game behavior is untested.
 
-Private Traefik access is not working. Kernel records prove UFW blocks portal (10.0.4.3) on enp4s0; the return route uses 10.0.0.1. Local HTTPS validates against the Workbench LAN CA. The actual workbench.twich.gg route reaches portal with valid TLS, then returns HTTP 504.
-
-The smallest firewall addition permits only 10.0.4.3 to reach 10.0.0.9:9487. The owner approved this firewall exception and the service’s exact /32 allowance. A reviewed administrator update is prepared but not installed; 75 offline safety and recovery checks pass. The service filter and application peer/host checks also exclude portal. Actual Traefik backend CA trust and private-client restrictions remain unverified.
-
-The next complete outcome is verified private HTTPS through workbench.twich.gg with direct access and protections preserved. Owner interactive authentication is needed to install the prepared administrator update; policy approval is already recorded. Trusted access to inspect portal is also needed. Zero tasks have completed end to end through this proxy route.
+Connectivity is complete and needs no further owner permission. The separate next product outcome remains resolving that gallery check and delivering the preserved feature draft, under its own scope decision. No new campaign is queued.

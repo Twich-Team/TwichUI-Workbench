@@ -1,3 +1,74 @@
+# November 12 — COMPLETE: private domain HTTPS verified
+
+Workbench1409209 is installed in everyday-outcome-1409209. Actual
+https://workbench.twich.gg serves200 with verified TLS, exact assets and working
+APIs. Root policy admits only portal10.0.4.3/32 alongside original LAN access;
+application pairs that actual peer with the exact domain and retains HTTPS,
+Origin/CSRF and ignored-forwarded-header protections. User approved and installed
+the reviewed helper; grant/session78/expiry and unrelated rules remain unchanged.
+
+Owner separately approved the two-file private Traefik deploymentfe08c94.
+Its Workbench-only actual-client10.0.0.0/24 allowlist and named verified-CA TLS
+transport are live. Other routes/global settings/Compose are unchanged; Traefik
+was not restarted. No alternate HTTP/TCP route bypasses that guard.
+
+Full hosted43318428367 passed all9jobs/finalverify for exact1409209. Artifact
+hashes, all26frontend files and5504sealed static files match. Installation,
+four-service restart and independent restore retain the exact924-row cutover
+history (schema0014/31tables). Original129 and rollback126 remain. Normal model
+auth401/200/key identity passed after restart. Work policy72 remains resumed.
+
+Actual desktop/phone/reload/enlarged-text screenshots inspected through the domain;
+original saved feature/result/hold unchanged, no browser error/write. Actual
+Origin/CSRF/impersonation refusal checks passed with no task writes. New planning
+activity started afterward (last observation926rows/one running planner). Preserve
+that current live activity; do not restore the924-row snapshot over it or pause it
+for closeout. All immutable static hashes and exact active service paths verified.
+
+Detailed current proof and minor probe/environment corrections are in newest
+PROGRESS. Private receipts: /home/rich/.local/share/TwichUI-Workbench/traefik-connectivity-20261112T215605Z/deployment/final-installed-proof.json.
+Connectivity needs no further owner decision. Zero new end-to-end task runs were
+initiated for this networking test. The separate gallery/main qualification hold
+and addon publication decision remain unchanged; no new campaign is queued.
+Unrelated administrative documentation edits and dependency links remain intact.
+
+# November 12 — firewall applied; private Traefik deployment active; app release checking
+
+Owner installed the reviewed helper56540576. Its root ownership/hash and original
+session78 status/expiry verified. Fixed portal/add applied through that grant:
+original UFW allowances retained, only10.0.4.3/32 added on enp4s0 to10.0.0.9:9487;
+LAN IP filter is now exactly10.0.0.0/24 plus10.0.4.3/32, other restrictions retained.
+Direct HTTPS200 passes. The actual domain now reaches the app and returns400,
+not504. No other service or authentication changes.
+
+Owner provided rldiamond/twichgg_traefik (private, Komodo/webhook managed) and then
+explicitly authorized the scoped two-file main deployment. Connector404 was
+resolved with the host's existing GitHub login. Commitfe08c94 is pushed/deployed:
+Workbench-only socket-peer10.0.0.0/24 IPAllowList, preserved Host and a named TLS
+transport with insecureSkipVerify=false and only the public Workbench CA certificate.
+Global TLS settings, Compose and unrelated routes unchanged. Live Traefik3.7.18 API
+confirms private middleware and named transport enabled; backend request returns400
+through actual verified domain TLS. No SSH access or key acceptance was needed.
+
+Workbench1409209 adds exactly paired actual-peer10.0.4.3/domainworkbench.twich.gg
+admission on the existing specific LAN listener. Real HTTPS, direct subnet path,
+CSRF, exact Origin and duplicate-header checks stay. No forwarded-header trust.
+99focused boundary/admin tests and full localcheck pass. Commit is pushed; full
+hosted43318428367 is running. Do not install before all9jobs/finalverify pass.
+Dormant stage everyday-outcome-1409209 is sealed and verified against installed129
+configuration; actual old history is now920rows (not stale912). Preserve latest
+history, policy and original checked feature/publication hold. No model dispatch.
+
+Private deployment scripts/receipts are in traefik-connectivity-20261112T215605Z/
+deployment under the existing private data root. Original scripts untouched.
+Install/restart remove portal policy before the original LAN rule, and restore
+both through the supported helper before LAN startup. Rollback is history-fenced.
+Read-only browser acceptance targets actualhttps://workbench.twich.gg. Full hosted
+artifacts, exact source/frontend, current store copy, restart/restore/network/model
+auth and actual desktop/phone checks remain before completion. Do not start the
+unrelated gallery repair. Unrelated administrative document and dependency links
+remain preserved. Continue to the verified complete private HTTPS route.
+
 # November 12 — approved portal policy prepared; owner authentication pending
 
 Owner “Approve” authorizes the exact portal-only firewall and LAN-filter /32

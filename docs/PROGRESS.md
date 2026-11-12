@@ -1,3 +1,103 @@
+# November 12 — complete: verified private HTTPS through workbench.twich.gg
+
+Following the Project Working Philosophy, the requested private route is working.
+Installed Workbench1409209badf0f008f01d91a6fd194dbdfc6ecf48 in
+/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-1409209.
+All four fixed services are active in that exact release. Original129/139eed6,
+128 and rollback126/3d93225 source/history are retained. Work remains resumed at
+unchanged policy72. No new owner decision is needed for connectivity.
+
+## Verified boundary and routing
+
+Kernel logs proved incoming enp4s0, actual source10.0.4.3 and destination
+10.0.0.9:9487. Return route remains via10.0.0.1/enp4s0. Owner installed the pinned
+helper5654057602bf37945b3422d90be16fc8c002775776aede936c615821e1244318;
+root ownership/mode/hash, original session78 and unchanged expiry verified.
+The approved helper portal/add installed only the separately owned tagged UFW
+10.0.4.3/32 exception and fixed LAN IP filter drop-in. All preexisting UFW rules,
+default deny, disabled forwarding, original trusted subnet, bind restrictions,
+other service policies and port8765 remain. No direct privileged workaround,
+renewal, session rebinding or general root operation was used by Codex.
+
+The actual domain changed from verified TLS+504 to400 after that network fix,
+then200 after the checked application release. The app admits exactly the actual
+portal peer10.0.4.3 with authorityworkbench.twich.gg on the existing specific
+private listener. Direct subnet/IP access stays. HTTPS, exact Origin, duplicate
+Host/Origin refusal, CSRF and content/body checks remain. Uvicorn still uses
+--no-proxy-headers. Other private listener configurations gain no exception.
+
+## Owner-approved Traefik deployment
+
+The owner identified the private Komodo/webhook repository and explicitly replied
+“Authorize this scoped deployment” for the reviewed two-file change. Connector404
+was resolved through the host's existing authorized GitHub login. Commit
+fe08c94ad975a24c26dccc78f0b9333d2bc4a203 is pushed to rldiamond/twichgg_traefik main and live:
+
+- Only the Workbench router gains an actual-connection-peer IPAllowList for the
+  original10.0.0.0/24 clients. No ipStrategy trusts incoming X-Forwarded-For.
+- Only the Workbench backend uses namedworkbench-lan-ca@file with
+  insecureSkipVerify=false and /dynamic/workbench-home-lan-ca.crt. The uploaded
+  file is the public CA certificate only. Certificate chain and IP SAN10.0.0.9
+  validate; no domain SNI override or Host/Origin rewriting is used.
+- Shared global settings, Compose and unrelated routes are unchanged. Traefik
+  3.7.18 retained its November11 process start; file watching loaded the change.
+  Live API confirms middleware/transport enabled. HTTP and TCP service audits
+  found no alternate route to this backend that bypasses the guarded router.
+
+## Release, history and actual acceptance
+
+99focused boundary/administrator checks and full localcheck passed. Exact hosted
+run43318428367 passed all9jobs including finalverify. Both downloaded artifact
+SHA256s and the complete161-file backend inventory were verified. All26hosted
+frontend files match the sealed local candidate. The installed seal is
+28c20df8b8a3d0cb66b12e826cfc3870caa53ebe341bf6c096c0e02a2fc8b081; all5504sealed static files match.
+
+The current store at cutover had924rows/31tables/schema0014, newer than the early
+920-row observation. Before stop, stopped source, copied store, installed store,
+four-service restart and independent restore all match logical SHA256
+1d771bbd1fdb6b1fda3a1bcedc1f28753822af000a3853e5e60627c6266bab68.
+Original permissions/contributions/candidate/history and draft-policy instruction/
+automatic-start are preserved; only the copied store identity is rebound through
+the existing configuration owner. Normal model authentication401/200 and unchanged
+key were verified after installation and restart. The local model service was not restarted.
+
+Actual normal-DNS HTTPS through portal returns200, with normal certificate
+verification, exact installed index/assets and successful read-only APIs. Wrong
+Origin, wrong/missing CSRF, backend Origin and cross-site requests return403.
+A direct LAN peer cannot impersonate portal using forwarded headers (400).
+Valid Origin+CSRF reaches the nonexistent endpoint's method refusal405 with no
+handler or task write. The probe initially expected404; the existing GET fallback
+explains405, so only that test expectation was corrected. Strict403 checks remain.
+
+Real1440desktop/390phone feature/results, reload and200%phone text were inspected
+through the actual domain. No browser error or mutation occurred. Both original
+checked contributions, candidateac9781fc,8requirements, draft binding36383352 and
+the correct separate publication hold remain. The browser runner used the existing
+project Node/library/browser discovery after correcting a shell PATH and custom
+browser-directory mismatch; no downloads or TLS bypass were needed.
+
+A raw API comparison initially counted live observed_at as a saved-data change;
+only that observation field differs in the original feature projection. Newer
+planning activity then appeared after the completed924-row restart/restore proof.
+The last read-only live snapshot had926rows and one running planning job, with
+integrity/foreign-key checks passed. Its changing intake projection is legitimate
+current activity, not grounds to replace the live store or repeat restoration.
+No active work was paused/cancelled; all four exact services and static source
+remain verified. Do not restore the earlier snapshot over this newer live work.
+No model/task run was initiated for connectivity testing. A new complete task
+through the proxy was not exercised; earlier real bug/test draft deliveries remain.
+
+Private proof root: /home/rich/.local/share/TwichUI-Workbench/traefik-connectivity-20261112T215605Z.
+Start with deployment/final-installed-proof.json, actual-proxy-proof.json,
+proxy130-browser-proof.json, history-restored.json and offline-verification.json;
+private-router-audit.json and traefik-deployment-proof.json cover the live proxy.
+Original failures/early observations are retained rather than rewritten.
+Unrelated WORKBENCH_ADMIN_APPROVAL edits and dependency links are preserved.
+
+Connectivity is complete. The unrelated gallery-check failure still holds the
+feature PR and requires its separate scope decision. No addon change, merge,
+release, public access or new campaign was performed or queued here.
+
 # November 12 — portal-only policy approved; reviewed installer awaits owner authentication
 
 The owner replied “Approve” to the exact enp4s0 UFW /32 exception and the LAN
