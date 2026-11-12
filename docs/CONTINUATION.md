@@ -1,3 +1,36 @@
+# November 12 — installed126; corrected third allowed coding grant ACTIVE
+
+Exact3d932257fad9aff49f3ab58823f05857245ddacf ALL9 full43204609232 passed.
+Frontend13937530770 SHAe02c497999d3cdc54eed6e8fdd83aad7b0667ea9f6e8162af9879118604f8693;
+acceptance13939335626 SHA6e3571f7adcfc755ee200124d534f23530ae63ea8d02f97d1879b4e8c7bc5ab1.
+Installed126 sealfe713920ea1734da5d563e8494a3d8f531630095acb9b8d2b49891155a500f93.
+Fresh763rows fingerprintaecb0a02b8c3d0b6c12abc4a90f2e19d3aee7adfd76060141d624c90b50815a9
+preserved with all52requests and6contextfiles/1750423bytes/manifest7e1d463d. Independent
+old/new/restore readers, four-role restart, ACTUAL126→125→126, TLS/LAN/firewall/8765/
+model401/200/keyhash/seals passed BEFORE new writes. Desktop1440,phone390,320at200%,
+keyboard/reload/default/advanced passedzeroerrors/mutations; desktop/phone inspected.
+All26frontend bytes match exact hosted artifact. Backend2artifact independently
+verified1251cases no failures/errors.62related cases passed. Native763row copy replay
+advanced slot4/codinggrant3 of ORIGINAL3, original approval/ALLgrants/ALLusage exact,
+no model/grant. Inactive dependency restore all4085bytes/modes/links/mtimes passed;
+verified archives retain inactive dependencies, current/rollback/fallback untouched.
+
+resume-after-install.py ALREADY EXECUTED ONCE: own24unpaused→25engineeringpause→26
+unpaused restored. DO NOT replay. At11:14:59UTC SAME parent6998247a native SLOT4 is
+codingGRANT3,39model-attempt rows/1active/3coding request rows (old unknown before
+provider, known first actual862tokens/13responses/read-loop, CURRENT correctedcode).
+Native preparation ready and baseline-reuse.json true, fresh isolation passed.
+Qwen receives its compiled step checks and focused-test-first initial context;
+2empty repeated source decisions after BOTH writable files invokes guarded edit
+phase. Actual grant count includes the prior unknown grant in full; hard max3,
+24000tokens/20turns each unchanged. Every old slot/clock/record stays exact. Parent
+14:15:43 window unchanged. Zero checked steps/real feature completions at observation.
+NEVER restart/deploy/replay763baseline rollback or old drivers while coding active or
+after new writes. Monitor actual output/checks, then meaningful dependent steps,
+independent combined checks and coherent draft PR; attach actual URL. Continue campaign.
+Private receipts outcome-3d93225, LATEST_NATIVE_FEATURE_DELIVERY.json. Original local
+edits in docs and .venv/node_modules links remain unrelated and preserved.
+
 # November 12 — first actual Qwen coding settled; navigation and grant accounting repaired
 
 Installed125 requeste911f1ce/fence511f4952 actually ran13complete provider responses:
