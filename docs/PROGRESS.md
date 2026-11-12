@@ -1,3 +1,73 @@
+# November 12 — COMPLETE: verified combined feature installed128; stop for owner review
+
+This is the latest operational state. Earlier active/stopped notes below are history.
+Following the Project Working Philosophy, the owner-requested evidence-composition
+milestone is complete. Do not start another feature campaign or dispatch a model.
+
+Installed **bca52b785748ad9ad4ae4b11c8ea929ade34a411 / deployment128**, branch
+`codex/everyday-workbench`. Full hosted **43292806054** passed all9required jobs,
+including final `verify`; exact full-release artifact,160-file backend inventory
+hash and both artifact ZIP digests verified. All26frontend files match hosted bytes.
+Seal `cd1a2d206f0bfa8ae7575948a38bfa7dc6549f0c5b2eb50c6565a0bf489dc94b`.
+Source proof verifies679tracked files and exact root owner documents. The closing
+report-only commit does not change the installed runtime or authorize another build.
+
+One actual coherent local feature result is saved: comparison8a11c7e1 / parent1ce16b7f,
+combined execution3050529d-13d5-50a0-a938-f9b0885f43a2,
+candidateac9781fc3b725a1a29382418b02c904e34a6c4c3ab9fa1b19545fca43d634a45.
+Two preserved real Codex implementations; original and exact final addon suites178/0;
+all10supplemental observations pass candidate with correct original controls and
+semantic missing-feature failures. Frozen completion, exact final ancestry and one
+credential-free local Git bundle qualify. No implementation replay or new model
+request. See [frozen local evidence matrix](FEATURE_EVIDENCE_COMPOSITION_20261112.md).
+Later fixture corrections remain candidate-exposed diagnostics, not new blind authorship.
+
+All4installed services active/enabled. Loopback/privateLAN/TLS/assets, inherited
+filters, ingress/CSRF boundaries, model401/200/unchanged key and untouched8765pass.
+Actual1440desktop/390phone feature and complete-result screenshots inspected after
+four-service restart;8behavior summaries,3checked steps plus ready local package,
+review link, reload, no overflow/errors/writes. Publicationfalse/no draftURL;
+actual game installation/rendering/reload/logout and physical handset remain unproved.
+
+The installed store, pre/postrestart store and independent restore all match:
+**908rows/31tables/schema0014/hash22190b1c908b9318bb5ad4cf4a4f77289e595d8169d7bda3093ee7163888f25f**.
+ALL789original rows and52original requests remain byte-exact;55total intake records
+retain previous comparison history. Every original model-attempt row is unchanged;
+zero new provider operations. Global AI/other preferences are unchanged; workpaused.
+Original Qwen feature5d62e6bc retains5planned/0checked and original permissions.
+Original127/ade9295with789rows and rollback126/3d93225seals/source/history are retained.
+Do not restore an older snapshot over the newer completed history.
+
+Local release evidence:2605backend passes/8skips across the complete2613-case
+inventory,65frontend,129standard+4connected browser,12visual without reference edits.
+The interrupted serial run is not a full pass. /tmp inode failures were retained,
+exact affected cases rerun on private home storage, and failed scratch archives
+hash-verified including Git hard links before removal. The remaining budget receipt
+writer now explicitly creates0600; all28affected recovery/session cases pass and
+strict readers remain unchanged. Hosted verification independently passes final code.
+
+Operational holds remain visible: wrong dormant-check mode for a formerly installed
+rollback, an absent comparison-context source after exact original-context copy,
+LAN startup attempted before its required rule, and a browser read interrupted by
+our restart. Correct historical seal mode, unchanged context snapshot, required
+firewall-before-LAN order and stable postrestart browser checks all pass. No source,
+network, service-owner, data or acceptance guard was waived. Do not replay old install
+or worker scripts; installation and recovery already executed.
+
+Private evidence: `/home/rich/.local/share/TwichUI-Workbench/evidence-composition-20261112`;
+release proof `deployment/final-installed-proof.json`, native result/backup/control
+receipts, `restarted-browser-proof.json` and screenshots. Current source is
+`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-bca52b7`.
+**Retain the comparison stage** `/home/rich/TwichUI-Workbench/.local/m5-review/everyday-codex-comparison-20261112`:
+its immutable task artifacts/handoffs and local feature bundle remain authoritative
+absolute references. Retain the private evidence root, original127 and rollback126.
+The existing LATEST_NATIVE_FEATURE_DELIVERY pointer now reflects128and separates
+unfinished original Qwen work from this completed local Codex feature.
+
+Stop for owner review. Addon publication/merge/game changes and a new campaign are
+not queued. No genuine access, product or spending decision is needed to close this
+assigned local result. Unrelated administrative notes and dependency links are intact.
+
 # November 12 — REAL combined feature result saved
 
 The same existing two checked Codex steps now produce one independently verified

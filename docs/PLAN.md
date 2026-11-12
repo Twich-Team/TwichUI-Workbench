@@ -1,3 +1,13 @@
+# November 12 — assigned milestone complete; owner review
+
+One real combined Feature Workshop result is independently verified, saved and
+installed in private128/bca52b7. Full hosted43292806054 and all installed/restart/
+restore/desktop/phone checks pass. Original Qwen/history/permissions, old127and
+rollback126remain preserved. Addon publication and actual game changes remain held.
+See CURRENT_STATUS and the latest CONTINUATION receipts. Stop here for owner review;
+no new model request, feature work or development campaign is queued. Earlier active
+entries below are historical for this completed assignment.
+
 # November 12 — accepted evidence-composition assignment
 
 The owner accepted the design review and authorized completing one real combined
