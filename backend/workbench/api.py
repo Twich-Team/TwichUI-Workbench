@@ -12,7 +12,7 @@ from sqlalchemy.exc import OperationalError
 from workbench import verification, admission, implementation, pr_preparation, private_lan
 from workbench import catalog, monitoring, preferences, intake, model_policy, model_accounting
 from workbench.schemas import DisplaySettings, Resources, Policy, ActivityDistribution
-from workbench.schemas import (FeatureAttachmentUpload, FeatureAttachmentView,
+from workbench.schemas import (ArtifactReferenceInput, FeatureAttachmentUpload, FeatureAttachmentView,
     FeatureReferenceLookupInput, FeatureReferenceLookupView)
 from workbench.schemas import CatalogPage, CatalogDetail, WorkOverview, HistoryPage
 from workbench.db import commands, engine_for, tasks
@@ -237,6 +237,11 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     @app.post('/api/intake/{identity}/artifacts', response_model=IntakeView, responses=errors)
     def proposal_attach(identity: str, body: ArtifactInput):
         intake.attach(app.state.engine, identity, body)
+        return intake.view(app.state.engine, identity)
+
+    @app.post('/api/intake/{identity}/reference-artifacts', response_model=IntakeView, responses=errors)
+    def attach_original_reference(identity: str, body: ArtifactReferenceInput):
+        intake.attach_reference(app.state.engine, identity, body)
         return intake.view(app.state.engine, identity)
 
     @app.get('/api/planning-artifacts/{identity}')

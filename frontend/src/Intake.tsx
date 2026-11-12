@@ -15,7 +15,7 @@ import { minutes, providerOutcome } from './taskProgress';
 import { ExactRunLimits, RunLimits } from './RunLimits';
 import {savedTaskRoute,savedTaskAI,taskAIRoute} from './modelPreferences';
 import {ModelChoiceFields} from './ModelChoiceFields';
-import {FeatureContextFields} from './FeatureReferences';
+import {FeatureContextFields,ProposalReferenceFiles} from './FeatureReferences';
 import {CleanupReview,TaskActions,type CleanupChoice} from './TaskCleanup';
 
 type Input = components['schemas']['IntakeInput'];
@@ -509,6 +509,7 @@ function ProposalReview({proposal, data, act, busy}: {proposal:Proposal;data:Int
   <details open={review.required_artifacts.length>0 || review.scope_conflicts.length>0 || undefined}>
     <summary>In-game scope and attachments</summary>
     <ScopeControl key={`scope-${review.id}-${data.human_scope.revision}`} data={data} proposal={review} act={act} busy={busy}/>
+    <ProposalReferenceFiles intake={data} proposal={review} disabled={locked} act={act}/>
   <div className="proposal-artifacts">{review.required_artifacts.length>0 && <p>Add a picture of the proposed change and a picture of the current in-game screen before approval.</p>}{review.scope_conflicts.map(message=><p className="scope-conflict" role="note" key={message}>{message}</p>)}{review.artifacts.map(a=><figure key={a.id}>{a.media_type==='image/png' && <img src={`/api/planning-artifacts/${a.id}`} alt={`${artifactRole(a.role)}: ${a.label}`}/>}<figcaption><a href={`/api/planning-artifacts/${a.id}`}>{a.label}</a> · {artifactRole(a.role)} · Manually attached reference, not proof of implementation</figcaption></figure>)}
   {!locked && !draft && <details><summary>Attach a picture or supporting note</summary><form className="artifact-form" onSubmit={e=>void upload(e)}><label>Artifact role<select value={role} onChange={e=>setRole(e.target.value as Artifact['role'])}><option value="mockup">Proposed mockup</option><option value="game_context">In-game-context reference</option><option value="evidence">Supporting evidence</option></select></label><label>Artifact label<input required maxLength={160} value={label} onChange={e=>setLabel(e.target.value)}/></label><label>Private attachment · PNG or text, up to 1 MiB<input type="file" accept="image/png,text/plain" required onChange={e=>setFile(e.target.files?.[0] || null)}/></label>{uploadError && <p className="form-error" role="alert">{uploadError}</p>}<Button type="submit">Attach to this plan</Button></form></details>}</div>
   </details>

@@ -605,6 +605,17 @@ test('feature files and source references stay with the original request through
  expect(saved.request_attachments).toHaveLength(1);expect(saved.reference_addons).toHaveLength(2);
  expect(saved.reference_addons[0].revision).toBe('a'.repeat(40));expect(saved.reference_addons[1].revision).toBeNull();
  expect(saved.intake.original.feature_attachments[0].id).toBe(saved.request_attachments[0].id);
+ await page.getByRole('link',{name:'Review plan or question',exact:true}).click();
+ await page.getByText('In-game scope and attachments',{exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Pictures and notes from your request',exact:true})).toBeVisible();
+ const copied=page.waitForResponse(response=>response.url().endsWith('/api/intake/'+identity+'/reference-artifacts')&&response.request().method()==='POST');
+ await page.getByRole('button',{name:'Use A long owner design reference with spaces.png for this plan',exact:true}).click();
+ const copiedResponse=await copied;expect(copiedResponse.ok()).toBeTruthy();const adopted=await copiedResponse.json();
+ expect(adopted.decisions).toHaveLength(0);expect(adopted.proposals[0].artifacts).toHaveLength(1);
+ expect(adopted.proposals[0].artifacts[0].sha256).toBe(saved.request_attachments[0].sha256);
+ await page.getByRole('button',{name:'Open refreshed review',exact:true}).click();
+ await expect(page.getByText('A long owner design reference with spaces.png · Used in this plan.',{exact:true})).toBeVisible();
+ await page.goto('/features/'+identity);await expect(page.getByText('3 references',{exact:true})).toBeVisible();
  for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
   await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
   await overflow(page);await capture(page,info,`feature-owner-references-${width}-${font}`,{keepInCompact:true});

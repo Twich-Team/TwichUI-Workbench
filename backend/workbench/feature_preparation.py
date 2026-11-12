@@ -5,6 +5,7 @@ are used throughout. A provider claim never expires into automatic replay.
 """
 import copy
 import json
+import re
 import time
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
@@ -50,9 +51,13 @@ def packet(c, decision_id, task_id, feature_input, *, inspections=()):
     directories={str(PurePosixPath(f['path']).parent)+'/' for f in files}
     inventory=feature_step_source.index(root,base)
     inventory.sort(key=lambda item:(not any(item['path'].startswith(d) for d in directories),item['path']))
+    terms=set(re.findall(r'[a-z]{3,}',linked['original']['title'].lower()+' '+linked['original']['description'].lower()))
+    tests=[item for item in inventory if re.fullmatch(r'tests/test_[A-Za-z0-9_-]+\.lua',item['path'])]
+    tests.sort(key=lambda item:(-sum(term in item['path'].lower() for term in terms),item['path']))
     value.update(source_index=inventory[:96],source_index_truncated=len(inventory)>96,
+        focused_test_candidates=tests[:12],
         inspection_capabilities=dict(read_only=True,max_requests=3,page_lines=80,response_characters=6500,
-            note='Request actual source reads/searches when excerpts omit definitions. No shell, network, edits or new provider authority.'))
+            note='Index and test candidates are existing names, not inspected source. Read a suitable existing focused test before completing a scope. Request actual definitions as needed. No shell, network, edits or new provider authority.'))
     for record in inspections:
         if record.get('feature_input_binding')!=digest(feature_input):
             raise ValueError('Source inspection belongs to different checked predecessor input.')
@@ -215,8 +220,11 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
                 if parsed.limitation.strip():
                     unsupported=True
                     raise ValueError('This step needs an unsupported source capability: '+parsed.limitation)
-                if not set(parsed.read_paths) <= {f['path'] for f in current_packet['files'] if f['excerpts']}:
-                    raise ValueError('Step preparation selected a source file outside its inspected packet.')
+                inspected={f['path'] for f in current_packet['files'] if f['excerpts']}
+                unseen=set(parsed.read_paths)-inspected
+                if unseen:
+                    names=[path for path in sorted(unseen) if feature_steps.eligible_path(path)]
+                    raise ValueError('Step preparation needs committed-source inspection for selected paths: '+', '.join(names)[:650]+'. Request inspection before selecting them.')
                 result = feature_steps.compile_scope(c, decision_id, task_id, raw, feature_input=feature_input)
     except (ValueError, OSError, HTTPException, PlanningUnavailable, KeyError, TypeError) as error:
         failure = 'Step preparation could not finish: '+(str(error)[:800] if not isinstance(error, HTTPException) else 'The saved feature changed.')

@@ -1,3 +1,65 @@
+# November 12 — installed117; read choices and current-plan picture reuse ready for release
+
+Exact446fcd3377ebb5d11c315b76e6ab5db64fbb6192 passed ALL9jobs in full43149083695.
+Frontend13912119137 SHAc7529122a64e5ad41f4735ba8e54546a6a848ee2ee48e5ad6923ac403f3407d5;
+acceptance13912734500 SHA10ac745612a42a57ae0ad7ce1bde66d541cd035177c2e3a8370c49adc71abda5.
+Installed117 seal927c31ee00b00c75dd19df52e673d64a27cc04565fc9b03b20f93ecebbbed2ec.
+All722rows/52requests preserved through exact copy, BOTH independent readers,
+actual117→116→117 and four-role restart. ALL6private context files/1750423bytes
+copied with exact manifest7e1d463dd5be86d160574cb1232f8e1a2090e352e57a2b46559463a94a539e0a,
+including original unsubmitted drafta49dd05f. TLS/LAN/firewall/8765/source seal and
+normal model401/200 verified. New reader independently qualified old pre-send
+rejection without changing NULL usage and replayed actual source hash receipts;
+next wire packet20654bytes < unchanged24000. No4469d8dactivation occurred.
+
+Ordinary browser then granted fresh3read-only requests for SAME parent6998247a.
+One12token response was only inspection:null (grammar allowed an empty response);
+local validator rejected it. Two further requests read actual definitions. A
+THIRD separate finite allowance then produced3complete-shaped scopes, all rejected:
+unread map files plus fabricated tests/map_view_spec.lua, which does NOT exist.
+No addon edit/request/grant/checked step. Real history now11scope records:10known
+finished generations and1native pre-send rejection;16total model-attempt rows,
+0active. Known scope usage63412tokens, original NULL usage retained. Parent/request/
+plan/old scope and ledger histories remain immutable. TWO continuation drivers
+for117 ALREADY EXECUTED: continue-real-feature-446fcd3.cjs and
+continue-real-feature-third-read-allowance.cjs. Their unique command/intent/review/
+receipts and native snapshots are under outcome-446fcd3; DO NOT replay them or Build.
+Current728row hash6e7e0f7f32468bb5f295cf70a6530d34c1ecd0c454c1284d0426346c34fce9d5.
+Normal model auth/source seal verified after the hold. Do NOT replay722baseline
+rollback scripts after these newer records. Original parent deadline remains
+2026-11-12T07:32:09.163458+00:00, never extended by read-only allowances.
+
+Development wire now requires a complete scope, nonempty actual inspection, or
+nonempty limitation. No empty/inspection:null outcome; full scopes enumerate ONLY
+currently inspected read/write paths and existing inspected tests/test_*.lua.
+Without an inspected suitable test, only inspection/limitation can be generated.
+A bounded12name existing-test index guides actual source reads; names alone confer
+no read/write authority. Read paths must include every writable file/focused test.
+Missing-path feedback names the needed inspections instead of repeating a generic
+error. Actual held packet20975bytes and no tests yet inspected, so its grammar
+correctly offers only inspection/limitation. No manual map scope/solution/new file
+permission. Existing-file/write/independent-check safeguards remain unchanged.
+
+FW6 original-picture reuse uses a new explicit current-proposal attachment action
+through existing proposal_artifacts and CAS binding. Exact original owner UUID/
+SHA/metadata/purpose must validate; foreign, altered or missing files cannot copy.
+Copying original passive4MiB files does not relax the old1MiB manual-upload route,
+authorize any plan/run, or cause model/network calls. Old/reviewed revisions stay
+immutable. Native bytes and both visual roles qualify only after owner selection;
+original files remain context until that action. UI previews/reuses originals,
+keeps exact retry identity, fences stale attachment commands, and avoids duplicate
+references in Feature Workshop. No table/migration/new permission owner.
+
+157affected native/planning/visual/context cases and58frontend cases pass. Three
+connected browser journeys pass with actual Lua/Git combined checks and explicit
+source-picture reuse/review, while model/egress responses remain controlled. The
+first reuse test forgot to open the existing collapsed nonvisual scope section;
+it now follows that actual UI.6formatting errors in the new test were corrected.
+Final source static/browser checks are in current logs. Need exact new full9job
+acceptance before activation. Continue SAME feature with a FRESH separately reviewed
+finite source allowance after installation; old attempts/clock stay unchanged.
+FW6 supported comparison/results and FW7 remain; zero real feature completions.
+
 # November 12 — installed116; real source windows worked, pre-send input hold repaired in development
 
 Exact98ed82b30128311e31b4a4d0bb923ff5aed4f17e passed ALL9 hosted jobs in

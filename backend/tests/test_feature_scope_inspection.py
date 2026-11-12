@@ -8,6 +8,7 @@ from sqlalchemy import select
 
 from workbench import feature_preparation
 from workbench import feature_step_source
+from workbench import feature_steps
 from workbench.db import planning_jobs, real_execution_grants, model_attempts
 from test_feature_preparation import context, ScopePlanner
 from test_feature_steps import scope
@@ -16,6 +17,23 @@ from test_everyday import installed as installed
 
 def read_request():
     return dict(inspection=[dict(path=scope()["read_paths"][0], start=1, end=120)], limitation="")
+
+
+def test_scope_wire_requires_an_outcome_and_only_inspected_existing_test_choices():
+    from workbench.planning_response import wire_schema
+    files=[dict(path='!!!TwichUI/View.lua',excerpts=[dict(line=1,text='local state = {}')]),
+           dict(path='tests/test_view.lua',excerpts=[dict(line=1,text='local H = {}')]),
+           dict(path='tests/test_metadata_only.lua',excerpts=[])]
+    schema=wire_schema(feature_steps.StepScope,files=files)
+    assert all(branch['required'] for branch in schema['anyOf'])
+    complete=schema['anyOf'][0]
+    assert set(complete['required'])=={'role','read_paths','writable_paths','focused_test','checks'}
+    assert complete['properties']['focused_test']['enum']==['tests/test_view.lua']
+    assert complete['properties']['read_paths']['items']['enum']==['!!!TwichUI/View.lua','tests/test_view.lua']
+    inspection=next(b for b in schema['anyOf'] if b['required']==['inspection'])
+    assert inspection['properties']['inspection']['type']=='array'
+    without_test=wire_schema(feature_steps.StepScope,files=files[:1])
+    assert all('role' not in branch['required'] for branch in without_test['anyOf'])
 
 
 def test_inspect_actual_definitions_then_prepare_scope_in_same_parent_and_original_limits(

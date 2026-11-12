@@ -482,6 +482,34 @@ def validate_artifact(body, *, max_bytes=1024*1024):
 
 def attach(engine, identity, body):
     data = validate_artifact(body)
+    return _attach_bytes(engine, identity, body, data)
+
+
+def attach_reference(engine, identity, body):
+    """An explicit current-plan choice reuses exact original owner bytes.
+
+    Original pictures remain context across revisions. Only this reviewed action
+    associates one with the current proposal; nothing approves the plan or run.
+    """
+    from types import SimpleNamespace
+    from workbench import feature_attachments
+    with engine.connect() as connection:
+        row = require(connection, intakes, identity)
+        claim = next((value for value in row['payload'].get('feature_attachments') or []
+                      if value['id'] == str(body.reference_id)), None)
+        if not claim:
+            raise HTTPException(422, 'Choose a file attached to this original feature request.')
+        try:
+            feature_attachments.validate(engine, identity, [claim])
+            metadata, data = feature_attachments.load(engine, claim.get('source_request_id') or identity, claim['id'])
+        except (ValueError, OSError, KeyError, TypeError):
+            raise HTTPException(409, 'The original reference is unavailable or changed. Nothing was attached.') from None
+    selected = SimpleNamespace(artifact_id=body.artifact_id, proposal_id=body.proposal_id,
+        binding=body.binding, role=metadata['role'], label=metadata['filename'], media_type=metadata['media_type'])
+    return _attach_bytes(engine, identity, selected, data, reserve=True)
+
+
+def _attach_bytes(engine, identity, body, data, *, reserve=False):
     with write_transaction(engine) as connection:
         old = connection.execute(select(proposal_artifacts).where(proposal_artifacts.c.id == str(body.artifact_id))).mappings().first()
         if old:
@@ -497,6 +525,14 @@ def attach(engine, identity, body):
             raise HTTPException(409, 'A decided proposal is immutable. Request a revision before changing its artifacts.')
         if len(artifact_rows(connection, proposal['id'])) >= 8:
             raise HTTPException(422, 'This revision already has eight artifacts.')
+        if reserve:
+            import os
+            import shutil
+            from workbench.storage_resources import RECOVERY
+            from pathlib import Path
+            parent = Path(engine.url.database).parent
+            if shutil.disk_usage(parent).free < RECOVERY + len(data) + 16384 or os.statvfs(parent).f_favail < 8192:
+                raise HTTPException(409, 'There is not enough free storage to retain this reference safely. The original file remains saved.')
         connection.execute(proposal_artifacts.insert().values(id=str(body.artifact_id), proposal_id=proposal['id'],
             role=body.role, label=body.label, sha256=hashlib.sha256(data).hexdigest(), media_type=body.media_type,
             data=data, created_at=now()))

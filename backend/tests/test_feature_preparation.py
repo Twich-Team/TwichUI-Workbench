@@ -71,7 +71,8 @@ def test_settled_invalid_scope_gets_bounded_feedback_and_unknown_generation_neve
     assert feature_preparation.prepare_scope(store, job_id, first, adapter=invalid)
     unknown = ScopePlanner(uncertain=True)
     assert feature_preparation.prepare_scope(store, job_id, first, adapter=unknown)
-    assert 'outside its inspected packet' in unknown.calls[0]['previous_validation_failure']
+    assert 'committed-source inspection' in unknown.calls[0]['previous_validation_failure']
+    assert '!!!TwichUI/absent.lua' in unknown.calls[0]['previous_validation_failure']
     assert not feature_preparation.prepare_scope(store, job_id, first, adapter=ScopePlanner())
     with store.connect() as c:
         job = c.execute(select(planning_jobs).where(planning_jobs.c.id == job_id)).mappings().one()

@@ -624,6 +624,13 @@ class ArtifactInput(StrictModel):
     data_base64: Annotated[str, Field(max_length=1400000)]
 
 
+class ArtifactReferenceInput(StrictModel):
+    artifact_id: UUID
+    proposal_id: UUID
+    binding: Annotated[str, Field(pattern=r'^[a-f0-9]{64}$')]
+    reference_id: UUID
+
+
 class ArtifactView(StrictModel):
     id: str
     role: str

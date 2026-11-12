@@ -428,3 +428,4 @@ h2,h3{overflow-wrap:anywhere;min-width:0;}
 .feature-file-reference img {display:block;width:100%;max-height:16rem;object-fit:contain;border:1px solid #65503b;border-radius:.3rem;background:#100c09;}
 .feature-file-reference figcaption {margin-top:.5rem;font-size:.9rem;}
 .reference-project-choices {display:grid;gap:.6rem;margin:.7rem 0;}
+.original-plan-references .button {white-space:normal;max-width:100%;text-align:left;}

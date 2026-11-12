@@ -20,6 +20,32 @@ export function RequestReferences({requestId,files,references,notice}:{requestId
  return <>{notice&&<p className="soft-callout" role="note">{notice}</p>}{files.map(file=><figure className="feature-file-reference" key={file.id}>{file.media_type==='image/png'&&<a href={attachmentURL(file.request_id||requestId,file.id)} target="_blank" rel="noreferrer"><img loading="lazy" src={attachmentURL(file.request_id||requestId,file.id)} alt={file.caption||file.filename}/></a>}<figcaption><a href={attachmentURL(file.request_id||requestId,file.id)} target="_blank" rel="noreferrer">{file.filename}</a> · {Math.ceil(file.size/1024)} KB{file.caption&&<p>{file.caption}</p>}<small>Owner reference · Not proof of implementation</small></figcaption></figure>)}{references.map((reference,i)=><ReferenceCard reference={reference} key={reference.source_url||reference.name+i}/>)}</>;
 }
 
+export function ProposalReferenceFiles({intake,proposal,disabled,act}:{
+ intake:components['schemas']['IntakeView'];proposal:components['schemas']['ProposalView'];disabled:boolean;
+ act:(suffix:string,body:unknown,method?:string)=>Promise<void>;
+}){
+ const claims=intake.original.feature_attachments||[];
+ const files=useQuery({queryKey:['proposal-owner-files',intake.id,claims],queryFn:()=>Promise.all(claims.map(file=>request<Attachment>(attachmentURL(file.source_request_id||intake.id,file.id)+'/metadata'))),enabled:claims.length>0});
+ const [error,setError]=useState('');const [saving,setSaving]=useState(false);
+ async function useReference(file:Attachment){
+  const key=`proposal-file:${proposal.id}:${file.id}`;setSaving(true);setError('');
+  try{
+   const previous=localStorage.getItem(key);let pending:components['schemas']['ArtifactReferenceInput']|null=null;
+   try{pending=previous?JSON.parse(previous):null;}catch{/* A damaged local draft grants no authority. */}
+   // A changed canonical binding fences the old copy. A fresh click can choose
+   // this same original file for the newly opened review with a new identity.
+   const command=pending?.binding===proposal.binding?pending:{artifact_id:crypto.randomUUID(),proposal_id:proposal.id,binding:proposal.binding,reference_id:file.id};
+   localStorage.setItem(key,JSON.stringify(command));await act('reference-artifacts',command);localStorage.removeItem(key);
+  }catch(reason){setError((reason as Error).message);}finally{setSaving(false);}
+ }
+ if(!claims.length)return null;
+ return <section className="original-plan-references" aria-label="Original request files"><h3>Pictures and notes from your request</h3><p>Choose a saved reference for this plan without uploading it again. This attaches its original bytes and purpose to this revision; plan and run approval remain separate.</p>
+ {files.isError&&<p role="alert">An original reference is unavailable. Its saved request remains unchanged.</p>}
+ {files.data?.map(file=>{const used=proposal.artifacts.some(artifact=>artifact.sha256===file.sha256&&artifact.role===file.role);return <div key={file.id}>{used?<p>{file.filename} · Used in this plan.</p>:<><RequestReferences requestId={intake.id} files={[file]} references={[]}/><Button type="button" variant="secondary" disabled={disabled||saving} onClick={()=>void useReference(file)}>Use {file.filename} for this plan</Button></>}</div>;})}
+ {error&&<p role="alert" className="form-error">{error} Retrying keeps the same saved attachment command.</p>}
+ </section>;
+}
+
 export function FeatureContextFields({body,update,disabled,onBusy}:{body:Input;update:(change:(current:Input)=>Input)=>void;disabled:boolean;onBusy:(busy:boolean)=>void}){
  const fileField=useRef<HTMLInputElement>(null);
  const [file,setFile]=useState<File|null>(null);const [caption,setCaption]=useState('');

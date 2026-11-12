@@ -34,7 +34,7 @@ function FeatureDetail({identity}:{identity:string}){
  const feature=query.data;const original=feature.intake;const proposal=original.proposals.find(p=>p.revision===original.revision);const plan=proposal?.content;
  const active=feature.steps.find(s=>s.task.id===feature.current_step);const next=feature.steps.find(s=>s.task.id===feature.next_step);
  const preferences=original.original.ai_settings;const provider=preferences?.primary.provider||(original.original.local_planning?.startsWith('codex')?'codex':original.original.local_planning?'local':null);
- const attachments=proposal?.artifacts||[];const objective=objectivePreview(feature.objective);const referenceCount=attachments.length+(feature.request_attachments?.length||0)+(feature.reference_addons?.length||0);
+ const attachments=(proposal?.artifacts||[]).filter(artifact=>!(feature.request_attachments||[]).some(file=>file.sha256===artifact.sha256&&file.role===artifact.role));const objective=objectivePreview(feature.objective);const referenceCount=attachments.length+(feature.request_attachments?.length||0)+(feature.reference_addons?.length||0);
  async function correctSteps(){
   if(!feature.correction)return;
   const command=correctionCommand||{command_id:crypto.randomUUID(),binding:feature.correction.binding};

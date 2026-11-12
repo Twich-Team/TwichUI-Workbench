@@ -1,3 +1,13 @@
+# Original pictures in current plan review — November 12, 2026
+
+Original feature uploads remain untrusted context. Only an explicit CSRF-protected
+current-proposal action copies validated original owner bytes/purpose into existing
+proposal_artifacts. CAS, immutable decided revisions, exact retry identity, private
+source binding and physical recovery reserve remain. This is an attachment choice,
+never plan/run approval, a model request, image generation or implementation proof.
+Read-only feature grammar now enumerates actual inspected paths/tests and disallows
+empty outcomes; the authoritative compiler still owns all scope/grant decisions.
+
 # Native pre-send feature preparation settlement — November 12, 2026
 
 A native StepScope schema/request-rejected journal may independently establish an
