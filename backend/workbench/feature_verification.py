@@ -131,6 +131,8 @@ def specification(c, job):
     source, base, _ = repository()
     if base != permission["scope"]["feature_base"]:
         raise ValueError("Original feature base moved before combined verification.")
+    from workbench.feature_run_recovery import time_authority
+    authority_reference, allowed_end = time_authority(c,approval,permission)
     value = dict(
         version=1,
         operation_kind=KIND,
@@ -148,7 +150,8 @@ def specification(c, job):
         independent_packet=prepared["packet"],
         independent_review=prepared["review"],
         identity=configuration(c.engine)["identity"],
-        expires_at=permission["expires_at"],
+        expires_at=allowed_end,
+        **({'time_authority':authority_reference} if authority_reference != 'original-parent-run' else {}),
         attempt=payload.get("feature_verification_attempt", 1),
     )
     return {**value, "binding": digest(value)}, oracle
@@ -516,6 +519,7 @@ class Runtime(CodingRuntime):
 
 
 def authority(c, snapshot, *, active=True):
+    from workbench.feature_run_recovery import deadline as parent_deadline
     spec = snapshot["feature_verification"]
     approval, permission, contributions, paths = checked_chain(
         c, spec["decision_id"], spec["records"], spec["feature_input"], active=active
@@ -541,7 +545,8 @@ def authority(c, snapshot, *, active=True):
         or spec["records"] != job["payload"].get("completed_steps")
         or contributions != spec["contributions"]
         or paths != spec["paths"]
-        or permission["expires_at"] != spec["expires_at"]
+        or parent_deadline(
+            c,approval,permission,reference=spec.get('time_authority','original-parent-run')) != spec["expires_at"]
         or not 1 <= spec.get("attempt", 1) <= permission["budget"].get("verification_attempts", 1)
         or spec["scope"]["task_id"] != linked["task"]["id"]
         or spec["scope"]["scope"]["role"] != "verification"

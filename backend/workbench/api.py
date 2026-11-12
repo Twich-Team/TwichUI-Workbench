@@ -26,6 +26,7 @@ from workbench.workspace_view import WorkspacePage
 from workbench import work_controls
 from workbench import feature_workshop, feature_recovery, feature_permission
 from workbench import feature_scope_recovery
+from workbench import feature_run_recovery
 
 # Exact authorities only. The dedicated HTTPS service admits the configured home subnet.
 AUTHORITIES = {"127.0.0.1:8787", "localhost:8787", "127.0.0.1:5180", "localhost:5180",
@@ -180,6 +181,11 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     @app.get('/api/features/{identity}/run-offer', response_model=feature_workshop.FeatureRunAvailability)
     def feature_run_offer(identity: str):
         return feature_workshop.run_offer(app.state.engine, identity)
+
+    @app.post('/api/features/{identity}/continue-unstarted-run', response_model=feature_workshop.FeatureView, responses=errors)
+    def continue_unstarted_feature(identity: str, body: feature_run_recovery.RunRecoveryInput):
+        feature_run_recovery.request(app.state.engine,identity,body)
+        return feature_workshop.view(app.state.engine,identity)
 
     @app.post('/api/features/{identity}/run', response_model=ProposalReceipt, responses=errors)
     def run_feature(identity: str, body: feature_permission.FeatureRunInput):

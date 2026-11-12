@@ -186,7 +186,9 @@ def reuse_baseline(runtime,source):
     if (previous.recipe!=runtime.recipe or sha(previous.initial.read_bytes())!=sha(runtime.initial.read_bytes())
             or tree(runtime.workspace)!=json.loads(runtime.initial.read_text())):
         return None
-    release=root.parents[3]
+    release=next((p for p in root.parents[:8] if (p/'backend/workbench/real_workspace.py').is_file()),None)
+    if release is None:
+        return None
     current=Path(__file__).resolve().parents[2]
     for name in ('real_workspace.py','real_confine.py','real_sandbox.py','verification_process.py'):
         old=release/'backend/workbench'/name

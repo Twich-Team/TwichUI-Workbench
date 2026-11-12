@@ -1,3 +1,28 @@
+# Never-dispatched feature continuation — November 12, 2026
+
+One explicit CSRF-protected browser receipt may permit a fresh six-hour window
+for the same first feature step after its unused slot was held for insufficient
+remaining time. This requires a canonical held journal/parent/slot, exact original
+scope and current source, known settled read-only usage (or native pre-send proof),
+no coding grants ever for this parent, no active requests, and the actual original
+private package containing ONLY BUDGET_BASELINE and owner-command. Its positive
+no-reservation proof and independently reconstructed readiness are hash-bound.
+The old approval, original expiry, old offer/deadline/package, usage and unused slot
+remain immutable. Fresh slot2 consumes the existing three-attempt allowance;
+no token/turn/provider/fallback/publication limit is reset. Stop and changed scope
+still withdraw dispatch. Existing grant/offer deadlines normalize as of their
+original creation time; fresh grants name the separate time-authority command.
+Combined checks bind their exact time-authority receipt. No old grant revives.
+This narrowly supports the actual never-dispatched initial slot, not uncertain
+implementation, general retry, arbitrary duration extension or unlimited windows.
+
+Package validation accepts a narrower one-cycle duration below existing ceilings;
+its existing full-run reserve still forbids short-slot dispatch. Native baseline
+reuse can locate an unchanged sealed checker from the existing preparation root;
+exact source/recipe/interpreter checks remain, fresh isolation is mandatory and
+candidate behavior is always checked again. No table/scheduler/privileged-policy
+or publication owner is added.
+
 # Inspected source remains usable through compaction — November 12, 2026
 
 Model-packet compaction preserves one actual excerpt per natively inspected file

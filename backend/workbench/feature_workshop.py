@@ -11,6 +11,7 @@ from workbench.schemas import (IntakeView, PlannedTaskView, FeatureBudget,
     FeatureAttachmentView, FeatureReferenceEvidence)
 from workbench.feature_recovery import CorrectionOffer
 from workbench.feature_scope_recovery import FeatureScopeCorrectionOffer as ScopeCorrectionOffer
+from workbench.feature_run_recovery import RunRecoveryOffer
 from workbench.service import now
 
 FeatureState = Literal['understanding', 'planning', 'needs_clarification', 'ready', 'working',
@@ -47,6 +48,7 @@ class FeatureRunView(BaseModel):
     can_stop: bool
     cancel_requested: bool = False
     expires_at: str
+    continuation_expires_at: str | None = None
 
 
 class FeatureResult(BaseModel):
@@ -80,6 +82,7 @@ class FeatureView(BaseModel):
     reference_addons: list[FeatureReferenceEvidence] = []
     reference_notice: str | None = None
     scope_correction: ScopeCorrectionOffer | None = None
+    run_recovery: RunRecoveryOffer | None = None
 
 
 class FeaturePage(BaseModel):
@@ -197,6 +200,9 @@ def view_in(c, identity):
             message=(session or journal or parent)['message'], cancel_requested=stopped,
             can_stop=not stopped and (parent['status'] == 'pending' or bool(session and session['status'] in ACTIVE | {'held','failed'})),
             expires_at=parent['payload']['feature_run']['expires_at'])
+        if journal and journal['payload'].get('execution_windows'):
+            from workbench.feature_run_recovery import deadline
+            run['continuation_expires_at'] = deadline(c,parent,parent['payload']['feature_run'])
         state, message, needs_owner = 'held', run['message'], False
         if parent['status'] == 'pending':
             message = 'Your feature run decision is saved and waiting to apply.'
@@ -259,6 +265,11 @@ def view_in(c, identity):
             scope_correction={k:v for k,v in offered.items() if k!='approved_inputs'}
             needs_owner=True
             message='The next step needs more preparation. Your feature and completed work are saved.'
+    from workbench.feature_run_recovery import offer as run_recovery_offer
+    recovery = run_recovery_offer(c,identity) if run and run['status']=='held' else None
+    if recovery:
+        needs_owner=True
+        message='The first coding request never started. Continue the saved feature in a new bounded window.'
     return dict(id=identity, title=row['payload']['title'], objective=row['payload']['description'],
         state=state, message=message, active=actual_activity, needs_owner=needs_owner,
         completed_steps=sum(s['verified'] for s in steps), total_steps=len(steps),
@@ -267,7 +278,8 @@ def view_in(c, identity):
         intake=data, steps=steps, observed_at=now(),
         correction=correction, run=run, feature_result=feature_result, integrated_verification=integrated,
         request_attachments=request_attachments,reference_addons=reference_addons,reference_notice=reference_notice,
-        scope_correction=scope_correction)
+        scope_correction=scope_correction,
+        run_recovery={k:v for k,v in recovery.items() if k != 'approved_inputs'} if recovery else None)
 
 
 def run_offer(engine, identity):

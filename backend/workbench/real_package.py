@@ -38,7 +38,7 @@ class Package:
             b["max_generated_tokens"],
         )
         if not (
-            profile
+            (profile
             in (
                 (14400, 3, 3, 3, 72000),
                 (7200, 2, 2, 2, 48000),
@@ -46,7 +46,7 @@ class Package:
                 (7200, 1, 1, 1, 24000),
                 (10800, 1, 1, 1, 24000),
                 (21600, 3, 3, 3, 100000),
-            )
+            ) or (0 < profile[0] <= 10800 and profile[1:] == (1, 1, 1, 24000)))
             and b["reserved_tokens_per_cycle"] == b["original_attempt_token_ceiling"] == 24000
             and b["original_turns"] == 20
         ):

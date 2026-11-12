@@ -213,3 +213,14 @@ def test_package_reserves_only_unspent_evidence_without_raising_aggregate_cap(pa
         bounded.enforce_storage()["package_bytes"] + bounded.remaining_evidence_reservation()
         == 72 << 20
     )
+
+
+def test_narrowed_single_slot_keeps_full_run_reserve_and_cannot_dispatch(package):
+    data = dict(package.budget)
+    data.update(deadline=data['started_at'] + 318.724755, max_cycles=1,
+                max_probes=1, max_attempts=1, max_generated_tokens=24000)
+    package.spec.write_text(json.dumps(data))
+    bounded = Package(package.root)
+    with pytest.raises(ValueError, match='time ceiling/reserve'):
+        bounded.reserve(cycle(bounded, 1))
+    assert bounded.reservations() == []

@@ -1,3 +1,73 @@
+# November 12 — first real scope and baseline passed; unused-slot time recovery
+
+Installed122 ninth allowance produced a REAL Qwen implementation scope after1call
+(1505generated/9755total tokens,75.119s; operationa01eb790).27scope records,
+32model-attempt rows,196054known source tokens. Qwen itself selected View.lua and
+existing test_friend_login; NO manual addon scope/code/test solution. Actual full
+original Lua suite and isolated boundary passed under native worker readiness.
+First slotf406f7e3 then held BEFORE configuration/reservation/lease/grant/model:
+package duration318.724755s was clipped by original07:32:09parent deadline and
+could not reserve a full run. Native package contains ONLY BUDGET_BASELINE and
+owner-command; zero coding grants/requests, zero edits, zero checked steps.
+Original approval has now expired unchanged. Live745rows fingerprint
+88ac2560899e2c9cf3d85cbaac9e601b1eff1345cc7274da5a4ea8999aa444e0.
+Snapshotnative-after-first-readiness and history-after-first-unused-slot retained
+under outcome-4978181. NEVER replay any of the9read-allowance drivers or old
+743baseline rollback after these newer writes.
+
+Development adds a narrowly proved never-dispatched continuation: distinct actual
+browser receipt, fresh six-hour window, same parent/scope/graph/request/provider,
+original attempt/token/turn/publication limits. Old approval/expiry/offer/package/
+slot remain exact. Fresh slot2 counts toward existing3attempts. Native old-package
+proof and old source/readiness must qualify; unknown usage/Stop/changed config,
+source or reservation prevents it. Historical permission uses as-of offer time;
+fresh permissions explicitly name new command. Combined checks bind exact time
+receipt. No direct database edits, old-clock reset or owner renewal question.
+See ownership and feature_run_recovery. Existing package reserve remains enforced;
+shorter allocations now fail with the accurate reserve diagnosis. No exposure,
+privileged helper change, spending, source push/PR or live addon edits.
+
+Actual READ-ONLY replay of current745row state validates the native unused package
+and independently reconstructed readiness; no writes/provider call/new approval.
+Actual private original-baseline reuse proof passes with unchanged checker,
+recipe/source/interpreters; fresh isolation and all candidate checks still required.
+Evidence: feature-workshop-20261111/never-started-continuation-proof.
+49existing regressions,9new native-transition/uncertainty cases,64frontend cases,
+2connected browser journeys and full static/contracts/build/schema pass. New native
+flow test includes original approval expired before continuation, exact historical
+policy and new time-authority reference, then one actual Lua-checked CONTROLLED
+step. It is NOT real Qwen implementation. Broader51combined/check-preparation/package/repair-cycle cases pass in421.78s.
+Initial fixture lacked local protocol attribution and installed preparation path;
+corrected fixtures, without weakening native proof. Failed logs retained.
+Need finish appropriate checks, commit/push exact full hosted acceptance,
+123installation/745row readers/restart/rollback BEFORE any new write, then inspect
+new desktop/phone consent and ordinary-browser continuation for SAME feature.
+Create-only continue-real-feature-new-window.cjs EXISTS but is NOT EXECUTED. Pass the next exact installed receipt directory and full SHA only AFTER all gates. NO new time receipt is approved yet.
+Continue campaign; zero real Feature Workshop features complete end to end.
+
+# November 12 — installed122; ninth finite source allowance active
+
+Exact497818139aba330cc9bbe5b933ee4415d441ca15 ALL9jobs passed in full43172449787.
+Frontend13921509880 SHA0f3166cd1afc69a06f3bb83e2a794adbef8abb45dbb774d200cc2fd48340fd0e;
+acceptance13922799795 SHA27d0e74a9374b90bf87f9e1157ec4043abb6357dd05ef6bb211b990d6eaa83d8.
+Installed122 seal4d9a81d68d5282b512b41ddd168dbbde7e9285bf294a97fdd5a1d4d7a5f7731e.
+Fresh measured baseline743rows, fingerprint84b74a5d9f12cf6c6b3fc9f6c0f05d8d74fbed61b7d0a755207e5f196e52d9e8
+(NOT746; previous handoff estimate corrected). All743/52requests and six context
+files/1750423bytes/manifest7e1d463d preserved. Independent old/new code readers,
+actual four-role restart and ACTUAL122→121→122 passed before further work.
+TLS/LAN/firewall/8765/model401/200/key hash/seals verified. Actual desktop1440,
+phone390,320at200%, keyboard/reload passed and desktop/phone inspected.
+
+continue-real-feature-4978181.cjs ALREADY EXECUTED ONCE, native ninth3request
+allowance for SAME parent6998247a; original expiry07:32:09.163458UTC unchanged.
+Review/intent/command/receipt/screens retained outcome-4978181/real-map-zoom-
+continuation. NO manual addon source/test selection, scope, code or solution.
+Initial26scope/32model-attempt rows/1active, zero implementation/checked steps.
+Do NOT restart/deploy/replay any driver or743baseline rollback after these writes.
+Previous26scope/31attempt rows,186299known source tokens. Earlier23scope/28attempt
+prefix and original parent snapshot/binding proved EXACT after eighth allowance.
+Native ninth actual outcome still requires monitoring; continue campaign.
+
 # November 12 — stalled source navigation changes strategy
 
 Installed121 native eighth allowance settled all3real calls with known usage;
@@ -25,7 +95,7 @@ limits. No provider/model call or live store changes in this proof. Initial priv
 proof file accidentally shadowed Python inspect; renamed and exact proof passed.
 Evidence: feature-workshop-20261111/stalled-navigation-proof and fw3-stalled-
 navigation-tests-final.log. Need own exact full hosted gate and122deployment
-with latest746rows, restart/readers/rollback BEFORE fresh bounded native allowance.
+with latest743rows (fresh measured fingerprint84b74a5d), restart/readers/rollback BEFORE fresh bounded native allowance.
 Continue original campaign; zero real feature completions.
 
 # November 12 — exact cd94344 installed121; same feature continuing

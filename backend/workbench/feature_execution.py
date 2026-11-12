@@ -123,7 +123,9 @@ def _prepared(engine, job, *, provision=None, stop_event=None):
             durable(root/'feature-recovery.json', json.dumps(recovery,sort_keys=True).encode())
             (root/'feature-recovery.json').chmod(0o600)
         runtime = Runtime(root, stop_event=stop_event)
-        (provision or task_session.provision)(runtime, dict(control_patches={}))
+        (provision or task_session.provision)(runtime, dict(control_patches={},
+            **({'baseline_source':recovery['baseline_source']}
+               if recovery and recovery.get('kind') == 'never-dispatched-feature-slot-v1' else {})))
     runtime = Runtime(root)
     if (claim['scope_binding'] != saved['scope_binding'] or claim['policy_binding'] != digest(policy)
             or claim.get('attempt',1) != attempt

@@ -388,7 +388,9 @@ def permission(c, approval, task_id, *, offer_id=None, require_current=True):
         slot = (session or {}).get('state',{}).get('feature_slot')
         if slot and slot['snapshot']['feature_offer_id'] != selected['id']:
             raise ValueError('Another feature attempt owns the current parent slot; old inputs cannot dispatch.')
-    end = min(datetime.fromisoformat(parent_permission['expires_at']),
+    from workbench.feature_run_recovery import time_authority
+    time_reference, allowed_end = time_authority(c,approval,parent_permission,at=selected['created_at'])
+    end = min(datetime.fromisoformat(allowed_end),
         datetime.fromisoformat(selected['created_at']) + timedelta(seconds=parent_permission['budget']['per_attempt_seconds']))
     if require_current and datetime.now(timezone.utc) >= end:
         raise ValueError('This feature step attempt expired; its history remains available.')
@@ -399,7 +401,8 @@ def permission(c, approval, task_id, *, offer_id=None, require_current=True):
         turns=parent_permission['budget']['per_attempt_turns'], publication='hold', activate_once=True)
     return dict(decision_id=approval['id'], budget=budget.model_dump(mode='json'), offer=selected,
         expires_at=end.isoformat(), feature_task_id=task_id,
-        feature_attempt=selected['snapshot']['feature_step']['attempt'])
+        feature_attempt=selected['snapshot']['feature_step']['attempt'],
+        **({'feature_time_authority':time_reference} if time_reference != 'original-parent-run' else {}))
 
 
 def preparation_inputs(c, offered):

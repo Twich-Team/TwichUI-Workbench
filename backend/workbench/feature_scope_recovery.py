@@ -22,6 +22,7 @@ from workbench.db import (
 )
 from workbench.schemas import StrictModel
 from workbench.visual_scope import digest
+from workbench.feature_run_recovery import deadline as parent_deadline
 
 
 class FeatureScopeCorrectionInput(StrictModel):
@@ -96,7 +97,8 @@ def allowance(c, job, task_id, permission, *, active=True):
     history = _history(job, task_id)
     maximum = permission["budget"]["scope_attempts_per_step"]
     reference = "original-parent-run"
-    deadline = datetime.fromisoformat(permission["expires_at"])
+    approval, _ = feature_steps.parent(c, job['payload']['feature_decision_id'],active=False)
+    deadline = datetime.fromisoformat(parent_deadline(c,approval,permission))
     for receipt in job["payload"].get("scope_recoveries", []):
         saved = receipt["approved_inputs"]
         if saved["task_id"] != task_id:
@@ -130,7 +132,7 @@ def allowance(c, job, task_id, permission, *, active=True):
             or receipt["expires_at"]
             != min(
                 datetime.fromisoformat(receipt["approved_at"]) + timedelta(minutes=30),
-                datetime.fromisoformat(permission["expires_at"]),
+                datetime.fromisoformat(parent_deadline(c,approval,permission,at=receipt['approved_at'])),
             ).isoformat()
         ):
             raise ValueError(
@@ -189,7 +191,7 @@ def offer(c, identity):
                 )
             ).first()
             or datetime.now(timezone.utc) + timedelta(seconds=120)
-            >= datetime.fromisoformat(permission["expires_at"])
+            >= datetime.fromisoformat(parent_deadline(c,approval,permission))
         ):
             return None
         task_id = history[-1]["task_id"]
@@ -263,7 +265,7 @@ def request(engine, identity, body):
                 "The original scope, stopped state, source or settled history changed. Refresh before continuing preparation.",
             )
         inputs = selected["approved_inputs"]
-        _, permission = feature_steps.parent(c, inputs["decision_id"])
+        approval, permission = feature_steps.parent(c, inputs["decision_id"])
         at = intake.now()
         value = dict(
             command_id=str(body.command_id),
@@ -272,7 +274,7 @@ def request(engine, identity, body):
             approved_at=at,
             expires_at=min(
                 datetime.fromisoformat(at) + timedelta(minutes=30),
-                datetime.fromisoformat(permission["expires_at"]),
+                datetime.fromisoformat(parent_deadline(c,approval,permission)),
             ).isoformat(),
             generation_requests=3,
             request_seconds=120,

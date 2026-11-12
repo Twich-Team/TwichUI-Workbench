@@ -195,6 +195,7 @@ def validate(c, row, *, pending=False, active=True):
     parent = intake.require(c,proposal_decisions,current['scope_approval_id'])
     continuation = row['payload']['execution_continuation']
     expected = digest(dict(execution_continuation=continuation,feature_run=permission))
+    from workbench.feature_run_recovery import deadline
     if (permission['scope'] != current or row['binding'] != expected
             or row['proposal_id'] != current['proposal_id'] or row['payload']['proposal_id'] != current['proposal_id']
             or row['scope_revision'] != parent['scope_revision'] or row['required_artifacts'] != parent['required_artifacts']
@@ -206,7 +207,7 @@ def validate(c, row, *, pending=False, active=True):
             or continuation.get('owner_provenance') != dict(actor='owner',purpose='browser-feature-run-v1',command_id=row['id'])
             or row['scope_review_required'] or row['status'] != ('pending' if pending else 'applied')
             or (not pending and not row['finished_at'])
-            or (active and datetime.now(timezone.utc) >= datetime.fromisoformat(permission['expires_at']))
+            or (active and datetime.now(timezone.utc) >= datetime.fromisoformat(deadline(c,row,permission)))
             or datetime.fromisoformat(permission['expires_at']) != datetime.fromisoformat(row['created_at'])+timedelta(seconds=permission['budget']['overall_seconds'])
             or permission['maximum_generated_tokens'] != maximum_tokens(current,permission['budget'])):
         raise ValueError('The parent feature permission is expired, stale, or changed.')

@@ -97,6 +97,10 @@ def settled(c, offered):
 
 def validate(c, proof, scope, *, active=True):
     """A saved recovery never grants authority after parent expiry or withdrawal."""
+    if proof.get('kind') == 'never-dispatched-feature-slot-v1':
+        feature_steps.parent(c, scope['decision_id'], active=active)
+        from workbench.feature_run_recovery import validate_unstarted
+        return validate_unstarted(c,proof,scope)
     if proof['binding'] != digest({k:v for k,v in proof.items() if k!='binding'}):
         raise ValueError('Failed-attempt recovery receipt changed.')
     approval, permission = feature_steps.parent(c, scope['decision_id'], active=active)
