@@ -1,3 +1,32 @@
+# November 12 — installed127; distinct one-attempt coding continuation admitted
+
+Exactade92958346a3e43841dcc655005287e8feeb100 ALL9 full43211210566 passed.
+Frontend13941072138 SHA4f1dc7f24411d9f9b4ec00260de344074434cfced9a837993dbcc23459004871;
+acceptance13942781202 SHA522e4263822cf03d5122956d5fb34034447d126f0d5a8c0a740ddc2e60718496.
+Seal e2c5a840699984bdc4658032716e23d367bd0bba40d38f746009c23d49c817f2.
+All26frontend files byte-equal hosted artifact; exact150file backend inventory and all
+release groups verified. Independent backend2 artifact1129cases no failures/errors.
+Fresh770rows fingerprintd432aee9eab3fc1dc45e45587f313459abef8d27d9e3594a7c5097035b7512cc
+preserved; all52requests read by both versions and restored independently. Six reference
+files remain exact. Four-role restart and ACTUAL127→126→127, TLS/LAN/firewall/8765,
+model401/200/keyhash/seals passed BEFORE new native writes. Actual desktop1440,phone390,
+320at200%,keyboard/reload passed with zeroerrors/mutations. Desktop/phone inspected.
+Pointer-driven focus-visible assertion diagnostic retained; actual Tab/Enter journey
+passed without changing product code or weakening focus assertion.
+
+R=E/outcome-ade9295. resume-after-install.py ALREADY EXECUTED ONCE, own26unpaused→27
+paused→28unpaused. DO NOT replay. At12:07 native browser receipt separately admitted
+ONE extra coding reservation under existing campaign acceptance delegation. Original
+3grant limit/unknown usage/all failure rows unchanged; exact same scope/last checked
+source and14:15:43 parent deadline. New slot5/grant4 uses24k/20turn/90min. No failed
+edits carried, no manual addon code/test solution, no fallback/publication change.
+Native worker preparing_runtime:39attempt rows/0active/3coding requests at observation.
+Original baseline/fresh isolation precede any grant. Zero checked steps/finishedfeatures.
+NEVER restart/deploy/replay770baseline rollback or old drivers after these new writes.
+Monitor real coding/early checks; continue dependent steps/combined checks/coherent draft
+PR; attach actual URL. LATEST_NATIVE_FEATURE_DELIVERY.json carries operational paths.
+Original five doc edits and .venv/node_modules symlinks preserved. Keep working.
+
 # November 12 — check actual feature edits before generation capacity ends
 
 The latest actual coding run edited source and tests but used all20turns without a check.
