@@ -1,3 +1,50 @@
+# November 12 — approved portal policy prepared; owner authentication pending
+
+Owner “Approve” authorizes the exact portal-only firewall and LAN-filter /32
+exceptions. No renewed policy approval is needed. The reviewed helper extension
+and owner installer are ready;75admin/refusal/interruption checks pass, including
+actual systemd parsing and unchanged admission/template boundaries. See newest
+PROGRESS entry for exact hashes, installation, application/proxy limits and rollback.
+
+No live settings changed. The existing session78 grant still works, but normal
+sudo requires interactive authentication to install the replacement helper.
+Owner action requested: bash ops/upgrade_workbench_admin_portal.sh in an
+authenticated owner terminal. It installs only the pinned helper and preserves
+the grant/session/expiry. Then verify from the approved executor, stop only LAN,
+portal/add and restart/verify the same release. Do not bypass privilege controls.
+
+The application still excludes portal and the domain authority. Trusted access
+and a verified SSH host key for portal are also pending. Inspect its private
+frontend restrictions and scoped backend CA trust before adding application
+proxy support. The actual domain's latest result is verified TLS plus HTTP504,
+not a completed route. Installed139eed6/129, history, rollback and unrelated
+local edits remain preserved. Do not start the separate gallery repair.
+
+# November 12 — private Traefik route diagnosed; owner policy decision pending
+
+New owner assignment: investigate private workbench.twich.gg through portal
+10.0.4.3 to llm 10.0.0.9:9487. Kernel logs prove UFW blocks those exact TCP SYNs
+on enp4s0. Return route uses enp4s0 via10.0.0.1. Existing subnet-only UFW,
+systemd IP filter and application peer restriction all exclude portal. Exact
+domain Host is also unsupported (real400); invalid Origin remains403. Backend
+TLS with the named LAN CA is valid and local HTTPS200 passes. Private portal
+TLS validates but proxy response is504. This route is NOT working end to end.
+
+See newest PROGRESS entry for exact proposed /32 UFW addition/removal, required
+administrator lifecycle support, exact peer/host/origin design and scoped CA
+trust. Existing helper supports only original subnet rule and rejects another
+9487 rule. No new privileged policy is authorized or installed. Session78 status
+still works; no grant/session control was bypassed. Portal SSH lacks a verified
+host key here; actual Traefik configuration/private-client boundary remains
+uninspected. Resolve trusted access before modifying remote configuration.
+
+Next: obtain owner authorization for the exact portal-only policy exception,
+prepare/verify any administrator replacement before its separate installation,
+then finish backend/proxy configuration and actual domain acceptance. Preserve
+all other rules, authentication, private access and rollback; do not start the
+unrelated gallery repair. Installed139eed6/129 and original evidence are unchanged.
+Private receipts: /home/rich/.local/share/TwichUI-Workbench/traefik-connectivity-20261112T215605Z.
+
 # Final gallery diagnostic — compressed PNG bytes only; hold retained
 
 Confined regeneration of all4samples confirms identical decoded pixels/uncompressed

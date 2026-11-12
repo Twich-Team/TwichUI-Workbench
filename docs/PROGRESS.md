@@ -1,3 +1,172 @@
+# November 12 — portal-only policy approved; reviewed installer awaits owner authentication
+
+The owner replied “Approve” to the exact enp4s0 UFW /32 exception and the LAN
+service's additional 10.0.4.3/32 allowance, through a reviewed administrator update.
+Do not ask for that policy approval again. It does not renew or rebind the grant.
+
+Prepared ops/workbench_admin.py adds only the fixed portal/add|remove operation.
+It owns a separate protected interruption record, the exact tagged firewall rule
+and a fixed LAN-only 30-portal.conf drop-in. Original unit rendering, session/
+boot/expiry admission, audit, bounded commands, address/forwarding checks and
+settlement fences are byte/AST unchanged. Unexpected/duplicate/broader rules,
+changed/unowned drop-ins and starting LAN with partial policy are refused.
+Original LAN rule removal requires removing the portal exception first.
+Interrupted add/remove and pending systemd reload reconcile through the existing
+stopped-service sync mechanism. Owner recovery may remove but never add it.
+
+75 offline administrator tests, fixed-drop-in systemd syntax, targeted lint and
+whitespace checks pass. An initial fixture-mode error was corrected; an injected
+changed-drop-in case then exposed reload occurring before drop-in validation.
+Validation now happens before reload, and all refusal/recovery checks pass.
+No application code, service, firewall, installed helper, grant or remote setting
+changed. The running app remains139eed6/deployment129; its application peer/host
+checks still exclude portal.
+
+New helper SHA256:5654057602bf37945b3422d90be16fc8c002775776aede936c615821e1244318.
+Installer ops/upgrade_workbench_admin_portal.sh SHA256:
+eb497fe15af5d48f8cd4d5dafead00f11673ba7cb093abb7eedbaf391130abf9.
+The installer pins both old/new helper bytes, checks unchanged admission/template
+functions, locks the protected state, saves helper-before-portal.py, replaces
+atomically, and verifies the complete protected grant remains byte-identical.
+It performs no firewall, service, source, application or Traefik change. It is
+idempotent only for the exact installed candidate with its matching original backup.
+
+Existing session78 status succeeds; installed helper remains original SHA256
+72ceb24137afba5ebab832a4bc15d3784f49090f7c3e67998d4a800ac6b0e0a4.
+Normal sudo requires interactive authentication. This is an actual access boundary,
+not an additional policy approval. The owner has been asked to run:
+
+```bash
+bash /home/rich/.codex/worktrees/everyday-workbench/TwichUI-Workbench/ops/upgrade_workbench_admin_portal.sh
+```
+
+After that action, verify the installed hash and unchanged grant status from the
+existing approved executor. Stop only workbench-everyday-lan, call the helper with
+{"op":"portal","action":"add"}, and restart that same LAN release. Verify actual
+UFW, loaded IPAddressAllow (original subnet plus exact /32), effective filters,
+direct LAN HTTPS200, untouched loopback/8765 and portal TCP/backend TLS. The app
+will still reject portal until a separately checked application change supplies
+exact peer/authority/origin support. Do not waive that refusal to claim completion.
+For rollback stop LAN, portal/remove, then restart original LAN; keep the original
+subnet rule and complete history. Do not restore the original helper until the
+portal drop-in/rule/ownership record are absent and verified.
+
+Trusted access to portal and its SSH host-key fingerprint are still needed.
+Do not accept an unverified key or change Traefik remotely. Inspect and preserve
+private frontend admission/authentication before enabling application proxy access;
+use only scoped Workbench CA trust, exact domain Host/Origin and existing CSRF.
+Actual domain HTTPS most recently validated TLS and returned504. End-to-end route
+acceptance remains unmet. Original gallery publication hold is unrelated and kept.
+Unrelated administrative notes and dependency links remain preserved.
+
+# November 12 — private Traefik connectivity investigation; policy approval needed
+
+Following the Project Working Philosophy, this assignment investigates private
+`workbench.twich.gg` access only. No live firewall, service, helper, grant,
+application, router or Traefik configuration changed. The unrelated local
+WORKBENCH_ADMIN_APPROVAL edits and dependency links remain preserved.
+
+Verified on llm:
+
+- `10.0.0.9/24` belongs to `enp4s0`. The return route is
+  `10.0.4.3 via 10.0.0.1 dev enp4s0 src 10.0.0.9`.
+- Kernel UFW records show actual SYNs with `IN=enp4s0 SRC=10.0.4.3
+  DST=10.0.0.9 PROTO=TCP DPT=9487` blocked. This establishes the incoming
+  interface and unchanged source; it is stronger than inferring ingress from
+  the return route. Portal's route via 10.0.4.1/ens18 is owner-supplied evidence,
+  not a new remote observation. Successful ping does not establish TCP admission:
+  the inspected UFW before-input chain separately permits echo requests.
+- UFW is active, default deny incoming, disabled routed, with only the existing
+  `10.0.0.0/24 -> 10.0.0.9:9487` allowance on enp4s0. Raw UFW/nft output agrees.
+- Both existing listeners remain bound to their approved addresses. Validated
+  backend HTTPS GET returns 200. Certificate issuer is TwichUI Workbench Home
+  LAN CA 2026; its sole SAN is IP 10.0.0.9. Chain and IP verification pass using
+  the retained CA. The certificate expires November 6, 2027 UTC.
+- The active LAN service also has `IPAddressDeny=any` and
+  `IPAddressAllow=10.0.0.0/24`, with effective ingress/egress and bind filters.
+  Application peer checking independently rejects 10.0.4.3.
+- Installed application code accepts only `Host: 10.0.0.9:9487` on LAN and
+  requires its exact HTTPS origin and CSRF token for writes. A real validated
+  backend request with Host workbench.twich.gg returns 400; an unrelated Origin
+  returns 403. Its supported LAN configuration contains only the private IP
+  and one subnet. No external-authority or trusted-proxy setting exists.
+  Uvicorn explicitly uses `--no-proxy-headers`.
+- Private HTTPS to portal at 10.0.4.3 with SNI/Host workbench.twich.gg passes
+  normal certificate verification but returns HTTP 504 after the backend wait.
+  This is a failed route, not end-to-end completion.
+- Read-only administrator status succeeds in approved session78. Installed
+  helper SHA-256 is 72ceb24137afba5ebab832a4bc15d3784f49090f7c3e67998d4a800ac6b0e0a4,
+  matching repository source. Its firewall API cannot specify another source;
+  its matcher rejects any additional 9487 rule as conflicting. The existing
+  grant therefore cannot apply the proposed exception. No direct sudo workaround,
+  recovery-mode activation, grant renewal or session rebinding was attempted.
+- Portal SSH configuration/logs were not inspected: no verified SSH host key is
+  available in this executor. Strict checking was retained; no key was accepted
+  or installed. Traefik version, provider, backend trust configuration and its
+  incoming-client restrictions remain unverified.
+
+Exact proposed firewall addition, requiring owner authorization and a reviewed
+administrator-policy extension before execution (shown without an executable
+sudo wrapper):
+
+```text
+/usr/sbin/ufw allow in on enp4s0 from 10.0.4.3/32 to 10.0.0.9 port 9487 proto tcp comment twichui-workbench-traefik
+```
+
+Retain every existing rule, especially the original subnet allowance and ports
+22/8080/8765. No subnet expansion, forwarding, NAT, routing, IPv6 allowance,
+default-policy change, UFW reset or unrelated service changes. Roll back only
+this exact newly owned rule:
+
+```text
+/usr/sbin/ufw delete allow in on enp4s0 from 10.0.4.3/32 to 10.0.0.9 port 9487 proto tcp
+```
+
+The administrator extension must retain the original session/boot/expiry checks,
+fixed commands, root ownership, audit, locks and bounded requests. Give the
+exception its own protected ownership/interruption record; preserve preexisting
+rules without adopting them. Recognize exactly the original rule plus this
+optional tagged exception during preflight/start/cleanup, reject every broader
+or unexpected rule, and preserve existing listener-close/rollback fences. A raw
+manual extra rule would break existing helper preflight and is not a supported
+complete adjustment. Prepare/test the exact helper replacement and its
+hash-pinned owner installation before asking to execute that replacement.
+
+Firewall-only approval will not make the application usable. The narrowly scoped
+connected policy needed for the complete route is:
+
+1. Add only 10.0.4.3/32 alongside the existing subnet in the LAN service's
+   IP filter, through the approved administrator renderer. Keep bind and all
+   other service restrictions. This also needs owner policy authorization.
+2. Add explicit application support for the actual peer 10.0.4.3 with exact
+   authority workbench.twich.gg and exact origin https://workbench.twich.gg.
+   Retain the original direct-LAN authority/subnet behavior, real HTTPS scheme,
+   duplicate Host/Origin rejection, CSRF and body/content-type checks. Do not
+   expand the subnet or enable general forwarded-header trust. Keep
+   `--no-proxy-headers`; TLS to the backend already supplies the true scheme.
+3. Inspect the actual Traefik configuration through trusted read access. Require
+   private ingress and preserve existing authentication. The backend sees portal
+   for every proxied user, so opening backend access is conditional on verifying
+   frontend client restrictions; backend /32 alone does not make a public proxy
+   private. Preserve Host rather than rewriting Host or Origin to evade checks.
+4. Use a Workbench-specific HTTP ServersTransport, attached only to this backend,
+   with the public LAN CA certificate in rootCAs and insecureSkipVerify false.
+   Backend URL is https://10.0.0.9:9487; validate its IP SAN. Do not set serverName
+   to workbench.twich.gg against the current IP-only certificate, copy any CA
+   private key, or change global TLS verification. Actual Traefik configuration
+   and CA-file mount remain unverified. Reference:
+   https://doc.traefik.io/traefik/reference/routing-configuration/http/load-balancing/serverstransport/
+5. After approved installation, verify portal TCP and verified backend HTTPS,
+   then the normal DNS HTTPS route through workbench.twich.gg: actual app/assets,
+   read-only API, exact Host/Origin/CSRF acceptance and refusal without task writes,
+   existing direct access, other-peer refusal and retained rollback. Do not mark
+   complete on a TCP handshake, local 200, TLS handshake, fixture or HTTP 504.
+
+Private receipts:
+`/home/rich/.local/share/TwichUI-Workbench/traefik-connectivity-20261112T215605Z`.
+No source code changed, so application/browser suites were not repeated for this
+read-only diagnosis. No model call, addon work or publication was performed.
+
 # Final bounded diagnostic — gallery pixels/textures match; strict PNG check still fails
 
 All4regenerated gallery samples have identical decoded pixels/uncompressed PNG data

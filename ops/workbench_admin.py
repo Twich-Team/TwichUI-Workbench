@@ -42,6 +42,11 @@ UFW = '/usr/sbin/ufw'
 FIREWALL = ('in', 'on', 'enp4s0', 'from', '10.0.0.0/24', 'to', '10.0.0.9', 'port', '9487', 'proto', 'tcp')
 FIREWALL_LINE = '10.0.0.9 9487/tcp on enp4s0 ALLOW IN 10.0.0.0/24'
 FIREWALL_TAG = 'twichui-workbench-admin'
+PORTAL_FIREWALL = ('in', 'on', 'enp4s0', 'from', '10.0.4.3/32', 'to', '10.0.0.9', 'port', '9487', 'proto', 'tcp')
+PORTAL_LINE = '10.0.0.9 9487/tcp on enp4s0 ALLOW IN 10.0.4.3'
+PORTAL_TAG = 'twichui-workbench-traefik'
+PORTAL_DROP = 'workbench-everyday-lan.service.d/30-portal.conf'
+PORTAL_BYTES = b'[Service]\nIPAddressAllow=10.0.4.3/32\n'
 DENY_CODEX = ('0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 '
               '192.168.0.0/16 224.0.0.0/4 240.0.0.0/4 ::/128 ::1/128 fc00::/7 fe80::/10 ff00::/8')
 ENV = dict(PATH='/usr/bin:/usr/sbin:/bin', LANG='C.UTF-8', LC_ALL='C.UTF-8', SYSTEMD_COLORS='0', SYSTEMD_PAGER='cat')
@@ -259,6 +264,8 @@ def approved_drop():
 def check_definition(role, info):
     unit = unit_name(role)
     drop = str(SYSTEM / DROP) if role == 'worker' and approved_drop() else ''
+    if role == 'lan' and approved_portal_drop():
+        drop = str(SYSTEM / PORTAL_DROP)
     require(info.get('LoadState') == 'loaded' and info.get('Names') == unit
             and info.get('FragmentPath') == str(SYSTEM / unit) and info.get('DropInPaths', '') == drop
             and info.get('User') == info.get('Group') == 'rich' and info.get('NeedDaemonReload') == 'no',
@@ -328,11 +335,15 @@ def service(action, role, release=None):
     if action in {'start', 'restart', 'enable'} and role == 'lan':
         check_lan_address()
         require(lan_rule(), 'Exact UFW LAN rule is required')
+        owned = portal_state()
+        require(not owned or (owned == b'added\n' and approved_portal_drop() and portal_rule()),
+                'Reconcile the portal policy before starting LAN access')
     if action in {'enable', 'disable'}:
         return boot_link(role, action == 'enable')
     if action == 'remove':
         require(active in INACTIVE and info.get('UnitFileState') == 'disabled', 'Stop and disable the service before removal')
         require(role != 'worker' or not approved_drop(), 'Remove the acceptance drop-in first')
+        require(role != 'lan' or not portal_state(), 'Remove the portal policy first')
         path.unlink()
         sync_dir(SYSTEM)
         command(*SYSTEMCTL, 'daemon-reload')
@@ -404,16 +415,98 @@ def firewall_status():
     return command(UFW, 'status', 'verbose')
 
 
-def lan_rule():
+def portal_state():
+    try:
+        owned = checked_file(STATE / 'portal', 64, private=True)
+    except FileNotFoundError:
+        return b''
+    require(owned in {b'adding\n', b'added\n', b'removing\n'}, 'Portal ownership record differs')
+    return owned
+
+
+def approved_portal_drop():
+    path = SYSTEM / PORTAL_DROP
+    if not os.path.lexists(path.parent):
+        return False
+    protected_dir(path.parent)
+    try:
+        data = checked_file(path, 128)
+    except FileNotFoundError:
+        return False
+    require(portal_state() and data == PORTAL_BYTES, 'Portal drop-in is not owned or differs')
+    return True
+
+
+def firewall_rules():
     status = firewall_status()
     require('Status: active' in status.splitlines() and 'Default: deny (incoming)' in status
             and 'disabled (routed)' in status, 'UFW baseline or forwarding policy changed')
     lines = [' '.join(line.split()) for line in status.splitlines() if '9487' in line]
-    require(not lines or lines in ([FIREWALL_LINE], [FIREWALL_LINE + ' # ' + FIREWALL_TAG]),
-            'A conflicting Workbench port rule is present')
-    if not lines:
-        return None
-    return 'tagged' if '#' in lines[0] else 'external'
+    found = {}
+    for line in lines:
+        if line in {FIREWALL_LINE, FIREWALL_LINE + ' # ' + FIREWALL_TAG}:
+            name = 'lan'
+        else:
+            require(line == PORTAL_LINE + ' # ' + PORTAL_TAG and portal_state(),
+                    'A conflicting Workbench port rule is present')
+            name = 'portal'
+        require(name not in found, 'A conflicting duplicate Workbench port rule is present')
+        found[name] = 'tagged' if '#' in line else 'external'
+    return found
+
+
+def lan_rule():
+    return firewall_rules().get('lan')
+
+
+def portal_rule():
+    return firewall_rules().get('portal')
+
+
+def portal(action):
+    """Only the approved portal /32, with a separate recoverable ownership record."""
+    require(read_unit('lan') is not None, 'Install the known LAN definition first')
+    info = show(unit_name('lan'))
+    require(info.get('ActiveState') in INACTIVE, 'Stop the LAN listener before changing portal policy')
+    owned = portal_state()
+    drop = approved_portal_drop()
+    if owned and info.get('NeedDaemonReload') == 'yes':
+        service('sync', 'lan')
+        info = show(unit_name('lan'))
+    check_definition('lan', info)
+    rules = firewall_rules()
+    path = SYSTEM / PORTAL_DROP
+    state = STATE / 'portal'
+    if action == 'add':
+        check_lan_address()
+        require(rules.get('lan'), 'Exact UFW LAN rule is required')
+        atomic_write(state, b'adding\n')
+        if not drop:
+            if not os.path.lexists(path.parent):
+                path.parent.mkdir(mode=0o755)
+            protected_dir(path.parent)
+            atomic_write(path, PORTAL_BYTES, 0o644)
+        command(*SYSTEMCTL, 'daemon-reload')
+        check_definition('lan', show(unit_name('lan')))
+        if not rules.get('portal'):
+            command(UFW, 'allow', *PORTAL_FIREWALL, 'comment', PORTAL_TAG)
+        require(portal_rule() == 'tagged' and approved_portal_drop(), 'Portal policy did not verify after add')
+        atomic_write(state, b'added\n')
+        return 'Exact portal firewall and LAN filter exception present; application restrictions unchanged'
+    if not owned:
+        return 'No portal policy is owned by this grant'
+    atomic_write(state, b'removing\n')
+    if rules.get('portal'):
+        command(UFW, 'delete', 'allow', *PORTAL_FIREWALL)
+    require(not portal_rule(), 'Portal rule still present after delete')
+    if drop:
+        path.unlink()
+        sync_dir(path.parent)
+    command(*SYSTEMCTL, 'daemon-reload')
+    check_definition('lan', show(unit_name('lan')))
+    state.unlink()
+    sync_dir(STATE)
+    return 'Owned portal firewall and LAN filter exception absent'
 
 
 def check_lan_address():
@@ -425,6 +518,8 @@ def check_lan_address():
 
 
 def firewall(action):
+    if action == 'remove':
+        require(not portal_state(), 'Remove the portal policy before removing the LAN rule')
     state = STATE / 'firewall'
     try:
         owned = checked_file(state, 64, private=True)
@@ -681,7 +776,8 @@ def validate(request):
     op = request['op']
     allowed = {
         'service': {'op', 'action', 'role'}, 'drop-in': {'op', 'action'},
-        'firewall': {'op', 'action'}, 'probe': {'op', 'mode'}, 'probe-clean': {'op', 'mode'},
+        'firewall': {'op', 'action'}, 'portal': {'op', 'action'},
+        'probe': {'op', 'mode'}, 'probe-clean': {'op', 'mode'},
         'inspect': {'op', 'target'}, 'audit': {'op', 'lines'}, 'status': {'op'}, 'revoke': {'op'},
     }
     require(op in allowed, 'Unknown operation')
@@ -695,7 +791,7 @@ def validate(request):
             valid_release(request.get('release'))
     if op == 'drop-in':
         require(action in ('on', 'off'), 'Unknown drop-in action')
-    if op == 'firewall':
+    if op in {'firewall', 'portal'}:
         require(action in ('add', 'remove'), 'Unknown firewall action')
     if op in ('probe', 'probe-clean'):
         probe_unit(mode)
@@ -752,6 +848,8 @@ def dispatch(request, grant):
         return set_drop(args['action'] == 'on')
     if op == 'firewall':
         return firewall(**args)
+    if op == 'portal':
+        return portal(**args)
     if op == 'probe':
         return probe(**args)
     if op == 'probe-clean':
@@ -773,7 +871,8 @@ def request_deadline(_signum, _frame):
 def recovery_request(request):
     op, action, role = (request.get(key) for key in ('op', 'action', 'role'))
     safe = op in {'inspect', 'audit', 'probe-clean', 'revoke'} or (
-        op in {'firewall', 'drop-in'} and action == {'firewall': 'remove', 'drop-in': 'off'}[op])
+        op in {'firewall', 'portal', 'drop-in'}
+        and action == {'firewall': 'remove', 'portal': 'remove', 'drop-in': 'off'}[op])
     if op == 'service':
         safe = action in {'stop', 'disable', 'remove', 'sync'} or (
             role.startswith('review-') and action in {'write', 'start'})
