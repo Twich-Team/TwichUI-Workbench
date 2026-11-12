@@ -49,7 +49,7 @@ def interrupted(client, headers, store, monkeypatch):
     return identity,decision,first
 
 
-@pytest.mark.parametrize('fault',[None,'stop','terminal','active_unit','expired','changed_scope'])
+@pytest.mark.parametrize('fault',[None,'stop','terminal','active_unit','expired','parent_expired','changed_scope','grant'])
 def test_native_preparation_recovery_preserves_generation_budget_and_original_deadline(
     client,headers,store,installed,monkeypatch,fault,
 ):
@@ -59,7 +59,16 @@ def test_native_preparation_recovery_preserves_generation_budget_and_original_de
         parent=c.execute(select(sessions).where(sessions.c.id==decision)).mappings().one()
         old_slot=parent['state']['feature_slot']
         old_deadline=old_slot['snapshot']['deadline']
-    if fault in {'stop','expired','changed_scope'}:
+    if fault in {'expired','parent_expired'}:
+        from datetime import datetime, timedelta, timezone
+        instant = datetime.now(timezone.utc)+timedelta(hours=2 if fault=='expired' else 7)
+        class Clock(datetime):
+            @classmethod
+            def now(cls,tz=None):
+                return instant if tz is not None else instant.replace(tzinfo=None)
+        monkeypatch.setattr(recovery,'datetime',Clock)
+        monkeypatch.setattr('workbench.intake.now',lambda:instant.isoformat())
+    if fault in {'stop','changed_scope'}:
         with write_transaction(store) as c:
             if fault=='stop':
                 state={**parent['state'],'cancel_requested':True,'stop_command':str(uuid4())}
@@ -67,18 +76,23 @@ def test_native_preparation_recovery_preserves_generation_budget_and_original_de
                 import copy
                 state=copy.deepcopy(parent['state'])
                 slot=state['feature_slot']
-                if fault=='expired':
-                    slot['snapshot']['deadline']='2020-01-01T00:00:00+00:00'
-                else:
-                    slot['snapshot']['budget_fingerprint']='changed'
+                slot['snapshot']['budget_fingerprint']='changed'
                 from workbench.visual_scope import digest
                 slot['binding']=digest(slot['snapshot'])
             c.execute(sessions.update().where(sessions.c.id==decision).values(state=state))
+    elif fault=='grant':
+        from workbench.db import real_execution_grants
+        from workbench.visual_scope import digest
+        from workbench.intake import now
+        snapshot={'task_budget':{'offer':{'id':old_slot['snapshot']['feature_offer_id']}}}
+        with write_transaction(store) as c:
+            c.execute(real_execution_grants.insert().values(id=str(uuid4()),
+                snapshot=snapshot,binding=digest(snapshot),issued_at=now(),expires_at=old_deadline))
     elif fault=='terminal':
         root=task_sessions.ROOT/'artifacts/runs'/('task-lease-task-session-'+old_slot['id']+'-01')
         (root/'session-finished.json').write_text('{}')
-    assert recovery.resume(store) is (fault is None)
-    if fault is not None:
+    assert recovery.resume(store) is (fault in {None,'expired'})
+    if fault not in {None,'expired'}:
         return
     assert feature_execution.advance(store,provision=controlled_readiness)
     assert feature_execution.advance(store)
@@ -86,10 +100,18 @@ def test_native_preparation_recovery_preserves_generation_budget_and_original_de
         parent=c.execute(select(sessions).where(sessions.c.id==decision)).mappings().one()
         slot=parent['state']['feature_slot']
         assert slot['id'] != old_slot['id']
-        assert slot['snapshot']['deadline'] == old_deadline
+        assert slot['snapshot']['deadline'] > old_deadline
+        assert slot['snapshot']['deadline'] <= job_parent_deadline(c,decision)
+        assert parent['state']['feature_history'][-1]['preparation_recovery']['expires_at'] == old_deadline
         job=c.execute(select(planning_jobs).where(planning_jobs.c.kind=='feature_execution')).mappings().one()
         assert job['payload'].get('current_attempt',1)==1
         assert job['payload']['current_preparation_recovery']['attempt_reset'] is False
         assert parent['state']['feature_history'][-1]['slot']==old_slot
     # Stop remains available in this resumed parent.
     task_sessions.cancel(store,decision,str(uuid4()))
+
+
+def job_parent_deadline(c,decision):
+    from workbench.feature_run_recovery import deadline
+    row=c.execute(select(proposal_decisions).where(proposal_decisions.c.id==decision)).mappings().one()
+    return deadline(c,row,row['payload']['feature_run'])

@@ -1,9 +1,12 @@
 # November 12 — preparation recovery remains subordinate to the original attempt
 
 A known native storage cancellation before any coding grant may receive a new
-immutable preparation revision within the SAME implementation ordinal and original
-slot deadline. Original offer/configuration/outcome and all accounting remain exact.
-A changed scope, owner Stop, active readiness unit/descendants, coding grant, expired
+immutable preparation revision within the SAME unused coding ordinal and existing
+approved parent window. Its unspent90minute coding reservation starts with the fresh
+preparation, bounded by the current parent deadline. The proof names that exact
+parent time authority and old expiry. Original offer/configuration/deadlines/outcome
+and all accounting remain exact; no generation count or token allowance is added.
+A changed scope, owner Stop, active readiness unit/descendants, coding grant, expired parent
 window or changed native evidence prevents recovery. Fresh isolation is mandatory;
 only the original passed baseline may be reused. Global work pause protects actual
 installation/rollback checks and is restored only if this engineering action set it.

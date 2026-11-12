@@ -1,6 +1,7 @@
-"""Resume a proved storage interruption before dispatch, within the same attempt.
+"""Resume a proved storage interruption before dispatch, within the same unused coding attempt.
 
-A new immutable preparation retains the original deadline and generation budget.
+A fresh preparation retains the generation budget inside the existing parent window.
+All original preparation deadlines remain immutable historical evidence.
 Owner Stop, any coding grant, uncertain descendants or changed evidence prevents it.
 """
 from datetime import datetime, timezone
@@ -45,6 +46,12 @@ def validate(c, proof, scope):
     for path, expected in proof['files'].items():
         if sha(Path(path).read_bytes()) != expected:
             raise ValueError('Original preparation evidence changed.')
+    approval, permission = feature_steps.parent(c,scope['decision_id'],active=False)
+    from workbench.feature_run_recovery import deadline
+    if (proof['parent_expires_at'] != deadline(c,approval,permission,reference=proof['parent_time_authority'])
+            or proof['unused_generation_seconds'] != permission['budget']['per_attempt_seconds']
+            or proof['time_policy'] != 'fresh-unused-coding-reservation-within-approved-parent-v1'):
+        raise ValueError('Preparation recovery differs from the approved parent time budget.')
     config = private_json(Path(proof['config']))
     terminal = private_json(Path(config['run_root'])/'session-finished.json')
     if (config['feature_offer_id'] != old['id'] or config['deadline'] != proof['expires_at']
@@ -87,11 +94,11 @@ def proof(c, job, parent, offered):
             or slot['binding'] != digest(slot['snapshot'])):
         raise ValueError('Only a native resource interruption before coding can resume.')
     approval, permission = feature_steps.parent(c,parent['id'],active=False)
-    from workbench.feature_run_recovery import deadline
-    allowed_end = deadline(c,approval,permission)
+    from workbench.feature_run_recovery import time_authority
+    time_reference, allowed_end = time_authority(c,approval,permission)
     expires = slot['snapshot']['deadline']
-    if datetime.now(timezone.utc) >= min(datetime.fromisoformat(expires),datetime.fromisoformat(allowed_end)):
-        raise ValueError('The original implementation attempt has expired.')
+    if datetime.now(timezone.utc) >= datetime.fromisoformat(allowed_end):
+        raise ValueError('The approved parent execution window has expired.')
     ready = Path(offered['snapshot']['ready_preparation']['root'])
     # Recover the frozen installation from its native preparation path.
     runs = next((p for p in ready.parents if p.name == 'runs' and p.parent.name == 'artifacts'),None)
@@ -109,6 +116,9 @@ def proof(c, job, parent, offered):
         previous_offer_fingerprint=offered['fingerprint'], attempt=detail['attempt'],
         revision=detail.get('preparation_revision',0)+1, attempt_reset=False,
         expires_at=expires,config=str(config_file),outcome=result['outcome'],
+        parent_time_authority=time_reference,parent_expires_at=allowed_end,
+        unused_generation_seconds=permission['budget']['per_attempt_seconds'],
+        time_policy='fresh-unused-coding-reservation-within-approved-parent-v1',
         baseline_source=offered['snapshot']['ready_preparation']['root'],
         files={str(p):sha(p.read_bytes()) for p in paths})
     return validate(c,{**value,'binding':digest(value)},detail['scope'])
@@ -139,7 +149,7 @@ def resume(engine):
                 for key in ('current_offer_id','feature_preparation_claim','session_id'):
                     payload.pop(key,None)
                 c.execute(task_sessions.update().where(task_sessions.c.id==parent['id']).values(
-                    status='pending',finished_at=None,state=state,message='Storage is ready. Resuming preparation within the original attempt and deadline.'))
+                    status='pending',finished_at=None,state=state,message='Storage is ready. Resuming preparation within the unused coding attempt and approved feature window.'))
                 # Current source, scope and time authority must still pass before committing.
                 feature_steps.validate_scope(c,payload['current_step_scope'])
                 c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(

@@ -407,9 +407,6 @@ def permission(c, approval, task_id, *, offer_id=None, require_current=True):
     time_reference, allowed_end = time_authority(c,approval,parent_permission,at=selected['created_at'])
     end = min(datetime.fromisoformat(allowed_end),
         datetime.fromisoformat(selected['created_at']) + timedelta(seconds=parent_permission['budget']['per_attempt_seconds']))
-    preparation_recovery = selected['snapshot']['feature_step'].get('preparation_recovery')
-    if preparation_recovery:
-        end = min(end,datetime.fromisoformat(preparation_recovery['expires_at']))
     if require_current and datetime.now(timezone.utc) >= end:
         raise ValueError('This feature step attempt expired; its history remains available.')
     from workbench.schemas import TaskBudget

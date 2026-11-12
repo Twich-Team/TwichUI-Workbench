@@ -1,3 +1,17 @@
+# November 12 — unused coding reservation follows fresh preparation
+
+Release checks outlasted the old readiness slot's remaining full-run reserve.
+No coding grant was ever issued for ordinal3. A fresh immutable preparation now
+receives that UNUSED coding attempt's existing90minute reservation, bounded by the
+already-approved parent window14:15:43UTC. Native proof names the parent time command,
+90minute budget, old10:05:48expiry and exact old configuration/outcome. Original
+approval/slot deadlines stay unchanged in history. No additional coding attempt,
+tokens, model or publication authority. Expired parent windows and Stop still block.
+This corrects an operational reservation starting before engineering recovery rather
+than resetting a consumed generation. New-work remains paused until exact candidate
+full hosted acceptance, readers, restart, actual rollback/return and screenshots.
+f7360e5 is an intermediate staged candidate; never install it using another SHA's CI.
+
 # November 12 — installed123; native prompt failure settled and resource recovery underway
 
 Exact5f5fe3d full43178751718 all9 passed; installed123 seal8e59df4192c0905b8f052dc81f76de2dbd16361c977acb73a53ab16466ee62d2.
@@ -13,7 +27,7 @@ aggregate retained scratch crossed1GiB; NO owner Stop, NO grant/model/probe fors
 Original slot3 deadline10:05:48 unchanged. Native read-only recovery proof passes.
 New code fixes missing typed recovery prompt; retains per-workspace1GiB/4GiB physical
 reserve, removes obsolete aggregate scratch cap; new preparation revisions retain
-same implementation ordinal and deadline, stopped-unit proof, no grant, current
+same unused coding ordinal within the approved parent window, stopped-unit proof, no grant, current
 scope/source, and exact original terminal evidence. Stop remains available whileheld.
 Native new-work control paused for engineering installation/rollback; restore ONLY
 our own pause using outcome-5f5fe3d/storage-recovery-pause-intent.json afterward.
