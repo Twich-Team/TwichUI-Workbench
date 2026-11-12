@@ -378,3 +378,66 @@ def test_scope_packet_never_silently_truncates_the_reviewed_request_or_latest_de
     )
     with pytest.raises(ValueError, match="reviewed requirements"):
         feature_step_source.compact(packet)
+
+
+def test_compaction_keeps_test_and_every_inspected_file_without_changing_native_identity():
+    from workbench.planning_response import wire_schema
+
+    paths = ["!!!TwichUI/map/View.lua", "tests/test_existing.lua", "!!!TwichUI/map/Prefs.lua"]
+    text = "\n".join(
+        "local inspected_definition_" + str(i) + ' = "' + "x" * 40 + '"' for i in range(80)
+    )
+    packet = dict(
+        original=dict(description="Exact reviewed requirement: " + "r" * 6000),
+        approved_scope=["Keep defaults and exclusions."],
+        source_note="Partial source.",
+        source_index=[],
+        files=[
+            dict(path=path, sha256="a" * 64, excerpts=[dict(line=1, text=text)]) for path in paths
+        ]
+        + [dict(path="tests/test_metadata.lua", sha256="b" * 64, excerpts=[])],
+        source_windows=[
+            dict(
+                path=path,
+                start=1,
+                end=80,
+                sha256="a" * 64,
+                git_blob="c" * 40,
+                total_lines=100,
+                next_line=81,
+            )
+            for path in paths
+        ],
+        source_inspection_results=[
+            dict(
+                kind="read",
+                path=paths[-1],
+                start=1,
+                end=80,
+                sha256="a" * 64,
+                git_blob="c" * 40,
+                total_lines=100,
+                next_line=81,
+            )
+        ],
+    )
+    original = copy.deepcopy(packet)
+    packed = feature_step_source.compact(packet)
+    assert len(json.dumps(packed, ensure_ascii=True, separators=(",", ":")).encode()) <= 22000
+    assert (
+        packed["original"] == original["original"]
+        and packed["approved_scope"] == original["approved_scope"]
+    )
+    assert all(file["excerpts"] for file in packed["files"][:3])
+    assert packed["files"][-1]["excerpts"] == []
+    assert packed["files"][2]["excerpts"][0]["text"] == text  # Latest definitions stay complete.
+    assert any(len(file["excerpts"][0]["text"]) < len(text) for file in packed["files"][:2])
+    for before, after in zip(original["source_windows"], packed["source_windows"], strict=True):
+        assert {k: before[k] for k in ["path", "start", "end", "sha256"]} == {
+            k: after[k] for k in ["path", "start", "end", "sha256"]
+        }
+        assert "git_blob" not in after
+    shape = wire_schema(feature_steps.StepScope, files=packed["files"])
+    assert shape["anyOf"][0]["properties"]["read_paths"]["items"]["enum"] == paths
+    assert shape["anyOf"][0]["properties"]["focused_test"]["enum"] == ["tests/test_existing.lua"]
+    assert packet == original  # Frozen observations are never compacted in place.

@@ -1,3 +1,55 @@
+# November 12 — installed120; preserve inspected files across source navigation
+
+Exact521e5ff920eb6fa0dcb09d10b6a381d0b4e37ad2 passed ALL9jobs in full43161721857.
+Frontend13917579595 SHAa0c08de5484969d2a4d246348561624e43bca5e04cbd6d91d6ad50b6cd009506;
+acceptance13918313753 SHA2c30c8e9f377dfe0e7f7076026d2c5da208628207a96691a1b907bfc0410ffa1.
+Installed120 seale920206692ff0af36b7e39e2410db956a28a66b5f33784175748188f10607e38.
+All734rows/52requests survived BOTH independent readers, four-role restart and
+ACTUAL120→119→120. ALL6private context files transferred byte-exact, same manifest
+7e1d463dd5be86d160574cb1232f8e1a2090e352e57a2b46559463a94a539e0a.
+Installed desktop/390phone/320at200%, keyboard/reload/plain-default/advanced-original
+reason inspected with zero mutations/errors. TLS/LAN/firewall/8765, normal model
+401/200/key hash and active seal verified. Native comparison path now installed;
+operator-driven, not an automatic scheduler. No actual feature result exists yet.
+
+Two distinct ordinary-browser3request allowances ALREADY EXECUTED on120:
+continue-real-feature-521e5ff.cjs and continue-real-feature-521e5ff-seventh-read-
+allowance.cjs. Create-only command/review/intent/receipt/screens retained under
+outcome-521e5ff/real-map-zoom-continuation and continuation-7. NEVER replay them.
+Actual native local-wire-schema hashes now match outgoing schemas. Qwen truly read
+existing tests/test_friend_login.lua and map Prefs definitions. However compaction
+retained only the latest batch, dropping the earlier test or map definitions.
+It oscillated between rereading files, ending with an all-repeated batch rejection.
+No addon edit/request/checked step;23scope records/28model-attempt rows/0active.
+Known SOURCE-scope usage161358tokens; original pre-send NULL usage unchanged.
+Original17scope/22ledger records and parent snapshot/binding proved exact after
+new work. Original parent6998247a deadline stays2026-11-12T07:32:09.163458UTC.
+Live740row fingerprintdd7f4f4aa7f96d4fedd26d2cb9af27db294f0e01e22879f6b694e2c2fa4a52c4.
+Do NOT replay734baseline rollback after these newer records. Normal model auth
+and active120seal rechecked AFTER both allowances settled.
+
+Development compaction retains an actual native-inspected excerpt for EVERY
+inspected file, alongside full newest definitions. Redundant historical Git/blob/
+line-count navigation metadata is omitted only from the model packet; range/hash
+identities and full native observations stay exact. Older excerpts may shorten at
+line boundaries with explicit partial labels, without emptying an inspected file.
+Metadata-only files remain unavailable to a scope. Owner requirements are never
+truncated. Guidance distinguishes a bounded implementation proposal and new internal
+interfaces from an already-written solution. No guessed source or manual map scope.
+A controlled replay of ALL23native scope records reproduces EVERY inspection hash
+and retains FriendLogin,View,test_friend_login,Prefs in21161bytes under SAME24KB
+prepared-packet guard. It can now form a complete scope; no provider was contacted.
+
+35affected scope/preparation/recovery/workshop cases, static/contracts/build/schema
+and2connected browser journeys pass. Initial test caught removal of git_blob from
+latest diagnostics; latest diagnostics retain it, only historical navigation is
+compacted. Initial formatting error corrected. Frozen native evidence is unchanged.
+Held view no longer duplicates the source-consent action with an irrelevant plan-
+review card. Need exact new full hosted acceptance, compatible121installation
+preserving740rows/ALL6context files, restore/rollback BEFORE any new task writes,
+then FRESH finite ordinary-browser source allowance for SAME parent. Prior drivers
+and old budget clocks are immutable. Continue campaign; zero real feature completions.
+
 # November 12 — installed119; actual model-schema handoff fixed and native comparison ready
 
 Exact0b3d8cefffd7e50a61bdfd184334c1f611cc7ca1 passed ALL9jobs in full43156839438.

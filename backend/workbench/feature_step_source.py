@@ -141,18 +141,25 @@ def inspect(packet, root, base, requests):
                 if len(matches) >= 8:
                     break
             prior = value.get("source_searches", [])
-            if any(p["query"].casefold() == request.query.casefold() and p["path"] == request.path for p in prior):
+            if any(
+                p["query"].casefold() == request.query.casefold() and p["path"] == request.path
+                for p in prior
+            ):
                 raise ValueError(
                     "This source search was already returned. Change the query or inspect an actual matching path."
                 )
             record = dict(kind="search", query=request.query, path=request.path, matches=matches)
             value.setdefault("source_searches", []).append(record)
             out.append(record)
-    value["source_inspection_results"] = [{k: v for k, v in item.items() if k != "text"} for item in out]
+    value["source_inspection_results"] = [
+        {k: v for k, v in item.items() if k != "text"} for item in out
+    ]
     if len(json.dumps(value, ensure_ascii=False).encode()) > 131072:
         raise ValueError("Feature source inspection reached its packet boundary.")
-    if out and all(item.get('reused') for item in out):
-        raise ValueError('Every requested source window was already inspected. Read an uninspected focused test or the next source lines.')
+    if out and all(item.get("reused") for item in out):
+        raise ValueError(
+            "Every requested source window was already inspected. Read an uninspected focused test or the next source lines."
+        )
     return value, out
 
 
@@ -175,30 +182,79 @@ def compact(packet, limit=22000):
     explicitly, while file and window identities remain available for navigation.
     """
     value = copy.deepcopy(packet)
-    if not value.get('source_windows'):
+    if not value.get("source_windows"):
         return value
-    inventory = value.get('source_index', [])
-    value['source_index'] = inventory[:32]
-    value['source_index_truncated'] = value.get('source_index_truncated', False) or len(inventory) > 32
-    for file in value['files']:
+    inventory = value.get("source_index", [])
+    value["source_index"] = inventory[:32]
+    value["source_index_truncated"] = (
+        value.get("source_index_truncated", False) or len(inventory) > 32
+    )
+    # Full observations stay in their native receipts. Navigation needs the
+    # range/hash identity, not another copy of Git and file-size metadata.
+    navigation = {"kind", "path", "start", "end", "sha256", "next_line", "reused"}
+    for name in ("source_windows",):
+        value[name] = [
+            {k: v for k, v in item.items() if k in navigation}
+            if item.get("kind", "read") == "read"
+            else item
+            for item in value.get(name, [])
+        ]
+    for file in value["files"]:
         unique = {}
-        for excerpt in file['excerpts']:
-            unique[excerpt['line']] = excerpt
-        file['excerpts'] = list(unique.values())
-    latest = {(item['path'], item['start']) for item in value.get('source_inspection_results', [])
-              if item['kind'] == 'read'}
+        for excerpt in file["excerpts"]:
+            unique[excerpt["line"]] = excerpt
+        file["excerpts"] = list(unique.values())
+    latest = {
+        (item["path"], item["start"])
+        for item in value.get("source_inspection_results", [])
+        if item["kind"] == "read"
+    }
+    last_by_file = {
+        item["path"]: item["start"]
+        for item in value.get("source_windows", [])
+        if "path" in item and "start" in item
+    }
+    retained = latest | set(last_by_file.items())
+
     def size():
-        return len(json.dumps(value, ensure_ascii=True, separators=(',', ':')).encode())
+        return len(json.dumps(value, ensure_ascii=True, separators=(",", ":")).encode())
+
     omitted = 0
-    for file in value['files']:
-        for excerpt in list(file['excerpts']):
-            if size() <= limit - 200:
+    for file in value["files"]:
+        for excerpt in list(file["excerpts"]):
+            if size() <= limit - 400:
                 break
-            if (file['path'], excerpt['line']) not in latest:
-                file['excerpts'].remove(excerpt)
+            if (file["path"], excerpt["line"]) not in retained:
+                file["excerpts"].remove(excerpt)
                 omitted += 1
+    shortened = 0
+    while size() > limit - 400:
+        options = [
+            excerpt
+            for file in value["files"]
+            for excerpt in file["excerpts"]
+            if (file["path"], excerpt["line"]) not in latest
+            and len(excerpt["text"].splitlines()) > 8
+        ]
+        if not options:
+            break
+        excerpt = max(options, key=lambda item: len(item["text"]))
+        lines = excerpt["text"].splitlines()
+        excerpt["text"] = "\n".join(lines[: max(8, len(lines) // 2)])
+        excerpt["coverage"] = (
+            "Partial earlier inspected window; full bytes remain in native evidence."
+        )
+        shortened += 1
     if omitted:
-        value['source_note'] += ' Older excerpts were omitted to fit the unchanged input limit; empty excerpt lists are metadata only.'
+        value["source_note"] += (
+            " Older excerpts were omitted to fit the unchanged input limit; empty excerpt lists are metadata only."
+        )
+    if shortened:
+        value["source_note"] += (
+            " Some earlier inspected windows are shortened, so each inspected file remains available; request narrower definitions as needed."
+        )
     if size() > limit:
-        raise ValueError('The latest source definitions and reviewed requirements exceed the bounded scope packet. Request narrower source windows.')
+        raise ValueError(
+            "The latest source definitions and reviewed requirements exceed the bounded scope packet. Request narrower source windows."
+        )
     return value

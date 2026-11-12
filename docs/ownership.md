@@ -1,3 +1,11 @@
+# Inspected source remains usable through compaction — November 12, 2026
+
+Model-packet compaction preserves one actual excerpt per natively inspected file
+and all newest definitions. Earlier excerpts may explicitly shorten; metadata-only
+files cannot become inspected code. Native observations, range/hash identities,
+original requirements and parent/usage histories remain immutable. This changes
+read-only context management, never source-write, model-route or publishing authority.
+
 # Native simulator context and actual local scope schema — November 12, 2026
 
 Existing checked source/completion owners gate native operator capture. Passive

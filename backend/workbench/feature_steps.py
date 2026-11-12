@@ -48,6 +48,11 @@ INSTRUCTIONS = (
     'New internal helpers in the approved existing files are allowed when the feature '
     'needs them; do not confuse adding scoped behavior with claiming an uninspected '
     'API already exists. Read needed definitions before declaring source unavailable.'
+    ' Prepare a bounded implementation attempt, not a finished solution. Once relevant '
+    'production and focused-test definitions are available, select its complete scope. '
+    'New internal interfaces may be proposed work rather than existing APIs; keep that '
+    'distinction explicit in the checks. Do not require an already-written solution '
+    'or read every line before proposing a source-grounded attempt.'
 )
 
 
