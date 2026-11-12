@@ -517,6 +517,12 @@ def test_current_feature_brief_preserves_compiled_checks_and_prioritizes_focused
     assert 'Implement only the current approved feature step' in value
     initial=json.JSONDecoder().raw_decode(value.split('Initial bounded reads: ',1)[1])[0]
     assert initial[0]['path']=='source.lua' and initial[1]['path']=='tests/test_scope.lua'
+    task=json.JSONDecoder().raw_decode(value.split('Current reviewed task:\n',1)[1])[0]
+    assert task['report']=='Current implementation step'
+    assert task['intended_behavior']['acceptance']==['Current behavior']
+    assert task['feature_background_only']==dict(original_request='Whole parent feature')
+    assert 'Actual source findings' not in value and 'Parent behavior' not in value
+    assert value.count('CONTROLLED compiled step observation')==1
 
 
 def test_bounded_feature_checks_changed_work_before_consuming_all_twenty_turns(tmp_path):
@@ -574,3 +580,16 @@ def test_bounded_feature_never_finishes_on_focused_pass_when_candidate_fails(tmp
     with pytest.raises(BudgetError,match='turn limit consumed'):
         implement(ControlledTools(),'Controlled feature','','controlled',lambda:True,transport=Transport)
     assert len(Transport.bodies)==4 and checks==['focused','candidate','focused','candidate']
+
+
+def test_large_feature_prefill_uses_bounded_real_setup_and_tail_with_normal_read_accounting(tmp_path):
+    path,tools,view=current_fixture(tmp_path)
+    view.runtime.recipe['repair_cycle']='scoped-feature-v1'
+    view.runtime.source_read_limit=path.stat().st_size-1
+    view.prefill(tools)
+    assert set(view.files['source.lua']['lines'])==set(range(1,121))|set(range(181,301))
+    assert 'current_1 = 1' in view.message['content'] and 'current_300 = 300' in view.message['content']
+    assert tools.read < view.runtime.source_read_limit
+    before=tools.read
+    view.read(tools.handle('read_file',dict(path='source.lua',start=1,end=120)))
+    assert tools.read==before

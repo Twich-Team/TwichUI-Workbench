@@ -10,6 +10,9 @@ Read the [November 11 legacy replacement direction](docs/OWNER_LEGACY_REPLACEMEN
 Workbench ultimately replaces the maintenance coordinator. Preserve current live
 owners until separately verified cutover is authorized; keep the local Qwen service.
 Follow [CONTINUATION](docs/CONTINUATION.md) and verified receipts for actual status.
+Apply the [temporary Feature Workshop model strategy](docs/OWNER_FEATURE_MODEL_STRATEGY_20261112.md):
+explicitly selected capable Codex for substantive feature work; original Qwen-only
+task permissions and other Qwen-first preferences remain unchanged.
 [Reference locations](docs/REFERENCE_DOCUMENTS.md) distinguish current from historical copies.
 
 Read shared guidance: [EXECUTION](docs/EXECUTION.md), [PLAN](docs/PLAN.md),

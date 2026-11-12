@@ -62,7 +62,7 @@ class Observation(Data):
 
 
 class ClientBootstrap(Data):
-    through_line: int = Field(ge=1, le=200)
+    through_line: int = Field(ge=1, le=600)
     client: Annotated[str, Field(pattern=r'^[A-Za-z_][A-Za-z0-9_]{0,39}$')]
     test_path: TestPath | None = None
 
@@ -218,7 +218,9 @@ def validation_diagnostics(error):
 
 
 class BugEvidence(Data):
-    bootstrap_source: Annotated[str, Field(max_length=16032)] = ''
+    # committed_bootstrap already caps the source prefix at 64 KiB. Include
+    # its fixed return statement; the final oracle keeps its separate bound.
+    bootstrap_source: Annotated[str, Field(max_length=65664)] = ''
     windows: Annotated[list[ReadWindow], Field(min_length=4, max_length=4)]
     plan: BugPlan
     review_digest: str
@@ -247,7 +249,7 @@ def committed_bootstrap(root, base, plan):
         raise ValueError('The reviewed client setup exceeds the committed test.')
     prefix = ''.join(lines[:spec['through_line']])
     client = spec['client']
-    if (len(prefix.encode()) > 16000 or not re.search(
+    if (len(prefix.encode()) > 65536 or not re.search(
             rf'^local\s+{re.escape(client)}\s*=\s*MakeClient\s*\(', prefix, re.MULTILINE)):
         raise ValueError('Select a bounded committed test setup with an existing client variable.')
     return prefix + '\nreturn ' + client + '\n'

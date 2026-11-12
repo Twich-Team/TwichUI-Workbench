@@ -1,3 +1,58 @@
+# November 12 — accepted evidence-composition assignment
+
+The owner accepted the design review and authorized completing one real combined
+feature result from the two preserved checked Codex steps, then full verification,
+Workbench development push/hosted acceptance/private installation and owner review.
+Do not restart implementation, change the original Qwen task, publish addon changes,
+or begin another campaign. Earlier review-stop entries below are historical.
+
+The existing verifier now accepts audited exact native assertions and app-owned
+provenance/suite controls alongside original-source supplemental observations.
+Complete original/final addon inventories and frozen completion remain mandatory.
+A committed fixture DB initializer must not replace serialized restart input.
+A native original-suite watchdog failure is retained; the same local contract uses
+the next existing attempt with a suitable per-suite watchdog and unchanged overall
+permission. This is engineering recovery, never a model or permission renewal.
+
+# November 12 — combined verification stopped for owner review
+
+The narrow corrected approach preserved both real checked Codex implementation steps
+but did not complete combined acceptance or the review package. See
+[diagnosis and retained evidence](FEATURE_COMBINED_VERIFICATION_20261112.md).
+No further model/source request or major development campaign is queued. The next
+complete outcome remains an independently qualified original/candidate result and one
+local feature package. Release gates remain unmet; installed127 and rollback126 stay.
+Earlier active campaign/continuation entries below are historical for this stopped pass.
+
+# November 12 comparison checkpoint
+
+The immediate real checked-step objective succeeded, followed by checked capture/
+restore. Combined independent preparation is held; no complete delivery yet.
+Use the checked second step for the next focused preparation-contract repair and
+combined verification. Do not restart implementation or repeat Qwen attempts.
+The exact operational state and preserved accounting are in CONTINUATION and the
+[comparison report](FEATURE_CODEX_COMPARISON_20261112.md). No broad redesign,
+new billing, addon publication or main-app installation is part of this comparison.
+
+# November 12 — focused Codex recovery under temporary model strategy
+
+The owner's later [temporary Feature Workshop model strategy](OWNER_FEATURE_MODEL_STRATEGY_20261112.md)
+supersedes the review stop below. Prefer explicitly selected capable Codex for
+substantive feature work; keep other Qwen-first preferences unchanged. Preserve
+the original Qwen task and run one separate nonpublishing comparison through
+existing provider controls. Demonstrate one real independently checked storage
+step, then dependent steps and combined verification. No broad orchestration
+redesign or repetition of the failed Qwen path. Current investigation and baseline
+are retained under `provider-comparison-20261112` in the private data directory.
+
+# November 12 targeted recovery closeout — failing sequence stopped
+
+Owner acceptance remains unmet:0real checked feature steps. Two evidence-informed real attempts failed; stop this path rather than starting another general repair campaign. Preserve all789rows and both execution stages. Installed127restored, new workpaused31. Reassess the first step's focused test and necessary source definitions before any future bounded attempt. No dependent step, full release pipeline or deployment of the local correction is authorized by a claimed success. See CURRENT_STATUS and latest CONTINUATION for actual state; prior active-run notes below are historical.
+
+# November 12 — targeted recovery replaces the broad campaign
+
+Deliver one real independently checked first step under the original map-zoom feature, then stop for owner review. Diagnose actual failure and review archived prototype; minimally correct step context, useful failure feedback and existing settled recovery; prove the actual runtime with deterministic retained responses; run the same saved feature with Qwen; require focused, original/candidate and full addon checks; preserve checked state through restart; push, full hosted verification and authorized installation of the minimal Workbench correction. No FW4/FW6/FW7 expansion or addon publication in this assignment.
+
 # November 12 — continue connected FW3/FW5 delivery
 
 One original campaign remains active. Complete current native/fault/browser checks,
@@ -156,6 +211,17 @@ its own additive copied-store path and is not a visual-development prerequisite.
 Implementation and final evidence: [Phase B acceptance](PHASE_B_ACCEPTANCE.md).
 
 ---
+
+# November 11 administrative investigation and Phase B independence
+
+The schema0013-compatible root helper is installed and its existing session78
+grant works. The owner's session413 was rejected only by the exact-session binding;
+no retry or policy weakening is needed. See [verified investigation](WORKBENCH_ADMIN_APPROVAL.md).
+Keep copied-store historical reconciliation and its eventual deployment separate
+from Phase B visual/usability development. Neither historical grouping nor a new
+administrator login is a prerequisite for isolated Phase B implementation and
+desktop/phone acceptance. Preserve the running deployment/store during development;
+verify actual installation authority again when a candidate is ready.
 
 # Active autonomous feature campaign — November 11, 2026
 

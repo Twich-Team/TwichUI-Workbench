@@ -8,7 +8,7 @@ import {WorkshopPanel} from './Workspace';
 
 type Feature=components['schemas']['FeatureView'];
 type Input=components['schemas']['FeatureRunInput'];
-function stored(key:string):Input|null{try{return JSON.parse(localStorage.getItem(key)||'null') as Input|null;}catch{return null;}}
+function stored<T=Input>(key:string):T|null{try{return JSON.parse(localStorage.getItem(key)||'null') as T|null;}catch{return null;}}
 
 export function FeatureRun({feature,onSaved}:{feature:Feature;onSaved:()=>void}){
  const key='feature-run:'+feature.id;
@@ -64,13 +64,13 @@ function FeatureStop({feature,onSaved}:{feature:Feature;onSaved:()=>void}){
 function FeatureScopeCorrection({feature,onSaved}:{feature:Feature;onSaved:()=>void}){
  const offer=feature.scope_correction!;
  const key='feature-scope-correction:'+feature.id;
- const [command,setCommand]=useState<Input|null>(()=>stored(key));
+ const [command,setCommand]=useState<components['schemas']['FeatureScopeCorrectionInput']|null>(()=>stored<components['schemas']['FeatureScopeCorrectionInput']>(key));
  const [accepted,setAccepted]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const saving=useRef(false);
  const stale=Boolean(command&&command.binding!==offer.binding);
  async function proceed(){
   if(saving.current||!accepted||stale)return;
-  const input=command||{command_id:crypto.randomUUID(),binding:offer.binding};
+  const input=command||{command_id:crypto.randomUUID(),binding:offer.binding,generation_requests:offer.generation_requests};
   saving.current=true;setBusy(true);setError('');setCommand(input);localStorage.setItem(key,JSON.stringify(input));
   try{await mutate('/api/features/'+feature.id+'/prepare-step-again',input);localStorage.removeItem(key);onSaved();}
   catch(reason){setError((reason as Error).message);}finally{saving.current=false;setBusy(false);}

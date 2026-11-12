@@ -1,3 +1,412 @@
+# November 12 — REAL combined feature result saved
+
+The same existing two checked Codex steps now produce one independently verified
+local feature result and coherent review bundle. See [complete evidence report](FEATURE_EVIDENCE_COMPOSITION_20261112.md).
+Execution3050529d-13d5-50a0-a938-f9b0885f43a2, candidateac9781fc3b725a1a29382418b02c904e34a6c4c3ab9fa1b19545fca43d634a45.
+Original and exact combined suites each178/0; all10supplemental phases pass candidate;
+original controls pass and changed observations fail semantically. No new inference.
+The first timeout remains failed; second existing attempt is checked. Local package
+is saved, publishedfalse, no draftURL. Original Qwen/permissions/history unchanged.
+
+Fresh backup908rows/55intakes/hash22190b1c908b9318bb5ad4cf4a4f77289e595d8169d7bda3093ee7163888f25f;
+ALL789originalrows and52originalrequests remain exact. Actual1440desktop/390phone
+review screenshots inspected: ready_to_review/passed_offline,8behavior summaries,
+complete-result link, reload/APIrestart, no overflow/errors/mutations. Native full
+completion and package read back. Installed127/rollback126remain untouched.
+
+Full local verification uses four complete inventory partitions plus frontend,
+browser and visual groups. Do not claim the interrupted serial run as a full pass.
+After exact hosted gates, install the reviewed build and same completed store via
+the approved private mechanism; retain original127/126and current comparison paths.
+Do not resume original Qwen work, dispatch models, publish addon changes or replay
+any admission/retry/worker scripts. Stop for owner review after this milestone.
+
+# November 12 — evidence composition in progress under accepted owner assignment
+
+The owner's latest attachment accepts the design-review recommendation and
+supersedes the preceding review stop for this one milestone. Preserve original
+Qwen history and both real checked Codex contributions. No implementation replay.
+
+Private current evidence: `/home/rich/.local/share/TwichUI-Workbench/evidence-composition-20261112`.
+Starting comparison backup exactly matched 900 rows / `42471ccdc9bc5f8dd48194832551feec0570a4ae80adcf59bb402f208f78387a`.
+Checked chain revalidated through native completion owners before source inspection.
+Supplement originally authored/frozen against the nine hash-matched original files
+before candidate inspection. Later original-derived input/bounds corrections are
+explicitly diagnostic-derived, not represented as new blind evidence.
+
+Ten supplemental phases pass read-only candidate preflight; original defaults,
+lifecycle and preserved controls pass, while intended missing-memory observations
+fail semantically. This preflight is not combined acceptance. Original Westfall
+click expectation stays unchanged; pointer placement is corrected. Full-client
+restart exposed the committed fixture overwriting its copied DB. Existing helper
+now protects serialized input only against that frozen setup chunk's initializers;
+actual addon replacements/writes remain observable. Both controls pass tests.
+
+The first real combined attempt hit the old120-second original-suite watchdog;
+its native timeout/cleanup/failure/grant remain retained, and no candidate ran.
+The same contract is using attempt2 of the existing3, with600seconds per full
+suite and the unchanged2400-second overall/check and parent expiry. No new model
+requests. Do not replay `run-real.py`, admission or retry scripts. Worker is the
+user unit `workbench-real-codex-task-lease-feature-composition`. Installed127 and
+its789-row canonical store remain unchanged. Full local verification is running.
+
+# November 12 — combined verification design review complete
+
+Following the Project Working Philosophy, this owner-requested review stops at a
+recommendation. See [exact diagnosis, coverage and proposed correction](FEATURE_VERIFICATION_DESIGN_REVIEW_20261112.md).
+No new model request, application/feature edit, candidate check, deployment or
+acceptance transition. Existing local edits and previous failures remain intact.
+
+Phase 3 line 31 incorrectly expects Westfall zoom after clicking the continent's
+screen center. CursorWorld is (0.7,0.35), deepest map1415; actual zoom3.3333333333333,
+expected16.666666666667. Every other individually evaluated phase3predicate passes
+on the exact original. A diagnostic world-target input correction satisfies the
+same preserved expectation; original still fails the intended missing feature.
+No corrected proposal was adopted. Historical diagnostic scripts target a surrounding
+checkout with four mismatched disclosed hashes at review; exact frozen7fd7be8 reproduces the
+same failed assertion with all nine hashes matching. Diagnostic receipts are in
+`/home/rich/.local/share/TwichUI-Workbench/verification-design-review-20261112`.
+
+Both handoffs remain clean and match their commits and all1116manifest paths.
+Step oracles are native runners of implementation-authored assertions, not a
+separate blind behavioral author. Preserve their valid step evidence without
+equating it to complete independent feature acceptance. Recommended narrow change:
+compose audited native assertions, app-owned provenance/suite controls and a small
+independent supplement through existing verification owners. Remaining coverage
+includes full fresh-client reset, deep DB preservation, non-wheel choice/reopen,
+opening map/center and content after restore. Keep complete addon verification.
+
+Installed127/ade9295 and all saved task states are unchanged by this review.
+Zero finished real features, no combined receipt/package; prior corrections remain
+uncommitted/uninstalled. Stop for owner review; no execution continuation is queued.
+
+# November 12 — corrected combined-verification attempt remains held
+
+Following the Project Working Philosophy, preserved and reused comparison8a11c7e1 /
+parent1ce16b7f / job8c063c44; no implementation, intake or original Qwen task was replayed.
+See [focused diagnosis](FEATURE_COMBINED_VERIFICATION_20261112.md).
+
+One separately recorded corrected-contract allowance used two further tool-free Codex
+requests (15/16); all14prior records, unknown usage and the original budget remain.
+Exclusive generation grammar now matches the existing validator. Instructions clarify
+complete phase allocation and app-owned history/full-suite portions. Request15 returned
+a complete5-phase program, but BugEvidence still capped a450-line selected bootstrap at
+16032characters despite source selection allowing64KiB. The downstream bound now agrees
+with selection; the final64KiB oracle bound remains. This program compiles to57290bytes.
+
+Real original-only confined diagnostics reject its preserved-behavior phase3 with
+outside-reviewed-results (phase1expected, phase2incorrect). A diagnostic game-clock
+adjustment did not fix that compound control; it is NOT an accepted correction.
+Request16asked for original Places/Caves/Art definitions outside the nine disclosed files;
+access was correctly refused. No candidate combined check, frozen result or final local
+package. No additional source/model call or acceptance waiver. Stop for owner review
+under the assignment's narrow unsuccessful-approach instruction; do not launch a campaign.
+
+E=/home/rich/.local/share/TwichUI-Workbench/combined-verification-20261112.
+Final trial900rows/fingerprint42471ccdc9bc5f8dd48194832551feec0570a4ae80adcf59bb402f208f78387a;
+final-comparison.sqlite3 independently matches. EVERY789canonical row remains exact in
+both stores; canonical52requests/schema0014/fingerprint7761f416... unchanged. Trial controls65
+paused, worker stopped, all model rows finished, parent/job held,2implementations/0checks.
+Request15/16reported150451tokens (144034prompt/6417completion,3104reasoning subset).
+New usage complete; earlier unknown final accounting remains unknown.
+
+Corrected contract/source and bootstrap bound are in the stopped isolated trial and root
+checkout, uncommitted/uninstalled. wb.py check and126compiler/recovery tests passed; focused groups and real diagnostic
+receipts are in the report (not full release acceptance). Actual1440/390screenshots inspected;
+held2of4 persists across reload/review-API restart with zero browser errors/mutations.
+Installed127/ade9295 sealpassed, four original servicesactive, rollback126preserved.
+No push, hosted run, deployment, addon publication, live addon edit or port8765change.
+
+# November 12, 17:30 UTC — two checked implementations; combined preparation held
+
+This is the current operational state; older active-run notes below are history.
+The bounded Codex comparison achieved the requested first real storage step and
+the dependent capture/restore step. Both passed native focused, original/candidate,
+full178/0 and frozen checks. No complete real feature delivery exists yet.
+See [comparison report](FEATURE_CODEX_COMPARISON_20261112.md) and CURRENT_STATUS.
+
+Same comparison8a11c7e1 / parent1ce16b7f / execution job8c063c44 remain the only
+continuation targets. Checked executionsfe4b9dd7 and2ed99020 are preserved.
+Final parent held; jobfailed/held; controls63paused; worker stopped; all model rows
+settled. Loopback9187 review API remains active and was restarted successfully.
+No completed combined check or local final package; publication held.
+Do not replay any prior intake, approval, start, continuation or recovery script.
+
+Blind independent history has14requests: original12 plus separately recorded2.
+Request9partial remains quarantined/unconfirmed, with56167observed tokens and
+unknown final accounting; larger existing Lua-program traffic profile now selected.
+Long actual committed bootstrap is450lines, not missing. Nine original source files
+are disclosed with bound hashes; no candidate entered this author. Request13 returned
+an incomplete12-phase program AND explicit limitation (reset/controls/mapping missing),
+correctly rejected. Request14 requested settings-test/SettingsKit source; restricted
+search returned no program. Do not adopt that incomplete response or silently reset
+the spent allowance. No actual combined original/candidate execution occurred.
+
+Next focused engineering: reconcile behavioral phase coverage with app-owned
+checkpoint/history/full-suite/publication safeguards, preserve every requirement,
+and use the existing committed map setup without irrelevant dependency hunting.
+Then continue native independent preparation/combined checks from checked step2;
+no reimplementation, Qwen retry, harness expansion or orchestration redesign.
+Engineering does not require a new owner product decision. Further provider/source
+admission still needs valid explicit task bindings and disclosure, never fake consent.
+
+E=/home/rich/.local/share/TwichUI-Workbench/provider-comparison-20261112.
+E/final-preservation.json and final-comparison-checkpoint.sqlite3 preserve896rows,
+fingerprintb56b731be8943ca4742aa2e802aee36606f291ee601961a50238dfd5e5e28de7.
+ALL789original rows remain exact in canonical AND comparison. Canonical52requests/
+schema0014/fingerprint7761f416... unchanged, sealpassed, four installedservicesactive.
+Installed127/ade9295 remains paused; normal Qwen access/globalpreferences untouched.
+No main installation, rootcommit, push, addon publication or game-file change.
+Native isolated local handoff commits carry checked predecessors only.
+Desktop1440/phone390 screenshots inspected:2of4checked/held persists on reload;
+zero browser errors/mutations. Root changes remain uncommitted/uninstalled;
+exact executing hashes E/stage-source.json, earlier snapshots retained.
+Known complete coding144470tokens/3responses (5670completion), earlier codingunknown.
+All comparison complete reported978900tokens +56167partialobserved, not exact total.
+Prior source-schema/coding unknown usage and pre-send/local refusals remain separate.
+Latest controlled15correction tests,12normal recovery tests and wb.py checkpassed;
+do not sum overlapping older groups or claim full hosted release acceptance.
+
+# November 12, 16:21 UTC — TWO real implementation steps checked; combined work active
+
+Same comparison8a11c7e1 / parent1ce16b7f now has2checked IMPLEMENTATIONS.
+Second execution2ed99020-a79c-550d-b4ec-6ec74b3228fb, slotce077116, candidate
+243fbe2fdea978b96852000a4690babd4416ca93fa9953168b8d4324b06225a8.
+Two completed Codex responses85942tokens (81711prompt/4231completion, reported
+2450reasoning subset). First response passed legacy map cases but its new test
+compared saved preferences after intentionally changing smoothing. Second fixed
+that test and guarded nil on original production. Focused/original differential/
+full178of178/frozen checks PASS. First58528+second85942=144470known coding tokens;
+the earlier interrupted response remains unavailable and fully reserved.
+
+Only View.lua/test_map_explore.lua changed. The checked second commit carries the
+first step. Player-choice flag separates explicit input from internal placement;
+restore is after normal OnShow initialization, at opening-map centre. Test-only
+logout clears isolate existing scenarios; original assertions/Westfall content stay.
+E/second-checked/result.json and exact869-row checkpoint preserve this milestone.
+No complete feature delivery yet. Installed127 and original Qwen0of5 unchanged.
+
+Blind original-source Codex adapter, checked-predecessor disclosure and window/search
+validation passed22/33/103overlapping focused groups plus wb.py check. Current trial
+source hashes: E/stage-source.json, prior executed source in second-checked/.
+No candidate enters blind-check producer; inspections stay within original selected
+source. Worker began verification scope. Operator guard initially counted only
+implementations, so pause NEW admission at55 while its current source call finishes;
+do NOT kill/cancel that call. Once ledger/job lease settles, stop idle worker, update
+monitor to count completed_steps + completed_checks (plus local bundle separately),
+then resume55->56 with threshold3. No native task or old result is replayed.
+Current run script already loaded; editing it cannot change that live process.
+
+Read E/worker-progress.json and native DB before resuming; no start/approval script
+replay. No draft authority file exists in trial artifacts, no publication records
+or external writes. A later fourth step may prepare the existing LOCAL coherent
+bundle only, with publication held. No commit/push/deployment/game installation.
+
+# November 12 — FIRST REAL CODEX STEP CHECKED; continue dependent work
+
+Comparison8a11c7e1 / parent1ce16b7f has ONE of FOUR steps checked.
+Executionfe4b9dd7-cdd8-565c-812c-20b0ac0fce18, sloteb812fb1, candidate
+2301e043d7e8f6d1b31e46e390ccf03130e54219c40bf8940d05abb116f98dec.
+Actual gpt-6.1-sol, requested high effort; ONE completed coding response,
+58528totaltokens (57089prompt/1439completion/516reasoning). Earlier canceled
+response retains unavailable usage and its full24000reservation. Native syntax,
+focused/original-failure differential/full178of178/frozen checks ALL passed.
+Independently reviewed exact7production+55test additions, zero deletions, only
+approved two files. Storage/reset only, no capture/restore/UI/config changes.
+
+Worker paused at1checked, controls49, BEFORE next scope. Latest owner direction
+explicitly continues dependent work and combined verification. Original Qwen
+feature STILL0of5checked, preserved. Zero complete real features so far.
+First checked snapshot E/first-checked-checkpoint.sqlite3 is verified; never
+replay it over newer records. Desktop1440 and phone390 screenshots inspected:
+1of4checked survives reload, zero errors/mutations. No deployment/commit/push.
+
+Next: root blind-check Codex adapter passed19focused tests and wb.py check.
+Copies are not yet in executing stage. Archive exact first-step stage source,
+copy only those adapter corrections while worker stopped; resume SAME parent
+until2checked or failure, inspect before original/combined verification.
+No re-planning, completed-step replay, new Qwen attempts or addon publication.
+
+# November 12, 15:47 UTC — storage recovered; same Codex first step resumed
+
+Comparison8a11c7e1 / parent1ce16b7f remains the only resume target. Actual scope
+c21ec22c permits View.lua + test_map_explore.lua writes and read-only Core/Persist/
+harness. Final scope turn used25334tokens. Fresh ORIGINAL addon suite178/0 passed.
+First coding sessionbe1d99e4 / execution704f2ff7 was interrupted by the native
+4GiB disk reserve. Connector1c31d8e0 positively confirms one tool-free readOnly
+turn, acknowledged interruption, zero returned output, closed producer. CODING
+GENERATION DID START; usage remains UNAVAILABLE, never zero. No patch/check result.
+Original failed DB/model/grant rows stay exact and its24000token reservation counts.
+
+E/canceled-request-match.json reconstructs the EXACT newline-inclusive request hash
+with transport disabled; no inference/writes. E/canceled-settlement.json records
+closed-response evidence under standing read-only recovery; pristine workspace
+matches its original1116-file manifest. Separate codex-readonly-settlement.json
+supports existing failed-step recovery without fabricating a missing native failure
+handoff or rewriting unavailable accounting. Capability/output/closure faults hold.
+Future coding turns now retain a request-hash intent before connector dispatch.
+69focused tests and wb.py check passed (one normal Starlette warning).
+
+Verified existing Python archive independently extracted in /dev/shm and matched
+58INACTIVE environments before pruning their duplicate dependency trees. Reclaimed
+~6GiB; free capacity>9GiB at recovery. Current127/rollback126/fallback125, previous
+protected environments, source/ops/seals/stores/results/failed work all retained.
+Per-environment inventories, timestamps and restore instructions: E/dependency-retention.
+No model-cache or unrelated files removed. E/storage-recovery archives exact prior
+executed backend/source hashes and worker state. New source only in isolated trial.
+
+Browser resumed trial controls47->48; same native worker active, threshold one
+checked step or settled failure. Monitor E/worker-progress.json / worker-terminal.json.
+DO NOT replay request/continuation/resume scripts. Installed127/ade9295 remains
+paused and untouched. Current strategy still one real independently checked step,
+then dependent steps and combined verification; no addon publication/live changes.
+
+# November 12 — real Codex preparation active; original Qwen task untouched
+
+Latest active comparison is8a11c7e1-b52c-43ff-a9c3-234a75a16bd4, parent
+1ce16b7f-89a4-4a18-a0e8-519d304cfde8, scoped plan670734de. Native saved
+gpt-6.1-sol/high, fallbackOff/publicationHeld; four dependent tasks, storage-only
+first with original three criteria plus explicit setup/scope exclusions. Earlier
+comparisons eaa96c69 and34f7fe08 are settled retained history, NOT resume targets.
+
+E=/home/rich/.local/share/TwichUI-Workbench/provider-comparison-20261112.
+Stage=/home/rich/TwichUI-Workbench/.local/m5-review/everyday-codex-comparison-20261112.
+The user review API is workbench-codex-comparison-review-api on127.0.0.1:9187.
+The existing worker runs in workbench-real-codex-task-lease-feature-comparison;
+its monitor stops before a repeated implementation, on first checked step or
+settled failure. Read E/worker-progress.json and worker-terminal.json when present.
+DO NOT replay request/approval/continuation scripts. Inspect their saved intents
+and native receipts. Executing source hashes are in E/stage-source.json; do not
+change that source while active. No coding grant or checked step existed at this
+checkpoint. Latest instruction remains one checked step, then dependent work and
+combined verification under the temporary Codex strategy; no publication.
+
+Actual Codex planning/decomposition and five real source reads worked. Integration
+corrections: parent gate accepts saved Codex; shared current-step coding brief;
+relevant test/harness selection; exact whole source lines; feature generation's
+existing complete-envelope transport; object-root scope formatting; Codex context
+packing with bound/verified search lines; final permitted preparation request must
+return scope or honest limitation. Source preparation chooses files/checks, not a
+completed implementation. All independent candidate checks remain unchanged.
+
+The failed scope turn bb157713 definitively ended failed after API400 invalid
+root schema, with no output and unavailable usage. Native tool-free capabilities,
+terminal/closed producer and immutable ledger qualify existing standing read-only
+recovery; unknown usage remains NULL. Earlier schema-only local refusal has its
+original verified zero-request ledger. Existing additive scope-recovery receipts
+bind both, with no implementation grant or old-history rewrite. Old exact code
+snapshots and receipts are in E/planning-first, planning-second, scope-preflight,
+scope-wire, scope-context and scope-selection. Never reuse old model output as a
+candidate. Current read context passes exact source validation, including searches.
+
+Installed127/ade9295 and canonical789rows/52requests remain unchanged and paused;
+all four managed services remain active. All789 original rows also remain exact
+in the copied comparison store. No Qwen call, model service/key change, commit,
+push, deployment, addon edit/publication or port8765change. Original local edits
+and dependency symlinks preserved. Static/contracts/build/schema and affected
+checks passed; last final-scope transition has42focused passes. A prior broader
+native worker/provider set passed78checks. These are not a real checked step.
+
+# November 12 — owner selects Codex for focused Feature Workshop recovery
+
+Follow [temporary model strategy](OWNER_FEATURE_MODEL_STRATEGY_20261112.md). The
+latest owner direction resumes focused recovery: explicitly selected Codex for
+substantive feature work, existing subscription only, original Qwen task untouched,
+one checked real storage step before dependent steps/combined verification.
+No broad redesign. Earlier Qwen stop and archived evidence remain historical.
+
+Private evidence: `/home/rich/.local/share/TwichUI-Workbench/provider-comparison-20261112`.
+Fresh verified backup exactly matches all789rows/52requests and original fingerprint
+7761f416878474f4888558ac8c700289e73e18c9d64af98294fa28bad6a0e778. Installed127/ade9295
+and four managed services remain unchanged and paused. Separate native review
+stage `everyday-codex-comparison-20261112` has copied history and loopback9187 API.
+New native intake eaa96c69-577d-4f8e-91e5-0dc7039d099c explicitly selects
+gpt-6.1-sol/high, fallbackOff, and names original evidence. Do not resubmit it.
+No real provider has run yet. Source-selection/admission/current-step corrections
+are under deterministic verification; no addon solution or previous patch supplied.
+
+# November 12 — TARGETED RECOVERY STOPPED AFTER TWO REAL FAILURES; preview restored
+
+This is the latest operational state. One-real-checked-step objective NOT achieved. Stop the failing attempt sequence for review, per the owner's instruction; do not automatically repeat it or launch dependent steps. No new commit/push/full release/deployment was performed because the required real-step acceptance did not pass. HEAD remains6e1f332; installed127/ade9295 source is unchanged and its seal reverified.
+
+Canonical current store is AGAIN /home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-ade9295/artifacts/workbench.sqlite3. All four original managed services are active. Exact latest789rows/31tables/schema0014,52requests; fingerprint7761f416878474f4888558ac8c700289e73e18c9d64af98294fa28bad6a0e778. Original approvals/grants/requests/model ledger rows preserved byte-for-byte; legitimate original parent/journal now include the new attempts. All model/execution/planning/publication work settled. Native work controls revision31paused. Auth401/200,keyhash unchanged,all slots idle. Port8765 untouched. Desktop1440/phone390 screenshots inspected; zero browser errors/mutations. Four-service restart and reload preserve the held failure with0of5checked. No checked step exists to certify restart success.
+
+E=/home/rich/.local/share/TwichUI-Workbench/targeted-recovery-20261112. E/recovery-report.json is the concrete assessment; E/restoration contains fresh latest.sqlite3, history-forward proof, all52-request reader, model restoration, source seal and screenshots. NEVER replay older776/782/770/763backups over the789-row store. Both user review APIs/workers are stopped. Both temporary execution stages remain immutable evidence with actual native run artifacts; do not remove them. Do not replay any start/continuation/restore scripts.
+
+Real request4e440dc5 (first targeted) and99e76efa (second targeted) each completed20responses and failed at turn limit. Known coding usage436758+331237tokens (3055+3879generated); cancellation-probe ledgers remain separate; old unknownusage remains unknown. First failed map test setup (On nil); second focused check passed but original differential failed via missing helper, not a native assertion. Final turn added presence assertions, then exhausted the cap with no qualifying comparison/full-suite result. Second candidate also invents PLAYER_RELOAD absent from pinned SystemDocumentation; fake event assertion is not actual reload evidence. No real checked predecessor or feature publication.
+
+The current compiled scope pairs View.lua with unrelated test_friend_login.lua and exposes only those two paths, while the harness and map dependency definitions are not readable by the model. Narrowing parent-vs-step context corrected observed production scope creep, but did not solve the setup/turn-budget problem. Next technical work should reassess this scope/test selection within the original parent; do not keep repeating identical constrained attempts or supply a manual addon solution. Current backend changes remain local, targeted-tested and archived, NOT a proven release. Native scripted rehearsal passed178/0 and differential/frozen verification; second entry rehearsal plus31focused tests passed. Original prototype archives are preserved; failed-edit carry and final-turn autocheck were removed. No new framework was introduced. Unrelated original docs/admin/ownership edits and dependency symlinks remain intact.
+
+# November 12 — SECOND real targeted attempt active; first settled failure preserved
+
+First real targeted request4e440dc5/fence261241ec used20responses and failed its test setup, not the earlier out-of-scope map behavior. No checked step. Normal model restoration completed. Original776rows grew to782; exact settled copy and backup retained. First execution stage is immutable evidence; its review API and worker stopped.
+
+Latest owner is user unit workbench-real-targeted-worker2; API workbench-targeted-review-api2 on127.0.0.1:9187. Active stage /home/rich/TwichUI-Workbench/.local/m5-review/everyday-targeted-recovery2-20261112; DB artifacts/workbench.sqlite3. One new native browser continuation saved under E/second-real (E=/home/rich/.local/share/TwichUI-Workbench/targeted-recovery-20261112); DO NOT replay second-real/start.py or browser script. Native pause29→run30. Same stop monitor stops after one checked step or settled failure, before another task. Original installed127 LAN/API/worker remain stopped. Never restore old776/782backups over newer second-stage writes.
+
+Second correction adds bounded upfront source/setup reads through existing scoped tools when the working set is too large for full prefill, and read-only latest focused-test diagnosis when a failed attempt never reached suite checks.31focused tests passed; actual Runtime.execute entry plus actual CurrentSource.prefill/private Lua diagnosis passed at E/recovery-entry-2, no model calls. Original baseline/rehearsal remains178/0. No model answer or addon patch supplied. Second source snapshot/hashes and exact782-row preservation at E/second-real/source.json. Monitor second-real/real-worker-progress.json and real-worker-terminal.json, and journalctl --user -u workbench-real-targeted-worker2. Stop repeating this failing approach if the new evidence-informed attempt also fails; preserve latest state and restore preview safely. No success/commit/push/deployment claimed yet.
+
+# November 12 — REAL targeted step active in preserved-state review instance
+
+Native deterministic Runtime.execute passed: original suite178/0; retained Qwen candidate177/1; full assertion/actual values delivered through scripted HTTP; corrected scripted candidate178/0, differential/frozen verification passed. Separate actual recovery entry proved current scope/exclusions and read-only prior-failure observation before inference. These are NOT real Qwen results. Focused checks54passed across the private-mode run plus exact error-text recheck; extra unknown-usage/diagnostic checks4passed. Static/contracts/build/schema passed.
+
+Current original installed127services lan/api/worker are STOPPED through the named helper; codex connector untouched. Do not start a competing worker. Original776-row store is unchanged and independently backed up at E/pre-real-workbench.sqlite3 (E=/home/rich/.local/share/TwichUI-Workbench/targeted-recovery-20261112). Exact all-row copy became the review store at /home/rich/TwichUI-Workbench/.local/m5-review/everyday-targeted-recovery-20261112/artifacts/workbench.sqlite3. This is continuation of the SAME original feature/parent, not a new task. Original backup/store must NOT overwrite newer review-store work after model calls.
+
+Review API is user unit workbench-targeted-review-api on127.0.0.1:9187; actual browser saved ONE new coding continuation. Receipt E/real-browser-continuation.json; do not replay. Current existing persistent worker is user unit workbench-real-targeted-worker, running original worker.run/tick with an operator stop monitor: pause and stop immediately after ONE checked step or a settled failure. Its ordinary owner lock, capacity checks, model priority, lease and independent checker are intact. The runtime is in the EXISTING approved m5-review directory; no path safeguard changed. Original source/head remains6e1f332 with minimal uncommitted correction. Source snapshot E/execution-stage-source.json; location E/execution-stage-location.json. Do not change executing source.
+
+Monitor E/real-worker-progress.json, E/real-worker-terminal.json and journalctl --user -u workbench-real-targeted-worker. At dispatch, native preparation was running; no success claimed. If settled failure, inspect actual new request/output and diagnose before any new grant. If checked, independently inspect source/result/reload, then minimal commit/push, exact full hosted/local release gates and authorized installation preserving the NEW review history, restart, rollback safety and screenshots. Do not launch the next step or publish addon changes. The current task ends at one real checked step installed and surviving restart.
+
+# November 12 — targeted recovery authorized and in progress
+
+The owner's new Targeted Feature Execution Recovery request supersedes the review pause below. Stop at ONE real checked map-zoom implementation step, installed and preserved after restart; no broader FW campaign or addon publication. Full request is retained privately at `/home/rich/.local/share/TwichUI-Workbench/targeted-recovery-20261112/request.txt`.
+
+Independent diagnosis on base7fd7be8: retained candidate fails test_map_explore.lua:833 with only dungeon:36 present, whereas dungeon:36/dock:3/cave:101 are required. Original production passes. Removing only the premature wheel capture and reopen restore hunks in a disposable diagnostic copy passes. No diagnostic patch is a deliverable or input to real Qwen. The approved first step permits storage/helpers/reset only. Full-suite failure was real; focused friend-login assertions cover storage but not map reopening. Parent-feature behavior in the execution brief encouraged scope expansion; tests/run.sh tail lost the full failure, and provider feedback did not contain useful local values.
+
+Review archives verified byte-for-byte and preserved. Removed prototype failed-edit restoration from active code (feature_retained_work and feature_steps/real_provider integrations); old files remain in the archive. Keeping a smaller current-step brief, bounded full assertion diagnostics using existing Lua observation machinery, and extension of the existing coding-continuation receipt for expired settled work. No new worker/store/framework. Original grants/deadlines/unknown usage remain immutable; failed source is diagnostic only.
+
+Work in progress, NOT installed or certified. Native Runtime.execute rehearsal uses retained model changes and scripted HTTP, actual confined Lua and original/candidate/full-suite checks. Live feature still0checked; no new real-model calls yet. Private evidence is `targeted-recovery-20261112`. Latest installed127/ade9295 remains unchanged. Continue from this work; do not replay old drivers or old backups.
+
+# November 12 — OWNER REVIEW CHECKPOINT: stop after assessment
+
+The owner's new20-hour course-correction request explicitly PAUSES implementation,
+model experiments, deployments/publication and new infrastructure repairs until a
+direction is selected. It overrides the earlier continue instructions below for this
+checkpoint. Do not automatically resume or finish the uncommitted recovery expansion.
+
+Branch codex/everyday-workbench HEAD6e1f3327755a03dc1fd631c745131b1e42ee4f6c;
+installed127 ade92958346a3e43841dcc655005287e8feeb100/full43211210566 ALL9 passed.
+Current request1c2930b5/fence77da06a0 FAILED after20complete responses/2998generated
+and411460prompt tokens. Focused/oracle/original differential passed, complete addon
+suite177pass1fail. Fixed isolated diagnostic: test_map_explore.lua:833 Westfall whole.
+The model implemented later capture/restore behavior during the storage-only step.
+All4coding owners/descendants stopped; all normal config/access restorations true.
+Fresh model401/200/keyhash and slot0 is_processing=false. No queued/running model,
+planning, execution or publication rows. No active/queued hosted runs at review.
+Zero checked steps and zero completed real FeatureWorkshopfeatures. No new feature PR.
+
+Uncommitted WIP:7modified+2new Python modules for current-step brief, retained model
+work, full-suite assertion details and another time-window mechanism. Unfinished;
+first focused run FAILS because its old test expects0hours while prototype offers6.
+No source fixes/tests/deployments/model calls were initiated after owner intervention.
+Preserved tracked binary patch + new-source TAR, content hashes and HEAD applicability
+proof under E/review-20261112; original5doc edits and2dependency symlinks retained.
+Fresh settled DB backup776rows/31tables/schema0014/fingerprinta9d9167dc102283fd1435fd96cd619d2dbe670387796c7f1ec9a01b4a84769de.
+All52requests remain. Current/rollback seals reverified. Actual127→126→127 was proven
+BEFORE later native writes. Never replay old770baseline rollback over this newer store.
+
+Review recommendation B: core UI/API/durable-worker design is viable, but recovery,
+source-context handling and release cadence have displaced useful delivery.29full CI
+runs over the review window:23success/5fail/1cancel,374summed minutes/358wallcoverage,
+median13.7min.17verified installations.53coding model requests consumed488.37seconds
+of request intervals; planning/source operation ledger782.58seconds. Saved local
+pytest logs show about143minutes (incomplete lower bound; overlapsCI). Exact manual
+implementation/debug/report/idle allocations unavailable; do not invent them.
+89confirmed model requests =53coding+31planning/source+5cancellationprobes. One extra
+source record has missingusage/not_started input-budget diagnostics; one pre-provider
+codinggrant keeps unknownusage/24000reservation. Known response receipts1205210tokens,
+16436generated. Each probe's final generation is bounded1..60, not exact. Original
+unknowns remain unchanged. Full review evidence/timing/checkpoint JSONs are private
+under E/review-20261112. Preserve this checkpoint and WAIT FOR OWNER DIRECTION.
+
 # November 12 — installed127; distinct one-attempt coding continuation admitted
 
 Exactade92958346a3e43841dcc655005287e8feeb100 ALL9 full43211210566 passed.
@@ -1573,6 +1982,32 @@ is coherent Feature Workshop parent/dependent work with integrated verification;
 do not launch that separate campaign during this UI assignment.
 
 ---
+
+# Administrative update investigation — November 11, 2026 (Mountain time)
+
+Following the Project Working Philosophy, the owner's upgrade installed the exact
+schema0013-compatible helper d7c20bde… at 04:19 MST, then failed its final status
+request because the owner login was session413 while the protected grant permits
+only session78. Host sudo journal and protected helper audit establish the actual
+mismatch; this is legitimate owner authentication outside a deliberately narrow
+older session grant. The existing Codex executor still matches session78 and its
+normal read-only status succeeds. Original expiry is November13 16:29:31 MST.
+No policy change or owner retry is needed for this update. Do not rerun either
+upgrade or bootstrap. See [the investigation and access boundary](WORKBENCH_ADMIN_APPROVAL.md).
+
+All four running services remain b3cb3f0/deployment107. A read-only transaction
+revalidated integrity, foreign keys, settlement and the exact prior633-row/28-table
+schema0012 fingerprint7c61a77c…. No root-owned file, service, store, model or
+publication was changed by this investigation. Schema0013 grouping remains
+uninstalled, but its helper compatibility prerequisite is now satisfied; perform
+normal copied-store migration/cutover proofs separately. Phase B visual/usability
+development may proceed independently and must not wait for historical grouping
+or a new login grant. No Phase B implementation was started by this investigation.
+
+The earlier helper-pending/owner-retry paragraphs below describe the preceding
+checkpoint and are superseded by this verified finding. Private receipt:
+`admin-schema0013-investigation-20261111/verified-findings.json` under the existing
+private Workbench data directory.
 
 # Installed feature-campaign checkpoint — November 11, 2026 (UTC)
 

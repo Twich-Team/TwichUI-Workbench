@@ -39,16 +39,33 @@ def coding_grants(c, scope):
         .order_by(grants.c.issued_at,grants.c.id)).mappings()]
 
 
+def _accounted(c, row, grant):
+    if settled_accounting({**row, 'grant_snapshot':grant['snapshot']}):
+        return True
+    from workbench.codex_failure_settlement import load
+    return load(c, row, grant) is not None
+
+
+def _failed_outcome(c, runtime, row, grant, owner):
+    native = runtime.recover_outcome({**row, 'result':{**row['result'], 'owner':owner}}, grant)
+    if native and native['result'] == row['result']:
+        return True
+    # Storage can refuse the native failure handoff after the database retained
+    # it. A separate positive closure proof keeps that historical result exact.
+    from workbench.codex_failure_settlement import load
+    return load(c, row, grant) is not None
+
+
 
 def settled(c, offered, *, additional_review=False):
     saved = offered['snapshot']
     detail = saved['feature_step']
     scope = detail['scope']
-    approval, permission = feature_steps.parent(c, scope['decision_id'])
+    approval, permission = feature_steps.parent(c, scope['decision_id'], active=not additional_review)
     consumed = coding_grants(c,scope)
     if not additional_review and len(consumed) >= permission['budget']['implementation_attempts_per_step']:
         raise ValueError('The approved feature step attempt budget is exhausted.')
-    feature_steps.validate_scope(c, scope)
+    feature_steps.validate_scope(c, scope, active=not additional_review)
     parent = c.execute(select(task_sessions).where(task_sessions.c.id == approval['id'])).mappings().one()
     slot = parent['state'].get('feature_slot') or {}
     outcome = parent['state'].get('feature_slot_result') or {}
@@ -67,7 +84,7 @@ def settled(c, offered, *, additional_review=False):
             or grant['snapshot']['task_budget']['offer'] != offered
             or ledger['outcome'] != 'failed' or not ledger['finished_at']
             or ledger['usage'] != row['result'].get('usage')
-            or not settled_accounting({**row, 'grant_snapshot':grant['snapshot']})):
+            or not _accounted(c, row, grant)):
         raise ValueError('Failed feature generation or accounting is not settled.')
     if (c.execute(select(requests.c.id).where(requests.c.status.in_(
             ['pending','running','checking','cancel_requested']))).first()
@@ -91,8 +108,7 @@ def settled(c, offered, *, additional_review=False):
         raise ValueError('The original model controller has not proved normal access restoration.')
     if not runtime.owns_recovery(grant) or runtime.recipe != saved['specification']:
         raise ValueError('Original failed feature evidence changed.')
-    native = runtime.recover_outcome({**row,'result':{**row['result'],'owner':owned['owner']}},grant)
-    if not native or native['result'] != row['result']:
+    if not _failed_outcome(c, runtime, row, grant, owned['owner']):
         raise ValueError('The actual durable failed outcome is unavailable or changed.')
     for prepared in (root/'edit-batches').glob('*/prepared.json'):
         if not any((prepared.parent/name).exists() for name in ('applied.json','rolled-back.json')):
@@ -195,10 +211,9 @@ def validate(c, proof, scope, *, active=True):
             or sha(Path(proof['controller_report']).read_bytes()) != proof['controller_report_sha256']
             or private_json(proof['controller_report']).get('restoration',{}).get('restored') is not True
             or digest(tree(runtime.workspace)) != proof['original_tree_sha256']
-            or not settled_accounting({**row, 'grant_snapshot':grant['snapshot']})):
+            or not _accounted(c, row, grant)):
         raise ValueError('The old owner, restoration, source or accounting is not safely settled.')
-    native = runtime.recover_outcome({**row,'result':{**row['result'],'owner':owner['owner']}},grant)
-    if not native or native['result'] != row['result']:
+    if not _failed_outcome(c, runtime, row, grant, owner['owner']):
         raise ValueError('The failed outcome is no longer intact.')
     for item in proof['feedback']:
         path = root/item['path']

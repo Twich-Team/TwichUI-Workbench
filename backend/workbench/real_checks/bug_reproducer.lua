@@ -97,6 +97,7 @@ local function exercise(seed, only_fixture, shared_coroutines)
     return chunk
   end
   local wrapped_makers = {}
+  local finish_seed_setup
   local seeded, making_client = false, false
   local function restore_client(client)
     if not seed or seeded then return end
@@ -119,6 +120,37 @@ local function exercise(seed, only_fixture, shared_coroutines)
       local client = instrument_client_events(make(...))
       making_client = false
       restore_client(client)
+      if seed then
+        -- A committed test may assign its synthetic initial DB after MakeClient
+        -- returns. During a restart that fixture initializer must not replace
+        -- the serialized input. Preserve addon writes (including replacement
+        -- roots); only writes by the exact frozen setup chunk are initializers.
+        -- The caller inspector stays outside the candidate/program environment.
+        local caller = debug.getinfo
+        local prior = getmetatable(client)
+        local meta, roots = {}, {}
+        for key, value in pairs(prior or {}) do meta[key] = value end
+        for name in pairs(seed.saved) do
+          roots[name] = rawget(client, name)
+          rawset(client, name, nil)
+        end
+        meta.__index = function(self, key)
+          if seed.saved[key] ~= nil then return roots[key] end
+          if prior and type(prior.__index) == 'function' then return prior.__index(self, key) end
+          return prior and type(prior.__index) == 'table' and prior.__index[key] or nil
+        end
+        meta.__newindex = function(self, key, value)
+          if seed.saved[key] ~= nil then
+            if caller(2, 'S').source ~= '@committed-client-setup' then roots[key] = value end
+          elseif prior and prior.__newindex then prior.__newindex(self, key, value)
+          else rawset(self, key, value) end
+        end
+        setmetatable(client, meta)
+        finish_seed_setup = function()
+          for name in pairs(seed.saved) do rawset(client, name, roots[name]) end
+          setmetatable(client, prior)
+        end
+      end
       return client
     end
     wrapped_makers[wrapped] = true
@@ -159,6 +191,7 @@ local function exercise(seed, only_fixture, shared_coroutines)
       instrument_factory()
       root = env.MakeClient('Workbench', {'!!!TwichUI', 'TwichUI_Settings'})
     end
+    if finish_seed_setup then finish_seed_setup() end
     activate_client_events(root)
   end
   if only_fixture then

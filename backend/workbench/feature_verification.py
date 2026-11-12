@@ -100,15 +100,19 @@ def specification(c, job):
     saved = payload["current_step_scope"]
     feature_steps.validate_scope(c, saved)
     prepared = payload["independent_check_preparation"]
-    compiled, oracle = feature_checks.compile(
-        prepared["packet"], prepared["proposed_program"]["program"]
-    )
+    composed = payload.get('evidence_composition')
+    if composed:
+        compiled, oracle = composed_checks(c, job)
+    else:
+        compiled, oracle = feature_checks.compile(
+            prepared["packet"], prepared["proposed_program"]["program"]
+        )
     if (
         payload["phase"] != "independent_checks_ready"
         or saved["scope"]["role"] != "verification"
-        or prepared["proposed_program"] != compiled
-        or not prepared["review"]["ready"]
-        or prepared["review"]["program_binding"] != compiled["binding"]
+        or not composed and (prepared["proposed_program"] != compiled
+            or not prepared["review"]["ready"]
+            or prepared["review"]["program_binding"] != compiled["binding"])
     ):
         raise ValueError(
             "Combined verification needs its exact independently prepared and reviewed observations."
@@ -118,9 +122,9 @@ def specification(c, job):
     approval, permission, contributions, paths = checked_chain(
         c, saved["decision_id"], records, actual
     )
-    if len(prepared["history"]) > permission["budget"].get("verification_requests", 0) or any(
-        not r["confirmed_finished"] for r in prepared["history"]
-    ):
+    from workbench.feature_check_preparation import request_limit, finished_history
+    if (len(prepared['history']) > request_limit(c, job, permission, active=False)
+            or not finished_history(c, job, prepared['history'])):
         raise ValueError(
             "Independent preparation exceeded its original permission or has uncertain work."
         )
@@ -148,13 +152,181 @@ def specification(c, job):
         paths=paths,
         independent_checks=compiled,
         independent_packet=prepared["packet"],
-        independent_review=prepared["review"],
+        independent_review=(dict(kind='audited-evidence-composition', binding=composed['binding'])
+                            if composed else prepared["review"]),
         identity=configuration(c.engine)["identity"],
         expires_at=allowed_end,
         **({'time_authority':authority_reference} if authority_reference != 'original-parent-run' else {}),
         attempt=payload.get("feature_verification_attempt", 1),
     )
     return {**value, "binding": digest(value)}, oracle
+
+
+def composed_checks(c, job):
+    """Audit native evidence under the existing completion and ancestry owners."""
+    payload = job['payload']
+    receipt = payload['evidence_composition']
+    value = {k:v for k,v in receipt.items() if k != 'binding'}
+    prepared = payload['independent_check_preparation']
+    if (receipt['binding'] != digest(value)
+            or receipt['scope_binding'] != receipt['scope']['scope_binding']
+            or receipt['history_binding'] != digest(prepared)
+            or receipt['records_binding'] != digest(payload['completed_steps'])
+            or not re.fullmatch('[a-f0-9]{64}', receipt['authorization_sha256'])):
+        raise ValueError('Composed verification history, scope or checked source changed.')
+    composition = receipt['composition']
+    feature_steps.validate_scope(c, receipt['scope'], active=False)
+    compiled, oracle = feature_checks.compile(prepared['packet'], receipt['program'],
+        composition=composition, retained=True)
+    records = payload['completed_steps']
+    approval, permission, contributions, paths = checked_chain(c, payload['feature_decision_id'],
+        records, records[-1]['input'], active=False)
+    if (composition['contributions_binding'] != digest(contributions)
+            or composition['feature_input_binding'] != digest(records[-1]['input'])
+            or composition['paths'] != paths):
+        raise ValueError('Composed receipts belong to different checked source or ancestry.')
+    native = {}
+    for record in records:
+        row, grant, _, result = feature_source._checked(c, record['execution_id'])
+        native[row['id']] = row, grant, result
+    checked_source = Path(records[-1]['input']['source'])
+    patch = subprocess.check_output(['git', '-C', str(checked_source), 'diff', '--no-ext-diff',
+        '--no-textconv', '--binary', prepared['packet']['base'], records[-1]['input']['commit']], timeout=30)
+    control_hashes = {
+        'checked-ancestry':digest(contributions),
+        'approved-diff':sha(patch),
+        'full-suite':digest([r[2]['checks'][-1] for r in native.values()]),
+        'history-and-permission':digest(dict(approval=dict(approval), permission=permission,
+            history=prepared, records=records)),
+    }
+    for evidence in composition['evidence']:
+        if evidence['kind'] == 'control' and evidence.get('sha256') != control_hashes[evidence['control']]:
+            raise ValueError('Application-owned source, suite or permission evidence changed.')
+        if evidence['kind'] != 'native':
+            continue
+        if evidence['execution_id'] not in native:
+            raise ValueError('A reused assertion is not from this checked feature chain.')
+        row, grant, result = native[evidence['execution_id']]
+        frozen = Path(grant['snapshot']['recovery']['root'])/'candidates'/result['candidate_id']/'files'/evidence['path']
+        source = frozen.read_bytes()
+        lines = source.decode().splitlines(keepends=True)
+        assertion = ''.join(lines[evidence['start']-1:evidence['end']]).encode()
+        final_source = subprocess.check_output(['git', '-C', str(checked_source),
+            'show', records[-1]['input']['commit']+':'+evidence['path']], timeout=30)
+        if (evidence['result_binding'] != digest(result)
+                or evidence['file_sha256'] != sha(source)
+                or evidence['sha256'] != sha(assertion)
+                or assertion not in final_source
+                or not re.search(rb'\bassert\s*\(', assertion)
+                or re.search(rb'\bassert\s*\(\s*true\s*[,)]', assertion)
+                or not any(check.get('status') == 'pass' and check.get('rc') == 0
+                    and check.get('command') == ['lua5.1', '-e', PRELUDE, Path(evidence['path']).name]
+                    for check in result['checks'])):
+            raise ValueError('A reused assertion, focused command or frozen receipt changed.')
+    return compiled, oracle
+
+
+def compose(engine, job_id, program, composition, authorization):
+    """Retain a host-audited contract without rewriting model preparation history.
+
+    No inference, coding, publication or completion is authorized here. Exact
+    replay is read-only; a different contract cannot replace an admitted one.
+    """
+    if not authorization.strip():
+        raise ValueError('Owner authority for composed local verification is required.')
+    with write_transaction(engine) as c:
+        job = intake.require(c, planning_jobs, job_id)
+        payload = job['payload']
+        if payload.get('evidence_composition'):
+            prior = payload['evidence_composition']
+            if prior['composition'] != composition or prior['program'] != program:
+                raise ValueError('An admitted composed contract cannot be replaced.')
+            composed_checks(c, job)
+            return prior
+        approval, permission = feature_steps.parent(c, payload['feature_decision_id'])
+        from workbench.feature_check_preparation import finished_history
+        if (job['kind'] != 'feature_execution' or job['status'] not in {'failed', 'queued'}
+                or payload['phase'] not in {'held', 'prepare_independent_checks'}
+                or payload['current_step_scope']['scope']['role'] != 'verification'
+                or payload.get('completed_checks') or payload.get('feature_verification_claim')
+                or not finished_history(c, job, payload['independent_check_preparation']['history'])
+                or c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()
+                or c.execute(select(requests.c.id).where(requests.c.status.in_(
+                    ['pending', 'running', 'checking', 'cancel_requested']))).first()):
+            raise ValueError('Composed checks require settled preparation and no active or completed verification.')
+        value = dict(program=program, composition=composition,
+            authorization_sha256=sha(authorization.encode()), recorded_at=intake.now(),
+            scope_binding=payload['current_step_scope']['scope_binding'],
+            scope=payload['current_step_scope'],
+            history_binding=digest(payload['independent_check_preparation']),
+            records_binding=digest(payload['completed_steps']))
+        receipt = {**value, 'binding':digest(value)}
+        updated = {**payload, 'evidence_composition':receipt, 'phase':'independent_checks_ready'}
+        composed_checks(c, {**job, 'payload':updated})
+        feature_steps.validate_scope(c, payload['current_step_scope'])
+        c.execute(planning_jobs.update().where(planning_jobs.c.id == job_id).values(
+            status='queued', finished_at=None, payload=updated,
+            message='Audited existing evidence and supplemental observations are ready for combined local execution. Earlier failures remain retained.'))
+        c.execute(task_sessions.update().where(task_sessions.c.id == approval['id']).values(
+            status='pending', finished_at=None, message='Combined local checks are prepared; the feature is not yet accepted.'))
+        return receipt
+
+
+def retry_composed_timeout(engine, job_id, authorization):
+    """Re-admit the same local contract after a positively settled suite timeout.
+
+    Keep the failed grant/outcome, count the consumed attempt, and do not renew
+    time, inference, source, scope or publication permission. This cannot replay
+    an uncertain operation or use a candidate exposed by an unsuccessful run.
+    """
+    from workbench.repair_continuation import private_json
+    with write_transaction(engine) as c:
+        job = intake.require(c, planning_jobs, job_id)
+        payload = job['payload']
+        approval, permission = feature_steps.parent(c, payload['feature_decision_id'])
+        if not authorization.strip() or not payload.get('evidence_composition'):
+            raise ValueError('Exact owner authority and the same composed contract are required.')
+        if payload.get('phase') == 'independent_checks_ready' and payload.get('verification_history'):
+            return payload['verification_history'][-1]
+        root = Path(payload['feature_verification_claim']['root'])
+        runtime = Runtime(root)
+        grant = c.execute(select(grants).where(grants.c.snapshot['recovery']['root'].as_string()==str(root))).mappings().one()
+        row = c.execute(select(requests).where(requests.c.grant_id==grant['id'])).mappings().one()
+        spec = runtime.spec
+        marker = private_json(root/('ownership-'+row['id']+'.json'))
+        owned_row = {**row,'result':{**row['result'],'owner':marker['owner']}}
+        failure = runtime.recover_outcome(owned_row, grant)
+        usage_bytes = (root/'usage.jsonl').read_bytes()
+        usage = [json.loads(line) for line in usage_bytes.decode().splitlines()]
+        if (job['status'] != 'failed' or payload['phase'] != 'held'
+                or row['status'] != 'failed' or not row['finished_at'] or not grant['revoked_at']
+                or not failure or failure['result'] != row['result'] or not runtime.cleanup(owned_row)
+                or spec['independent_checks']['evidence_composition'] != payload['evidence_composition']['composition']
+                or spec.get('attempt',1) >= permission['budget']['verification_attempts']
+                or (root/'combined.patch').exists() or tree(runtime.workspace) != json.loads(runtime.initial.read_text())
+                or len(usage) != 1 or usage[0].get('status') != 'timeout'
+                or usage[0].get('cgroup_removed') is not True
+                or any(usage[0].get(k) for k in ('oom_kill','pids_limit_hit','leaked_after_kill'))
+                or c.execute(select(requests.c.id).where(requests.c.status.in_(
+                    ['pending','running','checking','cancel_requested']))).first()
+                or c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()):
+            raise ValueError('Only a settled original-suite timeout within the existing attempt limit may be retried.')
+        composed_checks(c, job)
+        record = dict(execution_id=row['id'],grant_binding=grant['binding'],result_binding=digest(row['result']),
+            specification_binding=spec['binding'],attempt=spec.get('attempt',1),
+            original_only=True,failed_changes_reused=False,usage=None,local_timeout=True,
+            resource_receipt_sha256=sha(usage_bytes),authorization_sha256=sha(authorization.encode()))
+        updated = {**payload,'phase':'independent_checks_ready',
+            'feature_verification_attempt':spec.get('attempt',1)+1,
+            'verification_history':payload.get('verification_history',[])+[record],
+            'current_step_scope':payload['evidence_composition']['scope']}
+        updated.pop('feature_verification_claim')
+        c.execute(planning_jobs.update().where(planning_jobs.c.id==job_id).values(
+            status='queued',finished_at=None,payload=updated,
+            message='The original suite watchdog expired. Its settled failure is retained; the same local checks may run within the original limits.'))
+        c.execute(task_sessions.update().where(task_sessions.c.id==approval['id']).values(
+            status='pending',finished_at=None,message='Retrying the same local combined verification; no model request or permission expansion.'))
+        return record
 
 
 class Runtime(CodingRuntime):
@@ -174,7 +346,8 @@ class Runtime(CodingRuntime):
         ):
             raise ValueError("Combined verification configuration changed.")
         compiled, oracle = feature_checks.compile(
-            spec["independent_packet"], spec["independent_checks"]["program"], retained=True
+            spec["independent_packet"], spec["independent_checks"]["program"], retained=True,
+            composition=spec['independent_checks'].get('evidence_composition')
         )
         if (
             compiled != spec["independent_checks"]
@@ -267,14 +440,15 @@ class Runtime(CodingRuntime):
         if self.stop_event is not None and self.stop_event.is_set():
             raise ValueError("Combined feature checks were stopped before the next command.")
         result = self.check(
-            argv, cwd, ro=[self.oracle_source], timeout=120, private_loopback=loopback
+            argv, cwd, ro=[self.oracle_source],
+            timeout=600 if argv == ['bash', 'tests/run.sh'] else 120, private_loopback=loopback
         )
-        require_safe_check(result)
         self._check_index = getattr(self, "_check_index", 0) + 1
         durable(
             self.root / "local-checks" / f"{self._check_index:02}.json",
             json.dumps(result, sort_keys=True).encode(),
         )
+        require_safe_check(result)
         return result
 
     def expected_checks(self):
@@ -559,6 +733,12 @@ def authority(c, snapshot, *, active=True):
         job["status"] != "running" or job["payload"].get("phase") != "checking_combined_feature"
     ):
         raise ValueError("The combined verification owner is no longer current.")
+    if spec['independent_checks'].get('evidence_composition'):
+        compiled, _ = composed_checks(c, job)
+        if (compiled != spec['independent_checks']
+                or spec['independent_review'] != dict(kind='audited-evidence-composition',
+                    binding=job['payload']['evidence_composition']['binding'])):
+            raise ValueError('The composed acceptance contract differs from the frozen verification.')
     return approval, permission, job
 
 
@@ -1116,6 +1296,7 @@ def observation_binding(program):
 def correct_original_observations(c, job, parent, row, grant, runtime):
     """Correct only a settled original-only failure; candidate failures never feed this producer."""
     from workbench.repair_continuation import private_json
+    from workbench.feature_check_preparation import request_limit, finished_history
 
     spec = runtime.spec
     try:
@@ -1131,8 +1312,8 @@ def correct_original_observations(c, job, parent, row, grant, runtime):
             or row["result"].get("usage") is not None
             or parent["state"].get("cancel_requested")
             or spec.get("attempt", 1) >= permission["budget"].get("verification_attempts", 1)
-            or len(saved["history"]) >= permission["budget"]["verification_requests"]
-            or any(not r["confirmed_finished"] for r in saved["history"])
+            or len(saved['history']) >= request_limit(c, job, permission)
+            or not finished_history(c, job, saved['history'])
             or c.execute(
                 select(requests.c.id).where(
                     requests.c.status.in_(["pending", "running", "checking", "cancel_requested"])

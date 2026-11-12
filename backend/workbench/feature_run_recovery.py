@@ -55,57 +55,50 @@ def journal(c, decision_id):
     )
 
 
+def _windows(c, approval, permission):
+    job=journal(c,approval['id'])
+    if not job:
+        return []
+    original=job['payload'].get('execution_windows',[])
+    if len(original)>1:
+        raise ValueError('Only the separately reviewed initial continuation is supported.')
+    windows=[*original,*[r for r in job['payload'].get('coding_continuations',[]) if r.get('new_window')]]
+    for receipt in windows:
+        value={k:v for k,v in receipt.items() if k!='receipt_binding'}
+        inputs=receipt['approved_inputs']
+        coding=receipt.get('new_window') is True
+        if (receipt['receipt_binding']!=digest(value) or receipt['binding']!=digest(inputs)
+                or inputs['decision_id']!=approval['id'] or inputs['parent_binding']!=approval['binding']
+                or inputs['permission_binding']!=digest(permission)
+                or receipt['owner_provenance']!=('browser-feature-coding-continuation-v1' if coding
+                    else 'browser-never-dispatched-feature-continuation-v1')
+                or receipt['expires_at']!=(datetime.fromisoformat(receipt['approved_at'])+timedelta(hours=6)).isoformat()
+                or receipt['original_expires_at']!=permission['expires_at']
+                or receipt['scope_changed'] or receipt['attempts_reset'] or receipt['publication_changed']
+                or coding and (receipt['additional_attempts']!=1 or receipt['original_budget_changed'] is not False)):
+            raise ValueError('The separate feature continuation changed.')
+    return sorted(windows,key=lambda r:(r['approved_at'],r['command_id']))
+
+
 def deadline(c, approval, permission, *, at=None, reference=None):
     """As-of authority keeps every existing offer/grant deadline unchanged."""
-    original = permission["expires_at"]
-    job = journal(c, approval["id"])
-    if not job:
-        return original
-    windows = job["payload"].get("execution_windows", [])
-    if len(windows) > 1:
-        raise ValueError("Only the separately reviewed initial continuation is supported.")
-    for receipt in windows:
-        value = {k: v for k, v in receipt.items() if k != "receipt_binding"}
-        inputs = receipt["approved_inputs"]
-        if (
-            receipt["receipt_binding"] != digest(value)
-            or receipt["binding"] != digest(inputs)
-            or inputs["decision_id"] != approval["id"]
-            or inputs["parent_binding"] != approval["binding"]
-            or inputs["permission_binding"] != digest(permission)
-            or receipt["owner_provenance"] != "browser-never-dispatched-feature-continuation-v1"
-            or receipt["expires_at"]
-            != (datetime.fromisoformat(receipt["approved_at"]) + timedelta(hours=6)).isoformat()
-            or receipt["original_expires_at"] != original
-            or receipt["scope_changed"]
-            or receipt["attempts_reset"]
-            or receipt["publication_changed"]
-        ):
-            raise ValueError("The separate feature continuation changed.")
-        if reference is not None:
-            if receipt["command_id"] == reference:
-                return receipt["expires_at"]
-        elif at is None or datetime.fromisoformat(receipt["approved_at"]) <= datetime.fromisoformat(
-            at
-        ):
-            return receipt["expires_at"]
-    if reference is not None and reference != "original-parent-run":
-        raise ValueError("The exact feature time authority is unavailable.")
-    return original
+    windows=_windows(c,approval,permission)
+    if reference is not None:
+        if reference=='original-parent-run':
+            return permission['expires_at']
+        match=next((r for r in windows if r['command_id']==reference),None)
+        if not match:
+            raise ValueError('The exact feature time authority is unavailable.')
+        return match['expires_at']
+    eligible=[r for r in windows if at is None or datetime.fromisoformat(r['approved_at'])<=datetime.fromisoformat(at)]
+    return eligible[-1]['expires_at'] if eligible else permission['expires_at']
 
 
 def time_authority(c, approval, permission, *, at=None):
-    job = journal(c, approval["id"])
-    windows = job["payload"].get("execution_windows", []) if job else []
-    eligible = [
-        r
-        for r in windows
-        if at is None or datetime.fromisoformat(r["approved_at"]) <= datetime.fromisoformat(at)
-    ]
-    return (
-        eligible[-1]["command_id"] if eligible else "original-parent-run",
-        deadline(c, approval, permission, at=at),
-    )
+    eligible=[r for r in _windows(c,approval,permission)
+        if at is None or datetime.fromisoformat(r['approved_at'])<=datetime.fromisoformat(at)]
+    return (eligible[-1]['command_id'] if eligible else 'original-parent-run',
+        deadline(c,approval,permission,at=at))
 
 
 def validate_unstarted(c, proof, scope):
@@ -305,7 +298,9 @@ def request(engine, identity, body):
             planning_jobs.c.kind == "feature_execution")).mappings().first()
         if not job:
             raise HTTPException(409, "This feature has no saved run to continue.")
-        if any(r['command_id'] == str(body.command_id) for r in job['payload'].get('coding_continuations', [])):
+        if any(r['command_id'] == str(body.command_id) for r in job['payload'].get('execution_windows', [])):
+            coding = False
+        elif any(r['command_id'] == str(body.command_id) for r in job['payload'].get('coding_continuations', [])):
             coding = True
         else:
             selected = offer(c, identity)

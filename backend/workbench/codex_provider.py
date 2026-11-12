@@ -1196,7 +1196,7 @@ class Planner:
         self.reference_manifest = None
         self.source_lines = {}
 
-    def bind_source(self, packet):
+    def bind_source(self, packet, *, source_root=None):
         """Freeze the task's selected source disclosure before any provider turn.
 
         Local dependency reads remain permitted, but a new private file or search
@@ -1210,7 +1210,13 @@ class Planner:
         from workbench.bug_source_planning import committed
 
         for item in packet["files"]:
-            raw, actual = committed(item["path"], packet["base"])
+            if source_root is None:
+                raw, actual = committed(item["path"], packet["base"])
+            else:
+                # Feature preparation supplies this root only after validating
+                # the native checked-predecessor manifest and dependencies.
+                from workbench.feature_steps import _file
+                actual, raw = _file(Path(source_root), packet['base'], item['path'])
             if actual["sha256"] != item["sha256"]:
                 raise Hold("disclosure")
             self.source_lines[item["path"]] = raw.decode().splitlines()
@@ -1228,6 +1234,25 @@ class Planner:
     def validate_source(self, packet):
         if self.source_manifest is None:
             raise Hold("disclosure")
+        for window in packet.get('inspection_windows', []):
+            lines = self.source_lines.get(window.get('path'), [])
+            start, end = window.get('line'), window.get('through_line')
+            if (window.get('path') not in self.source_manifest
+                    or window.get('sha256') != self.source_manifest[window['path']]
+                    or type(start) is not int or type(end) is not int
+                    or not 1 <= start <= end <= len(lines)
+                    or window.get('text') != '\n'.join(lines[start-1:end])):
+                raise Hold('disclosure')
+        for search in packet.get('inspection_searches', []):
+            if (search.get('paths') is None or not set(search['paths']) <= set(self.source_manifest)
+                    or any(match.get('path') not in self.source_manifest for match in search.get('matches', []))):
+                raise Hold('disclosure')
+            for match in search.get('matches', []):
+                lines = self.source_lines[match['path']]
+                number = match.get('line')
+                if (type(number) is not int or not 1 <= number <= len(lines)
+                        or match.get('text') != lines[number-1][:240]):
+                    raise Hold('disclosure')
         for key, allowed in [
             ("files", self.source_manifest),
             ("api_references", self.reference_manifest),
@@ -1254,6 +1279,14 @@ class Planner:
             for match in packet.get("inspection_result", {}).get("search_matches", [])
         ):
             raise Hold("disclosure")
+        for search in packet.get('source_searches', []):
+            for match in search.get('matches', []):
+                path, number = match.get('path'), match.get('line')
+                lines = self.source_lines.get(path, [])
+                if (path not in self.source_manifest or match.get('sha256') != self.source_manifest[path]
+                        or type(number) is not int or not 1 <= number <= len(lines)
+                        or match.get('text') != lines[number-1][:240]):
+                    raise Hold('disclosure')
         notebook = packet.get("completed_searches")
         if notebook is not None:
             if (
@@ -1301,12 +1334,17 @@ class Planner:
 
         bug_schema = schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse)
         from workbench.feature_planning import FeatureDecomposition, INSTRUCTIONS as FEATURE_INSTRUCTIONS
-        feature_schema = schema is FeatureDecomposition or packet.get('original', {}).get('feature_planning')
+        from workbench.feature_checks import Response as FeatureChecks, Review as FeatureCheckReview
+        feature_schema = (schema in (FeatureDecomposition, FeatureChecks, FeatureCheckReview)
+            or packet.get('original', {}).get('feature_planning'))
         if feature_schema:
             instructions = FEATURE_INSTRUCTIONS
         from workbench.feature_steps import StepScope, INSTRUCTIONS as STEP_INSTRUCTIONS
         if schema is StepScope:
             instructions = STEP_INSTRUCTIONS
+        if schema in (FeatureChecks, FeatureCheckReview):
+            from workbench.feature_checks import INSTRUCTIONS as CHECK_INSTRUCTIONS, REVIEW_INSTRUCTIONS
+            instructions = REVIEW_INSTRUCTIONS if schema is FeatureCheckReview else CHECK_INSTRUCTIONS
         if schema is IntentResponse:
             from workbench.bug_intent import INSTRUCTIONS
             instructions = INSTRUCTIONS
@@ -1336,10 +1374,30 @@ class Planner:
             output_schema = required_output(
                 wire_schema(
                     schema,
-                    packet.get("coverage") if bug_schema else None,
-                    packet.get("files") if bug_schema else None,
+                    packet.get("coverage") if bug_schema or feature_schema else None,
+                    packet.get("files") if bug_schema or feature_schema else None,
                 )
             )
+            if schema in (FeatureChecks, FeatureCheckReview):
+                # These use the existing bounded Lua-program/review traffic
+                # profiles. The domain classes have generic names, so their
+                # default titles would incorrectly select the small-response
+                # observation guard despite the approved larger source input.
+                output_schema['title'] = 'ReviewResponse' if schema is FeatureCheckReview else 'ProgramResponse'
+            if schema is FeatureChecks:
+                definitions = output_schema.pop('$defs', {})
+                output_schema = dict(title='ProgramResponse', type='object',
+                    properties=dict(response=output_schema), required=['response'],
+                    additionalProperties=False, **{'$defs': definitions})
+                instructions += ' Return an object with one response field containing exactly one complete outcome.'
+            if schema is StepScope:
+                # The supported endpoint requires an object at the root.
+                # Keep the unchanged scope union inside an explicit envelope.
+                definitions = output_schema.pop('$defs', {})
+                output_schema = dict(title='FeatureStepScopeResponse', type='object',
+                    properties=dict(scope=output_schema), required=['scope'],
+                    additionalProperties=False, **{'$defs': definitions})
+                instructions += ' Return exactly one object with a scope field containing the complete scope decision. This envelope changes formatting only.'
             if bug_schema:
                 from workbench.codex_wire import schema as inspection_schema, NOTE, FLAT_NOTE, PLAN_NOTE
 
@@ -1381,7 +1439,7 @@ class Planner:
                 self.stopped,
                 **(
                     {"input_limit": MAX_BUG_INPUT, "request_seconds": self.request_seconds}
-                    if bug_schema
+                    if bug_schema or feature_schema
                     else {}
                 ),
             )
@@ -1416,7 +1474,7 @@ class Planner:
         )
         if getattr(result, "provider_receipt", None):
             self.diagnostics["provider_receipt"] = result.provider_receipt
-        if bug_schema:
+        if bug_schema or feature_schema:
             from workbench.planning_response import normalize_bug
 
             if self.response_evidence:
@@ -1432,7 +1490,17 @@ class Planner:
                     response_identity_available=False,
                 )
             changes = []
-            if schema in (BugPlanningResponse,IntentResponse):
+            if schema is StepScope:
+                if not isinstance(result, dict) or set(result) != {'scope'} or not isinstance(result['scope'], dict):
+                    raise ValueError('Codex feature scope needs its exact explicit envelope.')
+                result = result['scope']
+                changes.append('unwrap-feature-scope')
+            elif schema is FeatureChecks:
+                if not isinstance(result, dict) or set(result) != {'response'} or not isinstance(result['response'], dict):
+                    raise ValueError('Codex independent checks need their exact explicit envelope.')
+                result = result['response']
+                changes.append('unwrap-feature-check-response')
+            elif schema in (BugPlanningResponse,IntentResponse):
                 result, changes = normalize_bug(result)
             if self.response_evidence:
                 self.response_evidence.parsed(result, self.diagnostics, changes)

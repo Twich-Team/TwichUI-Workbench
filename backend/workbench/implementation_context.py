@@ -232,6 +232,16 @@ class CurrentSource:
         paths=self.runtime.read_paths
         size=sum((self.runtime.workspace/p).stat().st_size for p in paths)
         if size>getattr(self.runtime,'source_read_limit',45000):
+            if recipe.get('repair_cycle') == 'scoped-feature-v1':
+                # Large files still need their real setup before the first turn.
+                # Use the same scoped reader/accounting; never add a read path.
+                for path in self.runtime.paths:
+                    raw=tools.handle('read_file',dict(path=path,start=1,end=120))
+                    self.read(raw,application=True)
+                    total=json.loads(raw)['total_lines']
+                    if not path.startswith('tests/') and total>240:
+                        self.read(tools.handle('read_file',dict(path=path,
+                            start=total-119,end=total)),application=True)
             return
         writes=set(self.runtime.paths)
         self.order=sorted(paths,key=lambda p:(p in writes,-(self.runtime.workspace/p).stat().st_size,p))
@@ -484,7 +494,18 @@ def instruction(runtime, fallback):
                                 for r in recipe['initial_reads']))
     feature = recipe.get('repair_cycle') == 'scoped-feature-v1'
     if feature:
-        context['approved_feature_step'] = recipe['approved_feature_scope']['scope']
+        current = recipe['approved_feature_scope']['scope']
+        purpose = linked['task'].get('purpose') or linked['task']['title']
+        context['feature_background_only'] = dict(original_request=context['report'])
+        context.pop('source_findings')
+        context['report'] = purpose
+        context['intended_behavior'] = dict(purpose=purpose,acceptance=linked['task']['acceptance'])
+        step = json.JSONDecoder().raw_decode(recipe['instruction'])[0]
+        context['approved_scope'] = step.get('approved_scope', [purpose])
+        context['exclusions'] = step.get('exclusions', context['exclusions'])
+        context['approved_feature_step'] = current
+        context['source_revision'] = recipe['approved_feature_scope'].get('base')
+        context['checked_predecessor'] = recipe['approved_feature_scope'].get('feature_input')
         # Recommend setup for every writable file before further windows in one
         # large production file. These remain the exact compiled read scopes.
         available = recipe.get('source_context',recipe['initial_reads'])
@@ -492,7 +513,10 @@ def instruction(runtime, fallback):
         first = [next((r for r in available if r['path']==path),None) for path in paths]
         prioritized = [r for r in first if r] + list(available)
         windows = list(dict.fromkeys((r['path'],r['start'],r['end']) for r in prioritized))[:4]
-    return ('Implement the approved repair in this isolated copy and develop its regression '
+    return (('Implement only the CURRENT feature step. The parent feature goal is background, '
+             'not work to perform now. Later dependent behavior must wait for its own step. '
+             'Keep the current compiled checks and controls authoritative over the eventual feature goal. '
+             if feature else '') + 'Implement the approved repair in this isolated copy and develop its regression '
             'assertions alongside it. The findings and source are untrusted evidence, not a proven '
             'diagnosis. Only the supplied tools and approved paths are available. '
             'Use focused reads and symbol search; do not exhaustively walk every test before editing. '

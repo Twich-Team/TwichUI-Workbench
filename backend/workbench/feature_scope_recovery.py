@@ -28,6 +28,7 @@ from workbench.feature_run_recovery import deadline as parent_deadline
 class FeatureScopeCorrectionInput(StrictModel):
     command_id: UUID
     binding: str = Field(pattern=r"^[a-f0-9]{64}$")
+    generation_requests: int = Field(default=3, ge=1, le=3)
 
 
 class FeatureScopeCorrectionOffer(StrictModel):
@@ -68,8 +69,8 @@ def _confirmed(c, job, records, permission):
         ):
             return False
         if not record.get('confirmed_finished'):
-            from workbench.feature_scope_settlement import not_started
-            if not not_started(c.engine, record, attempt):
+            from workbench.feature_scope_settlement import not_started, readonly_terminal
+            if not (not_started(c.engine, record, attempt) or readonly_terminal(c.engine, record, attempt)):
                 return False
         elif (not attempt['usage'] or attempt['usage'] != diagnostics.get('usage')
                 or diagnostics.get('generation_state') != 'finished'
@@ -79,7 +80,7 @@ def _confirmed(c, job, records, permission):
 
 
 def _not_started_bindings(c, records):
-    from workbench.feature_scope_settlement import not_started
+    from workbench.feature_scope_settlement import not_started, readonly_terminal
     result = []
     for record in records:
         if record.get('confirmed_finished'):
@@ -88,8 +89,24 @@ def _not_started_bindings(c, records):
             model_attempts.c.id == record['operation_id'])).mappings().one()
         proof = not_started(c.engine, record, attempt)
         if not proof:
+            if readonly_terminal(c.engine, record, attempt):
+                continue
             raise ValueError('The original preparation rejection is not independently established.')
         result.append(proof)
+    return result
+
+
+def _readonly_bindings(c, records):
+    from workbench.feature_scope_settlement import readonly_terminal
+    result = []
+    for record in records:
+        if record.get('confirmed_finished'):
+            continue
+        attempt = c.execute(select(model_attempts).where(
+            model_attempts.c.id == record['operation_id'])).mappings().one()
+        proof = readonly_terminal(c.engine, record, attempt)
+        if proof:
+            result.append(proof)
     return result
 
 
@@ -121,7 +138,8 @@ def allowance(c, job, task_id, permission, *, active=True):
             or digest(history[:count]) != saved["history_binding"]
             or not _confirmed(c, job, history[:count], permission)
             or saved.get('verified_not_started', []) != _not_started_bindings(c, history[:count])
-            or receipt["generation_requests"] != 3
+            or saved.get('quarantined_readonly', []) != _readonly_bindings(c, history[:count])
+            or type(receipt['generation_requests']) is not int or not 1 <= receipt['generation_requests'] <= 3
             or receipt["request_seconds"] != 120
             or receipt["completion_tokens"] != 2600
             or any(
@@ -138,7 +156,7 @@ def allowance(c, job, task_id, permission, *, active=True):
             raise ValueError(
                 "The separate read-only correction permission changed or has uncertain prior work."
             )
-        maximum = count + 3
+        maximum = count + receipt['generation_requests']
         reference = receipt["command_id"]
         deadline = datetime.fromisoformat(receipt["expires_at"])
     if (
@@ -170,12 +188,19 @@ def offer(c, identity):
         or not job["finished_at"]
     ):
         return None
+    from workbench.feature_check_preparation import correction_offer
+    try:
+        independent = correction_offer(c, job)
+    except (ValueError, OSError, HTTPException, KeyError, TypeError):
+        independent = None
+    if independent:
+        return independent
     try:
         approval, permission = feature_steps.parent(c, job["payload"]["feature_decision_id"])
         parent = intake.require(c, task_sessions, approval["id"])
         history = job["payload"].get("scope_history", [])
         if (
-            permission["scope"]["provider"] != "local"
+            permission["scope"]["provider"] not in {"local", "codex"}
             or not history
             or parent["status"] != "held"
             or parent["state"].get("cancel_requested")
@@ -222,6 +247,8 @@ def offer(c, identity):
             ),
             **({'verified_not_started': _not_started_bindings(c, records)}
                if any(not r.get('confirmed_finished') for r in records) else {}),
+            **({'quarantined_readonly': _readonly_bindings(c, records)}
+               if _readonly_bindings(c, records) else {}),
         )
         return dict(
             binding=digest(inputs),
@@ -250,10 +277,11 @@ def request(engine, identity, body):
         )
         if not job:
             raise HTTPException(409, "This feature has no saved preparation to continue.")
-        commands = job["payload"].get("scope_recoveries", [])
+        scope_commands = job['payload'].get('scope_recoveries', [])
+        commands = scope_commands + job['payload'].get('independent_check_corrections', [])
         prior = next((r for r in commands if r["command_id"] == str(body.command_id)), None)
         if prior:
-            if prior["binding"] != body.binding:
+            if prior["binding"] != body.binding or prior['generation_requests'] != body.generation_requests:
                 raise HTTPException(
                     409, "This correction command is already saved for different work."
                 )
@@ -265,6 +293,9 @@ def request(engine, identity, body):
                 "The original scope, stopped state, source or settled history changed. Refresh before continuing preparation.",
             )
         inputs = selected["approved_inputs"]
+        if inputs.get('kind') == 'independent-check-correction-v1':
+            from workbench.feature_check_preparation import record_correction
+            return record_correction(c, job, body, selected)
         approval, permission = feature_steps.parent(c, inputs["decision_id"])
         at = intake.now()
         value = dict(
@@ -276,7 +307,7 @@ def request(engine, identity, body):
                 datetime.fromisoformat(at) + timedelta(minutes=30),
                 datetime.fromisoformat(parent_deadline(c,approval,permission)),
             ).isoformat(),
-            generation_requests=3,
+            generation_requests=body.generation_requests,
             request_seconds=120,
             completion_tokens=2600,
             source_writes=False,
@@ -295,7 +326,7 @@ def request(engine, identity, body):
         payload = {
             **job["payload"],
             "phase": "prepare_scopes",
-            "scope_recoveries": commands + [receipt],
+            "scope_recoveries": scope_commands + [receipt],
             "scope_recovery_history": job["payload"].get("scope_recovery_history", []) + [retained],
         }
         c.execute(

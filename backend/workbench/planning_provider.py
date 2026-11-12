@@ -13,7 +13,7 @@ import subprocess
 from itertools import islice
 from workbench.planning_transport import LocalHTTP, NoRedirect as NoRedirect, PlanningUnavailable
 
-from workbench.schemas import DecompositionOutput
+from workbench.schemas import DecompositionOutput, PlanningOutput
 from workbench.regression_evidence import ScenarioResponse
 from workbench.bug_evidence import BugPlanningResponse
 from workbench.bug_intent import Response as IntentResponse
@@ -328,7 +328,7 @@ class LocalProvider:
         if schema is InvestigationResponse:
             from workbench.bug_investigation_stage import INSTRUCTIONS as SOURCE_INSTRUCTIONS
             instructions = SOURCE_INSTRUCTIONS
-        context = json.loads(encoded) if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse, FeatureChecks, FeatureCheckReview, StepScope) else {}
+        context = json.loads(encoded) if schema in (PlanningOutput, BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse, FeatureChecks, FeatureCheckReview, StepScope) else {}
         if schema is IntentResponse:
             from workbench.bug_intent import INSTRUCTIONS as INTENT_INSTRUCTIONS
             instructions = INTENT_INSTRUCTIONS

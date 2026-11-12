@@ -305,7 +305,7 @@ def test_single_turn_with_exact_model_and_usage(secondary_is_null):
 
 
 @pytest.mark.parametrize('tokens',[66618,150000,codex.BUG_OBSERVED,codex.BUG_OBSERVED+1])
-@pytest.mark.parametrize('title',['InvestigationResponse','BugIntentResponse'])
+@pytest.mark.parametrize('title',['InvestigationResponse','BugIntentResponse','ProgramResponse','ReviewResponse'])
 def test_larger_context_uses_current_post_observation_guard_without_a_billing_guarantee(tokens,title):
     events=completed()
     values=events[1]['params']['tokenUsage']['total']

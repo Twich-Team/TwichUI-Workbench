@@ -17,7 +17,7 @@ class Bootstrap(Data):
     kind: Literal['client-bootstrap']
     test_path: TestPath
     client: str
-    through_line: int = Field(ge=1, le=200)
+    through_line: int = Field(ge=1, le=600)
 
 
 class Module(Data):

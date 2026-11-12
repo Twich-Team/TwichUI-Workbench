@@ -75,8 +75,10 @@ def offer(engine, identity):
     capability(engine)
     with engine.connect() as c:
         current = scope(c, identity)
-        if current['provider'] != 'local':
-            raise ValueError('The saved Codex planning choice is retained. Bounded feature implementation currently requires the installed local Qwen controls; no fallback or model change was made.')
+        if current['provider'] == 'codex':
+            # The saved route already selects the existing tool-free Codex
+            # adapter. A feature run never activates its planning fallback.
+            provider_routes.validate_selection('codex', current['route']['model'], current['route']['effort'])
         existing = c.execute(select(proposal_decisions.c.payload).where(
             proposal_decisions.c.proposal_id == current['proposal_id'])).scalars()
         if any(p.get('feature_run') for p in existing):

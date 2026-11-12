@@ -1,3 +1,357 @@
+# November 12 — REAL combined feature result saved
+
+The same existing two checked Codex steps now produce one independently verified
+local feature result and coherent review bundle. See [complete evidence report](FEATURE_EVIDENCE_COMPOSITION_20261112.md).
+Execution3050529d-13d5-50a0-a938-f9b0885f43a2, candidateac9781fc3b725a1a29382418b02c904e34a6c4c3ab9fa1b19545fca43d634a45.
+Original and exact combined suites each178/0; all10supplemental phases pass candidate;
+original controls pass and changed observations fail semantically. No new inference.
+The first timeout remains failed; second existing attempt is checked. Local package
+is saved, publishedfalse, no draftURL. Original Qwen/permissions/history unchanged.
+
+Fresh backup908rows/55intakes/hash22190b1c908b9318bb5ad4cf4a4f77289e595d8169d7bda3093ee7163888f25f;
+ALL789originalrows and52originalrequests remain exact. Actual1440desktop/390phone
+review screenshots inspected: ready_to_review/passed_offline,8behavior summaries,
+complete-result link, reload/APIrestart, no overflow/errors/mutations. Native full
+completion and package read back. Installed127/rollback126remain untouched.
+
+Full local verification uses four complete inventory partitions plus frontend,
+browser and visual groups. Do not claim the interrupted serial run as a full pass.
+After exact hosted gates, install the reviewed build and same completed store via
+the approved private mechanism; retain original127/126and current comparison paths.
+Do not resume original Qwen work, dispatch models, publish addon changes or replay
+any admission/retry/worker scripts. Stop for owner review after this milestone.
+
+# November 12 — original evidence qualified; native combined verification active
+
+Following the Project Working Philosophy, the accepted owner assignment reuses
+two real checked Codex steps and extends the existing verifier with explicit
+requirement-to-evidence composition. Each audited native assertion binds its exact
+range/source/result and must survive in the final source. Source, ancestry, scope,
+permission, history, suite and supplemental observations retain separate evidence.
+No green-file shortcut or fake model review; missing/misattributed/stale evidence
+rejects admission. Existing generated-complete-program entry remains unchanged.
+
+Read-only original/candidate supplemental preflight qualifies all10observations:
+preserved originals pass and new memory behavior distinguishes the sources.
+Original-only authored code was frozen before inspecting candidate diffs; later
+fixture corrections retain non-blind diagnostic provenance. The failed Westfall
+expectation is kept with a corrected world target. Back history is cleared by
+original OnHide, and original bounds constrain low-zoom opening centers.
+
+A native first attempt expired the120-second original-suite watchdog. No candidate
+check began; cleanup confirmed. Its immutable failure and consumed attempt remain.
+The existing local verifier now retains resource failures before safety rejection,
+allows600seconds per full suite inside the unchanged40-minute operation, and
+re-admits this positively settled original-only timeout against the same contract
+within the original3attempts. This adds no inference, source writes, time renewal,
+provider or publication permission. Exact fresh verification is underway.
+
+# November 12 — combined verification design review complete
+
+Following the Project Working Philosophy, completed the owner's review only.
+[Report](FEATURE_VERIFICATION_DESIGN_REVIEW_20261112.md) maps the original request,
+owner storage-first conditions and saved plan clauses to actual checked assertions
+and missing feature-level checks. No model, feature/runtime edit, candidate execution
+or deployment. Preexisting edits and all earlier failure records are preserved.
+
+Exact failed conjunct: retained phase3line31 expects FitZoom(1436), but its left
+click is at world(0.7,0.35), on continent1415. Original zoom3.3333333333333 is correct;
+the asserted16.666666666667 is not. It is a preserved control (true/true), not an
+intended negative control. All other independently evaluated phase3predicates pass.
+Correcting only the diagnostic pointer input makes that control pass with unchanged
+expectations; original missing-feature failure remains. Exact retained oracle and
+original focused test were also exercised read-only. No diagnostic was promoted.
+
+Historical original-only probe scripts target a surrounding checkout with four
+source hashes differing from the packet at review. Repeated on clean frozen7fd7be8 with all nine hashes
+matching; failure and causal diagnosis are unchanged. Proposal timing also shadows
+bootstrap CLOCK rather than advancing client GetTime; no generic compiler change
+is proposed for that fixture issue. Both handoffs match all1116native manifest paths.
+
+Recommendation: narrow evidence-composition entry in existing verification owners,
+with explicit requirement/evidence mapping and only necessary independent behavior
+supplements. Keep provenance, original/candidate roles and controls, full suites,
+scope, recovery and publication gates. Step native oracles execute candidate-authored
+tests; do not mislabel that as separate blind authorship or full feature acceptance.
+Private receipts: `verification-design-review-20261112` under the Workbench data dir.
+CURRENT_STATUS updated; existing installed/task states unchanged. Stop for owner review.
+
+# November 12 — corrected combined-verification attempt remains held
+
+Following the Project Working Philosophy, preserved and reused comparison8a11c7e1 /
+parent1ce16b7f / job8c063c44; no implementation, intake or original Qwen task was replayed.
+See [focused diagnosis](FEATURE_COMBINED_VERIFICATION_20261112.md).
+
+One separately recorded corrected-contract allowance used two further tool-free Codex
+requests (15/16); all14prior records, unknown usage and the original budget remain.
+Exclusive generation grammar now matches the existing validator. Instructions clarify
+complete phase allocation and app-owned history/full-suite portions. Request15 returned
+a complete5-phase program, but BugEvidence still capped a450-line selected bootstrap at
+16032characters despite source selection allowing64KiB. The downstream bound now agrees
+with selection; the final64KiB oracle bound remains. This program compiles to57290bytes.
+
+Real original-only confined diagnostics reject its preserved-behavior phase3 with
+outside-reviewed-results (phase1expected, phase2incorrect). A diagnostic game-clock
+adjustment did not fix that compound control; it is NOT an accepted correction.
+Request16asked for original Places/Caves/Art definitions outside the nine disclosed files;
+access was correctly refused. No candidate combined check, frozen result or final local
+package. No additional source/model call or acceptance waiver. Stop for owner review
+under the assignment's narrow unsuccessful-approach instruction; do not launch a campaign.
+
+E=/home/rich/.local/share/TwichUI-Workbench/combined-verification-20261112.
+Final trial900rows/fingerprint42471ccdc9bc5f8dd48194832551feec0570a4ae80adcf59bb402f208f78387a;
+final-comparison.sqlite3 independently matches. EVERY789canonical row remains exact in
+both stores; canonical52requests/schema0014/fingerprint7761f416... unchanged. Trial controls65
+paused, worker stopped, all model rows finished, parent/job held,2implementations/0checks.
+Request15/16reported150451tokens (144034prompt/6417completion,3104reasoning subset).
+New usage complete; earlier unknown final accounting remains unknown.
+
+Corrected contract/source and bootstrap bound are in the stopped isolated trial and root
+checkout, uncommitted/uninstalled. wb.py check and126compiler/recovery tests passed; focused groups and real diagnostic
+receipts are in the report (not full release acceptance). Actual1440/390screenshots inspected;
+held2of4 persists across reload/review-API restart with zero browser errors/mutations.
+Installed127/ade9295 sealpassed, four original servicesactive, rollback126preserved.
+No push, hosted run, deployment, addon publication, live addon edit or port8765change.
+
+# November 12, 17:30 UTC — two checked implementations; combined preparation held
+
+This is the current operational state; older active-run notes below are history.
+The bounded Codex comparison achieved the requested first real storage step and
+the dependent capture/restore step. Both passed native focused, original/candidate,
+full178/0 and frozen checks. No complete real feature delivery exists yet.
+See [comparison report](FEATURE_CODEX_COMPARISON_20261112.md) and CURRENT_STATUS.
+
+Same comparison8a11c7e1 / parent1ce16b7f / execution job8c063c44 remain the only
+continuation targets. Checked executionsfe4b9dd7 and2ed99020 are preserved.
+Final parent held; jobfailed/held; controls63paused; worker stopped; all model rows
+settled. Loopback9187 review API remains active and was restarted successfully.
+No completed combined check or local final package; publication held.
+Do not replay any prior intake, approval, start, continuation or recovery script.
+
+Blind independent history has14requests: original12 plus separately recorded2.
+Request9partial remains quarantined/unconfirmed, with56167observed tokens and
+unknown final accounting; larger existing Lua-program traffic profile now selected.
+Long actual committed bootstrap is450lines, not missing. Nine original source files
+are disclosed with bound hashes; no candidate entered this author. Request13 returned
+an incomplete12-phase program AND explicit limitation (reset/controls/mapping missing),
+correctly rejected. Request14 requested settings-test/SettingsKit source; restricted
+search returned no program. Do not adopt that incomplete response or silently reset
+the spent allowance. No actual combined original/candidate execution occurred.
+
+Next focused engineering: reconcile behavioral phase coverage with app-owned
+checkpoint/history/full-suite/publication safeguards, preserve every requirement,
+and use the existing committed map setup without irrelevant dependency hunting.
+Then continue native independent preparation/combined checks from checked step2;
+no reimplementation, Qwen retry, harness expansion or orchestration redesign.
+Engineering does not require a new owner product decision. Further provider/source
+admission still needs valid explicit task bindings and disclosure, never fake consent.
+
+E=/home/rich/.local/share/TwichUI-Workbench/provider-comparison-20261112.
+E/final-preservation.json and final-comparison-checkpoint.sqlite3 preserve896rows,
+fingerprintb56b731be8943ca4742aa2e802aee36606f291ee601961a50238dfd5e5e28de7.
+ALL789original rows remain exact in canonical AND comparison. Canonical52requests/
+schema0014/fingerprint7761f416... unchanged, sealpassed, four installedservicesactive.
+Installed127/ade9295 remains paused; normal Qwen access/globalpreferences untouched.
+No main installation, rootcommit, push, addon publication or game-file change.
+Native isolated local handoff commits carry checked predecessors only.
+Desktop1440/phone390 screenshots inspected:2of4checked/held persists on reload;
+zero browser errors/mutations. Root changes remain uncommitted/uninstalled;
+exact executing hashes E/stage-source.json, earlier snapshots retained.
+Known complete coding144470tokens/3responses (5670completion), earlier codingunknown.
+All comparison complete reported978900tokens +56167partialobserved, not exact total.
+Prior source-schema/coding unknown usage and pre-send/local refusals remain separate.
+Latest controlled15correction tests,12normal recovery tests and wb.py checkpassed;
+do not sum overlapping older groups or claim full hosted release acceptance.
+
+# November 12, 16:21 UTC — TWO real implementation steps checked; combined work active
+
+Same comparison8a11c7e1 / parent1ce16b7f now has2checked IMPLEMENTATIONS.
+Second execution2ed99020-a79c-550d-b4ec-6ec74b3228fb, slotce077116, candidate
+243fbe2fdea978b96852000a4690babd4416ca93fa9953168b8d4324b06225a8.
+Two completed Codex responses85942tokens (81711prompt/4231completion, reported
+2450reasoning subset). First response passed legacy map cases but its new test
+compared saved preferences after intentionally changing smoothing. Second fixed
+that test and guarded nil on original production. Focused/original differential/
+full178of178/frozen checks PASS. First58528+second85942=144470known coding tokens;
+the earlier interrupted response remains unavailable and fully reserved.
+
+Only View.lua/test_map_explore.lua changed. The checked second commit carries the
+first step. Player-choice flag separates explicit input from internal placement;
+restore is after normal OnShow initialization, at opening-map centre. Test-only
+logout clears isolate existing scenarios; original assertions/Westfall content stay.
+E/second-checked/result.json and exact869-row checkpoint preserve this milestone.
+No complete feature delivery yet. Installed127 and original Qwen0of5 unchanged.
+
+Blind original-source Codex adapter, checked-predecessor disclosure and window/search
+validation passed22/33/103overlapping focused groups plus wb.py check. Current trial
+source hashes: E/stage-source.json, prior executed source in second-checked/.
+No candidate enters blind-check producer; inspections stay within original selected
+source. Worker began verification scope. Operator guard initially counted only
+implementations, so pause NEW admission at55 while its current source call finishes;
+do NOT kill/cancel that call. Once ledger/job lease settles, stop idle worker, update
+monitor to count completed_steps + completed_checks (plus local bundle separately),
+then resume55->56 with threshold3. No native task or old result is replayed.
+Current run script already loaded; editing it cannot change that live process.
+
+Read E/worker-progress.json and native DB before resuming; no start/approval script
+replay. No draft authority file exists in trial artifacts, no publication records
+or external writes. A later fourth step may prepare the existing LOCAL coherent
+bundle only, with publication held. No commit/push/deployment/game installation.
+
+# November 12 — FIRST REAL CODEX STEP CHECKED; continue dependent work
+
+Comparison8a11c7e1 / parent1ce16b7f has ONE of FOUR steps checked.
+Executionfe4b9dd7-cdd8-565c-812c-20b0ac0fce18, sloteb812fb1, candidate
+2301e043d7e8f6d1b31e46e390ccf03130e54219c40bf8940d05abb116f98dec.
+Actual gpt-6.1-sol, requested high effort; ONE completed coding response,
+58528totaltokens (57089prompt/1439completion/516reasoning). Earlier canceled
+response retains unavailable usage and its full24000reservation. Native syntax,
+focused/original-failure differential/full178of178/frozen checks ALL passed.
+Independently reviewed exact7production+55test additions, zero deletions, only
+approved two files. Storage/reset only, no capture/restore/UI/config changes.
+
+Worker paused at1checked, controls49, BEFORE next scope. Latest owner direction
+explicitly continues dependent work and combined verification. Original Qwen
+feature STILL0of5checked, preserved. Zero complete real features so far.
+First checked snapshot E/first-checked-checkpoint.sqlite3 is verified; never
+replay it over newer records. Desktop1440 and phone390 screenshots inspected:
+1of4checked survives reload, zero errors/mutations. No deployment/commit/push.
+
+Next: root blind-check Codex adapter passed19focused tests and wb.py check.
+Copies are not yet in executing stage. Archive exact first-step stage source,
+copy only those adapter corrections while worker stopped; resume SAME parent
+until2checked or failure, inspect before original/combined verification.
+No re-planning, completed-step replay, new Qwen attempts or addon publication.
+
+# November 12, 15:47 UTC — storage recovered; same Codex first step resumed
+
+Comparison8a11c7e1 / parent1ce16b7f remains the only resume target. Actual scope
+c21ec22c permits View.lua + test_map_explore.lua writes and read-only Core/Persist/
+harness. Final scope turn used25334tokens. Fresh ORIGINAL addon suite178/0 passed.
+First coding sessionbe1d99e4 / execution704f2ff7 was interrupted by the native
+4GiB disk reserve. Connector1c31d8e0 positively confirms one tool-free readOnly
+turn, acknowledged interruption, zero returned output, closed producer. CODING
+GENERATION DID START; usage remains UNAVAILABLE, never zero. No patch/check result.
+Original failed DB/model/grant rows stay exact and its24000token reservation counts.
+
+E/canceled-request-match.json reconstructs the EXACT newline-inclusive request hash
+with transport disabled; no inference/writes. E/canceled-settlement.json records
+closed-response evidence under standing read-only recovery; pristine workspace
+matches its original1116-file manifest. Separate codex-readonly-settlement.json
+supports existing failed-step recovery without fabricating a missing native failure
+handoff or rewriting unavailable accounting. Capability/output/closure faults hold.
+Future coding turns now retain a request-hash intent before connector dispatch.
+69focused tests and wb.py check passed (one normal Starlette warning).
+
+Verified existing Python archive independently extracted in /dev/shm and matched
+58INACTIVE environments before pruning their duplicate dependency trees. Reclaimed
+~6GiB; free capacity>9GiB at recovery. Current127/rollback126/fallback125, previous
+protected environments, source/ops/seals/stores/results/failed work all retained.
+Per-environment inventories, timestamps and restore instructions: E/dependency-retention.
+No model-cache or unrelated files removed. E/storage-recovery archives exact prior
+executed backend/source hashes and worker state. New source only in isolated trial.
+
+Browser resumed trial controls47->48; same native worker active, threshold one
+checked step or settled failure. Monitor E/worker-progress.json / worker-terminal.json.
+DO NOT replay request/continuation/resume scripts. Installed127/ade9295 remains
+paused and untouched. Current strategy still one real independently checked step,
+then dependent steps and combined verification; no addon publication/live changes.
+
+# November 12 — controlled Codex comparison, native integration verified
+
+Following the Project Working Philosophy: keep real-provider evidence separate
+from deterministic checks. The owner now prefers capable Codex for substantive
+Feature Workshop work; [temporary strategy](OWNER_FEATURE_MODEL_STRATEGY_20261112.md)
+preserves the original Qwen-only task and defaults elsewhere.
+
+Baseline127/ade9295 and all789rows/52requests independently backed up and unchanged.
+Four installed services remain active and paused; separate loopback9187 comparison
+stage uses copied history. Its per-task selection is gpt-6.1-sol/high, fallbackOff,
+through the existing signed-in subscription connector. No API billing or local
+Qwen call. All789original rows also remain byte-identical in the comparison store.
+
+The existing Codex coding controller already supports the feature verification
+profile. Removed only the local-only parent admission refusal, retaining exact
+saved-route/catalog validation. Codex now receives the shared current-step brief.
+Source selection weights the task title before long incidental description words,
+selects an existing test that loads relevant modules, and includes the harness.
+Actual retained map source now selects test_map_explore rather than friend-login.
+No addon implementation or prior candidate patch was supplied.
+
+Real planning eaa96c69 completed but was rejected for a nonempty related_ids list;
+13,332 reported tokens retained. The existing empty-list requirement is now also
+in the generation schema. New comparison34f7fe08 produced a valid real Codex plan
+(13,088 reported tokens), then decomposition was refused locally before dispatch
+because plan plus source exceeded the smaller transport envelope. Both histories
+and executed backend snapshots remain private immutable evidence. Feature source
+requests now use the existing bounded complete envelope and inspected-source schema
+metadata. This changes neither allowed paths nor the independent acceptance checks.
+
+Latest native comparison8a11c7e1-b52c-43ff-a9c3-234a75a16bd4 is active. Source
+inspection is folded into existing automatic preparation, rather than a separate
+execution task. One real coding attempt has NOT yet started; zero checked steps.
+Existing worker monitor pauses after first checked step or settled failure, before
+any repeated implementation. No deployment, commit/push, publication or addon change.
+199 affected checks and static/contracts/build/schema passed before the last
+transport correction; subsequent112 affected checks pass. More existing worker
+checks are running. Evidence: private provider-comparison-20261112 directory.
+
+# November 12 targeted recovery outcome — not achieved
+
+Following the Project Working Philosophy: distinguish controlled checks from a real result. Original scope-expansion regression independently proven; current-step context, read-only useful failure feedback and additive settled continuation tested. Scripted actual Runtime.execute178/0 is a demonstration only. Two real Qwen attempts failed at20turns; second reached focused pass, then rejected original comparison. Zero checked steps. Stop this failing sequence; no full hosted release or installation claim. Unsuitable focused-test/source selection and ineffective model navigation/setup remain the concrete blocker. The second diff also invents a reload event absent from pinned declarations.
+
+Restored the installed127/ade9295 preview with latest789rows,52requests, unchanged original immutable approvals/usage. All4services active; pause31; normal model401/200/keyhash/idle verified; port8765preserved. Complete source seal passed after removing only newly generated Python caches from the restoration reader (no tracked bytes changed). Desktop/phone/reload inspected, zeroerrors/mutations; only observed_at changes across API reads. Fresh recovery copy and full evidence: targeted-recovery-20261112/recovery-report.json and restoration/. All old backups are stale. Uncommitted corrections and original prototype archives remain available. No addon publication or live addon change.
+
+# November 12 — targeted first-step recovery: independent diagnosis
+
+Following the Project Working Philosophy, working toward one real checked step under the original feature. Live API confirms0completed steps. Archived prototype TAR/patch hashes match the review record. Fresh isolated test_map_explore observations: original passes, failed Qwen candidate fails at833 (only dungeon:36; missing dock:3/cave:101), diagnostic removal of out-of-step capture/restore passes. Diagnosis is scope expansion plus misleading parent context and lost detailed suite feedback, not an unrelated baseline or a false suite result. Friend-login was a weakly related but explicitly approved test harness; its passing new storage assertions never established preserved map behavior. No source scope is broadened.
+
+Prototype classification: current-step brief and suite assertion recovery are needed; retained-work seed/freeze machinery and associated source/provider integrations are unnecessary for this storage step and removed from active changes, preserving original archive. Final-turn auto-check is independently useful but deferred. Expired settled execution does require fresh authority through the SAME existing coding-continuation receipt; historical clocks and grants must remain as-of immutable. No competing owner/framework.
+
+Evidence: private `targeted-recovery-20261112/diagnosis/report.json`; no model calls, no installed changes. Initial old tests failed because this shell's group-writable default file mode differs from the deployed service's private mode; exact diagnostic identifies0664BUDGET_BASELINE.json rejected by the unchanged owned-path check. Tests are rerun with private mode, without weakening ownership checks. Native confined runtime rehearsal is underway; simulated success will not be called real completion.
+
+# November 12 — OWNER REVIEW CHECKPOINT: stop after assessment
+
+The owner's new20-hour course-correction request explicitly PAUSES implementation,
+model experiments, deployments/publication and new infrastructure repairs until a
+direction is selected. It overrides the earlier continue instructions below for this
+checkpoint. Do not automatically resume or finish the uncommitted recovery expansion.
+
+Branch codex/everyday-workbench HEAD6e1f3327755a03dc1fd631c745131b1e42ee4f6c;
+installed127 ade92958346a3e43841dcc655005287e8feeb100/full43211210566 ALL9 passed.
+Current request1c2930b5/fence77da06a0 FAILED after20complete responses/2998generated
+and411460prompt tokens. Focused/oracle/original differential passed, complete addon
+suite177pass1fail. Fixed isolated diagnostic: test_map_explore.lua:833 Westfall whole.
+The model implemented later capture/restore behavior during the storage-only step.
+All4coding owners/descendants stopped; all normal config/access restorations true.
+Fresh model401/200/keyhash and slot0 is_processing=false. No queued/running model,
+planning, execution or publication rows. No active/queued hosted runs at review.
+Zero checked steps and zero completed real FeatureWorkshopfeatures. No new feature PR.
+
+Uncommitted WIP:7modified+2new Python modules for current-step brief, retained model
+work, full-suite assertion details and another time-window mechanism. Unfinished;
+first focused run FAILS because its old test expects0hours while prototype offers6.
+No source fixes/tests/deployments/model calls were initiated after owner intervention.
+Preserved tracked binary patch + new-source TAR, content hashes and HEAD applicability
+proof under E/review-20261112; original5doc edits and2dependency symlinks retained.
+Fresh settled DB backup776rows/31tables/schema0014/fingerprinta9d9167dc102283fd1435fd96cd619d2dbe670387796c7f1ec9a01b4a84769de.
+All52requests remain. Current/rollback seals reverified. Actual127→126→127 was proven
+BEFORE later native writes. Never replay old770baseline rollback over this newer store.
+
+Review recommendation B: core UI/API/durable-worker design is viable, but recovery,
+source-context handling and release cadence have displaced useful delivery.29full CI
+runs over the review window:23success/5fail/1cancel,374summed minutes/358wallcoverage,
+median13.7min.17verified installations.53coding model requests consumed488.37seconds
+of request intervals; planning/source operation ledger782.58seconds. Saved local
+pytest logs show about143minutes (incomplete lower bound; overlapsCI). Exact manual
+implementation/debug/report/idle allocations unavailable; do not invent them.
+89confirmed model requests =53coding+31planning/source+5cancellationprobes. One extra
+source record has missingusage/not_started input-budget diagnostics; one pre-provider
+codinggrant keeps unknownusage/24000reservation. Known response receipts1205210tokens,
+16436generated. Each probe's final generation is bounded1..60, not exact. Original
+unknowns remain unchanged. Full review evidence/timing/checkpoint JSONs are private
+under E/review-20261112. Preserve this checkpoint and WAIT FOR OWNER DIRECTION.
+
 # November 12 — installed127; distinct one-attempt coding continuation admitted
 
 Exactade92958346a3e43841dcc655005287e8feeb100 ALL9 full43211210566 passed.
@@ -1350,6 +1704,37 @@ and all deep links. Source/static50frontend126affectedbackend/admin and controll
 bug/task browser checks pass. Actual before/after desktop/phone rendering inspected;
 full local/hosted verification and sealed private cutover continue. Older local
 documentation edits and dependency links are preserved outside this checkpoint.
+
+## November 11, 2026 — schema0013 administrator session investigation
+
+Following the Project Working Philosophy, investigated the owner's failed final
+status without repeating installation or changing privileged policy. The sudo
+journal establishes Rich/loginUID1000/session413/cgroup session-413.scope for the
+04:19MST backup/install/status sequence. Protected audit records the exact refusal
+before parsing input. The installed root:root0755 helper is d7c20bde… and matches
+reviewed source; comparison with pinned original1fd4a561… proves only schema0012/
+0013 settlement compatibility changed. The prior helper was copied by the script
+before replacement; its root-private backup contents were not independently read.
+
+The protected grant remains bound to original Codex login78 on the current boot,
+through November13 16:29:31MST. The existing executor has that kernel cgroup/audit
+identity and normal status succeeds. Its scope is closing/abandoned but contains
+surviving processes; the helper requires their kernel identity and protected scope,
+not a live attached terminal. Owner session413 is absent from the later live list.
+New SSH/console authentication creates another session; it does not recover78.
+This is legitimate owner authentication outside a narrower old grant, not evidence
+of intrusion. No login-policy change is needed for the already installed update.
+
+Allfour actual workbench-everyday services are active on installed107/b3cb3f0.
+Read-only SQLite transaction passes integrity/foreign-key/settlement checks and
+matches exact633rows/28tables/schema0012/hash7c61a77c… from prior restart proof.
+No root-owned file mutation, service transition, model call, live migration or
+publication occurred. Private receipt: admin-schema0013-investigation-20261111/
+verified-findings.json. Updated trust documentation, current status and handoff;
+removed current retry instruction and kept PhaseB visual/usability development
+independent of historical grouping and future administrator grant changes.
+All48 offline administrator checks and git diff whitespace validation pass.
+No runtime/UI change was made; no full browser/visual rerun was needed.
 
 ## Verified current — source-read and fresh-run recovery installed
 

@@ -180,6 +180,9 @@ class CodexRuntime(Runtime):
                 'Propose up to six small exact replacements in the approved files. '
                 'Change only what is needed for the reported behavior. '
                 'Include an existing test edit if the approved scope and evidence require it.')
+            if self.recipe.get('repair_cycle') == 'scoped-feature-v1':
+                from workbench.implementation_context import instruction
+                instructions = instruction(self, instructions)
         else:
             instructions, _ = reviewed_instruction(self)
             if not instructions or len(self.paths) != 1:
@@ -324,6 +327,14 @@ class CodexRuntime(Runtime):
                             total_patch_bytes=job.LIMITS['patch_bytes'],old_plus_new_bytes_per_replacement=8192,
                             replacements_per_turn=6,existing_test_lines_must_remain=True),
                         operation_turn_bound=job.LIMITS['turns']),ensure_ascii=True))
+                # Bind the exact wire request before dispatch, even when a
+                # later cancellation prevents returning a provider receipt.
+                wire = codex_provider.encode_request(self.codex_selection['model'],
+                    self.codex_selection['effort'], prompt, schema, codex_provider.BUG_SECONDS)
+                durable(self.root/('codex-intent-'+identity+'-'+str(turn+1)+'.json'),
+                    json.dumps(dict(execution_id=identity, fence=fence, turn=turn+1,
+                        model=self.codex_selection['model'], effort=self.codex_selection['effort'],
+                        request_sha256=sha(wire+b'\n')), sort_keys=True).encode())
                 try:
                     edit,counted=codex_provider.generate(self.codex_selection['model'],self.codex_selection['effort'],
                         prompt,schema,stop=lambda:not permitted() or time.monotonic()>=self.implementation_deadline,input_limit=codex_provider.MAX_BUG_INPUT,

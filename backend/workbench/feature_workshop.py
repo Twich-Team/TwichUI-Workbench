@@ -57,6 +57,7 @@ class FeatureResult(BaseModel):
     published: bool
     draft_url: str | None = None
     message: str
+    verified_requirements: list[str] = []
 
 
 class FeatureView(BaseModel):

@@ -290,16 +290,29 @@ def json_bytes(value):
 
 
 def client_bootstrap(lines):
-    prefix = lines[:160]
-    client = next((m[1] for line in prefix if (m := re.match(
-        r'^local\s+([A-Za-z_]\w*)\s*=\s*MakeClient\s*\(', line))), None)
-    loads = [i for i, line in enumerate(prefix) if 'loadfile(' in line]
-    if not client or not loads:
-        return None
-    # The chosen prefix must compile and run unchanged in isolation.
-    through = next((i for i in range(loads[-1]+1, min(len(prefix), loads[-1]+16))
-                    if not prefix[i].strip()), None)
-    return dict(client=client, through_line=through) if through else None
+    def select(prefix, lookahead):
+        client = next((m[1] for line in prefix if (m := re.match(
+            r'^local\s+([A-Za-z_]\w*)\s*=\s*MakeClient\s*\(', line))), None)
+        loads = [i for i, line in enumerate(prefix) if 'loadfile(' in line]
+        if not client or not loads:
+            return None
+        through = next((i for i in range(loads[-1]+1, min(len(prefix), loads[-1]+lookahead))
+                        if not prefix[i].strip()), None)
+        return dict(client=client, through_line=through) if through else None
+
+    # Preserve every historical short-prefix choice. Some native map fixtures
+    # define substantial game inputs before loading the addon. Recognize their
+    # existing startup rather than inventing a replacement harness.
+    legacy = select(lines[:160], 16)
+    if legacy:
+        return legacy
+    selected = select(lines[:600], 80)
+    if selected:
+        raw = ('\n'.join(lines[:selected['through_line']])+'\nreturn '+selected['client']+'\n').encode()
+        from workbench.source_context import compiled_shape
+        if len(raw) <= 65536 and compiled_shape(raw)[1] is not None:
+            return selected
+    return None
 
 
 def client_context(root, base, primary, inspected):

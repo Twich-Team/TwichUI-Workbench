@@ -28,11 +28,28 @@ INSTRUCTIONS = (
     'Keep expected and original scalars outside phase code. At least one changed '
     'behavior must actually differ on original production; controls must preserve '
     'original behavior. Map phases to every indexed approved requirement. '
+    'A phase may cover several related requirements and return a compound boolean; '
+    'allocate the available phases to cover the COMPLETE behavior, especially session '
+    'reset, before adding redundant reopening cases. Keep helper code concise. '
     'Do not inspect source strings, detect candidate identity, return constants '
     'or assign expected output into tested addon state. For stateful behavior '
     'observe initial defaults, real actions, repeated actions and changed inputs; '
     'use only the declared app restart helper for offline session reset. '
     'Missing definitions or setup require source inspection, never invented APIs. '
+    'An exact public call already shown in a supplied committed test may be repeated '
+    'with the same call form and arguments; its separate definition is not required '
+    'solely to repeat that tested call. The app separately owns frozen original/candidate '
+    'comparison, complete-suite execution, saved step receipts and publication guards. '
+    'Do not reimplement those controls in phase code or demand withheld candidate/history '
+    'to establish them. Write observations of the requested addon behavior. '
+    'For a clause combining behavior and an app-owned safeguard, map its behavioral '
+    'observations to that clause; the app separately establishes its checkpoint/history '
+    'and original/candidate/full-suite portions. Phase mapping does not claim those '
+    'operations ran. Existing committed settings defaults and controls plus the frozen '
+    'diff establish exclusions; do not construct a second settings-addon runtime just '
+    'to re-prove the absence of new settings. Use the supplied exact committed bootstrap '
+    'and restart_session helper for fresh module initialization. A complete program '
+    'has limitation=null; an incomplete program must be returned as a limitation alone. '
     'No edits, shell, network, provider choice, permission or publication tools. '
     'An accepted program remains a proposal until original/candidate checks run.'
 )
@@ -73,6 +90,21 @@ class Review(StrictModel):
         if self.ready == bool(self.issues):
             raise ValueError('A ready program has no issues; a rejected program explains its issues.')
         return self
+
+
+def wire_schema():
+    """Express the existing exclusive outcome rule in the generation grammar."""
+    import copy
+    declared = Response.model_json_schema()
+    variants = []
+    for selected in ('inspection', 'program', 'limitation'):
+        properties = copy.deepcopy(declared['properties'])
+        for name in ('inspection', 'program', 'limitation'):
+            properties[name] = (next(v for v in properties[name]['anyOf'] if v.get('type') != 'null')
+                                if name == selected else dict(type='null'))
+        variants.append(dict(type='object', additionalProperties=False,
+            properties=properties, required=list(properties)))
+    return dict(anyOf=variants, **{'$defs': declared['$defs']})
 
 
 REVIEW_INSTRUCTIONS = (
@@ -151,7 +183,7 @@ def validate_packet(initial, supplied):
     return supplied
 
 
-def compile(packet, proposed, *, retained=False):
+def compile(packet, proposed, *, retained=False, composition=None):
     from workbench import regression_preparation as source, bug_evidence
     if packet['input_binding'] != digest({k:v for k,v in packet.items() if k!='input_binding'}):
         raise ValueError('The independent original-source packet changed.')
@@ -159,6 +191,11 @@ def compile(packet, proposed, *, retained=False):
     selected = {item['path']:item for item in packet['files']}
     needed = {item['index'] for item in packet['indexed_clauses']}
     covered = {index for phase in program.phases for index in phase.clause_indices}
+    if composition is not None:
+        # Historical ordering, source exclusions and suite receipts are not Lua
+        # observations. The authoritative execution owner audits their concrete
+        # evidence before admitting this contract, and again on recovery.
+        covered |= composition_clauses(packet, program, composition)
     setup = program.setup
     root, base, _ = source.repository(**({'retained_base':packet['base']} if retained else {}))
     if (base != packet['base'] or covered != needed
@@ -209,4 +246,72 @@ def compile(packet, proposed, *, retained=False):
         oracle_sha256=__import__('hashlib').sha256(oracle.encode()).hexdigest(),
         focused_tests=program.focused_tests,behavior_id=BEHAVIOR,
         independently_executed=False,model_review='not_recorded')
+    if composition is not None:
+        value['evidence_composition'] = composition
     return {**value,'binding':digest(value)},oracle
+
+
+def composition_clauses(packet, program, composition):
+    """Validate explicit evidence references, never infer coverage from a file name.
+
+    Relevance is a retained host review of exact assertions/observations. This is
+    admission structure, not a correctness verdict; original/candidate execution
+    and frozen native evidence remain mandatory in feature_verification.
+    """
+    if (composition.get('version') != 1
+            or composition.get('input_binding') != packet['input_binding']
+            or composition.get('program_binding') != digest(program.model_dump(mode='json'))
+            or composition.get('binding') != digest({k:v for k,v in composition.items() if k != 'binding'})
+            or not composition.get('reviewer') or not composition.get('authorship')
+            or composition.get('approved_clauses') != packet['indexed_clauses']
+            or not composition.get('original_request_binding') == digest(packet['original'])):
+        raise ValueError('Composed evidence requirements, author or supplement changed.')
+    requirements, evidence = composition.get('requirements', []), composition.get('evidence', [])
+    if not 1 <= len(requirements) <= 32 or not 1 <= len(evidence) <= 64:
+        raise ValueError('Composed verification needs bounded concrete evidence for every requirement.')
+    indexed = {r['index']:r['requirement'] for r in packet['indexed_clauses']}
+    sources = {e['id']:e for e in evidence}
+    if len(sources) != len(evidence) or len({r['id'] for r in requirements}) != len(requirements):
+        raise ValueError('Duplicate requirement or evidence identity.')
+    covered, used = set(), set()
+    for requirement in requirements:
+        refs = requirement.get('evidence', [])
+        if (not requirement.get('text') or not requirement.get('rationale')
+                or not refs or len(refs) != len(set(refs)) or not set(refs) <= set(sources)
+                or requirement.get('kind') not in {'behavior', 'provenance', 'regression'}):
+            raise ValueError('Each requirement needs relevant audited evidence, not a coverage flag.')
+        indices = requirement.get('clause_indices', [])
+        if not indices or not set(indices) <= set(indexed):
+            raise ValueError('Composed evidence names an unknown approved requirement.')
+        selected = [sources[ref] for ref in refs]
+        if requirement['kind'] == 'behavior' and not any(e['kind'] in {'phase', 'native'} for e in selected):
+            raise ValueError('Source provenance or a green suite cannot prove requested behavior.')
+        if any(requirement['id'] not in e.get('requirements', []) for e in selected):
+            raise ValueError('Evidence was not audited for this requirement.')
+        covered.update(indices)
+        used.update(refs)
+    if used != set(sources):
+        raise ValueError('Unused evidence cannot imply requirement coverage.')
+    if covered != set(indexed):
+        raise ValueError('Every original approved requirement needs its own qualifying evidence mapping.')
+    for item in evidence:
+        if not item.get('rationale') or not set(item.get('requirements', [])) <= {r['id'] for r in requirements}:
+            raise ValueError('Evidence requires an explicit relevance audit.')
+        if item['kind'] == 'phase':
+            index = item.get('phase')
+            if (not isinstance(index, int) or not 1 <= index <= len(program.phases)
+                    or item.get('sha256') != digest(program.phases[index-1].model_dump(mode='json'))
+                    or item.get('authorship') not in {'original-only', 'retained-blind', 'non-blind-diagnostic'}):
+                raise ValueError('Supplement observation hash or authorship changed.')
+        elif item['kind'] == 'native':
+            if (not item.get('execution_id') or not item.get('path', '').startswith('tests/test_')
+                    or not isinstance(item.get('start'), int) or not isinstance(item.get('end'), int)
+                    or not 1 <= item['start'] <= item['end'] <= item['start']+120
+                    or item.get('authorship') != 'implementation-authored'):
+                raise ValueError('Native reuse needs an exact independently executed assertion and its authorship.')
+        elif item['kind'] == 'control':
+            if item.get('control') not in {'checked-ancestry', 'approved-diff', 'full-suite', 'history-and-permission'}:
+                raise ValueError('Unknown application-owned verification control.')
+        else:
+            raise ValueError('Unknown composed evidence source.')
+    return covered

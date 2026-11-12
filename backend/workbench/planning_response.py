@@ -97,6 +97,9 @@ def normalize_bug(value, changes=()):
 
 
 def wire_schema(model, coverage=None, files=None):
+    from workbench.feature_checks import Response as FeatureChecks, wire_schema as checks_schema
+    if model is FeatureChecks:
+        return checks_schema()
     if model.__module__ == 'workbench.feature_steps' and model.__name__ == 'StepScope':
         from workbench.feature_steps import wire_schema as feature_scope_schema
         return feature_scope_schema(files, coverage)
@@ -108,6 +111,11 @@ def wire_schema(model, coverage=None, files=None):
         from workbench.bug_program import schema
         return schema(coverage, files)
     result = model.model_json_schema()
+    if model.__name__ == 'PlanningOutput' and (coverage or {}).get('feature_planning'):
+        # Feature validation accepts no model-invented task relationships.
+        # Constrain generation to that same contract instead of rejecting a
+        # complete plan only after it echoes an owner-mentioned comparison ID.
+        result['properties']['related_ids']['maxItems'] = 0
     if model.__name__ == 'InvestigationResponse':
         selected = [item['path'] for item in (files or [])
                     if isinstance(item, dict) and isinstance(item.get('path'), str)]

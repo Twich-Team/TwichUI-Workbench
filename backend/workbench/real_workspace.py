@@ -160,7 +160,7 @@ class Runtime:
                     base_manifest_sha256=sha(self.initial.read_bytes()) if self.initial.is_file() else None,
                     oracle_sha256=sha(self.oracle_source.read_bytes()), contract=job.digest(self.execution_contract),
                     helper_sha256={name: sha(Path(__file__).with_name(name).read_bytes()) for name in
-                       ['real_execution.py','real_workspace.py','storage_resources.py','implementation_context.py','continuing_repair.py','lua_failure_context.py','local_generation_recovery.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py','repair_edits.py','repair_continuation.py']})
+                       ['real_execution.py','real_workspace.py','storage_resources.py','implementation_context.py','continuing_repair.py','lua_failure_context.py','suite_failure_detail.py','local_generation_recovery.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py','repair_edits.py','repair_continuation.py']})
         if self.recipe:
             value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes()) for name in ['real_recipes.py','task_budget.py','verification_process.py']})
             if self.recipe.get('repair_cycle'):
@@ -593,6 +593,19 @@ class Runtime:
             # existing8KiB tool result limit even for adversarial escaped text.
             details = self.feedback.record(checks[-1], f'working-{index:02}-{len(checks):02}')
             feedback.update(details)
+            if self.recipe and self.recipe.get('repair_cycle') and feedback['failed_check_name']=='complete-suite':
+                from workbench.suite_failure_detail import observe
+                observed=observe(self,checks[-1],folder,permitted)
+                if observed:
+                    details=self.feedback.record(observed[0]['result'],f'working-{index:02}-{len(checks)+1:02}')
+                    feedback.update({k:details[k] for k in ('diagnostic','context_hint','check_id','log','truncated')})
+                    feedback['related_failed_tests']=[item['test'] for item in observed]
+                    feedback['failure_source']={k:v for k,v in observed[0].items() if k!='result'}
+                    feedback['status']='fail'  # A passing diagnostic never overrides the failed suite.
+                    while len(json.dumps(feedback,ensure_ascii=True).encode()) > 7600:
+                        feedback['diagnostic']=feedback['diagnostic'][:len(feedback['diagnostic'])//2]
+                        feedback['failure_source']['source_excerpt']=feedback['failure_source']['source_excerpt'][:150]
+                        feedback['truncated']=True
             if (self.recipe and self.recipe.get('repair_cycle') and feedback['failed_check_name']=='complete-suite'
                     and manifest['patch_sha256'] not in getattr(self,'_suite_retried_patches',set())):
                 feedback['note'] += (' One full rerun on this exact unchanged patch is available; '
@@ -643,6 +656,15 @@ class Runtime:
                 previous = private_json(self.root/'feature-recovery.json',65536)
                 from workbench.feature_attempts import recovery_instruction
                 instruction += recovery_instruction(previous)
+                if previous.get('recovery_root'):
+                    from workbench.suite_failure_detail import previous_failure
+                    observations = previous_failure(self,previous,permitted)
+                    if observations:
+                        item = observations[0]
+                        details = self.feedback.record(item['result'],'fixed-990')
+                        instruction += ('\nRead-only observation of the PREVIOUS FAILED candidate, not the current source. '
+                            'Its edits remain unverified and are NOT carried into this workspace:\n'+json.dumps(dict(
+                                source={k:v for k,v in item.items() if k!='result'},feedback=details),ensure_ascii=True))
         linked = getattr(self, 'workflow_task', None)
         if linked and not (self.recipe and self.recipe.get('repair_cycle')):
             # Planning text is untrusted task data, never executable tool/config instructions.

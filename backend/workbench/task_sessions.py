@@ -236,6 +236,7 @@ def _config(engine, row):
         evidence_ceiling_bytes=64 << 20,
     )
     durable(package_root / "BUDGET_BASELINE.json", json.dumps(budget, sort_keys=True).encode())
+    (package_root / "BUDGET_BASELINE.json").chmod(0o600)
     instruction = dict(
         source="Actual saved owner scope-and-run command in Workbench, not generated chat text",
         decision_id=ref['approval_id'],

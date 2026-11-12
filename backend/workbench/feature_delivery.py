@@ -186,6 +186,13 @@ def preview(row, grant):
         "<!-- workbench-delivery:" + row["id"] + ":" + result["candidate_id"] + " -->",
     ]
     body = "\n".join(lines)
+    composition = spec['independent_checks'].get('evidence_composition')
+    if composition:
+        body += '\n\nRequirement evidence\n' + '\n'.join(
+            '- '+text(r['text'], 500)+': established by '+', '.join(r['evidence'])
+            for r in composition['requirements'])
+        body += ('\nReused native assertions retain implementation authorship. '
+            'Supplement authorship and any later diagnostic corrections are retained separately in the frozen contract.')
     if len(body.encode()) > 16384:
         raise DeliveryHeld("The complete feature summary exceeds the publication text bound.")
     return dict(
@@ -346,6 +353,42 @@ def start(engine, job):
     return True
 
 
+def prepare_scope(engine, job_id):
+    """Fixed local delivery preparation after an audited composed verification.
+
+    The last graph node packages an already checked result; it needs no newly
+    generated source/checking program. Keep the existing scope compiler and
+    delivery owner, and never issue a provider operation for this local action.
+    """
+    from workbench import task_execution
+    with write_transaction(engine) as c:
+        job = intake.require(c, planning_jobs, job_id)
+        payload = job['payload']
+        approval, permission = feature_steps.parent(c, payload['feature_decision_id'])
+        if (job['status'] != 'queued' or payload['phase'] != 'prepare_scopes'
+                or not payload.get('evidence_composition') or len(payload.get('completed_checks', [])) != 1):
+            return False
+        records = payload['completed_steps']
+        actual = records[-1]['input']
+        done = {r['task_id'] for r in records} | feature_verification.satisfied_tasks(c, approval['id'], actual)
+        remaining = [r for r in permission['scope']['graph'] if r['task_id'] not in done]
+        if len(remaining) != 1 or not set(remaining[0]['dependencies']) <= done:
+            raise DeliveryHeld('Only the final local packaging step can use fixed delivery preparation.')
+        task_id = remaining[0]['task_id']
+        linked = task_execution.snapshot(c, approval['intake_id'], task_id, approval['id'])
+        original = payload['evidence_composition']['scope']['scope']
+        scope = feature_steps.compile_scope(c, approval['id'], task_id, dict(
+            role='delivery',read_paths=original['read_paths'],writable_paths=[],
+            focused_test=original['focused_test'],checks=[dict(acceptance_index=i,
+                observation='Package the exact independently checked combined feature: '+criterion[:480],
+                control='Require the same frozen candidate, complete result and held publication; never edit source or dispatch a model.')
+                for i,criterion in enumerate(linked['task']['acceptance'])],limitation=''),feature_input=actual)
+        c.execute(planning_jobs.update().where(planning_jobs.c.id==job_id).values(
+            payload={**payload,'phase':'scope_ready','current_step_scope':scope},
+            message='Preparing the final local review package from the checked result. No model request is needed.'))
+        return True
+
+
 def view_in(c, job):
     """Show only the actual local artifact and verified publication receipts."""
     import re
@@ -376,6 +419,9 @@ def view_in(c, job):
         delivery_task_id=saved["task_id"],
         published=published,
         draft_url=url if published else None,
+        verified_requirements=[r['text'] for r in grant['snapshot']['feature_verification']
+            ['independent_checks'].get('evidence_composition', {}).get('requirements', [])
+            if r['kind'] == 'behavior'],
         message="The feature draft PR is ready for review."
         if published
         else "One coherent feature draft bundle is ready for review. Publishing follows your saved permissions.",

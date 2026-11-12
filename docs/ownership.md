@@ -1,3 +1,40 @@
+# November 12 — composed evidence within the existing feature verifier
+
+`feature_checks` validates bounded explicit requirement/evidence mappings and
+compiles the existing Lua supplement. `feature_verification` audits exact native
+assertion spans and frozen receipts, final-source survival, checked ancestry,
+approved diff, suite receipts and unchanged permission/history. Its existing
+journal retains one host-audited composition alongside untouched model preparation
+history; no second completion owner, table, queue or model review is introduced.
+
+The same specification/runtime/original-controls/full-inventory/frozen-completion
+owners still determine acceptance. A positively settled original-only suite timeout
+may consume the next existing attempt for the same contract, with its old failed
+grant/outcome/resource receipt retained. No deadline, source, inference or publishing
+permission is renewed. Duplicate requests cannot allocate another completed result.
+
+The existing restart helper protects serialized saved roots from initializer writes
+by the exact frozen committed setup chunk only. Addon writes/replacement roots
+remain observable; fresh runtime locals/frames/listeners are still recreated.
+`feature_delivery` can compile the final read-only packaging scope deterministically
+after composed acceptance, using the existing scope compiler and checked graph.
+It does not fabricate provider usage or grant external publication.
+
+# November 12 — independent response contract and bounded compiler correction
+
+Existing feature-check preparation owns the exclusive program/inspection/limitation
+wire grammar and its exact Codex response envelope. The existing correction journal
+supports its prior source correction plus one separately bound corrected-contract
+program/review allowance, without new source, rewritten history, reset accounting or
+implementation authority. Earlier expired receipts remain historical; only the last
+receipt gates new admission. Identical browser commands remain idempotent.
+
+The existing BugEvidence compiler accepts the same bounded committed startup as source
+selection, including its return statement; final oracle size, Lua sandbox, original
+controls, full suite, checked ancestry and publication owners remain unchanged. Compiler
+success and original-only diagnostics cannot set proposed_program/review/acceptance in
+the saved journal. The observed invalid original control remains held, not waived.
+
 # Separately reviewed feature coding reservation — November 12, 2026
 
 The existing feature execution journal owns additive coding_continuations receipts. The existing
@@ -2006,7 +2043,13 @@ connector independently validates model/effort and included access before genera
 Task views separate saved requested choices from reported identities; absent actual
 effort remains unreported. Settings never activate execution.
 
-The existing root-owned administrator helper accepts only schema0012. A one-line
+November11 follow-up: the owner installed the exact one-line schema0012/0013 helper
+update. Final status failed in owner login413; approved executor78 succeeds under
+the unchanged protected grant. No policy, service or store transition was performed
+by the investigation. [Detailed trust and login findings](WORKBENCH_ADMIN_APPROVAL.md)
+supersede the preceding checkpoint's helper-installation hold described below.
+
+At the preceding checkpoint, the root-owned administrator helper accepted only schema0012. A one-line
 schema0013 compatibility patch retains all original settlement and service/network
 checks. The tested owner-terminal upgrade script preserves the previous helper and
 verifies both hashes; its installation requires root access outside the current

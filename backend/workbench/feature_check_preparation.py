@@ -21,6 +21,300 @@ from workbench.real_execution import owner_identity
 from workbench.visual_scope import digest
 
 
+def request_limit(c, job, permission, *, active=True):
+    limit = permission['budget']['verification_requests']
+    history = job['payload']['independent_check_preparation']['history']
+    corrections = job['payload'].get('independent_check_corrections', [])
+    if len(corrections) > 2:
+        raise ValueError('Only source correction and one corrected-contract attempt are supported.')
+    for ordinal, receipt in enumerate(corrections):
+        inputs = receipt['approved_inputs']
+        if ordinal and (inputs.get('preparation_contract') != contract_binding()
+                or inputs['additional_source']):
+            raise ValueError('The corrected-contract attempt cannot add source or change its contract.')
+        approval, _ = feature_steps.parent(c, inputs['decision_id'], active=active)
+        from workbench.feature_run_recovery import deadline
+        if (receipt['receipt_binding'] != digest({k:v for k,v in receipt.items() if k != 'receipt_binding'})
+                or receipt['binding'] != digest(inputs) or inputs['parent_binding'] != approval['binding']
+                or inputs['permission_binding'] != digest(permission) or inputs['starts_after'] != limit
+                or digest(history[:limit]) != inputs['history_binding']
+                or receipt['generation_requests'] != 2 or receipt['request_seconds'] != 120
+                or receipt['completion_tokens'] != permission['budget']['verification_completion_tokens']
+                or receipt['owner_provenance'] != 'browser-feature-readonly-check-correction'
+                or any(receipt[k] is not False for k in ('source_writes','implementation_dispatch','publication','fallback'))
+                or receipt['expires_at'] != min(datetime.fromisoformat(receipt['approved_at'])+timedelta(minutes=30),
+                    datetime.fromisoformat(deadline(c, approval, permission, at=receipt['approved_at']))).isoformat()):
+            raise ValueError('The separate original-source check correction changed.')
+        if active and ordinal == len(corrections)-1 and datetime.now(timezone.utc)+timedelta(seconds=120) >= datetime.fromisoformat(receipt['expires_at']):
+            raise ValueError('The bounded read-only check correction expired.')
+        expected = {f['path']:f['sha256'] for f in receipt['prior_context']['packet']['files']}
+        expected.update({f['path']:f['sha256'] for f in inputs['additional_source']})
+        actual = {f['path']:f['sha256'] for f in job['payload']['independent_check_preparation']['packet']['files']}
+        if actual != expected:
+            raise ValueError('Independent source disclosure differs from its recorded correction.')
+        limit += receipt['generation_requests']
+    return limit
+
+
+def contract_binding():
+    return digest(dict(instructions=feature_checks.INSTRUCTIONS,
+        schema=feature_checks.wire_schema(), review=feature_checks.REVIEW_INSTRUCTIONS))
+
+
+def correction_offer(c, job):
+    """One finite program/review correction after settled disclosure failures."""
+    if ((job['payload'].get('current_step_scope') or {}).get('scope', {}).get('role') != 'verification'
+            or len(job['payload'].get('independent_check_corrections', [])) >= 2
+            or not job['payload'].get('independent_check_preparation')):
+        return None
+    approval, permission = feature_steps.parent(c, job['payload']['feature_decision_id'])
+    saved = job['payload']['independent_check_preparation']
+    history = saved['history']
+    prior = job['payload'].get('independent_check_corrections', [])
+    if (len(history) != request_limit(c, job, permission, active=False) or saved.get('proposed_program')
+            or not finished_history(c, job, history)
+            or c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()):
+        return None
+    from workbench.repair_continuation import private_json
+    from workbench.bug_source_planning import committed
+    selected = {f['path'] for f in saved['packet']['files']}
+    additional = []
+    # These are the blind producer's actual retained dependency requests, not
+    # paths inferred from candidate code or a developer-written answer key.
+    for record in ([] if prior else history):
+        if record.get('confirmed_finished') and 'source disclosure permission' in (record.get('failure') or ''):
+            path = everyday.ROOT/'artifacts/runs'/('planning-evidence-'+record['operation_id'])/'proposed-plan.json'
+            raw = private_json(path, 48000)
+            for item in raw.get('inspection') or []:
+                name = item.get('path')
+                if not name or name in selected:
+                    continue
+                try:
+                    _, metadata = committed(name, saved['packet']['base'])
+                except (ValueError, OSError):
+                    continue
+                selected.add(name)
+                additional.append({k:metadata[k] for k in ('path','sha256','git_blob')})
+    if (not additional and not prior) or len(selected) > 12:
+        return None
+    if prior and (prior[-1]['approved_inputs'].get('preparation_contract') == contract_binding()
+            or not saved.get('feedback')):
+        return None
+    from workbench.feature_run_recovery import deadline
+    if datetime.now(timezone.utc)+timedelta(seconds=240) >= datetime.fromisoformat(deadline(c, approval, permission)):
+        return None
+    inputs = dict(kind='independent-check-correction-v1', decision_id=approval['id'],
+        parent_binding=approval['binding'], permission_binding=digest(permission), starts_after=len(history),
+        history_binding=digest(history), packet_binding=digest(saved['packet']), additional_source=additional,
+        **({'preparation_contract': contract_binding()} if prior else {}))
+    return dict(binding=digest(inputs), approved_inputs=inputs, task_title='Prepare and review independent feature checks',
+        generation_requests=2, request_seconds=120, completion_tokens=permission['budget']['verification_completion_tokens'],
+        message=('Prepare one complete program and its review under the corrected exclusive response contract, using the same original source. No implementation is repeated. ' if prior else
+            'Prepare one independent program and its review. Add only these requested original dependencies: '+', '.join(f['path'] for f in additional)+'. ')+
+            'Two separately recorded read-only requests; earlier responses, usage, original limits and publication hold remain unchanged.')
+
+
+def record_correction(c, job, body, selected):
+    if body.generation_requests != 2:
+        raise HTTPException(409, 'This correction permits exactly one program request and one review.')
+    inputs = selected['approved_inputs']
+    approval, permission = feature_steps.parent(c, inputs['decision_id'])
+    saved = job['payload']['independent_check_preparation']
+    packet = copy.deepcopy(saved['packet'])
+    from workbench.bug_source_planning import inspect
+    from workbench.bug_evidence import InvestigationRead
+    source = inputs['additional_source']
+    for start in range(0, len(source), 3):
+        inspect(packet, [InvestigationRead(path=f['path'], start=1, end=80) for f in source[start:start+3]])
+    for file in source:
+        actual = next(f for f in packet['files'] if f['path'] == file['path'])
+        if actual['sha256'] != file['sha256'] or actual['git_blob'] != file['git_blob']:
+            raise ValueError('Original dependency changed before read-only correction.')
+    packet['input_binding'] = digest({k:v for k,v in packet.items() if k != 'input_binding'})
+    feature_checks.validate_packet(saved['initial_packet'], packet)
+    from workbench.feature_run_recovery import deadline
+    at = intake.now()
+    value = dict(command_id=str(body.command_id), binding=body.binding, approved_inputs=inputs, approved_at=at,
+        expires_at=min(datetime.fromisoformat(at)+timedelta(minutes=30),datetime.fromisoformat(deadline(c, approval, permission))).isoformat(),
+        generation_requests=2, request_seconds=120, completion_tokens=permission['budget']['verification_completion_tokens'],
+        source_writes=False, implementation_dispatch=False, publication=False, fallback=False,
+        owner_provenance='browser-feature-readonly-check-correction', prior_context=saved)
+    receipt = {**value, 'receipt_binding':digest(value)}
+    payload = {**job['payload'], 'phase':'prepare_independent_checks',
+        'independent_check_corrections':job['payload'].get('independent_check_corrections', [])+[receipt], 'independent_check_preparation':{**saved, 'packet':packet,
+            'feedback':dict(kind='corrected-contract' if inputs.get('preparation_contract') else 'original-dependencies-supplied',message='The complete selected original dependency definitions are supplied. Return one COMPLETE program using tested public calls and the supplied committed startup. Combine related observations within phases so lifecycle reset, controls and requirement mapping fit; an incomplete program is a limitation alone. Map behavioral portions of checkpoint/full-suite clauses to related observations; native history, full-suite execution and publication safeguards remain app-owned, not phase code. Existing tests establish settings defaults and control calls; no second settings runtime is needed. No candidate is disclosed.')}}
+    c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
+        status='queued', finished_at=None, payload=payload, message='Two separately recorded original-source check requests; all earlier history retained.'))
+    c.execute(task_sessions.update().where(task_sessions.c.id == approval['id']).values(
+        status='pending', finished_at=None, message='Preparing independent checks from the explicitly bound original dependencies.'))
+    return receipt
+
+
+def finished_history(c, job, history):
+    from workbench.feature_scope_settlement import readonly_partial_check
+    for record in history:
+        if record.get('confirmed_finished'):
+            continue
+        attempt = c.execute(select(model_attempts).where(model_attempts.c.id == record['operation_id'])).mappings().first()
+        if not attempt or attempt['job_id'] != job['id']:
+            return False
+        actual = readonly_partial_check(c.engine, record, attempt)
+        matching = [p for p in job['payload'].get('independent_readonly_quarantines', [])
+                    if p['operation_id'] == record['operation_id']]
+        if actual is None or matching != [actual]:
+            return False
+    return True
+
+
+def resume_closed_check(engine, job_id):
+    """Quarantine a positively closed tool-free response; use unused requests only."""
+    from workbench.feature_scope_settlement import readonly_partial_check
+    with write_transaction(engine) as c:
+        job = intake.require(c, planning_jobs, job_id)
+        approval, permission = feature_steps.parent(c, job['payload']['feature_decision_id'])
+        saved = job['payload']['independent_check_preparation']
+        history = saved['history']
+        if (job['kind'] != 'feature_execution' or job['status'] != 'failed' or job['lease']
+                or job['payload']['phase'] != 'held' or not job['finished_at'] or not history
+                or saved.get('proposed_program') or job['payload']['current_step_scope']['scope']['role'] != 'verification'
+                or permission['scope']['provider'] != 'codex'
+                or len(history) >= permission['budget']['verification_requests']
+                or c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()):
+            raise ValueError('A closed unused independent-check reservation is required.')
+        feature_steps.validate_scope(c, job['payload']['current_step_scope'])
+        attempt = intake.require(c, model_attempts, history[-1]['operation_id'])
+        if attempt['job_id'] != job['id'] or attempt['requested_model'] != permission['scope']['route']['model']:
+            raise ValueError('The interrupted response belongs to another task or provider.')
+        proof = readonly_partial_check(c.engine, history[-1], attempt)
+        if proof is None:
+            raise ValueError('Actual capability, supported interruption and producer closure are required.')
+        quarantines = job['payload'].get('independent_readonly_quarantines', [])+[proof]
+        prospective = {**job, 'payload':{**job['payload'], 'independent_readonly_quarantines':quarantines}}
+        if not finished_history(c, prospective, history):
+            raise ValueError('Earlier uncertain responses prevent continuation.')
+        feature_checks.validate_packet(feature_checks.packet(c, approval['id']), saved['packet'])
+        payload = {**prospective['payload'], 'phase':'prepare_independent_checks',
+            'independent_check_preparation':{**saved, 'feedback':dict(kind='closed-response-quarantined',
+                message='The previous tool-free response was interrupted by an incorrectly selected small-program observation guard. Its partial text is not reusable. A fresh response uses the existing larger Lua-program traffic profile, within the unchanged original request/time/output allowance.')}}
+        c.execute(planning_jobs.update().where(planning_jobs.c.id == job_id).values(
+            status='queued', finished_at=None, payload=payload,
+            message='Interrupted read-only output quarantined; continuing within the unused original check allowance.'))
+        c.execute(task_sessions.update().where(task_sessions.c.id == approval['id']).values(
+            status='pending', finished_at=None, message='Fresh original-source verification preparation; interrupted output stays unusable.'))
+    return dict(proof=proof, requests_consumed=len(history),
+        requests_remaining=permission['budget']['verification_requests']-len(history),
+        original_request_limit=permission['budget']['verification_requests'],
+        budget_changed=False, interrupted_output_reused=False,
+        reserved_generated_tokens=permission['budget']['verification_completion_tokens'])
+
+
+def complete_original_wire(packet):
+    """Deterministic original context within the already selected disclosure.
+
+    Reading the selected files needs no model round trips. Keep the durable
+    inspection packet intact; only the provider's validated copy is expanded.
+    """
+    from workbench.bug_source_planning import committed
+    wire = copy.deepcopy(packet)
+    # Full original files supersede duplicated display windows/search snippets.
+    # Their complete durable observations remain in the native packet/history.
+    wire.pop('inspection_windows', None)
+    wire.pop('inspection_searches', None)
+    size = 0
+    for file in wire['files']:
+        raw, metadata = committed(file['path'], wire['base'])
+        if metadata['sha256'] != file['sha256']:
+            raise ValueError('Original independent source changed before disclosure.')
+        size += len(raw)
+        if size > 262144:
+            raise ValueError('Selected original context exceeds its existing read bound.')
+        file['excerpts'] = [dict(line=1, text=raw.decode())]
+    wire['input_binding'] = digest({k:v for k,v in wire.items() if k != 'input_binding'})
+    return wire
+
+
+def refresh_original_setup(engine, job_id):
+    """Resume UNUSED original requests after a settled setup-discovery defect.
+
+    Preserve all earlier observations, failures and accounting. No new model
+    allowance, source, task permission, candidate or old program is introduced.
+    """
+    with engine.connect() as c:
+        job = intake.require(c, planning_jobs, job_id)
+        approval, permission = feature_steps.parent(c, job['payload']['feature_decision_id'])
+        initial = feature_checks.packet(c, approval['id'])
+        saved = job['payload']['independent_check_preparation']
+        history = saved['history']
+        scope = job['payload'].get('current_step_scope', {})
+        if (job['kind'] != 'feature_execution' or job['status'] != 'failed' or job['lease']
+                or job['payload']['phase'] != 'held' or not job['finished_at']
+                or scope.get('scope', {}).get('role') != 'verification'
+                or saved.get('proposed_program') or not history
+                or len(history) >= permission['budget']['verification_requests']):
+            raise ValueError('A settled unused independent-check reservation is required.')
+        feature_steps.validate_scope(c, scope)
+        actual_ids = set(c.execute(select(model_attempts.c.id).where(model_attempts.c.job_id == job['id'],
+            model_attempts.c.purpose == 'feature_check_preparation')).scalars())
+        if actual_ids != {r['operation_id'] for r in history} or len(actual_ids) != len(history):
+            raise ValueError('Every original independent generation must remain counted.')
+        for record in history:
+            attempt = intake.require(c, model_attempts, record['operation_id'])
+            diagnostics = record.get('diagnostics', {})
+            if (not record['confirmed_finished'] or attempt['job_id'] != job['id']
+                    or not attempt['finished_at'] or attempt['outcome'] not in {'completed', 'failed'}
+                    or attempt['backend'] != permission['scope']['provider']
+                    or attempt['requested_model'] != permission['scope']['route']['model']
+                    or attempt['purpose'] != 'feature_check_preparation'
+                    or diagnostics.get('generation_state') != 'finished'
+                    or diagnostics.get('accounting_state') != 'complete'
+                    or not attempt['usage'] or attempt['usage'] != diagnostics.get('usage')):
+                raise ValueError('Unsettled independent generation cannot be refreshed.')
+
+        def unchanged(value):
+            value = copy.deepcopy(value)
+            value.pop('input_binding', None)
+            for file in value['files']:
+                file.pop('client_bootstrap', None)
+                file.pop('client_access_paths', None)
+            return value
+
+        old = saved['initial_packet']
+        if (unchanged(initial) != unchanged(old) or initial == old
+                or not any(file.get('client_bootstrap') for file in initial['files'])):
+            raise ValueError('Only corrected setup metadata on unchanged original source may be refreshed.')
+        packet = copy.deepcopy(saved['packet'])
+        packet['files'][:len(initial['files'])] = copy.deepcopy(initial['files'])
+        packet['input_binding'] = digest({k:v for k,v in packet.items() if k != 'input_binding'})
+        feature_checks.validate_packet(initial, packet)
+        receipt = dict(kind='unused-original-feature-check-context-refresh-v1',
+            decision_id=approval['id'], parent_binding=approval['binding'],
+            permission_binding=digest(permission), prior_context=saved,
+            new_initial_binding=initial['input_binding'], history_binding=digest(history),
+            requests_consumed=len(history), requests_remaining=permission['budget']['verification_requests']-len(history),
+            original_request_limit=permission['budget']['verification_requests'], budget_changed=False,
+            requests_reset=False, provider_changed=False, candidate_disclosed=False,
+            authority='standing-autonomous-delivery; original unused read-only reservation',
+            recorded_at=intake.now())
+        receipt = {**receipt, 'binding':digest(receipt)}
+        next_saved = {**saved, 'initial_packet':initial, 'packet':packet,
+            'feedback':dict(kind='original-setup-corrected',
+                message='The original committed client startup is now recognized. All previous source observations remain; the original unused request allowance is unchanged. Complete selected original files are supplied deterministically. Prepare the independent program and review it; no candidate is disclosed.')}
+    with write_transaction(engine) as c:
+        current = intake.require(c, planning_jobs, job_id)
+        feature_steps.parent(c, approval['id'])
+        if (current != job or c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()):
+            raise ValueError('Work changed before original setup refresh.')
+        parent = intake.require(c, task_sessions, approval['id'])
+        c.execute(planning_jobs.update().where(planning_jobs.c.id == job_id).values(
+            status='queued', finished_at=None, payload={**job['payload'],
+                'phase':'prepare_independent_checks', 'independent_check_preparation':next_saved,
+                'independent_context_refreshes':job['payload'].get('independent_context_refreshes', [])+[receipt]},
+            message='Original setup metadata corrected. Remaining approved independent-check requests retain all earlier history.'))
+        c.execute(task_sessions.update().where(task_sessions.c.id == parent['id']).values(
+            status='pending', finished_at=None, message='Continuing original-source checks within their unused approved allowance.'))
+    return receipt
+
+
 def start(engine, job):
     with engine.connect() as c:
         _, permission = feature_steps.parent(c,job['payload']['feature_decision_id'])
@@ -56,8 +350,8 @@ def advance(engine, job, *, adapter=None, stop_event=None):
         budget = permission['budget']
         if (budget['version']!=2 or job['status']!='queued'
                 or job['payload']['phase']!='prepare_independent_checks'
-                or len(history)>=budget['verification_requests']
-                or any(not record['confirmed_finished'] for record in history)):
+                or len(history)>=request_limit(c, job, permission)
+                or not finished_history(c, job, history)):
             return False
         initial = feature_checks.packet(c,approval['id'])
         if initial != saved['initial_packet']:
@@ -72,11 +366,14 @@ def advance(engine, job, *, adapter=None, stop_event=None):
         elif saved.get('feedback'):
             wire['previous_check_feedback']=saved['feedback']
         route = permission['scope']['route']
-        if permission['scope']['provider']!='local':
+        provider = permission['scope']['provider']
+        if provider not in {'local', 'codex'}:
             raise ValueError('The saved provider has no supported independent feature-check request bound. No fallback was made.')
+        if provider == 'codex':
+            wire = complete_original_wire(wire)
     if everyday.enabled():
         everyday.require_room(everyday.configuration(engine))
-    if adapter is None:
+    if adapter is None and provider == 'local':
         from workbench.local_model_priority import planning_ready
         if not planning_ready():
             return False
@@ -99,18 +396,27 @@ def advance(engine, job, *, adapter=None, stop_event=None):
             payload={**current['payload'],'phase':'preparing_independent_checks','feature_checks_claim':claim},
             message='Reviewing independent feature checks.' if proposed else 'Reading original source to prepare independent feature checks.'))
         c.execute(model_attempts.insert().values(id=lease,job_id=job['id'],task_id=approval['intake_id'],
-            purpose='feature_check_preparation',source='workbench',backend='local',
+            purpose='feature_check_preparation',source='workbench',backend=provider,
             requested_model=route['model'],requested_effort=route.get('effort'),policy_revision=route['policy_revision'],
             outcome='running',started_at=intake.now(),
             routing_reason='Parent-approved blind feature checks from original source. No candidate/coding response, editing or fallback authority.'))
         c.execute(task_sessions.update().where(task_sessions.c.id==approval['id']).values(
             status='active',finished_at=None,message='Preparing read-only independent feature checks from original source.'))
-    used = adapter or LocalProvider(stopped,ends_at=time.monotonic()+budget['verification_request_seconds'])
+    if adapter is not None:
+        used = adapter
+    elif provider == 'codex':
+        from workbench.codex_provider import Planner
+        used = Planner(dict(model=route['model'], effort=route.get('effort')), stopped.is_set)
+        used.ends_at = time.monotonic()+budget['verification_request_seconds']
+    else:
+        used = LocalProvider(stopped,ends_at=time.monotonic()+budget['verification_request_seconds'])
     evidence = None
     failure = model = basis = None
     accepted = unsupported = False
     next_saved = copy.deepcopy(saved)
     try:
+        if adapter is None and provider == 'codex':
+            used.bind_source(current_packet)
         evidence = create_evidence(lease,schema,files=current_packet['files'])
         used.response_evidence = evidence
         with engine.connect() as c:
@@ -118,7 +424,7 @@ def advance(engine, job, *, adapter=None, stop_event=None):
         raw,model,basis = used.generate(wire,schema,expected_model=route['model'])
         if evidence:
             evidence.snapshot('proposed-plan',raw)
-        if model!=route['model'] or basis not in {'local','demo'} or len(json.dumps(raw).encode())>48000:
+        if model!=route['model'] or basis not in {provider,'demo'} or len(json.dumps(raw).encode())>48000:
             raise ValueError('Independent check response differs from its bounded saved model.')
         parsed = schema.model_validate(raw)
         if proposed:
@@ -135,7 +441,8 @@ def advance(engine, job, *, adapter=None, stop_event=None):
             unsupported = True
             raise ValueError('Independent feature checks need an unsupported capability: '+parsed.limitation)
         elif parsed.inspection:
-            windows,matches,_ = inspect(current_packet,parsed.inspection,result_budget=6500)
+            windows,matches,_ = inspect(current_packet,parsed.inspection,result_budget=6500,
+                **({'disclosure_paths':{f['path'] for f in current_packet['files']}} if provider == 'codex' else {}))
             if source_characters(current_packet)>262144:
                 raise ValueError('Independent source inspection exceeded its original-source bound.')
             current_packet['input_binding']=digest({k:v for k,v in current_packet.items() if k!='input_binding'})
@@ -181,7 +488,7 @@ def advance(engine, job, *, adapter=None, stop_event=None):
         next_saved['history'] = history+[record]
         if failure:
             next_saved['feedback'] = dict(kind='validation',message=failure)
-        can_continue = confirmed and not stopped_parent and not unsupported and len(history)+1<budget['verification_requests']
+        can_continue = confirmed and not stopped_parent and not unsupported and len(history)+1<request_limit(c, active, permission)
         ready = accepted and confirmed and not stopped_parent and not failure
         if ready:
             message = 'Independent observations are prepared and reviewed. Original/candidate execution has not yet run.'

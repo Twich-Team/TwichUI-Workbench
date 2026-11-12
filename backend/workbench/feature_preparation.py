@@ -34,7 +34,12 @@ def packet(c, decision_id, task_id, feature_input, *, inspections=()):
         windows = []
         for window in item['excerpts']:
             start = max(1, min(window['line'], len(lines)))
-            text = '\n'.join(lines[start-1:start+34])[:1000]
+            chunk = []
+            for line in lines[start-1:start+34]:
+                if sum(len(s)+1 for s in chunk) + len(line) > 1000:
+                    break
+                chunk.append(line)
+            text = '\n'.join(chunk)
             windows.append(dict(line=start, text=text))
         files.append(dict(path=bound['path'], sha256=bound['sha256'], excerpts=windows))
         evidence.append(dict(id='step-source-'+str(len(evidence)), path=bound['path'],
@@ -62,7 +67,21 @@ def packet(c, decision_id, task_id, feature_input, *, inspections=()):
     for record in inspections:
         if record.get('feature_input_binding')!=digest(feature_input):
             raise ValueError('Source inspection belongs to different checked predecessor input.')
-    return feature_step_source.compact(feature_step_source.restore(value,root,base,inspections))
+    restored = feature_step_source.restore(value,root,base,inspections)
+    if permission['scope']['provider'] == 'codex':
+        # Keep complete observations in native evidence, while disclosing search
+        # text only from the selected files. Incidental global matches must not
+        # consume the twelve-file read scope or silently expand disclosure.
+        selected_paths = {file['path'] for file in restored['files']}
+        for name in ('source_searches', 'source_inspection_results'):
+            for search in restored.get(name, []):
+                if 'matches' in search:
+                    matches = search['matches']
+                    search['matches'] = [m for m in matches if m['path'] in selected_paths]
+                    search['omitted_matches'] = len(matches)-len(search['matches'])
+        restored['search_context_notice'] = 'Search excerpts outside selected files are omitted from external context; full original observations remain in native evidence. Read a needed named file before using its source.'
+        return feature_step_source.compact(restored, limit=98304)
+    return feature_step_source.compact(restored)
 
 
 def recover_one(engine):
@@ -112,7 +131,7 @@ def validation_feedback(record):
     return record.get('failure')
 
 
-def scope_packet(c, decision_id, task_id, feature_input, previous):
+def scope_packet(c, decision_id, task_id, feature_input, previous, *, remaining=None):
     """Change strategy after settled navigation failures instead of looping."""
     inspections = [record['inspection'] for record in previous if record.get('inspection')]
     value = packet(c, decision_id, task_id, feature_input, inspections=inspections)
@@ -122,15 +141,21 @@ def scope_packet(c, decision_id, task_id, feature_input, previous):
     navigation_errors = ('Every requested source window was already inspected.',
                          'Requested source range is outside the committed file.')
     inspected = [file['path'] for file in value['files'] if file.get('excerpts')]
-    if (len(stalled) == 2 and all(record.get('confirmed_finished')
+    codex_ready = (remaining == 1 and bool(inspections)
+        and feature_steps.parent(c, decision_id)[1]['scope']['provider'] == 'codex')
+    repeated_navigation = len(stalled) == 2 and all(record.get('confirmed_finished')
             and not record.get('inspection')
             and any(message in (record.get('failure') or '') for message in navigation_errors)
             for record in stalled)
+    if ((codex_ready or repeated_navigation)
             and any(path.startswith(('!!!TwichUI/', 'TwichUI_Settings/')) for path in inspected)
             and any(re.fullmatch(r'tests/test_[A-Za-z0-9_-]+\.lua', path) for path in inspected)):
         value['coverage']['scope_decision_required'] = True
         value['scope_strategy'] = (
-            'Two settled navigation requests made no progress. Use the actual available '
+            'Source preparation selects paths and independent acceptance checks; it does not '
+            'write the implementation or require a completed checking artifact. The coding '
+            'adapter will receive the complete approved files for implementation and tests. '
+            'Use the actual available '
             'definitions to propose a bounded implementation scope, or state the specific '
             'missing capability as a limitation. Further inspection is unavailable in '
             'this decision. A proposed scope is not an implementation or verification.')
@@ -152,7 +177,8 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         previous = [r for r in history if r['task_id'] == task_id]
         from workbench.feature_scope_recovery import allowance
         maximum,scope_authorization,scope_deadline=allowance(c,job,task_id,permission)
-        current_packet = scope_packet(c, decision_id, task_id, feature_input, previous)
+        current_packet = scope_packet(c, decision_id, task_id, feature_input, previous,
+            remaining=maximum-len(previous))
         if (job['kind'] != 'feature_execution' or job['status'] != 'queued'
                 or job['intake_id'] != row['intake_id']
                 or job['revision'] != permission['scope']['revision']
@@ -211,7 +237,10 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
             else:
                 from workbench.codex_provider import Planner
                 used = Planner(route, stopped.is_set)
-                used.bind_source(current_packet)
+                with engine.connect() as c:
+                    linked = task_execution.snapshot(c, row['intake_id'], task_id, decision_id)
+                    root, _ = feature_steps.source(c, linked, permission, feature_input)
+                used.bind_source(current_packet, source_root=root)
         evidence = create_evidence(lease, feature_steps.StepScope,
             coverage=current_packet.get('coverage'),files=current_packet['files'])
         used.response_evidence = evidence
@@ -227,7 +256,8 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
             raise ValueError('Proposed step scope exceeds its output bound.')
         parsed = feature_steps.StepScope.model_validate(raw)
         with engine.connect() as c:
-            reread = scope_packet(c, decision_id, task_id, feature_input, previous)
+            reread = scope_packet(c, decision_id, task_id, feature_input, previous,
+                remaining=maximum-len(previous))
             if reread != current_packet:
                 raise ValueError('The feature source or scope changed during preparation.')
             if parsed.inspection:

@@ -309,6 +309,36 @@ end)
     assert 'WB_OBSERVATION bug-reproducer 9 expected' in candidate.stdout
 
 
+@pytest.mark.parametrize('replace_in_addon', [False, True])
+def test_restart_preserves_saved_input_over_committed_fixture_initializer_but_keeps_addon_writes(
+    tmp_path, replace_in_addon,
+):
+    session_harness(tmp_path)
+    evidence = session_evidence()
+    # This is the map fixture's actual load shape: a synthetic DB initializer
+    # after module loading, followed by startup. Restart must supply saved input
+    # rather than reset it through that original test initializer.
+    evidence['bootstrap_source'] = evidence['bootstrap_source'].replace(
+        'return c\n', "c.ExampleDB={unrelated='fixture-only'}\nreturn c\n")
+    phases = evidence['plan']['reproducer']['phases']
+    evidence['plan']['reproducer']['event_coverage'] = False
+    phases[:] = [
+        dict(description='Choose and save a real input.', code="client.ExampleDB={kept=17}; return client.ExampleDB.kept"),
+        dict(description='Restart with serialized data.', code="restart_session({'ExampleDB'});return client.ExampleDB.kept"),
+    ]
+    evidence['plan']['reproducer']['observations'] = [
+        dict(after_step=1,source='return',path=[1],expected=17,incorrect=0),
+        dict(after_step=2,source='return',path=[1],expected=17,incorrect=0),
+    ]
+    evidence['review_digest'] = review_digest(evidence['plan'], evidence['bootstrap_source'])
+    source = "Example={Current=function() return 0 end}; ExampleDB=ExampleDB or {}\n"
+    if replace_in_addon:
+        source += "ExampleDB={kept=0} -- actual addon writes must remain observable\n"
+    observed = run(tmp_path, evidence, source)
+    assert observed.returncode == (1 if replace_in_addon else 0), observed.stdout + observed.stderr
+    assert 'WB_FIXTURE_ERROR' not in observed.stdout
+
+
 @pytest.mark.parametrize('code',[
     "client.ExampleDB={secret=function()end};restart_session({'ExampleDB'});return 2",
     "client.ExampleDB={};client.ExampleDB.self=client.ExampleDB;restart_session({'ExampleDB'});return 2",
