@@ -112,6 +112,31 @@ def validation_feedback(record):
     return record.get('failure')
 
 
+def scope_packet(c, decision_id, task_id, feature_input, previous):
+    """Change strategy after settled navigation failures instead of looping."""
+    inspections = [record['inspection'] for record in previous if record.get('inspection')]
+    value = packet(c, decision_id, task_id, feature_input, inspections=inspections)
+    if previous and previous[-1].get('failure'):
+        value['previous_validation_failure'] = validation_feedback(previous[-1])
+    stalled = previous[-2:]
+    navigation_errors = ('Every requested source window was already inspected.',
+                         'Requested source range is outside the committed file.')
+    inspected = [file['path'] for file in value['files'] if file.get('excerpts')]
+    if (len(stalled) == 2 and all(record.get('confirmed_finished')
+            and not record.get('inspection')
+            and any(message in (record.get('failure') or '') for message in navigation_errors)
+            for record in stalled)
+            and any(path.startswith(('!!!TwichUI/', 'TwichUI_Settings/')) for path in inspected)
+            and any(re.fullmatch(r'tests/test_[A-Za-z0-9_-]+\.lua', path) for path in inspected)):
+        value['coverage']['scope_decision_required'] = True
+        value['scope_strategy'] = (
+            'Two settled navigation requests made no progress. Use the actual available '
+            'definitions to propose a bounded implementation scope, or state the specific '
+            'missing capability as a limitation. Further inspection is unavailable in '
+            'this decision. A proposed scope is not an implementation or verification.')
+    return value
+
+
 def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, stop_event=None):
     """One claimed operation; no implementation or automatic fallback capability."""
     from workbench.planning_provider import LocalProvider
@@ -127,8 +152,7 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         previous = [r for r in history if r['task_id'] == task_id]
         from workbench.feature_scope_recovery import allowance
         maximum,scope_authorization,scope_deadline=allowance(c,job,task_id,permission)
-        inspections = [r['inspection'] for r in previous if r.get('inspection')]
-        current_packet = packet(c, decision_id, task_id, feature_input, inspections=inspections)
+        current_packet = scope_packet(c, decision_id, task_id, feature_input, previous)
         if (job['kind'] != 'feature_execution' or job['status'] != 'queued'
                 or job['intake_id'] != row['intake_id']
                 or job['revision'] != permission['scope']['revision']
@@ -149,8 +173,6 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         from workbench.local_model_priority import planning_ready
         if not planning_ready():
             return False
-    if previous and previous[-1].get('failure'):
-        current_packet['previous_validation_failure'] = validation_feedback(previous[-1])
     claim = dict(owner=owner_identity(), decision_id=decision_id, parent_binding=row['binding'],
         task_id=task_id, feature_input=feature_input, packet_sha256=digest(current_packet),
         scope_request_permission=scope_authorization)
@@ -205,9 +227,7 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
             raise ValueError('Proposed step scope exceeds its output bound.')
         parsed = feature_steps.StepScope.model_validate(raw)
         with engine.connect() as c:
-            reread = packet(c, decision_id, task_id, feature_input, inspections=inspections)
-            if previous and previous[-1].get('failure'):
-                reread['previous_validation_failure'] = validation_feedback(previous[-1])
+            reread = scope_packet(c, decision_id, task_id, feature_input, previous)
             if reread != current_packet:
                 raise ValueError('The feature source or scope changed during preparation.')
             if parsed.inspection:

@@ -53,6 +53,9 @@ def test_local_request_really_transmits_inspected_scope_and_same_native_schema(t
             outgoing = body["response_format"]["json_schema"]["schema"]
             assert outgoing == recorded.schema
             assert json.loads(body["messages"][1]["content"]) == packet
+            assert body['max_tokens'] == 2600
+            assert body['reasoning_budget_tokens'] == 1024
+            assert body['chat_template_kwargs']['enable_thinking'] is True
             complete = [branch for branch in outgoing["anyOf"] if "role" in branch["required"]]
             if has_test:
                 assert complete[0]["properties"]["focused_test"]["enum"] == [
@@ -142,6 +145,53 @@ def test_scope_wire_requires_an_outcome_and_only_inspected_existing_test_choices
         coverage=dict(focused_test_candidates=["tests/test_actual.lua"]),
     )
     assert restored["anyOf"][0]["properties"]["focused_test"]["enum"] == ["tests/test_view.lua"]
+
+    decision = wire_schema(feature_steps.StepScope, files=files,
+                           coverage=dict(scope_decision_required=True))
+    assert {tuple(branch['required']) for branch in decision['anyOf']} == {
+        tuple(complete['required']), ('limitation',)}
+    # Missing source still allows inspection; a stale strategy flag cannot
+    # manufacture inspected test authority or make a complete scope available.
+    missing = wire_schema(feature_steps.StepScope, files=files[:1],
+                          coverage=dict(scope_decision_required=True))
+    assert any(branch['required'] == ['inspection'] for branch in missing['anyOf'])
+    assert not any('role' in branch['required'] for branch in missing['anyOf'])
+
+
+def test_stalled_navigation_decision_requires_two_known_failures_and_actual_source(monkeypatch):
+    files = [dict(path='!!!TwichUI/View.lua', excerpts=[dict(line=1, text='local state = {}')]),
+             dict(path='tests/test_existing.lua', excerpts=[dict(line=1, text='local H = {}')])]
+    packet = dict(files=files, coverage={})
+    monkeypatch.setattr(feature_preparation, 'packet', lambda *args, **kwargs: copy.deepcopy(packet))
+    failed = dict(confirmed_finished=True, failure='Every requested source window was already inspected.')
+    records = [dict(failed), dict(failed)]
+    before = copy.deepcopy(records)
+    decision = feature_preparation.scope_packet(None, 'parent', 'task', None, records)
+    assert decision['coverage']['scope_decision_required'] is True
+    assert records == before and packet['coverage'] == {}
+    assert 'scope_decision_required' not in feature_preparation.scope_packet(
+        None, 'parent', 'task', None, records[:1])['coverage']
+    records[-1]['confirmed_finished'] = False
+    assert 'scope_decision_required' not in feature_preparation.scope_packet(
+        None, 'parent', 'task', None, records)['coverage']
+    packet['files'][-1]['excerpts'] = []
+    assert 'scope_decision_required' not in feature_preparation.scope_packet(
+        None, 'parent', 'task', None, before)['coverage']
+
+
+def test_compaction_keeps_first_definitions_and_last_native_window():
+    path = '!!!TwichUI/View.lua'
+    first = '\n'.join('local first_' + str(i) + ' = true' for i in range(80))
+    latest = '\n'.join('local last_' + str(i) + ' = true' for i in range(80))
+    packet = dict(source_note='Partial source.', files=[dict(path=path, excerpts=[
+        dict(line=1, text=first), dict(line=81, text='x' * 21000), dict(line=161, text=latest)])],
+        source_windows=[dict(path=path, start=start, end=start+79, total_lines=240,
+                             sha256='a'*64) for start in (1, 81, 161)],
+        source_inspection_results=[dict(kind='read', path=path, start=161, end=240)])
+    packed = feature_step_source.compact(packet)
+    excerpts = {item['line']: item['text'] for item in packed['files'][0]['excerpts']}
+    assert excerpts[1] == first and excerpts[161] == latest and 81 not in excerpts
+    assert packed['files'][0]['total_lines'] == 240
 
 
 def test_reused_first_window_does_not_discard_fresh_test_in_same_batch(

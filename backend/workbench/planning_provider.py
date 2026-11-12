@@ -370,7 +370,7 @@ class LocalProvider:
                 name='planning', strict=True, schema=output_schema)),
             messages=[dict(role='system', content=general + instructions),
                 dict(role='user', content=encoded)])
-        if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse):
+        if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse, StepScope):
             # Installed Qwen template/server support bounded thinking and a
             # separate reasoning channel. Legacy total is2600; the program
             # profile below selects its own shared output/reasoning bound. Never log reasoning.

@@ -214,7 +214,16 @@ def compact(packet, limit=22000):
         for item in value.get("source_windows", [])
         if "path" in item and "start" in item
     }
-    retained = latest | set(last_by_file.items())
+    first_by_file = {}
+    for item in packet.get("source_windows", []):
+        if 'path' not in item or 'start' not in item:
+            continue
+        path = item["path"]
+        first_by_file[path] = min(first_by_file.get(path, item["start"]), item["start"])
+        file = next(file for file in value["files"] if file["path"] == path)
+        if 'total_lines' in item:
+            file["total_lines"] = item["total_lines"]
+    retained = latest | set(last_by_file.items()) | set(first_by_file.items())
 
     def size():
         return len(json.dumps(value, ensure_ascii=True, separators=(",", ":")).encode())

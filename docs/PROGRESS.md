@@ -1,3 +1,57 @@
+# November 12 — stalled source navigation changes strategy
+
+Installed121 native eighth allowance settled all3real calls with known usage;
+26scope records/31model-attempt rows/0active/0implementation/0checked steps.
+Original parent, five steps, request, plan and07:32:09deadline unchanged.
+Qwen requested View767..846 beyond actual766line end, alternated with already
+inspected View1/691 and Prefs1. No new source inspected in these3calls. Do NOT
+repeat this unchanged strategy. Native journals and snapshot retained under
+outcome-cd94344/native-eight-allowance-held.json. Never replay its driver.
+
+Development: retain FIRST and most recent native-inspected definitions per file;
+retain actual total_lines once per file. Range/hash/native receipts unchanged.
+After two consecutive confirmed no-progress navigation failures with actual
+production AND focused-test excerpts, the NEXT request must select a bounded
+source-grounded scope OR explain a specific limitation. It cannot request more
+identical inspection. Without inspected test source, navigation remains available.
+No authority/implementation/verification bypass; compiler and exact checks unchanged.
+StepScope receives1024reasoning tokens WITHIN same2600total/120sec request limit.
+
+32affected cases and full static/contracts/build/schema pass. First test exposed
+synthetic metadata without start; handled missing navigation keys. Actual26record
+read-only replay proves packet21765bytes, native/outgoing schema equality, no
+inspection branch in stalled decision, exact actual test choices and same output
+limits. No provider/model call or live store changes in this proof. Initial private
+proof file accidentally shadowed Python inspect; renamed and exact proof passed.
+Evidence: feature-workshop-20261111/stalled-navigation-proof and fw3-stalled-
+navigation-tests-final.log. Need own exact full hosted gate and122deployment
+with latest746rows, restart/readers/rollback BEFORE fresh bounded native allowance.
+Continue original campaign; zero real feature completions.
+
+# November 12 — exact cd94344 installed121; same feature continuing
+
+Full43169232894 ALL9jobs success including final verify; frontend13921970147
+SHA8fe19f3a7e20a3007a95c03e3d68d5633d89c031ade357d9002ce47545d1497e,
+acceptance13921274688 SHAd0828b971f8c3ec9c231b4d9892839c8f1616b36076ae5bcfca684b2b34da729.
+Installed121 seal68768d76de83c25cb8ddba9714a3c3f6e4abb5a185492e5a50e75f43d515fd5a.
+All740rows/52requests, six context files/1750423bytes/manifest7e1d463d preserved;
+new/old code readers, actual four-role restart, ACTUAL121→120→121 passed.
+Initial restart method was correctly denied by existing ingress sequencing guard;
+ordinary close-ingress stop/start sequence succeeded, no policy changes.
+TLS/LAN/firewall/8765/model401/200/key hash/seals verified. Desktop1440, phone390,
+320at200%, keyboard/reload inspected with zero mutations/errors.
+
+continue-real-feature-cd94344.cjs ALREADY EXECUTED ONCE: distinct bounded native
+browser source-preparation allowance for SAME parent6998247a, original expiry
+2026-11-12T07:32:09.163458UTC unchanged. Create-only intent/command/review/receipt/
+screens in outcome-cd94344/real-map-zoom-continuation. NO manual addon scope.
+Initial monitor23scope records/29model-attempt records/1active, zero implementation
+requests/checked steps. Need monitor actual outcome and preserve all prior history;
+do NOT replay any prior driver/Build/740baseline rollback after new records.
+Independent actual outgoing packet21340bytes retains existing test and production
+choices with native-schema equality. No provider contact during offline proof.
+Continue campaign: zero real Feature Workshop features complete end to end.
+
 # November 12 — installed120; preserve inspected files across source navigation
 
 Exact521e5ff920eb6fa0dcb09d10b6a381d0b4e37ad2 passed ALL9jobs in full43161721857.

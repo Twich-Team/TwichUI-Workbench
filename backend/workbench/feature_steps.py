@@ -114,10 +114,11 @@ def wire_schema(files=None, coverage=None):
             properties=dict(path=dict(type='string',enum=candidates),
                 start=dict(type='integer',const=1),end=dict(type='integer',const=80)),
             required=['path','start','end']))
-    return dict(title='StepScope', **{'$defs':declared['$defs']}, anyOf=outcomes+[
+    navigation = [] if (coverage or {}).get('scope_decision_required') and tests else [
         dict(type='object',additionalProperties=False,
              properties=dict(inspection=inspection,limitation=dict(type='string',const='')),
-             required=['inspection']),
+             required=['inspection'])]
+    return dict(title='StepScope', **{'$defs':declared['$defs']}, anyOf=outcomes+navigation+[
         dict(type='object',additionalProperties=False,
              properties=dict(limitation=dict(type='string',minLength=1,maxLength=1000)),required=['limitation']),
     ])
