@@ -13,16 +13,22 @@ def test_feature_browser_gate_discovers_the_actual_controlled_journey():
     from project_env import environment
     root = Path(__file__).resolve().parents[2]
     workflow = (root / '.github/workflows/verify.yml').read_text()
-    step = workflow.split('name: Grounded feature planning through the controlled everyday installation', 1)[1].split('- uses:', 1)[0]
+    step = workflow.split('id: feature-connected-acceptance', 1)[1].split('- uses:', 1)[0]
     assert "WORKBENCH_E2E_EVERYDAY: '1'" in step
     assert "if: matrix.shard == '1/4'" in step
-    pattern = re.search(r"run: npm run test-e2e -- --grep '([^']+)'", workflow)[1]
+    pattern = re.search(r"run: npm run test-e2e -- --grep '([^']+)'", step)[1]
     result = subprocess.run(['node', str(root/'node_modules/@playwright/test/cli.js'), 'test',
         '--project=chromium', '--list', '--grep', pattern], cwd=root,
         env=environment(), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=20)
     assert result.returncode == 0, result.stdout
-    assert 'Feature Workshop grounded intake automatically plans connected steps' in result.stdout
-    assert 'Total: 1 test in 1 file' in result.stdout
+    for title in (
+        'Feature Workshop grounded intake automatically plans connected steps',
+        'one browser feature reaches independent combined checks and one coherent local result',
+        'feature files and source references stay with the original request through reload',
+        'a held feature needs a separate read-only allowance before more source preparation',
+    ):
+        assert title in result.stdout
+    assert 'Total: 4 tests in 1 file' in result.stdout
 
 
 def test_one_matrix_source_covers_the_whole_partition():

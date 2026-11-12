@@ -1,3 +1,37 @@
+# November 12 — 4469d8d full gate rejected; CI journey discovery corrected
+
+Do NOT activate4469d8d. Full hosted43142811118 passed seven jobs but Backend2/2
+failed its CI discovery test, so finalverify correctly failed. The browser step
+was expanded/renamed but its discovery assertion still searched the old name and
+expected one test. All1026other cases in that partition passed; Backend1/2 and
+all four browser partitions (including all four connected feature journeys) plus
+visual/build passed. No test verdict or release gate was bypassed. Discovery now
+uses a stable step ID and requires the exact four journeys. Require the corrected
+commit's own full gate. Dormant446stage/seal2fade1a30b0e0434d9d78601b6e20ac0b3301f4a87725a820dbe7e43d7f16539
+is retained; no activation/real continuation occurred. Installed115/cd remains.
+
+Current settled live baseline is720rows/52requests, hash
+f5fa693287d0072035441baee689acf2b7391aa470e128837d40ba462fac8664.
+Both cd and446 readers independently read ALL52 restored requests unchanged.
+With capability coordinates rebound to the independent copy, the446 reader exposes
+the expected separate read-only offer for SAME held mapzoom parent. Its first
+probe lacked copy-bound capability configuration; this was corrected in the private
+reader setup, not production permission checks. Preflight caught three unsealed
+Python cache files from a system-Python inspection; moved only those extras into
+private evidence, restored the ORIGINAL seal, and preflight passed. No resealing
+or source relaxation. Prepared continuation driver has NOT executed; do not replay
+original Build. Native same-feature monitor confirms8historical model calls,
+3scope calls, zero active calls/implementation requests/checked steps.
+
+FW6 actual isolated pinned simulator probe: no-addon startup has zero Lua errors;
+opening Blizzard WorldMap produces MapCanvas nil/number and missing
+GetOutdoorPvPWaitTime errors. Actual1440x1000capture inspected: world-map artwork
+absent. Returncode0 does NOT pass the scenario. No candidate/addon loaded, no
+network/game access/shared lab mutation. Retain unsupported status/provenance in
+fw6-map-capability/unsupported-map-scenario.json under private campaign root;
+never use that image as feature before/after acceptance or patch production to
+fit missing simulator behavior. Reusable supported comparison/results remains.
+
 # November 12 — real source-preparation failure repaired in development
 
 The SAME installed mapzoom run held before edits after three finished Qwen scope

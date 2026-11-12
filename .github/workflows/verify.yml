@@ -86,6 +86,7 @@ jobs:
           path: frontend/dist
       - run: npm run test-e2e -- --shard=${{ matrix.shard }}
       - name: Feature planning, references, continuation and combined result in the controlled installation
+        id: feature-connected-acceptance
         if: matrix.shard == '1/4'
         env:
           WORKBENCH_E2E_EVERYDAY: '1'
