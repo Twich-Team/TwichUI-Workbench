@@ -1,3 +1,12 @@
+# November 12 — f604 full gate found two repaired legacy compatibility defects
+
+Do not install f60430f. Hosted43130050847 Backend2/2 failed existing publisher
+control-rejection and continuous worker recovery tests. Restore early controlled
+result rejection and load typed feature runtime only for actual feature jobs;
+neither legacy test was weakened.65legacy cases and3native recovery cases pass
+with the repair; final static/contracts/build/schema checks pass. An exact new
+full gate remains mandatory. Installed114/044f521 and all713rows unchanged.
+
 # November 12 — independent combined verification, one local feature result
 
 Development now has a typed local check operation in existing real execution

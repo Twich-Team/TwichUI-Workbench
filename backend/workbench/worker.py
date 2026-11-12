@@ -103,8 +103,7 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
     from workbench.work_controls import read as work_status
     session_options = dict(advance=session_adapter) if session_adapter is not None else {}
     if work_status(engine).paused:
-        from workbench.feature_verification import recover_owned
-        if recover_owned(engine):
+        if feature_execution.recover_combined(engine):
             return True
         return task_sessions.process_one(engine, stop_event=stop_event, resume_only=True, **session_options)
     from workbench.preparation_resources import process_one as recover_storage

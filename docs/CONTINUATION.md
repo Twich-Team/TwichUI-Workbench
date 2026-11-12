@@ -1,3 +1,25 @@
+# November 12 — full hosted compatibility failures repaired; exact full gate next
+
+Full f60430f hosted43130050847 failed Backend2/2 on two legacy cases. The new
+publisher adapter looked for a task specification before rejecting a controlled
+non-model result; restore that early rejection before newer fields are read.
+The ordinary worker imported the new local-check Runtime even with no feature
+jobs, breaking its existing injected recovery runtime in a subprocess test.
+Feature dispatch/recovery now loads the typed local operation only for an actual
+matching saved job; generic publication also avoids that unrelated import.
+65legacy publication/continuous-recovery/global-control cases pass unchanged;
+3actual native dead-owner/sealed-completion recovery cases pass after the repair.
+Static/contracts/build/schema checks pass. The later exact corrected commit needs
+its OWN complete hosted gate; never activate f604 or reuse another commit's pass.
+Its dormant sealed stage and exact frontend equality proof remain retained; no
+live service/data/model operation or publication occurred. Installed114 unchanged.
+
+FW4 WIP exists in3UNTRACKED files: feature_references.py,
+scripts/feature_reference_lookup.py and test_feature_references.py.18pure identity/
+reader tests passed. No UI/API/intake integration, real lookup, attachment storage
+or release capability exists yet. Do not call this shipped reference support.
+Continue same authorized campaign without a routine permission request.
+
 # November 12 — combined feature checks and coherent delivery (development only)
 
 The same parent journal/session now advances two checked implementation children

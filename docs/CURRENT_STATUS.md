@@ -10,6 +10,6 @@ The installed build passed all nine hosted release jobs. Desktop, phone, enlarge
 
 Development now connects one feature run decision to dependent edits, independent checks of the combined feature and one coherent local draft bundle. A controlled browser walkthrough reached that reviewable result with actual Lua checks and preserved changes. Stop, failed-step retries and recovery have test evidence. This uses controlled model and confinement responses; it is not installed or a real-model feature completion. Nothing new has been published.
 
-The previous development checkpoint passed all nine hosted jobs. The newer combined-check changes need their own full release check and installation. Optional files and addon references, simulator comparison, and the real dependent-addon demonstration remain unfinished. Failed combined candidate checks currently hold the feature for attention.
+The full release check found two compatibility problems in the newer development build. Both are repaired and pass focused checks; the corrected build needs its own complete hosted release check and installation. Optional files and addon references, simulator comparison, and the real dependent-addon demonstration remain unfinished. Failed combined candidate checks currently hold the feature for attention.
 
 The next complete outcome is the real reviewed feature progressing through dependent implementation, combined checks and one coherent draft PR in the running app. No owner decision is needed for current engineering work. Legacy schedules and game files remain unchanged.

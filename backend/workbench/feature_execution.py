@@ -187,17 +187,29 @@ def resume_failed_step(engine):
     return False
 
 
+def recover_combined(engine):
+    with engine.connect() as c:
+        if not c.execute(select(planning_jobs.c.id).where(
+                planning_jobs.c.kind == 'feature_execution', planning_jobs.c.status == 'running',
+                planning_jobs.c.payload['phase'].as_string() == 'checking_combined_feature')).first():
+            return False
+    from workbench.feature_verification import recover_owned
+    return recover_owned(engine)
+
+
 def advance(engine, *, adapter=None, provision=None, stop_event=None):
     """Finite parent progress; the existing worker/session/controller own execution."""
     from workbench import feature_steps, feature_source, feature_preparation, real_execution
     from workbench.db import task_run_offers, task_sessions, real_execution_requests, real_execution_grants
     if stop_event is not None and stop_event.is_set():
         return False
+    with engine.connect() as c:
+        if not c.execute(select(planning_jobs.c.id).where(planning_jobs.c.kind == 'feature_execution')).first():
+            return False
     from workbench import feature_delivery
     if feature_delivery.reconcile(engine):
         return True
-    from workbench.feature_verification import recover_owned
-    if recover_owned(engine):
+    if recover_combined(engine):
         return True
     try:
         feature_permission.capability(engine)

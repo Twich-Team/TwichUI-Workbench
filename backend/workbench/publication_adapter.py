@@ -273,13 +273,17 @@ class PilotGitHub:
         return rows[0] if rows else None
 
     def prepare(self, snapshot, result):
+        if result.get('inference_ran') is not True and not result.get('authorship') and not snapshot.get('feature_artifact'):
+            raise DeliveryHeld('A real model implementation is required; controls cannot be published.')
         from workbench.session_authorship import authorship_valid
-        from workbench.feature_delivery import authorship_valid as feature_authorship
 
         spec = specification(snapshot)
         contract = spec.get('contract',{})
-        if result.get("inference_ran") is not True and not authorship_valid(contract, result) and not (
-                snapshot.get('feature_artifact') and feature_authorship(contract,result)):
+        combined_authorship = False
+        if snapshot.get('feature_artifact'):
+            from workbench.feature_delivery import authorship_valid as feature_authorship
+            combined_authorship = feature_authorship(contract,result)
+        if result.get("inference_ran") is not True and not authorship_valid(contract, result) and not combined_authorship:
             raise DeliveryHeld(
                 "A real model implementation is required; controls cannot be published."
             )

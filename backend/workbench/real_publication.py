@@ -102,8 +102,7 @@ def _checked(c, row, grant):
 
 def current(c, row, grant):
     _checked(c, row, grant)
-    from workbench.feature_verification import is_grant
-    if is_grant(grant):
+    if grant['snapshot'].get('operation_kind') == 'feature-verification-v1':
         raise DeliveryHeld('Complete feature delivery follows its separate saved publication permission.')
     linked = grant["snapshot"]["workflow_task"]
     approval = (
