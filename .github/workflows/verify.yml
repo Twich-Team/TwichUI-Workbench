@@ -85,11 +85,11 @@ jobs:
           name: ${{ needs.checks.outputs.build_artifact }}
           path: frontend/dist
       - run: npm run test-e2e -- --shard=${{ matrix.shard }}
-      - name: Grounded feature planning through the controlled everyday installation
+      - name: Feature planning, references, continuation and combined result in the controlled installation
         if: matrix.shard == '1/4'
         env:
           WORKBENCH_E2E_EVERYDAY: '1'
-        run: npm run test-e2e -- --grep 'Feature Workshop grounded intake'
+        run: npm run test-e2e -- --grep 'Feature Workshop grounded intake|one browser feature reaches independent combined|feature files and source references|held feature needs'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -59,7 +59,7 @@ class FeatureDecomposition(StrictModel):
     tasks: Annotated[list[FeatureTask], Field(min_length=1, max_length=6)]
 
 
-def research(original, feedback=''):
+def research(original, feedback='', *, engine=None):
     """Inspect fixed committed local source only; never execute addon or reference code."""
     from workbench import regression_preparation as source
     from workbench.bug_investigation import clean_base
@@ -117,8 +117,9 @@ def research(original, feedback=''):
         evidence.append(dict(id=identity, kind='addon', label=path, sha256=sha,
                              source_revision=base, excerpt=excerpt))
         files.append(dict(path=path, sha256=sha, excerpts=[dict(line=start+1, text=excerpt)]))
+    from workbench.feature_context import context
     return dict(original=original, feedback=feedback, base=base,
-                evidence=evidence, files=files, related=[],
+                evidence=evidence, files=files, related=context(engine, original),
                 source_note='Partial exact committed Lua excerpts. Load-order files, other code and runtime behavior remain unverified.')
 
 
@@ -319,7 +320,7 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
     try:
         if everyday.enabled():
             everyday.require_room(everyday.configuration(engine))
-        packet = research(original, feedback)
+        packet = research(original, feedback, engine=engine)
         if job['kind'] == 'decomposition':
             with engine.connect() as c:
                 proposal = intake.require(c, proposals, job['payload']['proposal_id'])
@@ -392,7 +393,7 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
         if model != selected or basis not in {'demo', 'local', 'codex'}:
             raise ValueError('Feature planning attribution does not match the saved AI choice.')
         result = validate_response(raw, schema, packet)
-        if research(original, feedback) != {k:v for k,v in packet.items() if k not in {'proposal','indexed_scope','correction'}}:
+        if research(original, feedback, engine=engine) != {k:v for k,v in packet.items() if k not in {'proposal','indexed_scope','correction'}}:
             raise ValueError('Committed source changed while the feature was being planned.')
     except (OSError, ValueError, HTTPException, PlanningUnavailable, KeyError, TypeError) as error:
         failure = 'Feature planning could not finish. The request and earlier evidence are preserved. ' + (

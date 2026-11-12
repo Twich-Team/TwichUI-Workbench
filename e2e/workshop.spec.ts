@@ -559,3 +559,87 @@ test('maintenance status and cleanup menus reflow with enlarged text',async({pag
  await page.locator('.result-archive-filter select').selectOption('archived');await expect(page).toHaveURL(/archive=archived/);await overflow(page);
  await capture(page,info,'cleanup-result-filter-320-200',{keepInCompact:true});
 });
+
+test('feature files and source references stay with the original request through reload',async({page},info)=>{
+ test.setTimeout(90000);
+ test.skip(process.env.WORKBENCH_E2E_EVERYDAY!=='1','Dedicated controlled source reader; no real network or model.');
+ fixture('feature-workshop-setup');
+ await page.goto('/features');await page.getByRole('link',{name:'Describe a feature',exact:true}).click();
+ await page.getByLabel('Description',{exact:true}).fill('Remember my normalization choice, using the attached colors and documented defaults as references.');
+ await page.getByLabel('Title Optional').fill('Remember a normalization choice with references');
+ await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
+ await page.getByRole('button',{name:'Use my preferred AI settings',exact:true}).click();
+ await page.getByText('Optional pictures, notes and addon references',{exact:true}).click();
+ await page.getByRole('button',{name:'Add an addon reference',exact:true}).click();
+ await page.getByLabel('Addon name or reference link',{exact:true}).fill('https://github.com/Team/Addon');
+ await page.getByRole('textbox',{name:'What should Workbench learn? Optional',exact:true}).fill('Use its documented defaults as context, without copying code.');
+ await page.getByRole('button',{name:'Add an addon reference',exact:true}).click();
+ await page.getByLabel('Addon name or reference link',{exact:true}).nth(1).fill('https://curseforge.com/wow/addons/addon');
+ await page.getByRole('textbox',{name:'What should Workbench learn? Optional',exact:true}).nth(1).fill('Keep this unavailable source as an unverified reference.');
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('intake-draft:feature')!).feature_references.items.length)).toBe(2);
+ const draft=await page.evaluate(()=>JSON.parse(localStorage.getItem('intake-draft:feature')!));
+ const seeded=JSON.parse(fixture('feature-workshop-reference-seed',['--request-id',draft.request_id,'--references-json',JSON.stringify(draft.feature_references.items)]));
+ await expect(page.getByRole('button',{name:'Plan feature',exact:true})).toBeDisabled();
+ await page.getByLabel('Reference file',{exact:true}).setInputFiles({name:'My own mockup.png',mimeType:'image/png',buffer:Buffer.from(seeded.png_base64,'base64')});
+ await page.getByLabel('What should Workbench notice? Optional',{exact:true}).fill('Keep the warm colors; this is inspiration, not an implemented result.');
+ await page.getByRole('button',{name:'Add file reference',exact:true}).click();
+ await expect(page.getByText('My own mockup.png',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Look up reference addons',exact:true}).click();
+ await expect(page.getByText('Repository metadata checked',{exact:true})).toBeVisible();
+ await expect(page.getByText('Source not available',{exact:true})).toBeVisible();
+ await page.reload();await page.getByText('Optional pictures, notes and addon references',{exact:true}).click();
+ await expect(page.getByText('My own mockup.png',{exact:true})).toBeVisible();
+ await expect(page.getByText('Repository metadata checked',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Plan feature',exact:true}).click();
+ await expect(page).toHaveURL(/\/features\/[a-f0-9-]{36}/);const identity=new URL(page.url()).pathname.split('/').at(-1)!;
+ fixture('feature-workshop-tick');fixture('feature-workshop-tick');await page.reload();
+ await expect(page.getByRole('link',{name:'My own mockup.png',exact:true})).toBeVisible();
+ await expect(page.getByText('Repository metadata checked',{exact:true})).toBeVisible();
+ await expect(page.getByText('Source not available',{exact:true})).toBeVisible();
+ const saved=await page.request.get('/api/features/'+identity).then(r=>r.json());
+ expect(saved.request_attachments).toHaveLength(1);expect(saved.reference_addons).toHaveLength(2);
+ expect(saved.reference_addons[0].revision).toBe('a'.repeat(40));expect(saved.reference_addons[1].revision).toBeNull();
+ expect(saved.intake.original.feature_attachments[0].id).toBe(saved.request_attachments[0].id);
+ for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
+  await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await overflow(page);await capture(page,info,`feature-owner-references-${width}-${font}`,{keepInCompact:true});
+ }
+});
+
+test('a held feature needs a separate read-only allowance before more source preparation',async({page},info)=>{
+ test.setTimeout(90000);
+ test.skip(process.env.WORKBENCH_E2E_EVERYDAY!=='1','Controlled source preparation; no real model or implementation.');
+ fixture('feature-workshop-build-setup');
+ await page.goto('/features');await page.getByRole('link',{name:'Describe a feature',exact:true}).click();
+ await page.getByLabel('Description',{exact:true}).fill('Return nil for an absent name and anonymous for an empty name. Keep existing trimming and lowercase behavior for other names.');
+ await page.getByLabel('Title Optional').fill('Handle absent and blank names safely');
+ await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
+ await page.getByRole('button',{name:'Use my preferred AI settings',exact:true}).click();
+ await page.getByRole('button',{name:'Plan feature',exact:true}).click();await expect(page).toHaveURL(/\/features\/[a-f0-9-]{36}/);
+ const identity=new URL(page.url()).pathname.split('/').at(-1)!;
+ fixture('feature-workshop-build-tick');fixture('feature-workshop-build-tick');
+ await page.reload();await page.getByRole('link',{name:'Review plan or question',exact:true}).click();
+ await page.getByRole('button',{name:'Approve plan',exact:true}).click();fixture('feature-workshop-build-tick');await page.goto('/features/'+identity);
+ await page.getByLabel('Build this reviewed feature within these limits.').check();await page.getByRole('button',{name:'Build reviewed feature',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Stop this feature',exact:true})).toBeVisible();
+ fixture('feature-workshop-run-tick');fixture('feature-workshop-scope-fail');await page.reload();
+ await expect(page.getByRole('heading',{name:'Continue step preparation',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Continue preparation',exact:true})).toBeDisabled();
+ const before=await page.request.get('/api/features/'+identity).then(r=>r.json());
+ expect(before.completed_steps).toBe(0);expect(before.scope_correction.generation_requests).toBe(3);
+ await page.getByLabel('Allow these additional read-only preparation requests.').check();
+ const correctionSaved=page.waitForResponse(response=>response.url().endsWith('/api/features/'+identity+'/prepare-step-again')&&response.request().method()==='POST');
+ await page.getByRole('button',{name:'Continue preparation',exact:true}).dblclick();expect((await correctionSaved).ok()).toBeTruthy();
+ await expect(page.getByRole('heading',{name:'Continue step preparation',exact:true})).toHaveCount(0);
+ fixture('feature-workshop-scope-inspect');fixture('feature-workshop-run-tick');await page.reload();
+ const after=await page.request.get('/api/features/'+identity).then(r=>r.json());
+ expect(after.run.id).toBe(before.run.id);expect(after.intake.decisions).toHaveLength(2);expect(after.completed_steps).toBe(0);
+ expect(after.scope_correction).toBeNull();expect(after.run.phase).toBe('scope_ready');
+ for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
+  await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await overflow(page);await capture(page,info,`feature-scope-correction-${width}-${font}`,{keepInCompact:true});
+ }
+ await page.getByRole('button',{name:'Stop this feature',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Feature stopped or stopping',exact:true})).toBeVisible();
+ await page.reload();await expect(page.getByRole('button',{name:'Continue preparation',exact:true})).toHaveCount(0);
+});

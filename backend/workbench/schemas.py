@@ -290,7 +290,117 @@ class TaskAISettings(StrictModel):
         return self
 
 
+class FeatureReferenceInput(StrictModel):
+    name_or_url: str = Field(min_length=1, max_length=300)
+    instruction: str = Field(default='', max_length=800)
+
+    @field_validator('name_or_url')
+    @classmethod
+    def supported_reference(cls, value):
+        from workbench.feature_references import identity
+        identity(value)
+        return value
+
+
+class FeatureReferenceSet(StrictModel):
+    source_request_id: UUID | None = Field(default=None, exclude_if=lambda value: value is None)
+    items: Annotated[list[FeatureReferenceInput], Field(min_length=1, max_length=4)]
+    evidence_binding: str | None = Field(default=None, pattern=r'^[a-f0-9]{64}$', exclude_if=lambda value: value is None)
+
+    @model_validator(mode='after')
+    def distinct_references(self):
+        from workbench.feature_references import identities
+        identities([r.model_dump() for r in self.items])
+        return self
+
+
+class FeatureAttachmentClaim(StrictModel):
+    source_request_id: UUID | None = Field(default=None, exclude_if=lambda value: value is None)
+    id: UUID
+    sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
+    metadata_binding: str = Field(pattern=r'^[a-f0-9]{64}$')
+
+
+class FeatureAttachmentUpload(StrictModel):
+    request_id: UUID
+    attachment_id: UUID
+    filename: str = Field(min_length=1, max_length=160)
+    caption: str = Field(default='', max_length=800)
+    role: Literal['mockup', 'game_context', 'evidence']
+    media_type: Literal['image/png', 'text/plain']
+    data_base64: str = Field(min_length=1, max_length=5592408)
+
+    @field_validator('filename')
+    @classmethod
+    def passive_filename(cls, value):
+        if value in {'.', '..'} or any(ord(c)<32 or c in '/\\' for c in value):
+            raise ValueError('Use the original filename without a directory or control characters.')
+        return value
+
+
+class FeatureAttachmentView(StrictModel):
+    id: str
+    request_id: str
+    filename: str
+    caption: str
+    role: Literal['mockup', 'game_context', 'evidence']
+    media_type: Literal['image/png', 'text/plain']
+    size: int
+    sha256: str
+    width: int | None
+    height: int | None
+    provenance: str
+    metadata_binding: str
+    created_at: str
+
+
+class FeatureReferenceDocument(StrictModel):
+    path: str = Field(max_length=120)
+    source_url: str = Field(max_length=500)
+    sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
+    bytes: int = Field(ge=0, le=49152)
+    excerpt: str = Field(max_length=3000)
+    excerpt_truncated: bool
+
+
+class FeatureReferenceChoice(StrictModel):
+    project_id: str = Field(max_length=100)
+    name: str = Field(max_length=200)
+    source_url: str = Field(max_length=500)
+    description: str = Field(max_length=300)
+
+
+class FeatureReferenceEvidence(StrictModel):
+    status: Literal['inspected', 'needs_clarification', 'unavailable']
+    provider: Literal['github', 'curseforge', 'name']
+    name: str = Field(max_length=200)
+    source_url: str | None = Field(max_length=500)
+    revision: str | None = Field(pattern=r'^[a-f0-9]{40}$')
+    project_id: str | None = Field(default=None, max_length=100)
+    license: str = Field(max_length=200)
+    description: str = Field(default='', max_length=800)
+    game_version: str = Field(max_length=300)
+    documentation: FeatureReferenceDocument | None
+    choices: Annotated[list[FeatureReferenceChoice], Field(max_length=5)] = []
+    limitations: Annotated[list[Annotated[str, Field(max_length=1000)]], Field(max_length=8)]
+    inspected_at: str
+    provenance: str = Field(max_length=300)
+
+
+class FeatureReferenceLookupInput(StrictModel):
+    request_id: UUID
+    references: Annotated[list[FeatureReferenceInput], Field(min_length=1, max_length=4)]
+
+
+class FeatureReferenceLookupView(StrictModel):
+    binding: str = Field(pattern=r'^[a-f0-9]{64}$')
+    references: list[FeatureReferenceEvidence]
+    message: str
+
+
 class IntakeInput(StrictModel):
+    feature_attachments: Annotated[list[FeatureAttachmentClaim] | None, Field(max_length=4, exclude_if=lambda value: value is None)] = None
+    feature_references: FeatureReferenceSet | None = Field(default=None, exclude_if=lambda value: value is None)
     feature_planning: bool | None = Field(default=None, strict=True, exclude_if=lambda value: value is None)
     ai_settings: TaskAISettings | None = Field(default=None, exclude_if=lambda value: value is None)
     requested_work: Literal['feature', 'inspection', 'simulation', 'data', 'other'] | None = Field(default=None, exclude_if=lambda value: value is None)

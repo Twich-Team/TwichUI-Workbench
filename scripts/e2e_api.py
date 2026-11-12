@@ -15,4 +15,15 @@ task_session.ROOT = root
 everyday_config(path)
 from workbench.api import create_app  # noqa: E402
 
+# Source lookup telemetry is controlled in browser fixtures. An unseeded cache
+# must never send a real external request from local or hosted acceptance.
+from workbench import feature_references  # noqa: E402
+_reference_lookup = feature_references.lookup
+
+def _controlled_reference_lookup(engine, request_id, references, **options):
+    def no_external_lookup(*args, **kwargs):
+        raise ValueError('Controlled browser fixture has no real external reference reader.')
+    return _reference_lookup(engine, request_id, references, execute=no_external_lookup)
+
+feature_references.lookup = _controlled_reference_lookup
 app = create_app()

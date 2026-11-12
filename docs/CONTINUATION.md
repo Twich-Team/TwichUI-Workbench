@@ -1,3 +1,105 @@
+# November 12 — real scope held; source inspection and FW4 ready for exact release gate
+
+Installed115/cd89112 remains the accepted running build. SAME mapzoom parent
+6998247a-be8e-4097-b21a-5459008b8d97 held during first source preparation:
+three Qwen calls finished with known usage (4056 + 4089 + 4089 = 12234 tokens),
+zero addon edits, zero implementation requests, zero checked steps. It lacked
+needed definitions and correctly declined to invent them. Original request,
+proposal63d4e9db and five steps remain unchanged. Normal model access restored.
+Exact native scope history: outcome-cd89112/real-map-zoom-run/settled-scope-held.json.
+Never replay the original browser admission driver or erase the new run rows.
+
+Development repair adds fixed app-owned committed-source windows/literal searches,
+using the original or exact checked predecessor. Inspection responses cannot be
+compiled as implementation scopes. Repeated reads/searches, stale input, unknown
+usage and Stop cannot grant work. A separate ordinary browser command may allow
+three additional120s/2600-token read-only requests, for at most30minutes within
+the ORIGINAL parent deadline. It preserves the three consumed calls, original
+run permission, all usage and implementation/publication limits. It creates no
+child approval/store/schema. Installed app does NOT yet have this repair. After
+exact hosted acceptance and compatible deployment, review that separate allowance
+through the ordinary browser under campaign acceptance delegation. Do not alter
+the store to resume, manually author a map solution, or replay Build.
+
+FW4 development now supports up to four passive PNG/UTF8 files and four addon
+references in ordinary feature intake, reload, saved request and References UI.
+Private immutable bytes/metadata are UUID/hash bound. Editing as a new submission
+retains explicit exact same-owner evidence identity. The current planning transport
+uses captions/text excerpts, not image pixels. Fixed anonymous GitHub reads retain
+project identity, pinned revision, license and bounded README; names require an
+explicit source choice. CurseForge access is honestly unavailable without a
+supported configured API; no scraper, download or third-party execution. All source
+text/files remain untrusted data, not authority or copying permission.
+
+Actual isolated anonymous GitHub reader acceptance retrieved DeadlyBossMods/
+DeadlyBossMods at e903df8116a961601b489c14dea996bbef148a11, README7828bytes,
+SHA3057edee25194aabb5daf814dbdfff56fa2212617c48a0fe5c56c5134b76a8d3.
+License reported NOASSERTION; no reuse or game compatibility claim. No model or
+existing app-store change. Evidence: real-reference-reader/result.json under the
+private campaign root. Controlled ordinary file/reference and read-only continuation
+browser journeys pass; desktop/390phone/320with200% screenshots inspected.
+
+Current local evidence:165affected execution/legacy recovery cases,35source/
+correction cases,89context/intake/history cases,6private copy/retention cases,
+58frontend cases and static/contracts/build/schema checks pass. Transfer copies
+all private context, including unsubmitted drafts, exact-byte checked with no
+links/shared permissions/overwrites; use scripts/feature_context_store.py between
+stopped preparation output roots at installation. Hosted workflow now includes
+these connected controlled journeys and the actual-Lua combined-result journey.
+The combined-result browser journey also passes with actual dependent Lua/Git checks (1.2minutes). This source needs its OWN full9job exact gate before activation. Zero real Feature
+Workshop features have completed end to end. Continue the SAME campaign through
+real dependent implementation, combined checks/coherent draft, FW6 and FW7.
+
+# November 12 — installed115/cd89112; SAME real mapzoom parent run started
+
+Exact cd8911276058a4163b672bad8913dde73a6bedf7 passed ALL9jobs in full hosted
+43131744309, including finalverify. Frontend artifact13906180272 ZIP SHA
+ e714d9aa8253c70b164b8c8cbfcb9cfefd3747a5562e65243d24011bc319bb8c;
+acceptance13906816028 SHA aad1c3e338f832a608af41656b2afc3dc1d45e358c1a54b8c8df59eb582caf4e.
+Hosted frontend bytes equal local prepared26files. Installed115 via unchanged
+named admin grant, seal2e69cb481143fa39a4d306be97dd853c6f7976d7c19fedc550ea149408ed1f93.
+Evidence private campaign root/outcome-cd89112. Full713-row fingerprint unchanged
+through actual115→114→115,52restoredrequests read by BOTH044andcd readers, four-role
+restart, source seal/TLS/firewall/8765/normal-model-auth checks. Actual1440/390/
+320with200%text screenshots inspected; keyboard/reload and zero browser writes
+proved BEFORE real scope/run. No f604 activation; its full gate FAILED and dormant
+stage is retained. All original unrelated local edits remain unchanged.
+
+Ordinary installed browser then reviewed exact original mapzoom request, proposed
+scope/defaults/reset/exclusions and explicit source-hook uncertainties, approved
+that SAME proposal once, and reviewed the v2parent limits/saved Qwen/fallbackOff/
+child publicationHold. One Build action created run6998247a-be8e-4097-b21a-5459008b8d97
+for feature5d62e6bc-1aa8-48f4-a3e1-4d05ade2d480. Original request/proposal content
+unchanged; no manual per-step preparation or addon solution. Runtime began phase
+preparing_scope. ZERO checked implementation steps and ZERO real feature completion
+at this checkpoint. Exact review/intent/receipts and screenshot are under
+outcome-cd89112/real-map-zoom-run. Never replay that driver: create-only intents
+already exist. Inspect canonical job/request/usage before any supported recovery.
+
+IMPORTANT: rollback proof was BEFORE new v2feature-run writes. Keep the newer
+store and use the compatible accepted115reader for subsequent recovery. Old
+baseline rollback scripts deliberately refuse changed history; never erase new
+rows or rewrite old approvals to make rollback succeed. Private preparation
+allowed_classes unchanged; only existing runtime feature flag was enabled.
+
+FW4 is UNCOMMITTED/UNINSTALLED WIP: passive4MiBPNG/UTF8 files with request-bound
+UUID/SHA/metadata claims; fixed anonymous GitHub metadata+pinnedREADME lookup,
+ambiguous-name source choice and honest unavailable CurseForge access; canonical
+intake/planning/projection and form/References UI.89context/intake/planning/history
+cases and latest static/contracts/build/schema checks pass. Tests use controlled
+source-reader telemetry, not actual egress. No actual reference lookup/browser
+acceptance or deployment yet. Supporting tests retain earlier corrected fixture
+permission/SVG-mimetype mistakes. New context schemas omit absent fields for old
+history. Explicit same-owner source_request_id claims preserve exact file/source
+identity when editing as a new submission, validated against real owned evidence.
+
+Continue full campaign: monitor real mapzoom first scope and repair generic app
+paths as needed; no manual addon solution. Finish FW4real/browser/retention checks,
+FW6supported simulator comparison and FW7polish. No routine owner renewal. Do not
+claim campaign/FW3/FW5complete before actual dependent implementation/combined proof/
+coherent draft through the running app. No game-file change, merge, new spending,
+legacy cutover or root-policy replacement is authorized.
+
 # November 12 — full hosted compatibility failures repaired; exact full gate next
 
 Full f60430f hosted43130050847 failed Backend2/2 on two legacy cases. The new

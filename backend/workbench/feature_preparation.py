@@ -19,13 +19,13 @@ from workbench.planning_transport import PlanningUnavailable
 from workbench.visual_scope import digest
 
 
-def packet(c, decision_id, task_id, feature_input):
+def packet(c, decision_id, task_id, feature_input, *, inspections=()):
     row, permission = feature_steps.parent(c, decision_id)
     linked = task_execution.snapshot(c, row['intake_id'], task_id, decision_id)
     root, base = feature_steps.source(c, linked, permission, feature_input)
     # Reuse the existing bounded local source selection, then read the exact
     # checked predecessor's versions. No live workspace or downloaded addon runs.
-    selected = feature_planning.research(linked['original'])
+    selected = feature_planning.research(linked['original'], engine=c.engine)
     files, evidence = [], []
     for item in selected['files']:
         bound, raw = feature_steps._file(root, base, item['path'])
@@ -38,12 +38,25 @@ def packet(c, decision_id, task_id, feature_input):
         files.append(dict(path=bound['path'], sha256=bound['sha256'], excerpts=windows))
         evidence.append(dict(id='step-source-'+str(len(evidence)), path=bound['path'],
             sha256=bound['sha256'], revision=base))
-    return dict(original=linked['original'], task=dict(title=linked['task']['title'],
+    value = dict(original=linked['original'], task=dict(title=linked['task']['title'],
         purpose=linked['task']['purpose'], acceptance=linked['task']['acceptance']),
         approved_scope=linked['approved_scope'], exclusions=linked['proposal_review']['content']['exclusions'],
         base=base, files=files, evidence=evidence,
+        **({'references': selected['related']} if selected['related'] else {}),
         indexed_acceptance=[dict(index=i, requirement=s) for i,s in enumerate(linked['task']['acceptance'])],
         source_note='Partial committed source excerpts; absent files and game behavior remain unknown.')
+    from workbench import feature_step_source
+    from pathlib import PurePosixPath
+    directories={str(PurePosixPath(f['path']).parent)+'/' for f in files}
+    inventory=feature_step_source.index(root,base)
+    inventory.sort(key=lambda item:(not any(item['path'].startswith(d) for d in directories),item['path']))
+    value.update(source_index=inventory[:96],source_index_truncated=len(inventory)>96,
+        inspection_capabilities=dict(read_only=True,max_requests=3,page_lines=80,response_characters=6500,
+            note='Request actual source reads/searches when excerpts omit definitions. No shell, network, edits or new provider authority.'))
+    for record in inspections:
+        if record.get('feature_input_binding')!=digest(feature_input):
+            raise ValueError('Source inspection belongs to different checked predecessor input.')
+    return feature_step_source.restore(value,root,base,inspections)
 
 
 def recover_one(engine):
@@ -95,16 +108,19 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         job = intake.require(c, planning_jobs, job_id)
         decision_id = job['payload']['feature_decision_id']
         row, permission = feature_steps.parent(c, decision_id)
-        current_packet = packet(c, decision_id, task_id, feature_input)
         history = job['payload'].get('scope_history', [])
         previous = [r for r in history if r['task_id'] == task_id]
+        from workbench.feature_scope_recovery import allowance
+        maximum,scope_authorization,scope_deadline=allowance(c,job,task_id,permission)
+        inspections = [r['inspection'] for r in previous if r.get('inspection')]
+        current_packet = packet(c, decision_id, task_id, feature_input, inspections=inspections)
         if (job['kind'] != 'feature_execution' or job['status'] != 'queued'
                 or job['intake_id'] != row['intake_id']
                 or job['revision'] != permission['scope']['revision']
                 or job['payload']['graph_binding'] != digest(permission['scope']['graph'])
                 or job['payload']['scope_approval_id'] != permission['scope']['scope_approval_id']
                 or job['payload'].get('phase') != 'prepare_scopes'
-                or len(previous) >= permission['budget']['scope_attempts_per_step']):
+                or len(previous) >= maximum):
             return False
         if any(not r.get('confirmed_finished') for r in previous):
             return False
@@ -116,14 +132,18 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         from workbench.local_model_priority import planning_ready
         if not planning_ready():
             return False
-    if previous:
+    if previous and previous[-1].get('failure'):
         current_packet['previous_validation_failure'] = previous[-1]['failure']
     claim = dict(owner=owner_identity(), decision_id=decision_id, parent_binding=row['binding'],
-        task_id=task_id, feature_input=feature_input, packet_sha256=digest(current_packet))
+        task_id=task_id, feature_input=feature_input, packet_sha256=digest(current_packet),
+        scope_request_permission=scope_authorization)
     lease = str(uuid4())
     with write_transaction(engine) as c:
         active = intake.require(c, planning_jobs, job_id)
         feature_steps.parent(c, decision_id)
+        actual_limit,actual_authorization,_=allowance(c,active,task_id,permission)
+        if actual_limit!=maximum or actual_authorization!=scope_authorization:
+            return False
         if active['status'] != 'queued' or active['payload'] != job['payload']:
             return False
         if c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first():
@@ -136,17 +156,19 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
             purpose='feature_step_scope', source='workbench', backend=backend,
             requested_model=route['model'], requested_effort=route.get('effort'),
             policy_revision=route['policy_revision'], outcome='running', started_at=intake.now(),
-            routing_reason='One parent-approved read-only feature step scope: '+task_id+'. No fallback or implementation authority.'))
+            routing_reason='One approved read-only feature step scope: '+task_id+'. Permission '+scope_authorization+'. No fallback or implementation authority.'))
         c.execute(task_sessions.update().where(task_sessions.c.id == decision_id).values(
             status='active', finished_at=None,
             message='Preparing a read-only feature step scope. No implementation has started.'))
     used, evidence, result, failure, model, basis = adapter, None, None, None, None, None
     stopped = ParentStop(engine, decision_id, stop_event)
     attempted = False
+    inspection = None
+    unsupported = False
     try:
         if used is None:
             if backend == 'local':
-                used = LocalProvider(stopped, ends_at=time.monotonic()+permission['budget']['scope_request_seconds'])
+                used = LocalProvider(stopped, ends_at=time.monotonic()+min(permission['budget']['scope_request_seconds'],(scope_deadline-datetime.now(timezone.utc)).total_seconds()))
             else:
                 from workbench.codex_provider import Planner
                 used = Planner(route, stopped.is_set)
@@ -164,15 +186,27 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         if len(json.dumps(raw, allow_nan=False).encode()) > 24000:
             raise ValueError('Proposed step scope exceeds its output bound.')
         parsed = feature_steps.StepScope.model_validate(raw)
-        if not set(parsed.read_paths) <= {f['path'] for f in current_packet['files']}:
-            raise ValueError('Step preparation selected a source file outside its inspected packet.')
         with engine.connect() as c:
-            reread = packet(c, decision_id, task_id, feature_input)
-            if previous:
+            reread = packet(c, decision_id, task_id, feature_input, inspections=inspections)
+            if previous and previous[-1].get('failure'):
                 reread['previous_validation_failure'] = previous[-1]['failure']
             if reread != current_packet:
                 raise ValueError('The feature source or scope changed during preparation.')
-            result = feature_steps.compile_scope(c, decision_id, task_id, raw, feature_input=feature_input)
+            if parsed.inspection:
+                from workbench import feature_step_source
+                linked=task_execution.snapshot(c,row['intake_id'],task_id,decision_id)
+                root,base=feature_steps.source(c,linked,permission,feature_input)
+                requests=[item.model_dump(mode='json') for item in parsed.inspection]
+                _,observations=feature_step_source.inspect(current_packet,root,base,requests)
+                inspection=dict(requests=requests,result_binding=digest(observations),
+                    feature_input_binding=digest(feature_input))
+            else:
+                if parsed.limitation.strip():
+                    unsupported=True
+                    raise ValueError('This step needs an unsupported source capability: '+parsed.limitation)
+                if not set(parsed.read_paths) <= {f['path'] for f in current_packet['files']}:
+                    raise ValueError('Step preparation selected a source file outside its inspected packet.')
+                result = feature_steps.compile_scope(c, decision_id, task_id, raw, feature_input=feature_input)
     except (ValueError, OSError, HTTPException, PlanningUnavailable, KeyError, TypeError) as error:
         failure = 'Step preparation could not finish: '+(str(error)[:800] if not isinstance(error, HTTPException) else 'The saved feature changed.')
     finally:
@@ -181,6 +215,9 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
     diagnostics = copy.deepcopy(getattr(used, 'diagnostics', {}))
     confirmed = (diagnostics.get('generation_state') == 'finished'
         and diagnostics.get('accounting_state') == 'complete' and bool(diagnostics.get('usage')))
+    if not confirmed:
+        result,inspection=None,None
+        failure='Read-only feature preparation has an unconfirmed outcome or usage. Exact evidence remains; no replay or implementation will start.'
     with write_transaction(engine) as c:
         active = intake.require(c, planning_jobs, job_id)
         if active['status'] != 'running' or active['lease'] != lease:
@@ -188,20 +225,23 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         try:
             feature_steps.parent(c, decision_id)
         except (ValueError, OSError, HTTPException, KeyError, TypeError):
-            failure, result = 'The feature was stopped or changed. Its late scope output is retained without implementation.', None
-        finish_attempt(c, {**job, 'lease':lease}, used, model, basis, 'completed' if result else 'failed')
+            failure, result, inspection = 'The feature was stopped or changed. Its late scope output is retained without implementation.', None, None
+        finish_attempt(c, {**job, 'lease':lease}, used, model, basis, 'completed' if result or inspection else 'failed')
         record = dict(task_id=task_id, operation_id=lease, confirmed_finished=confirmed,
-            failure=failure, diagnostics=diagnostics, scope_binding=result['scope_binding'] if result else None)
+            scope_request_permission=scope_authorization,
+            failure=failure, diagnostics=diagnostics, scope_binding=result['scope_binding'] if result else None,
+            **({'inspection':inspection} if inspection else {}))
         parent = intake.require(c, task_sessions, decision_id)
-        can_correct = bool(failure and confirmed and not parent['state'].get('cancel_requested')
-            and len(previous)+1 < permission['budget']['scope_attempts_per_step'])
+        can_correct = bool((failure or inspection) and confirmed and not unsupported and not parent['state'].get('cancel_requested')
+            and len(previous)+1 < maximum)
         payload = {**active['payload'], 'phase':'scope_ready' if result else 'prepare_scopes' if can_correct else 'held',
             'scope_history':history+[record], 'current_step_scope':result,
             'response_evidence_id':lease if evidence else None}
+        message = 'The next feature step has a bounded source and check scope; implementation is not yet verified.' if result else 'Committed source inspection finished. Preparing the step from its actual definitions.' if inspection and can_correct else failure or 'Source inspection finished, but the permitted preparation requests were used before a complete scope was ready.'
         c.execute(planning_jobs.update().where(planning_jobs.c.id == job_id).values(
             status='queued' if result or can_correct else 'failed', lease=None, lease_until=None,
             finished_at=None if result or can_correct else intake.now(), payload=payload,
-            message='The next feature step has a bounded source and check scope; implementation is not yet verified.' if result else failure))
+            message=message))
         if parent['state'].get('cancel_requested'):
             known_ended = confirmed or not attempted or diagnostics.get('generation_state') == 'not_started'
             c.execute(task_sessions.update().where(task_sessions.c.id == decision_id).values(
@@ -214,5 +254,5 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
                 status='pending', finished_at=None, message='Feature step scope prepared; implementation has not yet started.'))
         if not result and not can_correct:
             from workbench.feature_sessions import hold_if_idle
-            hold_if_idle(c, decision_id, failure)
+            hold_if_idle(c, decision_id, message)
     return True

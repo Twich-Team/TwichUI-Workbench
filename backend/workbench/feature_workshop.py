@@ -7,8 +7,10 @@ from sqlalchemy import select
 
 from workbench import intake, task_execution, feature_recovery
 from workbench.db import intakes, proposals, planning_jobs, proposal_decisions, task_sessions
-from workbench.schemas import IntakeView, PlannedTaskView, FeatureBudget
+from workbench.schemas import (IntakeView, PlannedTaskView, FeatureBudget,
+    FeatureAttachmentView, FeatureReferenceEvidence)
 from workbench.feature_recovery import CorrectionOffer
+from workbench.feature_scope_recovery import FeatureScopeCorrectionOffer as ScopeCorrectionOffer
 from workbench.service import now
 
 FeatureState = Literal['understanding', 'planning', 'needs_clarification', 'ready', 'working',
@@ -74,6 +76,10 @@ class FeatureView(BaseModel):
     correction: CorrectionOffer | None = None
     run: FeatureRunView | None = None
     feature_result: FeatureResult | None = None
+    request_attachments: list[FeatureAttachmentView] = []
+    reference_addons: list[FeatureReferenceEvidence] = []
+    reference_notice: str | None = None
+    scope_correction: ScopeCorrectionOffer | None = None
 
 
 class FeaturePage(BaseModel):
@@ -233,13 +239,34 @@ def view_in(c, identity):
     correction = feature_recovery.offer(c, row)
     if correction:
         message = 'The plan is saved, but its proposed steps did not pass the checks. Prepare corrected steps to continue.'
+    request_attachments, reference_addons, reference_notice = [], [], None
+    original = row['payload']
+    if original.get('feature_attachments') or original.get('feature_references'):
+        try:
+            from workbench.feature_context import validate
+            from workbench import feature_attachments, feature_references
+            validate(c.engine, original)
+            request_attachments = feature_attachments.validate(c.engine,identity,original.get('feature_attachments') or [])
+            if original.get('feature_references'):
+                reference_addons = feature_references.evidence(c.engine,original['feature_references'].get('source_request_id') or identity,original['feature_references']['items'])
+        except (ValueError, OSError, KeyError, TypeError):
+            reference_notice = 'Some original reference evidence is unavailable. Its saved request bindings remain; no new lookup or model call was started.'
+    scope_correction = None
+    if run and run['status']=='held':
+        from workbench.feature_scope_recovery import offer as scope_offer
+        offered=scope_offer(c,identity)
+        if offered:
+            scope_correction={k:v for k,v in offered.items() if k!='approved_inputs'}
+            needs_owner=True
     return dict(id=identity, title=row['payload']['title'], objective=row['payload']['description'],
         state=state, message=message, active=actual_activity, needs_owner=needs_owner,
         completed_steps=sum(s['verified'] for s in steps), total_steps=len(steps),
         current_step=active_step['task']['id'] if active_step else None,
         next_step=next_step['task']['id'] if next_step else None,
         intake=data, steps=steps, observed_at=now(),
-        correction=correction, run=run, feature_result=feature_result, integrated_verification=integrated)
+        correction=correction, run=run, feature_result=feature_result, integrated_verification=integrated,
+        request_attachments=request_attachments,reference_addons=reference_addons,reference_notice=reference_notice,
+        scope_correction=scope_correction)
 
 
 def run_offer(engine, identity):

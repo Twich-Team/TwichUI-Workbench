@@ -64,6 +64,7 @@ def main():
             'feature-workshop-setup', 'feature-workshop-tick', 'feature-workshop-invalid-steps',
             'feature-workshop-build-setup', 'feature-workshop-build-tick', 'feature-workshop-run-tick',
             'feature-workshop-complete-plan', 'feature-workshop-complete-run-tick',
+            'feature-workshop-reference-seed', 'feature-workshop-scope-fail', 'feature-workshop-scope-inspect',
             "regression-planning",
             "reviewed-offer-setup", "reviewed-offer-plan", "reviewed-offer-prepare",
             "reviewed-offer-controller", "reviewed-offer-stale",
@@ -105,7 +106,11 @@ def main():
             "nonvisual-planning",
         ],
     )
+    parser.add_argument('--request-id')
+    parser.add_argument('--references-json')
     args = parser.parse_args()
+    if (args.request_id or args.references_json) and args.action != 'feature-workshop-reference-seed':
+        parser.error('Reference arguments require the dedicated controlled reference fixture.')
     path = fixture_path((ROOT / ".local/e2e-db-path").read_text())
     if args.action == "pilot-fresh":
         pilot = path.parent / "pilot.sqlite3"
@@ -128,6 +133,36 @@ def main():
         if os.environ.get('WORKBENCH_E2E_EVERYDAY') != '1':
             raise SystemExit('Feature planning needs the explicitly controlled everyday browser fixture.')
         everyday_config(path)
+        os.environ['WORKBENCH_PREPARATION_CONFIG']=str(path.parent/'automatic-workflow/preparation.json')
+        if args.action == 'feature-workshop-reference-seed':
+            import base64
+            import json
+            from uuid import UUID
+            from test_feature_context import fixture_lookup
+            from test_intake import png
+            if not args.request_id or not args.references_json or len(args.references_json)>6000:
+                parser.error('Use a bounded request identity and reference list.')
+            os.environ['WORKBENCH_PREPARATION_CONFIG']=str(path.parent/'automatic-workflow/preparation.json')
+            fixture_lookup(engine,UUID(args.request_id),json.loads(args.references_json))
+            print(json.dumps(dict(png_base64=base64.b64encode(png()).decode())))
+            return
+        if args.action in {'feature-workshop-scope-fail','feature-workshop-scope-inspect'}:
+            from test_feature_scope_recovery import LocalProtocolPlanner
+            from test_feature_steps import scope
+            from workbench import task_sessions,task_session
+            task_sessions.ROOT=path.parent/'controlled-session-owner'
+            task_session.ROOT=task_sessions.ROOT
+            os.environ['WORKBENCH_RESEARCH_ROOT']=str(path.parent/'reviewed-research/source')
+            os.environ['WORKBENCH_PREPARATION_CONFIG']=str(path.parent/'automatic-workflow/preparation.json')
+            response=scope()
+            if args.action=='feature-workshop-scope-fail':
+                response['checks']=[]
+                for _ in range(3):
+                    assert worker.tick(engine,planning_adapter=LocalProtocolPlanner(response=response))
+            else:
+                response=dict(inspection=[dict(path=response['read_paths'][0],start=1,end=120)],limitation='')
+                assert worker.tick(engine,planning_adapter=LocalProtocolPlanner(response=response))
+            return
         if args.action in {'feature-workshop-setup','feature-workshop-build-setup'}:
             setup(path)
             advance(engine, path, 'automatic-setup')

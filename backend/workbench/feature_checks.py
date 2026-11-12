@@ -116,7 +116,7 @@ def packet(c, decision_id):
     linked = task_execution.snapshot(c,approval['intake_id'],first,decision_id)
     original = linked['original']
     # Build a fresh packet; never copy the execution journal or checked source.
-    selected = feature_planning.research(original)
+    selected = feature_planning.research(original, engine=c.engine)
     if selected['base'] != permission['scope']['feature_base']:
         raise ValueError('Original feature source moved before independent preparation.')
     plan = c.execute(select(proposals.c.content).where(proposals.c.id==approval['proposal_id'])).scalar_one()
@@ -135,6 +135,8 @@ def packet(c, decision_id):
         plan_review='source-grounded-lua-v1',policy_sha256=digest(trusted_preparation.configuration(c.engine)),
         app_test_runtime=RUNTIME_INTERFACE,
         evidence_boundary='Only original committed source and approved requirements. No implementation response, candidate, patch or candidate test additions.')
+    if selected['related']:
+        value['references'] = selected['related']
     return {**value,'input_binding':digest(value)}
 
 

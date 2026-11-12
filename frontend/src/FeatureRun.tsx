@@ -27,7 +27,7 @@ export function FeatureRun({feature,onSaved}:{feature:Feature;onSaved:()=>void})
   try{localStorage.setItem(key,JSON.stringify(command));setDraft(command);await mutate('/api/features/'+feature.id+'/run',command);onSaved();await query.refetch();}
   catch(e){setError((e as Error).message);}finally{saving.current=false;setBusy(false);}
  }
- if(feature.run)return <FeatureStop key={feature.run.id} feature={feature} onSaved={onSaved}/>;
+ if(feature.run)return <>{feature.scope_correction&&<FeatureScopeCorrection key={feature.scope_correction.binding} feature={feature} onSaved={onSaved}/>}<FeatureStop key={feature.run.id} feature={feature} onSaved={onSaved}/></>;
  if(!shown)return null;
  const budget=shown.budget;
  return <WorkshopPanel title="Build this feature" icon={<ShieldCheck size={21}/>}>
@@ -58,5 +58,28 @@ function FeatureStop({feature,onSaved}:{feature:Feature;onSaved:()=>void}){
  return <WorkshopPanel title={run.cancel_requested?'Feature stopped or stopping':'Feature run'} icon={<ShieldCheck size={21}/>}>
   <p>{run.message}</p>{run.can_stop&&<Button variant="secondary" disabled={busy} onClick={()=>void stop()}>{busy?'Saving stop request…':'Stop this feature'}</Button>}
   {error&&<p role="alert" className="form-error">{error} Retrying keeps the same stop request.</p>}
+ </WorkshopPanel>;
+}
+
+function FeatureScopeCorrection({feature,onSaved}:{feature:Feature;onSaved:()=>void}){
+ const offer=feature.scope_correction!;
+ const key='feature-scope-correction:'+feature.id;
+ const [command,setCommand]=useState<Input|null>(()=>stored(key));
+ const [accepted,setAccepted]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const saving=useRef(false);
+ const stale=Boolean(command&&command.binding!==offer.binding);
+ async function proceed(){
+  if(saving.current||!accepted||stale)return;
+  const input=command||{command_id:crypto.randomUUID(),binding:offer.binding};
+  saving.current=true;setBusy(true);setError('');setCommand(input);localStorage.setItem(key,JSON.stringify(input));
+  try{await mutate('/api/features/'+feature.id+'/prepare-step-again',input);localStorage.removeItem(key);onSaved();}
+  catch(reason){setError((reason as Error).message);}finally{saving.current=false;setBusy(false);}
+ }
+ return <WorkshopPanel title="Continue step preparation" icon={<ShieldCheck size={21}/>}>
+  <h3>{offer.task_title}</h3><p>{offer.message}</p><p className="small-text">Up to {offer.generation_requests} read-only requests, {offer.request_seconds/60} minutes and {offer.completion_tokens.toLocaleString()} generated tokens each. The original feature deadline and implementation limits stay in place.</p>
+  <label className="feature-run-consent"><input type="checkbox" checked={accepted} disabled={busy||stale} onChange={event=>setAccepted(event.target.checked)}/><span>Allow these additional read-only preparation requests.</span></label>
+  {stale&&<><p role="alert">This saved decision is out of date. Review the current preparation limits before allowing another request.</p><Button variant="secondary" onClick={()=>{setCommand(null);localStorage.removeItem(key);setAccepted(false);}}>Review current preparation limits</Button></>}
+  {error&&<p role="alert" className="form-error">{error} Retrying keeps the same saved command.</p>}
+  <Button disabled={!accepted||busy||stale} onClick={()=>void proceed()}>{busy?'Saving decision…':command?'Retry saved preparation decision':'Continue preparation'}</Button>
  </WorkshopPanel>;
 }

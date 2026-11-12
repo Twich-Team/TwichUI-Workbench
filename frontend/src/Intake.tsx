@@ -15,6 +15,7 @@ import { minutes, providerOutcome } from './taskProgress';
 import { ExactRunLimits, RunLimits } from './RunLimits';
 import {savedTaskRoute,savedTaskAI,taskAIRoute} from './modelPreferences';
 import {ModelChoiceFields} from './ModelChoiceFields';
+import {FeatureContextFields} from './FeatureReferences';
 import {CleanupReview,TaskActions,type CleanupChoice} from './TaskCleanup';
 
 type Input = components['schemas']['IntakeInput'];
@@ -83,6 +84,7 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
   });
   const [sent,setSent] = useState(false);
   const [busy,setBusy] = useState(false);
+  const [contextBusy,setContextBusy]=useState(false);
   const [error,setError] = useState('');
   const [lua,setLua] = useState(Boolean(body.lua_error));
   const [regressionAcceptance,setRegressionAcceptance] = useState(body.regression_tests?.acceptance.join('\n')||'');
@@ -95,6 +97,7 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
     chooseWork(next,body);
     if((next==='bug')===(kind==='issue'))setBody({...body,requested_work:next==='bug'||next==='coverage'?null:next,
       supported_task:null,local_planning:null,feature_planning:null,lua_error:next==='bug'?body.lua_error:'',
+      ...(next!=='feature'?{feature_attachments:null,feature_references:null}:{}),
       regression_tests:next==='coverage'?{acceptance:regressionAcceptance.split('\n').filter(s=>s.trim()),test_paths:[]}:null});
   }
 
@@ -201,7 +204,8 @@ function IntakeFormBody({kind,work,description,chooseWork,unified}:{
     </details>}
   </div>}
 </fieldset>
-  <p className="detail-copy">{featureWork&&body.local_planning?'Your request and saved AI choices will be used to investigate the source and prepare connected feature steps. No addon changes start at this stage.':future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)?'Your idea will be saved in the backlog. No work will start.':localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':(bugWork?'Your report will be saved. Model investigation needs your permission.':'Your request will be saved. Model planning requires the test coverage option and your permission.')):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || !body.description.trim()}>{busy?'Saving…':sent?'Retry same submission':body.feature_planning&&body.local_planning?'Retry feature planning':featureWork&&body.local_planning?'Plan feature':(featureWork||future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled))?'Save for later':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
+  {chosen==='feature'&&featureWork&&<FeatureContextFields body={body} update={setBody} disabled={busy||sent} onBusy={setContextBusy}/>}
+  <p className="detail-copy">{featureWork&&body.local_planning?'Your request and saved AI choices will be used to investigate the source and prepare connected feature steps. No addon changes start at this stage.':future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled)?'Your idea will be saved in the backlog. No work will start.':localWork.data?.enabled?(body.local_planning?'Your request and one planning approval will be saved.':(bugWork?'Your report will be saved. Model investigation needs your permission.':'Your request will be saved. Model planning requires the test coverage option and your permission.')):'Workbench saves your description and starts planning or investigating. Supported work needs approval before a run.'}</p>{error && <p role="alert" className="form-error">{error}</p>}<Button type="submit" disabled={busy || contextBusy || !body.description.trim() || Boolean(chosen==='feature'&&body.feature_references&&!body.feature_references.evidence_binding)}>{busy?'Saving…':sent?'Retry same submission':body.feature_planning&&body.local_planning?'Retry feature planning':featureWork&&body.local_planning?'Plan feature':(featureWork||future&&(unified||Boolean(body.requested_work)||localWork.data?.enabled))?'Save for later':'Submit request'}<ArrowRight size={16}/></Button>{sent && !busy && <Button variant="ghost" onClick={()=>{setSent(false);setBody({...body,request_id:crypto.randomUUID()});}}>Edit as a new submission</Button>}</form></div>;
 }
 
 export function IntakeDetail() {

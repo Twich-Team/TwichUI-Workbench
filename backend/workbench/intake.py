@@ -72,6 +72,15 @@ def submit(engine, body, *, owner_provenance=None):
     if body.kind == 'feature' and body.lua_error:
         raise HTTPException(422, 'Lua errors belong to issue reports.')
     identity = str(body.request_id)
+    if original.get('feature_attachments') or original.get('feature_references'):
+        with engine.connect() as c:
+            saved = c.execute(select(intakes.c.id).where(intakes.c.id == identity)).first()
+        if not saved:
+            try:
+                from workbench.feature_context import validate
+                validate(engine, original)
+            except (ValueError, OSError, KeyError, TypeError):
+                raise HTTPException(422, 'Review the original feature files and reference identities before submitting. Ambiguous addon names need an exact project choice.') from None
     with write_transaction(engine) as connection:
         from workbench.task_cleanup import lifecycle
         if (lifecycle(connection).get(identity) or {}).get('deleted_at'):
@@ -416,10 +425,10 @@ def decide(engine, identity, body):
     return {k:v for k,v in receipt.items() if k not in {'snapshot','intake_id'}}
 
 
-def validate_artifact(body):
+def validate_artifact(body, *, max_bytes=1024*1024):
     try:
         data = base64.b64decode(body.data_base64, validate=True)
-        if not 1 <= len(data) <= 1024*1024:
+        if not 1 <= len(data) <= max_bytes:
             raise ValueError()
         if body.media_type == 'text/plain':
             text = data.decode('utf-8')
@@ -436,7 +445,7 @@ def validate_artifact(body):
                 kind = data[offset+4:offset+8]
                 chunk = data[offset+8:offset+8+size]
                 checksum = struct.unpack('>I', data[offset+8+size:offset+12+size])[0]
-                if size > 1024*1024 or zlib.crc32(kind+chunk) & 0xffffffff != checksum or kind in {b'acTL', b'fcTL', b'fdAT'}:
+                if size > max_bytes or zlib.crc32(kind+chunk) & 0xffffffff != checksum or kind in {b'acTL', b'fcTL', b'fdAT'}:
                     raise ValueError()
                 if len(kinds) >= 512 or (kinds and kind == b'IHDR'):
                     raise ValueError()
@@ -467,7 +476,7 @@ def validate_artifact(body):
             if len(pixels) != expected or not decoder.eof or decoder.unused_data or any(pixels[i] > 4 for i in range(0,expected,stride)):
                 raise ValueError()
     except (ValueError, UnicodeError, struct.error, IndexError, zlib.error):
-        raise HTTPException(422, 'Use a valid non-interlaced PNG up to 1 MiB / 8 megapixels, or UTF-8 text evidence up to 1 MiB.') from None
+        raise HTTPException(422, f'Use a valid non-interlaced PNG up to {max_bytes//(1024*1024)} MiB / 8 megapixels, or UTF-8 text evidence up to {max_bytes//(1024*1024)} MiB.') from None
     return data
 
 

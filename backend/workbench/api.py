@@ -12,6 +12,8 @@ from sqlalchemy.exc import OperationalError
 from workbench import verification, admission, implementation, pr_preparation, private_lan
 from workbench import catalog, monitoring, preferences, intake, model_policy, model_accounting
 from workbench.schemas import DisplaySettings, Resources, Policy, ActivityDistribution
+from workbench.schemas import (FeatureAttachmentUpload, FeatureAttachmentView,
+    FeatureReferenceLookupInput, FeatureReferenceLookupView)
 from workbench.schemas import CatalogPage, CatalogDetail, WorkOverview, HistoryPage
 from workbench.db import commands, engine_for, tasks
 from workbench.schemas import (Decision, Problem, Receipt, Session, Task, IntakeInput, IntakeView,
@@ -23,6 +25,7 @@ from workbench.task_execution import TaskExecutionContext
 from workbench.workspace_view import WorkspacePage
 from workbench import work_controls
 from workbench import feature_workshop, feature_recovery, feature_permission
+from workbench import feature_scope_recovery
 
 # Exact authorities only. The dedicated HTTPS service admits the configured home subnet.
 AUTHORITIES = {"127.0.0.1:8787", "localhost:8787", "127.0.0.1:5180", "localhost:5180",
@@ -63,7 +66,8 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
             body = bytearray()
             async for chunk in request.stream():
                 body.extend(chunk)
-                if len(body) > (1420000 if request.url.path.endswith('/artifacts') else 16384):
+                limit = 5600000 if request.url.path == '/api/feature-attachments' else 1420000 if request.url.path.endswith('/artifacts') else 16384
+                if len(body) > limit:
                     return JSONResponse({"detail": "Request is too large."}, status_code=413)
             request._body = bytes(body)
         response = await call_next(request)
@@ -107,6 +111,58 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     def features(page: int = Query(default=1, ge=1, le=1000), archived: bool = False):
         return feature_workshop.listing(app.state.engine, page, archived)
 
+    @app.post('/api/feature-attachments', response_model=FeatureAttachmentView, responses=errors)
+    def upload_feature_reference(body: FeatureAttachmentUpload):
+        from workbench import feature_attachments
+        try:
+            return feature_attachments.upload(app.state.engine, body)
+        except (ValueError, OSError):
+            raise HTTPException(409, 'Private reference storage is unavailable or changed. Your original file was not overwritten.') from None
+
+    @app.get('/api/feature-attachments/{request_id}/{attachment_id}/metadata', response_model=FeatureAttachmentView)
+    def feature_attachment_metadata(request_id: str, attachment_id: str):
+        from workbench import feature_attachments
+        try:
+            value, _ = feature_attachments.load(app.state.engine, request_id, attachment_id)
+            return feature_attachments.view(value)
+        except (ValueError, OSError, KeyError, TypeError):
+            raise HTTPException(404, 'This original feature reference is unavailable.') from None
+
+    @app.get('/api/feature-attachments/{request_id}/{attachment_id}')
+    def feature_attachment_content(request_id: str, attachment_id: str):
+        from workbench import feature_attachments
+        try:
+            value, data = feature_attachments.load(app.state.engine, request_id, attachment_id)
+            media_type = value['media_type']
+            if media_type not in {'image/png', 'text/plain'}:
+                raise ValueError('Unsupported passive reference')
+        except (ValueError, OSError, KeyError, TypeError):
+            raise HTTPException(404, 'This original feature reference is unavailable.') from None
+        return Response(data, media_type=media_type, headers={
+            'Content-Disposition': 'inline; filename="feature-reference.png"' if media_type=='image/png' else 'attachment; filename="feature-reference.txt"',
+            'X-Content-Type-Options': 'nosniff',
+            'Content-Security-Policy': "sandbox; default-src 'none'; frame-ancestors 'none'"})
+
+    @app.post('/api/feature-references/lookup', response_model=FeatureReferenceLookupView, responses=errors)
+    def lookup_feature_reference(body: FeatureReferenceLookupInput):
+        from workbench import feature_references
+        try:
+            return feature_references.lookup_view(app.state.engine, body)
+        except (ValueError, OSError, KeyError, TypeError):
+            raise HTTPException(409, 'Reference lookup is busy or unavailable. Keep your links and try again.') from None
+
+    @app.post('/api/feature-references/evidence', response_model=FeatureReferenceLookupView, responses=errors)
+    def saved_feature_reference(body: FeatureReferenceLookupInput):
+        from workbench import feature_references
+        from workbench.visual_scope import digest
+        try:
+            values = feature_references.evidence(app.state.engine,body.request_id,[r.model_dump(mode='json') for r in body.references])
+            if len(values)!=len(body.references):
+                raise ValueError('Reference evidence unavailable')
+            return dict(binding=digest(values),references=values,message='Saved reference evidence. No new lookup ran.')
+        except (ValueError, OSError, KeyError, TypeError):
+            raise HTTPException(404, 'Saved reference evidence is unavailable. No lookup or model call was started.') from None
+
     @app.get('/api/features/{identity}', response_model=feature_workshop.FeatureView)
     def feature_detail(identity: str):
         return feature_workshop.view(app.state.engine, identity)
@@ -114,6 +170,11 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     @app.post('/api/features/{identity}/correct-steps', response_model=feature_workshop.FeatureView, responses=errors)
     def correct_feature_steps(identity: str, body: feature_recovery.CorrectionInput):
         feature_recovery.request(app.state.engine, identity, body)
+        return feature_workshop.view(app.state.engine, identity)
+
+    @app.post('/api/features/{identity}/prepare-step-again', response_model=feature_workshop.FeatureView, responses=errors)
+    def continue_feature_preparation(identity: str, body: feature_scope_recovery.FeatureScopeCorrectionInput):
+        feature_scope_recovery.request(app.state.engine, identity, body)
         return feature_workshop.view(app.state.engine, identity)
 
     @app.get('/api/features/{identity}/run-offer', response_model=feature_workshop.FeatureRunAvailability)

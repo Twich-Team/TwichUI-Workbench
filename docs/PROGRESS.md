@@ -1,3 +1,29 @@
+# November 12 — real source-preparation failure repaired in development
+
+The SAME installed mapzoom run held before edits after three finished Qwen scope
+calls (12234tokens total). Missing source definitions were not fabricated. Original
+request/plan/parent/usage are retained. There are zero checked steps and zero real
+Feature Workshop completions. Installed115/cd89112 passed its own full9job gate;
+new development has not yet been activated or exercised by real Qwen.
+
+Fixed committed-source inspection now reads/searches actual original/checked input;
+a distinct browser read-only allowance preserves original consumed attempts/clock,
+and never grants edits/publication/fallback. Unknown usage, repeats, stale source,
+Stop and late output hold safely.35focused cases and165affected execution/legacy
+cases pass. No manual map implementation, per-child consent or database reset.
+
+FW4 connects passive private files, exact source identity, explicit name choice,
+GitHub metadata/pinned README, optional unavailable sources and saved References
+through intake/planning/reload.89connected context/history cases pass. Two new
+controlled browser journeys pass with inspected desktop/phone/enlarged text.
+An ACTUAL isolated anonymous GitHub read passed against DeadlyBossMods, retaining
+revision e903df8116a961601b489c14dea996bbef148a11 and README SHA3057edee25194aabb5daf814dbdfff56fa2212617c48a0fe5c56c5134b76a8d3.
+No existing store/model change or third-party code execution. Caption/text transport
+is disclosed; image pixels are not sent.6private installation-copy cases and
+58frontend cases pass; static/contracts/build/schema checks pass. Exact release
+hosted gate, compatible install and real continuation remain next. No owner
+engineering decision needed; keep new live history with a compatible reader.
+
 # November 12 — f604 full gate found two repaired legacy compatibility defects
 
 Do not install f60430f. Hosted43130050847 Backend2/2 failed existing publisher

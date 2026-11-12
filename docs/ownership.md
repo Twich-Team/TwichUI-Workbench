@@ -1,3 +1,23 @@
+# Feature context and same-parent scope correction — November 12, 2026
+
+Existing private preparation output owns passive feature-context evidence; request
+claims bind actual upload bytes/metadata and cached source identity. Optional
+same-owner source_request_id preserves identity across new submissions. No new
+store or permission owner. Anonymous fixed-host lookup runs only the app-owned
+reader in existing user confinement; remote content cannot provide commands or
+source scope. Copy all feature-context files, including drafts, during stopped
+installation and verify an exact independent manifest with feature_context_store.
+
+Existing feature planning journal/session owns committed-source inspection and
+append-only scope history. The original parent run remains immutable. A separate
+CSRF-protected browser command may record exactly three additional read-only
+requests after all prior scope calls have known terminal ledgers/usage. The
+receipt binds exact history, original/checked input, graph, route and parent;
+it expires within30minutes AND the original parent deadline. No implementation,
+publication, fallback, child decision, new session or rewritten old permission.
+Unknown/active/Stop/stale work cannot renew; identical commands are idempotent.
+This is development authority until exact full hosted acceptance/installation.
+
 # Combined feature verification/delivery ownership — November 12, 2026
 
 Existing real_execution grants/requests own feature-verification-v1 local checks;
