@@ -1,3 +1,40 @@
+# November 12 — native pre-grant service-manager query failure repaired and proved
+
+Installed124 native preparation-01 passed REAL full original Lua suite, original
+baseline and fresh boundary. Newslot2cc3391e, SAME ordinal3,90minute deadline11:17:34,
+within parent14:15:43. One actual cancellation probe7cb624c8 passed: input64, generated
+UNKNOWN with native1..60bound; exact ledger retained. NO new coding grant/request/edit.
+Controller exited1 BEFORE grant in chronicle_lease.store→task_budget.permission→
+feature_steps._offer→preparation_recovery.validate. Its systemctl --user query cannot
+use service-manager sockets inside the existing isolated implementation unit.
+Native parent ended-before-result, feature held; controller report inferenceFalse,
+attempt_consumedFalse, probe1, restored normal config/auth and rejected temporarykey.
+Temporary model epoch1173657/start91319069 gone; normal restored1174408/start91321561.
+NO owner Stop. Original request69393927/fence688d61e6 still unknown/reserved24000.
+
+Repair uses native private preparation-owner recipe hash, dead pid/start/boot and
+read-only OWN user-manager cgroup hierarchy; no new socket/network privilege. Current
+native readonly audit ACTUALLY REPRODUCES old false result inside AF_UNIX-blocked user
+service, then passes the FULL corrected feature permission for the actual saved offer.
+Same database fingerprint before/after; no grant/model/approval/store mutation.
+Native old helper SHA9a638fa0bca4404c7579f5b7d0b72af980b946453df493d81a187f6809d1f6c4
+qualifies ONLY that exact pre-grant controller fault, dead owner/descendants, absentold
+temporary epoch, exact normal restoration, passed bounded probe ledger and no grants.
+Stable permission validation rechecks frozen files/owner/cgroup/old epoch and ledger;
+it does NOT recheck normal access during a subsequent legitimate temporary lease.
+Fresh preparation-02 may reuse exact124passed baseline with unchanged real checker;
+fresh isolation/candidate checks remain mandatory. SAME coding ordinal3/tokens/turns,
+new immutable unused90minute reservation within existing parent14:15window. All old
+outcomes/clocks/probe and unknown coding accounting stay exact. Stop now works for
+ended-before-result feature holds too.36related cases pass;17initial new cases pass.
+
+Native proof/audit under outcome-d1d43d5/native-pregrant-controller-recovery-inspection
+and native-isolated-permission-audit.{json,log}. New global engineering pause:
+22unpaused→23paused, intentcontroller-recovery-pause-intent.json. Restore ONLY this
+pause after exact next-source full CI/install/all-row readers/restart/actual rollback
+and desktop/phone checks. Never use752baseline rollback after these native writes.
+Continue campaign; zero REAL Feature Workshop features finished end to end.
+
 # November 12 — installed124; native preparation resumed under the same parent
 
 Exact d1d43d5be31a4effc42131ab34d7521a50f3be1a ALL9 full43191232135 passed.

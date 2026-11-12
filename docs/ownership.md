@@ -1,3 +1,18 @@
+# November 12 — pre-grant readiness validation inside isolated controllers
+
+Preparation liveness checks read the original private owner/recipe identity and
+own-user cgroup hierarchy directly; they require no service-manager socket access.
+A separately proved native controller failure before any coding grant may reprepare
+the SAME unused coding ordinal. The narrowly accepted frozen124helper fault requires
+exact controller evidence, no coding grant, dead owner/descendants, terminated old
+model epoch, normal authenticated restoration and the original passed bounded
+cancellation-probe ledger. Missing exact probe tokens remain unknown with their
+native bounds; prior unknown coding usage remains reserved. Historical files and
+outcomes stay unchanged. Admission checks normal restoration; subsequent permission
+checks validate its immutable receipt and old epoch, without querying normal access
+while a fresh authorized temporary lease is active. Stop and changed scope prevent
+resumption. This grants no new coding attempts, token limit, source or publication.
+
 # November 12 — preparation recovery remains subordinate to the original attempt
 
 A known native storage cancellation before any coding grant may receive a new

@@ -632,7 +632,7 @@ def cancel(engine, identity, command_id):
                 raise HTTPException(409, "Another stop request is already saved")
             return dict(id=identity, status=row["status"])
         from workbench.feature_preparation_recovery import resource_paused
-        feature_held = row['snapshot'].get('feature_parent') and (row['status'] in {'held', 'failed'} or resource_paused(row))
+        feature_held = row['snapshot'].get('feature_parent') and (row['status'] in {'held', 'failed', 'ended-before-result'} or resource_paused(row))
         if row["status"] not in ACTIVE and not feature_held:
             raise HTTPException(409, "This task session has finished; its history is retained")
         state.update(cancel_requested=True, stop_command=command_id)
