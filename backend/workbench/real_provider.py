@@ -170,6 +170,7 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
     current_check=WorkingCheck(source_view) if source_view else None
     last_checked_content = repair.writable_content() if repair else None
     candidate_success_content=None
+    progress_checked_edits=0
     if continuing and getattr(runtime, 'root', None) and (runtime.root/'repair-resume.json').is_file():
         if not permitted() or (stop_event and stop_event.is_set()):
             raise BudgetError('Current permission required before checking retained work')
@@ -490,7 +491,9 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                 correction_count=corrections,read_input_errors=read_errors,tool_input_errors=tool_errors,
                 final_message='',completion_reason='independent-candidate-checks-passed')
         guidance = source_progress.turn(tool_results)
-        if (continuing and repair and edits_done and source_progress.repeated==2
+        feature_progress = bool(scoped_cycle and runtime.recipe.get('repair_cycle') == 'scoped-feature-v1'
+            and edits_done-progress_checked_edits >= 2)
+        if (repair and edits_done and (feature_progress or continuing and source_progress.repeated==2)
                 and repair.writable_content()!=last_checked_content):
             # Do not depend on a model remembering to request the next check.
             # Observe its own changed work, returning actual feedback without a
@@ -511,7 +514,13 @@ def implement(tools, instruction, secret, model, permitted, stop_event=None, tra
                 return dict(log=log,completion_tokens=completion,prompt_tokens=prompt,
                     correction_count=corrections,read_input_errors=read_errors,tool_input_errors=tool_errors,
                     final_message='',completion_reason='independent-checks-passed-after-progress-observation')
-            current_check.set(feedback,'application progress check')
+            progress_checked_edits=edits_done
+            if current_check:
+                current_check.set(feedback,'application progress check')
+            else:
+                messages.append(dict(role='user',content='Application check of your current edits failed. '
+                    'Repair the actual failure within this same attempt; remain within the current step. '
+                    +json.dumps(feedback,ensure_ascii=True)))
             source_progress.repeated=0
             guidance=None
         if source_progress.repeated >= 4 and (getattr(runtime, 'recipe', None) or {}).get('repair_cycle'):

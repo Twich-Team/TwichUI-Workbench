@@ -99,7 +99,7 @@ function FeatureRunRecovery({feature,onSaved}:{feature:Feature;onSaved:()=>void}
  }
  return <WorkshopPanel title="Continue this feature" icon={<ShieldCheck size={21}/>}>
   <h3>{offer.task_title}</h3><p>{offer.message}</p>
-  <details><summary>Continuation limits</summary><p>A separate {offer.hours}-hour window for the same reviewed feature. The earlier attempt remains in history and counts toward the existing attempt limit. Each fresh attempt keeps the existing 24,000 generated-token and 20-turn limits. Fallback stays off. Publishing follows your saved permissions.</p></details>
+  <details><summary>Continuation limits</summary>{offer.limits_description?<p>{offer.limits_description}</p>:<p>A separate {offer.hours}-hour window for the same reviewed feature. The earlier attempt remains in history and counts toward the existing attempt limit. Each fresh attempt keeps the existing 24,000 generated-token and 20-turn limits. Fallback stays off. Publishing follows your saved permissions.</p>}</details>
   <label className="feature-run-consent"><input type="checkbox" checked={accepted} disabled={busy||stale} onChange={e=>setAccepted(e.target.checked)}/><span>Continue the same feature within these limits.</span></label>
   {stale&&<><p role="alert">The saved continuation changed. Review the current offer.</p><Button variant="secondary" onClick={()=>{setCommand(null);localStorage.removeItem(key);setAccepted(false);}}>Review current continuation</Button></>}
   {error&&<p role="alert" className="form-error">{error} Retrying keeps the same command.</p>}

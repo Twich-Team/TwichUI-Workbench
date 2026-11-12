@@ -517,3 +517,60 @@ def test_current_feature_brief_preserves_compiled_checks_and_prioritizes_focused
     assert 'Implement only the current approved feature step' in value
     initial=json.JSONDecoder().raw_decode(value.split('Initial bounded reads: ',1)[1])[0]
     assert initial[0]['path']=='source.lua' and initial[1]['path']=='tests/test_scope.lua'
+
+
+def test_bounded_feature_checks_changed_work_before_consuming_all_twenty_turns(tmp_path):
+    source=tmp_path/'source.lua'
+    source.write_text('local controlled = 1\n')
+    runtime=SimpleNamespace(root=tmp_path,workspace=tmp_path,read_paths=['source.lua'],paths=['source.lua'],
+        recipe=dict(source_context=[{}],verification_profile='lua-feature-step-v1',repair_cycle='scoped-feature-v1'),
+        tool_commands=lambda:{'focused':['controlled-no-shell']})
+    checks=[]
+    class ControlledTools:
+        def __init__(self):self.runtime=runtime
+        def handle(self,name,args):
+            if name=='replace_text':
+                source.write_text(source.read_text().replace(args['old'],args['new']))
+                return 'Controlled edit saved.'
+            assert name=='run_check'
+            checks.append((args['name'],source.read_text()))
+            return json.dumps(dict(status='fail' if len(checks)==1 else 'pass',
+                diagnostic='Controlled new-test setup failure' if len(checks)==1 else 'Controlled pass'))
+    Transport.responses=[response('replace_text',dict(path='source.lua',old=f'= {i}',new=f'= {i+1}'),i-1)
+        for i in range(1,5)]
+    Transport.bodies=[]
+    result=implement(ControlledTools(),'Controlled feature','','controlled',lambda:True,transport=Transport)
+    assert [name for name,_ in checks]==['focused','focused','candidate']
+    assert '= 3' in checks[0][1] and '= 5' in checks[-1][1]
+    assert len(Transport.bodies)==4
+    assert any('Controlled new-test setup failure' in m.get('content','') for m in Transport.bodies[2]['messages'])
+    assert result['completion_reason']=='independent-checks-passed-after-progress-observation'
+    records=sorted((tmp_path/'attempt').glob('progress-check-*.json'))
+    assert len(records)==3 and json.loads(records[0].read_text())['result']['status']=='fail'
+
+
+def test_bounded_feature_never_finishes_on_focused_pass_when_candidate_fails(tmp_path,monkeypatch):
+    from workbench import real_provider
+    source=tmp_path/'source.lua'
+    source.write_text('local controlled = 1\n')
+    runtime=SimpleNamespace(root=tmp_path,workspace=tmp_path,read_paths=['source.lua'],paths=['source.lua'],
+        recipe=dict(source_context=[{}],verification_profile='lua-feature-step-v1',repair_cycle='scoped-feature-v1'),
+        tool_commands=lambda:{'focused':['controlled-no-shell']})
+    monkeypatch.setitem(real_provider.LIMITS,'turns',4)
+    checks=[]
+    class ControlledTools:
+        def __init__(self):self.runtime=runtime
+        def handle(self,name,args):
+            if name=='replace_text':
+                source.write_text(source.read_text().replace(args['old'],args['new']))
+                return 'Controlled edit saved.'
+            assert name=='run_check'
+            checks.append(args['name'])
+            return json.dumps(dict(status='pass' if args['name']=='focused' else 'fail',
+                diagnostic='Controlled independent candidate rejection'))
+    Transport.responses=[response('replace_text',dict(path='source.lua',old=f'= {i}',new=f'= {i+1}'),i-1)
+        for i in range(1,5)]
+    Transport.bodies=[]
+    with pytest.raises(BudgetError,match='turn limit consumed'):
+        implement(ControlledTools(),'Controlled feature','','controlled',lambda:True,transport=Transport)
+    assert len(Transport.bodies)==4 and checks==['focused','candidate','focused','candidate']

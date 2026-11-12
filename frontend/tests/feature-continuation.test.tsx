@@ -43,3 +43,26 @@ it('a changed native offer requires fresh review and consent',async()=>{
  expect(screen.getByRole('button',{name:'Continue saved feature'})).toBeDisabled();
  expect(fetch).not.toHaveBeenCalled();
 });
+
+it('shows a separate coding reservation without promising a new time window',async()=>{
+ const sent:string[]=[];
+ vi.stubGlobal('fetch',vi.fn(async(path:string,init?:RequestInit)=>{
+  if(path==='/api/session')return {ok:true,json:async()=>({csrf_token:'controlled-token'})};
+  if(init?.method==='POST')sent.push(String(init.body));
+  return {ok:true,json:async()=>({})};
+ }));
+ const value={...feature,run_recovery:{...feature.run_recovery!,kind:'coding_attempt',hours:0,
+  message:'Earlier coding attempts ended without a checked result.',
+  limits_description:'One additional isolated coding attempt. Existing deadline stays in place. Earlier grants and unknown usage remain counted.'}};
+ const rendered=form(value);
+ await userEvent.click(screen.getByText('Continuation limits'));
+ expect(screen.getByText(value.run_recovery.limits_description)).toBeVisible();
+ expect(screen.queryByText(/A separate 0-hour/)).not.toBeInTheDocument();
+ expect(screen.getByRole('button',{name:'Continue saved feature'})).toBeDisabled();
+ expect(sent).toHaveLength(0);
+ await userEvent.click(screen.getByLabelText('Continue the same feature within these limits.'));
+ await userEvent.click(screen.getByRole('button',{name:'Continue saved feature'}));
+ expect(sent).toHaveLength(1);
+ expect(JSON.parse(sent[0])).toMatchObject({binding:value.run_recovery.binding});
+ expect(rendered.saved).toHaveBeenCalledOnce();
+});

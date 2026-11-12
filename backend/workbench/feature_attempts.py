@@ -40,13 +40,13 @@ def coding_grants(c, scope):
 
 
 
-def settled(c, offered):
+def settled(c, offered, *, additional_review=False):
     saved = offered['snapshot']
     detail = saved['feature_step']
     scope = detail['scope']
     approval, permission = feature_steps.parent(c, scope['decision_id'])
     consumed = coding_grants(c,scope)
-    if len(consumed) >= permission['budget']['implementation_attempts_per_step']:
+    if not additional_review and len(consumed) >= permission['budget']['implementation_attempts_per_step']:
         raise ValueError('The approved feature step attempt budget is exhausted.')
     feature_steps.validate_scope(c, scope)
     parent = c.execute(select(task_sessions).where(task_sessions.c.id == approval['id'])).mappings().one()
@@ -119,7 +119,9 @@ def settled(c, offered):
         checked_input=scope['feature_input'],feedback=feedback,failed_changes_reused=False,
         execution_diagnostic=str(row['result'].get('error') or '')[:1800],
         baseline_source=saved['ready_preparation']['root'],
-        coding_budget=dict(policy='issued-coding-grants-v1',limit=permission['budget']['implementation_attempts_per_step'],
+        **({'reviewed_additional':True} if additional_review else {}),
+        coding_budget=dict(policy='issued-coding-grants-v1',limit=(len(consumed)+1 if additional_review
+            else permission['budget']['implementation_attempts_per_step']),
             consumed=[dict(id=g['id'],binding=g['binding']) for g in consumed],next_index=len(consumed)+1))
     return {**proof,'binding':digest(proof)}
 
@@ -133,11 +135,14 @@ def validate(c, proof, scope, *, active=True):
     if proof['binding'] != digest({k:v for k,v in proof.items() if k!='binding'}):
         raise ValueError('Failed-attempt recovery receipt changed.')
     approval, permission = feature_steps.parent(c, scope['decision_id'], active=active)
+    if proof.get('reviewed_additional'):
+        from workbench.feature_coding_recovery import validate_authority
+        validate_authority(c,proof,scope)
     if (proof['version'] != 1 or proof['decision_id'] != approval['id']
             or proof['parent_binding'] != approval['binding'] or proof['task_id'] != scope['task_id']
             or proof['checked_input'] != scope['feature_input'] or proof['failed_changes_reused'] is not False
             or not 1 <= proof['previous_attempt'] < proof['next_attempt'] <= (
-                permission['budget']['implementation_attempts_per_step']+1 if proof.get('coding_budget')
+                proof['coding_budget']['limit']+1 if proof.get('coding_budget')
                 else permission['budget']['implementation_attempts_per_step'])
             or proof['next_attempt'] != proof['previous_attempt']+1):
         raise ValueError('Fresh feature attempt differs from its original parent or checked input.')
@@ -145,7 +150,8 @@ def validate(c, proof, scope, *, active=True):
         budget = proof['coding_budget']
         consumed = budget['consumed']
         if (budget['policy'] != 'issued-coding-grants-v1'
-                or budget['limit'] != permission['budget']['implementation_attempts_per_step']
+                or budget['limit'] != (len(consumed)+1 if proof.get('reviewed_additional')
+                    else permission['budget']['implementation_attempts_per_step'])
                 or not 1 <= len(consumed) < budget['limit']
                 or budget['next_index'] != len(consumed)+1
                 or len({g['id'] for g in consumed}) != len(consumed)

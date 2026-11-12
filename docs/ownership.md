@@ -1,3 +1,15 @@
+# Separately reviewed feature coding reservation — November 12, 2026
+
+The existing feature execution journal owns additive coding_continuations receipts. The existing
+CSRF browser continuation endpoint reviews exactly one extra reservation for its fully settled
+failed step. No original proposal decision, grant, usage or terminal outcome is rewritten. Each
+receipt binds exact scope, failed result, consumed grant prefix, parent state and current deadline.
+Only its exact successor offer can use that one reservation. The original three-grant limit stays
+recorded and enforced for ordinary offers. No failed edits become input; last checked source remains
+authoritative. Parent expiry/Stop,24k/20turn/90minute attempt bounds, same provider, independent
+checks and separate publication owner remain. Early application checks observe model edits within
+the original attempt; they grant no new inference and cannot certify a failing candidate.
+
 # November 12 — coding capacity counts actual issued grants
 
 The original maximum3coding attempts per feature step is enforced by counting

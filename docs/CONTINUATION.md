@@ -1,3 +1,28 @@
+# November 12 — real third grant failed after edits; early checks and explicit continuation repaired
+
+Installed126 real request40f936c7/fence8e1d283c settled FAILED:20 fully validated responses,
+3195generated/399159prompt/402354total tokens;10applied edit batches,0working checks.
+Actual error Twenty-turn limit consumed; no further inference. Normal config/access restored,
+temporary epoch gone; actual restoration report retained. Zero checked steps/finished features.
+Independent fresh copy under delegated cgroups/socket-denied confinement passed syntax for both
+files then failed test_friend_login.lua:534 nil MV. Original workspace/evidence unchanged;
+E/retained-model-diagnostics/report.json. No model calls or candidate certification.
+
+Repair checks changed feature work after two successful edits, focused then independent candidate;
+actual failures return within SAME unchanged20turn/24k limits. Candidate rejection cannot finish.
+Separate CSRF browser continuation offers ONE additional coding reservation only after exact
+failed-owner/accounting/restoration proof. Original3grant budget/history unchanged; no reset.
+Receipt binds old grant prefix/failed result/source/current parent state; only exact new slot can
+use it. Same14:15:43 parent window, original90min/24k/20turn and no failed edits carried. Native
+readonly769row proof42e82460… qualifies slot5/grant4 only after distinct review; live unchanged.
+67related backend cases and3frontend cases pass; full static passed. New candidate not installed.
+Native own work pause26unpaused→27paused, E/coding-early-check-pause-intent.json and paused.json.
+Restore ONLY this pause after exact source full9job CI, fresh copied baseline/context, independent
+readers/restore/restart/actual rollback/browser gates. NEVER replay old763baseline after new writes.
+Then ordinary browser continuation under current acceptance delegation; preserve all original
+permissions/clocks/grants/unknown usage. Continue actual dependent implementation/combined checks/
+one coherent draft PR; attach actual URL. No routine engineering renewal. Original local edits preserved.
+
 # November 12 — installed126; corrected third allowed coding grant ACTIVE
 
 Exact3d932257fad9aff49f3ab58823f05857245ddacf ALL9 full43204609232 passed.

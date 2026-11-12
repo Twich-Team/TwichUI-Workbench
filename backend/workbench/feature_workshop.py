@@ -267,10 +267,10 @@ def view_in(c, identity):
             needs_owner=True
             message='The next step needs more preparation. Your feature and completed work are saved.'
     from workbench.feature_run_recovery import offer as run_recovery_offer
-    recovery = run_recovery_offer(c,identity) if run and run['status']=='held' else None
+    recovery = run_recovery_offer(c,identity) if run and run['status'] in {'held','failed'} else None
     if recovery:
         needs_owner=True
-        message='The first coding request never started. Continue the saved feature in a new bounded window.'
+        message=recovery['message']
     return dict(id=identity, title=row['payload']['title'], objective=row['payload']['description'],
         state=state, message=message, active=actual_activity, needs_owner=needs_owner,
         completed_steps=sum(s['verified'] for s in steps), total_steps=len(steps),

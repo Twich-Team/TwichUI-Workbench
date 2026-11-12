@@ -35,6 +35,8 @@ class RunRecoveryInput(StrictModel):
 
 class RunRecoveryOffer(StrictModel):
     binding: str
+    kind: str = "window"
+    limits_description: str | None = None
     hours: int = 6
     task_title: str
     message: str
@@ -167,6 +169,13 @@ def validate_unstarted(c, proof, scope):
 def offer(c, identity):
     try:
         feature_permission.capability(c.engine)
+        from workbench import feature_coding_recovery
+        try:
+            coding = feature_coding_recovery.offer(c, identity)
+        except (ValueError, OSError, HTTPException, KeyError, TypeError, NoResultFound, MultipleResultsFound):
+            coding = None
+        if coding:
+            return coding
         job = (
             c.execute(
                 select(planning_jobs).where(
@@ -290,6 +299,19 @@ def offer(c, identity):
 
 
 def request(engine, identity, body):
+    from workbench import feature_coding_recovery
+    with engine.connect() as c:
+        job = c.execute(select(planning_jobs).where(planning_jobs.c.intake_id == identity,
+            planning_jobs.c.kind == "feature_execution")).mappings().first()
+        if not job:
+            raise HTTPException(409, "This feature has no saved run to continue.")
+        if any(r['command_id'] == str(body.command_id) for r in job['payload'].get('coding_continuations', [])):
+            coding = True
+        else:
+            selected = offer(c, identity)
+            coding = bool(selected and selected.get('kind') == 'coding_attempt')
+    if coding:
+        return feature_coding_recovery.request(engine, identity, body)
     with write_transaction(engine) as c:
         job = (
             c.execute(

@@ -1,3 +1,18 @@
+# November 12 — check actual feature edits before generation capacity ends
+
+The latest actual coding run edited source and tests but used all20turns without a check.
+Independent isolated diagnostics of a fresh copy established the focused test setup failure
+(nil map module), preserving the original failed run and full actual usage. No checked step.
+Application now observes changed feature work after two edits and runs focused/candidate checks;
+real failure feedback reaches the remaining generation turns. A focused pass cannot certify a
+candidate failure;20turn/24k ceilings unchanged. A separate exact browser receipt can add one
+bounded coding attempt after settled failure, within the current parent window. It leaves original
+approval,3grant capacity, unknown usage, terminal outcomes and source untouched. No failed edits
+become checked input. Receipt admits only its exact successor; stale/stopped/unsettled work refuses.
+67related backend tests/3form tests/static passed. Native readonly actual769row proof unchanged.
+Candidate needs exact full hosted CI and installation. Own admission pause26→27 saved privately.
+Continue through real feature delivery; tests and this checkpoint are not task completion.
+
 # November 12 — installed126; corrected third allowed coding grant ACTIVE
 
 Exact3d932257fad9aff49f3ab58823f05857245ddacf ALL9 full43204609232 passed.

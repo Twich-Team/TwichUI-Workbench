@@ -288,7 +288,7 @@ def _offer(c, row, *, active):
     saved = row['snapshot']
     detail = saved['feature_step']
     scope = detail['scope']
-    if (row['fingerprint'] != digest(saved) or detail['attempt'] not in (1, 2, 3, 4)
+    if (row['fingerprint'] != digest(saved) or type(detail['attempt']) is not int or detail['attempt'] < 1
             or row['proposal_id'] != saved['proposal_id']):
         raise ValueError('Feature offer identity or bounded attempt changed.')
     validate_scope(c, scope, active=active)
@@ -334,7 +334,7 @@ def register_offer(engine, runtime, *, attempt=1, recovery=None, preparation_rec
     runtime = Runtime(runtime.root)
     if any(g['status'] != 'passed' for g in runtime.static_preflight()):
         raise ValueError('Feature preparation requires a clean source, passing baseline and protected checks.')
-    if attempt not in (1, 2, 3, 4) or type(attempt) is not int:
+    if type(attempt) is not int or attempt < 1:
         raise ValueError('Feature implementation attempt budget exhausted.')
     prepared = dict(root=str(runtime.root), readiness=readiness(runtime))
     scope = runtime.recipe['approved_feature_scope']
@@ -409,8 +409,14 @@ def permission(c, approval, task_id, *, offer_id=None, require_current=True):
     if require_current:
         from workbench.feature_attempts import coding_grants
         issued = coding_grants(c,selected['snapshot']['feature_step']['scope'])
+        recovery=selected['snapshot']['feature_step'].get('recovery') or {}
+        limit=parent_permission['budget']['implementation_attempts_per_step']
+        if recovery.get('reviewed_additional'):
+            from workbench.feature_coding_recovery import validate_authority
+            validate_authority(c,recovery,selected['snapshot']['feature_step']['scope'])
+            limit=recovery['coding_budget']['limit']
         if (not any(g['snapshot']['task_budget']['offer']['id']==selected['id'] for g in issued)
-                and len(issued) >= parent_permission['budget']['implementation_attempts_per_step']):
+                and len(issued) >= limit):
             raise ValueError('The approved coding-grant budget for this step is exhausted.')
     from workbench.feature_run_recovery import time_authority
     time_reference, allowed_end = time_authority(c,approval,parent_permission,at=selected['created_at'])
