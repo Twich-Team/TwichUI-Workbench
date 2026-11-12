@@ -8,6 +8,6 @@ The map-zoom feature has a finished local review result, with its original and c
 
 All nine hosted Workbench release checks passed. Restart, independent history restore, desktop/phone reload and the correct publication hold passed. The 912-row history retains all 789 original rows unchanged. No new model generation occurred. Actual WoW behavior remains untested.
 
-Publication is blocked by separate compatibility checking: unchanged current main passes 195 tests and fails its gallery artwork reproducibility test because reminder-lion-shield.png rebuilds with different bytes. The feature patch was not applied to that failed baseline.
+Publication is blocked by separate compatibility checking: unchanged current main passes 195 tests and fails its gallery artwork reproducibility test because compressed PNG bytes differ. A diagnostic confirms identical pixels and game textures in all four samples. The feature patch was not applied to that failed baseline.
 
-The next complete outcome is resolving that separate check failure, qualifying the preserved feature on current main, and publishing one draft PR. Owner decision: whether to authorize that separate gallery-check investigation/repair. No further campaign is queued; nothing was merged or released.
+The next complete outcome is resolving that separate check failure, qualifying the preserved feature on current main, and publishing one draft PR. Owner decision: whether to authorize a separate gallery-check correction. No further campaign is queued; nothing was merged or released.

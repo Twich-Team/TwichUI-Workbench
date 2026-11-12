@@ -187,3 +187,15 @@ The final private installation proof is deployment/final-installed-proof.json;
 installed browser proof and screenshots are adjacent. The current delivery pointer
 was updated with its old128version retained. The final documentation-only checkpoint
 does not replace the installed139eed6runtime or reuse CI for different application code.
+
+## Final read-only encoding diagnosis
+
+A separate confined diagnostic regenerated all4existing gallery samples under the
+actual checker (zlib1.3.1). Every sample has identical decoded pixels, identical
+uncompressed PNG image data and byte-identical large/small TGA game textures. Only
+compressed PNG file bytes differ. The strict original byte-reproducibility assertion
+therefore remains failed; this diagnostic is **not** a suite pass or a compatibility
+acceptance receipt. No stored image/test/result was replaced. Resolving that separate
+reproducibility contract or its declared toolchain is outside the preserved map
+feature and remains the next owner scope decision. Private proof:
+gallery-pixel-diagnostic/result.json. Installed code139eed6/history912/hold are unchanged.

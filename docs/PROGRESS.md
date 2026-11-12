@@ -1,3 +1,12 @@
+# Final bounded diagnostic — gallery pixels/textures match; strict PNG check still fails
+
+All4regenerated gallery samples have identical decoded pixels/uncompressed PNG data
+and byte-identical TGA textures. Compressed PNG file bytes differ (checker zlib1.3.1).
+The existing strict suite remains195pass/1fail, no compatibility success receipt,
+no candidate dispatch or addon publication. No source/artwork/test changed. The
+separate reproducibility contract/toolchain needs owner scope direction. Installed
+139eed6/129 and912-row history are unchanged; private native diagnostic retained.
+
 # November 12 — installed129 and verified hold; no feature PR
 
 Installed139eed6 /129 with all9hosted43306252569 release jobs passed.2613backend

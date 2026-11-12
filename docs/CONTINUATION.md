@@ -1,3 +1,14 @@
+# Final gallery diagnostic — compressed PNG bytes only; hold retained
+
+Confined regeneration of all4samples confirms identical decoded pixels/uncompressed
+PNG image data and byte-identical large/small TGA game textures, with different
+compressed PNG bytes under checker zlib1.3.1. The strict original test still FAILS.
+This diagnostic does not grant compatibility acceptance and no success receipt was
+created. Do not use it to waive the196-file suite. No source/image/test/checked hash
+changed. The owner may separately decide how to resolve PNG-byte reproducibility or
+its declared toolchain. Installed139eed6/129, full hosted acceptance,912-row restored
+history and real publication hold remain as recorded below. Stop here.
+
 # November 12 — INSTALLED129; original integrity defect fixed; addon publication safely held
 
 This is the current operational state. Following the Project Working Philosophy,
