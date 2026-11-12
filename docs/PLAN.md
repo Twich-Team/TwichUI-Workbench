@@ -1,3 +1,17 @@
+# November 12 — focused bug investigation recovery
+
+The owner authorized only recovery of the existing reminder-gallery investigation,
+bounded committed-source discovery, full Workbench verification/release and the
+corrected saved repair plan. Do not approve/implement that plan or advance the
+separate map-zoom publication hold. Preserve current private HTTPS/Traefik settings,
+original Qwen records, checked feature and all history. No broader campaign.
+
+Prove the stopped response from immutable receipts, separate execution from missing
+usage, verify active/disconnected refusals and idempotent Bug Report continuation,
+then full hosted exact-commit acceptance before replacement. Resume the original
+saved report through its normal continuation owner; retain every earlier proposal
+and decision. Python plans stay review-only under the existing Lua runtime boundary.
+
 # November 12 — repair release complete; draft delivery blocked by current-main qualification
 
 The false integrity refusal is repaired and verified139eed6/deployment129 is installed.

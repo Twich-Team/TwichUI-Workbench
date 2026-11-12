@@ -1,3 +1,17 @@
+# November 12 — investigation settlement and format boundaries
+
+The existing immutable provider receipt reader determines local terminal execution
+from a complete nonstreaming wire plus its bound final envelope, independently of
+proposal text/usage availability. Delivery phases and renewed_budget retain unknown
+usage and never grant output acceptance or implementation. Clarification/worker
+remain the single continuation owner; active or disconnected uncertainty holds.
+
+Bug source-inspection schemas permit bounded committed tests/tools Python/scripts
+and controlled assets PNG metadata through the existing Git/read/disclosure owners.
+Frozen Lua/feature execution schemas remain unchanged. Python repair proposals bind
+inspected source but remain review-only through scope_missing and an explicit
+preparation refusal; no Python runtime or orchestration owner is introduced.
+
 # November 12 — owner-authorized separate current-main compatibility
 
 The owner answered "Allow separate compatibility checks" to the exact request to

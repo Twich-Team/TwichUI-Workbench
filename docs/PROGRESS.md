@@ -1,3 +1,47 @@
+# November 12 — focused reminder-gallery investigation recovery
+
+Following the Project Working Philosophy: restore the existing report and retain
+all history, rather than asking the owner to repeat continuation. The actual failed
+phase is a complete nonstreaming local HTTP envelope whose finish_reason is length;
+text is partial, provider execution ended, and its24440tokens were reported. The
+old delivery-phase gate accepts only finished generation; the separate partial
+reconciler requires a single attempt and no proposal, so the existing3proposals/
+4attempt history could never qualify. All original rows and private receipts are
+preserved; current idle slot is corroboration, not the terminal proof.
+
+The existing provider_receipts and delivery_phase owners now prove bounded final
+local envelopes (stop/length/content_filter), request identity/order, full wire,
+model identity and saved usage consistency. They do not accept content, invent
+cancellation or overwrite usage. NULL historical usage remains NULL, unavailable
+receipt usage stays unknown, and any known subtotal is separately retained. Fresh
+operations preserve that distinction, complete phase history, original limits and
+same provider. Active/disconnected/unbound requests still hold with a specific
+reason. The existing clarification API/worker enforce duplicate admission.
+
+Source access was Lua-only at schema, directory, literal-search and committed-read
+layers. Existing bounded reads now allow tests/tools Python and shell scripts and
+assets PNG metadata. PNG structure/CRCs and fixed header facts are inspected without
+decompression, embedded-text disclosure or raw binary transmission. Source SHA256
+still binds the original PNG; metadata has its separate digest and explicit label.
+No filesystem, shell, execution or external disclosure authority was added.
+
+Python plan paths are allowed only as review proposals; existing scope_missing and
+approval guards plus an explicit preparation refusal keep the Lua execution owner
+closed to Python. Frozen feature/executable schemas remain exact, as demonstrated
+by the native original runtime after correcting the shared-schema approach. No
+feature record, oracle, checked result or publication hold was modified.
+
+Native reproduction in the existing confined checker gives8pass/1fail at Python
+assertion174; generator png_rgba uses zlib.compress(raw,9). All4samples differ only
+in PNG encoding; decoded pixels, uncompressed PNG streams and both TGA sizes match.
+The report/plan must distinguish the existing strict byte assertion from the
+proposed portable image-equivalence contract and retain independent negative
+controls for real artwork/alpha/dimensions changes. No addon edit is authorized.
+
+38focused tests and normalcheck pass. Full local/hosted release and actual original
+report continuation are pending; installed1409209 remains the active private build.
+Private evidence root: /home/rich/.local/share/TwichUI-Workbench/gallery-investigation-recovery-20261112.
+
 # November 12 — complete: verified private HTTPS through workbench.twich.gg
 
 Following the Project Working Philosophy, the requested private route is working.

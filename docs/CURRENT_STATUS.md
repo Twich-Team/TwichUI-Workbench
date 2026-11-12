@@ -1,11 +1,13 @@
 Last updated November 12, 2026.
 
-Private Workbench HTTPS now works at workbench.twich.gg. Build 1409209 is installed. Work is resumed; previous build 139eed6 and rollback 126 are preserved.
+Build 1409209 remains installed at private workbench.twich.gg. Recovery changes are being verified before replacement.
 
-Portal alone gained backend access alongside the original trusted subnet. The domain accepts only the original 10.0.0.0/24 client network. Backend TLS verifies against the Workbench LAN CA. Exact host/origin and CSRF protections remain; forwarded headers are ignored. Other firewall rules, shared Traefik settings, authentication and administrator session controls are preserved.
+The stuck reminder-gallery request actually ended at its response limit with 24,440 reported tokens. Its partial plan was unusable; its execution was closed. All original reports, proposals, decisions and usage remain saved.
 
-All nine hosted release checks and 99 focused safety checks passed. The actual domain served the exact app and assets after restart. Desktop and phone browser views, reload and security refusals passed. All 924 rows present at cutover survived installation, restart and independent restore. Newer planning activity remains live and was not interrupted.
+Controlled Bug Report tests now cover safe continuation, unknown usage, active/disconnected holds, interrupted receipt recording, repeated continuation and preserved history. Committed Python tests, generator tools and PNG metadata are discoverable. Python repair plans remain review-only.
 
-Earlier real bug/test requests reached draft delivery. Zero new tasks were run from request to finished result for this proxy verification. The map-zoom feature remains checked locally; its separate draft delivery is still held by the current-main gallery reproducibility failure. Actual game behavior is untested.
+The real unchanged Python check was reproduced: PNG bytes differ while decoded pixels and game textures match. No artwork or addon code changed. Full local/hosted release checks, installation and continuation of the saved report remain in progress.
 
-Connectivity is complete and needs no further owner permission. The separate next product outcome remains resolving that gallery check and delivering the preserved feature draft, under its own scope decision. No new campaign is queued.
+Earlier real bug/test tasks reached draft delivery. Zero new tasks have completed from request to finished result in this recovery assignment. The completed map-zoom result and its separate publication hold remain unchanged.
+
+Next complete outcome: install the verified Workbench correction and save the original investigation’s narrowly grounded plan. No repeated continuation decision is needed from the owner. Repair approval and implementation remain separate and are outside this assignment.

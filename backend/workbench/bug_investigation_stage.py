@@ -3,7 +3,8 @@ from typing import Annotated
 
 from pydantic import Field
 
-from workbench.bug_evidence import Data, InvestigationRead, InvestigationSearch, Short
+from workbench.bug_evidence import Data, Short
+from workbench.source_inspection import InvestigationRead, InvestigationSearch
 from workbench.planning_response import ResponseValidationError
 
 

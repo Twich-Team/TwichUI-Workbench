@@ -1,3 +1,49 @@
+# November 12 — reminder-gallery recovery in verification
+
+Current owner assignment supersedes the earlier gallery investigation stop only
+for restoring existing intake7f1ea569 and producing its corrected plan. No addon
+implementation/approval/publication, map-zoom replay, Traefik change or broad campaign.
+Installed1409209 remains running until a replacement passes full hosted acceptance.
+
+Actual held attempt8e111965/job e514fff9 (sequence4) returned HTTP response
+chatcmpl-fQDR3yRRPrel4bglXsM8uDBegKK4HvJX on2026-11-12T22:50:28Z, finish_reason=length,
+21840prompt+2600completion=24440tokens. Its JSON proposal was partial; execution
+was closed. No cancellation requested/acknowledged. LocalHTTP closes the complete
+nonstreaming response before its immutable wire/envelope records. All4operations
+have16responses/360395tokens; no missing usage for this incident. Current server
+slot is idle. Original report,3proposals, requested-change decision, scope and usage
+are preserved privately in gallery-investigation-recovery-20261112/before.sqlite3
+and original-history.json. Do not replace newer live history with that snapshot.
+
+Delivery-phase observation now verifies the final local envelopes independently
+of content completeness/accounting. Unknown ledger usage stays NULL; partial known
+subtotals and unavailable usage remain distinct in fresh bindings. Missing terminal
+response, active work, changed attribution or safeguards keep the hold. Existing
+source-memory, request bounds, fresh bindings and idempotent intake/worker own renewal.
+The old partial-planning reconciler refused this multi-proposal history; no history
+reset or single-attempt exception was added.
+
+Bounded investigation formats now admit tests/tools Python and shell scripts and
+assets PNG metadata, with the original128KiB/regular-blob/path/disclosure/size guards.
+New bug read schemas are separate from the frozen Lua execution/feature schemas.
+This separation is necessary: an initial native diagnostic correctly refused a
+changed feature-oracle digest when shared schemas were expanded. After keeping
+those schemas exact, the unchanged native runtime succeeds in its checks and retains
+the actual expected gallery failure. No original oracle or candidate was changed.
+
+Actual confined current-main test gives8pass/1fail at test_reminder_gallery.py:174.
+All4sample PNG byte strings differ; decoded pixels/uncompressed image data and both
+TGA textures match under zlib1.3.1. Native receipts are in
+/home/rich/.local/share/TwichUI-Workbench/gallery-investigation-recovery-20261112/native-diagnostic.
+Both actual Python blobs and the56130-byte PNG now read through the fixed owner.
+A Python-only repair plan can be saved, but approval/preparation remains blocked by
+the existing Lua-only execution boundary. No test/artwork/addon change is made.
+
+38focused entry-point/recovery/history/source/feature checks and build/schema/lint
+passed. Full local regression is running; hosted exact-commit verification,
+replacement installation and real saved-report continuation remain outstanding.
+Continue this assignment to the corrected saved plan and final owner report only.
+
 # November 12 — COMPLETE: private domain HTTPS verified
 
 Workbench1409209 is installed in everyday-outcome-1409209. Actual

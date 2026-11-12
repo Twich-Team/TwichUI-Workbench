@@ -322,3 +322,62 @@ def not_started_local_turn(identity, evidence_roots, diagnostics):
             or any(e.get('phase') in {'wire-received','envelope','provider-result'} for e in events)):
         raise ValueError('Local stop does not prove non-dispatch')
     return dict(provider_outcome='not_started',requests=0,usage_observation=None,source_sha256=sha,database_records_unchanged=True)
+
+
+def settled_local_turns(identity, usage, evidence_roots, requested_model):
+    """A final HTTP envelope settles execution independently of text and tokens.
+
+    LocalHTTP closes its bounded non-streaming response before recording the
+    envelope. A disconnect/closed socket alone is never terminal evidence.
+    Historical accounting is returned unchanged; absent receipts stay unknown.
+    """
+    identity = str(UUID(identity))
+    roots = list(dict.fromkeys(Path(p) for p in evidence_roots))
+    matches = [p for p in roots if (p/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl').is_file()]
+    if len(matches) != 1 or not requested_model:
+        raise ValueError('Local receipt owner is missing or ambiguous')
+    root = matches[0]
+    first, _ = _read(root/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl', lines=True, bound=65536)
+    followups = [e for e in first if e.get('phase') == 'source-followup']
+    count = len(followups)+1
+    if count > 16 or [e.get('turn') for e in followups] != list(range(2, count+1)):
+        raise ValueError('Local request sequence is unavailable')
+    totals = dict(prompt_tokens=0, completion_tokens=0, total_tokens=0)
+    records, seen, unknown = [], set(), 0
+    for index in range(count):
+        phase = identity if index == 0 else str(uuid5(UUID(identity), 'committed-source-turn-'+str(index)))
+        if index and followups[index-1].get('evidence_id') != phase:
+            raise ValueError('Local request identity changed')
+        events, sha = _read(root/'release/artifacts/runs'/('planning-evidence-'+phase)/'events.jsonl', lines=True, bound=65536)
+        schemas = [e for e in events if e.get('phase') == 'request-schema']
+        envelopes = [e for e in events if e.get('phase') == 'envelope']
+        wires = [e for e in events if e.get('phase') == 'wire-received']
+        if (len(schemas) != 1 or schemas[0].get('request_number') != index+1
+                or len(envelopes) != 1 or len(wires) != 1 or wires[0].get('bounded_prefix') is not False):
+            raise ValueError('Local final response is missing or incomplete')
+        end = envelopes[0]
+        response = end.get('response_identity')
+        if (end.get('completion') not in {'stop', 'length', 'content_filter'}
+                or end.get('model_matches') != 1 or not isinstance(response, str)
+                or len(response) != 64 or response in seen
+                or end.get('generation_state') != ('partial' if end['completion'] == 'length' else 'finished')):
+            raise ValueError('Local final response identity or finish reason is unverified')
+        seen.add(response)
+        values = (end.get('usage') or {}).get('values')
+        valid = (isinstance(values, dict) and set(values) == set(totals)
+                 and all(type(v) is int and v >= 0 for v in values.values())
+                 and values['prompt_tokens']+values['completion_tokens'] == values['total_tokens'])
+        if valid and end.get('accounting_state') == 'complete':
+            for key in totals:
+                totals[key] += values[key]
+        else:
+            unknown += 1
+        records.append(dict(phase=phase, source_sha256=sha, response_identity=response,
+                            finish_reason=end['completion'], usage=values if valid else None))
+    if isinstance(usage, dict) and usage.get('status') == 'complete':
+        if unknown or usage.get('values') != totals or usage.get('requests_observed') != count:
+            raise ValueError('Local final receipts disagree with saved accounting')
+    return dict(provider_outcome='completed', actual_model=requested_model, requests=count,
+                records=records, known_usage=totals, unknown_usage_requests=unknown,
+                historical_usage_unavailable=not isinstance(usage, dict) or usage.get('status') != 'complete',
+                database_records_unchanged=True, output_accepted=False, execution_authorized=False)

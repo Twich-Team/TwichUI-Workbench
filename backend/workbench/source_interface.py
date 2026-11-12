@@ -134,6 +134,8 @@ def context(packet, original, programs=(), *, focus_paths=None):
     example_groups=[]
     example_chars=0
     for item in packet['files']:
+        if not item['path'].endswith('.lua'):
+            continue  # Python/scripts/metadata have no Lua compiler or interface claims.
         if item['path'].startswith('tests/test_') and (not focus_paths or item['path'] in focus_paths):
             raw,actual=source.committed(item['path'],packet['base'])
             if actual['sha256']!=item['sha256']:

@@ -11,7 +11,7 @@ def directory(base, permitted=None):
         raise ValueError('The committed project changed during file discovery.')
     bug.clean_base(root, base)
     allowed = None if permitted is None else set(permitted)
-    roots = sorted(allowed) if allowed is not None else ['!!!TwichUI', 'TwichUI_Settings', 'tests']
+    roots = sorted(allowed) if allowed is not None else inspection.ROOTS
     # An empty external permission is empty, never a request for the whole tree.
     inventory = source.git(root, 'ls-tree', '-rz', '-l', base, '--', *roots, max_bytes=1 << 20) if roots else b''
     groups = {}
@@ -39,4 +39,4 @@ def directory(base, permitted=None):
              'Read the relevant implementation and settings/UI pages, then their tests; the initial excerpts are only a starting selection. '
              'File discovery does not authorize editing, execution, publication or external disclosure.',
         disclosure_scope='Only the existing externally permitted paths.' if allowed is not None
-                         else 'Eligible committed project Lua and test file names. No source body is supplied here.')
+                         else 'Eligible committed Lua, Python, test/generator scripts and PNG names. PNG reads return controlled metadata only. No source body is supplied here.')

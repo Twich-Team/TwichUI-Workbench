@@ -155,6 +155,8 @@ def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=
         from workbench.repair_cycle import oracle
         from workbench.api_mock_contract import source_support
         plan=reviewed['bug_intent']['plan']
+        if any(not path.endswith('.lua') for path in plan['writable_paths']):
+            raise ValueError('This investigation plan is review-only; the isolated repair runtime supports Lua.')
         api_contracts,_=source_support(regression_preparation.repository()[0],reviewed['resolved_base'],plan['read_paths'])
         compiled=dict(oracle=oracle(plan['focused_test'],api_contracts),behavior_id='bug-reproducer',
             read_paths=plan['read_paths'],focused_test=plan['focused_test'])

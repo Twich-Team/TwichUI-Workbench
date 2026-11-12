@@ -13,12 +13,13 @@ from workbench.bug_evidence import BugPlanningResponse, Reproducer, Step
 from workbench.planning_provider import PlanningUnavailable
 from workbench.planning_response import Evidence, ResponseValidationError, wire_schema
 from workbench import bug_plan_review, bug_investigation_stage as stage
+from workbench.source_artifacts import PATTERN, ROOTS
 
 REQUESTS = bug.INVESTIGATION_REQUESTS
 MAX_FILES = 24
 READ_CHARS = 45000
 WIRE_TEXT = 24000
-INSPECT_PATH = re.compile(r'(?:(?:!!!TwichUI|TwichUI_Settings)/[A-Za-z0-9_./!-]+|tests/[A-Za-z0-9_./-]+)\.lua')
+INSPECT_PATH = re.compile(PATTERN)
 
 
 def program_context(packet):
@@ -109,7 +110,7 @@ def committed(path, base):
     if (not INSPECT_PATH.fullmatch(path)
             or '..' in path.split('/') or any(p.startswith('.') for p in path.split('/'))
             or {'lib', 'libs', 'vendor'} & {p.lower() for p in path.split('/')}):
-        raise ValueError('Source inspection is restricted to committed project Lua and tests.')
+        raise ValueError('Source inspection is restricted to eligible committed project source and PNG metadata.')
     root, actual, _ = source.repository()
     if actual != base:
         raise ValueError('The committed project changed during investigation.')
@@ -120,16 +121,23 @@ def committed(path, base):
     if (name != path or len(fields) != 4 or fields[0] not in {'100644', '100755'}
             or fields[1] != 'blob' or int(fields[3]) > 131072):
         raise ValueError('The requested committed source is unavailable.')
-    raw = source.blob(root, fields[2])
-    lines = raw.decode().splitlines()
+    binary = path.endswith('.png')
+    raw = source.git(root, 'cat-file', 'blob', fields[2]) if binary else source.blob(root, fields[2])
     item = dict(path=path, git_blob=fields[2], sha256=hashlib.sha256(raw).hexdigest(),
-                file_lines=len(lines), support_only=True, excerpts=[])
-    if path.startswith('tests/test_'):
+                support_only=True, excerpts=[])
+    if binary:
+        from workbench.source_artifacts import png_metadata
+        raw = png_metadata(raw)
+        item['content_kind'] = 'controlled-png-metadata-v1'
+        item['content_sha256'] = hashlib.sha256(raw).hexdigest()
+    lines = raw.decode().splitlines()
+    item['file_lines'] = len(lines)
+    if path.startswith('tests/test_') and path.endswith('.lua'):
         setup = bug.client_bootstrap(lines)
         if setup:
             item['client_bootstrap'] = setup
             item['client_access_paths'] = bug.client_access_paths(lines, setup)
-    elif path.startswith(('!!!TwichUI/', 'TwichUI_Settings/')):
+    elif path.startswith(('!!!TwichUI/', 'TwichUI_Settings/')) and path.endswith('.lua'):
         from workbench.source_context import compiled_shape
         item['top_level_returns_value'] = compiled_shape(raw)[1]
     return raw, item
@@ -144,7 +152,7 @@ def search(base, query, paths=None):
     bug.clean_base(root, base)
     result, scanned = [], 0
     inventory = source.git(root, 'ls-tree', '-rz', '-l', base, '--',
-                           *(sorted(paths) if paths is not None else ['!!!TwichUI', 'TwichUI_Settings', 'tests']), max_bytes=1 << 20)
+                           *(sorted(paths) if paths is not None else ROOTS), max_bytes=1 << 20)
     for entry in inventory.split(b'\0'):
         if not entry:
             continue
@@ -156,7 +164,7 @@ def search(base, query, paths=None):
                 or paths is not None and not any(path==p or path.startswith(p+'/') for p in paths)
                 or {'lib', 'libs', 'vendor'} & {p.lower() for p in path.split('/')}):
             continue
-        raw = source.blob(root, oid)
+        raw = committed(path, base)[0] if path.endswith('.png') else source.blob(root, oid)
         scanned += len(raw)
         if scanned > 16 << 20:
             raise ValueError('The source search exceeded its bounded local scan.')
@@ -309,10 +317,10 @@ def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_bu
         except ValueError as error:
             if errors is not None and str(error) == 'The requested committed source is unavailable.':
                 errors.append(dict(path=request.path, status='unavailable',
-                    note='No source returned: this path is absent or not a readable regular Lua blob within the committed-source limits. Search the permitted committed project for actual paths; do not assume a file exists.'))
+                    note='No source returned: this path is absent or exceeds the regular committed-file limits. Search the permitted committed project for actual paths; do not assume a file exists.'))
                 continue
             raise ResponseValidationError('The requested committed source is unavailable or disallowed.',
-                ['inspection', index, 'path'], 'an allowed regular committed Lua/test file', request.path) from error
+                ['inspection', index, 'path'], 'eligible regular committed source or controlled PNG metadata', request.path) from error
         lines = raw.decode().splitlines()
         if not 1 <= request.start <= request.end or request.start > len(lines):
             raise ResponseValidationError('The requested source lines are outside the committed file.',

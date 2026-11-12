@@ -53,6 +53,17 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
             from workbench.provider_receipts import not_started_local_turn
             terminal_proof=not_started_local_turn(attempt,evidence_roots,facts)
             provider_state='not_started'
+        elif (attempt and terminal and backend=='local' and local=='failed' and read_only
+              and (facts.get('generation_state')!='finished' or not isinstance(usage,dict) or usage.get('status')!='complete')):
+            from workbench.provider_receipts import settled_local_turns
+            try:
+                terminal_proof=settled_local_turns(attempt,usage,evidence_roots,requested)
+            except (ValueError, OSError, KeyError, TypeError):
+                pass  # A closed socket, missing envelope or uncertain request still holds.
+            else:
+                provider_state=terminal_proof['provider_outcome']
+                if actual is None:
+                    actual=terminal_proof['actual_model']
         elif attempt and terminal and isinstance(usage,dict) and usage.get('status')=='complete':
             if backend=='codex':
                 terminal_proof=(interrupted_turns(attempt,usage,evidence_roots,facts,caps)
@@ -68,7 +79,7 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
                 provider_state=terminal_proof['provider_outcome']
                 if actual is None:
                     actual=terminal_proof['actual_model']  # Recovered fact only; database stays unchanged.
-        if provider_state in {'completed','interrupted'}:
+        if provider_state in {'completed','interrupted'} and isinstance(usage,dict) and usage.get('status')=='complete':
             values=usage.get('values',{})
             if (usage.get('units')!='tokens' or not isinstance(values,dict)
                     or any(type(values.get(k)) is not int or values[k]<0
@@ -78,7 +89,11 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
                 if type(value) is not int or value<0:
                     raise ValueError('Completed phase accounting is malformed')
                 totals[key]=totals.get(key,0)+value
-        count=0 if provider_state=='not_started' else usage.get('requests_observed',1) if isinstance(usage,dict) else None
+        elif terminal_proof and terminal_proof.get('known_usage'):
+            for key,value in terminal_proof['known_usage'].items():
+                totals[key]=totals.get(key,0)+value
+        count=(0 if provider_state=='not_started' else terminal_proof['requests']
+               if terminal_proof and 'requests' in terminal_proof else usage.get('requests_observed',1) if isinstance(usage,dict) else None)
         if provider_state in {'completed','interrupted'} and (type(count) is not int or count<1
                 or provider_state=='completed' and (actual!=requested or not actual)
                 or actual is not None and actual!=requested):
@@ -97,7 +112,8 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
             or sorted(set(sequences+explained))!=list(range(start,end+1))):
         raise ValueError('The processing phase history is unavailable or duplicated')
     return dict(phases=phases,local_operations=operations,next_sequence=end+1,
-        known_usage=totals,unknown_usage=any(p['provider_state'] in {'unknown','active'} for p in phases),
+        known_usage=totals,unknown_usage=any(p['provider_state'] in {'unknown','active'} or
+            p['provider_state']!='not_started' and (not isinstance(p['usage'],dict) or p['usage'].get('status')!='complete') for p in phases),
         execution_authorized=False)
 
 
@@ -110,5 +126,10 @@ def renewable(snapshot):
 
 def hold_reason(snapshot):
     if any(p['provider_state']=='active' for p in snapshot['phases']):
-        return 'Workbench is still finishing the previous read-only investigation. Its results and usage must settle before another request can start. Refresh this task for progress.'
-    return 'Workbench cannot yet confirm the previous investigation’s final state and usage. It has held new generation to avoid duplicate work. Your report, scope choice and earlier plan are saved.'
+        return 'Workbench is still finishing the previous read-only investigation. Its execution must settle before another request can start. Your report, scope choice and earlier plan are saved.'
+    unresolved=next((p for p in snapshot['phases'] if p['provider_state']=='unknown'),None)
+    if unresolved:
+        return (f"Investigation request {unresolved['attempt'] or unresolved['job']} has no verified terminal response. "
+                'A disconnected transport does not prove it stopped. New generation is held to avoid duplicate work. '
+                'Your report, scope choice, earlier plan and any known usage are saved.')
+    return 'The previous investigation lacks verified read-only safeguards or a finished local record. New generation remains held; your report and history are saved.'

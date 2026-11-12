@@ -241,6 +241,7 @@ def renewed_budget(connection, initial, *, exclude_job=None, fresh_source=False)
         return dict(budget_version=5,renewal_consent=True,source_refresh=True,
             operation_request_bound=request_bound(initial['payload']['local_planning_receipt']),
             consumed_requests=sum(p['requests'] for p in phases),known_prior_usage=snapshot['known_usage'],
+            **({'unknown_prior_usage':True} if snapshot['unknown_usage'] else {}),
             prior_phases=[{k:p[k] for k in ('job','sequence','attempt','backend','actual_model',
                 'database_outcome','provider_state','usage','input_binding')} for p in phases],
             next_sequence=snapshot['next_sequence'])
@@ -289,6 +290,7 @@ def renewed_budget(connection, initial, *, exclude_job=None, fresh_source=False)
         operation_request_bound=request_bound(initial['payload']['local_planning_receipt']),
         consumed_requests=sum(p['requests'] for p in phases),
         known_prior_usage=snapshot['known_usage'],
+        **({'unknown_prior_usage':True} if snapshot['unknown_usage'] else {}),
         prior_phases=[{k:p[k] for k in ('job','sequence','attempt','backend','actual_model',
                        'database_outcome','provider_state','usage','input_binding')} for p in phases],
         next_sequence=snapshot['next_sequence'],
