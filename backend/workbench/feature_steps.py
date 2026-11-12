@@ -77,7 +77,7 @@ class StepScope(StrictModel):
         return self
 
 
-def wire_schema(files=None):
+def wire_schema(files=None, coverage=None):
     """The grammar must require a real outcome, as the local validator does."""
     declared = StepScope.model_json_schema()
     properties = declared['properties']
@@ -98,9 +98,20 @@ def wire_schema(files=None):
         tests = True
     if tests:
         outcomes.append(dict(type='object',additionalProperties=False,properties=complete,required=required))
+    inspection = nonnull('inspection')
+    candidates = (coverage or {}).get('focused_test_candidates', [])
+    if files is not None and not tests and candidates:
+        # A complete implementation scope needs an existing inspected test.
+        # Advance that missing prerequisite before spending calls on more of
+        # the same production windows. Names still confer no write authority.
+        inspection = dict(type='array',minItems=1,maxItems=3,items=dict(
+            type='object',additionalProperties=False,
+            properties=dict(path=dict(type='string',enum=candidates),
+                start=dict(type='integer',const=1),end=dict(type='integer',const=80)),
+            required=['path','start','end']))
     return dict(title='StepScope', **{'$defs':declared['$defs']}, anyOf=outcomes+[
         dict(type='object',additionalProperties=False,
-             properties=dict(inspection=nonnull('inspection'),limitation=dict(type='string',const='')),
+             properties=dict(inspection=inspection,limitation=dict(type='string',const='')),
              required=['inspection']),
         dict(type='object',additionalProperties=False,
              properties=dict(limitation=dict(type='string',minLength=1,maxLength=1000)),required=['limitation']),

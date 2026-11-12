@@ -99,7 +99,7 @@ def normalize_bug(value, changes=()):
 def wire_schema(model, coverage=None, files=None):
     if model.__module__ == 'workbench.feature_steps' and model.__name__ == 'StepScope':
         from workbench.feature_steps import wire_schema as feature_scope_schema
-        return feature_scope_schema(files)
+        return feature_scope_schema(files, coverage)
     from workbench.bug_intent import Response as IntentResponse, schema as intent_schema
     if model is IntentResponse:
         return intent_schema(files or [])

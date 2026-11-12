@@ -1,3 +1,11 @@
+# Mixed source-inspection batches — November 12, 2026
+
+Identical committed windows may be explicitly reused in a mixed inspection batch;
+only new windows enter source_windows and all-repeated batches still fail. Exact
+native replay hashes retain attribution. With no inspected focused test, the wire
+first chooses among actual existing test candidates. Names are not inspected
+source or write permission. The original parent and accounting owners are unchanged.
+
 # Original pictures in current plan review — November 12, 2026
 
 Original feature uploads remain untrusted context. Only an explicit CSRF-protected

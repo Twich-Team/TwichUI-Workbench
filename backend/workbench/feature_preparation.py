@@ -56,6 +56,7 @@ def packet(c, decision_id, task_id, feature_input, *, inspections=()):
     tests.sort(key=lambda item:(-sum(term in item['path'].lower() for term in terms),item['path']))
     value.update(source_index=inventory[:96],source_index_truncated=len(inventory)>96,
         focused_test_candidates=tests[:12],
+        coverage=dict(focused_test_candidates=[item['path'] for item in tests[:12]]),
         inspection_capabilities=dict(read_only=True,max_requests=3,page_lines=80,response_characters=6500,
             note='Index and test candidates are existing names, not inspected source. Read a suitable existing focused test before completing a scope. Request actual definitions as needed. No shell, network, edits or new provider authority.'))
     for record in inspections:

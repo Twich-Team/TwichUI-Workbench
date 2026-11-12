@@ -21,19 +21,86 @@ def read_request():
 
 def test_scope_wire_requires_an_outcome_and_only_inspected_existing_test_choices():
     from workbench.planning_response import wire_schema
-    files=[dict(path='!!!TwichUI/View.lua',excerpts=[dict(line=1,text='local state = {}')]),
-           dict(path='tests/test_view.lua',excerpts=[dict(line=1,text='local H = {}')]),
-           dict(path='tests/test_metadata_only.lua',excerpts=[])]
-    schema=wire_schema(feature_steps.StepScope,files=files)
-    assert all(branch['required'] for branch in schema['anyOf'])
-    complete=schema['anyOf'][0]
-    assert set(complete['required'])=={'role','read_paths','writable_paths','focused_test','checks'}
-    assert complete['properties']['focused_test']['enum']==['tests/test_view.lua']
-    assert complete['properties']['read_paths']['items']['enum']==['!!!TwichUI/View.lua','tests/test_view.lua']
-    inspection=next(b for b in schema['anyOf'] if b['required']==['inspection'])
-    assert inspection['properties']['inspection']['type']=='array'
-    without_test=wire_schema(feature_steps.StepScope,files=files[:1])
-    assert all('role' not in branch['required'] for branch in without_test['anyOf'])
+
+    files = [
+        dict(path="!!!TwichUI/View.lua", excerpts=[dict(line=1, text="local state = {}")]),
+        dict(path="tests/test_view.lua", excerpts=[dict(line=1, text="local H = {}")]),
+        dict(path="tests/test_metadata_only.lua", excerpts=[]),
+    ]
+    schema = wire_schema(feature_steps.StepScope, files=files)
+    assert all(branch["required"] for branch in schema["anyOf"])
+    complete = schema["anyOf"][0]
+    assert set(complete["required"]) == {
+        "role",
+        "read_paths",
+        "writable_paths",
+        "focused_test",
+        "checks",
+    }
+    assert complete["properties"]["focused_test"]["enum"] == ["tests/test_view.lua"]
+    assert complete["properties"]["read_paths"]["items"]["enum"] == [
+        "!!!TwichUI/View.lua",
+        "tests/test_view.lua",
+    ]
+    inspection = next(b for b in schema["anyOf"] if b["required"] == ["inspection"])
+    assert inspection["properties"]["inspection"]["type"] == "array"
+    without_test = wire_schema(feature_steps.StepScope, files=files[:1])
+    assert all("role" not in branch["required"] for branch in without_test["anyOf"])
+    guided = wire_schema(
+        feature_steps.StepScope,
+        files=files[:1],
+        coverage=dict(focused_test_candidates=["tests/test_actual.lua"]),
+    )
+    branch = next(b for b in guided["anyOf"] if b["required"] == ["inspection"])
+    item = branch["properties"]["inspection"]["items"]
+    assert item["properties"]["path"]["enum"] == ["tests/test_actual.lua"]
+    assert item["properties"]["start"]["const"] == 1
+    assert item["properties"]["end"]["const"] == 80
+    # Once an existing test has actually been read, ordinary source navigation
+    # and the complete-scope branch return. Index names alone cannot do this.
+    restored = wire_schema(
+        feature_steps.StepScope,
+        files=files,
+        coverage=dict(focused_test_candidates=["tests/test_actual.lua"]),
+    )
+    assert restored["anyOf"][0]["properties"]["focused_test"]["enum"] == ["tests/test_view.lua"]
+
+
+def test_reused_first_window_does_not_discard_fresh_test_in_same_batch(
+    client,
+    headers,
+    store,
+    installed,
+):
+    decision, task, _, job_id = context(client, headers, store)
+    assert feature_preparation.prepare_scope(
+        store, job_id, task, adapter=ScopePlanner(response=read_request())
+    )
+    batch = dict(
+        inspection=[
+            *read_request()["inspection"],
+            dict(path=scope()["focused_test"], start=1, end=80),
+        ]
+    )
+    assert feature_preparation.prepare_scope(
+        store, job_id, task, adapter=ScopePlanner(response=batch)
+    )
+    with store.connect() as c:
+        job = c.execute(select(planning_jobs).where(planning_jobs.c.id == job_id)).mappings().one()
+        history = job["payload"]["scope_history"]
+        assert history[-1]["failure"] is None and history[-1]["inspection"]
+        packet = feature_preparation.packet(
+            c,
+            decision,
+            task,
+            None,
+            inspections=[item["inspection"] for item in history if item.get("inspection")],
+        )
+        assert len(packet["source_windows"]) == 2
+        assert packet["source_inspection_results"][0]["reused"] is True
+        assert "reused" not in packet["source_inspection_results"][1]
+        assert any(f["path"] == scope()["focused_test"] and f["excerpts"] for f in packet["files"])
+        assert not c.execute(select(real_execution_grants)).first()
 
 
 def test_inspect_actual_definitions_then_prepare_scope_in_same_parent_and_original_limits(
@@ -173,8 +240,11 @@ def test_later_source_reads_use_the_actual_checked_predecessor_not_original_prod
     writer = ScopePlanner()
     assert tick(writer)
     assert "text" not in writer.calls[0]["source_windows"][0]
-    assert any("if s == nil then return nil end" in excerpt["text"]
-        for file in writer.calls[0]["files"] for excerpt in file["excerpts"])
+    assert any(
+        "if s == nil then return nil end" in excerpt["text"]
+        for file in writer.calls[0]["files"]
+        for excerpt in file["excerpts"]
+    )
     with store.connect() as c:
         job = (
             c.execute(select(planning_jobs).where(planning_jobs.c.kind == "feature_execution"))
@@ -187,26 +257,46 @@ def test_later_source_reads_use_the_actual_checked_predecessor_not_original_prod
 
 
 def test_scope_packet_keeps_new_definitions_once_and_fits_the_existing_transport():
-    latest = 'NEW-DEFINITION-' + 'x' * 6000
-    old = 'OLDER-HEURISTIC-' + 'y' * 14000
-    packet = dict(original={'description': 'Keep the exact reviewed request.'},
-        approved_scope=['Preserve defaults.'], source_note='Partial source.',
-        files=[dict(path='!!!TwichUI/map/View.lua', sha256='a'*64,
-            excerpts=[dict(line=1, text=old), dict(line=350, text=latest)])],
-        source_windows=[dict(path='!!!TwichUI/map/View.lua',start=350,end=430,sha256='a'*64)],
-        source_inspection_results=[dict(kind='read',path='!!!TwichUI/map/View.lua',start=350,end=430)],
-        source_index=[dict(path='!!!TwichUI/map/example'+str(i)+'.lua',bytes=100) for i in range(96)])
+    latest = "NEW-DEFINITION-" + "x" * 6000
+    old = "OLDER-HEURISTIC-" + "y" * 14000
+    packet = dict(
+        original={"description": "Keep the exact reviewed request."},
+        approved_scope=["Preserve defaults."],
+        source_note="Partial source.",
+        files=[
+            dict(
+                path="!!!TwichUI/map/View.lua",
+                sha256="a" * 64,
+                excerpts=[dict(line=1, text=old), dict(line=350, text=latest)],
+            )
+        ],
+        source_windows=[dict(path="!!!TwichUI/map/View.lua", start=350, end=430, sha256="a" * 64)],
+        source_inspection_results=[
+            dict(kind="read", path="!!!TwichUI/map/View.lua", start=350, end=430)
+        ],
+        source_index=[
+            dict(path="!!!TwichUI/map/example" + str(i) + ".lua", bytes=100) for i in range(96)
+        ],
+    )
     packed = feature_step_source.compact(packet)
-    raw = json.dumps(packed, ensure_ascii=True, separators=(',', ':'))
+    raw = json.dumps(packed, ensure_ascii=True, separators=(",", ":"))
     assert len(raw.encode()) <= 22000 and raw.count(latest) == 1
-    assert packed['original'] == packet['original'] and packed['approved_scope'] == packet['approved_scope']
-    assert packed['source_index_truncated'] and len(packed['source_index']) == 32
-    assert len(packet['source_index']) == 96
+    assert (
+        packed["original"] == packet["original"]
+        and packed["approved_scope"] == packet["approved_scope"]
+    )
+    assert packed["source_index_truncated"] and len(packed["source_index"]) == 32
+    assert len(packet["source_index"]) == 96
 
 
 def test_scope_packet_never_silently_truncates_the_reviewed_request_or_latest_definitions():
-    packet = dict(original={'description':'x'*24000},source_note='Partial source.',
-        source_index=[],files=[],source_windows=[dict(path='!!!TwichUI/map/View.lua')],
-        source_inspection_results=[])
-    with pytest.raises(ValueError, match='reviewed requirements'):
+    packet = dict(
+        original={"description": "x" * 24000},
+        source_note="Partial source.",
+        source_index=[],
+        files=[],
+        source_windows=[dict(path="!!!TwichUI/map/View.lua")],
+        source_inspection_results=[],
+    )
+    with pytest.raises(ValueError, match="reviewed requirements"):
         feature_step_source.compact(packet)

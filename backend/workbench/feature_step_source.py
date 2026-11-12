@@ -75,9 +75,10 @@ def _append(packet, root, base, path, start, end, allowance):
         digest({k: w[k] for k in ("path", "start", "end", "sha256")}) == identity
         for w in packet.get("source_windows", [])
     ):
-        raise ValueError(
-            "This exact source window was already inspected. Read its next lines or choose another search."
-        )
+        # Reuse identical committed evidence without hiding fresh requests later
+        # in the same batch. A repeated first item must not discard a new test
+        # read. The caller still rejects batches that discover nothing new.
+        return dict(window, reused=True), 0
     file = next((f for f in packet["files"] if f["path"] == path), None)
     if file is None:
         if len(packet["files"]) >= 12:
@@ -150,6 +151,8 @@ def inspect(packet, root, base, requests):
     value["source_inspection_results"] = [{k: v for k, v in item.items() if k != "text"} for item in out]
     if len(json.dumps(value, ensure_ascii=False).encode()) > 131072:
         raise ValueError("Feature source inspection reached its packet boundary.")
+    if out and all(item.get('reused') for item in out):
+        raise ValueError('Every requested source window was already inspected. Read an uninspected focused test or the next source lines.')
     return value, out
 
 

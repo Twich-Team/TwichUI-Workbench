@@ -1,3 +1,42 @@
+# November 12 — installed118; repeated-window batches repaired for next release
+
+Exact c897d483407579488c277533cf7878795e6b13f1 passed ALL9jobs in full43153933277.
+Frontend13914513948 SHA1f05560a6de4ef2cf1efbdb4b7808ac4442078b8a073b8a2800733ebb206edc4;
+acceptance13915028821 SHA268884706e7082237d068ec0f2f1c11703572629d06649a787a4367d942723ad.
+Installed118 sealb2f23a65f063a49d4b39b634d8760fd255960e24efe2ea2d6a80a1da38571e7d.
+All728rows/52requests survived both independent readers, four-role restart and
+ACTUAL118→117→118. ALL6private reference files/1750423bytes transferred exactly,
+manifest7e1d463dd5be86d160574cb1232f8e1a2090e352e57a2b46559463a94a539e0a.
+Normal model401/200/key hash, TLS/LAN/firewall/8765 and source seal checked.
+Independent feature reader initially used an unconfigured dormant runtime, then
+an unnormalized path; corrected private reader binds the actual installed runtime
+and canonical copy coordinates. No production permission check was weakened.
+
+A fresh ordinary-browser3request allowance for SAME parent6998247a ran once on118.
+Driver continue-real-feature-c897d48.cjs ALREADY EXECUTED; native command50058fba-
+5169-4325-af1c-35f383694c84, review/intent/receipt/screens retained under outcome-
+c897d48/real-map-zoom-continuation. Original expiry remains07:32:09.163458UTC.
+First response actually requested tests/test_settings_defaults.lua after duplicate
+View windows. The old atomic inspection rejected the first duplicate and discarded
+that fresh test read. One later View611–690read succeeded; last request repeated
+windows and held. All3generations finished with known usage; no addon edit/request.
+14scope records,19model-attempt records,0active,0checked steps; known SOURCE-scope
+usage86656tokens. Original11scope/16ledger records and parent snapshot/binding
+proved EXACT. Old pre-send NULL usage remains NULL. Current731row fingerprint
+f9718c4fae9f4261688cd224ce41199dbbfdc62f599273fa4489fdb5aca9d5e5.
+Do NOT replay728baseline rollback after these new records, nor any old browserdriver.
+
+Development now reuses identical committed source windows with explicit reused
+metadata, retaining fresh later reads in the same batch. An all-repeated batch
+still fails and cannot count as new source. Native receipts replay exactly.
+When no focused test is inspected, wire grammar first selects one of the actual
+existing test candidates for a bounded1–80read; inspected files remain required
+for any implementation scope. No manual addon solution/scope or wider write grant.
+101affected source/preparation/recovery/response cases and static/contracts/build/
+schema pass. Require exact new full release acceptance before installation or any
+new real continuation. FW6comparison code is separate UNCOMMITTED development;
+its existence is not acceptance or installed capability. Continue campaign.
+
 # November 12 — installed117; read choices and current-plan picture reuse ready for release
 
 Exact446fcd3377ebb5d11c315b76e6ab5db64fbb6192 passed ALL9jobs in full43149083695.
