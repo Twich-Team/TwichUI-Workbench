@@ -1,3 +1,12 @@
+# November 12 — retained search inventory semantics
+
+The existing investigation notebook owns search-format versions. Missing version is
+the original bounded Lua inventory, including original scoped searches. Fresh
+version2 adds eligible Python/scripts and PNG metadata. The verifier independently
+recomputes each against its own scope; no historical search is rewritten or treated
+as absence across a larger inventory. Both versions retain the same bounds and
+source-disclosure gate. No new queue or execution authority exists.
+
 # November 12 — investigation settlement and format boundaries
 
 The existing immutable provider receipt reader determines local terminal execution

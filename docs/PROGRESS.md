@@ -1,3 +1,28 @@
+# November 12 — real continuation found retained-search scope incompatibility
+
+ff00633 passed all9hosted checks43326947690 and was installed from the duplicate-free
+8-character stage. The first private settings copy appended a duplicate existing
+accounting root; its worker refusal, restored old service, failed seals/settings and
+new valid copy remain retained. No source, history or safeguard was waived. Actual
+restart/restore preserves936rows; domain/network/auth/source checks and original
+map/Qwen/publication views pass. The comprehensive local pass was2631backend,
+8skips and65frontend; do not misattribute it to the later search correction.
+
+Actual Bug Report reply returned409before enqueue: the expanded search inventory
+changed the recomputed meaning of4old retained searches. The guard correctly refused;
+there was no new generation. This compatibility case was missing from the first
+controlled source tests. The existing notebook now retains an explicit version2
+for expanded searches, uses the original Lua-only inventory for historical records,
+and distinguishes identical queries over different inventories in duplicate detection
+and displayed scope. It never rewrites the old matches, counts, queries or usage.
+
+113focused checks pass, including normal API creation with old Lua-only search,
+negative and scoped receipts, then same-report continuation into Python discovery.
+A pure read-only renewal against the actual installed history now returns sequence5,
+16prior requests and4retained searches. The native current-main PNG reproduction and
+original report/plan/decision evidence remain unchanged. Fresh full hosted acceptance
+is mandatory for this code revision before installation and real continuation.
+
 # November 12 — focused reminder-gallery investigation recovery
 
 Following the Project Working Philosophy: restore the existing report and retain

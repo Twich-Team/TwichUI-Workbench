@@ -1,3 +1,42 @@
+# November 12 — actual saved-search compatibility corrected; final release pending
+
+The first recovery/source-format release ff006338ba1626229cb0c6b8f49375065820294e
+passed full hosted43326947690/all9jobs and is installed in everyday-outcome-ff006338.
+Original staged7-character directory refused startup because its copied inputs
+appended an already-present accounting root. Original settings/seals/failures remain
+retained; the old1409209 service was restored first. A fresh8-character directory
+uses the SAME hosted source with that duplicate removed, no guard or permission
+change. Normal installation, service probes, both listeners/private domain TLS,
+Origin/CSRF, four-service restart and independent restore all pass. All936rows/
+31tables/schema0014 remain exact at logical4f0c5fea3571d8dc0f6b7da6bd49c49186cba0254e7bb6df33510df46862490c.
+Original Qwen/map feature/result/publication hold remain exact; desktop/phone/reload/
+enlarged-text checked. No Traefik or addon publication setting changed.
+
+The actual Bug Report browser continuation then refused409before enqueue/model:
+Committed search evidence changed. Broadened search had reinterpreted4retained
+Lua-only search receipts against Python as well. No fifth job/attempt or generation
+was created; original16responses/360395tokens and all report/history remain exact.
+
+The existing notebook now marks fresh expanded searches version2; unversioned old
+records revalidate through the exact old Lua inventory, including scoped searches.
+Keys/wire scope descriptions distinguish both inventories. Old records stay exact;
+the same literal query over newly available source can legitimately discover more.
+Changed results, malformed versions, unknown execution and disclosure still refuse.
+113focused source/history/continuation tests pass, including original Lua-only API
+searches followed by Python-enabled continuation. Read-only renewed_budget against
+the actual installed store now succeeds: sequence5,16consumed requests,4unchanged
+old searches. No model call occurred. Finalcheck and exact new hosted release are
+required before installing this second code correction; ff00633 remains running.
+The first broad local suite passed2631/8skips and65frontend checks; it predates
+this final history correction. Keep its receipt distinct from final acceptance.
+
+Continue this SAME assignment: checkpoint/push, full exact hosted acceptance,
+fresh duplicate-free private stage/install/restart/restore, then the one original
+Bug Report browser continuation and corrected saved Python plan. The prepared
+resume message and browser script are in gallery-investigation-recovery-20261112.
+Do not ask the owner to repeat continuation, approve/implement the repair, advance
+the feature publication hold, change Traefik or launch another campaign.
+
 # November 12 — reminder-gallery recovery in verification
 
 Current owner assignment supersedes the earlier gallery investigation stop only

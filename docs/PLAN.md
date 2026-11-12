@@ -1,3 +1,13 @@
+# November 12 — finish retained-search compatibility and saved plan
+
+The actual installed browser continuation exposed one further fail-closed boundary:
+old Lua-only search receipts must keep their original inventory after Python/PNG
+source access is added. Version fresh expanded searches within the existing notebook;
+prove actual saved renewal, verify/push, require new exact full hosted acceptance,
+install a fresh duplicate-free stage and resume the original Bug Report. Preserve
+all history and the existing checked feature/publication hold. Stop at the corrected
+saved plan; no repair approval, implementation or wider campaign.
+
 # November 12 — focused bug investigation recovery
 
 The owner authorized only recovery of the existing reminder-gallery investigation,

@@ -1,13 +1,11 @@
 Last updated November 12, 2026.
 
-Build 1409209 remains installed at private workbench.twich.gg. Recovery changes are being verified before replacement.
+Build ff00633 is installed at private workbench.twich.gg. All nine hosted checks passed. Installation, restart and independent restore preserved all 936 saved rows, the map-zoom result, original Qwen records and publication hold. Private access and model authentication remain intact.
 
-The stuck reminder-gallery request actually ended at its response limit with 24,440 reported tokens. Its partial plan was unusable; its execution was closed. All original reports, proposals, decisions and usage remain saved.
+The stuck request ended with 24,440 reported tokens; its text was incomplete but execution was closed. The first recovery correction and bounded Python/PNG source access are installed. No artwork or addon code changed.
 
-Controlled Bug Report tests now cover safe continuation, unknown usage, active/disconnected holds, interrupted receipt recording, repeated continuation and preserved history. Committed Python tests, generator tools and PNG metadata are discoverable. Python repair plans remain review-only.
+The real browser continuation found one remaining history issue before any model work: old searches were being checked against the expanded inventory. A correction now preserves their original Lua scope and marks new searches separately. It passes 113 focused checks and read-only validation against the actual saved report; fresh full hosted verification and installation remain pending.
 
-The real unchanged Python check was reproduced: PNG bytes differ while decoded pixels and game textures match. No artwork or addon code changed. Full local/hosted release checks, installation and continuation of the saved report remain in progress.
+The real PNG byte mismatch was reproduced while pixels and game textures matched. The original investigation has not yet produced its corrected plan. Earlier bug/test tasks reached draft delivery; zero new addon repair tasks completed end to end in this assignment.
 
-Earlier real bug/test tasks reached draft delivery. Zero new tasks have completed from request to finished result in this recovery assignment. The completed map-zoom result and its separate publication hold remain unchanged.
-
-Next complete outcome: install the verified Workbench correction and save the original investigation’s narrowly grounded plan. No repeated continuation decision is needed from the owner. Repair approval and implementation remain separate and are outside this assignment.
+Next outcome: install the fully verified history correction, continue the saved report and retain its narrowly grounded plan. No repeated continuation decision is needed from the owner. Repair approval and implementation remain outside this assignment.

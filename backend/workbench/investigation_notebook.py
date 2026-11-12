@@ -8,7 +8,7 @@ MAX_SEARCHES = 24
 WIRE_BYTES = 12000
 
 
-def record(packet, query, matches, paths):
+def record(packet, query, matches, paths, *, search_version=None):
     scope = sorted(paths) if paths is not None else None
     entry = dict(
         query=query,
@@ -17,9 +17,13 @@ def record(packet, query, matches, paths):
         complete_scan=len(matches) < 12,
         match_limit=12,
     )
+    if search_version is not None:
+        if type(search_version) is not int or search_version != 2:
+            raise ValueError('Unsupported committed search version')
+        entry['search_version'] = search_version
     history = packet.setdefault("inspection_searches", [])
-    key = (query.casefold(), digest(scope))
-    prior = next((e for e in history if (e["query"].casefold(), digest(e["paths"])) == key), None)
+    key = (query.casefold(), digest(scope), search_version)
+    prior = next((e for e in history if (e["query"].casefold(), digest(e["paths"]), e.get('search_version')) == key), None)
     if prior:
         if {k: v for k, v in prior.items() if k != "query"} != {
             k: v for k, v in entry.items() if k != "query"
@@ -37,13 +41,17 @@ def wire(packet):
     scopes, searches = {}, []
     selected={f['path'] for f in packet.get('files',[])}
     for item in packet.get("inspection_searches", []):
-        identity = digest(item["paths"])[:16]
+        version = item.get('search_version')
+        identity = digest(dict(paths=item['paths'],search_version=version) if version else item["paths"])[:16]
         scopes[identity] = dict(
             paths=item["paths"],
             description="these selected committed files only"
             if item["paths"] is not None
+            else "the bounded committed project source and PNG metadata inventory" if version == 2
             else "the bounded committed project Lua inventory",
         )
+        if version is None and item['paths'] is not None:
+            scopes[identity]['description'] += '; Lua files only under the original search contract'
         seen_paths=set()
         matches=[]
         for match in item['matches']:
@@ -99,7 +107,7 @@ def wire(packet):
     return result
 
 
-def verify(initial, packet, search):
+def verify(initial, packet, search, *, legacy_search=None):
     history = packet.get("inspection_searches", [])
     if not isinstance(history, list) or len(history) > MAX_SEARCHES:
         raise ValueError("Invalid committed search notebook")
@@ -107,7 +115,9 @@ def verify(initial, packet, search):
     for item in history:
         if (
             not isinstance(item, dict)
-            or set(item) != {"query", "paths", "matches", "complete_scan", "match_limit"}
+            or set(item) not in ({"query", "paths", "matches", "complete_scan", "match_limit"},
+                                 {"query", "paths", "matches", "complete_scan", "match_limit", "search_version"})
+            or 'search_version' in item and (type(item['search_version']) is not int or item['search_version'] != 2)
             or not isinstance(item["query"], str)
             or not 3 <= len(item["query"].strip()) <= 80
             or "\n" in item["query"]
@@ -121,11 +131,12 @@ def verify(initial, packet, search):
             )
         ):
             raise ValueError("Invalid committed search record")
-        key = (item["query"].casefold(), digest(item["paths"]))
+        key = (item["query"].casefold(), digest(item["paths"]), item.get('search_version'))
         if key in seen:
             raise ValueError("Duplicate committed search record")
         seen.add(key)
-        found = search(initial["base"], item["query"], item["paths"])
+        reader = legacy_search if item.get('search_version') is None and legacy_search is not None else search
+        found = reader(initial["base"], item["query"], item["paths"])
         if (
             item["matches"] != found
             or item["match_limit"] != 12

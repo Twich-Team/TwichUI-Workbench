@@ -143,7 +143,7 @@ def committed(path, base):
     return raw, item
 
 
-def search(base, query, paths=None):
+def search(base, query, paths=None, *, legacy=False):
     if paths is not None and not paths:
         return []
     root, actual, _ = source.repository()
@@ -152,7 +152,7 @@ def search(base, query, paths=None):
     bug.clean_base(root, base)
     result, scanned = [], 0
     inventory = source.git(root, 'ls-tree', '-rz', '-l', base, '--',
-                           *(sorted(paths) if paths is not None else ROOTS), max_bytes=1 << 20)
+                           *(sorted(paths) if paths is not None else ROOTS[:3] if legacy else ROOTS), max_bytes=1 << 20)
     for entry in inventory.split(b'\0'):
         if not entry:
             continue
@@ -161,6 +161,7 @@ def search(base, query, paths=None):
         path = raw_path.decode()
         if (mode not in {'100644', '100755'} or kind != 'blob' or int(size) > 131072
                 or not INSPECT_PATH.fullmatch(path) or any(p.startswith('.') for p in path.split('/'))
+                or legacy and not path.endswith('.lua')
                 or paths is not None and not any(path==p or path.startswith(p+'/') for p in paths)
                 or {'lib', 'libs', 'vendor'} & {p.lower() for p in path.split('/')}):
             continue
@@ -174,6 +175,11 @@ def search(base, query, paths=None):
                 if len(result) == 12:
                     return result
     return result
+
+
+def legacy_search(base, query, paths=None):
+    """Retained search receipts keep their original Lua-only inventory."""
+    return search(base, query, paths, legacy=True)
 
 
 def search_scope(request,disclosure_paths=None):
@@ -289,7 +295,7 @@ def verify_packet(initial, supplied):
                     or window['coverage'] != ('partial requested committed lines' if end < wanted else 'requested committed lines')):
                 raise ValueError('The source continuation metadata changed.')
     from workbench.investigation_notebook import verify
-    verify(initial,supplied,search)
+    verify(initial,supplied,search,legacy_search=legacy_search)
     return supplied
 
 
@@ -301,7 +307,7 @@ def inspect(packet, requests, *, disclosure_paths=None, page_lines=80, result_bu
             scope=search_scope(request,disclosure_paths)
             found = search(packet['base'], request.query, scope) if scope is not None else search(packet['base'], request.query)
             from workbench.investigation_notebook import record
-            record(packet,request.query,found,scope)
+            record(packet,request.query,found,scope,search_version=2)
             allowance = (result_budget-total)//max(1, len(requests)-index)
             for match in found:
                 if len(match['text']) > allowance:

@@ -235,3 +235,48 @@ def test_continuation_preserves_prior_proposal_scope_decision_and_usage(client,h
     assert len(after['planning_jobs'])==len(before['planning_jobs'])+1
     assert after['model_attempts']==before['model_attempts']
     assert after['proposal_decisions']==before['proposal_decisions']
+
+
+@pytest.mark.usefixtures('installed')
+@pytest.mark.parametrize('path',[None,'tests'])
+def test_existing_lua_search_history_survives_expanded_source_continuation(
+    client,headers,store,monkeypatch,tmp_path,path,
+):
+    setup(monkeypatch,tmp_path)
+    from workbench import bug_source_planning as source,investigation_notebook as notebook
+    from test_bug_source_planning import scripted
+    original_search,original_record=source.search,notebook.record
+    query=dict(query='expected_png',**({'path':path} if path else {}))
+    # Exercise a saved operation produced by the original Lua-only search owner.
+    with monkeypatch.context() as legacy:
+        legacy.setattr(source,'search',lambda base,query,paths=None,**kw: original_search(base,query,paths,legacy=True))
+        legacy.setattr(notebook,'record',lambda packet,query,matches,paths,**kw: original_record(packet,query,matches,paths))
+        scripted(legacy,[dict(finding='Search the original permitted inventory.',draft=dict(inspection=[query])),
+                         dict(finding='The original Lua inventory has no match.',draft=dict(question='Which reproducibility contract is intended?'))])
+        saved=client.post('/api/intake',headers=headers,json=report()).json()
+        assert worker.tick(store)
+    url='/api/intake/'+saved['id']
+    current=client.get(url).json()
+    assert current['status']=='waiting_for_information'
+    with store.connect() as c:
+        old=dict(c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==saved['id'])).mappings().one())
+    old_search=copy.deepcopy(old['payload']['bug_inspection_packet']['inspection_searches'][0])
+    assert 'search_version' not in old_search and not old_search['matches']
+    command=dict(command_id=str(uuid4()),revision=current['revision'],text='Continue with the actual Python reproducibility test.',
+                 continue_investigation=True,renew_operation=True)
+    response=client.post(url+'/clarification',headers=headers,json=command)
+    assert response.status_code==200,response.text
+    calls=scripted(monkeypatch,[dict(finding='Search the newly permitted source formats.',draft=dict(inspection=[query])),
+                               dict(finding='The Python test is now discoverable.',draft=dict(limitation='A review-only test finding; no implementation.'))])
+    assert worker.tick(store)
+    assert len(calls)==2
+    facts=calls[1]['completed_searches']
+    assert len(facts['searches'])==2
+    assert facts['searches'][0]['match_count']==0 and facts['searches'][1]['match_count']==1
+    assert any('Lua' in s['description'] for s in facts['scopes'].values())
+    with store.connect() as c:
+        rows=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==saved['id']).order_by(planning_jobs.c.revision)).mappings().all()
+    assert dict(rows[0])==old
+    history=rows[1]['payload']['bug_inspection_packet']['inspection_searches']
+    assert history[0]==old_search and history[1]['search_version']==2
+    assert history[1]['matches'][0]['path']==TEST
