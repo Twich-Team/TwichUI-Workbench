@@ -169,7 +169,8 @@ class Runtime:
                 value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes())
                     for name in ('feature_steps.py','feature_permission.py','feature_source.py','provider_routes.py',
                         'feature_sessions.py','feature_execution.py','feature_preparation.py','feature_attempts.py',
-                        'feature_step_source.py','feature_scope_recovery.py','feature_scope_settlement.py','schemas.py')})
+                        'feature_step_source.py','feature_scope_recovery.py','feature_scope_settlement.py',
+                        'feature_run_recovery.py','feature_preparation_recovery.py','schemas.py')})
                 recovery = self.root/'feature-recovery.json'
                 value['feature_recovery_sha256'] = sha(recovery.read_bytes()) if recovery.is_file() else None
             if self.recipe.get('verification_profile'):
