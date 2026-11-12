@@ -47,6 +47,14 @@ class FeatureRunView(BaseModel):
     expires_at: str
 
 
+class FeatureResult(BaseModel):
+    execution_id: str
+    delivery_task_id: str
+    published: bool
+    draft_url: str | None = None
+    message: str
+
+
 class FeatureView(BaseModel):
     id: str
     title: str
@@ -65,6 +73,7 @@ class FeatureView(BaseModel):
     observed_at: str
     correction: CorrectionOffer | None = None
     run: FeatureRunView | None = None
+    feature_result: FeatureResult | None = None
 
 
 class FeaturePage(BaseModel):
@@ -168,6 +177,8 @@ def view_in(c, identity):
         proposal_decisions.c.proposal_id == latest,
         proposal_decisions.c.payload['feature_run'].as_string().is_not(None))).mappings().first()
     run = None
+    feature_result = None
+    integrated = 'not_recorded'
     if parent:
         journal = c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'feature_execution',
             planning_jobs.c.payload['feature_decision_id'].as_string() == parent['id'])).mappings().first()
@@ -190,14 +201,35 @@ def view_in(c, identity):
         elif session and session['status'] in ACTIVE and not stopped:
             state = 'ready'
         current_scope = journal['payload'].get('current_step_scope') if journal else None
-        if journal and journal['status'] == 'running' and run['phase'] == 'preparing_runtime':
+        if journal and journal['status'] == 'running' and run['phase'] in {'preparing_runtime','checking_combined_feature'}:
             from workbench.real_execution import alive
-            owner = (journal['payload'].get('feature_preparation_claim') or {}).get('owner')
+            owner = (journal['payload'].get('feature_preparation_claim' if run['phase']=='preparing_runtime' else 'feature_verification_claim') or {}).get('owner')
             if owner and alive(owner):
                 actual_activity, state = True, 'checking'
         if not active_step and current_scope and not stopped:
             active_step = next((s for s in steps if s['task']['id'] == current_scope['task_id']), None)
             next_step = next((s for s in steps if not s['verified'] and s is not active_step), None)
+        if journal and journal['payload'].get('completed_checks'):
+            try:
+                from workbench.feature_verification import satisfied_tasks
+                checked = satisfied_tasks(c,parent['id'],journal['payload']['completed_steps'][-1]['input'])
+                integrated = 'passed_offline' if checked else 'not_recorded'
+                from workbench.feature_delivery import view_in as result_view
+                feature_result = result_view(c,journal)
+                if feature_result:
+                    state,message,needs_owner = 'ready_to_review',feature_result['message'],False
+                    delivered = next((s for s in steps if s['task']['id']==feature_result['delivery_task_id']),None)
+                    if delivered:
+                        delivered.update(state='ready_to_review',message=feature_result['message'])
+                    if feature_result['published']:
+                        if delivered:
+                            delivered.update(state='verified',verified=True,message='The one coherent feature draft PR was published and verified.')
+            except (ValueError,OSError,HTTPException,KeyError,TypeError):
+                integrated = 'needs_review'
+                for prior in journal['payload'].get('completed_checks',[]):
+                    step = next((s for s in steps if s['task']['id']==prior['task_id']),None)
+                    if step:
+                        step.update(state='held',verified=False,message='The combined verification evidence needs review. Earlier records remain saved.')
     correction = feature_recovery.offer(c, row)
     if correction:
         message = 'The plan is saved, but its proposed steps did not pass the checks. Prepare corrected steps to continue.'
@@ -207,7 +239,7 @@ def view_in(c, identity):
         current_step=active_step['task']['id'] if active_step else None,
         next_step=next_step['task']['id'] if next_step else None,
         intake=data, steps=steps, observed_at=now(),
-        correction=correction, run=run)
+        correction=correction, run=run, feature_result=feature_result, integrated_verification=integrated)
 
 
 def run_offer(engine, identity):

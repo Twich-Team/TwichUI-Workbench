@@ -10,7 +10,7 @@ from sqlalchemy import select
 
 from workbench import intake, task_execution, provider_routes, task_sessions
 from workbench.db import intakes, proposals, proposal_decisions, backlog_items, planning_jobs, write_transaction
-from workbench.schemas import FeatureBudget
+from workbench.schemas import FeatureBudget, FeatureBudgetV1
 from workbench.schemas import FeatureRunInput as FeatureRunInput
 from workbench.visual_scope import digest
 
@@ -20,6 +20,14 @@ def capability(engine):
     if not configured or configured.get('feature_execution') != 'sequential-feature-v1':
         raise ValueError('Sequential feature implementation is not installed.')
     return configured
+
+
+def maximum_tokens(scope, budget):
+    result = len(scope['graph'])*(budget['scope_attempts_per_step']*budget['scope_completion_tokens']
+        +budget['implementation_attempts_per_step']*budget['per_attempt_tokens'])
+    if budget['version'] == 2:
+        result += budget['verification_requests']*budget['verification_completion_tokens']
+    return result
 
 
 def scope(c, identity, *, dispatch=True):
@@ -78,8 +86,7 @@ def offer(engine, identity):
     budget = FeatureBudget().model_dump(mode='json')
     bound = dict(scope=current,budget=budget)
     return dict(**bound,binding=digest(bound),step_count=len(current['graph']),
-        maximum_generated_tokens=len(current['graph'])*(budget['scope_attempts_per_step']*budget['scope_completion_tokens']
-            +budget['implementation_attempts_per_step']*budget['per_attempt_tokens']))
+        maximum_generated_tokens=maximum_tokens(current,budget))
 
 
 def stop(engine, identity, decision_id, command_id):
@@ -183,7 +190,7 @@ def validate(c, row, *, pending=False, active=True):
         if session and (session['state'].get('cancel_requested') or session['status'] in {'cancelled','expired'}):
             raise ValueError('This parent feature was stopped or expired; its history remains available.')
     permission = row['payload']['feature_run']
-    FeatureBudget.model_validate(permission['budget'])
+    (FeatureBudgetV1 if permission['budget'].get('version') == 1 else FeatureBudget).model_validate(permission['budget'])
     current = scope(c, row['intake_id'], dispatch=active)
     parent = intake.require(c,proposal_decisions,current['scope_approval_id'])
     continuation = row['payload']['execution_continuation']
@@ -201,8 +208,6 @@ def validate(c, row, *, pending=False, active=True):
             or (not pending and not row['finished_at'])
             or (active and datetime.now(timezone.utc) >= datetime.fromisoformat(permission['expires_at']))
             or datetime.fromisoformat(permission['expires_at']) != datetime.fromisoformat(row['created_at'])+timedelta(seconds=permission['budget']['overall_seconds'])
-            or permission['maximum_generated_tokens'] != len(current['graph'])*(
-                permission['budget']['scope_attempts_per_step']*permission['budget']['scope_completion_tokens']
-                +permission['budget']['implementation_attempts_per_step']*permission['budget']['per_attempt_tokens'])):
+            or permission['maximum_generated_tokens'] != maximum_tokens(current,permission['budget'])):
         raise ValueError('The parent feature permission is expired, stale, or changed.')
     return permission

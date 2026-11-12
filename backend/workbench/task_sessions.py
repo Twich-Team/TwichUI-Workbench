@@ -660,9 +660,15 @@ def _propagate_stop(engine, decision_id, command_id):
         session = c.execute(select(sessions).where(sessions.c.id == decision_id)).mappings().first()
         offer_id = session['snapshot'].get('feature_offer_id') if session else None
         actual_decision = session['snapshot']['task']['approval_id'] if offer_id else decision_id
+        decision_match = execution.grants.c.snapshot['task_budget']['decision_id'].as_string() == actual_decision
+        if session and session['snapshot'].get('feature_parent'):
+            from sqlalchemy import or_,and_
+            decision_match = or_(decision_match,and_(
+                execution.grants.c.snapshot['operation_kind'].as_string()=='feature-verification-v1',
+                execution.grants.c.snapshot['feature_verification']['decision_id'].as_string()==decision_id))
         query = select(execution.requests.c.id).join(execution.grants,
             execution.requests.c.grant_id == execution.grants.c.id).where(
-            execution.grants.c.snapshot['task_budget']['decision_id'].as_string() == actual_decision,
+            decision_match,
             execution.requests.c.status.in_(['pending','running','checking']))
         if offer_id:
             query = query.where(execution.grants.c.snapshot['task_budget']['offer']['id'].as_string() == offer_id)

@@ -273,3 +273,29 @@ def test_bad_parent_admission_does_not_overwrite_an_unowned_or_active_journal(
             assert actual==job
         assert c.execute(select(func.count()).select_from(model_attempts)).scalar_one()==2
         assert not c.execute(select(real_execution_grants)).first()
+
+
+def test_original_v1_permission_keeps_its_limits_and_cannot_gain_independent_check_requests(
+    client,headers,store,installed,monkeypatch,
+):
+    from workbench.schemas import FeatureBudgetV1
+    from workbench import feature_check_preparation
+    identity,_=ready(client,headers,store)
+    enable()
+    with monkeypatch.context() as old:
+        old.setattr(feature_permission,'FeatureBudget',FeatureBudgetV1)
+        selected=feature_permission.offer(store,identity)
+        body=request(selected)
+        feature_permission.request(store,identity,body)
+    from workbench import feature_execution
+    assert feature_execution.apply_one(store)
+    with store.connect() as c:
+        parent=c.execute(select(proposal_decisions).where(proposal_decisions.c.id==str(body.command_id))).mappings().one()
+        saved=feature_permission.validate(c,parent)
+        assert saved['budget']['version']==1 and 'verification_requests' not in saved['budget']
+        assert saved['maximum_generated_tokens']==selected['maximum_generated_tokens']
+        job=dict(c.execute(select(planning_jobs).where(planning_jobs.c.kind=='feature_execution')).mappings().one())
+    with pytest.raises(ValueError,match='old limits remain unchanged'):
+        feature_check_preparation.start(store,job)
+    with store.connect() as c:
+        assert c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.id==job['id'])).scalar_one()==job['payload']

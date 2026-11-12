@@ -15,7 +15,7 @@ from pydantic import Field
 from sqlalchemy import select as sql_select
 
 from workbench import real_publication as publication
-from workbench.db import engine_for, real_publications, real_execution_requests
+from workbench.db import engine_for, real_publications, real_execution_requests, real_execution_grants
 from workbench.real_workspace import durable
 from workbench.schemas import StrictModel
 from workbench.visual_scope import digest
@@ -114,8 +114,10 @@ def queue_automatic(engine):
         return False
     with engine.connect() as c:
         candidates = c.execute(sql_select(real_execution_requests.c.id)
+            .join(real_execution_grants,real_execution_requests.c.grant_id==real_execution_grants.c.id)
             .outerjoin(real_publications, real_publications.c.execution_id == real_execution_requests.c.id)
             .where(real_execution_requests.c.status == "checked",
+                   real_execution_grants.c.snapshot['task_budget']['feature_task_id'].as_string().is_(None),
                    real_execution_requests.c.finished_at >= policy["automatic_since"],
                    real_publications.c.id.is_(None))
             .order_by(real_execution_requests.c.finished_at).limit(16)).scalars().all()

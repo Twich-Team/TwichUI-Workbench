@@ -193,6 +193,12 @@ def advance(engine, *, adapter=None, provision=None, stop_event=None):
     from workbench.db import task_run_offers, task_sessions, real_execution_requests, real_execution_grants
     if stop_event is not None and stop_event.is_set():
         return False
+    from workbench import feature_delivery
+    if feature_delivery.reconcile(engine):
+        return True
+    from workbench.feature_verification import recover_owned
+    if recover_owned(engine):
+        return True
     try:
         feature_permission.capability(engine)
     except (ValueError, OSError):
@@ -207,7 +213,7 @@ def advance(engine, *, adapter=None, provision=None, stop_event=None):
         if not row or row['payload'].get('parent_permission_pending'):
             return False
         job = dict(row)
-        if job['status'] == 'running' and job['payload'].get('phase') != 'preparing_runtime':
+        if job['status'] == 'running' and job['payload'].get('phase') not in {'preparing_runtime','checking_combined_feature'}:
             return False
     try:
         with engine.connect() as c:
@@ -216,17 +222,31 @@ def advance(engine, *, adapter=None, provision=None, stop_event=None):
                     or job['payload']['graph_binding'] != intake.digest(permission['scope']['graph'])):
                 raise ValueError('Feature journal differs from the approved graph.')
         phase = job['payload'].get('phase')
+        if phase == 'prepare_delivery':
+            from workbench import feature_delivery
+            return feature_delivery.prepare(engine,job)
+        if phase == 'delivery_ready':
+            return False  # Existing draft delivery owns publication and its separate authority.
+        if phase == 'prepare_independent_checks':
+            from workbench import feature_check_preparation
+            return feature_check_preparation.advance(engine,job,adapter=adapter,stop_event=stop_event)
+        if phase in {'independent_checks_ready','checking_combined_feature'}:
+            from workbench import feature_verification
+            return feature_verification.advance(engine,job,stop_event=stop_event)
         if phase == 'prepare_scopes':
             completed = job['payload'].get('completed_steps', [])
-            done = {item['task_id'] for item in completed}
+            implementation_done = {item['task_id'] for item in completed}
+            done = set(implementation_done)
             if completed:
                 with engine.connect() as c:
                     from workbench import task_execution, trusted_preparation
                     linked = task_execution.snapshot(c, approval['intake_id'], completed[-1]['task_id'], approval['id'])
                     carried = feature_source.prerequisite_tasks(c, completed[-1]['input'], linked,
                         trusted_preparation.configuration(engine))
-                    if carried != done:
+                    if carried != implementation_done:
                         raise ValueError('Feature progress differs from its actual checked source ancestry.')
+                    from workbench.feature_verification import satisfied_tasks
+                    done |= satisfied_tasks(c,approval['id'],completed[-1]['input'])
             candidates = [t for t in permission['scope']['graph'] if t['task_id'] not in done and set(t['dependencies']) <= done]
             if not candidates:
                 return _hold(engine, job, 'Implementation steps are checked. Combined feature verification is still required; the parent feature is not complete.')
@@ -235,6 +255,12 @@ def advance(engine, *, adapter=None, provision=None, stop_event=None):
                 feature_input=completed[-1]['input'] if completed else None, adapter=adapter, stop_event=stop_event)
         if phase in {'scope_ready','preparing_runtime'}:
             role = job['payload']['current_step_scope']['scope']['role']
+            if role == 'verification':
+                from workbench import feature_check_preparation
+                return feature_check_preparation.start(engine,job)
+            if role == 'delivery':
+                from workbench import feature_delivery
+                return feature_delivery.start(engine,job)
             if role != 'implementation':
                 return _hold(engine, job, 'The next step requires combined '+role+'. Its scope is saved; that connected path is not installed yet.')
             return _prepared(engine, job, provision=provision, stop_event=stop_event)
@@ -305,6 +331,7 @@ def advance(engine, *, adapter=None, provision=None, stop_event=None):
         # that exact claim rather than letting the older queued snapshot win.
         with engine.connect() as c:
             current = dict(intake.require(c, planning_jobs, job['id']))
-        if current['payload'].get('feature_preparation_claim',{}).get('owner') == real_execution.owner_identity():
+        if any(current['payload'].get(key,{}).get('owner') == real_execution.owner_identity()
+               for key in ('feature_preparation_claim','feature_verification_claim')):
             job = current
         return _hold(engine, job, 'Feature execution is held: '+str(error)[:700])

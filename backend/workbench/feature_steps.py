@@ -81,7 +81,10 @@ def source(c, linked, permission, feature_input):
         validate_input(c, feature_input, linked, policy)
         carried = prerequisite_tasks(c, feature_input, linked, policy)
         if not set(linked['dependencies']) <= carried:
-            raise ValueError('Every prerequisite must be present in the checked source ancestry.')
+            from workbench.feature_verification import satisfied_tasks
+            carried |= satisfied_tasks(c,linked['approval']['id'],feature_input)
+            if not set(linked['dependencies']) <= carried:
+                raise ValueError('Every prerequisite must be present in checked source or its actual combined verification.')
         return Path(feature_input['source']), feature_input['commit']
     if linked['dependencies']:
         raise ValueError('A dependent step requires its exact checked predecessor input.')

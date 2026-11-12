@@ -308,7 +308,8 @@ def planning_demand(engine, *, eligible=False):
         from workbench.feature_permission import validate
         for job in c.execute(select(planning_jobs).where(planning_jobs.c.kind=='feature_execution',
                 planning_jobs.c.status.in_(['queued','running']))).mappings():
-            if job['payload'].get('phase') not in {'prepare_scopes','preparing_scope'}:
+            if job['payload'].get('phase') not in {'prepare_scopes','preparing_scope',
+                    'prepare_independent_checks','preparing_independent_checks'}:
                 continue
             approval=c.execute(select(proposal_decisions).where(
                 proposal_decisions.c.id==job['payload'].get('feature_decision_id'))).mappings().first()

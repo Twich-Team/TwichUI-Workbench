@@ -1,3 +1,16 @@
+# November 12 — continue connected FW3/FW5 delivery
+
+One original campaign remains active. Complete current native/fault/browser checks,
+commit/push and pass the exact full hosted gate, then install the connected parent
+executor/combined verification/coherent result. Preserve and restore all713rows;
+exercise rollback before new-format feature run writes. Run the SAME original
+mapzoom feature via ordinary browser scope/run decisions under valid acceptance
+delegation: real saved Qwen, dependent checked implementations, independent combined
+proof and one separately authorized coherent draft. Do not call fixtures a real
+feature. In parallel ordinary engineering, finish FW4 optional references/files,
+FW6 supported simulator evidence and FW7 polish/ordinary journeys. No teams,
+legacy cutover, game-file changes, new spending, merges or privileged-policy edits.
+
 # November 11 — continue from tested parent execution into combined result
 
 The uninstalled parent API/browser sequence and settled failure renewal now work

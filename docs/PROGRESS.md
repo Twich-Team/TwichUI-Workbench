@@ -1,3 +1,33 @@
+# November 12 — independent combined verification, one local feature result
+
+Development now has a typed local check operation in existing real execution
+ownership, without a fake inference ledger or usage. Blind producer/review uses
+only original requirements/source; actual original observations qualify before
+candidate application. The exact combined diff retains all native child ancestry,
+then syntax/focused/frozen-behavior/full-original-suite checks gate one create-only
+native result. Original-check correction is finite and original-only; unknown or
+stopped generation cannot replay. Failed candidate checks remain held.
+
+One local combined Git bundle and the existing separately approved draft owner
+replace any per-child publication. All steps and exact combined proof must match;
+no fake URL/completion from controlled publisher telemetry. Existing running app
+and real mapzoom remain unchanged:114/044f521,713rows,52requests,5steps/0checked.
+Zero real features completed end to end. Prior2dd full hosted43120980539 all9passed;
+new source needs its own exact full acceptance.145affected backend and58frontend
+cases pass. Controlled browser combined-result journey passes with actual Lua,
+Git/frozen proof; desktop/phone/enlarged text inspected. Native interruption cases pass for missing partial artifacts and never-dispatched
+pending checks; current38other combined/compiler/budget cases also pass. The
+coherent final delivery case passed again after adding parent identity. Final
+static/contracts/build/schema checks and browser-0ehlga also pass. A test helper initially used a nonexistent pause method; a second
+fault injection intercepted the earlier generic dispatch instead of the intended
+local operation. Both test defects were corrected without weakening runtime gates.
+
+Implementation limits: existing Lua files only; one combined verification node;
+saved Codex feature route held until transport bounds exist; no autonomous repair
+of a failed combined candidate yet. Optional references and supported simulator
+comparison are still campaign work. Test fixtures do not establish real Qwen,
+confinement, publication or in-game behavior. Continue without routine approval.
+
 # November 11 — public parent decision, verified failed-step renewal (not installed)
 
 The development path now exposes one exact feature run offer/command and a single

@@ -251,6 +251,13 @@ def validate(c, grant, prerequisites=True):
         return  # Legacy real grants keep their existing meaning.
     if not current(c, linked):
         raise Waiting("The task, plan approval or scope mapping changed. Execution is held.")
+    if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
+        from workbench.feature_verification import authority
+        try:
+            authority(c,grant['snapshot'])
+        except (ValueError,OSError,HTTPException,KeyError,TypeError):
+            raise Waiting('The exact combined feature check authority or source changed.') from None
+        return
     if grant["snapshot"].get("task_budget"):
         from workbench.task_budget import permission
 

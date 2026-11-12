@@ -1,3 +1,61 @@
+# November 12 — combined feature checks and coherent delivery (development only)
+
+The same parent journal/session now advances two checked implementation children
+into a distinct model-free local verification operation and one coherent draft
+bundle. No new table, scheduler, privileged policy, child approval or fabricated
+model ledger/usage. The blind checker sees original source/requirements only;
+actual original missing-behavior observations and preserved controls must qualify
+BEFORE the combined patch is applied. Candidate syntax, focused tests, frozen
+observations and the unchanged full repository inventory must then pass. Child
+native ledgers/commits remain separate and are revalidated as exact ancestry.
+
+New run budgets are version2: twelve tool-free180s/6144-token preparation requests
+and at most three2400s local check operations, all under the original six-hour
+parent deadline. Old version1 permissions retain their exact historical bounds.
+Unknown provider outcome/usage, Stop, stale scope and tampered evidence cannot
+renew. A defective ORIGINAL observation program can be corrected only with its
+original-only diagnostics after actual failed native outcome/cleanup; the same
+rejected observations cannot repeat. Candidate failures remain held; no claim of
+an autonomous combined implementation repair is made.
+
+Typed combined-feature-artifact-v1 uses the existing separate publication owner.
+It prepares a real credential-free local Git commit of the complete combined diff,
+then gates external delivery on the saved checked approval and exact bundle proof.
+Individual children can never publish. Controlled publication receipts expose no
+fake URL or parent completion. Real draft publication still requires the existing
+owner authorization record. No actual new addon PR exists.
+
+Controlled ordinary browser journey passed request→plan review→one feature run
+→two dependent actual-Lua implementations→blind combined native checks→one local
+result→review/reload. Three of four steps checked; delivery honestly remains ready
+for review. Desktop1440/390phone/320with200% text screenshots inspected. The narrow
+hero now gives text its full width. This is controlled model/confinement evidence,
+NOT real Qwen or game completion. Native crash/Stop/sealed-completion recovery and
+original-check correction evidence are under the private campaign root.
+145 affected legacy/backend cases pass.38 combined/compiler/budget cases passed;
+the2corrected dead-owner tests also pass, and the final coherent delivery case
+was rerun successfully after adding its parent identity.58frontend cases and
+final static/contracts/build/schema checks pass. Final browser evidence is
+browser-0ehlga; exact logs are fw5-accepted-local-browser.log,
+fw5-final-coherent-delivery.log, fw5-dead-local-preparation-corrected.log,
+fw5-current-native-focused.log and fw5-affected-legacy-tests.log. The first native
+aggregate retained2test-helper failures; do not describe that log as all green.
+
+Latest prior pushed source2dd5fe900aa83ca24cee218da45f7b06ec176d00 passed ALL9
+hosted jobs in43120980539, including finalverify. Frontend artifact13900442328 SHA
+7742aa02299a3b1c5285f1fb5e5c2063f913cd060a4be8b5d32f5e97c327993c;
+acceptance13900872758 SHA fad45aae2c760ad9581648e83d1aa59151c29b1176d8d592efdcaebf1421f564.
+This acceptance does NOT cover later combined-check source; require its exact full
+gate before installation. Installed114/044f521 remains unchanged, with713rows and
+52requests. Fresh full fingerprint and active seal were independently rechecked.
+Real mapzoom feature still5steps/0checked. Zero real Feature Workshop completions.
+
+Continue the authorized campaign: exact accepted combined-execution release,
+preservation/restore/rollback BEFORE new-format run writes, installed real Qwen
+multi-step demonstration and coherent draft; FW4 references/attachments, FW6 honest
+supported simulator comparison and FW7 finish remain. Do not stop at checkpoint.
+No ordinary engineering renewal is needed. Preserve all5preexisting doc edits.
+
 # November 11 — public parent decision, verified failed-step renewal (not installed)
 
 The development path now exposes one exact feature run offer/command and a single

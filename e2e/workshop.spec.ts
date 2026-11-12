@@ -88,6 +88,53 @@ test('one browser feature decision runs two dependent steps and Stop prevents mo
  expect((await page.request.get('/api/features/'+identity).then(r=>r.json())).run.cancel_requested).toBeTruthy();
 });
 
+test('one browser feature reaches independent combined checks and one coherent local result',async({page},info)=>{
+ test.setTimeout(180000);
+ test.skip(process.env.WORKBENCH_E2E_EVERYDAY!=='1','Uses the dedicated controlled everyday installation.');
+ fixture('feature-workshop-build-setup');
+ await page.goto('/intake/new?kind=feature&plan=1');
+ // Use the normal feature entry so the saved request has actual planning consent.
+ await page.goto('/features');await page.getByRole('link',{name:'Describe a feature',exact:true}).click();
+ const description='Return nil for an absent name and anonymous for an empty name. Keep existing trimming and lowercase behavior for other names.';
+ await page.getByLabel('Description',{exact:true}).fill(description);
+ await page.getByLabel('Title Optional').fill('Handle absent and blank names safely');
+ await page.getByLabel('Does this change how the addon looks?').selectOption('nonvisual');
+ await page.getByRole('button',{name:'Use my preferred AI settings',exact:true}).click();
+ await page.getByRole('button',{name:'Plan feature',exact:true}).click();
+ await expect(page).toHaveURL(/\/features\/[a-f0-9-]{36}/);
+ const identity=new URL(page.url()).pathname.split('/').at(-1)!;
+ fixture('feature-workshop-complete-plan');fixture('feature-workshop-complete-plan');
+ await page.reload();await page.getByRole('link',{name:'Review plan or question',exact:true}).click();
+ await page.getByRole('button',{name:'Approve plan',exact:true}).click();
+ fixture('feature-workshop-complete-plan');await page.goto('/features/'+identity);
+ await page.getByLabel('Build this reviewed feature within these limits.').check();
+ await page.getByRole('button',{name:'Build reviewed feature',exact:true}).click();
+ let result;
+ for(let phase=0;phase<24;phase++){
+  fixture('feature-workshop-complete-run-tick');
+  result=await page.request.get('/api/features/'+identity).then(r=>r.json());
+  if(result.feature_result)break;
+ }
+ expect(result.feature_result?.execution_id).toBeTruthy();
+ expect(result.feature_result.draft_url).toBeNull();expect(result.feature_result.published).toBe(false);
+ expect(result.intake.decisions).toHaveLength(2);expect(result.integrated_verification).toBe('passed_offline');
+ expect(result.completed_steps).toBe(3);expect(result.total_steps).toBe(4);expect(result.state).toBe('ready_to_review');
+ expect(result.intake.original.description).toBe(description);
+ await page.reload();await expect(page.getByText('3 of 4 checked',{exact:true})).toBeVisible();
+ await expect(page.getByRole('link',{name:'Open feature draft PR',exact:true})).toHaveCount(0);
+ const full=page.getByText('Full request',{exact:true});await full.focus();await full.press('Enter');
+ await expect(page.getByText(description,{exact:true})).toBeVisible();
+ for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
+  await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await overflow(page);await capture(page,info,`feature-combined-result-${width}-${font}`,{keepInCompact:true});
+ }
+ await page.getByRole('link',{name:'Review complete feature',exact:true}).click();
+ await expect(page.getByText('This result combines 2 checked implementation steps.',{exact:false})).toBeVisible();
+ await expect(page.getByText('Offline checks only · Not installed or tested in game',{exact:true})).toBeVisible();
+ await overflow(page);
+ await page.reload();await expect(page.getByText('Automated checks',{exact:true})).toBeVisible();
+});
+
 test('Feature Workshop retains its parent plan and real worker decomposition through reload',async({page},info)=>{
  await page.goto('/intake/new?kind=feature');
  await page.getByLabel('Description',{exact:true}).fill('Preserve my guide selection when I reload the addon.');

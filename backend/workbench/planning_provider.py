@@ -235,6 +235,10 @@ class LocalProvider:
         with local_slot(ends_at=min(self.ends_at or time.monotonic()+300,time.monotonic()+300), stop_event=self.stop_event):
             secret = Path(key_path).read_text().strip()
             transport = LocalHTTP(self.stop_event)
+            from workbench.feature_checks import Response as FeatureChecks, Review as FeatureCheckReview
+            if schema in (FeatureChecks, FeatureCheckReview):
+                transport.seconds = 180
+                transport.ends_at = time.monotonic()+transport.seconds
             if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse):
                 from workbench.bug_investigation import INVESTIGATION_REQUEST_SECONDS
                 transport.seconds = INVESTIGATION_REQUEST_SECONDS
@@ -309,6 +313,12 @@ class LocalProvider:
         from workbench.feature_steps import StepScope, INSTRUCTIONS as STEP_INSTRUCTIONS
         if schema is StepScope:
             instructions = STEP_INSTRUCTIONS
+        from workbench.feature_checks import Response as FeatureChecks, Review as FeatureCheckReview
+        from workbench.feature_checks import INSTRUCTIONS as CHECK_INSTRUCTIONS, REVIEW_INSTRUCTIONS as CHECK_REVIEW_INSTRUCTIONS
+        if schema is FeatureChecks:
+            instructions = CHECK_INSTRUCTIONS
+        elif schema is FeatureCheckReview:
+            instructions = CHECK_REVIEW_INSTRUCTIONS
         if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse):
             from workbench.bug_investigation import INSTRUCTIONS
             instructions = INSTRUCTIONS
@@ -318,7 +328,7 @@ class LocalProvider:
         if schema is InvestigationResponse:
             from workbench.bug_investigation_stage import INSTRUCTIONS as SOURCE_INSTRUCTIONS
             instructions = SOURCE_INSTRUCTIONS
-        context = json.loads(encoded) if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse) else {}
+        context = json.loads(encoded) if schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse, FeatureChecks, FeatureCheckReview) else {}
         if schema is IntentResponse:
             from workbench.bug_intent import INSTRUCTIONS as INTENT_INSTRUCTIONS
             instructions = INTENT_INSTRUCTIONS

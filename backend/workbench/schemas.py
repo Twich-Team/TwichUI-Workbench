@@ -379,7 +379,7 @@ class TaskBudget(StrictModel):
 
 
 
-class FeatureBudget(StrictModel):
+class FeatureBudgetV1(StrictModel):
     version: Literal[1] = 1
     overall_seconds: Literal[21600] = 21600
     max_steps: Literal[6] = 6
@@ -392,6 +392,15 @@ class FeatureBudget(StrictModel):
     per_attempt_turns: Literal[20] = 20
     child_publication: Literal['hold'] = 'hold'
     implementation_fallback: Literal[False] = False
+
+
+class FeatureBudget(FeatureBudgetV1):
+    version: Literal[2] = 2
+    verification_requests: Literal[12] = 12
+    verification_request_seconds: Literal[180] = 180
+    verification_completion_tokens: Literal[6144] = 6144
+    verification_attempts: Literal[3] = 3
+    verification_seconds: Literal[2400] = 2400
 
 
 class FeatureRunInput(StrictModel):
@@ -423,8 +432,8 @@ class FeatureScopeBinding(StrictModel):
 
 class FeatureRunPermission(StrictModel):
     scope: FeatureScopeBinding
-    budget: FeatureBudget
-    maximum_generated_tokens: int = Field(ge=1, le=478800)
+    budget: FeatureBudget | FeatureBudgetV1
+    maximum_generated_tokens: int = Field(ge=1, le=552528)
     expires_at: str = Field(max_length=64)
 
 

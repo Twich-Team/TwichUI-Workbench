@@ -50,9 +50,10 @@ def recover_one(engine):
     with engine.connect() as c:
         jobs = list(c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'feature_execution',
             planning_jobs.c.status == 'running', planning_jobs.c.lease.is_not(None),
-            planning_jobs.c.payload['phase'].as_string() == 'preparing_scope')).mappings())
-    candidate = next((j for j in jobs if j['payload'].get('feature_scope_claim')
-        and not alive(j['payload']['feature_scope_claim']['owner'])), None)
+            planning_jobs.c.payload['phase'].as_string().in_(['preparing_scope','preparing_independent_checks']))).mappings())
+    def claim(job):
+        return job['payload'].get('feature_scope_claim' if job['payload']['phase']=='preparing_scope' else 'feature_checks_claim')
+    candidate = next((j for j in jobs if claim(j) and not alive(claim(j)['owner'])), None)
     if not candidate:
         return False
     with write_transaction(engine) as c:

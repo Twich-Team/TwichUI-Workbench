@@ -19,7 +19,8 @@ type View={id:string;title:string;status:string;message:string;base:string;curre
   workflow_task?:{intake_id:string;task_id:string;binding:string}|null;current_task?:boolean|null;
   result:null|{inference_ran?:boolean|null;verification?:string;candidate_id?:string;
     handler_returned?:boolean;
-    authorship?:{kind:string;author:string;parent_author?:string};
+    operation_kind?:string;contributions?:{task_id:string;execution_id:string}[];
+    authorship?:{kind:string;author?:string;parent_author?:string};
     usage?:{status:string;values?:{completion_tokens?:number;prompt_tokens?:number}|null};
     check_failure?:{name:string;diagnostic:string;context_hint?:{path:string;start:number;end:number}|null};
     files?:components['schemas']['FileComparison'][];
@@ -30,7 +31,7 @@ function checkName(command: string[] | undefined, i: number) {
   const [tool,...args] = command || [];
   const target = args.at(-1);
   if (tool?.startsWith('luac') && args.includes('-p')) return 'Lua syntax';
-  if (tool?.startsWith('lua') && target?.endsWith('/oracle.lua')) return 'Independent behavior check';
+  if (tool?.startsWith('lua') && /\/(?:recipe-)?oracle\.lua$/.test(target||'')) return 'Independent behavior check';
   if (tool?.startsWith('lua') && /(?:^|\/)test_[^/]+\.lua$/.test(target || '')) return 'Focused regression test';
   if (tool === 'bash' && target === 'tests/run.sh') return 'Existing test suite';
   return `Check ${i+1}`;
@@ -66,6 +67,7 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
         :<p>{row.later_review?'A later check found a problem with this patch. Review that finding before relying on these changes.':row.message}</p>}
       {checked&&<p className="result-limit">Offline checks only · Not installed or tested in game</p>}
       </div></div>
+      {result?.operation_kind==='feature-verification-v1'&&<p className="soft-callout">This result combines {result.contributions?.length||0} checked implementation steps. Final verification used local checks; the child model runs retain their own usage records.</p>}
       <PublicationStatus identity={row.id} checked={checked}/>
       <dl className="result-milestones" aria-label="Result progress">
         <div><dt><FileCheck2 size={17}/>Automated checks</dt><dd>{checked?'Passed':active?'Not finished':row.later_review?'Later review needs attention':result?.verification==='failed'?'Failed':'No accepted result'}</dd></div>

@@ -40,7 +40,11 @@ def _proof(row, grant):
     recovery = grant["snapshot"].get("recovery")
     if not recovery:
         raise DeliveryHeld("The original owned evidence directory is required.")
-    runtime = Runtime(Path(recovery["root"]))
+    if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
+        from workbench.feature_verification import Runtime as FeatureRuntime
+        runtime = FeatureRuntime(Path(recovery['root']))
+    else:
+        runtime = Runtime(Path(recovery["root"]))
     if not runtime.owns_recovery(grant):
         raise DeliveryHeld("The evidence directory identity changed.")
     completed = runtime.recover_completion(row, grant)
@@ -54,6 +58,14 @@ def _proof(row, grant):
 def _checked(c, row, grant):
     from workbench.session_authorship import usage_eligible
     from workbench.result_rejection import later_review
+
+    if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
+        from workbench.feature_verification import checked
+        try:
+            checked(c,row,grant)
+        except (ValueError,OSError,HTTPException,KeyError,TypeError):
+            raise DeliveryHeld('The combined feature result or its independently checked contributions changed.') from None
+        return
 
     from workbench.task_cleanup import require_current
     linked_task = grant['snapshot'].get('workflow_task') or {}
@@ -90,6 +102,9 @@ def _checked(c, row, grant):
 
 def current(c, row, grant):
     _checked(c, row, grant)
+    from workbench.feature_verification import is_grant
+    if is_grant(grant):
+        raise DeliveryHeld('Complete feature delivery follows its separate saved publication permission.')
     linked = grant["snapshot"]["workflow_task"]
     approval = (
         c.execute(
@@ -115,6 +130,9 @@ def current(c, row, grant):
 
 
 def preview(row, grant):
+    if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
+        from workbench.feature_delivery import preview as feature_preview
+        return feature_preview(row,grant)
     linked = grant["snapshot"]["workflow_task"]
 
     # Publish approved, bounded purpose and check status, never raw model/tool logs,
@@ -193,6 +211,9 @@ def _inputs(engine, identity):
 
 
 def _snapshot(row, grant, policy, result):
+    if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
+        from workbench.feature_delivery import snapshot
+        return snapshot(row,grant,policy,result)
     identity = row["id"]
     return dict(
         version=1,
@@ -250,6 +271,9 @@ def _enqueue(engine, row, grant, snapshot):
 def _saved_policy(c, row, grant):
     """The earlier run supplies evidence only. Its publication hold remains intact."""
     _checked(c, row, grant)
+    if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
+        from workbench.feature_delivery import policy
+        return policy(c,row,grant,already_checked=True)
     saved = grant["snapshot"].get("task_budget") or {}
     if saved.get('feature_task_id'):
         raise DeliveryHeld('Feature steps are delivered together after combined verification, never as separate drafts.')

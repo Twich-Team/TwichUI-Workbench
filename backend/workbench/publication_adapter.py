@@ -24,6 +24,13 @@ PILOT = Path("/home/rich/twichui-pilot/batch/publish.py")
 PILOT_SHA = "e8940795227e137530f1d13a51c1e790bf616f8942bd043f018a63358ab9ed5d"
 
 
+def specification(snapshot):
+    if snapshot.get('feature_artifact'):
+        from workbench.feature_delivery import publication_specification
+        return publication_specification(snapshot)
+    return snapshot['task_budget']['offer']['snapshot']['specification']
+
+
 class PilotGitHub:
     real = True
 
@@ -267,20 +274,16 @@ class PilotGitHub:
 
     def prepare(self, snapshot, result):
         from workbench.session_authorship import authorship_valid
+        from workbench.feature_delivery import authorship_valid as feature_authorship
 
-        contract = (
-            snapshot.get("task_budget", {})
-            .get("offer", {})
-            .get("snapshot", {})
-            .get("specification", {})
-            .get("contract", {})
-        )
-        if result.get("inference_ran") is not True and not authorship_valid(contract, result):
+        spec = specification(snapshot)
+        contract = spec.get('contract',{})
+        if result.get("inference_ran") is not True and not authorship_valid(contract, result) and not (
+                snapshot.get('feature_artifact') and feature_authorship(contract,result)):
             raise DeliveryHeld(
                 "A real model implementation is required; controls cannot be published."
             )
         self._url(snapshot)
-        spec = snapshot["task_budget"]["offer"]["snapshot"]["specification"]
         source = Path(spec["contract"]["source"])
         source_bytes = sum(
             p.stat().st_size for p in source.rglob("*") if p.is_file() and not p.is_symlink()
@@ -412,7 +415,7 @@ class PilotGitHub:
         expected = sorted(f["path"] for f in result["files"])
         if paths != expected or any(
             p
-            not in snapshot["task_budget"]["offer"]["snapshot"]["specification"]["contract"][
+            not in specification(snapshot)["contract"][
                 "paths"
             ]
             for p in paths

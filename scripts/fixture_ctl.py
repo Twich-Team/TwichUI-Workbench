@@ -63,6 +63,7 @@ def main():
         choices=[
             'feature-workshop-setup', 'feature-workshop-tick', 'feature-workshop-invalid-steps',
             'feature-workshop-build-setup', 'feature-workshop-build-tick', 'feature-workshop-run-tick',
+            'feature-workshop-complete-plan', 'feature-workshop-complete-run-tick',
             "regression-planning",
             "reviewed-offer-setup", "reviewed-offer-plan", "reviewed-offer-prepare",
             "reviewed-offer-controller", "reviewed-offer-stale",
@@ -143,7 +144,8 @@ def main():
         else:
             os.environ['WORKBENCH_RESEARCH_ROOT'] = str(path.parent / 'reviewed-research/source')
             planner = ControlledFeaturePlanner()
-            if args.action in {'feature-workshop-build-tick','feature-workshop-run-tick'}:
+            if args.action in {'feature-workshop-build-tick','feature-workshop-run-tick',
+                    'feature-workshop-complete-plan','feature-workshop-complete-run-tick'}:
                 from test_feature_execution import missing_names_plan, controlled_readiness, controlled_slot, controlled_check
                 from test_feature_preparation import ScopePlanner
                 from workbench import task_sessions, task_session
@@ -152,12 +154,16 @@ def main():
                 task_sessions.ROOT = path.parent/'controlled-session-owner'
                 task_session.ROOT = task_sessions.ROOT
                 os.environ['WORKBENCH_PREPARATION_CONFIG'] = str(path.parent/'automatic-workflow/preparation.json')
-                if args.action == 'feature-workshop-run-tick':
-                    with patch.object(Runtime,'check',controlled_check):
-                        assert worker.tick(engine,planning_adapter=ScopePlanner(),
+                if args.action in {'feature-workshop-run-tick','feature-workshop-complete-run-tick'}:
+                    from workbench import real_confine
+                    from test_feature_check_preparation import IndependentPlanner
+                    selected=IndependentPlanner() if args.action=='feature-workshop-complete-run-tick' else ScopePlanner()
+                    with patch.object(Runtime,'check',controlled_check), patch.object(real_confine,'root',
+                            lambda:'/sys/fs/cgroup/workbench-real-CONTROLLED-local-feature'):
+                        assert worker.tick(engine,planning_adapter=selected,
                             feature_provision=controlled_readiness,session_adapter=controlled_slot)
                     return
-                planner.mutate = missing_names_plan
+                planner.mutate = (lambda result,schema:missing_names_plan(result,schema,verification=True)) if args.action=='feature-workshop-complete-plan' else missing_names_plan
             if args.action == 'feature-workshop-invalid-steps':
                 def incomplete(result, schema):
                     result['tasks'] = result['tasks'][:1]

@@ -1,3 +1,21 @@
+# Combined feature verification/delivery ownership — November 12, 2026
+
+Existing real_execution grants/requests own feature-verification-v1 local checks;
+no model_attempt row, provider key or edit tool exists for this operation. Existing
+parent planning_jobs/task_sessions own its finite claim, Stop, recovery and history.
+Native create-only completion binds original base, frozen independent observations,
+combined diff and actual child ledger ancestry. Defective original observations
+may be corrected only from proved original-only feedback after settled failure;
+candidate failures cannot rewrite the independent expectation. Older permissions
+retain their version and limits. Unknown work/usage is never zero or replayable.
+
+combined-feature-artifact-v1 is a delivery adapter envelope, never a fake task/run
+approval. It requires the exact complete native result and one actual local bundle;
+existing checked publication authorization/real_publications own all external
+writes and uncertain recovery. Child drafts remain forbidden. Parent completion
+requires an actual matching GitHub publication receipt/URL. Controlled publisher
+records cannot complete a real feature or expose a fictitious PR link.
+
 # November 11 — feature run ingress and fresh failed slots
 
 Public feature run commands bind the exact reviewed offer and create the existing

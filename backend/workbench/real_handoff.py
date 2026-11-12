@@ -19,6 +19,12 @@ def _verified_checks(runtime, grant, result):
     from workbench.real_workspace import PRELUDE, sha, suite_inventory
     from workbench.session_authorship import usage_eligible
 
+    if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
+        return bool(getattr(runtime,'operation_kind',None)=='feature-verification-v1'
+            and runtime.verify_checks(result,grant)
+            and result['manifest']['oracle_sha256']==grant['snapshot']['runtime']['oracle_sha256']
+            and result['manifest']['original_manifest_sha256']==grant['snapshot']['runtime']['base_manifest_sha256'])
+
     checks = result.get("checks", [])
     expected = [["luac5.1", "-p", p] for p in job.PATHS] + [
         ["lua5.1", "-e", PRELUDE, "test_chronicle_journey.lua"],

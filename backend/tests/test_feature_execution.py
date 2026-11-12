@@ -100,11 +100,15 @@ def controlled_slot(engine, config_path, stop_event=None):
     task_session.finish(engine, config, 'verified', 'Controlled fixture has actual passing Lua checks.')
 
 
-def missing_names_plan(result, schema):
+def missing_names_plan(result, schema, *, verification=False):
     from workbench.schemas import PlanningOutput
     if schema is PlanningOutput:
         plan = result['proposal']
         plan.update(summary='Handle absent and blank names without changing normal name cleanup.',
+            value='Avoid absent-name errors and keep a useful blank-name default.',
+            feasibility='Controlled existing-file fixture; actual Lua checks are required.',
+            exclusions=['No new settings or persistence.', 'No interface or harness changes.'],
+            stages=['Handle absent input.', 'Restore the blank-name default.', 'Check the combined behavior.'],
             scope=['Return nil for an absent name without throwing.',
                 'Use anonymous for blank names while preserving normal cleanup and missing-input behavior.'],
             behavior=['Absent names return nil.', 'Blank names return anonymous.',
@@ -118,12 +122,24 @@ def missing_names_plan(result, schema):
             purpose='Return anonymous for blank names using the checked missing-input implementation.',
             acceptance=['Blank input returns anonymous, missing input still returns nil, and normal cleanup remains unchanged.'])
 
+    if verification and schema is not PlanningOutput:
+        for key,title,dependency in (
+            ('verify','Check the complete feature','restore'),
+            ('deliver','Prepare the feature delivery','verify'),
+        ):
+            result['tasks'].append(dict(key=key,kind='task',parent=None,title=title,purpose=title,
+                acceptance=['The complete absent/blank behavior and original normalization are independently checked.']
+                    if key=='verify' else ['One coherent feature result is prepared for review.'],
+                scope_indices=[0,1],depends_on=[dependency],source_ids=result['tasks'][0]['source_ids']))
 
-def missing_names_parent(client, headers, store):
+
+def missing_names_parent(client, headers, store, *, verification=False):
     from test_feature_planning import ControlledFeaturePlanner
+    def proposed(result,schema):
+        missing_names_plan(result,schema,verification=verification)
     return prepared_parent(client, headers, store,
         browser=True,
-        planner=ControlledFeaturePlanner(mutate=missing_names_plan), title='Handle absent and blank names safely',
+        planner=ControlledFeaturePlanner(mutate=proposed), title='Handle absent and blank names safely',
         description='Return nil for an absent name and anonymous for an empty name. Keep existing trimming and lowercase behavior for other names.')
 
 

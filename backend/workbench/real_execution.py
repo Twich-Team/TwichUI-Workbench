@@ -56,6 +56,9 @@ def issue(engine, authorization, provenance, activation, *, task=None):
     activation is a runtime-owned object with fresh live checks, not client booleans.
     All capability gates must pass before starting the 60 minute clock.
     """
+    if getattr(activation,'operation_kind',None)=='feature-verification-v1':
+        from workbench.feature_verification import issue as local_checks
+        return local_checks(engine,authorization,provenance,activation,task=task)
     if not authorization.strip() or not provenance.strip():
         raise ValueError('Exact owner instruction and provenance required')
     gates = activation.preflight()
@@ -162,6 +165,9 @@ def contract_matches(snapshot):
 
 
 def valid(grant):
+    if grant and grant['snapshot'].get('operation_kind')=='feature-verification-v1':
+        from workbench.feature_verification import valid as local_checks
+        return local_checks(grant)
     return (grant is not None and not grant['revoked_at'] and
             grant['binding'] == digest(grant['snapshot']) and contract_matches(grant['snapshot']) and
             datetime.now(timezone.utc) < datetime.fromisoformat(grant['expires_at']) <=
@@ -393,6 +399,9 @@ def failure_observations(runtime, identity, fence):
 
 
 def process_one(engine, runtime=None, stop_event=None):
+    if getattr(runtime,'operation_kind',None)=='feature-verification-v1':
+        from workbench.feature_verification import process_one as local_checks
+        return local_checks(engine,runtime,stop_event)
     if runtime is None:
         root = os.environ.get('WORKBENCH_REAL_EXECUTION_ROOT')
         recovery_root = os.environ.get('WORKBENCH_REAL_RECOVERY_ROOT')
@@ -653,7 +662,7 @@ def review(engine, identity):
             and differential.get('result_sha256'))
         # A differential proves that new assertions expose the original bug;
         # it does not establish every proposed criterion individually.
-    return dict(id=row['id'], title=linked['task']['title'] if linked else grant['snapshot']['contract']['title'], status=row['status'],
+    return dict(id=row['id'], title=(linked['original']['title'] if grant['snapshot'].get('operation_kind')=='feature-verification-v1' else linked['task']['title']) if linked else grant['snapshot']['contract']['title'], status=row['status'],
                 message=notice or row['message'], base=grant['snapshot']['contract']['base'], current_grant=valid(grant),
                 workflow_task=dict(intake_id=linked['intake_id'],task_id=linked['task']['id'],
                                    binding=binding) if linked else None,
