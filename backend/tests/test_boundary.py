@@ -80,3 +80,54 @@ def test_home_lan_peers_share_operator_access_with_origin_and_duplicate_checks(s
         assert first.post('/v1/chat/completions', json={}, headers=headers).status_code in {404, 405}
     with store.connect() as connection:
         assert len(connection.execute(select(commands)).all()) == 1
+
+
+def test_portal_requires_its_actual_peer_exact_domain_https_origin_and_csrf(store, monkeypatch):
+    monkeypatch.setenv('WORKBENCH_PRIVATE_LAN_IP', '10.0.0.9')
+    monkeypatch.setenv('WORKBENCH_PRIVATE_LAN_SUBNET', '10.0.0.0/24')
+    app = create_app(store)
+    origin = 'https://workbench.twich.gg'
+    with TestClient(app, base_url=origin, client=('10.0.4.3', 1234)) as proxy:
+        token = proxy.get('/api/session').json()['csrf_token']
+        headers = {'origin': origin, 'x-csrf-token': token}
+        payload = body(proxy)
+        for override in ({'origin': 'https://10.0.0.9:9487'}, {'origin': 'https://evil.invalid'},
+                         {'origin': 'null'}, {'x-csrf-token': 'wrong'}, {'sec-fetch-site': 'cross-site'}):
+            assert proxy.post(URL, json=payload, headers=headers | override).status_code == 403
+        assert proxy.post(URL, json=payload, headers={'x-csrf-token': token}).status_code == 403
+        assert proxy.get('/api/session', headers=[('host', 'workbench.twich.gg'),
+                                                 ('host', '10.0.0.9:9487')]).status_code == 400
+        assert proxy.post(URL, json=payload, headers=[*headers.items(), ('origin', origin)]).status_code == 403
+        for host in ('10.0.0.9:9487', 'evil.invalid', 'workbench.twich.gg.evil.invalid', 'workbench.twich.gg:443'):
+            assert proxy.get('/api/session', headers={'host': host}).status_code == 400
+        with store.connect() as connection:
+            assert not connection.execute(select(commands)).first()
+        accepted = proxy.post(URL, json=payload, headers=headers)
+        assert accepted.is_success
+        assert proxy.post(URL, json=payload, headers=headers).json() == accepted.json()
+        with store.connect() as connection:
+            assert len(connection.execute(select(commands)).all()) == 1
+    with TestClient(app, base_url='http://workbench.twich.gg', client=('10.0.4.3', 1234)) as plain:
+        assert plain.get('/api/session', headers={'x-forwarded-proto': 'https'}).status_code == 403
+
+
+@pytest.mark.parametrize('peer', ['10.0.4.2', '10.0.4.4', '10.0.0.25', '127.0.0.1', '::ffff:10.0.4.3'])
+def test_forwarding_headers_cannot_impersonate_the_portal(store, monkeypatch, peer):
+    monkeypatch.setenv('WORKBENCH_PRIVATE_LAN_IP', '10.0.0.9')
+    monkeypatch.setenv('WORKBENCH_PRIVATE_LAN_SUBNET', '10.0.0.0/24')
+    app = create_app(store)
+    with TestClient(app, base_url='https://workbench.twich.gg', client=(peer, 1234)) as client:
+        assert client.get('/api/session', headers={
+            'x-forwarded-for': '10.0.4.3', 'x-forwarded-host': 'workbench.twich.gg',
+            'x-forwarded-proto': 'https',
+            'forwarded': 'for=10.0.4.3;host=workbench.twich.gg;proto=https',
+        }).status_code == 400
+
+
+@pytest.mark.parametrize('listener,subnet', [('10.0.1.9', '10.0.1.0/24'),
+                                           ('10.0.0.9', '10.0.0.0/25')])
+def test_other_private_listener_configurations_do_not_gain_portal_access(store, monkeypatch, listener, subnet):
+    monkeypatch.setenv('WORKBENCH_PRIVATE_LAN_IP', listener)
+    monkeypatch.setenv('WORKBENCH_PRIVATE_LAN_SUBNET', subnet)
+    with TestClient(create_app(store), base_url='https://workbench.twich.gg', client=('10.0.4.3', 1234)) as client:
+        assert client.get('/api/session').status_code == 400

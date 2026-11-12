@@ -3,6 +3,18 @@ from ipaddress import IPv4Address, IPv4Network
 import os
 
 PRIVATE = tuple(IPv4Network(block) for block in ('10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'))
+PORTAL_AUTHORITY = 'workbench.twich.gg'
+
+
+def is_portal(lan, host):
+    """The owner-approved proxy has one actual peer and one HTTPS authority.
+
+    This complements the fixed administrator /32 exception. Forwarded headers
+    never establish the peer, and other private listener configurations retain
+    their existing subnet boundary.
+    """
+    return (lan[0] == '10.0.0.9:9487' and lan[1] == IPv4Network('10.0.0.0/24')
+            and host == '10.0.4.3')
 
 
 def allows_peer(subnet, host):

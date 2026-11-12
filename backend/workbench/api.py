@@ -47,10 +47,11 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     async def boundary(request: Request, call_next):
         hosts = request.headers.getlist("host")
         origins = request.headers.getlist("origin")
-        authority = lan[0] if lan else None
+        portal = bool(lan and request.client and private_lan.is_portal(lan, request.client.host))
+        authority = private_lan.PORTAL_AUTHORITY if portal else (lan[0] if lan else None)
         if len(hosts) != 1 or (hosts[0] != authority if lan else hosts[0] not in AUTHORITIES):
             return JSONResponse({"detail": "Unrecognized host."}, status_code=400)
-        if lan and (not request.client or not private_lan.allows_peer(lan[1], request.client.host)
+        if lan and (not request.client or not (portal or private_lan.allows_peer(lan[1], request.client.host))
                     or request.scope['scheme'] != 'https'):
             return JSONResponse({"detail": "Private Workbench access is restricted."}, status_code=403)
         expected_origin = ('https://' if lan else 'http://') + hosts[0]
