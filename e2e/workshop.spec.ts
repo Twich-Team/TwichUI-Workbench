@@ -580,20 +580,25 @@ test('feature files and source references stay with the original request through
  const draft=await page.evaluate(()=>JSON.parse(localStorage.getItem('intake-draft:feature')!));
  const seeded=JSON.parse(fixture('feature-workshop-reference-seed',['--request-id',draft.request_id,'--references-json',JSON.stringify(draft.feature_references.items)]));
  await expect(page.getByRole('button',{name:'Plan feature',exact:true})).toBeDisabled();
- await page.getByLabel('Reference file',{exact:true}).setInputFiles({name:'My own mockup.png',mimeType:'image/png',buffer:Buffer.from(seeded.png_base64,'base64')});
+ await page.getByLabel('Reference file',{exact:true}).setInputFiles({name:'A long owner design reference with spaces.png',mimeType:'image/png',buffer:Buffer.from(seeded.png_base64,'base64')});
  await page.getByLabel('What should Workbench notice? Optional',{exact:true}).fill('Keep the warm colors; this is inspiration, not an implemented result.');
  await page.getByRole('button',{name:'Add file reference',exact:true}).click();
- await expect(page.getByText('My own mockup.png',{exact:true})).toBeVisible();
+ await expect(page.getByText('A long owner design reference with spaces.png',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Look up reference addons',exact:true}).click();
  await expect(page.getByText('Repository metadata checked',{exact:true})).toBeVisible();
  await expect(page.getByText('Source not available',{exact:true})).toBeVisible();
  await page.reload();await page.getByText('Optional pictures, notes and addon references',{exact:true}).click();
- await expect(page.getByText('My own mockup.png',{exact:true})).toBeVisible();
+ await expect(page.getByText('A long owner design reference with spaces.png',{exact:true})).toBeVisible();
  await expect(page.getByText('Repository metadata checked',{exact:true})).toBeVisible();
+ for(const [width,height,font] of [[390,844,16],[320,700,32]]){
+  await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+  await overflow(page);await capture(page,info,`feature-reference-draft-${width}-${font}`,{keepInCompact:true});
+ }
+ await page.setViewportSize({width:1440,height:1000});await page.evaluate(()=>document.documentElement.style.fontSize='16px');
  await page.getByRole('button',{name:'Plan feature',exact:true}).click();
  await expect(page).toHaveURL(/\/features\/[a-f0-9-]{36}/);const identity=new URL(page.url()).pathname.split('/').at(-1)!;
  fixture('feature-workshop-tick');fixture('feature-workshop-tick');await page.reload();
- await expect(page.getByRole('link',{name:'My own mockup.png',exact:true})).toBeVisible();
+ await expect(page.getByRole('link',{name:'A long owner design reference with spaces.png',exact:true})).toBeVisible();
  await expect(page.getByText('Repository metadata checked',{exact:true})).toBeVisible();
  await expect(page.getByText('Source not available',{exact:true})).toBeVisible();
  const saved=await page.request.get('/api/features/'+identity).then(r=>r.json());

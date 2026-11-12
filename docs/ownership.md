@@ -1,3 +1,15 @@
+# Native pre-send feature preparation settlement — November 12, 2026
+
+A native StepScope schema/request-rejected journal may independently establish an
+input rejection before any provider request. Exact local route/job/operation,
+private journal identity/hash/timestamps, input bound and absence of later events
+must match. This does not rewrite false-confirmed history or NULL usage. The
+existing separate browser correction binds that native proof before allowing any
+fresh read-only request; unknown or changed provider activity still cannot renew.
+The source packet carries actual definitions once, within the original24KBguard;
+metadata-only/omitted file text cannot grant an inspected implementation path.
+No new store, model route, child decision, publication or root policy owner.
+
 # Feature context and same-parent scope correction — November 12, 2026
 
 Existing private preparation output owns passive feature-context evidence; request

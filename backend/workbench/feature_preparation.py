@@ -56,7 +56,7 @@ def packet(c, decision_id, task_id, feature_input, *, inspections=()):
     for record in inspections:
         if record.get('feature_input_binding')!=digest(feature_input):
             raise ValueError('Source inspection belongs to different checked predecessor input.')
-    return feature_step_source.restore(value,root,base,inspections)
+    return feature_step_source.compact(feature_step_source.restore(value,root,base,inspections))
 
 
 def recover_one(engine):
@@ -97,6 +97,15 @@ class ParentStop:
         return bool(not row or row['state'].get('cancel_requested') or row['status'] in {'cancelled','expired'})
 
 
+def validation_feedback(record):
+    diagnostics = record.get('diagnostics') or {}
+    if diagnostics.get('generation_state') == 'not_started' and diagnostics.get('category') == 'input_budget':
+        return ('The previous request exceeded the local input limit and was rejected before contacting the model. '
+                'Its native rejection has been independently checked. This packet is compacted within the same limit; '
+                'continue preparing the step from the supplied actual source definitions.')
+    return record.get('failure')
+
+
 def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, stop_event=None):
     """One claimed operation; no implementation or automatic fallback capability."""
     from workbench.planning_provider import LocalProvider
@@ -123,7 +132,9 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
                 or len(previous) >= maximum):
             return False
         if any(not r.get('confirmed_finished') for r in previous):
-            return False
+            from workbench.feature_scope_recovery import _confirmed
+            if not _confirmed(c, job, previous, permission):
+                return False
         route = permission['scope']['route']
         backend = permission['scope']['provider']
     if everyday.enabled():
@@ -133,7 +144,7 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         if not planning_ready():
             return False
     if previous and previous[-1].get('failure'):
-        current_packet['previous_validation_failure'] = previous[-1]['failure']
+        current_packet['previous_validation_failure'] = validation_feedback(previous[-1])
     claim = dict(owner=owner_identity(), decision_id=decision_id, parent_binding=row['binding'],
         task_id=task_id, feature_input=feature_input, packet_sha256=digest(current_packet),
         scope_request_permission=scope_authorization)
@@ -189,7 +200,7 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         with engine.connect() as c:
             reread = packet(c, decision_id, task_id, feature_input, inspections=inspections)
             if previous and previous[-1].get('failure'):
-                reread['previous_validation_failure'] = previous[-1]['failure']
+                reread['previous_validation_failure'] = validation_feedback(previous[-1])
             if reread != current_packet:
                 raise ValueError('The feature source or scope changed during preparation.')
             if parsed.inspection:
@@ -204,7 +215,7 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
                 if parsed.limitation.strip():
                     unsupported=True
                     raise ValueError('This step needs an unsupported source capability: '+parsed.limitation)
-                if not set(parsed.read_paths) <= {f['path'] for f in current_packet['files']}:
+                if not set(parsed.read_paths) <= {f['path'] for f in current_packet['files'] if f['excerpts']}:
                     raise ValueError('Step preparation selected a source file outside its inspected packet.')
                 result = feature_steps.compile_scope(c, decision_id, task_id, raw, feature_input=feature_input)
     except (ValueError, OSError, HTTPException, PlanningUnavailable, KeyError, TypeError) as error:
@@ -217,7 +228,9 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         and diagnostics.get('accounting_state') == 'complete' and bool(diagnostics.get('usage')))
     if not confirmed:
         result,inspection=None,None
-        failure='Read-only feature preparation has an unconfirmed outcome or usage. Exact evidence remains; no replay or implementation will start.'
+        failure=('The source-preparation request was rejected before generation at its input limit. Its original record and unrecorded usage remain; native evidence must qualify any separate continuation.'
+            if diagnostics.get('generation_state')=='not_started' and diagnostics.get('category')=='input_budget' else
+            'Read-only feature preparation has an unconfirmed outcome or usage. Exact evidence remains; no replay or implementation will start.')
     with write_transaction(engine) as c:
         active = intake.require(c, planning_jobs, job_id)
         if active['status'] != 'running' or active['lease'] != lease:

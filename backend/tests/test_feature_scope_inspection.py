@@ -1,10 +1,13 @@
 """App-owned committed-source navigation before feature scope generation."""
 
 import copy
+import json
+import pytest
 
 from sqlalchemy import select
 
 from workbench import feature_preparation
+from workbench import feature_step_source
 from workbench.db import planning_jobs, real_execution_grants, model_attempts
 from test_feature_preparation import context, ScopePlanner
 from test_feature_steps import scope
@@ -151,7 +154,9 @@ def test_later_source_reads_use_the_actual_checked_predecessor_not_original_prod
     assert tick(reader)
     writer = ScopePlanner()
     assert tick(writer)
-    assert "if s == nil then return nil end" in writer.calls[0]["source_windows"][0]["text"]
+    assert "text" not in writer.calls[0]["source_windows"][0]
+    assert any("if s == nil then return nil end" in excerpt["text"]
+        for file in writer.calls[0]["files"] for excerpt in file["excerpts"])
     with store.connect() as c:
         job = (
             c.execute(select(planning_jobs).where(planning_jobs.c.kind == "feature_execution"))
@@ -161,3 +166,29 @@ def test_later_source_reads_use_the_actual_checked_predecessor_not_original_prod
         assert len(job["payload"]["completed_steps"]) == 1
         assert job["payload"]["current_step_scope"]["task_id"] == second
         assert job["payload"]["phase"] == "scope_ready"
+
+
+def test_scope_packet_keeps_new_definitions_once_and_fits_the_existing_transport():
+    latest = 'NEW-DEFINITION-' + 'x' * 6000
+    old = 'OLDER-HEURISTIC-' + 'y' * 14000
+    packet = dict(original={'description': 'Keep the exact reviewed request.'},
+        approved_scope=['Preserve defaults.'], source_note='Partial source.',
+        files=[dict(path='!!!TwichUI/map/View.lua', sha256='a'*64,
+            excerpts=[dict(line=1, text=old), dict(line=350, text=latest)])],
+        source_windows=[dict(path='!!!TwichUI/map/View.lua',start=350,end=430,sha256='a'*64)],
+        source_inspection_results=[dict(kind='read',path='!!!TwichUI/map/View.lua',start=350,end=430)],
+        source_index=[dict(path='!!!TwichUI/map/example'+str(i)+'.lua',bytes=100) for i in range(96)])
+    packed = feature_step_source.compact(packet)
+    raw = json.dumps(packed, ensure_ascii=True, separators=(',', ':'))
+    assert len(raw.encode()) <= 22000 and raw.count(latest) == 1
+    assert packed['original'] == packet['original'] and packed['approved_scope'] == packet['approved_scope']
+    assert packed['source_index_truncated'] and len(packed['source_index']) == 32
+    assert len(packet['source_index']) == 96
+
+
+def test_scope_packet_never_silently_truncates_the_reviewed_request_or_latest_definitions():
+    packet = dict(original={'description':'x'*24000},source_note='Partial source.',
+        source_index=[],files=[],source_windows=[dict(path='!!!TwichUI/map/View.lua')],
+        source_inspection_results=[])
+    with pytest.raises(ValueError, match='reviewed requirements'):
+        feature_step_source.compact(packet)

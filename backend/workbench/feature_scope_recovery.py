@@ -45,7 +45,8 @@ def _history(job, task_id):
 
 
 def _confirmed(c, job, records, permission):
-    if not records or any(not r.get("confirmed_finished") for r in records):
+    """Finished calls or native pre-send rejects; never infer absent generation."""
+    if not records:
         return False
     for record in records:
         attempt = (
@@ -63,13 +64,32 @@ def _confirmed(c, job, records, permission):
             or attempt["purpose"] != "feature_step_scope"
             or not attempt["finished_at"]
             or attempt["outcome"] not in {"completed", "failed"}
-            or not attempt["usage"]
-            or attempt["usage"] != diagnostics.get("usage")
-            or diagnostics.get("generation_state") != "finished"
-            or diagnostics.get("accounting_state") != "complete"
         ):
             return False
+        if not record.get('confirmed_finished'):
+            from workbench.feature_scope_settlement import not_started
+            if not not_started(c.engine, record, attempt):
+                return False
+        elif (not attempt['usage'] or attempt['usage'] != diagnostics.get('usage')
+                or diagnostics.get('generation_state') != 'finished'
+                or diagnostics.get('accounting_state') != 'complete'):
+            return False
     return True
+
+
+def _not_started_bindings(c, records):
+    from workbench.feature_scope_settlement import not_started
+    result = []
+    for record in records:
+        if record.get('confirmed_finished'):
+            continue
+        attempt = c.execute(select(model_attempts).where(
+            model_attempts.c.id == record['operation_id'])).mappings().one()
+        proof = not_started(c.engine, record, attempt)
+        if not proof:
+            raise ValueError('The original preparation rejection is not independently established.')
+        result.append(proof)
+    return result
 
 
 def allowance(c, job, task_id, permission, *, active=True):
@@ -98,6 +118,7 @@ def allowance(c, job, task_id, permission, *, active=True):
             or count > len(history)
             or digest(history[:count]) != saved["history_binding"]
             or not _confirmed(c, job, history[:count], permission)
+            or saved.get('verified_not_started', []) != _not_started_bindings(c, history[:count])
             or receipt["generation_requests"] != 3
             or receipt["request_seconds"] != 120
             or receipt["completion_tokens"] != 2600
@@ -197,6 +218,8 @@ def offer(c, identity):
                 if job["payload"].get("completed_steps")
                 else None
             ),
+            **({'verified_not_started': _not_started_bindings(c, records)}
+               if any(not r.get('confirmed_finished') for r in records) else {}),
         )
         return dict(
             binding=digest(inputs),

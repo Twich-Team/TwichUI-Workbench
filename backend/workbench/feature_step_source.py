@@ -87,7 +87,9 @@ def _append(packet, root, base, path, start, end, allowance):
     if file["sha256"] != metadata["sha256"]:
         raise ValueError("A checked predecessor source file changed during inspection.")
     file["excerpts"].append(dict(line=start, text=text))
-    packet.setdefault("source_windows", []).append(window)
+    # Source text belongs in files/excerpts once. Keep navigation identities
+    # here; the full native observations returned below remain hash-bound.
+    packet.setdefault("source_windows", []).append({k: v for k, v in window.items() if k != "text"})
     return window, used
 
 
@@ -145,7 +147,7 @@ def inspect(packet, root, base, requests):
             record = dict(kind="search", query=request.query, path=request.path, matches=matches)
             value.setdefault("source_searches", []).append(record)
             out.append(record)
-    value["source_inspection_results"] = out
+    value["source_inspection_results"] = [{k: v for k, v in item.items() if k != "text"} for item in out]
     if len(json.dumps(value, ensure_ascii=False).encode()) > 131072:
         raise ValueError("Feature source inspection reached its packet boundary.")
     return value, out
@@ -159,4 +161,41 @@ def restore(initial, root, base, records):
             raise ValueError(
                 "Previously inspected committed source changed. No model request started."
             )
+    return value
+
+
+def compact(packet, limit=22000):
+    """Fit the existing 24 KB transport without dropping reviewed requirements.
+
+    Native inspection observations stay complete in their existing receipts.
+    Keep the newest definitions; older heuristic/source text can be omitted
+    explicitly, while file and window identities remain available for navigation.
+    """
+    value = copy.deepcopy(packet)
+    if not value.get('source_windows'):
+        return value
+    inventory = value.get('source_index', [])
+    value['source_index'] = inventory[:32]
+    value['source_index_truncated'] = value.get('source_index_truncated', False) or len(inventory) > 32
+    for file in value['files']:
+        unique = {}
+        for excerpt in file['excerpts']:
+            unique[excerpt['line']] = excerpt
+        file['excerpts'] = list(unique.values())
+    latest = {(item['path'], item['start']) for item in value.get('source_inspection_results', [])
+              if item['kind'] == 'read'}
+    def size():
+        return len(json.dumps(value, ensure_ascii=True, separators=(',', ':')).encode())
+    omitted = 0
+    for file in value['files']:
+        for excerpt in list(file['excerpts']):
+            if size() <= limit - 200:
+                break
+            if (file['path'], excerpt['line']) not in latest:
+                file['excerpts'].remove(excerpt)
+                omitted += 1
+    if omitted:
+        value['source_note'] += ' Older excerpts were omitted to fit the unchanged input limit; empty excerpt lists are metadata only.'
+    if size() > limit:
+        raise ValueError('The latest source definitions and reviewed requirements exceed the bounded scope packet. Request narrower source windows.')
     return value

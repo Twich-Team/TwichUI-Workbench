@@ -417,7 +417,9 @@ h2,h3{overflow-wrap:anywhere;min-width:0;}
 .feature-context-fields legend {padding-inline:.4rem;}
 .feature-context-fields label {display:block;margin-block:.7rem;}
 .feature-context-fields .button {white-space:normal;margin:.35rem .4rem .35rem 0;}
-.draft-reference-file {display:flex;align-items:center;justify-content:space-between;gap:.5rem;overflow-wrap:anywhere;}
+.draft-reference-file {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem;overflow-wrap:anywhere;}
+.draft-reference-file>span {min-width:0;flex:1 1 12rem;}
+.draft-reference-file>.button {flex:0 0 auto;}
 .draft-addon-reference,.feature-addon-reference {padding:.8rem 0;border-top:1px solid #604a3280;overflow-wrap:anywhere;}
 .feature-addon-reference p {font-size:.9rem;line-height:1.6;margin:.45rem 0;}
 .feature-addon-reference a {display:inline-flex;align-items:center;gap:.4rem;max-width:100%;}

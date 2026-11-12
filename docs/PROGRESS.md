@@ -1,3 +1,72 @@
+# November 12 — installed116; real source windows worked, pre-send input hold repaired in development
+
+Exact98ed82b30128311e31b4a4d0bb923ff5aed4f17e passed ALL9 hosted jobs in
+43144868480. Frontend13910988302 SHA064833f027f0ec380f1fe0e8fde4f071fe58159a5ea3370cbf87a543fa7287a6;
+acceptance13911577031 SHAd6c76a3dc0eb5d07fc9ca36f7d9629b9907e608d9e8c2baed64aa79d7fafc317.
+Installed116 with seal e32a1d8e30275a498b959609ad793e39425f6009ec2d48f99641547325de343d.
+Latest720rows preserved exactly through forward copy, BOTH readers/all52 restored
+requests, four-role restart, ACTUAL116→115→116, source seal, TLS/LAN/firewall,
+8765 and normal model401/200/key-hash checks. Evidence outcome-98ed82b.4469d8d
+was NEVER activated; its failed discovery gate remains failed, not relabeled.
+
+Ordinary installed browser reviewed/granted one separate3request allowance for
+SAME parent6998247a-be8e-4097-b21a-5459008b8d97 under campaign delegation. Original
+request/plan/five steps/parent permission, first3scopes and all8earlier ledgers
+preserved EXACTLY. Driver continue-real-feature-98ed82b.cjs ALREADY EXECUTED;
+create-only native command/intent/review/receipt and screenshots retained in
+outcome-98ed82b/real-map-zoom-continuation. NEVER replay Build or that driver.
+
+Qwen operation0f503fa7 requested3actual committed View.lua windows; native reads
+completed, usage5702prompt+132completion=5834tokens. Total known SOURCE-scope
+usage18068tokens across4finished generations. Next operation5711a40c was rejected
+BEFORE transport: prepared37673bytes > unchanged24000cap. Native journal has
+exactly schema/request-rejected, generation not_started; ledger finishedfailed,
+actual_model/usageNULL. Installed handler incorrectly called this uncertain.
+Old record remains unchanged. Live journal now5scope records/10model-attempt
+records/0active/0implementation/0checked. Store722rows, hash
+f0bf6204b7d433514d2ee67dc56ac49dce110f0da7a749397c0e1f1fcd63fdc1.
+Normal model auth401/200/key-hash and active116seal verified AFTER the hold.
+DO NOT replay720baseline rollback scripts after these new records/context files.
+
+Development repair removes threefold source-window duplication; full native
+observations/hashes remain untouched. One actual-definition text copy and a32path
+index produce~20.5KB within SAME24KBcap, with full reviewed request/requirements.
+Older optional excerpts may be explicitly omitted; metadata-only files cannot be
+selected as inspected code. Duplicate positions prefer newest actual definitions.
+Native two-event pre-send qualification validates exact job/route/operation,
+private journal identity/schema/hash/time/input bounds and no later activity.
+A separate browser receipt binds that evidence, keeps original false-confirmed
+history/NULLusage, and grants only fresh bounded reads under ORIGINAL parentclock.
+Unknown/missing/altered/late-provider evidence still cannot renew. A native-input
+hint explains the proved transport rejection without rewriting the old failure.
+No manual map scope/solution, fake human child decision or invented zero usage.
+
+70affected scope/API/CI cases and three connected controlled browser journeys
+pass after the main repair. The final feedback qualification passes18focused cases; final static/contracts/
+build/schema passes and the long-filename draft browser journey passes again. Initial pre-send test used a generic fake
+adapter, correctly rejected as nonlocal; it now exercises the REAL LocalProvider
+input guard without entering transport. Native later-wire/changed-limit/public
+journal faults fail closed. Static check initially found3test formatting errors;
+those are fixed; retain its failed log alongside corrected final verification.
+
+Actual installed FW4browser acceptance uploaded original owner PNG and retrieved
+DeadlyBossMods metadata/pinned README, surviving reload without /api/intake or
+model dispatch. Saved draft requesta49dd05f-ad5f-42f7-b511-82635e33ab1a and native
+context remain. Exact independent copy:6files/1750423bytes, manifest
+7e1d463dd5be86d160574cb1232f8e1a2090e352e57a2b46559463a94a539e0a.
+Copy ORIGINAL uploaded PNG equals attachment bytes. Actual desktop/phone inspected;
+long filename exposed a cramped Remove button. Development flex-wrap fixes it;
+controlled draft screenshots cover long filenames/390/320at200%.
+
+Next: commit exact verified scope-packing/native-settlement repair, full9job CI,
+compatible117installation preserving722rows AND ALL6private context files (including
+unsubmitted draft), restore/rollback BEFORE new writes; review a FRESH bounded
+read-only command for SAME parent and continue real Qwen. Old additional allowance
+expires03:43:46.591390UTC; original parent stays07:32:09.163458UTC. Do not
+extend/rewrite old permission or erase the held native record. Continue FW6small
+supported comparison path and FW7; zero real Feature Workshop completions so far.
+No owner engineering renewal needed. Preserve all original unrelated doc edits.
+
 # November 12 — 4469d8d full gate rejected; CI journey discovery corrected
 
 Do NOT activate4469d8d. Full hosted43142811118 passed seven jobs but Backend2/2
