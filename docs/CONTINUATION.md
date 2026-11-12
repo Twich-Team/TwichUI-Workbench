@@ -1,3 +1,37 @@
+# November 12 — installed125; FIRST actual feature coding request active
+
+Exactfbf5ec4f889942cb3f74f5bf05affbbb69509b4f ALL9 full43197382569 passed.
+Frontend13933292534 SHA6b9f3ef6c7c1790cec3c44c99a6f7e9bc55cb12e2cd87bb2c2749b658341b661;
+acceptance13934542211 SHA8c1f40f0ce95c62c2e0a4d352a828c4a9029bb6aa2b0184010640942142e92b1.
+Installed125 seal69f4d890b8ddf06197ee8b51e63548887fdf20eaf8c81152353e8444a80080bc.
+Fresh756row fingerprintad0a7cb56c50c470eb076339cb31a088f190cbc9850064c90034722ade191c12
+preserved with all52requests and6contextfiles/1750423bytes/manifest7e1d463d.
+Old/new and independent restored readers, four-role restart, ACTUAL125→124→125,
+TLS/LAN/firewall/8765/model401/200/keyhash/seals passed BEFORE new native writes.
+Desktop1440,390phone,320at200%, keyboard/reload/default/advanced passedzeroerrors/
+mutations; desktop/phone images actually inspected.18new pre-grant recovery cases,
+36related cases and full static/contracts/schema pass. Native readonly audit reproduced
+old DBus-denied false, then passed FULL corrected permission inside socket-blocked
+user unit. Real756row copy replay performed native transition to sameordinal3/revision2,
+original approval and ALLmodel ledgers exact, zero grants/model calls. Verified full
+inactive dependency restore4085entries exactbytes/modes/links/mtimes; archives retained.
+
+resume-after-install.py ALREADY EXECUTED ONCE. Own22unpaused→23engineeringpause→24
+unpaused restored. DO NOT replay. Native coordinator resumed SAME parent6998247a,
+SAME Qwen scope, SAME implementation ordinal3 as preparation2. Native preparation
+completed with actual baseline-reuse.json and fresh boundary. At10:26:42UTC actual
+FIRST Qwen feature coding request active:37model-attempt rows/1active,2implementation
+request rows (old69393927 failed BEFORE provider + current actual coding),0checked
+steps. Original scope history27 and first35finished ledger rows remain retained.
+Parent window14:15:43 unchanged; original07:32:09 and all older slot clocks preserved.
+Prior unknown coding usage stays reserved24000; safety probes retain native unknown
+exact output with1..60bounds, never zero. NO manual addon scope/code/test solution.
+NEVER restart/deploy/replay756baseline rollback or old drivers after these new writes.
+Monitor actual coding/checked output, then dependent steps, independent combined
+checks and coherent draft PR. Attach actual new PR URL. Continue campaign; zero real
+Feature Workshop features finished end to end. All receipts outcome-fbf5ec4 and
+LATEST_NATIVE_FEATURE_DELIVERY.json; original unrelated local edits remain untouched.
+
 # November 12 — native pre-grant service-manager query failure repaired and proved
 
 Installed124 native preparation-01 passed REAL full original Lua suite, original
