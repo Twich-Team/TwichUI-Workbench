@@ -1,3 +1,15 @@
+# November 12 — preparation recovery remains subordinate to the original attempt
+
+A known native storage cancellation before any coding grant may receive a new
+immutable preparation revision within the SAME implementation ordinal and original
+slot deadline. Original offer/configuration/outcome and all accounting remain exact.
+A changed scope, owner Stop, active readiness unit/descendants, coding grant, expired
+window or changed native evidence prevents recovery. Fresh isolation is mandatory;
+only the original passed baseline may be reused. Global work pause protects actual
+installation/rollback checks and is restored only if this engineering action set it.
+Unknown usage from a prior generation remains reserved and unknown after qualified
+native epoch settlement; historical outcomes are never rewritten as successful.
+
 # Never-dispatched feature continuation — November 12, 2026
 
 One explicit CSRF-protected browser receipt may permit a fresh six-hour window

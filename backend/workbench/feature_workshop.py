@@ -195,10 +195,11 @@ def view_in(c, identity):
         stopped = bool(session and session['state'].get('cancel_requested') or
             journal and journal['payload'].get('feature_stop_command'))
         from workbench.task_sessions import ACTIVE
+        from workbench.feature_preparation_recovery import resource_paused
         run = dict(id=parent['id'], status=session['status'] if session else parent['status'],
             phase=journal['payload'].get('phase','pending') if journal else 'held',
             message=(session or journal or parent)['message'], cancel_requested=stopped,
-            can_stop=not stopped and (parent['status'] == 'pending' or bool(session and session['status'] in ACTIVE | {'held','failed'})),
+            can_stop=not stopped and (parent['status'] == 'pending' or bool(session and (session['status'] in ACTIVE | {'held','failed'} or resource_paused(session)))),
             expires_at=parent['payload']['feature_run']['expires_at'])
         if journal and journal['payload'].get('execution_windows'):
             from workbench.feature_run_recovery import deadline

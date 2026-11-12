@@ -48,7 +48,10 @@ def queue(engine, offered):
         selected = _offer(c, offered, active=True)
     detail = selected['snapshot']['feature_step']
     saved = detail['scope']
-    slot_id = str(uuid5(UUID(saved['decision_id']), 'feature-step:'+saved['task_id']+':'+str(detail['attempt'])))
+    slot_key = 'feature-step:'+saved['task_id']+':'+str(detail['attempt'])
+    if detail.get('preparation_revision'):
+        slot_key += ':preparation:'+str(detail['preparation_revision'])
+    slot_id = str(uuid5(UUID(saved['decision_id']), slot_key))
     with write_transaction(engine) as c:
         approval, authorization = parent(c, saved['decision_id'])
         existing = c.execute(select(task_sessions).where(task_sessions.c.id == approval['id'])).mappings().first()

@@ -114,8 +114,6 @@ def require_room(policy, reserve=START_RESERVE):
         raise ValueError('Workbench could not measure storage capacity.') from None
     if free < 4 << 30:
         raise CapacityHold(f'Waiting for storage: {free/(1<<30):.2f} GiB free. Workbench keeps 4 GiB for safe recovery; verified cleanup is automatic.', remaining,'low_disk')
-    if scratch > 1 << 30:
-        raise CapacityHold('Waiting for working-copy storage. Disposable scratch exceeds its 1 GiB operation safety limit; Workbench is checking retained copies.',remaining,'scratch_limit')
     if remaining < reserve:
         raise CapacityHold(f'Waiting for storage. Workbench needs {reserve >> 20} MiB beyond its physical recovery reserve.', remaining)
     return remaining

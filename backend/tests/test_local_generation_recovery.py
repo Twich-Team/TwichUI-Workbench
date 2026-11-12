@@ -143,34 +143,41 @@ def test_terminated_epoch_discharge_preserves_unknown_usage_original_failure_and
     assert recovery.reconcile(t.store, "controlled-execution") == proof
 
 
-@pytest.mark.parametrize(
-    'mismatch',[None,'sealed-owner','sealed-result','finished-at']
-)
-def test_normal_terminal_failure_reuses_bound_owner_without_rewriting_unknown_usage(terminated,mismatch):
-    t=terminated
+@pytest.mark.parametrize("mismatch", [None, "sealed-owner", "sealed-result", "finished-at"])
+def test_normal_terminal_failure_reuses_bound_owner_without_rewriting_unknown_usage(
+    terminated, mismatch
+):
+    t = terminated
     with write_transaction(t.store) as c:
-        row=c.execute(select(execution.requests)).mappings().one()
-        owner=row['result']['owner']
-        result={k:v for k,v in row['result'].items() if k!='owner'}
-        finished=execution.now()
-        c.execute(execution.requests.update().values(status='failed',result=result,finished_at=finished))
-    def sealed(row,grant):
-        assert row['result']['owner']==owner
-        if mismatch=='sealed-owner':
+        row = c.execute(select(execution.requests)).mappings().one()
+        owner = row["result"]["owner"]
+        result = {k: v for k, v in row["result"].items() if k != "owner"}
+        finished = execution.now()
+        c.execute(
+            execution.requests.update().values(status="failed", result=result, finished_at=finished)
+        )
+
+    def sealed(row, grant):
+        assert row["result"]["owner"] == owner
+        if mismatch == "sealed-owner":
             return None
-        return dict(status='failed',result={} if mismatch=='sealed-result' else result,
-                    completed_at='different' if mismatch=='finished-at' else finished)
-    t.runtime.recover_outcome=sealed
+        return dict(
+            status="failed",
+            result={} if mismatch == "sealed-result" else result,
+            completed_at="different" if mismatch == "finished-at" else finished,
+        )
+
+    t.runtime.recover_outcome = sealed
     if mismatch:
-        with pytest.raises(ValueError,match='Exact owned local failure evidence'):
-            recovery.reconcile(t.store,'controlled-execution')
-        assert not (t.root/'terminated-generation.json').exists()
+        with pytest.raises(ValueError, match="Exact owned local failure evidence"):
+            recovery.reconcile(t.store, "controlled-execution")
+        assert not (t.root / "terminated-generation.json").exists()
     else:
-        proof=recovery.reconcile(t.store,'controlled-execution')
-        assert proof['final_usage']=='unknown' and proof['partial_response_dispatched'] is False
+        proof = recovery.reconcile(t.store, "controlled-execution")
+        assert proof["final_usage"] == "unknown" and proof["partial_response_dispatched"] is False
     with t.store.connect() as c:
-        saved=c.execute(select(execution.requests)).mappings().one()
-        assert saved['result']==result and saved['finished_at']==finished
+        saved = c.execute(select(execution.requests)).mappings().one()
+        assert saved["result"] == result and saved["finished_at"] == finished
 
 
 @pytest.mark.parametrize(
@@ -219,10 +226,14 @@ def test_no_release_when_termination_or_exact_failed_call_is_unproven(
             c.execute(execution.requests.update().values(status="checked"))
     if fault == "codex_provider":
         with write_transaction(t.store) as c:
-            grant=dict(c.execute(select(execution.grants)).mappings().one())
-            snapshot=grant['snapshot']
-            snapshot['runtime']['codex_selection']={'model':'controlled-codex'}
-            c.execute(execution.grants.update().values(snapshot=snapshot,binding=execution.digest(snapshot)))
+            grant = dict(c.execute(select(execution.grants)).mappings().one())
+            snapshot = grant["snapshot"]
+            snapshot["runtime"]["codex_selection"] = {"model": "controlled-codex"}
+            c.execute(
+                execution.grants.update().values(
+                    snapshot=snapshot, binding=execution.digest(snapshot)
+                )
+            )
     before = t.primary.read_bytes()
     with pytest.raises(ValueError):
         recovery.reconcile(
@@ -260,3 +271,112 @@ def test_continuation_accepts_only_the_proven_local_termination_with_unchanged_u
     if fault == "source_changed":
         (t.runtime.workspace / "known-edit.lua").write_text("unexpected change")
     assert repair_continuation.settled_accounting(row) is (fault is None)
+
+
+@pytest.fixture
+def context_terminated(terminated, monkeypatch):
+    t = terminated
+    from workbench.real_workspace import tree
+
+    (t.root.parent / "implementation/stream-02.json").unlink()
+    (t.root / "attempt/request-01.json").unlink()
+    previous = dict(kind="never-dispatched-feature-slot-v1", evidence_role="controlled")
+    durable(t.root / "feature-recovery.json", json.dumps(previous).encode())
+    helper = t.release / "backend/workbench/real_workspace.py"
+    durable(helper, b"controlled frozen instruction-construction failure before provider")
+    h = sha(helper.read_bytes())
+    monkeypatch.setattr(recovery, "CONTEXT_FAILURE_HELPER_SHA256", h)
+    t.runtime.initial = t.root / "base-manifest.json"
+    durable(t.runtime.initial, json.dumps(tree(t.runtime.workspace)).encode())
+    usage = dict(
+        status="unavailable",
+        values=dict(prompt_tokens=None, completion_tokens=None, total_tokens=None),
+        requests_observed=0,
+    )
+    result = dict(
+        error="KeyError: 'feedback'", usage=usage, verification="unknown", inference_ran=None
+    )
+    finished = execution.now()
+    t.runtime.failure_evidence = lambda *args: dict(usage=usage)
+    t.runtime.recover_outcome = lambda *args: dict(result=result, completed_at=finished)
+    t.record.update(state="released")
+    t.primary.write_text(json.dumps(t.record))
+    with write_transaction(t.store) as c:
+        grant = c.execute(select(execution.grants)).mappings().one()
+        snapshot = grant["snapshot"]
+        snapshot["runtime"]["helper_sha256"]["real_workspace.py"] = h
+        snapshot["runtime"]["feature_recovery_sha256"] = sha(
+            (t.root / "feature-recovery.json").read_bytes()
+        )
+        snapshot["task_budget"] = dict(
+            offer=dict(snapshot=dict(feature_step=dict(recovery=previous)))
+        )
+        c.execute(
+            execution.grants.update().values(
+                snapshot=snapshot, binding=execution.digest(snapshot), revoked_at=finished
+            )
+        )
+        c.execute(
+            execution.requests.update().values(status="failed", finished_at=finished, result=result)
+        )
+    return t
+
+
+def test_native_context_fault_can_be_inspected_then_sealed_without_rewriting_unknown_usage(
+    context_terminated,
+):
+    t = context_terminated
+    with t.store.connect() as c:
+        before = dict(c.execute(select(execution.requests)).mappings().one())
+    old = t.primary.read_bytes()
+    preview = recovery.reconcile(
+        t.store, "controlled-execution", expected_primary_sha256=sha(old), inspect_only=True
+    )
+    assert preview["qualification"] == "frozen-native-context-failure-v1"
+    assert preview["final_usage"] == "unknown" and preview["generation_final_outcome"] == "unknown"
+    assert t.primary.read_bytes() == old and not (t.root / "terminated-generation.json").exists()
+    proof = recovery.reconcile(t.store, "controlled-execution", expected_primary_sha256=sha(old))
+    assert (
+        proof["provider_epoch_terminated"] is True and proof["partial_response_dispatched"] is False
+    )
+    with t.store.connect() as c:
+        assert dict(c.execute(select(execution.requests)).mappings().one()) == before
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "helper",
+        "changed_source",
+        "request",
+        "context",
+        "epoch",
+        "active_owner",
+        "restoration",
+        "no_binding",
+    ],
+)
+def test_pre_provider_context_qualification_keeps_all_native_fences(
+    context_terminated, monkeypatch, fault
+):
+    t = context_terminated
+    if fault == "helper":
+        (t.release / "backend/workbench/real_workspace.py").write_text("different implementation")
+    elif fault == "changed_source":
+        (t.runtime.workspace / "known-edit.lua").write_text("changed after baseline")
+    elif fault == "request":
+        durable(t.root / "attempt/request-00.json", b"{}")
+    elif fault == "context":
+        (t.root / "feature-recovery.json").write_text("{}")
+    elif fault == "epoch":
+        value = json.loads(t.primary.read_text())
+        value["server_epoch"] = [1, "different"]
+        t.primary.write_text(json.dumps(value))
+    elif fault == "active_owner":
+        monkeypatch.setattr(execution, "alive", lambda _: True)
+    elif fault == "restoration":
+        monkeypatch.setattr(recovery, "normal_restored", lambda *args: False)
+    expected = sha(t.primary.read_bytes()) if fault != "no_binding" else None
+    with pytest.raises((ValueError, OSError, KeyError)):
+        recovery.reconcile(t.store, "controlled-execution", expected_primary_sha256=expected)
+    assert not (t.root / "terminated-generation.json").exists()

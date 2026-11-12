@@ -276,3 +276,52 @@ def test_uncertainty_or_changed_native_proof_cannot_authorize_continuation(
         assert response.status_code == 409, response.text
         with store.connect() as c:
             assert not c.execute(select(real_execution_grants)).first()
+
+
+def test_unused_slot_reaches_native_prompt_construction_without_coding_feedback(
+    client,
+    headers,
+    store,
+    installed,
+    monkeypatch,
+):
+    from workbench import real_provider, real_confine
+    from workbench.db import task_run_offers
+    from workbench.real_workspace import tree
+
+    identity, decision, _, offer, _ = never_started(client, headers, store, monkeypatch)
+    saved = client.post(
+        "/api/features/" + identity + "/continue-unstarted-run",
+        headers=headers,
+        json=dict(command_id=str(uuid4()), binding=offer["binding"]),
+    )
+    assert saved.status_code == 200, saved.text
+    assert feature_execution.advance(store, provision=controlled_readiness)
+    with store.connect() as c:
+        job = feature_run_recovery.journal(c, decision)
+        offered = (
+            c.execute(
+                select(task_run_offers).where(
+                    task_run_offers.c.id == job["payload"]["current_offer_id"]
+                )
+            )
+            .mappings()
+            .one()
+        )
+    runtime = Runtime(offered["snapshot"]["ready_preparation"]["root"])
+    before = tree(runtime.workspace)
+    observed = []
+
+    def no_provider(tools, instruction, *args, **kwargs):
+        observed.append(instruction)
+        raise RuntimeError("CONTROLLED prompt captured; no provider contacted")
+
+    monkeypatch.setattr(Runtime, "preflight", lambda self: self.static_preflight())
+    monkeypatch.setattr(real_provider, "implement", no_provider)
+    monkeypatch.setattr(
+        real_confine, "root", lambda: "/sys/fs/cgroup/workbench-real-controlled-no-provider"
+    )
+    with pytest.raises(RuntimeError, match="CONTROLLED prompt captured"):
+        runtime.execute(str(uuid4()), str(uuid4()), lambda: True)
+    assert len(observed) == 1 and "earlier slot never dispatched a coding request" in observed[0]
+    assert tree(runtime.workspace) == before

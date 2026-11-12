@@ -1,3 +1,27 @@
+# November 12 — installed123; native prompt failure settled and resource recovery underway
+
+Exact5f5fe3d full43178751718 all9 passed; installed123 seal8e59df4192c0905b8f052dc81f76de2dbd16361c977acb73a53ab16466ee62d2.
+745rows/52requests/six contextfiles preserved, independent readers, four-role restart,
+actual123→122→123, desktop/phone/320 enlarged text passed BEFORE later writes.
+Separate native window fb941ce4 expires14:15:43UTC; original07:32:09 approval unchanged.
+Slot2 dispatch failed BEFORE provider with KeyError feedback. Native narrow historical
+qualification proved exact frozen helper, empty coding journals, unchanged source,
+dead coding owner/descendants, terminated temporary model epoch and normal restored
+auth. Original request/ledger and unavailable usage remain exact, full24000 reserved.
+Native coordinator admitted ordinal3. It cancelled during readiness at08:35:56 because
+aggregate retained scratch crossed1GiB; NO owner Stop, NO grant/model/probe forslot3.
+Original slot3 deadline10:05:48 unchanged. Native read-only recovery proof passes.
+New code fixes missing typed recovery prompt; retains per-workspace1GiB/4GiB physical
+reserve, removes obsolete aggregate scratch cap; new preparation revisions retain
+same implementation ordinal and deadline, stopped-unit proof, no grant, current
+scope/source, and exact original terminal evidence. Stop remains available whileheld.
+Native new-work control paused for engineering installation/rollback; restore ONLY
+our own pause using outcome-5f5fe3d/storage-recovery-pause-intent.json afterward.
+Recoverable compressed browser retention inventory/verified archive under private
+inactive-browser-retention; current123 and rollback122 browser copies retained.
+Do NOT replay old drivers or745baseline rollback after newer native records.
+Continue campaign; ZERO real Feature Workshop features complete end to end.
+
 # November 12 — first real scope and baseline passed; unused-slot time recovery
 
 Installed122 ninth allowance produced a REAL Qwen implementation scope after1call

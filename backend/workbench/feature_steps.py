@@ -304,6 +304,14 @@ def _offer(c, row, *, active):
             raise ValueError('Feature attempt slot differs from its settled recovery.')
     elif detail['attempt'] != 1:
         raise ValueError('Further feature attempts require a settled recovery record.')
+    preparation_recovery = detail.get('preparation_recovery')
+    if preparation_recovery:
+        from workbench.feature_preparation_recovery import validate
+        validate(c, preparation_recovery, scope)
+        if detail.get('preparation_revision') != preparation_recovery['revision']:
+            raise ValueError('Preparation revision differs from its native proof.')
+    elif detail.get('preparation_revision',0):
+        raise ValueError('A preparation revision requires its original native proof.')
     runtime = Runtime(saved['ready_preparation']['root'])
     feature_attempts.context(runtime, recovery)
     if (runtime.recipe != saved['specification']
@@ -317,7 +325,7 @@ def _offer(c, row, *, active):
     return dict(row)
 
 
-def register_offer(engine, runtime, *, attempt=1, recovery=None):
+def register_offer(engine, runtime, *, attempt=1, recovery=None, preparation_recovery=None):
     """Worker-only preparation; one immutable offer per parent/task/attempt."""
     from workbench.real_workspace import Runtime
     from workbench.repair_cycle import readiness
@@ -344,11 +352,18 @@ def register_offer(engine, runtime, *, attempt=1, recovery=None):
                 raise ValueError('The fresh attempt differs from its settled recovery record.')
             feature_attempts.context(runtime, recovery)
             saved['feature_step']['recovery'] = recovery
+        if preparation_recovery:
+            from workbench.feature_preparation_recovery import validate
+            validate(c, preparation_recovery, scope)
+            saved['feature_step'].update(preparation_revision=preparation_recovery['revision'],
+                preparation_recovery=preparation_recovery)
         fingerprint = digest(saved)
         prior = c.execute(select(task_run_offers).where(
             task_run_offers.c.snapshot['feature_step']['scope']['decision_id'].as_string() == row['id'],
             task_run_offers.c.snapshot['feature_step']['scope']['task_id'].as_string() == scope['task_id'],
-            task_run_offers.c.snapshot['feature_step']['attempt'].as_integer() == attempt)).mappings().first()
+            task_run_offers.c.snapshot['feature_step']['attempt'].as_integer() == attempt)).mappings().all()
+        prior = next((p for p in prior if p['snapshot']['feature_step'].get('preparation_revision',0) ==
+            (preparation_recovery['revision'] if preparation_recovery else 0)),None)
         if prior:
             if prior['fingerprint'] != fingerprint:
                 raise ValueError('This feature attempt already owns a different immutable preparation.')
@@ -392,6 +407,9 @@ def permission(c, approval, task_id, *, offer_id=None, require_current=True):
     time_reference, allowed_end = time_authority(c,approval,parent_permission,at=selected['created_at'])
     end = min(datetime.fromisoformat(allowed_end),
         datetime.fromisoformat(selected['created_at']) + timedelta(seconds=parent_permission['budget']['per_attempt_seconds']))
+    preparation_recovery = selected['snapshot']['feature_step'].get('preparation_recovery')
+    if preparation_recovery:
+        end = min(end,datetime.fromisoformat(preparation_recovery['expires_at']))
     if require_current and datetime.now(timezone.utc) >= end:
         raise ValueError('This feature step attempt expired; its history remains available.')
     from workbench.schemas import TaskBudget

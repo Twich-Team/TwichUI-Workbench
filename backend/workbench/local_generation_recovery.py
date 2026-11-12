@@ -16,6 +16,50 @@ from workbench.real_primary import PrimarySession
 from workbench.real_workspace import Runtime, durable, sha, tree
 from workbench.repair_continuation import private_json
 
+# Frozen deployed implementation: its missing feedback lookup occurs while
+# constructing instructions, before implement() and its durable request hook.
+CONTEXT_FAILURE_HELPER_SHA256 = "af6ab4bdf6a2cfa59434dcbbe227df9e89d8323fd784893c5f342db8e650d8e9"
+
+
+def context_failure_qualification(runtime, row, grant, record, state):
+    """Qualify this known native pre-provider fault without inventing usage."""
+    root = runtime.root
+    release = root.parents[3]
+    source = release / "backend/workbench/real_workspace.py"
+    recovery = root / "feature-recovery.json"
+    previous = private_json(recovery)
+    expected = grant["snapshot"]["task_budget"]["offer"]["snapshot"]["feature_step"]["recovery"]
+    if (
+        row["status"] != "failed"
+        or not row["finished_at"]
+        or not grant["revoked_at"]
+        or row["result"].get("error") != "KeyError: 'feedback'"
+        or row["result"].get("usage", {}).get("status") != "unavailable"
+        or previous != expected
+        or previous.get("kind") != "never-dispatched-feature-slot-v1"
+        or "feedback" in previous
+        or sha(recovery.read_bytes()) != grant["snapshot"]["runtime"]["feature_recovery_sha256"]
+        or sha(source.read_bytes()) != CONTEXT_FAILURE_HELPER_SHA256
+        or grant["snapshot"]["runtime"]["helper_sha256"]["real_workspace.py"]
+        != CONTEXT_FAILURE_HELPER_SHA256
+        or record.get("state") != "released"
+        or record.get("server_epoch") != state["temporary_epoch"]
+        or list((root / "attempt").glob("*"))
+        or list((root.parent / "implementation").glob("*"))
+        or list((root / "edit-batches").glob("*"))
+        or tree(runtime.workspace) != private_json(runtime.initial, 4 << 20)
+        or runtime.failure_evidence(row["id"], row["fence"])["usage"] != row["result"]["usage"]
+    ):
+        raise ValueError(
+            "The exact native pre-provider fault and unchanged source are not established"
+        )
+    return dict(
+        qualification="frozen-native-context-failure-v1",
+        native_context_sha256=sha(recovery.read_bytes()),
+        pre_provider_helper_sha256=CONTEXT_FAILURE_HELPER_SHA256,
+        dispatch_journals_empty=True,
+    )
+
 
 def absent_epoch(epoch):
     pid, start = epoch
@@ -52,7 +96,7 @@ def normal_restored(private, state):
     )
 
 
-def reconcile(engine, identity, *, expected_primary_sha256=None):
+def reconcile(engine, identity, *, expected_primary_sha256=None, inspect_only=False):
     """Trusted recovery only; prove the exact failed call cannot act again.
 
     The original partial stream, failure, source edits and unknown usage stay
@@ -69,15 +113,24 @@ def reconcile(engine, identity, *, expected_primary_sha256=None):
             .mappings()
             .one()
         )
-    if row['status']=='cancelled':
-        from workbench.db import task_sessions,proposal_decisions
+    if row["status"] == "cancelled":
+        from workbench.db import task_sessions, proposal_decisions
         from workbench.continuing_repair import engineering_stop
+
         with engine.connect() as c:
-            decision=grant['snapshot']['task_budget']['decision_id']
-            session=c.execute(select(task_sessions).where(task_sessions.c.id==decision)).mappings().one()
-            approval=c.execute(select(proposal_decisions).where(proposal_decisions.c.id==decision)).mappings().one()
-        if not engineering_stop(session,approval):
-            raise ValueError('An owner-stopped operation cannot be revived by engineering recovery')
+            decision = grant["snapshot"]["task_budget"]["decision_id"]
+            session = (
+                c.execute(select(task_sessions).where(task_sessions.c.id == decision))
+                .mappings()
+                .one()
+            )
+            approval = (
+                c.execute(select(proposal_decisions).where(proposal_decisions.c.id == decision))
+                .mappings()
+                .one()
+            )
+        if not engineering_stop(session, approval):
+            raise ValueError("An owner-stopped operation cannot be revived by engineering recovery")
     elif row["status"] not in {"running", "checking", "failed", "interrupted"}:
         raise ValueError("Only a returned failed local operation may be reconciled")
     runtime = Runtime(grant["snapshot"]["recovery"]["root"])
@@ -97,19 +150,21 @@ def reconcile(engine, identity, *, expected_primary_sha256=None):
     ):
         raise ValueError("Exact owned local failure evidence is required")
     owned = private_json(root / ("ownership-" + identity + ".json"))
-    owner = row['result'].get('owner')
+    owner = row["result"].get("owner")
     # The normal terminal transaction stores the returned result without its
     # transient owner field. The immutable failure seal and process marker
     # still bind that identity. Recover it for proof inspection only; neither
     # replace the terminal row nor accept a different sealed result.
-    terminal = owner is None and row['status']=='failed' and row['finished_at']
+    terminal = owner is None and row["status"] == "failed" and row["finished_at"]
     proof_row = row
     if terminal:
-        owner = owned['owner']
-        proof_row = {**row, 'result': {**row['result'], 'owner': owner}}
+        owner = owned["owner"]
+        proof_row = {**row, "result": {**row["result"], "owner": owner}}
     failure = runtime.recover_outcome(proof_row, grant)
-    if not failure or (terminal and (failure['result'] != row['result']
-            or failure['completed_at'] != row['finished_at'])):
+    if not failure or (
+        terminal
+        and (failure["result"] != row["result"] or failure["completed_at"] != row["finished_at"])
+    ):
         raise ValueError("Exact owned local failure evidence is required")
     for name in ("real_provider.py", "real_stream.py"):
         if (
@@ -151,6 +206,46 @@ def reconcile(engine, identity, *, expected_primary_sha256=None):
         original_sha = sha(primary.read_bytes())
         if expected_primary_sha256 is not None and original_sha != expected_primary_sha256:
             raise ValueError("The exact held generation changed; nothing was released")
+        if (
+            row["result"].get("error") == "KeyError: 'feedback'"
+            and not list((root / "attempt").glob("*"))
+            and not list((root.parent / "implementation").glob("*"))
+        ):
+            if expected_primary_sha256 is None:
+                raise ValueError(
+                    "The exact released primary binding is required for this historical context fault"
+                )
+            qualification = context_failure_qualification(runtime, row, grant, record, state)
+            proof = dict(
+                version=1,
+                execution_id=identity,
+                fence=row["fence"],
+                original_primary_sha256=original_sha,
+                restored_state_sha256=sha((private / "state.json").read_bytes()),
+                terminated_epoch=state["temporary_epoch"],
+                normal_epoch=state["restored_epoch"],
+                source_tree_sha256=execution.digest(tree(runtime.workspace)),
+                outcome="failed",
+                generation_final_outcome="unknown",
+                final_usage="unknown",
+                partial_response_dispatched=False,
+                provider_epoch_terminated=True,
+                native_identity_bound=True,
+                observed_at=execution.now(),
+                **qualification,
+            )
+            if inspect_only:
+                return proof
+            durable(proof_path, json.dumps(proof, sort_keys=True).encode())
+            journal = PrimarySession(primary, [], record["attempt"], lambda: False)
+            journal.record = dict(
+                record,
+                state="released",
+                release_kind="verified-owned-epoch-termination",
+                termination_proof_sha256=sha(proof_path.read_bytes()),
+            )
+            journal._save()
+            return proof
         sequence = int(record["attempt"])
         stream = root.parent / "implementation" / f"stream-{sequence:02}.json"
         report = private_json(stream)
@@ -200,6 +295,8 @@ def reconcile(engine, identity, *, expected_primary_sha256=None):
             native_identity_bound=bound,
             observed_at=execution.now(),
         )
+        if inspect_only:
+            return proof
         durable(proof_path, json.dumps(proof, sort_keys=True).encode())
         journal = PrimarySession(primary, [], record["attempt"], lambda: False)
         journal.record = dict(

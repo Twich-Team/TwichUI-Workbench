@@ -88,6 +88,8 @@ def _prepared(engine, job, *, provision=None, stop_event=None):
     saved = job['payload']['current_step_scope']
     attempt = job['payload'].get('current_attempt', 1)
     recovery = job['payload'].get('current_recovery')
+    preparation_recovery = job['payload'].get('current_preparation_recovery')
+    revision = preparation_recovery['revision'] if preparation_recovery else 0
     policy = trusted_preparation.configuration(engine)
     with engine.connect() as c:
         spec, oracle = feature_steps.recipe(c, saved, policy['identity'])
@@ -100,12 +102,13 @@ def _prepared(engine, job, *, provision=None, stop_event=None):
         if not (root/'preparation-completed.json').is_file():
             return _hold(engine, job, 'Step readiness was interrupted. Partial evidence remains; no model or duplicate checks will start without recovery.')
     else:
-        root = Path(policy['output_root'])/'feature-steps'/saved['decision_id']/digest(saved['task_id'])[:24]/f'attempt-{attempt:02}'
+        root = Path(policy['output_root'])/'feature-steps'/saved['decision_id']/digest(saved['task_id'])[:24]/(f'attempt-{attempt:02}' + (f'-preparation-{revision:02}' if revision else ''))
         if root.exists():
             return _hold(engine, job, 'Step preparation output exists without its original journal claim. Retained evidence needs recovery; nothing was overwritten.')
         claim = dict(root=str(root), owner=real_execution.owner_identity(),
             scope_binding=saved['scope_binding'], policy_binding=digest(policy),
-            attempt=attempt, recovery_binding=recovery['binding'] if recovery else None)
+            attempt=attempt, recovery_binding=recovery['binding'] if recovery else None,
+            **({'preparation_recovery_binding':preparation_recovery['binding']} if preparation_recovery else {}))
         with write_transaction(engine) as c:
             feature_steps.validate_scope(c, saved)
             current = intake.require(c, planning_jobs, job['id'])
@@ -124,15 +127,17 @@ def _prepared(engine, job, *, provision=None, stop_event=None):
             (root/'feature-recovery.json').chmod(0o600)
         runtime = Runtime(root, stop_event=stop_event)
         (provision or task_session.provision)(runtime, dict(control_patches={},
+            **({'baseline_source':preparation_recovery['baseline_source']} if preparation_recovery else {}),
             **({'baseline_source':recovery['baseline_source']}
-               if recovery and recovery.get('kind') == 'never-dispatched-feature-slot-v1' else {})))
+               if not preparation_recovery and recovery and recovery.get('kind') == 'never-dispatched-feature-slot-v1' else {})))
     runtime = Runtime(root)
     if (claim['scope_binding'] != saved['scope_binding'] or claim['policy_binding'] != digest(policy)
             or claim.get('attempt',1) != attempt
             or claim.get('recovery_binding') != (recovery['binding'] if recovery else None)
+            or claim.get('preparation_recovery_binding') != (preparation_recovery['binding'] if preparation_recovery else None)
             or runtime.recipe != spec):
         raise ValueError('Feature preparation policy, source or scope changed.')
-    offered = feature_steps.register_offer(engine, runtime, attempt=attempt, recovery=recovery)
+    offered = feature_steps.register_offer(engine, runtime, attempt=attempt, recovery=recovery, preparation_recovery=preparation_recovery)
     with write_transaction(engine) as c:
         current = intake.require(c, planning_jobs, job['id'])
         feature_steps.validate_scope(c, saved)
@@ -218,6 +223,9 @@ def advance(engine, *, adapter=None, provision=None, stop_event=None):
     except (ValueError, OSError):
         return False
     if feature_preparation.recover_one(engine):
+        return True
+    from workbench import feature_preparation_recovery
+    if feature_preparation_recovery.resume(engine):
         return True
     if resume_failed_step(engine):
         return True
@@ -324,6 +332,7 @@ def advance(engine, *, adapter=None, provision=None, stop_event=None):
                     payload.pop(key,None)
                 payload.pop('current_attempt',None)
                 payload.pop('current_recovery',None)
+                payload.pop('current_preparation_recovery',None)
                 state = {**actual['state'], 'feature_history':actual['state'].get('feature_history',[])+[
                     dict(slot=slot, result=outcome, checked=record)]}
                 for key in ('feature_slot','feature_slot_result','feature_slot_state'):
