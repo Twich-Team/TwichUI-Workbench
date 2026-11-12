@@ -1,3 +1,43 @@
+# November 12 — owner-authorized separate current-main compatibility
+
+The owner answered "Allow separate compatibility checks" to the exact request to
+check the preserved feature against current main while retaining its original
+verification and both contributions unchanged. Main d09e6dc is43commits ahead of
+7fd7be8; both feature input files are still identical. This later instruction
+supersedes the initial no-repeat-check boundary only for separate compatibility.
+
+The existing feature delivery adapter can retain a create-only local compatibility
+receipt bound to the original exact draft review, owner instruction, current main,
+unchanged touched inputs, exact final feature files, original-source observations,
+current-main controls and complete current Lua/Python test inventory. The original
+candidate, branch parent, original result, approvals and saved draft snapshot stay
+unchanged. The publication owner requires the actual target to match that separately
+qualified base and records it; the PR adapter verifies the same exact target. A
+further moved main or changed receipt/source/check prevents delivery. No automatic
+rebase, new task, queue, model request, permission renewal or acceptance waiver.
+
+Two native setup refusals were retained before executable checks: a redundant source
+copy counted as diagnostic data, then an isolated-copy path failing the existing
+fixed verification capability. Removing only hash-verified redundant copies and
+using the existing required workspace layout resolved them. No native guard changed.
+Compatibility checks and final Workbench release checks are ongoing.
+
+# November 12 — feature publication connector policy repair
+
+The existing synchronous private connector loads the fixed installation's private
+preparation and relocation/storage policy paths for feature delivery only, validates
+both against its database through their existing owners, and restores its prior
+environment afterward. Socket data cannot supply configuration. All native child,
+combined completion, artifact, exact preview and standing publication checks remain.
+
+The existing publication enqueue owner may recover an identical separately approved
+feature snapshot from its diagnosed preflight-only integrity refusal only after
+complete evidence/permission revalidation. The canonical row must be held with empty
+state and the original exact refusal; no commit, owner, remote intent or uncertain
+operation can exist. The old refusal/time/state is retained in preflight_recovery;
+the snapshot/binding and original task permissions never change. Repeated submissions
+reuse that row. Other holds keep their existing reconciliation boundaries.
+
 # November 12 — composed evidence within the existing feature verifier
 
 `feature_checks` validates bounded explicit requirement/evidence mappings and

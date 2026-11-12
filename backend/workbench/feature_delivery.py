@@ -473,3 +473,154 @@ def reconcile(engine):
         except ValueError, OSError:
             continue
     return False
+
+
+def _compatibility_runtime(snapshot, directory):
+    from workbench.repair_continuation import private_json
+    runtime = feature_verification.Runtime(snapshot['evidence_root'])
+    runtime.root, runtime.workspace, runtime.initial = directory, directory / 'workbench-verify-compatibility/workspace', directory / 'base-manifest.json'
+    manifest = private_json(runtime.initial, 1 << 20)
+    # Current main may have added native tests since the original frozen run.
+    # Require every committed top-level Lua/Python test, with exact inventory
+    # accounting; retain the original runtime's historical inventory unchanged.
+    inventory = sorted(Path(p).name for p in manifest if p.startswith('tests/test_')
+                       and len(Path(p).parts) == 2 and p.endswith(('.lua', '.py')))
+    runtime.expected_suite = lambda: inventory
+    return runtime
+
+
+def compatible_base(snapshot, root):
+    """Read separate native compatibility evidence; never relabel the old result.
+
+    The feature branch keeps its exact checked parent and files. A newer main is
+    eligible only when it descends from that parent, both touched files are still
+    identical, and that main plus the exact patch passed the frozen observations
+    and its own complete current test inventory. No automatic rebase is allowed.
+    """
+    from workbench.repair_continuation import private_json
+    from workbench.real_workspace import tree, sha, git, require_safe_check
+    from workbench.visual_scope import digest
+    path = Path(root) / 'publication-base-compatibility.json'
+    if not path.exists():
+        return snapshot['base']
+    if not snapshot.get('feature_artifact'):
+        raise DeliveryHeld('Separate feature compatibility cannot authorize other delivery kinds.')
+    receipt = private_json(path, 16384)
+    value = {k:v for k,v in receipt.items() if k != 'binding'}
+    reviewed = {k:v for k,v in snapshot.items() if k != 'checked_approval'}
+    import re
+    if (receipt['binding'] != digest(value) or receipt['review_binding'] != digest(reviewed)
+            or receipt['original_base'] != snapshot['base']
+            or not re.fullmatch('[a-f0-9]{64}', receipt['owner_instruction_sha256'])
+            or not re.fullmatch('[a-f0-9]{40}', receipt['target_base'])):
+        raise DeliveryHeld('The separate feature compatibility binding changed.')
+    directory = Path(root) / 'base-compatibility' / receipt['target_base']
+    original = private_json(directory / 'base-manifest.json', 1 << 20)
+    candidate = private_json(directory / 'candidate-manifest.json', 1 << 20)
+    checks = private_json(directory / 'checks.json', 1 << 20)
+    from workbench.trusted_preparation import owned
+    source = owned(private_json(directory / 'source-location.json')['path'])
+    workspace = directory / 'workbench-verify-compatibility/workspace'
+    expected_paths = sorted(snapshot['feature_artifact']['specification']['contract']['paths'])
+    if (receipt['base_manifest_binding'] != digest(original)
+            or receipt['candidate_manifest_binding'] != digest(candidate)
+            or receipt['checks_binding'] != digest(checks)
+            or tree(source) != original or tree(workspace) != candidate
+            or git(source, 'rev-parse', 'HEAD').strip() != receipt['target_base']
+            or git(source, 'status', '--porcelain=v1', '--ignored').strip()
+            or sorted(p for p in set(original) | set(candidate) if original.get(p) != candidate.get(p)) != expected_paths
+            or any(candidate[p] != snapshot['manifest']['tree'][p] for p in expected_paths)):
+        raise DeliveryHeld('The current-base source or exact checked feature files changed.')
+    git(source, 'merge-base', '--is-ancestor', snapshot['base'], receipt['target_base'])
+    for p in expected_paths:
+        import subprocess
+        raw = subprocess.check_output(['git', '-C', str(source), 'show', snapshot['base'] + ':' + p], timeout=30)
+        if sha(raw) != original[p]:
+            raise DeliveryHeld('Current main changed a checked feature input file; no automatic adaptation.')
+    runtime = _compatibility_runtime(snapshot, directory)
+    if (not runtime.original_valid(checks['original'])
+            or [c['command'] for c in checks['candidate']] != runtime.expected_checks()
+            or any(c['status'] != 'pass' or c['rc'] != 0 for c in checks['candidate'])):
+        raise DeliveryHeld('Current-base original or candidate compatibility checks did not pass.')
+    from workbench.real_workspace import suite_inventory
+    if not suite_inventory(checks['candidate'][-1], runtime.expected_suite()):
+        raise DeliveryHeld('The complete current-base test inventory did not pass.')
+    for check in [*checks['original'], *checks['candidate']]:
+        require_safe_check(check)
+        if check.get('usage', {}).get('cgroup_removed') is not True:
+            raise DeliveryHeld('Current-base checks lack confirmed confined-process cleanup.')
+    return receipt['target_base']
+
+
+def check_base_compatibility(engine, execution_id, root, source, target_base, owner_instruction_sha256):
+    """Trusted, explicitly authorized local checks in the existing confinement.
+
+    This does not dispatch models, edit a checked result, renew task permission,
+    enqueue publication or change any frozen snapshot/approval/binding.
+    """
+    import re
+    import subprocess
+    from workbench import real_publication
+    from workbench.real_workspace import tree, sha, git, durable
+    from workbench.trusted_preparation import owned
+    from workbench.visual_scope import digest
+    row, grant, result, snapshot = real_publication._saved_inputs(engine, execution_id)
+    real_publication._checked_approval(Path(root), snapshot)
+    if (not snapshot.get('feature_artifact') or not re.fullmatch('[a-f0-9]{40}', target_base)
+            or not re.fullmatch('[a-f0-9]{64}', owner_instruction_sha256)):
+        raise DeliveryHeld('An exact checked feature and separate compatibility authorization are required.')
+    root, source = owned(root), owned(source)
+    if (git(source, 'rev-parse', 'HEAD').strip() != target_base
+            or git(source, 'status', '--porcelain=v1', '--ignored').strip()):
+        raise DeliveryHeld('Compatibility needs an unchanged exact current-main source.')
+    if (root / 'publication-base-compatibility.json').exists():
+        return compatible_base(snapshot, root)
+    directory = root / 'base-compatibility' / target_base
+    directory.mkdir(parents=True, mode=0o700)
+    durable(directory / 'source-location.json', json.dumps(dict(path=str(source))).encode())
+    workspace = directory / 'workbench-verify-compatibility/workspace'
+    workspace.parent.mkdir(mode=0o700)
+    subprocess.run(['git', '-c', 'protocol.allow=never', '-c', 'protocol.file.allow=always',
+        '-c', 'core.hooksPath=/dev/null', 'clone', '--local', '--shared', '--quiet', str(source), str(workspace)],
+        check=True, timeout=60)
+    current = source
+    original = tree(workspace)
+    durable(directory / 'base-manifest.json', json.dumps(original, sort_keys=True).encode())
+    paths = sorted(f['path'] for f in result['files'])
+    git(current, 'merge-base', '--is-ancestor', snapshot['base'], target_base)
+    for p in paths:
+        raw = subprocess.check_output(['git', '-C', str(current), 'show', snapshot['base'] + ':' + p], timeout=30)
+        if sha(raw) != original[p]:
+            raise DeliveryHeld('Current main changed a checked feature input file; no adaptation is authorized.')
+    # Reuse the native checker mechanics and the exact frozen independent oracle,
+    # with separate receipt paths and the actual newer complete test inventory.
+    runtime = _compatibility_runtime(snapshot, directory)
+    runtime._check_index = 0
+    original_checks = [runtime._check(['bash', 'tests/run.sh'], workspace, loopback=True),
+                       runtime._check(runtime.expected_checks()[-2], workspace / 'tests')]
+    if tree(workspace) != original or not runtime.original_valid(original_checks):
+        raise DeliveryHeld('Current main did not qualify the original controls and missing-feature observations.')
+    patch = Path(snapshot['evidence_root']) / 'candidates' / snapshot['candidate_id'] / 'changes.patch'
+    if sha(patch.read_bytes()) != snapshot['manifest']['patch_sha256']:
+        raise DeliveryHeld('The preserved checked feature patch changed.')
+    git(workspace, 'apply', '--check', str(patch))
+    git(workspace, 'apply', str(patch))
+    candidate = tree(workspace)
+    if (sorted(p for p in set(original) | set(candidate) if original.get(p) != candidate.get(p)) != paths
+            or any(candidate[p] != result['manifest']['tree'][p] for p in paths)):
+        raise DeliveryHeld('Current-main integration differs from the preserved exact feature files.')
+    candidate_checks = [runtime._check(argv, workspace / 'tests' if argv[0] == 'lua5.1' else workspace,
+                        loopback=argv == ['bash', 'tests/run.sh']) for argv in runtime.expected_checks()]
+    durable(directory / 'candidate-manifest.json', json.dumps(candidate, sort_keys=True).encode())
+    checks = dict(original=original_checks, candidate=candidate_checks)
+    durable(directory / 'checks.json', json.dumps(checks, sort_keys=True).encode())
+    value = dict(version=1, review_binding=digest(snapshot), original_base=snapshot['base'],
+        target_base=target_base, owner_instruction_sha256=owner_instruction_sha256,
+        base_manifest_binding=digest(original), candidate_manifest_binding=digest(candidate),
+        checks_binding=digest(checks))
+    # Validate staged proof fully before its create-only publication.
+    if (tree(workspace) != candidate or any(c['rc'] != 0 or c['status'] != 'pass' for c in candidate_checks)):
+        raise DeliveryHeld('Current-main checks failed or changed the exact candidate.')
+    durable(root / 'publication-base-compatibility.json',
+            json.dumps({**value, 'binding': digest(value)}, sort_keys=True).encode())
+    return compatible_base(snapshot, root)

@@ -251,6 +251,22 @@ def _enqueue(engine, row, grant, snapshot):
         if existing:
             if "checked_approval" in snapshot and existing["binding"] != binding:
                 raise DeliveryHeld("This result already has a different delivery record.")
+            if ("checked_approval" in snapshot and snapshot.get("feature_artifact")
+                    and existing["binding"] == binding and existing["snapshot"] == snapshot
+                    and existing["status"] == "held" and existing["state"] == {}
+                    and existing["message"] == 'The combined feature result or its independently checked contributions changed.'):
+                # A renewed exact submission may recover only the diagnosed
+                # preflight hold, before an owner/commit/remote intent existed.
+                # _saved_inputs and _checked_approval have revalidated the whole
+                # immutable result and permission; retain the original refusal.
+                recovery = dict(at=execution.now(), previous_outcome=dict(
+                    status=existing["status"], message=existing["message"],
+                    finished_at=existing["finished_at"], state=existing["state"]))
+                c.execute(records.update().where(records.c.id == existing["id"]).values(
+                    status="pending", finished_at=None,
+                    message="Retrying exact checked feature delivery after local policy repair; original refusal retained.",
+                    state=dict(preflight_recovery=recovery)))
+                return True
             return False
         c.execute(records.insert().values(
             id=str(uuid5(UUID(identity), "workbench-draft-delivery-v1")),
@@ -565,6 +581,8 @@ def _process_one(engine, publisher, stop_event, execution_id, checked_root):
                         grant["binding"] == snapshot["grant_binding"]
                         and digest(original["result"]) == snapshot["result_digest"]
                         and _checked_approval(checked_root, base_snapshot) == snapshot["checked_approval"]
+                        and (not hasattr(publisher, 'target_base') or not state.get('publication_base') or
+                             publisher.target_base(snapshot) == state['publication_base'])
                     )
                 return (
                     current(c, original, grant) == snapshot["task_budget"]
@@ -580,10 +598,12 @@ def _process_one(engine, publisher, stop_event, execution_id, checked_root):
     try:
         if not permitted():
             raise DeliveryHeld("Delivery budget, stop state or activation is no longer current.")
-        if not state.get("pr_started") and publisher.base_head(snapshot) != snapshot["base"]:
+        target_base = publisher.target_base(snapshot) if hasattr(publisher, 'target_base') else snapshot['base']
+        if not state.get("pr_started") and publisher.base_head(snapshot) != target_base:
             raise DeliveryHeld(
                 "The target base moved. Renewed independent verification is required; no automatic rebase."
             )
+        state['publication_base'] = target_base
         if not state.get("commit"):
             commit = publisher.prepare(snapshot, result)
             if not re.fullmatch("[0-9a-f]{40}", commit):

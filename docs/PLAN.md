@@ -1,3 +1,39 @@
+# November 12 — owner-authorized separate current-main compatibility
+
+The owner answered "Allow separate compatibility checks" to the exact request to
+check the preserved feature against current main while retaining its original
+verification and both contributions unchanged. Main d09e6dc is43commits ahead of
+7fd7be8; both feature input files are still identical. This later instruction
+supersedes the initial no-repeat-check boundary only for separate compatibility.
+
+The existing feature delivery adapter can retain a create-only local compatibility
+receipt bound to the original exact draft review, owner instruction, current main,
+unchanged touched inputs, exact final feature files, original-source observations,
+current-main controls and complete current Lua/Python test inventory. The original
+candidate, branch parent, original result, approvals and saved draft snapshot stay
+unchanged. The publication owner requires the actual target to match that separately
+qualified base and records it; the PR adapter verifies the same exact target. A
+further moved main or changed receipt/source/check prevents delivery. No automatic
+rebase, new task, queue, model request, permission renewal or acceptance waiver.
+
+Two native setup refusals were retained before executable checks: a redundant source
+copy counted as diagnostic data, then an isolated-copy path failing the existing
+fixed verification capability. Removing only hash-verified redundant copies and
+using the existing required workspace layout resolved them. No native guard changed.
+Compatibility checks and final Workbench release checks are ongoing.
+
+# November 12 — repair and deliver the preserved checked feature
+
+The owner's feature draft delivery assignment supersedes the preceding local-result
+review stop for this milestone only. Diagnose the exact integrity refusal, retain
+both checked implementations and combined completion, repair the publication
+adapter without weakening evidence, exercise preparation and refusal/recovery
+cases, verify/push the Workbench correction, pass exact full hosted acceptance,
+and install through the existing private release process. Then use the existing
+saved publication permission to deliver one draft feature PR to Twich-Team/TwichUI
+main, verify remote files and installed UI/history, update CURRENT_STATUS and stop.
+No model request, implementation replay, addon merge/release or game edit.
+
 # November 12 — assigned milestone complete; owner review
 
 One real combined Feature Workshop result is independently verified, saved and

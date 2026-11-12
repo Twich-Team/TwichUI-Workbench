@@ -266,6 +266,12 @@ class PilotGitHub:
         ).split()
         return rows[0] if rows else None
 
+    def target_base(self, snapshot):
+        if snapshot.get('feature_artifact'):
+            from workbench.feature_delivery import compatible_base
+            return compatible_base(snapshot, self.root)
+        return snapshot['base']
+
     def branch_head(self, snapshot):
         rows = self._call(
             ["git", "ls-remote", self._url(snapshot), "refs/heads/" + snapshot["branch"]]
@@ -530,7 +536,7 @@ class PilotGitHub:
             and value.get("isCrossRepository") is False
             and value.get("state") == "OPEN"
             and value.get("baseRefName") == snapshot["base_branch"]
-            and value.get("baseRefOid") == snapshot["base"]
+            and value.get("baseRefOid") == self.target_base(snapshot)
             and value.get("headRefName") == snapshot["branch"]
             and value.get("headRefOid") == commit
             and value.get("body") == snapshot["preview"]["body"]

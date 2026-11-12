@@ -1,3 +1,39 @@
+# November 12 — preserved feature draft delivery repair in progress
+
+The owner attachment ebb8eae5 supersedes the prior review stop for this one milestone.
+Follow [exact diagnosis and repair](FEATURE_DRAFT_DELIVERY_REPAIR_20261112.md).
+Active checkout/branch unchanged. Installed128/bca52b7 and rollback126remain intact.
+Preserve unrelated WORKBENCH_ADMIN_APPROVAL changes and dependency links.
+
+Original feature8a11c7e1 / combined3050529d / candidateac9781fc and both checked
+implementations are intact. Native child/final/hash/ancestry/bundle/publication
+revalidation passes. The API supplied its configuration; the env-i connector did
+not. It falsely translated missing preparation policy into changed contributions.
+Publicationc7d99d7e is held with state{} before any commit or remote intent. The
+repair loads fixed local policies and permits only exact preflight retry with the
+original refusal retained, no hash or original permission replacement.
+
+Pre-repair store910rows/hashd1c934145cb52f6009d3288622b2f399d8bdfe623908d287f00e99c59ebb09ec;
+the owner added publication and resumed work after128acceptance. Do not restore908
+or older history. Private evidence root:
+/home/rich/.local/share/TwichUI-Workbench/feature-draft-repair-20261112.
+
+Read-only remote main is d09e6dc,43commits ahead of7fd7be8. Both touched inputs are
+unchanged. The owner explicitly answered "Allow separate compatibility checks" to
+checking the exact preserved feature on current main without replacing its original
+verification. The existing delivery adapter retains a separate native compatibility
+receipt. The exact original feature branch parent/content/preview and old verification
+remain unchanged; actual PR target must equal the separately checked current base.
+No new inference or implementation replay. Full tests and native compatibility run
+are in progress; do not replay stopped native setup/refusal scripts blindly.
+
+Focused clean connector/refusal/recovery10cases and existing publication43cases pass.
+Standard browser129pass/8skipped. Final compatibility fixture, visual, static and full
+backend/frontend runs are in progress. Commit/push verified development work, confirm
+all9hosted release jobs for the exact candidate, complete safe draft delivery and
+private installation/restore/browser proof, update CURRENT_STATUS and stop. No merge,
+addon release, game write or unrelated campaign.
+
 # November 12 — COMPLETE: verified combined feature installed128; stop for owner review
 
 This is the latest operational state. Earlier active/stopped notes below are history.

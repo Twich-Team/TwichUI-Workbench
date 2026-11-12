@@ -1,6 +1,7 @@
 """Standing draft authority and delivery over the existing private egress connector."""
 
 from datetime import datetime
+from contextlib import contextmanager, nullcontext
 import json
 import os
 from pathlib import Path
@@ -188,38 +189,81 @@ def handle(connection, identity):
                 real_publications.c.execution_id == identity)).mappings().first()
         if not row or row["status"] not in publication.ACTIVE:
             return False
-        if "checked_approval" in row["snapshot"]:
-            root = policy["root"] / identity
-            worked = publication.process_one(engine, execution_id=identity, stop_event=Stop(),
-                                             checked_root=root)
-            final = publication.view(engine, identity)
-            if final["published"]:
-                from workbench.publication_adapter import PilotGitHub
-                with engine.connect() as c:
-                    completed = c.execute(sql_select(real_publications).where(
-                        real_publications.c.execution_id == identity)).mappings().one()
-                try:
-                    PilotGitHub(root, completed["snapshot"], scratch_root=root).cleanup(completed["state"]["commit"])
-                except (OSError, ValueError, RuntimeError):
-                    pass  # The delivery stays recorded and its owned copy is retained.
-            return worked
-        # A browser-approved run retains its separate, finite activation and budget.
-        root = Path(row["snapshot"]["evidence_root"]) / "publication"
-        previous = os.environ.get("WORKBENCH_PUBLICATION_ROOT")
-        try:
-            os.environ["WORKBENCH_PUBLICATION_ROOT"] = str(root)
-            from workbench.publication_adapter import PilotGitHub
-            scratch = ROOT.parent / "scratch"
-            if (scratch.resolve() != scratch or not scratch.is_dir()
-                    or scratch.stat().st_uid != os.getuid() or scratch.stat().st_mode & 0o077):
-                raise publication.DeliveryHeld("The installed publication scratch directory needs checking.")
-            publisher = PilotGitHub(root, row["snapshot"], scratch_root=scratch)
-            return publication.process_one(engine, publisher=publisher,
-                                           execution_id=identity, stop_event=Stop())
-        finally:
-            if previous is None:
-                os.environ.pop("WORKBENCH_PUBLICATION_ROOT", None)
-            else:
-                os.environ["WORKBENCH_PUBLICATION_ROOT"] = previous
+        # The connector starts with env -i. Feature ancestry also needs the
+        # installation's private preparation/relocation policies, just as the
+        # API does. Derive fixed paths locally; socket data supplies no policy.
+        with feature_policies(engine) if row["snapshot"].get("feature_artifact") else nullcontext():
+            return _advance(engine, policy, row, identity, Stop())
+    except (ValueError, OSError, KeyError, TypeError):
+        return False
     finally:
         engine.dispose()
+
+
+@contextmanager
+def feature_policies(engine):
+    from workbench import everyday, trusted_preparation
+
+    stage = ROOT.parent
+    inputs = trusted_preparation.owned(stage / "ops/inputs.json")
+    if (not inputs.is_file() or inputs.stat().st_mode & 0o077
+            or inputs.stat().st_size > 1 << 20):
+        raise publication.DeliveryHeld("The installed feature source policy is unavailable.")
+    research = Path(json.loads(inputs.read_text())["research_root"])
+    if (not research.is_absolute() or research.resolve() != research
+            or not research.is_dir() or research.stat().st_uid != os.getuid()):
+        raise publication.DeliveryHeld("The installed read-only feature source is unavailable.")
+    values = dict(WORKBENCH_PREPARATION_CONFIG=str(stage / "ops/preparation.json"),
+                  WORKBENCH_EVERYDAY_CONFIG=str(stage / "ops/everyday.json"),
+                  WORKBENCH_RESEARCH_ROOT=str(research),
+                  TMPDIR=str(stage / "scratch"))
+    previous = {key: os.environ.get(key) for key in values}
+    try:
+        os.environ.update(values)
+        trusted_preparation.configuration(engine)
+        everyday.configuration(engine)
+        yield
+    finally:
+        # The connector serves one connection at a time. Do not carry these
+        # delivery-only settings into its next model request.
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
+def _advance(engine, policy, row, identity, stop):
+    if "checked_approval" in row["snapshot"]:
+        root = policy["root"] / identity
+        worked = publication.process_one(engine, execution_id=identity, stop_event=stop,
+                                         checked_root=root)
+        final = publication.view(engine, identity)
+        if final["published"]:
+            from workbench.publication_adapter import PilotGitHub
+            with engine.connect() as c:
+                completed = c.execute(sql_select(real_publications).where(
+                    real_publications.c.execution_id == identity)).mappings().one()
+            try:
+                PilotGitHub(root, completed["snapshot"], scratch_root=root).cleanup(completed["state"]["commit"])
+            except (OSError, ValueError, RuntimeError):
+                pass  # The delivery stays recorded and its owned copy is retained.
+        return worked
+    # A browser-approved run retains its separate, finite activation and budget.
+    root = Path(row["snapshot"]["evidence_root"]) / "publication"
+    previous = os.environ.get("WORKBENCH_PUBLICATION_ROOT")
+    try:
+        os.environ["WORKBENCH_PUBLICATION_ROOT"] = str(root)
+        from workbench.publication_adapter import PilotGitHub
+        scratch = ROOT.parent / "scratch"
+        if (scratch.resolve() != scratch or not scratch.is_dir()
+                or scratch.stat().st_uid != os.getuid() or scratch.stat().st_mode & 0o077):
+            raise publication.DeliveryHeld("The installed publication scratch directory needs checking.")
+        publisher = PilotGitHub(root, row["snapshot"], scratch_root=scratch)
+        return publication.process_one(engine, publisher=publisher,
+                                       execution_id=identity, stop_event=stop)
+    finally:
+        if previous is None:
+            os.environ.pop("WORKBENCH_PUBLICATION_ROOT", None)
+        else:
+            os.environ["WORKBENCH_PUBLICATION_ROOT"] = previous

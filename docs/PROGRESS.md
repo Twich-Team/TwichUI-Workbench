@@ -1,3 +1,57 @@
+# November 12 — owner-authorized separate current-main compatibility
+
+The owner answered "Allow separate compatibility checks" to the exact request to
+check the preserved feature against current main while retaining its original
+verification and both contributions unchanged. Main d09e6dc is43commits ahead of
+7fd7be8; both feature input files are still identical. This later instruction
+supersedes the initial no-repeat-check boundary only for separate compatibility.
+
+The existing feature delivery adapter can retain a create-only local compatibility
+receipt bound to the original exact draft review, owner instruction, current main,
+unchanged touched inputs, exact final feature files, original-source observations,
+current-main controls and complete current Lua/Python test inventory. The original
+candidate, branch parent, original result, approvals and saved draft snapshot stay
+unchanged. The publication owner requires the actual target to match that separately
+qualified base and records it; the PR adapter verifies the same exact target. A
+further moved main or changed receipt/source/check prevents delivery. No automatic
+rebase, new task, queue, model request, permission renewal or acceptance waiver.
+
+Two native setup refusals were retained before executable checks: a redundant source
+copy counted as diagnostic data, then an isolated-copy path failing the existing
+fixed verification capability. Removing only hash-verified redundant copies and
+using the existing required workspace layout resolved them. No native guard changed.
+Compatibility checks and final Workbench release checks are ongoing.
+
+# November 12 — feature draft delivery diagnosis and focused correction
+
+Owner attachment ebb8eae5 authorizes this one delivery milestone, exact Workbench
+release and one draft addon PR if preserved evidence and saved permissions match.
+Following the Project Working Philosophy, original/Qwen/checked history is retained.
+
+The installed API revalidates the completed combined result successfully. The actual
+publication connector is started with env -i and no WORKBENCH_PREPARATION_CONFIG.
+real_publication._checked -> feature_verification.checked -> authority -> checked_chain
+rechecks both child completions successfully, then configuration(c.engine) raises
+before prerequisite_tasks. The catch converts missing local policy into the generic
+"combined feature result ... contributions changed" hold. No hash comparison failed.
+The canonical publication is held with state {}, before preparation or remote intent.
+
+The pre-repair backup has 910 rows (owner submission/pause added two since128's
+908-row acceptance). Both frozen children, combined completion/checks, source Git
+commits, saved snapshot/preview and standing policy pass unchanged. Original base
+7fd7be8 is a Git commit; ba09e94 is the final checked input Git commit; ac9781fc is
+SHA256 of frozen manifest bytes. The JSON result binding is separately867c10c4.
+Fixed paths !!!TwichUI/map/View.lua and tests/test_map_explore.lua are actual Git
+paths. Outgoing Markdown contains no View\.lua escaping; no presentation/source edit.
+
+Correction loads only the fixed installation policy paths in the existing serial
+connector and validates their original database identity. A repeated authorized
+submission may recover only this exact unchanged preflight hold and retains its
+original refusal. No hash replacement, candidate edit, new model or approval waiver.
+Focused fault/restart/restore/local-Git tests and full release verification underway.
+Private evidence: /home/rich/.local/share/TwichUI-Workbench/feature-draft-repair-20261112.
+Unrelated WORKBENCH_ADMIN_APPROVAL edits and dependency links remain untouched.
+
 # November 12 — COMPLETE: verified combined feature installed128; stop for owner review
 
 This is the latest operational state. Earlier active/stopped notes below are history.
