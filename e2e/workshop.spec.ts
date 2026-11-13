@@ -301,11 +301,18 @@ test('saved ordinary bug starts investigation without recreating the task or app
  const binding='9'.repeat(64);let writes=0;let posted:any;
  const oldFailure={id:'old-non-dispatch',kind:'planning',revision:1,status:'failed',attempts:2,message:'Old failure retained.',model:null,created_at:item.created_at,finished_at:item.created_at,diagnostics:{category:'unavailable'}};
  let current={...item,status:'waiting_for_information',jobs:[oldFailure],planning_start_binding:binding};
+ await page.route('**/api/models',async route=>{
+  const response=await route.fetch();const data=await response.json();
+  data.policy.providers.local={...data.policy.providers.local,enabled:true,model:'controlled-saved-local',effort:null};
+  data.capabilities.executors=data.capabilities.executors.map((entry:any)=>entry.backend==='local'?{...entry,observed_at:new Date().toISOString(),models:[{model:'controlled-saved-local',efforts:[]}]}:entry);
+  await route.fulfill({response,json:data});
+ });
  await page.route('**/api'+path,route=>route.fulfill({json:current}));
  await page.route('**/api'+path+'/investigation',async route=>{
   writes++;posted=route.request().postDataJSON();
   expect(posted.binding).toBe(binding);expect(posted.provider).toBe('qwen-once');
-  expect(Object.keys(posted).sort()).toEqual(['binding','command_id','provider']);
+  expect(Object.keys(posted).sort()).toEqual(['ai_settings','binding','command_id','provider']);
+  expect(posted.ai_settings).toEqual({primary:{provider:'local',model:'controlled-saved-local',effort:null},fallback:null});
   current={...current,status:'queued',jobs:[oldFailure,{...oldFailure,id:'fresh-permission',revision:2,status:'queued',attempts:0,message:'Queued.',finished_at:null}],planning_start_binding:undefined};
   await route.fulfill({json:current});
  });
