@@ -1,3 +1,65 @@
+# Milestone 3 — final native receipt boundary, November 13
+
+Following the Project Working Philosophy: finish the accepted release and the
+existing gallery report's review-only outcome. The shared receipt reader also
+recognizes a native completed Codex turn whose JSON parsing failed before a
+provider-result was projected. It verifies the saved tool-free isolation contract,
+exact pinned transport code, matching native lifecycle and closed producer. It
+never treats disconnect alone as completion, fills missing historical usage, or
+accepts the rejected output. Frozen native transport and old coding readers remain
+unchanged. Controlled cases cover missing terminal/isolation, changed code, unsafe
+capabilities, foreign turn identity and unavailable usage. Static checks pass.
+
+The previous full local run exposed four fixture/prefix failures; their corrections
+pass focused checks and the original failures remain in private evidence. Final
+full local and exact hosted acceptance are required before installation. Running
+f9e517b, the original 939 saved rows and gallery 4 attempts/3 proposals/1 owner
+changes decision/360,395 tokens remain unchanged. No live continuation or inference
+has occurred. Preserve the unrelated admin-document edit and dependency links.
+
+---
+
+# Milestone 3 — final contract checks and release verification, November 13
+
+Current code checkpoint6b5cc0a377297bfb511c38999a786bf4e1ee21a8 is pushed.
+Full exact hosted run43466311978is active. Full final local default test command
+is running (private full-final-local-test.log; session68442). Earlier broad local
+run remains diagnostic (full-local-test.log; session30362); it began before the
+final prefix and fixture corrections. No candidate is installed; f9e517b still
+has all939rows and healthy services/normal model access. Live gallery stays4jobs,
+4attempts/3proposals/1changes decision/16responses/360395tokens, no new model call.
+
+Astra's actual completed audit was recovered from its local session archive and
+read. Private ASTRA_AUDIT_20261112.md/audit-provenance.json record it. The earlier
+unavailable-audit note is superseded; no owner paste or permission is needed.
+Its compressor-version cause is explicitly unproved. Scope remains recommendations
+3/4, then the original report's review-only plan. No gallery implementation/M4.
+
+90focused source/settlement tests now cover completed response prefixes followed
+by native non-dispatch, missing stops, late wires and cancellation.54source-context
+checks and37feature-fixture checks pass; ordinary browser130/8conditional skips,
+12visual comparisons and corrected connected feature workflow pass. Controlled
+actual939-row API copy preserves every prior row/3plans/decision and appends only
+one continuation, deduplicates commands and makes no network/model request.
+Old installed and new readers agree on all original gallery phase/usage facts.
+Actual-tokenizer preparation (no generation) preserves5331Python-test,
+5287generator and363PNG-metadata characters from existing saved owner feedback.
+
+Private milestone3-20261113 contains RUN_STATE.json and all failures/proofs.
+Final candidate tools/stage are candidate-6b5cc0a / everyday-outcome-6b5cc0a;
+previous70ee90f/0657274stages remain UNINSTALLED, preserved and superseded.
+Finish final copied-history rehearsal/full local+hosted acceptance; complete and
+pin private envelope/prepared cutover directory/rollback, install once, verify
+restart/independent restore/actual scheduled retention/resources/healthy worker.
+Then use normal installed browser reply on existing gallery7f1ea569, with generic
+continuation text and NO new source paths. Verify one new job, original history,
+all usage, actual source reads and accurate small Python PNG plan. Stop at owner
+review or preserve a fundamental live orchestration blocker; no extended live
+repair campaign. User did not authorize approving/implementing gallery repair.
+Preserve unrelated administrative-document edit and dependency links.
+
+---
+
 # Milestone 3 in progress — November 13, 2026
 
 The owner authorized settlement/source-discovery consolidation and one normal

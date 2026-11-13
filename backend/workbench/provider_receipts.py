@@ -36,19 +36,18 @@ def request_state(identity, backend, requested, actual, outcome, usage, diagnost
     elif (identity and finished and backend == 'codex' and read_only
             and (not isinstance(usage,dict) or usage.get('status') != 'complete')):
         try:
-            proof = completed_turns(identity,usage,evidence_roots,allow_unavailable=True)
+            proof = completed_turns(identity,usage,evidence_roots,allow_unavailable=True,
+                capabilities=caps,requested_model=requested)
         except (ValueError,OSError,KeyError,TypeError):
             pass
         else:
             state = proof['provider_outcome']
-            if proof.get('actual_model') and actual and proof['actual_model'] != actual:
-                raise ValueError('Native terminal model attribution changed')
-            actual = actual or proof.get('actual_model')
     elif identity and finished and isinstance(usage,dict) and usage.get('status') == 'complete':
         if backend == 'codex':
             proof = (interrupted_turns(identity,usage,evidence_roots,facts,caps)
                 if outcome == 'incomplete_output' and facts.get('terminal_status') == 'interrupted'
-                else completed_turns(identity,usage,evidence_roots))
+                else completed_turns(identity,usage,evidence_roots,allow_unavailable=read_only,
+                    capabilities=caps,requested_model=requested))
             state = proof['provider_outcome']
         elif outcome == 'completed' or facts.get('generation_state') == 'finished' and facts.get('accounting_state') == 'complete':
             state = 'completed'
@@ -56,6 +55,10 @@ def request_state(identity, backend, requested, actual, outcome, usage, diagnost
             proof = completed_local_turns(identity,usage,evidence_roots,requested,facts)
             state = proof['provider_outcome']
             actual = actual or proof['actual_model']
+    if proof and proof.get('actual_model'):
+        if actual and proof['actual_model'] != actual:
+            raise ValueError('Native terminal model attribution changed')
+        actual = actual or proof['actual_model']
     count = (0 if state == 'not_started' else proof['requests'] if proof and 'requests' in proof
              else usage.get('requests_observed',1) if isinstance(usage,dict) else None)
     if state in {'completed','interrupted'} and (type(count) is not int or count < 1
@@ -64,7 +67,8 @@ def request_state(identity, backend, requested, actual, outcome, usage, diagnost
         raise ValueError('Completed operation attribution or request count is unavailable')
     reasons = [r.get('finish_reason') for r in (proof or {}).get('records', [])]
     content_complete = (False if facts.get('generation_state') == 'partial' or 'length' in reasons
-                        else True if state == 'completed' and facts.get('generation_state') == 'finished' else None)
+                        or facts.get('partial_output') is True else
+                        True if state == 'completed' and local_status == 'completed' else None)
     return dict(attempt=identity, provider_state=state, actual_model=actual, requests=count,
         terminal_proof=proof, read_only=read_only, local_status=local_status, local_finished=local_finished,
         dispatch='not_started' if state == 'not_started' else 'observed' if proof or state == 'completed' else 'unresolved',
@@ -98,7 +102,7 @@ def _read(path, *, lines=False, bound=2 << 20):
     return data,hashlib.sha256(raw).hexdigest()
 
 
-def completed_turns(identity,usage,evidence_roots,*,allow_unavailable=False):
+def completed_turns(identity,usage,evidence_roots,*,allow_unavailable=False,capabilities=None,requested_model=None):
     """Verify known complete turns; never infer terminal state from response content.
 
     Only private receipt identifiers/usage are returned. No model text, credentials,
@@ -132,6 +136,14 @@ def completed_turns(identity,usage,evidence_roots,*,allow_unavailable=False):
         phase=identity if index==0 else str(uuid5(UUID(identity),'committed-source-turn-'+str(index)))
         events,source_sha=_read(root/'release/artifacts/runs'/('planning-evidence-'+phase)/'events.jsonl',lines=True,bound=65536)
         results=[e for e in events if e.get('phase')=='provider-result']
+        held_projection=False
+        if not results and allow_unavailable:
+            stopped=[e for e in events if e.get('phase')=='request-stopped'
+                     and e.get('provider_terminal_confirmed') is True and e.get('terminal_status')=='completed']
+            if len(stopped)==1:
+                results=[dict(provider='codex',generation_state='finished',accounting_state='unavailable',
+                    provider_receipt=stopped[0].get('provider_receipt'),usage=None)]
+                held_projection=True
         if len(results)!=1:
             raise ValueError('A provider result receipt is missing or ambiguous')
         result=results[0]
@@ -144,6 +156,34 @@ def completed_turns(identity,usage,evidence_roots,*,allow_unavailable=False):
         used.add(receipt)
         terminal_events,terminal_sha=_read(root/'artifacts/codex-evidence'/(receipt+'.jsonl'),lines=True)
         finals=[e for e in terminal_events if e.get('phase')=='turn-finished']
+        if held_projection:
+            caps=capabilities or {}
+            expected_code={'backend/workbench/codex_provider.py','scripts/codex_connector.py',
+                           'backend/workbench/regression_preparation.py'}
+            if (caps.get('kind')!='tool-free-codex-investigation-v1' or not requested_model
+                    or not all(caps.get(k) is False for k in ('source_writes','execution_dispatch',
+                        'external_action_tools','owner_config_mounted'))
+                    or caps.get('empty_work_directory') is not True or caps.get('shell_disabled') is not True
+                    or caps.get('sandbox')!='readOnly' or caps.get('approval_policy')!='never'
+                    or set(caps.get('code',{}))!=expected_code
+                    or not any(e.get('phase')=='isolation-verified' and e.get('capabilities')==caps for e in terminal_events)):
+                raise ValueError('Completed held response has no verified tool-free capability binding')
+            for name,sha in caps['code'].items():
+                path=root/'release'/name
+                if (path.resolve()!=path or path.stat().st_uid!=os.getuid() or path.stat().st_mode&0o022
+                        or not stat.S_ISREG(path.stat().st_mode) or not 0<path.stat().st_size<=1<<20
+                        or hashlib.sha256(path.read_bytes()).hexdigest()!=sha):
+                    raise ValueError('Completed held response transport code changed')
+            if not finals:
+                held=[e for e in terminal_events if e.get('phase')=='turn-held'
+                      and e.get('status')=='terminal' and e.get('terminal_status')=='completed']
+                if len(held)==1:
+                    finals=[dict(held[0],status='completed')]
+            if len(finals)==1:
+                results[0].update(usage=dict(values=finals[0].get('usage')),
+                    accounting_state='complete' if finals[0].get('usage') is not None else 'unavailable',
+                    actual_model=requested_model)
+                result=results[0]
         lifecycles=[e for e in terminal_events if e.get('phase')=='lifecycle-terminal']
         identities={(e.get('thread_id'),e.get('turn_id')) for e in terminal_events
                     if e.get('phase') in {'turn-started','lifecycle-turn'}}

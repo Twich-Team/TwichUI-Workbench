@@ -60,6 +60,54 @@ def test_completed_codex_execution_does_not_depend_on_available_ledger_tokens(tm
         completed_turns(identity,None,[tmp_path],allow_unavailable=True)
 
 
+@pytest.mark.parametrize('missing_usage',[False,True])
+@pytest.mark.parametrize('fault',[None,'no_close','no_isolation','changed_code','unsafe','foreign_turn'])
+def test_native_completed_malformed_output_settles_before_the_parsed_result_exists(tmp_path,missing_usage,fault):
+    from workbench.provider_receipts import request_state,safe_continuation
+    from workbench.investigation_recovery import capabilities,ROOT
+    identity,path,events,usage=receipts(tmp_path)
+    caps=capabilities()
+    for name in caps['code']:
+        target=tmp_path/'release'/name
+        target.parent.mkdir(parents=True,exist_ok=True)
+        target.write_bytes((ROOT/name).read_bytes())
+        target.chmod(0o644)
+    if fault=='unsafe':
+        caps['source_writes']=True
+    events.insert(1,dict(phase='isolation-verified',capabilities=caps))
+    if missing_usage:
+        events[3]=dict(phase='turn-held',status='terminal',terminal_status='completed',usage=None)
+        usage=None
+    if fault=='no_close':
+        events.pop()
+    if fault=='no_isolation':
+        events.pop(1)
+    if fault=='foreign_turn':
+        events[2]['turn_id']='foreign'
+    if fault=='changed_code':
+        (tmp_path/'release/backend/workbench/codex_provider.py').write_text('changed')
+    write(path,events,True)
+    journal=tmp_path/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl'
+    write(journal,[dict(phase='request-stopped',provider_receipt=path.stem,
+        provider_terminal_confirmed=True,terminal_status='completed')],True)
+    before={p:p.read_bytes() for p in [journal,path]}
+    def read():
+        return request_state(identity,'codex','selected',None,'incomplete_output',usage,
+            dict(generation_state='finished'),caps,[tmp_path],
+            local_status='failed',local_finished='finished',finished='finished')
+    if fault and not missing_usage:
+        with pytest.raises(ValueError):
+            read()
+    else:
+        result=read()
+        assert safe_continuation(result)==(fault is None)
+        if fault is None:
+            assert result['provider_state']=='completed' and result['actual_model']=='selected'
+            assert result['content_complete'] is None and result['output_accepted'] is False
+            assert result['terminal_proof']['unknown_usage_requests']==int(missing_usage)
+    assert all(p.read_bytes()==raw for p,raw in before.items())
+
+
 @pytest.mark.parametrize('fault',['missing_lifecycle','failed','conflicting_terminal','no_close','wrong_usage','wrong_turn','aggregate','symlink'])
 def test_unknown_or_conflicting_execution_is_never_completed_by_content(tmp_path,fault):
     identity,path,events,usage=receipts(tmp_path)

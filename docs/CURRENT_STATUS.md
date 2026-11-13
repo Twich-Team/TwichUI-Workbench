@@ -6,4 +6,4 @@ Shared request-settlement interpretation and consistent versioned source discove
 
 The existing gallery report has not resumed. Its four prior attempts, three plans, owner decisions and 360,395 recorded tokens remain intact. Zero new addon tasks have completed end to end in this assignment. Controlled tests are not live recovery.
 
-The next complete outcome is a verified installation followed by one continuation of that same report to an accurate, narrowly scoped repair plan for owner review. No gallery repair will be approved or implemented. Astra’s original audit chat is unavailable to current tools; its text or local path was requested. No further engineering permission is needed.
+The next complete outcome is a verified installation followed by one continuation of that same report to an accurate, narrowly scoped repair plan for owner review. No gallery repair will be approved or implemented. Astra’s original audit was recovered from the local archive and read. No further engineering permission is needed.
