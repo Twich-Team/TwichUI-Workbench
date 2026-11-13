@@ -1,3 +1,30 @@
+# Milestone 2.5 checkpoint A progress — November 13 UTC
+
+Following the Project Working Philosophy, baseline installed c38d2bb/939 rows and
+normal authenticated Qwen were confirmed. Actual ordinary-user availability rose
+4,413,333,504→25,445,826,560 bytes (19.59 GiB net). Retired alternate Qwen3.8 Q4_K_M;
+shared eleven closed browser copies through existing verified release_cache,
+preserving all paths/seals. Allocated reclaim 21,031,006,208 bytes. Current and two
+validated rollback copies/inodes excluded; seals and rollback snapshot pass.
+All939 rows/305evidence roots/rejection references remain; four services active,
+zero restarts, installed API 200/readiness true, model 401/200/original key hash valid.
+
+Retain all 387 pilot checkouts and 223 actual stage directories: direct references
+or incomplete disposable lifecycle/archived ownership. Do not treat unmatched
+names as proof. Manual coder30b choice retired with backup; active choice unchanged.
+Two obsolete disabled root service selections remain pending a prepared narrow
+owner-terminal action (existing named grants do not permit modifying them).
+Associated Coder30B/Next weights remain; checkpoint A incomplete, B/C unstarted.
+No app deployment, model generation or active Qwen interruption.
+
+Verification setup generated 30 unsealed Python caches in the current stage; only
+those exact newly generated extras were removed after comparing every sealed file
+and link. Current/rollback seals pass. Early script setup errors preceded deletion;
+private receipts preserve failures/correction. Read CONTINUATION and private
+milestone2.5-20261113/CHECKPOINT_A_PROGRESS.md before resuming.
+
+---
+
 # Milestone 2 installed and complete — November 12 (Mountain time)
 
 STOP for owner review, as explicitly requested. Do not begin Milestones 3/4,

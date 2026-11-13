@@ -1,3 +1,52 @@
+# Milestone 2.5 authorized — November 13 UTC; checkpoint A in progress
+
+Owner authorized sequential storage recovery, existing-housekeeping retention and
+Machine Resources repair, full verification/push and one final accepted installation.
+This supersedes the Milestone 2 review stop only for that assignment. Do not begin
+Milestone 3, gallery/map work, addon generation, new providers or database migration.
+One agent. Preserve the unrelated admin-document edit and dependency links.
+
+Following the Project Working Philosophy, actual baseline c38d2bb/four services,
+939 rows/schema 0014 and original logical fingerprint were verified. Root ordinary
+availability increased from 4,413,333,504 to 25,445,826,560 bytes: measured gain 19.59 GiB.
+The unused alternate Qwen3.8 Q4_K_M was retired after identity/process/reference
+checks. Eleven closed browser copies now share byte/metadata-identical files via
+existing release_cache; 4,566,560,768 allocated bytes reclaimed, all paths/checksums
+preserved. Current c38d2bb and validated 0c3cecb-m1/4f03783 rollback targets/inodes
+were excluded. Their seals, rollback snapshot, 305 evidence roots, rejection sidecars,
+all939 rows, installed API/readiness and normal model authentication pass. Qwen PID
+1949395 unchanged; no model generation/restart/deployment occurred.
+
+Checkpoint A is NOT complete. Two obsolete disabled selections are root-owned;
+the existing named grants do not cover them. Owner has a pending asynchronous
+request to run the narrow prepared retirement script in their terminal. It backs
+up/removes only llama.service and llama-80b.service and daemon-reloads, checking
+active Qwen remains unchanged. Both associated weights are retained until this
+access boundary is resolved. The obsolete manual coder30b selection was backed
+up and removed; active qwen38 selection/serve.env untouched. Do not repeat deletion
+of the already-removed alternate. Next script must recheck references/processes.
+
+Private receipts, exact bytes, scripts, setup failures and correction:
+/home/rich/.local/share/TwichUI-Workbench/milestone2.5-20261113/CHECKPOINT_A_PROGRESS.md.
+Prepared root action: same directory/retire-disabled-model-units.py.
+Model retirements use same directory/retire-models.py; Next uses huggingface_hub
+cache revision deletion, accounting one snapshot symlink/blob once.
+
+All 387 pilot checkouts remain: 298 direct historical-reference matches; 89 unmatched
+but lacking proven disposable lifecycle/complete archived ownership. All 223 actual
+stages remain: current/two rollback, 145 historical-envelope references, 75 uncertain.
+Only verified browser duplicates were coalesced. Test/cache/download/evidence/history
+trees with uncertain references remain. Initial baseline command generated 30 unsealed
+.pyc additions in the current stage; only those exact command-time additions were
+removed after zero changed/missing sealed files was proved. Seal passes again.
+Always set PYTHONDONTWRITEBYTECODE=1 when reading installed modules.
+
+Continue A after owner root action, independently accept A, then B, then C. Neither
+retention implementation nor telemetry repair has started, honoring the sequence.
+No application changes installed. Stop for owner review after the whole milestone.
+
+---
+
 # Milestone 2 installed and complete — November 12 (Mountain time)
 
 STOP for owner review, as explicitly requested. Do not begin Milestones 3/4,

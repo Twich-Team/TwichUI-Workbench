@@ -1,3 +1,21 @@
+# Milestone 2.5 — active owner assignment, November 13 UTC
+
+Sequential checkpoints: A recover proven-disposable storage and verify active Qwen,
+history, evidence and rollback; B extend existing housekeeping/retention with preview,
+ownership/reference safety, bounded automatic cleanup and repeated-cycle proof;
+C repair the installed Machine Resources data path and desktop/phone panel. Then
+full local/exact hosted acceptance and one final sealed installation with copied
+history rehearsal, complete private preflight, rollback, restart and real UI checks.
+No Milestone 3, addon generation, gallery/map continuation or database migration.
+
+A in progress: 19.59 GiB measured gain; alternate weight retired/eleven identical
+browser copies shared. History/model/app/rollback verified. Two disabled root-owned
+model selections require the prepared owner-terminal action before their weights
+can be retired. Keep B/C pending until A is independently complete. Read the latest
+CONTINUATION and private CHECKPOINT_A_PROGRESS.md for exact receipts and next steps.
+
+---
+
 # Milestone 2 complete — owner review
 
 Installed accepted c38d2bb/everyday-outcome-c38d2bb. Task isolation/fairness,
