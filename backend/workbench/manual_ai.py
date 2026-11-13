@@ -35,6 +35,8 @@ def available(c,original):
 
 
 def offer(c,original):
+    if not original['payload'].get('local_planning'):
+        return None
     job=available(c,original)
     if job:
         return binding(original,job)

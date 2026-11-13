@@ -1,5 +1,7 @@
 """The independent producer receives original source and its saved provider."""
 import copy
+import time
+from uuid import uuid4
 
 import pytest
 from sqlalchemy import select
@@ -96,8 +98,9 @@ def test_codex_prepares_blind_feature_program_and_review_with_exact_disclosure(
     assert len(calls) == 1
 
 
-def test_independent_adapter_routes_to_codex_and_never_waits_for_optional_local_work(
-    client, headers, store, installed, monkeypatch,
+@pytest.mark.parametrize('backend',['codex','smart'])
+def test_independent_adapter_routes_to_authorized_native_stage_and_never_waits_for_optional_local_work(
+    client, headers, store, installed, monkeypatch,backend,
 ):
     _, _, _, _ = at_independent_preparation(client, headers, store, monkeypatch)
     original_parent = feature_steps.parent
@@ -107,8 +110,13 @@ def test_independent_adapter_routes_to_codex_and_never_waits_for_optional_local_
     def parent(*args, **kwargs):
         approval, permission = original_parent(*args, **kwargs)
         permission = copy.deepcopy(permission)
-        permission['scope']['provider'] = 'codex'
+        permission['scope']['provider'] = backend
         permission['scope']['route'].update(model='controlled-codex', effort='high')
+        if backend=='smart':
+            from workbench.ai_strategy import Stage,Strategy
+            permission['scope']['route'].update(provider='smart',strategy=Strategy(stages=[
+                Stage(id='primary',provider='codex',model='controlled-codex',effort='high',allocation=50),
+                Stage(id='next',provider='claude',model='claude-sonnet-5-5',effort='high',allocation=60)]).model_dump())
         return approval, permission
 
     monkeypatch.setattr(feature_steps, 'parent', parent)
@@ -132,6 +140,23 @@ def test_independent_adapter_routes_to_codex_and_never_waits_for_optional_local_
     monkeypatch.setattr(codex_provider, 'generate', lambda *args, **kwargs: (
         dict(response=dict(finding='Find only disclosed original definitions.', inspection=[dict(query='normalize')], program=None, limitation=None)),
         dict(prompt_tokens=20, completion_tokens=10, reasoning_tokens=2, total_tokens=30)))
+    native_calls=[]
+    if backend=='smart':
+        from workbench import ai_strategy as ai,smart_provider
+        def exchange(request,stop,seconds):
+            assert not stop()
+            observations=[ai.Observation(provider=p,state='available',observed_at=time.time(),paid_usage='disabled',
+                windows=[ai.Window(name='short',used_percent=100 if p=='codex' else 10,resets_at=time.time()+3600)]) for p in ('codex','claude')]
+            decision=ai.evaluate(request['strategy'],observations,[],now=time.time())
+            assert decision.provider=='claude'
+            if request['operation']=='smart-choose':
+                return dict(state='choice',decision=decision.model_dump())
+            assert request['operation']=='smart-turn' and request['stage_id']=='next'
+            native_calls.append(request)
+            return dict(state='completed',result=dict(actual_model='claude-sonnet-5-5',provider_receipt=str(uuid4()),
+                output=dict(response=dict(finding='Find only disclosed original definitions.',inspection=[dict(query='normalize')],program=None,limitation=None)),
+                usage=dict(prompt_tokens=20,completion_tokens=10,total_tokens=30)),admission={})
+        monkeypatch.setattr(smart_provider,'exchange',exchange)
     with store.connect() as c:
         job = c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'feature_execution')).mappings().one()
     assert feature_check_preparation.advance(store, job)
@@ -139,6 +164,14 @@ def test_independent_adapter_routes_to_codex_and_never_waits_for_optional_local_
     assert searches == [{f['path'] for f in bound[0]['files']}]
     assert not {'candidate', 'patch', 'completed_steps', 'execution_journal'} & bound[0].keys()
     with store.connect() as c:
-        ledger = c.execute(select(model_attempts).where(model_attempts.c.purpose == 'feature_check_preparation')).mappings().one()
-        assert ledger['backend'] == 'codex' and ledger['actual_model'] == 'controlled-codex'
+        ledger = c.execute(select(model_attempts).where(model_attempts.c.purpose == ('strategy-request' if backend=='smart' else 'feature_check_preparation'),
+            model_attempts.c.source=='workbench')).mappings().one()
+        assert ledger['backend']==('claude' if backend=='smart' else 'codex')
+        assert ledger['actual_model']==('claude-sonnet-5-5' if backend=='smart' else 'controlled-codex')
         assert ledger['usage']['values']['total_tokens'] == 30
+        if backend=='smart':
+            controller=c.execute(select(model_attempts).where(model_attempts.c.purpose=='feature_check_preparation',
+                model_attempts.c.source=='strategy-control')).mappings().one()
+            assert controller['usage']['values']['total_tokens']==30
+    if backend=='smart':
+        assert len(native_calls)==1 and ledger['requested_effort']=='high' and ledger['actual_effort'] is None

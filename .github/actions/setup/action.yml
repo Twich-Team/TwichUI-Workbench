@@ -29,15 +29,25 @@ runs:
       shell: bash
       run: |
         mirror_release=$(mktemp "${RUNNER_TEMP}/workbench-ubuntu-InRelease.XXXXXX")
-        curl --fail --location --retry 2 --connect-timeout 10 --max-time 30 \
-          https://mirrors.mit.edu/ubuntu/dists/noble/InRelease -o "$mirror_release"
-        gpgv --keyring /usr/share/keyrings/ubuntu-archive-keyring.gpg "$mirror_release"
+        verified_mirror=''
+        for mirror_base in https://mirrors.mit.edu/ubuntu/ https://archive.ubuntu.com/ubuntu/; do
+          if curl --fail --location --retry 2 --connect-timeout 10 --max-time 30 \
+            "${mirror_base}dists/noble/InRelease" -o "$mirror_release" && \
+            gpgv --keyring /usr/share/keyrings/ubuntu-archive-keyring.gpg "$mirror_release"; then
+            verified_mirror=$mirror_base
+            break
+          fi
+        done
+        test -n "$verified_mirror"
         test -f /etc/apt/apt-mirrors.txt
-        sudo tee /etc/apt/apt-mirrors.txt > /dev/null <<'MIRRORS'
-        https://mirrors.mit.edu/ubuntu/	priority:1
-        https://archive.ubuntu.com/ubuntu/	priority:2
-        https://security.ubuntu.com/ubuntu/	priority:3
-        MIRRORS
+        {
+          printf '%s\tpriority:1\n' "$verified_mirror"
+          for mirror_base in https://mirrors.mit.edu/ubuntu/ https://archive.ubuntu.com/ubuntu/ https://security.ubuntu.com/ubuntu/; do
+            if [[ $mirror_base != "$verified_mirror" ]]; then
+              printf '%s\tpriority:2\n' "$mirror_base"
+            fi
+          done
+        } | sudo tee /etc/apt/apt-mirrors.txt > /dev/null
     - name: Install Chromium with supported OS dependencies
       if: inputs.browser == 'true'
       shell: bash

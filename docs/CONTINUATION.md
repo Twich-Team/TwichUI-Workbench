@@ -1,3 +1,41 @@
+The latest hosted browser runner also failed before tests because the MIT Ubuntu
+mirror timed out after three bounded attempts. Existing official Ubuntu fallback
+URLs now undergo the same required signature check with the existing Ubuntu keyring;
+the verified mirror is preferred by apt. No trust key, package inventory, test
+discovery or acceptance gate changed. Actual signed official metadata, shell syntax,
+controlled MIT timeout fallback and invalid-signature refusal were verified.
+
+# Smart AI Choices — acceptance corrections, November 13, 2026
+
+The complete hosted suites exposed two real review issues before any activation:
+the saved-report browser contract still expected provider-only permission, and
+Start now offer lookup queried newer coding tables for ordinary non-AI reports
+in a populated schema0007 compatibility fixture. The browser now checks exact
+frozen model/effort fields and holds empty model selection. Non-AI reports return
+no manual offer before newer-table lookup. The old-schema preservation/restore
+case and existing manual controls passed together (7 checks).
+
+An additional exact blind feature-check adapter case selects Claude through the
+actual Smart planner after controlled Codex exhaustion, using only original source.
+It verifies source binding, native request identity, child model/effort/usage and
+separate logical accounting without double counting. Six focused checks passed,
+including the schema0007 case. This is controlled native IO, not a live Claude
+feature execution. Existing full runs are diagnostic if their source predates
+these corrections. Restart exact release acceptance on the corrected commit.
+
+Running app remains50cc64a with all942 rows/31tables/schema0014 unchanged. Dormant
+hosted artifacts/history copies and worker rehearsals never activated services.
+No addon changes, gallery repair, map publication, migration or maintenance cutover.
+The real full Smart app task remains required after installation.
+
+Actual protected administrator grant expires November13 23:29:31UTC. This is a
+host access boundary, not an engineering campaign clock. Do not renew it through
+unapproved privileges. Complete all available acceptance and the concrete private
+release envelope before requesting owner action if it expires. Original install
+remains safe and running. Continue ordinary engineering independently.
+
+---
+
 Boundary review before activation found and corrected three errors: contended
 admission is a durable known-nondispatch wait; a native terminal rejected response
 with complete usage releases only its settled owner while retaining unknown
