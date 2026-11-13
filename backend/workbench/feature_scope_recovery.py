@@ -200,7 +200,7 @@ def offer(c, identity):
         parent = intake.require(c, task_sessions, approval["id"])
         history = job["payload"].get("scope_history", [])
         if (
-            permission["scope"]["provider"] not in {"local", "codex"}
+            permission["scope"]["provider"] not in {"local", "codex", "claude"}
             or not history
             or parent["status"] != "held"
             or parent["state"].get("cancel_requested")

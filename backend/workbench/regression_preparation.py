@@ -305,6 +305,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 return True
         row = c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).join(intakes, planning_jobs.c.intake_id == intakes.c.id).where(
             planning_jobs.c.status == 'queued', planning_jobs.c.kind.in_(['planning', 'decomposition']), prepared_intake,
+            __import__('workbench.strategy_waiting',fromlist=['due']).due(),
         ).order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not row:
             return False
@@ -363,7 +364,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                                     message='Waiting for a verified project-source refresh. No model request has started.'))
                         return False
                 with engine.connect() as c:
-                    everyday.check_planning(c, original, job if bug else None)
+                    everyday.check_planning(c, original, job if bug or choice=='smart-strategy' else None)
                 if choice == 'qwen-once' and adapter is None and os.environ.get('WORKBENCH_LOCAL_KEY'):
                     from workbench.planning_provider import local_slot
                     try:
@@ -396,7 +397,9 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 if bug:
                     continuation=job['payload'].get('bug_followup',{})
                     frozen=continuation.get('source_scope')
-                    retained=continuation.get('retained_source_packet')
+                    retained=continuation.get('retained_source_packet') or job['payload'].get('ai_retained_packet')
+                    if retained and not frozen:
+                        frozen=dict(base=retained['base'],files={f['path']:f['sha256'] for f in retained['files']})
                     packet=bug_investigation.context(original['payload'], '' if continuation else feedback, policy,
                         **({'legacy':True} if retained and not retained.get('source_contract') else {}))
                     if frozen and retained:
@@ -443,6 +446,13 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 except (ValueError, OSError, HTTPException, OperationalError):
                     return True
 
+            if choice=='smart-strategy' or job['payload'].get('manual_ai'):
+                from workbench import strategy_waiting
+                with engine.connect() as current:
+                    prospective=provider_routes.approved(current,original)
+                route=prospective
+                if strategy_waiting.preflight(engine,job,prospective,provider_stopped,suitable_local=not bug):
+                    return True
             # Same job/lease and accounting owners; duplicate workers never call an
             # adapter for an already claimed job. No automatic inference retry.
             with write_transaction(engine) as c:
@@ -454,17 +464,17 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 from workbench.schemas import ScenarioModelSelection
 
                 if everyday_mode:
-                    everyday.check_planning(c, original, job if bug else None)
+                    everyday.check_planning(c, original, job if bug or choice=='smart-strategy' else None)
                     route = provider_routes.approved(c, original)
-                    planning_end = time.monotonic() + (bug_investigation.INVESTIGATION_SECONDS if bug else deadline_seconds())
+                    planning_end = time.monotonic() + __import__('workbench.strategy_waiting',fromlist=['seconds_remaining']).seconds_remaining(job,bug_investigation.INVESTIGATION_SECONDS if bug else deadline_seconds())
                     if bug and job['payload'].get('bug_followup'):
                         codex_route = provider_routes.bug_followup_codex(route, job['payload']['bug_followup'])
                         fallback_reason = job['payload']['bug_followup']['fallback_reason']
-                    elif choice in provider_routes.CODEX_CHOICES:
+                    elif route.get('strategy') or choice in provider_routes.REMOTE_CHOICES:
                         codex_route = route
                 if codex_route:
                     model_selection = ScenarioModelSelection(policy_revision=route['policy_revision'], model=route['model'])
-                    adapter_used = codex_provider.Planner(codex_route, provider_stopped)
+                    adapter_used = provider_routes.external_planner(codex_route, provider_stopped)
                 else:
                     adapter_used = adapter or (LocalProvider(stop_event, ends_at=planning_end)
                                                if everyday_mode else provider(stop_event))
@@ -476,13 +486,13 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 job['payload']['scenario_generation_claim'] = owner_identity()
                 if bug:
                     from workbench.investigation_recovery import capabilities
-                    job['payload']['recovery_capabilities'] = (capabilities() if isinstance(adapter_used,codex_provider.Planner) else dict(kind='local-message-investigation-v1',source_writes=False,execution_dispatch=False,external_action_tools=False))
+                    job['payload']['recovery_capabilities'] = (capabilities(getattr(adapter_used,'backend','codex')) if isinstance(adapter_used,codex_provider.Planner) else dict(kind='local-message-investigation-v1',source_writes=False,execution_dispatch=False,external_action_tools=False))
                 job.update(status='running', lease=lease, attempts=job['attempts']+1, message=('Investigating the bug and preparing a repair plan.' if bug else 'Preparing grounded behavioral examples for independent review.'))
                 c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
                     status='running', lease=lease, payload=job['payload'], attempts=job['attempts'], message=job['message']))
                 c.execute(model_attempts.insert().values(id=lease, job_id=job['id'], task_id=original['id'],
                     purpose='planning', source='workbench' if model_selection else 'unknown',
-                    backend='codex' if codex_route else 'local' if model_selection else None,
+                    backend=codex_route.get('provider','codex') if codex_route else 'local' if model_selection else None,
                     outcome='running', started_at=intake.now(),
                     policy_revision=model_selection.policy_revision if model_selection else None,
                     requested_model=model_selection.model if model_selection else None,
@@ -494,6 +504,10 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 c.execute(intakes.update().where(intakes.c.id == original['id']).values(status='investigating'))
                 original['status'] = 'investigating'
             claimed_generation = True
+            phase_started=time.monotonic()
+            if getattr(adapter_used,'strategy_control',False):
+                from workbench.strategy_waiting import options
+                adapter_used.bind_operation(engine,lease,**options(job,suitable_local=not bug))
             initial_source_packet = packet
             if bug and getattr(adapter_used, 'source_investigation', False):
                 adapter_used.request_seconds = job['payload'].get('local_planning_receipt', {}).get(
@@ -513,7 +527,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                     from workbench.bug_source_planning import generate as investigate
                     raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
                         feedback, provider_stopped, model_selection.model, engine=engine,
-                        max_requests=operation_request_bound(job['payload']))
+                        max_requests=__import__('workbench.strategy_waiting',fromlist=['remaining']).remaining(job,operation_request_bound(job['payload'])))
                     inspection_packet = packet
                 elif codex_route or not model_selection:
                     raw, model, basis = adapter_used.generate(wire, schema)
@@ -554,7 +568,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         routing_reason=f'{error} The approved {label} fallback took over the one planning request.'))
                 model_selection = model_selection.model_copy(update={'model': target})
                 if codex_route:
-                    adapter_used = codex_provider.Planner(codex_route, provider_stopped)
+                    adapter_used = provider_routes.external_planner(codex_route, provider_stopped)
                     if bug:
                         adapter_used.request_seconds = job['payload'].get('local_planning_receipt', {}).get(
                             'codex_request_deadline_seconds', codex_provider.SECONDS)
@@ -563,7 +577,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         from workbench.bug_source_planning import generate as investigate
                         raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
                             feedback, provider_stopped, target, engine=engine,
-                            max_requests=operation_request_bound(job['payload']))
+                            max_requests=__import__('workbench.strategy_waiting',fromlist=['remaining']).remaining(job,operation_request_bound(job['payload'])))
                         inspection_packet = packet
                     else:
                         raw, model, basis = adapter_used.generate(wire, schema)
@@ -574,13 +588,13 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         from workbench.bug_source_planning import generate as investigate
                         raw, model, basis, packet = investigate(adapter_used, packet, original['payload'],
                             feedback, provider_stopped, target, engine=engine,
-                            max_requests=operation_request_bound(job['payload']))
+                            max_requests=__import__('workbench.strategy_waiting',fromlist=['remaining']).remaining(job,operation_request_bound(job['payload'])))
                         inspection_packet = packet
                     else:
                         raw, model, basis = adapter_used.generate(wire, schema, expected_model=target)
             if planning_end is not None and time.monotonic() >= planning_end:
                 raise PlanningUnavailable('The shared planning deadline expired.', 'timeout')
-            if len(json.dumps(raw, allow_nan=False).encode()) > (40000 if bug else 24000) or basis not in {'demo', 'local', 'codex'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
+            if len(json.dumps(raw, allow_nan=False).encode()) > (40000 if bug else 24000) or basis not in {'demo', 'local', 'codex', 'claude'} or not isinstance(model, str) or not 1 <= len(model) <= 160:
                 raise ValueError('Invalid bounded scenario provider response')
             normalization = []
             if bug:
@@ -667,6 +681,9 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
         contract['scenario_grounding'] = dict(evidence_sha256=digest(packet['files']) if bug else packet['evidence_sha256'],
             policy_sha256=packet['policy_sha256'], basis=basis)
         if model_selection:
+            if route and route.get('strategy'):
+                model_selection=model_selection.model_copy(update={'model':model})
+                contract['scenario_grounding']['strategy_stage']=getattr(adapter_used,'decision',None).stage_id
             contract['scenario_grounding']['model_selection'] = model_selection.model_dump()
         if fallback_reason:
             contract['scenario_grounding']['fallback_reason'] = fallback_reason
@@ -702,6 +719,11 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
         fresh = intake.require(c, intakes, original['id'])
         scope_changed = (any(fresh[field] != original[field] for field in ('revision', 'status', 'payload'))
                          or intake.human_scope(c, original['id']) != scope)
+        if failure and failure[0]=='ai_wait' and not scope_changed:
+            from workbench.strategy_waiting import pause
+            wait=getattr(adapter_used,'diagnostics',{}).get('ai_wait')
+            if wait and pause(c,job,original,adapter_used,wait,active_seconds=time.monotonic()-phase_started):
+                return True
         if failure:
             category, detail = failure
             if category == 'context_budget':

@@ -1,3 +1,4 @@
+from workbench.manual_ai import StartNow
 import os
 import secrets
 from pathlib import Path
@@ -266,6 +267,12 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     def planning_retry(identity: str, body: PlanningRetry):
         intake.retry(app.state.engine, identity, body.job_id, preparation=body)
         return intake.view(app.state.engine, identity)
+
+    @app.post('/api/intake/{identity}/start-now', response_model=IntakeView, responses=errors)
+    def start_now(identity: str, body: StartNow):
+        from workbench.manual_ai import start
+        start(app.state.engine,identity,body)
+        return intake.view(app.state.engine,identity)
 
     @app.post('/api/intake/{identity}/investigation', response_model=IntakeView, responses=errors)
     def investigation_start(identity: str, body: InvestigationStart):

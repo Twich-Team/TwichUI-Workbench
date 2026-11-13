@@ -5,8 +5,19 @@ from workbench import everyday, model_policy
 from workbench.db import planning_jobs
 
 CODEX_CHOICES = {'codex-once', 'codex-with-local-fallback'}
-CHOICES = {'qwen-once', 'qwen-with-codex-fallback', *CODEX_CHOICES}
+REMOTE_CHOICES = {*CODEX_CHOICES,'claude-once','smart-strategy'}
+CHOICES = {'qwen-once', 'qwen-with-codex-fallback', *REMOTE_CHOICES}
 SAFE_CODEX_FALLBACK = {'authentication': 'unavailable', 'unavailable': 'unavailable', 'capacity': 'capacity'}
+
+
+def external_planner(selection, stop):
+    if selection.get('strategy'):
+        from workbench.smart_provider import Planner
+    elif selection.get('provider')=='claude':
+        from workbench.claude_client import Planner
+    else:
+        from workbench.codex_provider import Planner
+    return Planner(selection,stop)
 
 
 def codex_choice(saved):
@@ -30,10 +41,24 @@ def configured_fallback(saved, backend, conditions):
 
 def planning_binding(c, choice, settings=None):
     saved = model_policy.read_connection(c)
+    if choice=='smart-strategy':
+        from workbench.schemas import TaskAISettings
+        from workbench.ai_strategy import Strategy
+        frozen=TaskAISettings.model_validate(settings) if settings else None
+        if not frozen or not frozen.strategy:
+            raise ValueError('Review and freeze the strategy for this task before starting.')
+        strategy=Strategy.model_validate(frozen.strategy)
+        for stage in strategy.stages:
+            if not saved.providers[stage.provider].enabled:
+                raise ValueError('This strategy includes a disabled provider.')
+            validate_selection(stage.provider,stage.model,stage.effort)
+        first=strategy.stages[0]
+        return 'codex_route',dict(provider='smart',policy_revision=saved.revision,
+            model=first.model,effort=first.effort,fallback=[],strategy=strategy.model_dump())
     if settings:
         from workbench.schemas import TaskAISettings
         settings = TaskAISettings.model_validate(settings)
-        expected = ('qwen' if settings.primary.provider == 'local' else 'codex') + (
+        expected = ('qwen' if settings.primary.provider == 'local' else settings.primary.provider) + (
             '-with-' + ('codex' if settings.fallback.provider == 'codex' else 'local') + '-fallback'
             if settings.fallback else '-once')
         if choice != expected:
@@ -47,6 +72,13 @@ def planning_binding(c, choice, settings=None):
                 'model': config.model, 'effort': config.effort})
         # Task consent selects models, while global routing still limits fallback.
         saved = saved.model_copy(update={'providers': providers})
+    if choice=='claude-once':
+        config=saved.providers['claude']
+        if not saved.revision or not config.enabled or not config.model or settings and settings.fallback:
+            raise ValueError('Choose an enabled Claude model. Multi-provider Claude fallback requires a Smart AI strategy.')
+        validate_selection('claude',config.model,config.effort)
+        return 'codex_route',dict(provider='claude',policy_revision=saved.revision,
+                                  model=config.model,effort=config.effort,fallback=[])
     if choice in CODEX_CHOICES:
         route = codex_choice(saved)
         if choice == 'codex-with-local-fallback':
@@ -80,11 +112,21 @@ def local_choice(saved):
 
 def approved(c, original):
     choice = original['payload'].get('local_planning')
+    from workbench.intake import digest
+    manual=c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id==original['id'],
+        planning_jobs.c.kind.in_(['planning','decomposition']),
+        planning_jobs.c.payload['manual_ai'].as_string().is_not(None))
+        .order_by(planning_jobs.c.revision.desc(),planning_jobs.c.created_at.desc())).scalars().first()
+    if manual:
+        receipt=manual['manual_ai']
+        if receipt['original_binding']!=digest(original['payload']) or receipt['scope_revision']!=manual.get('scope_revision'):
+            raise ValueError('The explicit Start now choice no longer matches this task.')
+        return receipt['route']
     if original['payload'].get('ai_settings'):
         # The server receipt freezes this task's exact primary and fallback.
         # Global edits cannot change an already authorized operation.
         from workbench.intake import digest
-        key = 'codex_route' if choice in CODEX_CHOICES else 'local_route'
+        key = 'codex_route' if choice in REMOTE_CHOICES else 'local_route'
         receipts = c.execute(select(planning_jobs.c.payload).where(
             planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')
             .order_by(planning_jobs.c.created_at)).scalars()
@@ -152,10 +194,23 @@ def run_selection(c, linked):
             if selected['model'] != everyday.MODEL:
                 raise ValueError('The installed local model differs from the feature permission.')
             return None
-        return {k:v for k,v in selected.items() if k in {'model','effort','policy_revision'}}
+        return selected if selected.get('strategy') else {k:v for k,v in selected.items() if k in {'model','effort','policy_revision','provider'}}
     grounding = (linked['proposal_review'].get('task_contract') or {}).get('scenario_grounding') or {}
     basis = grounding.get('basis')
     reason = grounding.get('fallback_reason')
+    if selected.get('strategy'):
+        from workbench.ai_strategy import Strategy
+        strategy=Strategy.model_validate(selected['strategy'])
+        stage=next((s for s in strategy.stages if s.id==grounding.get('strategy_stage')),None)
+        if (stage is None or basis!=stage.provider or grounding.get('model_selection')!={
+                'model':stage.model,'policy_revision':selected['policy_revision']}):
+            raise ValueError('The reviewed plan does not identify a permitted frozen strategy stage.')
+        return selected
+    if choice=='claude-once':
+        if (basis!='claude' or reason or selected.get('provider')!='claude'
+                or grounding.get('model_selection')!={'model':selected['model'],'policy_revision':selected['policy_revision']}):
+            raise ValueError('The reviewed Claude selection changed.')
+        return selected
     if choice == 'qwen-once' and basis in {None, 'demo'} and not reason:
         return None  # Legacy or disposable fixture; no Codex authority.
     if basis == 'local':

@@ -79,6 +79,7 @@ export function SavedSetup(){
  const query=useQuery({queryKey:['models'],queryFn:()=>request<Overview>('/api/models')});
  const policy=query.data?.policy;
  if(!policy)return <p role="status">{query.isError?'Saved setup unavailable.':'Reading saved setup…'}</p>;
+ if(policy.strategy)return <div className="saved-setup"><strong>{policy.strategy.name}</strong><ol>{policy.strategy.stages.map(s=><li key={s.id}>{names[s.provider]} · {s.model}{s.effort?' · '+s.effort:''}{s.allocation?' · '+s.allocation+'%':''}{s.role==='fallback'?' fallback reserve':''}</li>)}</ol><p>Frozen task decisions keep their saved choices.</p></div>;
  const primary=policy.providers?.[policy.preferred];
  const route=savedTaskRoute(policy),other=policy.preferred==='local'?'codex':'local';
  const alternate=policy.providers?.[other];

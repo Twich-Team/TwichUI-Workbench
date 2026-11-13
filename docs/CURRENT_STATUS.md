@@ -1,9 +1,11 @@
 Last updated November 13, 2026 (UTC).
 
-Build 50cc64a remains installed with existing Qwen/Codex choices, task overrides, usage charts, retention and Machine Resources. Its previously accepted restart and restore protections remain. All 942 saved rows are unchanged and four services remain healthy.
+Build 50cc64a remains installed with Qwen/Codex choices, frozen task overrides, usage charts, retention, Machine Resources and the accepted recovery protections. No changed application code has been installed for this assignment.
 
-Smart AI Choices and Claude integration are the approved next priority. The server now has Claude Code 2.1.323, signed into Claude Pro. A real headless Sonnet 5.5 check succeeded outside Workbench and reported subscription windows and reset times. Usage credits were off. Existing provider/model tests passed: 132. Claude is not yet integrated into Workbench.
+The owner approved request-start allocation cutoffs, with honest reporting when a running request finishes above its cutoff. Strict-ceiling mode holds requests whose consumption cannot be bounded. No API billing or paid fallback is authorized.
 
-The provider interfaces checked do not guarantee a hard custom percentage ceiling: an already-started request can cross it. The owner must choose request-start percentage cutoffs with this limitation, or strict ceilings that hold automatic work when consumption cannot be bounded. No answer has been assumed.
+The new native Claude adapter passed real confined Sonnet 5.5 checks using Claude Pro with usage credits off. The actual strategy connector held a real request when native session use exceeded its 50% cutoff, then completed a separate authorized isolated 75% boundary check. Actual model and tokens were reported; actual effort remains unknown. Native terminal usage gives reset labels, not exact timestamps; native response events may provide exact resets.
 
-The strategy engine, visual builder, waiting/resumption and manual Start now action are not built or installed. The next complete outcome is a verified Claude adapter and connected strategy system after that allowance decision. Zero new AI-strategy tasks or addon repairs have completed end to end in this assignment. The gallery plan remains conditional and unapproved; excluded addon and maintenance work was not started.
+In development, controlled tests cover ordered strategies, separate cumulative provider budgets, serialized admission, waiting and resumption after restart, frozen choices, Dashboard reasons and explicit Start now overrides. The visual card builder has passed its focused interaction tests. Zero real tasks have completed through the full Smart AI Workbench workflow in this assignment.
+
+Work continues on coding/feature integration, durable recovery across all phases, phone and desktop acceptance, exact full hosted verification and one private release. The running application and existing saved records are preserved. No owner decision is currently needed. Stop for owner review after the complete verified milestone. Excluded addon, gallery, map publication and maintenance work remains untouched.

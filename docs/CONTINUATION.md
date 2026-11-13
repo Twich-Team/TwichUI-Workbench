@@ -1,3 +1,50 @@
+# Smart AI Choices — connected development checkpoint, November 13
+
+Following the Project Working Philosophy: the owner cutoff decision is accepted;
+continue the entire approved A–D outcome without a routine renewal. Request-start
+cutoffs are the default; native limits/billing/authentication remain mandatory.
+Strict mode holds unbounded subscription requests. Unknown usage/reset information
+uses explicit conservative settings. Never buy credits or switch to API billing.
+
+Running app is still 50cc64a. No installation/service restart, schema migration,
+new addon work, gallery repair, map publication or maintenance cutover occurred.
+Unrelated WORKBENCH_ADMIN_APPROVAL.md edits and dependency symlinks remain untouched.
+
+Implemented in development: native pinned Claude boundary and client; pure ordered
+policy; serialized connector admission with stable native request receipts; shared
+primary/reserve consumption across frozen model variants; task-frozen strategy
+receipts; ordered visual cards; cached allowance readings; initial planning-worker
+waiting/restart path; concise Dashboard reasons; explicit task Start now ingress.
+No parallel work queue was introduced. Existing global preferences remain stored.
+
+Real Claude adapter and actual strategy connector checks succeeded in an isolated
+private directory, not the installed app. Fresh native /usage read 59% session use:
+a 50% request-start cutoff held without generation. A separate 75% boundary check
+then returned {"ok":true}, actual claude-sonnet-5-5, 2391 prompt/9 output/2400 total
+reported tokens. Credits Off was checked before dispatch; native init had no API key,
+tools or MCP. Actual effort remains null. Native terminal reset labels are not exact
+epochs; response events can report exact resets. Do not infer or merge inconsistent
+percentages or reset identities. CLI binary remains audited 2.1.323 SHA604d29a6…96e348e.
+
+Focused backend suite passed 236 tests before the latest shared-role refinements;
+those refinements passed 33 focused tests. Visual builder/manual controls passed
+3 frontend interaction tests. wb check passed contracts/TS/build/ruff/schema with
+no migration. Full local backend/frontend test run is still diagnostic/in progress
+because sources changed during it; never reuse it as exact release acceptance.
+Private evidence: ~/.local/share/TwichUI-Workbench/smart-ai-20261113.
+
+Still required before delivery: finish Smart coding and feature scope/check adapters;
+ensure durable mid-operation waits/restart preserve source, model attribution,
+request/time budgets and native settlement; verify uncertain native receipts and
+shared reserve accounting; exact request hashing for Claude/Smart coding; add
+connected whole-path tests; inspect desktop/phone/enlarged text; run full local and
+exact full hosted Verify fixture application including final verify; private install
+once with approved rollback/record preservation; real app end-to-end acceptance.
+Do not describe partial implementation as complete. Stop only after verified
+milestone delivery for owner review, or a genuine essential-provider restriction.
+
+---
+
 # Smart AI Choices — provider audit and allowance decision, November 13, 2026
 
 Following the Project Working Philosophy: the owner promoted Smart AI Choices and

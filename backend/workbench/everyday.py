@@ -266,7 +266,7 @@ def planning_receipt(original, created_at):
     from workbench.intake import digest
 
     from workbench.bug_investigation import INVESTIGATION_SECONDS, INVESTIGATION_REQUESTS, INVESTIGATION_REQUEST_SECONDS, requested
-    return dict(binding=digest(original), expires_at=(
+    return dict(**(dict(automatic_ai_resume=True) if (original.get('ai_settings') or {}).get('strategy') else {}),binding=digest(original), expires_at=(
         datetime.fromisoformat(created_at) + timedelta(minutes=45 if requested(original) else PLANNING_MINUTES)).isoformat(),
         **(dict(feature_planning_version=1, feature_phases=['planning','decomposition'],
                 generation_requests_per_phase=1, request_deadline_seconds=120,
@@ -343,7 +343,8 @@ def check_planning(c, original, job=None):
                     or any(followup.get(k)!=v for k,v in actual.items())):
                 raise ValueError('Fresh operation binding or retained phase accounting changed')
         expected = followup
-    elif claimed:
+    elif claimed and not (job and expected.get('automatic_ai_resume') and
+            __import__('workbench.strategy_waiting',fromlist=['resume_valid']).resume_valid(c,job)):
         raise ValueError('The approved planning operation has already been claimed. Start a new task with updated details.')
-    if datetime.now(timezone.utc) + timedelta(seconds=operation_seconds) >= datetime.fromisoformat(expected['expires_at']):
+    if not expected.get('automatic_ai_resume') and datetime.now(timezone.utc) + timedelta(seconds=operation_seconds) >= datetime.fromisoformat(expected['expires_at']):
         raise ValueError('The planning approval expired before the worker could start. Start a new task to approve planning again.')

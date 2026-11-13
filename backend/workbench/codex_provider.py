@@ -656,7 +656,7 @@ def quota_bucket(result):
     return source.get(key), bucket
 
 
-def snapshot_checks(limits, now=None, *, allow_null_secondary=False):
+def snapshot_checks(limits, now=None, *, allow_null_secondary=False, cutoff=90, future_reset=True):
     if now is None:
         now = time.time()
     checks = [
@@ -736,7 +736,7 @@ def snapshot_checks(limits, now=None, *, allow_null_secondary=False):
                         limits[name],
                         "usedPercent",
                         lambda v: type(v) is int and 0 <= v <= 100,
-                        lambda v: v < 90,
+                        lambda v: v < cutoff,
                         "accounting",
                         contrary="capacity",
                     ),
@@ -745,7 +745,7 @@ def snapshot_checks(limits, now=None, *, allow_null_secondary=False):
                         limits[name],
                         "resetsAt",
                         lambda v: type(v) is int,
-                        lambda v: v > now,
+                        lambda v: not future_reset or v > now,
                         "accounting",
                     ),
                 ]
@@ -753,7 +753,7 @@ def snapshot_checks(limits, now=None, *, allow_null_secondary=False):
     return checks
 
 
-def allowance_checks(result, now=None):
+def allowance_checks(result, now=None, *, cutoff=90):
     limits, bucket = quota_bucket(result)
     ordinary = finding(
         "ordinary_usage",
@@ -767,22 +767,34 @@ def allowance_checks(result, now=None):
     checks = [bucket, ordinary]
     if not bucket["reason"]:
         checks.extend(
-            snapshot_checks(limits, now, allow_null_secondary=ordinary["state"] == "observed")
+            snapshot_checks(limits, now, allow_null_secondary=ordinary["state"] == "observed", cutoff=cutoff)
         )
     return checks
 
 
-def check_snapshot(limits, *, now=None, allow_null_secondary=False):
+def check_snapshot(limits, *, now=None, allow_null_secondary=False, cutoff=90, future_reset=True):
     _, bucket = quota_bucket({"rateLimits": limits})
     require_checks([bucket], "account/rateLimits/read")
     require_checks(
-        snapshot_checks(limits, now, allow_null_secondary=allow_null_secondary),
+        snapshot_checks(limits, now, allow_null_secondary=allow_null_secondary,cutoff=cutoff,future_reset=future_reset),
         "account/rateLimits/read",
     )
 
 
-def check_allowance(result, *, now=None):
-    require_checks(allowance_checks(result, now), "account/rateLimits/read")
+def check_allowance(result, *, now=None, cutoff=90):
+    require_checks(allowance_checks(result, now, cutoff=cutoff), "account/rateLimits/read")
+
+
+def smart_allowance(result):
+    """Native billing/permission checks remain strict; policy owns missing windows."""
+    checks=allowance_checks(result,cutoff=100)
+    require_checks([c for c in checks if not c['check'].startswith(('primary_', 'secondary_'))],
+                   'account/rateLimits/read')
+    limits,_=quota_bucket(result)
+    for name in ('primary','secondary'):
+        window=limits.get(name)
+        if isinstance(window,dict) and type(window.get('usedPercent')) is int and window['usedPercent']>=100:
+            raise Hold('capacity',phase='account/rateLimits/read')
 
 
 def initialize(rpc):
@@ -810,7 +822,7 @@ def usage(values):
     return observed
 
 
-def turn(rpc, model, effort, prompt, schema):
+def turn(rpc, model, effort, prompt, schema, *, on_admit=None):
     record = getattr(rpc, "evidence", lambda *args, **kwargs: None)
     observed_limit = (
         BUG_OBSERVED
@@ -829,7 +841,7 @@ def turn(rpc, model, effort, prompt, schema):
     require_checks(
         account_checks(rpc.call("account/read", {"refreshToken": False})), "account/read"
     )
-    check_allowance(rpc.call("account/rateLimits/read", {}))
+    (smart_allowance if on_admit else check_allowance)(rpc.call("account/rateLimits/read", {}))
     catalog = rpc.call("model/list", {"limit": 64, "includeHidden": False})
     require_checks(catalog_checks(catalog, model, effort), "model/list")
     result = rpc.call(
@@ -865,7 +877,8 @@ def turn(rpc, model, effort, prompt, schema):
     ):
         raise Hold("protocol")
     rpc.events[:] = [event for event in rpc.events if event.get("method") != "account/updated"]
-    check_allowance(rpc.call("account/rateLimits/read", {}))
+    last_allowance=rpc.call("account/rateLimits/read", {})
+    (smart_allowance if on_admit else check_allowance)(last_allowance)
     # The two full reads above affirmed ordinary usage for this turn. A pushed
     # snapshot can still stop it on new evidence, but cannot establish that permission.
     for event in rpc.events:
@@ -878,7 +891,16 @@ def turn(rpc, model, effort, prompt, schema):
         if event.get("method") == "account/rateLimits/updated":
             limits = event["params"]["rateLimits"]
             if limits.get("limitId") == "codex":
-                check_snapshot(limits, allow_null_secondary=True)
+                if on_admit:
+                    pushed=dict(last_allowance,rateLimits=limits,rateLimitsByLimitId={'codex':limits})
+                    smart_allowance(pushed)
+                    last_allowance=pushed
+                else:
+                    check_snapshot(limits,allow_null_secondary=True)
+    if on_admit is not None:
+        # This callback is the serialized Smart AI allowance owner. Legacy frozen
+        # routes retain their original reserve and interruption behavior.
+        on_admit(last_allowance)
     if rpc.stop() or time.monotonic() >= rpc.deadline:
         raise Hold("canceled" if rpc.stop() else "timeout")
     rpc.started = True  # A lost send or reply is an uncertain attempt, never a fallback.
@@ -994,7 +1016,15 @@ def turn(rpc, model, effort, prompt, schema):
             if method == "account/rateLimits/updated":
                 limits = p["rateLimits"]
                 if limits.get("limitId") == "codex":
-                    check_snapshot(limits, allow_null_secondary=True)
+                    if on_admit:
+                        # A new allowance cutoff stops future requests. Preserve
+                        # native credit/auth guards while allowing this turn to
+                        # finish; the provider still enforces its own limits.
+                        checks=snapshot_checks(limits,allow_null_secondary=True,cutoff=101,future_reset=False)
+                        require_checks([c for c in checks if c['check'] not in {'spend_control','reached_limit'}],
+                                       'account/rateLimits/read')
+                    else:
+                        check_snapshot(limits, allow_null_secondary=True)
             if method == "turn/completed":
                 final = p["turn"]
                 if final["id"] != turn_id:
@@ -1177,6 +1207,7 @@ def required_output(node):
 
 
 class Planner:
+    backend = 'codex'
     source_investigation = True
     reuse_review_lessons = False
     usage_source = "Codex app-server investigation turn tokens"
@@ -1195,6 +1226,15 @@ class Planner:
         self.source_base = None
         self.reference_manifest = None
         self.source_lines = {}
+
+    def dispatch(self, *args, **kwargs):
+        return generate(*args, **kwargs)
+
+    def reported_usage(self, counted):
+        value=usage_record(counted)
+        if self.backend!='codex':
+            value['source']=self.usage_source
+        return value
 
     def bind_source(self, packet, *, source_root=None):
         """Freeze the task's selected source disclosure before any provider turn.
@@ -1431,7 +1471,7 @@ class Planner:
                 self.validate_source(packet)
                 if self.response_evidence:
                     self.response_evidence.record("codex-request-budget", **packing)
-            result, counted = generate(
+            result, counted = self.dispatch(
                 model,
                 self.selection["effort"],
                 prefix + json.dumps(packet, ensure_ascii=True),
@@ -1461,7 +1501,10 @@ class Planner:
                 **error.metadata,
             )
             if error.counted is not None:
-                self.diagnostics["usage"] = usage_record(error.counted)
+                self.diagnostics["usage"] = self.reported_usage(error.counted)
+            if self.backend=='claude' and isinstance(getattr(error,'native_known_subtotal',None),dict):
+                self.diagnostics['native_known_subtotal']=error.native_known_subtotal
+                self.diagnostics['accounting_state']='unavailable'
             raise
         # generate returns only after the supported protocol confirms a completed
         # turn and validates its usage. This is not a provider finish_reason.
@@ -1470,7 +1513,7 @@ class Planner:
             generation_state="finished",
             completion_state="completed",
             accounting_state="complete",
-            usage=usage_record(counted),
+            usage=self.reported_usage(counted),
         )
         if getattr(result, "provider_receipt", None):
             self.diagnostics["provider_receipt"] = result.provider_receipt
@@ -1481,7 +1524,7 @@ class Planner:
                 self.response_evidence.capture_content(json.dumps(result, ensure_ascii=True), None)
                 self.response_evidence.record(
                     "provider-result",
-                    provider="codex",
+                    provider=self.backend,
                     generation_state="finished",
                     accounting_state="complete",
                     usage=self.diagnostics["usage"],
@@ -1504,7 +1547,7 @@ class Planner:
                 result, changes = normalize_bug(result)
             if self.response_evidence:
                 self.response_evidence.parsed(result, self.diagnostics, changes)
-        return result, model, "codex"
+        return result, model, self.backend
 
 
 def usage_record(counted):

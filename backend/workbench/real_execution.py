@@ -500,7 +500,7 @@ def process_one(engine, runtime=None, stop_event=None):
         task_id = linked['intake_id'] if linked and everyday.enabled() else (linked or {}).get('task', {}).get('id', TASK)
         c.execute(model_attempts.insert().values(id=fence, job_id=None, execution_id=row['id'],
             task_id=task_id,
-            source='workbench', backend='codex' if route else getattr(runtime,'execution_contract',contract())['provider'],
+            source='workbench', backend=route.get('provider','codex') if route else getattr(runtime,'execution_contract',contract())['provider'],
             purpose='implementation', requested_model=route['model'] if route else getattr(runtime,'execution_contract',contract())['model'],
             requested_effort=route['effort'] if route else None, policy_revision=route['policy_revision'] if route else None,
             actual_model=None if route else runtime.identity()['model'],

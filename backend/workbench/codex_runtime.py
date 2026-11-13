@@ -133,6 +133,15 @@ class CodexRuntime(Runtime):
         super().__init__(root, stop_event)
         self.codex_selection = selection
         self.provider_failure = None
+        self.provider_usage_source=('Native Claude Code reported response tokens including cache reads and creation'
+            if selection.get('provider')=='claude' else 'Codex app-server reported turn tokens')
+
+    def provider_generate(self, identity, fence, turn, *args, **kwargs):
+        if self.codex_selection.get('provider')=='claude':
+            from uuid import UUID,uuid5
+            from workbench.claude_client import generate
+            return generate(*args,request_id=str(uuid5(UUID(identity),'claude-coding-'+str(fence)+'-'+str(turn))),**kwargs)
+        return codex_provider.generate(*args,**kwargs)
 
     def identity(self):
         result = super().identity()
@@ -206,7 +215,7 @@ class CodexRuntime(Runtime):
         if not permitted():
             raise ValueError('Codex execution permission changed before source transmission.')
         try:
-            edit, counted = codex_provider.generate(
+            edit, counted = self.provider_generate(identity,fence,1,
                 self.codex_selection['model'], self.codex_selection['effort'],
                 prompt, schema, stop=lambda: not permitted(),
                 **({'input_limit':codex_provider.MAX_BUG_INPUT, 'request_seconds':codex_provider.BUG_SECONDS} if bug else {}))
@@ -336,7 +345,7 @@ class CodexRuntime(Runtime):
                         model=self.codex_selection['model'], effort=self.codex_selection['effort'],
                         request_sha256=sha(wire+b'\n')), sort_keys=True).encode())
                 try:
-                    edit,counted=codex_provider.generate(self.codex_selection['model'],self.codex_selection['effort'],
+                    edit,counted=self.provider_generate(identity,fence,turn+1,self.codex_selection['model'],self.codex_selection['effort'],
                         prompt,schema,stop=lambda:not permitted() or time.monotonic()>=self.implementation_deadline,input_limit=codex_provider.MAX_BUG_INPUT,
                         request_seconds=codex_provider.BUG_SECONDS)
                 except codex_provider.Hold as error:
@@ -419,7 +428,7 @@ class CodexRuntime(Runtime):
                 return dict(usage=dict(status='complete', units='tokens', values=receipt['values'],
                                        requests_observed=receipt.get('requests_observed',1),
                                        max_request_total_tokens=receipt.get('max_request_total_tokens',receipt['values']['total_tokens']),
-                                       provenance=dict(method='Codex app-server reported turn tokens',
+                                       provenance=dict(method=self.provider_usage_source,
                                                        request_id=identity, fence=fence,
                                                        receipt_sha256=sha(record.read_bytes()))),
                             inference_ran=True, correction_count=0, read_input_errors=0)
@@ -438,4 +447,5 @@ class CodexRuntime(Runtime):
                     provider_partial_output=failure.partial if failure else False,
                     provider_diagnostics=failure.metadata if failure else {},
                     provider_message=str(failure) if failure else
-                    'Codex completion or usage is uncertain. The attempt will not restart automatically.')
+                    ('Claude' if self.codex_selection.get('provider')=='claude' else 'Codex')+
+                    ' completion or usage is uncertain. The attempt will not restart automatically.')

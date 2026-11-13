@@ -299,17 +299,27 @@ class RegressionTestRequest(StrictModel):
 
 
 class TaskModelChoice(StrictModel):
-    provider: Literal['local', 'codex']
+    provider: Literal['local', 'codex', 'claude']
     model: str = Field(min_length=1, max_length=160, pattern=r'^[A-Za-z0-9_.:/-]+$')
     effort: str | None = Field(default=None, max_length=24, pattern=r'^[a-z0-9_-]+$')
 
 
 class TaskAISettings(StrictModel):
+    # Stored as validated JSON to avoid the schema/policy import cycle.
+    strategy: dict | None = Field(default=None,exclude_if=lambda value:value is None)
+    allocation_override: bool | None = Field(default=None,exclude_if=lambda value:not value)
     primary: TaskModelChoice
     fallback: TaskModelChoice | None = None
 
     @model_validator(mode='after')
     def different_provider(self):
+        if self.strategy is not None:
+            from workbench.ai_strategy import Strategy
+            strategy=Strategy.model_validate(self.strategy)
+            first=strategy.stages[0]
+            if self.fallback or self.allocation_override or (first.provider,first.model,first.effort)!=(self.primary.provider,self.primary.model,self.primary.effort):
+                raise ValueError('The strategy must match its first saved choice without a separate legacy fallback or manual override.')
+            self.strategy=strategy.model_dump()
         if self.fallback and self.fallback.provider == self.primary.provider:
             raise ValueError('Fallback must use a different provider.')
         return self
@@ -434,7 +444,7 @@ class IntakeInput(StrictModel):
     kind: Literal['issue', 'feature']
     supported_task: Annotated[str | None, Field(pattern=r'^[a-f0-9]{64}$', exclude_if=lambda value: value is None)] = None
     regression_tests: RegressionTestRequest | None = Field(default=None, exclude_if=lambda value: value is None)
-    local_planning: Literal['qwen-once', 'qwen-with-codex-fallback', 'codex-once', 'codex-with-local-fallback'] | None = Field(default=None, exclude_if=lambda value: value is None)
+    local_planning: Literal['qwen-once', 'qwen-with-codex-fallback', 'codex-once', 'codex-with-local-fallback', 'claude-once', 'smart-strategy'] | None = Field(default=None, exclude_if=lambda value: value is None)
     title: Annotated[str, Field(min_length=1, max_length=160)]
     description: Annotated[str, Field(min_length=1, max_length=6000)]
     lua_error: Annotated[str, Field(max_length=6000)] = ''
@@ -561,7 +571,7 @@ class FeatureScopeBinding(StrictModel):
     feature_base: str = Field(pattern=r'^[a-f0-9]{40}$')
     plan_binding: str = Field(pattern=r'^[a-f0-9]{64}$')
     graph: list[FeatureGraphBinding] = Field(min_length=1, max_length=6)
-    provider: Literal['local', 'codex']
+    provider: Literal['local', 'codex', 'claude']
     route: dict[str, JsonValue]
 
 
@@ -691,9 +701,10 @@ class ScenarioModelSelection(StrictModel):
 
 
 class ScenarioGrounding(StrictModel):
+    strategy_stage: str | None = Field(default=None,max_length=64,exclude_if=lambda value:value is None)
     evidence_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
     policy_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
-    basis: Literal['demo', 'local', 'codex']
+    basis: Literal['demo', 'local', 'codex', 'claude']
     fallback_reason: Literal['authentication', 'unavailable', 'capacity', 'local_unreachable'] | None = Field(
         default=None, exclude_if=lambda value: value is None)
     model_selection: ScenarioModelSelection | None = Field(default=None, exclude_if=lambda value: value is None)
@@ -741,7 +752,7 @@ class ProposalView(StrictModel):
     revision: int
     content: ProposalContent
     model: str
-    basis: Literal['demo', 'local', 'codex', 'owner', 'template', 'preparation']
+    basis: Literal['demo', 'local', 'codex', 'claude', 'owner', 'template', 'preparation']
     created_at: str
     artifacts: list[ArtifactView]
     binding: str
@@ -861,6 +872,7 @@ class TaskHistory(StrictModel):
 
 
 class IntakeView(StrictModel):
+    start_now_binding: str | None = Field(default=None,exclude_if=lambda value:value is None)
     archived_at: str | None = Field(default=None, exclude_if=lambda value: value is None)
     task_history: TaskHistory | None = Field(default=None, exclude_if=lambda value: value is None)
     local_model: LocalModelPriorityView | None = Field(default=None, exclude_if=lambda value: value is None)

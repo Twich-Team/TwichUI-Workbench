@@ -56,9 +56,9 @@ function AttentionCard({task}:{task:WorkspaceTask}){
 function CurrentWork({task,stale}:{task:WorkspaceTask;stale:boolean}){
  const Icon=icons[task.kind]||Compass;
  return <article className="current-work"><div className="current-work-title"><span className="work-emblem"><Icon size={25}/></span><div><Link to={'/intake/'+(task.current_intake_id||task.id)}><h3>{task.title}</h3></Link><span className={'kind-tag kind-'+task.kind}>{taskKind(task.kind)}</span></div></div>
- <div className="current-work-stage"><TaskState task={task}/><p>{task.message}</p></div>
+ <div className="current-work-stage"><TaskState task={task}/>{task.ai_status&&task.ai_status!==task.stage&&<strong>{task.ai_status}</strong>}<p>{task.message}</p>{task.ai_reason&&<details><summary>Why this model?</summary><p>{task.ai_reason}</p></details>}{task.ai_recheck_at&&<p className="small-text">{task.ai_reset_at?'Provider reset reported for ':'Check again: '}{formatTime(new Date((task.ai_reset_at||task.ai_recheck_at)*1000).toISOString())}</p>}</div>
  {!stale&&task.active&&<JourneyRail task={task}/>}
- <div className="current-work-footer"><span>{task.provider?`Working with ${task.provider==='local'?'Local Qwen':task.provider==='codex'?'Codex':task.provider}`:'Provider not reported'}</span><Link to={'/intake/'+(task.current_intake_id||task.id)}>View task<ArrowRight size={15}/></Link></div></article>;
+ <div className="current-work-footer"><span>{task.ai_status|| (task.provider?`${task.active?'Working with':'Last provider:'} ${task.provider==='local'?'Local Qwen':task.provider==='codex'?'Codex':task.provider==='claude'?'Claude':task.provider}`:'Provider not reported')}</span><Link to={'/intake/'+(task.current_intake_id||task.id)}>View task<ArrowRight size={15}/></Link></div></article>;
 }
 export function Dashboard(){
  const query=useWorkspace();const data=query.data;

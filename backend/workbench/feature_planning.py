@@ -271,7 +271,8 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
         with engine.connect() as c:
             next_job = c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).join(intakes, intakes.c.id == planning_jobs.c.intake_id).where(
                 intakes.c.payload['feature_planning'].as_boolean().is_(True),
-                planning_jobs.c.status == 'queued', planning_jobs.c.kind.in_(['planning','decomposition']))
+                planning_jobs.c.status == 'queued', planning_jobs.c.kind.in_(['planning','decomposition']),
+                __import__('workbench.strategy_waiting',fromlist=['due']).due())
                 .order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
             pending_model = c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()
         if next_job:
@@ -291,13 +292,20 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
                             payload={**current_job['payload'], 'source_refresh_retry_at':time.time()+60},
                             message='Waiting for verified source and recovery storage. No feature generation has started.'))
                 return False
+    if everyday.enabled() and next_job and adapter is None:
+        with engine.connect() as c:
+            prospective=provider_routes.approved(c,intake.require(c,intakes,next_job['intake_id']))
+        from workbench.strategy_waiting import preflight
+        if preflight(engine,dict(next_job),prospective,lambda:bool(stop_event and stop_event.is_set())):
+            return True
     with write_transaction(engine) as c:
         query = select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).join(intakes, intakes.c.id == planning_jobs.c.intake_id).where(
             intakes.c.payload['feature_planning'].as_boolean().is_(True))
         if everyday.enabled() and pending_model:
             return False  # Reconcile dead owners first; never move source or overlap another model claim.
         saved = c.execute(query.where(planning_jobs.c.status == 'queued',
-            planning_jobs.c.kind.in_(['planning', 'decomposition'])).order_by(
+            planning_jobs.c.kind.in_(['planning', 'decomposition']),
+            __import__('workbench.strategy_waiting',fromlist=['due']).due()).order_by(
                 planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not saved:
             return False
@@ -327,9 +335,9 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
             return True
         lease = str(uuid4())
         payload = {**job['payload'], 'feature_generation_claim':owner_identity()}
-        backend = 'codex' if original['local_planning'] in provider_routes.CODEX_CHOICES else 'local'
+        backend = route.get('provider','codex') if route.get('strategy') or original['local_planning'] in provider_routes.REMOTE_CHOICES else 'local'
         from workbench.investigation_recovery import capabilities
-        payload['recovery_capabilities'] = (capabilities() if backend == 'codex' else
+        payload['recovery_capabilities'] = (capabilities(backend) if backend in {'codex','claude'} else
             dict(kind='local-message-investigation-v1', source_writes=False,
                  execution_dispatch=False, external_action_tools=False))
         if backend == 'local' and adapter is None:
@@ -348,6 +356,8 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
             started_at=intake.now(), outcome='running'))
         if job['kind'] == 'planning':
             c.execute(intakes.update().where(intakes.c.id == row['id']).values(status='investigating'))
+    phase_started=time.monotonic()
+    ai_wait=None
     failure = None
     packet = None
     used = adapter
@@ -372,15 +382,18 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
                     instruction='Correct the step graph for this same saved plan. Cover every indexed scope requirement with actionable tasks. Source and requirements are unchanged.')
         schema = PlanningOutput if job['kind'] == 'planning' else FeatureDecomposition
         if used is None:
-            if backend == 'codex':
-                from workbench.codex_provider import Planner
-                used = Planner(route, lambda:stop_event is not None and stop_event.is_set())
+            if backend in {'codex','claude','smart'}:
+                used = provider_routes.external_planner(route, lambda:stop_event is not None and stop_event.is_set())
                 used.bind_source(packet)
             else:
                 used = LocalProvider(stop_event, ends_at=time.monotonic()+120)
         from workbench.planning_response import create_evidence
         evidence = create_evidence(lease, schema, coverage=packet.get('coverage'), files=packet['files'])
         used.response_evidence = evidence
+        if getattr(used,'strategy_control',False):
+            from workbench.strategy_waiting import options,seconds_remaining
+            used.bind_operation(engine,lease,**options(job))
+            used.ends_at=time.monotonic()+seconds_remaining(job,120)
         if stop_event is not None and stop_event.is_set():
             raise PlanningUnavailable('Feature planning stopped before dispatch.', 'cancelled')
         try:
@@ -427,12 +440,15 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
             raw, model, basis = used.generate(packet, schema, expected_model=selected)
         if evidence:
             evidence.snapshot('proposed-plan', raw)
-        if model != selected or basis not in {'demo', 'local', 'codex'}:
+        if (model != selected and not getattr(used,'strategy_control',False)) or basis not in {'demo', 'local', 'codex', 'claude'}:
             raise ValueError('Feature planning attribution does not match the saved AI choice.')
         result = validate_response(raw, schema, packet)
         if research(original, feedback, engine=engine) != {k:v for k,v in packet.items() if k not in {'proposal','indexed_scope','correction'}}:
             raise ValueError('Committed source changed while the feature was being planned.')
     except (OSError, ValueError, HTTPException, PlanningUnavailable, KeyError, TypeError) as error:
+        from workbench.smart_provider import Waiting
+        if isinstance(error,Waiting):
+            ai_wait=error.decision
         failure = 'Feature planning could not finish. The request and earlier evidence are preserved. ' + (
             str(error)[:400] if not isinstance(error, HTTPException) else 'The saved request or plan changed.')
     finally:
@@ -443,6 +459,10 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
         current = intake.require(c, intakes, row['id'])
         if active['status'] != 'running' or active['lease'] != lease:
             return True
+        if ai_wait:
+            from workbench.strategy_waiting import pause
+            if pause(c,dict(active),current,used,ai_wait,active_seconds=time.monotonic()-phase_started):
+                return True
         reviewed_during_generation = False
         if job['kind'] == 'decomposition' and active['payload'].get('approval_id'):
             from workbench.db import proposal_decisions
@@ -511,7 +531,7 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
             message=failure or 'Source-grounded feature plan saved.' if job['kind']=='planning' else failure or 'Connected feature steps saved. Execution remains separate.',
             finished_at=intake.now(), lease=None, lease_until=None))
         c.execute(model_attempts.update().where(model_attempts.c.id == lease).values(
-            source='demo' if basis == 'demo' else 'workbench',
+            source='strategy-control' if getattr(used,'strategy_control',False) else 'demo' if basis == 'demo' else 'workbench',
             actual_model=model or diagnostics.get('actual_model'), actual_effort=diagnostics.get('actual_effort'),
             outcome='failed' if failure else 'completed', finished_at=intake.now(), usage=diagnostics.get('usage')))
         if fail_before_commit:

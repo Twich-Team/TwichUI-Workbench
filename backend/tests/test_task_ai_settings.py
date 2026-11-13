@@ -114,3 +114,41 @@ def test_cache_discovery_allowlists_public_fields_without_credentials_or_inferen
     assert not any(s in result.model_dump_json() for s in ['never-return-this','private-account','hidden-codex'])
     cache.write_text('{invalid')
     assert model_policy.cached_codex_capability(cache) is None
+
+
+def test_claude_uses_actual_worker_route_and_keeps_its_frozen_override(
+    store,client,headers,installed,catalog,monkeypatch,
+):
+    from workbench import claude_client
+    model='claude-sonnet-5-5'
+    catalog.executors.append(model_policy.ExecutorCapability(backend='claude',executor='Controlled native',
+        source='Controlled catalog',observed_at=model_policy.now(),
+        models=[model_policy.ModelCapability(model=model,efforts=['high'])],limitation='No real call'))
+    save_codex_policy(store)
+    policy=model_policy.read(store)
+    policy.providers['claude']=model_policy.BackendPreference(model=model,effort='high',enabled=True)
+    model_policy.save(store,policy,catalog)
+    request={**body(),'local_planning':'claude-once','ai_settings':settings('claude',model,'high')}
+    response=client.post('/api/intake',headers=headers,json=request)
+    assert response.status_code==200,response.text
+    identity=response.json()['id']
+    policy=model_policy.read(store)
+    policy.providers['claude']=model_policy.BackendPreference(model='another-model',effort=None,enabled=True)
+    model_policy.save(store,policy,catalog)
+    planner=ControlledPlanner()
+    calls=[]
+    def generate(actual,effort,prompt,schema,stop,*,request_id,**kwargs):
+        calls.append((actual,effort,request_id))
+        raw,_,_=planner.generate(json.loads(prompt.split('Untrusted task data:\n')[1]),None)
+        return raw,dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)
+    monkeypatch.setattr(claude_client,'generate',generate)
+    store.dispose()
+    assert worker.tick(store)
+    assert len(calls)==1 and calls[0][:2]==(model,'high')
+    detail=client.get('/api/intake/'+identity).json()
+    activity=detail['provider_activity'][0]
+    assert activity['backend']=='claude' and activity['actual_model']==model
+    assert activity['requested_effort']=='high' and activity['actual_effort'] is None
+    assert detail['original']['ai_settings']==request['ai_settings']
+    assert client.get('/api/usage').status_code==200
+    assert not worker.tick(store)

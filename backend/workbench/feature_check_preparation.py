@@ -367,9 +367,9 @@ def advance(engine, job, *, adapter=None, stop_event=None):
             wire['previous_check_feedback']=saved['feedback']
         route = permission['scope']['route']
         provider = permission['scope']['provider']
-        if provider not in {'local', 'codex'}:
+        if provider not in {'local', 'codex', 'claude'}:
             raise ValueError('The saved provider has no supported independent feature-check request bound. No fallback was made.')
-        if provider == 'codex':
+        if provider in {'codex','claude'}:
             wire = complete_original_wire(wire)
     if everyday.enabled():
         everyday.require_room(everyday.configuration(engine))
@@ -404,9 +404,9 @@ def advance(engine, job, *, adapter=None, stop_event=None):
             status='active',finished_at=None,message='Preparing read-only independent feature checks from original source.'))
     if adapter is not None:
         used = adapter
-    elif provider == 'codex':
-        from workbench.codex_provider import Planner
-        used = Planner(dict(model=route['model'], effort=route.get('effort')), stopped.is_set)
+    elif provider in {'codex','claude'}:
+        from workbench.provider_routes import external_planner
+        used = external_planner(dict(model=route['model'], effort=route.get('effort'),provider=provider), stopped.is_set)
         used.ends_at = time.monotonic()+budget['verification_request_seconds']
     else:
         used = LocalProvider(stopped,ends_at=time.monotonic()+budget['verification_request_seconds'])
@@ -415,7 +415,7 @@ def advance(engine, job, *, adapter=None, stop_event=None):
     accepted = unsupported = False
     next_saved = copy.deepcopy(saved)
     try:
-        if adapter is None and provider == 'codex':
+        if adapter is None and provider in {'codex','claude'}:
             used.bind_source(current_packet)
         evidence = create_evidence(lease,schema,files=current_packet['files'])
         used.response_evidence = evidence
@@ -442,7 +442,7 @@ def advance(engine, job, *, adapter=None, stop_event=None):
             raise ValueError('Independent feature checks need an unsupported capability: '+parsed.limitation)
         elif parsed.inspection:
             windows,matches,_ = inspect(current_packet,parsed.inspection,result_budget=6500,
-                **({'disclosure_paths':{f['path'] for f in current_packet['files']}} if provider == 'codex' else {}))
+                **({'disclosure_paths':{f['path'] for f in current_packet['files']}} if provider in {'codex','claude'} else {}))
             if source_characters(current_packet)>262144:
                 raise ValueError('Independent source inspection exceeded its original-source bound.')
             current_packet['input_binding']=digest({k:v for k,v in current_packet.items() if k!='input_binding'})

@@ -10,14 +10,16 @@ The owner approved the complete connected outcome through checkpoints A–D:
 4. D: exact production-path deterministic and connected acceptance, full local and
    exact hosted release checks, preserved-history private installation and owner review.
 
-Read the [provider audit](history/20261113-smart-ai-provider-audit.md). Native Claude
-subscription headless access works; no application adapter or strategy implementation
-is complete. Provider percentage readings establish admission cutoffs but no hard
-custom percentage ceiling for an in-flight request. The owner was asked whether to
-accept that explicit limitation or require strict ceilings which hold automatic work
-when consumption cannot be bounded. Implementation is held for that material product
-decision under the assignment's essential-provider-limitation stop. No response is
-assumed, and no spending change is requested. Engineering authority otherwise persists.
+The owner explicitly chose request-start percentage cutoffs as the default: recheck
+fresh supported observations before each dispatch, stop new requests at the cutoff,
+allow an admitted request to finish and report actual overrun. Serialize Workbench
+admissions; count outside usage conservatively; keep primary/fallback allocations
+separate and cumulative per provider. Unknown/stale usage or resets follow explicit
+conservative owner settings, and optional strict mode holds unbounded consumption.
+No API billing, credits or paid fallback is authorized. The prior audit decision
+stop is resolved; proceed through the complete milestone without a checkpoint stop.
+Read the [dated audit](history/20261113-smart-ai-provider-audit.md) as historical
+evidence, not a current permission request.
 
 Preserve existing defaults, task overrides, frozen permissions, actual attribution,
 usage charts, durable worker, independent checks, retention/resources and rollback.

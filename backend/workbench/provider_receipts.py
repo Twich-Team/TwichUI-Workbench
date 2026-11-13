@@ -33,6 +33,14 @@ def request_state(identity, backend, requested, actual, outcome, usage, diagnost
         else:
             state = proof['provider_outcome']
             actual = actual or proof['actual_model']
+    elif identity and finished and backend=='claude' and read_only:
+        try:
+            proof=claude_turns(identity,usage,evidence_roots,requested,caps,diagnostics)
+        except (ValueError,OSError,KeyError,TypeError):
+            pass
+        else:
+            state=proof['provider_outcome']
+            actual=actual or proof.get('actual_model')
     elif (identity and finished and backend == 'codex' and read_only
             and (not isinstance(usage,dict) or usage.get('status') != 'complete')):
         try:
@@ -89,6 +97,66 @@ def safe_continuation(state):
     return (state['local_status'] in {'completed','failed'} and bool(state['local_finished'])
         and state['provider_state'] in {'completed','interrupted','not_started'}
         and state['read_only'] and not state['execution_authorized'])
+
+
+def claude_turns(identity,usage,evidence_roots,requested,capabilities,diagnostics):
+    """Verify private native-Claude terminals without accepting model content."""
+    if (str(UUID(identity))!=identity or capabilities.get('kind')!='tool-free-claude-investigation-v1'
+            or capabilities.get('native_login_readonly') is not True or capabilities.get('tools')!=[]
+            or capabilities.get('mcp_servers')!=[] or not isinstance(usage,dict)):
+        raise ValueError('Claude terminal capability or accounting is unavailable')
+    matches=[Path(root) for root in dict.fromkeys(evidence_roots)
+        if (Path(root)/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl').is_file()]
+    if len(matches)!=1:
+        raise ValueError('Claude operation evidence is missing or ambiguous')
+    root=matches[0]
+    expected={'backend/workbench/claude_native.py','backend/workbench/claude_client.py',
+              'backend/workbench/codex_provider.py','scripts/smart_connector.py',
+              'scripts/codex_connector.py','backend/workbench/regression_preparation.py'}
+    if set(capabilities.get('code',{}))!=expected:
+        raise ValueError('Claude native transport contract is incomplete')
+    for name,digest in capabilities['code'].items():
+        path=root/'release'/name
+        info=path.lstat()
+        if (path.resolve()!=path or not stat.S_ISREG(info.st_mode) or info.st_mode&0o022
+                or info.st_uid!=os.getuid() or hashlib.sha256(path.read_bytes()).hexdigest()!=digest):
+            raise ValueError('Claude native transport source changed')
+    count=usage.get('requests_observed',1)
+    if type(count)is not int or not 0<=count<=256:
+        raise ValueError('Claude request count is unavailable')
+    records=[]
+    summed={k:0 for k in ('prompt_tokens','completion_tokens','total_tokens')}
+    for index in range(count):
+        phase=identity if index==0 else str(uuid5(UUID(identity),'committed-source-turn-'+str(index)))
+        native,sha=_read(root/'artifacts/claude-evidence'/(phase+'.json'))
+        facts=native.get('facts',[])
+        finals=[f for f in facts if f.get('phase')=='native-result']
+        closed=[f for f in facts if f.get('phase')=='producer-closed']
+        dispatched=[f for f in facts if f.get('phase')=='dispatch']
+        result=native.get('result',{})
+        values=result.get('usage') if native.get('state')=='completed' else native.get('usage')
+        actual=result.get('actual_model') if native.get('state')=='completed' else native.get('actual_model')
+        if (native.get('request_id')!=phase or native.get('state') not in {'completed','completed_rejected'}
+                or native.get('native_binary_sha256')!='604d29a6869409106b6a1110bdadcc8b72e8654a5a865d23258f938a696e348e'
+                or len(finals)!=1 or finals[0].get('subtype')!='success' or finals[0].get('is_error') is not False
+                or len(closed)!=1 or closed[0].get('returncode')!=0
+                or len(dispatched)!=1 or dispatched[0].get('requested_model')!=requested or actual!=requested
+                or finals[0].get('usage')!=values or not isinstance(values,dict)
+                or any(type(values.get(k))is not int or values[k]<0 for k in summed)
+                or values['prompt_tokens']+values['completion_tokens']!=values['total_tokens']):
+            raise ValueError('Claude native completion, usage or attribution is unverified')
+        for key in summed:
+            summed[key]+=values[key]
+        records.append(dict(phase=phase,terminal_sha256=sha,usage=values))
+    if count==0:
+        events,_=_read(root/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl',lines=True,bound=65536)
+        if (diagnostics.get('generation_state')!='not_started' or usage.get('status')!='not_started'
+                or any(e.get('phase') in {'provider-result','wire-received','source-followup'} for e in events)):
+            raise ValueError('Claude non-dispatch is unverified')
+    elif any(usage.get('values',{}).get(k)!=value for k,value in summed.items()):
+        raise ValueError('Claude native usage differs from saved accounting')
+    return dict(provider_outcome='completed' if count else 'not_started',actual_model=requested if count else None,
+                requests=count,records=records,known_usage=summed,output_accepted=False,execution_authorized=False)
 
 
 def _read(path, *, lines=False, bound=2 << 20):

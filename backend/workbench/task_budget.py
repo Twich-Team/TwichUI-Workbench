@@ -416,7 +416,7 @@ def offer_view(c, proposal, selected):
             linked = task_execution.snapshot(c, **reviewed['ref'])
             route = provider_routes.run_selection(c, linked)
             grounding = linked['proposal_review']['task_contract'].get('scenario_grounding') or {}
-            provider = dict(backend='codex' if route else 'local',
+            provider = dict(backend=route.get('provider','codex') if route else 'local',
                             model=route['model'] if route else everyday.MODEL,
                             effort=route['effort'] if route else None,
                             fallback_reason=grounding.get('fallback_reason'))

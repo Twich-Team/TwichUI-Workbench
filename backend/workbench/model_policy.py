@@ -11,6 +11,7 @@ from sqlalchemy import select
 from workbench.schemas import ScenarioModelSelection, StrictModel
 from workbench.db import execution_policies, write_transaction
 from workbench.service import now
+from workbench.ai_strategy import Strategy, Observation as AllowanceObservation
 
 Backend = Literal['local', 'codex', 'claude']
 Condition = Literal['unavailable', 'capability', 'verification', 'capacity', 'unknown', 'stale']
@@ -32,6 +33,7 @@ class BackendPreference(StrictModel):
 
 
 class ExecutionPolicy(StrictModel):
+    strategy: Strategy | None = Field(default=None, exclude_if=lambda value:value is None)
     revision: int = Field(default=0, ge=0)
     preferred: Backend = 'local'
     fallback: list[Backend] = Field(default_factory=lambda: ['codex'], max_length=2)
@@ -114,8 +116,32 @@ def installed_capabilities(report):
             cached = cached_codex_capability()
             if cached:
                 others = [cached if e.backend == 'codex' else e for e in others]
+        claude=next((e for e in others if e.backend=='claude'),None)
+        if claude and not claude.models:
+            cached=cached_claude_capability()
+            if cached:
+                others=[cached if e.backend=='claude' else e for e in others]
         report = report.model_copy(update={'executors': [local, *others]})
     return report
+
+
+def cached_claude_capability(path=None):
+    """App-owned pinned transport metadata; no credential read or subprocess."""
+    from workbench import everyday, claude_native
+    try:
+        path=Path(path or everyday.ROOT.parent/'ops/claude.json')
+        if path.is_symlink() or not path.is_file() or path.stat().st_size>4096:
+            return None
+        value=json.loads(path.read_bytes())
+        if (value.get('binary_sha256')!='604d29a6869409106b6a1110bdadcc8b72e8654a5a865d23258f938a696e348e'
+                or value.get('usage_credits')!='off' or value.get('api_billing')!='denied'):
+            return None
+        return ExecutorCapability(backend='claude',executor='Pinned native Claude Code',version='2.1.323',
+            observed_at=now(),source='Configured verified native CLI contract and documented model/effort table',
+            models=[ModelCapability(model=m,efforts=sorted(claude_native.EFFORTS)) for m in sorted(claude_native.MODELS)],
+            limitation='Model support is not entitlement. The private connector checks native subscription usage, credits Off and actual model before use. Actual effort remains unknown unless reported.')
+    except (OSError,ValueError,TypeError):
+        return None
 
 
 def cached_codex_capability(path=None):
@@ -166,6 +192,11 @@ def support(report, backend, model, effort, instant=None):
 
 
 def save(engine, body, report):
+    if body.strategy:
+        for stage in body.strategy.stages:
+            if (not body.providers[stage.provider].enabled or
+                    support(report,stage.provider,stage.model,stage.effort)!='verified'):
+                raise HTTPException(422,'Every strategy stage needs an enabled provider and a current supported model and effort.')
     for backend, config in body.providers.items():
         state = support(report, backend, config.model, config.effort)
         if config.effort is not None and state != 'verified':
@@ -314,6 +345,8 @@ def preview(policy, report, case='saved', purpose='planning'):
 
 
 class ModelOverview(StrictModel):
+    allowance_readings: list[AllowanceObservation] | None = Field(default=None,exclude_if=lambda value:value is None)
+    allowance_overruns: list[dict] | None = Field(default=None,exclude_if=lambda value:value is None)
     policy: ExecutionPolicy
     capabilities: CapabilityReport
     acknowledgment: str
@@ -325,17 +358,27 @@ class ModelOverview(StrictModel):
     allocation_message: str
 
 
+def allowance_view():
+    from workbench import everyday,provider_admission
+    try:
+        data=provider_admission.read(everyday.ROOT.parent/'artifacts/ai-allowances/latest.json',{})
+        readings=[AllowanceObservation.model_validate(v) for v in data.get('observations',[])]
+        return dict(allowance_readings=readings or None,allowance_overruns=data.get('overrun') or None)
+    except (ValueError,OSError,TypeError):
+        return {}
+
+
 def overview(engine, report):
     from workbench import everyday
 
     policy = read(engine)
     if everyday.enabled():
-        return ModelOverview(policy=policy, capabilities=report,
+        return ModelOverview(**allowance_view(),policy=policy, capabilities=report,
             acknowledgment='Saved model choices are bound to eligible task planning and execution. Each task still requires its own scope and run approvals; this is not a global worker acknowledgment.',
             observations=[Observation(backend=b) for b in ('local','codex','claude')],
             routing=preview(policy, report), cases=CASES,
             usage_message='Reported tokens and requests describe Workbench activity. Codex eligibility reads before a turn are snapshots, not a per-turn included-allowance lock or an account balance. This page does not fetch account data.',
-            allocation_message='Task-wide provider and operation bounds remain enforced across permitted switches. Historical campaign totals do not limit new tasks. Internal Codex retries may not be fully observable; missing usage remains unknown. API-key execution and credit purchases are not provided. Subscription-percentage allocation remains unfinished.')
+            allocation_message=('Smart strategies use provider-specific request-start cutoffs with serialized admission. A running request can overrun its cutoff. Exact strict ceilings are unsupported; strict mode holds. Unknown or stale usage follows the frozen conservative policy. No paid billing fallback.' if policy.strategy else 'Task-wide provider and operation bounds remain enforced across permitted switches. Historical campaign totals do not limit new tasks. Internal Codex retries may not be fully observable; missing usage remains unknown. API-key execution and credit purchases are not provided. Subscription-percentage allocation applies only to explicitly frozen Smart strategies.'))
     return ModelOverview(policy=policy, capabilities=report,
         acknowledgment='Configuration saved; not activated for implementation. Grounded local planning records its saved model selection per attempt when separately configured.',
         observations=[Observation(backend=b) for b in ('local','codex','claude')],

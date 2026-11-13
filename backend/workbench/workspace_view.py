@@ -41,6 +41,10 @@ NEEDS = {'needs_input', 'needs_approval'}
 
 
 class WorkspaceTask(BaseModel):
+    ai_status: str | None = Field(default=None,exclude_if=lambda value:value is None)
+    ai_reason: str | None = Field(default=None,exclude_if=lambda value:value is None)
+    ai_recheck_at: float | None = Field(default=None,exclude_if=lambda value:value is None)
+    ai_reset_at: float | None = Field(default=None,exclude_if=lambda value:value is None)
     archived_at: str | None = Field(default=None, exclude_if=lambda value: value is None)
     history_count: int | None = Field(default=None, exclude_if=lambda value: value is None)
     history_failures: int | None = Field(default=None, exclude_if=lambda value: value is None)
@@ -136,7 +140,7 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
         plans = indexed(c.execute(select(proposals).order_by(proposals.c.revision)).mappings())
         choices = indexed(c.execute(select(proposal_decisions).order_by(proposal_decisions.c.created_at)).mappings())
         tasks = indexed(c.execute(select(backlog_items).where(backlog_items.c.kind == 'task')).mappings())
-        providers = indexed(c.execute(select(model_attempts).where(model_attempts.c.purpose.in_(['planning', 'implementation']))
+        providers = indexed(c.execute(select(model_attempts).where(model_attempts.c.purpose.in_(['planning', 'implementation','strategy-request']),model_attempts.c.source!='strategy-control')
                                       .order_by(model_attempts.c.started_at)).mappings(), 'task_id')
         from workbench.local_model_priority import snapshot as model_priority
         local_model = model_priority(c)
@@ -244,9 +248,31 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
                            if local_model['state']=='working' else local_model['message'])
             elif waiting_job and waiting_job['message'].startswith('Waiting for '):
                 message = waiting_job['message']
+        ai_status=ai_reason=ai_recheck_at=ai_reset_at=None
+        waiting_job=max((j for j in current_jobs if j['status']=='queued' and j['payload'].get('ai_wait')),
+                        key=lambda j:j['revision'],default=None)
+        if phase=='queued' and waiting_job:
+            import time
+            wait=waiting_job['payload']['ai_wait']
+            name={'codex':'Codex','claude':'Claude','local':'Local Qwen'}.get(wait.get('provider'),'AI')
+            condition=wait.get('condition')
+            ai_reason=wait['reason']
+            ai_recheck_at=wait.get('recheck_at')
+            ai_reset_at=wait.get('provider_reset_at')
+            ai_status=('Ready to resume automatically' if ai_recheck_at and ai_recheck_at<=time.time() else
+                'Waiting for '+name+' usage to reset' if condition=='provider_limit' else
+                'Work waiting for '+name+' allowance' if condition in {'allocation','unknown'} else
+                'All configured AI options are currently unavailable')
+            label,message=ai_status,ai_reason
+        elif phase in ACTIVE and providers[identity] and body.get('ai_settings'):
+            recent=providers[identity][-1]
+            name={'codex':'Codex','claude':'Claude','local':'Local Qwen'}.get(recent['backend'])
+            if name and recent['outcome']=='running':
+                ai_status=('Using '+name+' fallback' if 'fallback strategy stage' in recent['routing_reason'] else 'Working with '+name)
+                ai_reason=recent['routing_reason']
         from workbench.intake import priority as task_priority
         priority = task_priority(original)
-        rows.append(dict(description=body.get('description',''), priority=priority['priority'], priority_manual=priority['manual'], id=identity, title=body['title'], kind=task_kind, state=phase, stage=label, message=message,
+        rows.append(dict(ai_status=ai_status,ai_reason=ai_reason,ai_recheck_at=ai_recheck_at,ai_reset_at=ai_reset_at,description=body.get('description',''), priority=priority['priority'], priority_manual=priority['manual'], id=identity, title=body['title'], kind=task_kind, state=phase, stage=label, message=message,
                          created_at=original['created_at'], updated_at=max(timestamps), active=phase in ACTIVE,
                          needs_you=phase in NEEDS, result_id=result_id, result_kind=result_kind,
                          draft_pr_submitted=draft_pr_submitted or None, provider=providers[identity][-1]['backend'] if providers[identity] else None))

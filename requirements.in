@@ -6,3 +6,4 @@ pydantic
 pytest
 httpx
 ruff
+pyte

@@ -68,7 +68,7 @@ def packet(c, decision_id, task_id, feature_input, *, inspections=()):
         if record.get('feature_input_binding')!=digest(feature_input):
             raise ValueError('Source inspection belongs to different checked predecessor input.')
     restored = feature_step_source.restore(value,root,base,inspections)
-    if permission['scope']['provider'] == 'codex':
+    if permission['scope']['provider'] in {'codex','claude'}:
         # Keep complete observations in native evidence, while disclosing search
         # text only from the selected files. Incidental global matches must not
         # consume the twelve-file read scope or silently expand disclosure.
@@ -151,7 +151,7 @@ def scope_packet(c, decision_id, task_id, feature_input, previous, *, remaining=
                          'Requested source range is outside the committed file.')
     inspected = [file['path'] for file in value['files'] if file.get('excerpts')]
     codex_ready = (remaining == 1 and bool(inspections)
-        and feature_steps.parent(c, decision_id)[1]['scope']['provider'] == 'codex')
+        and feature_steps.parent(c, decision_id)[1]['scope']['provider'] in {'codex','claude'})
     repeated_navigation = len(stalled) == 2 and all(record.get('confirmed_finished')
             and not record.get('inspection')
             and any(message in (record.get('failure') or '') for message in navigation_errors)
@@ -244,8 +244,8 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
             if backend == 'local':
                 used = LocalProvider(stopped, ends_at=time.monotonic()+min(permission['budget']['scope_request_seconds'],(scope_deadline-datetime.now(timezone.utc)).total_seconds()))
             else:
-                from workbench.codex_provider import Planner
-                used = Planner(route, stopped.is_set)
+                from workbench.provider_routes import external_planner
+                used = external_planner(route, stopped.is_set)
                 with engine.connect() as c:
                     linked = task_execution.snapshot(c, row['intake_id'], task_id, decision_id)
                     root, _ = feature_steps.source(c, linked, permission, feature_input)

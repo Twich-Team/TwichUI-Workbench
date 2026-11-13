@@ -18,9 +18,12 @@ from workbench import codex_provider as codex
 RESOLVER = '/run/systemd/resolve/io.systemd.Resolve'
 
 
-def host_mapping(response):
+HOSTS = {codex.BACKEND_HOST,'api.anthropic.com','claude.ai'}
+
+
+def host_mapping(response, hostname=codex.BACKEND_HOST):
     """Accept only bounded public IPv4 answers for the fixed backend hostname."""
-    if not isinstance(response, dict) or 'error' in response:
+    if hostname not in HOSTS or not isinstance(response, dict) or 'error' in response:
         raise ValueError('Resolver refused lookup')
     records = response['parameters']['addresses']
     if not isinstance(records, list) or not 1 <= len(records) <= 16:
@@ -35,15 +38,17 @@ def host_mapping(response):
         if not address.is_global or address.is_multicast or address.is_reserved:
             raise ValueError('Non-public resolver answer')
         addresses.append(address)
-    return ''.join(f'{address} {codex.BACKEND_HOST}\n' for address in dict.fromkeys(addresses))
+    return ''.join(f'{address} {hostname}\n' for address in dict.fromkeys(addresses))
 
 
-def resolve_backend(stop, deadline):
+def resolve_backend(stop, deadline, hostname=codex.BACKEND_HOST):
     # The connector's cgroup denies explicit IP binds. Let the host resolver
     # do DNS over its Unix socket rather than enabling a bind in the sandbox.
+    if hostname not in HOSTS:
+        raise codex.Hold('unavailable',phase='resolve')
     end = min(deadline, time.monotonic() + 3)
     request = {'method': 'io.systemd.Resolve.ResolveHostname',
-               'parameters': {'name': codex.BACKEND_HOST, 'family': socket.AF_INET, 'flags': 1}}
+               'parameters': {'name': hostname, 'family': socket.AF_INET, 'flags': 1}}
     try:
         with socket.socket(socket.AF_UNIX) as client:
             client.settimeout(.1)
@@ -63,7 +68,7 @@ def resolve_backend(stop, deadline):
                 if not chunk or len(response) > 4096:
                     break
                 if response.endswith(b'\0'):
-                    return host_mapping(json.loads(response[:-1]))
+                    return host_mapping(json.loads(response[:-1]),hostname)
     except (OSError, ValueError, TypeError, KeyError):
         pass
     raise codex.Hold('unavailable', phase='resolve')
@@ -105,7 +110,7 @@ def allowed_cgroup(group, uid):
     return bool(child and re.fullmatch(r'workbench-real-codex-task-lease-[A-Za-z0-9-]+\.service', child[0]))
 
 
-def handle(connection, binary, credential, runtime, evidence_root=None):
+def handle(connection, binary, credential, runtime, evidence_root=None, *, claude_config=None):
     connection.settimeout(3)
     pid, uid, _ = struct.unpack('3i', connection.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
     if uid != os.getuid():
@@ -126,6 +131,14 @@ def handle(connection, binary, credential, runtime, evidence_root=None):
         request = json.loads(raw)
         if not isinstance(request, dict):
             raise codex.Hold('protocol')
+        if request.get('operation') in {'smart-choose','smart-turn'} and evidence_root is not None:
+            from strategy_connector import handle as strategy_handle
+            strategy_handle(connection,request,binary,credential,runtime,evidence_root,claude_config,resolve_backend)
+            return
+        if request.get('operation')=='claude-turn' and claude_config is not None:
+            from smart_connector import handle as claude_handle
+            claude_handle(connection,request,runtime,claude_config,resolve_backend)
+            return
         if request.get("operation") == "draft-delivery":
             if (set(request) != {"operation", "execution_id"} or len(raw) > 256
                     or not group.is_relative_to("/system.slice/workbench-everyday-worker.service")):
@@ -201,7 +214,8 @@ def main():
             with connection:
                 check_account_review(args.account_review)
                 handle(connection, args.binary, args.sign_in_file, args.socket.parent,
-                       args.account_review.parent.parent / 'artifacts' / 'codex-evidence')
+                       args.account_review.parent.parent / 'artifacts' / 'codex-evidence',
+                       claude_config=args.account_review.parent/'claude.json')
 
 
 if __name__ == '__main__':

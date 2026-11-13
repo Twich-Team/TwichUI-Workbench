@@ -25,8 +25,16 @@ HISTORICAL_ROOT = Path("/home/rich/TwichUI-Workbench/.local/m5-review/everyday-o
 CAMPAIGN = Path("/home/rich/.local/share/TwichUI-Workbench/delivery-campaign-7b5963a")
 
 
-def capabilities():
+def capabilities(provider='codex'):
     """Code-owned actual transport contract; never supplied by task/model text."""
+    if provider=='claude':
+        names=('backend/workbench/claude_native.py','backend/workbench/claude_client.py',
+            'backend/workbench/codex_provider.py','scripts/smart_connector.py',
+            'scripts/codex_connector.py','backend/workbench/regression_preparation.py')
+        return dict(kind='tool-free-claude-investigation-v1',source_writes=False,
+            execution_dispatch=False,external_action_tools=False,empty_work_directory=True,
+            owner_settings_mounted=False,native_login_readonly=True,tools=[],mcp_servers=[],
+            code={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in names})
     from workbench.codex_provider import FEATURES_OFF, command
 
     argv = command("/pinned-cli", "/readonly-auth")

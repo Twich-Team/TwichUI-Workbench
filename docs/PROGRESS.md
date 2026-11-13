@@ -1,3 +1,34 @@
+# November 13 — owner cutoff decision resolved; connected strategy work active
+
+Following the Project Working Philosophy: continue the complete Smart AI Choices
+and Claude milestone. The owner explicitly chose request-start cutoffs with possible
+in-flight overrun, separate provider primary/reserve allocations, serialized fresh
+admission, conservative unknown-usage choices and optional strict holds. The earlier
+pending-decision stop below is superseded, not an active gate.
+
+The native Claude adapter and actual connector admission path passed isolated real
+subscription checks. A fresh 59% native session reading held the 50% test cutoff
+without dispatch. A separate 75% boundary check completed with actual Sonnet 5.5,
+2391 prompt + 9 output = 2400 tokens, native credits Off and no API key/tools/MCP.
+Actual effort remains unknown. No account quota was deliberately exhausted and no
+real login was revoked. Exact terminal/reset limitations remain in the dated audit.
+
+Development now includes the visual ordered-card builder, separate provider budget
+summaries, pure allowance policy, serialized native admission, frozen task choices,
+initial durable planning waits/restarts, Dashboard reasons, and explicit Start now
+with provider/model/effort and optional allocation-only override. Controlled actual
+intake/worker tests prove waiting without dispatch, restart resumption after changed
+global defaults, exact attribution, no duplicated chart totals, and native 100% still
+holding manual override. Focused backend 236 passed; latest shared-budget subset 33
+passed; frontend card/manual interaction tests 3 passed. Contracts/build/lint/schema
+pass with no migration. Broader diagnostic suite is running; final exact acceptance
+and all coding/feature/recovery integration remain required.
+
+Installed code is unchanged at 50cc64a; no service restart or private release yet.
+Zero real Smart AI Workbench tasks completed end to end. Continue implementation,
+connected acceptance, one verified private release, then owner review. No new owner
+decision is needed. Preserve original records/permissions/rollback and excluded work.
+
 # November 13 — Smart AI provider audit; percentage-control decision pending
 
 Following the Project Working Philosophy: verified actual capabilities before new

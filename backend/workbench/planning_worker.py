@@ -390,17 +390,25 @@ def finish_attempt(connection, job, adapter, model, basis, outcome):
     diagnostics = getattr(adapter, 'diagnostics', {})
     is_demo = isinstance(adapter, DemoProvider) or basis == 'demo'
     is_local = isinstance(adapter, LocalProvider) or basis == 'local'
-    is_codex = isinstance(adapter, Planner) or basis == 'codex'
+    is_claude = getattr(adapter,'backend',None)=='claude' or basis=='claude'
+    is_codex = (isinstance(adapter, Planner) and not is_claude) or basis == 'codex'
     observed_usage = diagnostics.get('usage')
-    if is_codex and diagnostics.get('generation_state') == 'not_started' and observed_usage is None:
+    if is_claude and observed_usage is None and isinstance(diagnostics.get('native_known_subtotal'),dict):
+        prior=json.loads(diagnostics.get('known_usage') or '{}')
+        subtotal=diagnostics['native_known_subtotal']
+        known={k:prior.get(k,0)+subtotal.get(k,0) for k in ('prompt_tokens','completion_tokens','total_tokens')}
+        if all(type(v)is int and v>=0 for v in known.values()) and known['prompt_tokens']+known['completion_tokens']==known['total_tokens']:
+            observed_usage=dict(source='Native Claude Code observed subtotal; final consumption unavailable',
+                status='partial',units='tokens',values=None,known_values=known)
+    if (is_codex or is_claude) and diagnostics.get('generation_state') == 'not_started' and observed_usage is None:
         # A durable application claim precedes context assembly and transport.
         # This is a known non-dispatch, never a zero substituted for uncertain usage.
-        observed_usage = dict(source='Workbench verified no Codex turn started', units='tokens',
+        observed_usage = dict(source='Workbench verified no '+('Claude' if is_claude else 'Codex')+' turn started', units='tokens',
             status='not_started', requests_observed=0,
             values=dict(prompt_tokens=0,completion_tokens=0,reasoning_tokens=0,total_tokens=0))
     connection.execute(model_attempts.update().where(model_attempts.c.id == job['lease']).values(
-        source='demo' if is_demo else 'workbench' if is_local or is_codex else 'unknown',
-        backend='codex' if is_codex else 'local' if is_local else None,
+        source='strategy-control' if getattr(adapter,'strategy_control',False) else 'demo' if is_demo else 'workbench' if is_local or is_codex or is_claude else 'unknown',
+        backend='claude' if is_claude else 'codex' if is_codex else 'local' if is_local else None,
         requested_model=func.coalesce(model_attempts.c.requested_model, diagnostics.get('configured_model')),
         actual_model=diagnostics.get('actual_model') or model,
         finished_at=now(), outcome=outcome, usage=observed_usage))

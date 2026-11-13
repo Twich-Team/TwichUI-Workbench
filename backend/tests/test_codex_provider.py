@@ -304,6 +304,26 @@ def test_single_turn_with_exact_model_and_usage(secondary_is_null):
     assert methods[:methods.index('turn/start')].count('account/rateLimits/read') == 2
 
 
+def test_smart_request_start_cutoff_keeps_admitted_turn_running_above_legacy_reserve():
+    initial=allowance(95)
+    pushed=allowance(100)['rateLimits']
+    rpc=Transcript(limit=initial,events=[dict(method='account/rateLimits/updated',
+        params=dict(rateLimits=pushed)),*completed()])
+    admissions=[]
+    result=codex.turn(rpc,'fixture-model','low','synthetic',{},on_admit=admissions.append)
+    assert result['usage']['total_tokens']==24 and admissions==[initial]
+    assert not rpc.interrupted
+
+
+def test_smart_admission_still_blocks_real_provider_limit_and_credits_before_dispatch():
+    for limit in [allowance(100),allowance(5)|{'rateLimits':allowance(5)['rateLimits']|{
+            'credits':{'hasCredits':True,'unlimited':False,'balance':'1'}}}]:
+        rpc=Transcript(limit=limit)
+        with pytest.raises(codex.Hold):
+            codex.turn(rpc,'fixture-model','low','synthetic',{},on_admit=lambda _:None)
+        assert not any(method=='turn/start' for method,_ in rpc.calls)
+
+
 @pytest.mark.parametrize('tokens',[66618,150000,codex.BUG_OBSERVED,codex.BUG_OBSERVED+1])
 @pytest.mark.parametrize('title',['InvestigationResponse','BugIntentResponse','ProgramResponse','ReviewResponse'])
 def test_larger_context_uses_current_post_observation_guard_without_a_billing_guarantee(tokens,title):

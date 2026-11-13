@@ -62,7 +62,7 @@ def scope(c, identity, *, dispatch=True):
     if not job['payload'].get('feature_base'):
         raise ValueError('The graph has no grounded feature base.')
     route = provider_routes.approved(c, row)
-    provider = 'codex' if row['payload']['local_planning'] in provider_routes.CODEX_CHOICES else 'local'
+    provider = route.get('provider','codex') if row['payload']['local_planning'] in provider_routes.REMOTE_CHOICES else 'local'
     return dict(intake_id=identity,proposal_id=proposal['id'],scope_approval_id=approval['id'],
         scope_binding=approval['binding'],original_binding=digest(row['payload']),
         revision=proposal['revision'],scope_revision=proposal['scope_revision'],
@@ -75,10 +75,10 @@ def offer(engine, identity):
     capability(engine)
     with engine.connect() as c:
         current = scope(c, identity)
-        if current['provider'] == 'codex':
+        if current['provider'] in {'codex','claude'}:
             # The saved route already selects the existing tool-free Codex
             # adapter. A feature run never activates its planning fallback.
-            provider_routes.validate_selection('codex', current['route']['model'], current['route']['effort'])
+            provider_routes.validate_selection(current['provider'], current['route']['model'], current['route']['effort'])
         existing = c.execute(select(proposal_decisions.c.payload).where(
             proposal_decisions.c.proposal_id == current['proposal_id'])).scalars()
         if any(p.get('feature_run') for p in existing):
