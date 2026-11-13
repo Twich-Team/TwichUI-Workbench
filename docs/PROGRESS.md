@@ -1,3 +1,24 @@
+# November 13 — archived feature must not stop bug recovery
+
+Exact4f03783 passed full hosted43331894118/all9jobs and installed with latest938
+rows. The owner archived the checked map feature at2026-11-12T23:59:59Z; retain that
+lifecycle choice, original result and publication hold. Physical reserve was restored
+through verified compressed retention of closed owned test/browser evidence; all
+bytes/paths/modes/mtimes independently restored before pruning closed scratch.
+Private gallery-investigation-recovery-20261112 holds manifests/retention proofs.
+The active shared worker then revealed an uncaught409from the archived feature's
+background delivery reconciliation. Direct archived-task access correctly refuses;
+the worker must leave it alone and continue other work. No feature unarchive, result,
+permission, publication, source-oracle or task-history edit is authorized/needed.
+
+A controlled complete feature fixture reproduces the actual archival409through
+worker.tick. The minimal correction catches the existing policy refusal only in
+background delivery reconciliation, as it already does other invalid artifacts.
+The regression requires repeated worker ticks to reach other planning while all
+archived jobs, sessions, executions, model attempts and publication rows stay exact.
+Fresh focused checks and complete exact hosted acceptance precede installation.
+Continue only the original gallery report and stop at its corrected unapproved plan.
+
 # November 12 — real continuation found retained-search scope incompatibility
 
 ff00633 passed all9hosted checks43326947690 and was installed from the duplicate-free

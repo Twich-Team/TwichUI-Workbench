@@ -284,3 +284,41 @@ def test_separate_current_main_checks_preserve_original_result_and_exact_branch(
     candidate.write_bytes(candidate.read_bytes() + b'\n-- post-check change\n')
     with pytest.raises(ValueError):
         adapter.target_base(before['snapshot'])
+
+
+def test_archived_feature_delivery_cannot_stop_other_worker_work(
+    store, ready_feature, monkeypatch,
+):
+    from uuid import uuid4
+    from fastapi import HTTPException
+    from workbench import feature_delivery, task_cleanup, worker, planning_worker
+    from workbench.db import planning_jobs, task_sessions, model_attempts
+
+    identity, _, _, _ = ready_feature
+    context = task_cleanup.context(store, identity)
+    assert context['can_archive']
+    task_cleanup.apply(store, task_cleanup.CleanupCommand.model_validate(dict(
+        command_id=str(uuid4()), action='archive',
+        targets=[dict(intake_id=identity, binding=context['binding'])])))
+    tables = (planning_jobs, task_sessions, model_attempts, real_publications,
+              real_execution_requests)
+    def saved():
+        with store.connect() as c:
+            return {t.name: [dict(r) for r in c.execute(select(t)).mappings()] for t in tables}
+    before = saved()
+    with store.connect() as c:
+        job = c.execute(select(planning_jobs).where(
+            planning_jobs.c.kind == 'feature_execution')).mappings().one()
+        with pytest.raises(HTTPException) as refusal:
+            feature_delivery.view_in(c, job)
+        assert refusal.value.status_code == 409
+    reached = []
+    monkeypatch.setattr(planning_worker, 'process_one',
+                        lambda *_a, **_kw: reached.append('other planning') or True)
+    monkeypatch.setattr(feature_verification.Runtime, 'execute',
+                        lambda *_a, **_kw: pytest.fail('Repeated archived feature checks'))
+    assert worker.tick(store)
+    assert worker.tick(store)
+    assert reached == ['other planning', 'other planning']
+    assert saved() == before
+    assert task_cleanup.context(store, identity)['archived_at']

@@ -9,6 +9,7 @@ from pathlib import Path
 import json
 from uuid import UUID
 
+from fastapi import HTTPException
 from sqlalchemy import select
 
 from workbench import feature_verification, feature_steps, intake
@@ -470,7 +471,7 @@ def reconcile(engine):
                     )
                 )
             return True
-        except ValueError, OSError:
+        except ValueError, OSError, HTTPException:
             continue
     return False
 
