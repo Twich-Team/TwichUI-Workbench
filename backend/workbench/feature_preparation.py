@@ -98,15 +98,24 @@ def recover_one(engine):
         row = intake.require(c, planning_jobs, candidate['id'])
         if row['status'] != 'running' or row['lease'] != candidate['lease']:
             return True
-        c.execute(model_attempts.update().where(model_attempts.c.id == row['lease']).values(
-            outcome='interrupted_unknown', finished_at=intake.now()))
-        c.execute(planning_jobs.update().where(planning_jobs.c.id == row['id']).values(
-            status='failed', lease=None, lease_until=None, finished_at=intake.now(),
-            payload={**row['payload'], 'phase':'held', 'unknown_scope_operation':row['lease']},
-            message='Step preparation was interrupted. Its provider outcome and usage remain uncertain; the original claim is retained and will not be replayed.'))
-        from workbench.feature_sessions import hold_if_idle
-        hold_if_idle(c, row['payload']['feature_decision_id'], 'Step preparation was interrupted. Saved work and unknown usage remain; no automatic replay.')
+        hold_interrupted(c, row)
     return True
+
+
+def hold_interrupted(c, row):
+    """Same disposition for dead owners and an exception ending our own operation.
+
+    The timestamp closes the local attempt record; interrupted_unknown expressly
+    does not establish provider settlement, known usage or permission to replay.
+    """
+    c.execute(model_attempts.update().where(model_attempts.c.id == row['lease']).values(
+        outcome='interrupted_unknown', finished_at=intake.now()))
+    c.execute(planning_jobs.update().where(planning_jobs.c.id == row['id']).values(
+        status='failed', lease=None, lease_until=None, finished_at=intake.now(),
+        payload={**row['payload'], 'phase':'held', 'unknown_scope_operation':row['lease']},
+        message='Step preparation was interrupted. Its provider outcome and usage remain uncertain; the original claim is retained and will not be replayed.'))
+    from workbench.feature_sessions import hold_if_idle
+    hold_if_idle(c, row['payload']['feature_decision_id'], 'Step preparation was interrupted. Saved work and unknown usage remain; no automatic replay.')
 
 
 class ParentStop:

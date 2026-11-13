@@ -187,7 +187,7 @@ def composed_checks(c, job):
         raise ValueError('Composed receipts belong to different checked source or ancestry.')
     native = {}
     for record in records:
-        row, grant, _, result = feature_source._checked(c, record['execution_id'])
+        row, grant, _, result = feature_source._checked(c, record['execution_id'], active=False)
         native[row['id']] = row, grant, result
     checked_source = Path(records[-1]['input']['source'])
     patch = subprocess.check_output(['git', '-C', str(checked_source), 'diff', '--no-ext-diff',

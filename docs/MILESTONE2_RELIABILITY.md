@@ -72,3 +72,24 @@ Private evidence is under the Workbench user-data directory in
 milestone2-20261112 and m2-*.log. No new Workbench model request, addon execution,
 gallery continuation or map publication is part of this assignment. Passing this
 milestone does not establish complete unattended reliability.
+
+## Saved-store rehearsal and recovery consolidation
+
+The first hosted artifact (47ee725) was staged but not activated. Its saved-store
+rehearsal found one additional action gate inside composed native-evidence reads.
+That reader now uses historical validation too. The corrected test copy completes
+14 production worker ticks: all 938 rows remain exact, 13 ticks reach unrelated
+planning, one passive quarantine receipt is retained, and the transport guard
+allows zero model requests. The original archive still refuses new action409.
+The composed-evidence regression now also archives the real completed fixture and
+checks historical display plus action refusal.
+
+The old crash test intentionally expected RuntimeError to exit the shared worker.
+Its replacement requires containment and preserves all former no-replay, ledger,
+unknown-usage and task-count assertions. Unexpected feature-scope/check failures
+now use the same hold_interrupted disposition as dead-owner recovery. No second
+recovery interpretation is introduced. Six recovery/composition checks, all 51
+worker/installer/CI/delivery/pause checks and static checks pass. The final package
+also pins the retained release's interpreter/seal and invokes the exact pinned
+shell; rollback verification does not depend on candidate application files.
+A fresh full hosted run is required for this revised candidate before activation.

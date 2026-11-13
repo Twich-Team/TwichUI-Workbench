@@ -173,10 +173,9 @@ def test_uncertain_stopped_or_interrupted_check_preparation_cannot_advance_or_re
             raise RuntimeError("CONTROLLED worker exit before provider completion")
 
         planner.generate = lost
-        with pytest.raises(RuntimeError):
-            tick(planner)
+        assert tick(planner)  # The shared worker contains the failed task.
         monkeypatch.setattr(feature_preparation, "alive", lambda owner: False)
-        assert feature_execution.advance(store)
+        assert not feature_execution.advance(store)  # Already held by the same recovery owner.
     else:
         assert tick(planner)
     later = IndependentPlanner()

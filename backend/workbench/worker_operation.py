@@ -67,6 +67,14 @@ def isolated(function):
             message += f' ({type(error).__name__}). No automatic replay; original evidence and permissions are retained.'
             with write_transaction(engine) as c:
                 row = c.execute(select(table).where(table.c.id == identity)).mappings().one()
+                if (table.name == 'planning_jobs' and row['status'] == 'running'
+                        and row['kind'] == 'feature_execution' and row['lease']
+                        and isinstance(row['payload'], dict) and row['payload'].get('phase') in
+                        {'preparing_scope', 'preparing_independent_checks'}):
+                    from workbench.feature_preparation import hold_interrupted
+                    hold_interrupted(c, row)
+                    log.exception('Contained interrupted feature preparation id=%s', identity)
+                    return True
                 # Never replace an independently committed successful outcome.
                 if row['status'] not in {'completed', 'checked', 'published', 'applied', 'admitted', 'prepared',
                                          'cancelled', 'expired', 'rejected', 'blocked', 'stale', 'held', 'failed',

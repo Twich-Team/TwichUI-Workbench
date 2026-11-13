@@ -10,7 +10,7 @@ import pytest
 from sqlalchemy import select
 
 from workbench import feature_checks, feature_verification as verifier
-from workbench.db import planning_jobs, real_execution_requests, model_attempts
+from workbench.db import planning_jobs, real_execution_requests, real_execution_grants, model_attempts
 from workbench.real_workspace import sha
 from workbench.visual_scope import digest
 from test_feature_check_preparation import at_independent_preparation
@@ -158,6 +158,19 @@ def test_composed_contract_rejects_missing_stale_irrelevant_evidence_and_complet
     with store.connect() as c:
         assert len(c.execute(select(real_execution_requests)).all()) == count
     assert not worker.tick(store, planning_adapter=planner)
+    from uuid import uuid4
+    from fastapi import HTTPException
+    from workbench import task_cleanup
+    context = task_cleanup.context(store, identity)
+    assert context['can_archive']
+    task_cleanup.apply(store, task_cleanup.CleanupCommand.model_validate(dict(
+        command_id=str(uuid4()), action='archive',
+        targets=[dict(intake_id=identity, binding=context['binding'])])))
+    with store.connect() as c:
+        history = c.execute(select(planning_jobs).where(planning_jobs.c.id == job['id'])).mappings().one()
+        assert feature_delivery.view_in(c, history)['published'] is False
+        with pytest.raises(HTTPException):
+            verifier.checked(c, row, c.execute(select(real_execution_grants).where(real_execution_grants.c.id == row['grant_id'])).mappings().one())
 
 
 def test_unsafe_interrupted_check_is_retained_before_rejection(tmp_path):

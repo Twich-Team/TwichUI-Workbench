@@ -44,6 +44,14 @@ def file_entry(entry):
     return path
 
 
+def external_entry(entry):
+    dependency = Path(entry['path'])
+    if (str(dependency.resolve()) != entry['resolved'] or not dependency.is_file()
+            or dependency.stat().st_mode & 0o022
+            or sha256(dependency.read_bytes()).hexdigest() != entry['sha256']):
+        raise ValueError('External runtime dependency differs: ' + str(dependency))
+
+
 def history(path):
     private(path)
     with closing(sqlite3.connect(path.as_uri() + '?mode=ro', uri=True)) as c:
@@ -62,7 +70,14 @@ def rollback_ready(envelope):
         file_entry(entry)
     if history(Path(envelope['rollback_store'])) != envelope['history']:
         raise ValueError('Rollback history differs')
-    subprocess.run([envelope['python'], envelope['seal_script'], 'verify-active',
+    if envelope['rollback_seal_script'] != str(Path(envelope['rollback_stage']) / 'release/ops/acceptance_seal.py'):
+        raise ValueError('The retained application must own rollback sealing')
+    pins = {e['path']: e for e in envelope['external_files']}
+    for name in {envelope['rollback_python'], envelope['rollback_seal_script'], '/usr/bin/bash'}:
+        if name not in pins:
+            raise ValueError('Pinned rollback dependencies are required')
+        external_entry(pins[name])
+    subprocess.run([envelope['rollback_python'], envelope['rollback_seal_script'], 'verify-active',
                     envelope['rollback_stage']], check=True, stdout=subprocess.DEVNULL)
 
 
@@ -85,14 +100,10 @@ def preflight(path):
     if envelope['seal_script'] != str(Path(envelope['release']) / 'ops/acceptance_seal.py'):
         raise ValueError('The accepted application must own installation sealing')
     externals = envelope['external_files']
-    if not {envelope['python'], '/usr/bin/bash'} <= {e['path'] for e in externals}:
+    if not {envelope['python'], envelope['rollback_python'], '/usr/bin/bash'} <= {e['path'] for e in externals}:
         raise ValueError('Pinned installer executables are required')
     for entry in externals:
-        dependency = Path(entry['path'])
-        if (str(dependency.resolve()) != entry['resolved'] or not dependency.is_file()
-                or dependency.stat().st_mode & 0o022
-                or sha256(dependency.read_bytes()).hexdigest() != entry['sha256']):
-            raise ValueError('External runtime dependency differs: ' + str(dependency))
+        external_entry(entry)
     acceptance = read(Path(envelope['acceptance']))
     if (acceptance.get('full_release_acceptance') is not True
             or acceptance['commit'] != envelope['commit']
@@ -174,8 +185,10 @@ def activate(path, rollback=False):
         if not rollback:
             raise ValueError('Installation already attempted; inspect journal and use verified rollback')
     if rollback:
+        if not receipt.exists():
+            raise ValueError('No interrupted or activated installation exists for rollback')
         rollback_ready(envelope)
-        subprocess.run(['bash', envelope['rollback_script']], check=True)
+        subprocess.run(['/usr/bin/bash', envelope['rollback_script']], check=True)
         journal(receipt, dict(envelope_sha256=binding, state='rolled_back', history=envelope['history']))
         return
     # All failure paths before this durable intent leave running services untouched.
@@ -183,13 +196,13 @@ def activate(path, rollback=False):
     journal(receipt, dict(envelope_sha256=binding, state='activating',
                           rollback_script=envelope['rollback_script']))
     try:
-        subprocess.run(['bash', envelope['activation_script']], check=True)
+        subprocess.run(['/usr/bin/bash', envelope['activation_script']], check=True)
         verify(Path(envelope['application']), envelope['application_sha256'],
                envelope['commit'], Path(envelope['release']))
     except BaseException:
         # SIGKILL/power loss leaves the durable intent for the explicit rollback entry.
         rollback_ready(envelope)
-        subprocess.run(['bash', envelope['rollback_script']], check=True)
+        subprocess.run(['/usr/bin/bash', envelope['rollback_script']], check=True)
         journal(receipt, dict(envelope_sha256=binding, state='rolled_back', history=envelope['history']))
         raise
     journal(receipt, dict(envelope_sha256=binding, state='activated',

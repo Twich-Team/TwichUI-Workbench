@@ -92,11 +92,12 @@ def installation(tmp_path, store):
         release=str(stage / 'release'), configuration=str(config),
         store=str(stage / 'artifacts/workbench.sqlite3'), history=baseline,
         rollback_store=str(previous / 'artifacts/workbench.sqlite3'), rollback_stage=str(previous),
+        rollback_python=sys.executable, rollback_seal_script=str(previous / 'release/ops/acceptance_seal.py'),
         python=sys.executable, seal_script=str(stage / 'release/ops/acceptance_seal.py'),
         activation_script=str(activation), rollback_script=str(rollback), rejection_manifest=str(rejection),
         evidence_roots=[str(previous / 'artifacts')],
         external_files=[dict(path=p, resolved=str(Path(p).resolve()), sha256=sha256(Path(p).read_bytes()).hexdigest())
-                        for p in [sys.executable, '/usr/bin/bash']],
+                        for p in [sys.executable, '/usr/bin/bash', str(previous / 'release/ops/acceptance_seal.py')]],
         files=[dict(path=p, role=role, sha256=sha256(Path(p).read_bytes()).hexdigest()) for p, role in files.items()])
     envelope = tmp_path / 'envelope.json'
     save(envelope, manifest)
