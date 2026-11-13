@@ -18,6 +18,7 @@ MODEL = 'pilot-qwen38-27b'
 START_RESERVE = 72 << 20
 CLOSEOUT_RESERVE = 4 << 20
 PLANNING_MINUTES = 30
+_retention_cursor = 0
 
 
 class LocalWorkStatus(StrictModel):
@@ -39,6 +40,10 @@ class Installation(StrictModel):
     scratch: str
     # Legacy field name: this is now a retention watermark, not a delivery cap.
     evidence_limit_bytes: int = Field(default=1073741824, ge=64 << 20)
+    # Separate explicit write authority; accounting roots never grant deletion.
+    retention_pools: list[str] = Field(default_factory=list)
+    retention_keep: list[str] = Field(default_factory=list)
+    host_observations: bool = False
 
 
 def enabled():
@@ -67,6 +72,15 @@ def configuration(engine=None):
             or policy.scratch != str(scratch) or not scratch.is_dir()
             or scratch.stat().st_mode & 0o077 or os.environ.get('TMPDIR') != str(scratch)):
         raise ValueError('The Workbench storage or scratch configuration changed.')
+    from managed_storage import plain
+    for name in policy.retention_pools:
+        pool = Path(name)
+        if str(pool) != name or pool == Path(pool.anchor) or pool in {Path.home(), ROOT, database.parent}:
+            raise ValueError('Retention requires separate explicit allocation pools.')
+        plain(pool)
+    for name in policy.retention_keep:
+        if not Path(name).is_absolute() or Path(name).resolve() != Path(name):
+            raise ValueError('Retention protection must name an exact absolute location.')
     return policy
 
 
@@ -82,18 +96,33 @@ def measure(policy):
 
 
 def housekeep(policy):
+    global _retention_cursor
+    import time
     from evidence_retention import maintain
     from project_env import artifact_bytes
     from workbench.release_cache import maintain as maintain_browser_copies
+    from managed_storage import maintain as retain_managed
 
-    maintain_browser_copies(policy, ROOT.parent)
+    browser_bytes = maintain_browser_copies(policy, ROOT.parent)
+    protected = [ROOT, *(ROOT.parent/name for name in ('ops', 'browser', 'libs', 'artifacts')), *policy.retention_keep]
+    managed = retain_managed(policy.retention_pools, protected=protected, databases=[policy.database])
+    archived = []
+    deadline = time.monotonic()+8
 
     # Generic retention only touches closed owned browser evidence. Histories,
     # execution/recovery records and original stores are never candidates.
-    for name in policy.evidence_roots:
+    names = policy.evidence_roots
+    for _ in range(min(len(names), 8)):
+        if time.monotonic() > deadline:
+            break
+        name = names[_retention_cursor % len(names)]
+        _retention_cursor = (_retention_cursor+1) % len(names)
         root = Path(name)
         if artifact_bytes(root) > policy.evidence_limit_bytes:
-            maintain(root)
+            archived.append(maintain(root, protected=protected, databases=[policy.database]))
+            if archived[-1]['archived']:
+                break
+    return dict(managed=managed, browser_bytes=browser_bytes, archival=archived)
 
 
 class CapacityHold(ValueError):

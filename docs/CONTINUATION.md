@@ -1,3 +1,80 @@
+# Milestone 2.5 — combined candidate under full verification, November 13
+
+A COMPLETE: root backup JSON accepted and current states independently rechecked.
+B development checks COMPLETE: lifecycle-owned pools, all-row history references,
+active process/current/rollback protection, preview, bounded quarantine/prune,
+interruption recovery, existing worker housekeeping and default test scratch lifecycle.
+42 focused storage checks plus43 ordinary-worker/installer checks passed; three real
+host disposable cycles covered allfiveclasses while preserving939live rows/unique
+results. Final defensive delta (bounded receipt reads, escaped reference decoding,
+invalid closeout isolation, caller-owned TMPDIR) is under focused/full CI verification.
+
+C development is implemented. Root cause: actual API services had no configured
+resource history. A policy-enabled sampler in the existing worker now provides
+CPU/RAM/disk/swap/supported AMD/actual model/service readings to the existing read-only
+adapter. It continues during long operations and has its own bounded derived store;
+no main-store schema or model authority changes. Three actual host samples over32s
+verified all requested supported counters, the mapped IQ4_XS/normal auth and5services.
+AMD utilization is unreadable on this driver; VRAM works and the UI explains the gap.
+48 combined focused backend checks and3targeted browser cases passed; desktop/phone
+and enlarged-text images were inspected. Final threaded-collector and sparse-chart
+checks are included in the combined candidate verification.
+
+Full local backend/frontend and complete browser suites are running. Static/build/
+contracts/schema passed. Full hosted acceptance must bind the reviewed final commit;
+then stage only that exact application artifact, configure explicit pools/rollback
+and host_observations, rehearse copied939-row history, complete private envelope and
+one final verified installation/restart/restore/real resources UI. Running source
+remains c38d2bb. No deployment or generation occurred; old history/decisions retained.
+Continue through installed A/B/C acceptance, then owner review. No routine approval.
+
+Private receipts: milestone2.5-20261113/CHECKPOINT_A_COMPLETE.json,
+CHECKPOINT_B_DEVELOPMENT_VERIFIED.json, HOST_TELEMETRY_DEVELOPMENT_PROOF.json and
+full-local-test.log/full-local-browser.log. Preserve unrelated admin-document edit
+and .venv/node_modules links. Legacy unknown/reference-protected data remains kept.
+
+---
+
+# Milestone 2.5 — B development checks passed; C diagnosis next
+
+A is accepted, including the owner-run backup verification receipt. B extends the
+existing housekeeping owner with explicit managed-copy allocation/closeout receipts,
+preview, all-row saved-reference guards, active-process and current/rollback protection,
+bounded descriptor-relative cleanup and interrupted-subset recovery. Default tests
+use separate managed runs; explicit TMPDIR remains unchanged. Unknown legacy data,
+failed runs, unique evidence and usable model weights remain excluded. Required
+rollback also constrains existing browser sharing. See docs/STORAGE_RETENTION.md.
+
+Targeted storage tests pass; ordinary-worker/installer regression checks passed43.
+Three real-host disposable cycles exercised all five storage classes using production
+age/keep/budgets, reclaimed13,107,200 allocated bytes and kept active/failed/open/
+referenced/rollback/unknown data and all939live rows exact. Evidence is private
+CHECKPOINT_B_DEVELOPMENT_VERIFIED.json. B is not installed yet; final full/local/hosted
+and installed exercise remain mandatory. Proceed C actual Machine Resources diagnosis,
+then verify the combined candidate and install once. No approval gate or new model work.
+
+---
+
+# Milestone 2.5 — checkpoint A accepted; B in progress, November 13
+
+Following the Project Working Philosophy, the owner-run root verification receipt
+was inspected and accepted: exactly two root-owned backup files,658/790 bytes with
+recorded SHA256 digests and original model references, absent definitions and
+not-found/inactive units. Independent current checks confirm these states and
+unchanged active Qwen PID1949395. All939rows/305evidence roots/current+two rollback
+seals and snapshot/rejections/readiness/authentication pass. A is COMPLETE; no access
+or cleanup approval remains pending. Net storage recovery remains81.89GiB.
+Private milestone2.5-20261113/CHECKPOINT_A_COMPLETE.json binds the root receipt.
+
+Continue sequentially: B existing housekeeping with reference-aware automatic
+retention/preview/receipts and repeated-cycle failure protection; C actual host
+Machine Resources; full local/exact hosted verification, reviewed commit/push and
+one final sealed installation with copied history and rollback. No routine approval
+stop. Do not start Milestone3/addon/gallery/map work. Earlier pending-root entries
+below are historical and superseded by the successful owner-run receipt.
+
+---
+
 # Milestone 2.5 — model cleanup finished; root-only backup verification pending
 
 Following the Project Working Philosophy, recover the existing Milestone 2.5

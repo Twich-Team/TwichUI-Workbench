@@ -269,6 +269,21 @@ def lookup(root, original):
     raise ValueError('Original path is not indexed')
 
 
+def batch_lookup(root, archive_id):
+    """Verify one bound lookup inventory without repeatedly loading its manifest."""
+    bundle, manifest = load(root, archive_id)
+    result = {}
+    for name, entry in manifest['entries'].items():
+        if entry['kind'] != 'file':
+            continue
+        path = bundle/'data'/name
+        plain(path)
+        if path.stat().st_size != entry['size'] or digest(path) != entry['sha256']:
+            raise ValueError('Archived evidence mismatch: '+name)
+        result[name] = dict(original=name, archive_id=archive_id, path=str(path), **entry)
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)

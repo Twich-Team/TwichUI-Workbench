@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+from managed_storage import allocate, close, maintain as retain_managed
 from project_env import ROOT, environment
 from evidence_retention import maintain
 
@@ -25,7 +26,12 @@ def test_environment():
         if (scratch.resolve() != scratch or not scratch.is_dir()
                 or info.st_uid != os.getuid() or info.st_mode & 0o077):
             raise RuntimeError('Tests require a private owned temporary directory.')
-        env['TMPDIR'] = str(scratch)
+        unit = allocate(scratch, 'test-scratch')
+        env['TMPDIR'] = str(unit)
+        env['WORKBENCH_TEST_STORAGE_UNIT'] = str(unit)
+    else:
+        # A nested command owns neither its caller's unit nor explicit TMPDIR.
+        env.pop('WORKBENCH_TEST_STORAGE_UNIT', None)
     info = os.statvfs(Path(env['TMPDIR']))
     if info.f_files and info.f_favail < 65536:
         raise RuntimeError('Test temporary storage is short of file entries. Preserve evidence and reclaim closed owned scratch before another run.')
@@ -34,13 +40,15 @@ def test_environment():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['dev', 'check', 'test', 'test-e2e', 'test-visual', 'verify',
+    parser.add_argument('command', choices=['dev', 'check', 'test', 'test-e2e', 'test-visual', 'verify', 'retention',
                                            'prepare-offer', 'recover-preparation', 'run-preparation-recovery'])
     parser.add_argument('--disposable', action='store_true', help='Temporary fixture DB for dev')
     parser.add_argument("--built", action="store_true", help="Dev: serve built frontend through loopback API")
     parser.add_argument('--review', action='store_true', help='Dev: isolated built preview on allowed port 9187')
     parser.add_argument('--grep', help='Browser/visual tests only: select Playwright test titles while retaining evidence budgets')
-    parser.add_argument('--database', help='Preparation only: existing local SQLite store')
+    parser.add_argument('--database', help='Existing SQLite store for preparation or retention reference checks')
+    parser.add_argument('--preview', action='store_true', help='Retention: show candidates without changing data')
+    parser.add_argument('--pool', action='append', type=Path, help='Retention: explicit managed allocation pool')
     parser.add_argument('--intake-id')
     parser.add_argument('--task-id')
     parser.add_argument('--scope-approval-id')
@@ -48,7 +56,18 @@ def main():
     parser.add_argument('--job-id', help='Recovery only: full ID of the original preparation job')
     parser.add_argument('--review-binding', help='Recovery authorization only: exact approved proposal binding')
     args = parser.parse_args()
+    if args.command == 'retention':
+        if any((args.disposable, args.built, args.review, args.grep, args.intake_id, args.task_id,
+                args.scope_approval_id, args.evidence_root, args.job_id, args.review_binding)):
+            parser.error('Retention accepts only --pool, --preview and optional --database')
+        pools = args.pool or [TEST_CACHE / ('wbt-' + hashlib.sha256(str(ROOT).encode()).hexdigest()[:8])]
+        import json
+        print(json.dumps(retain_managed(pools, databases=[args.database] if args.database else [], preview=args.preview), indent=2))
+        return 0
+    if args.preview or args.pool:
+        parser.error('--preview and --pool require retention')
     maintain()
+    retain_managed([TEST_CACHE / ('wbt-' + hashlib.sha256(str(ROOT).encode()).hexdigest()[:8])])
     preparation_args = [args.database, args.intake_id, args.task_id, args.scope_approval_id, args.evidence_root]
     if args.command in RECOVERY:
         authorize = args.command == 'recover-preparation'
@@ -98,6 +117,12 @@ def main():
         command += ['--review']
     env = test_environment() if args.command in {'test', 'test-e2e', 'test-visual', 'verify'} else environment()
     result = subprocess.run(command, cwd=ROOT, env=env, check=False)
+    if 'WORKBENCH_TEST_STORAGE_UNIT' in env:
+        try:
+            close(Path(env['WORKBENCH_TEST_STORAGE_UNIT']), result.returncode == 0)
+        except (OSError, ValueError):
+            # Failed closeout cannot turn scratch into disposable data.
+            print('Test scratch retained: closeout could not safely certify it.', file=sys.stderr)
     maintain()
     return result.returncode
 

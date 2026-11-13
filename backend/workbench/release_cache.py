@@ -125,6 +125,8 @@ def maintain(policy, current):
         and (p / "browser").is_dir()
     ]
     keep = {current, *sorted(stages, key=lambda p: p.stat().st_mtime, reverse=True)[:3]}
+    # Required rollback is explicit, not inferred from directory recency.
+    keep.update(Path(p) for p in getattr(policy, 'retention_keep', ()) if Path(p).parent == STAGES)
     protected = {
         (info.st_dev, info.st_ino)
         for stage in keep
@@ -135,6 +137,9 @@ def maintain(policy, current):
     total = 0
     for stage in sorted(stages, key=lambda p: p.stat().st_mtime):
         if stage in keep:
+            continue
+        from managed_storage import process_reference
+        if process_reference(stage):
             continue
         safe(stage, True)
         # Immutable source/target release inventories independently bind every

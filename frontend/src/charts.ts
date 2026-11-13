@@ -25,5 +25,5 @@ export function resourceOptions(points: {at: number; [key:string]: unknown}[], f
     dataZoom: [{type:'slider', filterMode:'none', startValue:zoom?.start ?? window.start, endValue:zoom?.end ?? window.end,
       textStyle:{color:'#ddc9a8'}, height:25, bottom:18}, {type:'inside', filterMode:'none', zoomOnMouseWheel:'shift', moveOnMouseWheel:false}],
     series: fields.map(field => ({id:field, name:field === 'cpu' ? 'CPU' : field === 'gpu' ? 'GPU' : field === 'ram_used' ? 'System RAM' : 'VRAM',
-      type:'line', showSymbol:false, connectNulls:false, data:points.map(point => [point.at*1000, typeof point[field] === 'number' ? Number(point[field])/(unit === 'GiB' ? 2**30 : 1) : null])})) };
+      type:'line', showSymbol:points.filter(point => typeof point[field] === 'number').length <= 8, symbolSize:6, connectNulls:false, data:points.map(point => [point.at*1000, typeof point[field] === 'number' ? Number(point[field])/(unit === 'GiB' ? 2**30 : 1) : null])})) };
 }

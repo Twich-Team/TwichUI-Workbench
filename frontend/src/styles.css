@@ -328,6 +328,10 @@ select { font: inherit; min-height: 44px; max-width: 100%; border: 1px solid #79
 .resource-card p { color: #c0aa8d; font-size: .75rem; }
 .resource-card strong { display: block; font-size: 1.25rem; margin: 12px 0; font-weight: 500; }
 .resource-card small { color: #b7a58c; font-size: .6875rem; }
+.service-health { padding: 20px; margin-bottom: 20px; }
+.service-health-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(170px,100%),1fr)); gap: 12px; list-style: none; padding: 0; margin: 16px 0; }
+.service-health-list li { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--color-border); border-radius: 6px; overflow-wrap: anywhere; }
+.service-health-list span { color: var(--color-muted); font-size: .75rem; }
 .resource-charts { display: grid; gap: 18px; margin-bottom: 24px; }
 .chart-panel { min-width: 0; padding: 20px; }
 .chart-panel h2, .settings-panel h2, .policy-panel h2, .activity-panel h2 { font: 1.25rem/1.5 var(--font-display); margin-bottom: 10px; }

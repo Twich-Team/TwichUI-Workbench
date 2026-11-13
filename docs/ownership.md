@@ -1,3 +1,18 @@
+# November 13 — storage retention and host observations
+
+The existing housekeeping path owns managed disposable-copy allocation, closeout,
+reference checks, preview, bounded pruning and recovery receipts through
+`scripts/managed_storage.py`. Private installation `retention_pools` are explicit
+write authority; accounting roots are not. Saved history/evidence, active processes,
+current installation and explicit rollback protections are independent holds.
+Existing evidence_archive remains the browser archive/restore/lookup owner.
+Read [storage retention](STORAGE_RETENTION.md) for invariants and exclusions.
+
+The existing worker owns one read-only host sampler in `host_resources`; it writes
+only its bounded derived metrics store. `monitoring` remains the read-only API
+adapter. Neither owns task state, model authority, usage accounting, service
+control or legacy maintenance. See [host resources](HOST_RESOURCES.md).
+
 # November 12 — retained search inventory semantics
 
 The existing investigation notebook owns search-format versions. Missing version is

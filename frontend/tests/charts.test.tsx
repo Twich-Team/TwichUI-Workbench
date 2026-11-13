@@ -16,3 +16,10 @@ it('keeps CPU percentages distinct from byte-based RAM and leaves gaps null', ()
   expect(value(16*2**20,'GiB')).toBe('0.016 GiB');
   expect(value(1,'GiB')).toBe('<0.001 GiB');
 });
+
+it('shows sparse observations as points without inventing extra readings', () => {
+  const chart=resourceOptions([{at:100,cpu:35}],['cpu'],'%',{start:0,end:200000}) as {series:{showSymbol:boolean;connectNulls:boolean;data:unknown[][]}[]};
+  expect(chart.series[0].showSymbol).toBe(true);
+  expect(chart.series[0].data).toEqual([[100000,35]]);
+  expect(chart.series[0].connectNulls).toBe(false);
+});

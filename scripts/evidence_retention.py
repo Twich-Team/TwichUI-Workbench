@@ -22,26 +22,9 @@ RESERVE = 4 << 30
 
 
 def referenced(path):
-    """Any same-user open fd/cwd prevents pruning an evidence tree."""
-    for process in Path('/proc').iterdir():
-        if not process.name.isdigit():
-            continue
-        try:
-            if process.stat().st_uid != os.getuid():
-                continue
-            links = [process/'cwd', *list((process/'fd').iterdir())]
-            for link in links:
-                try:
-                    target = Path(os.readlink(link).removesuffix(' (deleted)'))
-                    if target.is_absolute() and target.is_relative_to(path):
-                        return True
-                except FileNotFoundError:
-                    pass
-        except FileNotFoundError:
-            continue
-        except PermissionError:
-            return True
-    return False
+    """Open files/cwd, mappings, arguments and unknown access all hold pruning."""
+    from managed_storage import process_reference
+    return process_reference(path)
 
 
 def closed_owned(root, path):
@@ -50,7 +33,10 @@ def closed_owned(root, path):
         return False
     if time.time()-path.stat().st_mtime < 3600 or referenced(path):
         return False
-    for item in [path, *path.rglob('*')]:
+    items = [path, *path.rglob('*')]
+    if len(items) > 4096 or sum(p.stat().st_size for p in items if p.is_file()) > 64 << 20:
+        return False  # Bound one archival pass; preserve larger trees for explicit retention.
+    for item in items:
         info = item.lstat()
         if (info.st_uid != os.getuid() or not (stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode))
                 or stat.S_ISREG(info.st_mode) and info.st_nlink != 1):
@@ -58,7 +44,7 @@ def closed_owned(root, path):
     return True
 
 
-def archive_closed(root, path, storage):
+def archive_closed(root, path, storage, protected=(), databases=()):
     if not closed_owned(root, path):
         raise ValueError('Evidence is active, too recent, unowned or outside closed browser output.')
     sources = [str(path.relative_to(root))]
@@ -72,15 +58,23 @@ def archive_closed(root, path, storage):
     bundle, manifest = archive.load(root, identity)
     archive.verify(verification, manifest)
     files = [name for name, entry in manifest['entries'].items() if entry['kind'] == 'file']
+    indexed = archive.batch_lookup(root, identity)
+    assert set(indexed) == set(files)
     for name in files:
-        assert archive.lookup(root, name)['sha256'] == manifest['entries'][name]['sha256']
+        assert indexed[name]['sha256'] == manifest['entries'][name]['sha256']
     if not closed_owned(root, path):
         raise ValueError('Evidence acquired an active reference before pruning; copies preserved.')
     archive.atomic_json(bundle/'retention-proof.json', dict(
         owner_authority='STANDING_OWNER_DIRECTION_AUTONOMOUS_DELIVERY.md',
         independent_restore_verified=True, original_paths_verified=len(files),
         ownership_and_open_references_checked=True, originals=sources))
-    result = archive.archive(root, storage, identity, sources, remove=True)
+    from managed_storage import history_guard, overlap
+    with history_guard(databases, write=True) as bodies:
+        if overlap(path, protected) or any(str(path).encode() in body for body in bodies):
+            raise ValueError('Evidence acquired a saved reference; original paths preserved')
+        if not closed_owned(root, path):
+            raise ValueError('Evidence acquired an active reference; originals preserved')
+        result = archive.archive(root, storage, identity, sources, remove=True)
     # This is only the verified temporary duplicate created by this operation.
     # The archive, lookup index and original/recovery evidence remain preserved.
     archive.verify(verification, manifest)
@@ -88,7 +82,7 @@ def archive_closed(root, path, storage):
     return {**copied, **result, 'independent_restore_verified': True}
 
 
-def maintain(root=ROOT, storage=archive.ARCHIVES):
+def maintain(root=ROOT, storage=archive.ARCHIVES, protected=(), databases=()):
     root = root.resolve()
     archive.plain(root)
     storage.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -96,6 +90,7 @@ def maintain(root=ROOT, storage=archive.ARCHIVES):
     used = artifact_bytes(root)
     archived = []
     deferred = False
+    deadline = time.monotonic()+8
     if used > SOFT_TRIGGER:
         with ExitStack() as stack:
             try:
@@ -105,11 +100,14 @@ def maintain(root=ROOT, storage=archive.ARCHIVES):
             if not deferred:
                 candidates = sorted((root/'artifacts/runs').glob('browser-*'), key=lambda p:p.stat().st_mtime)
                 for path in candidates:
-                    if used <= SOFT_TARGET:
+                    if used <= SOFT_TARGET or archived or time.monotonic() > deadline:
                         break
-                    if closed_owned(root, path):
-                        archived.append(archive_closed(root, path, storage))
-                        used = artifact_bytes(root)
+                    from managed_storage import history_guard, overlap
+                    with history_guard(databases) as bodies:
+                        if (databases and not overlap(path, protected) and
+                                not any(str(path).encode() in body for body in bodies) and closed_owned(root, path)):
+                            archived.append(archive_closed(root, path, storage, protected, databases))
+                            used = artifact_bytes(root)
     physical = min(shutil.disk_usage(p).free for p in [root, storage, '/dev/shm'])
     if physical < RESERVE:
         raise RuntimeError('Actual physical/shared-memory recovery reserve is below 4 GiB.')

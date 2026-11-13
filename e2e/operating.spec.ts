@@ -3,6 +3,39 @@ import { fixture, capture, overflow } from './helpers';
 
 test.beforeEach(()=>fixture('reset'));
 
+test('observed machine resources show real-source fields, partial GPU and stale service health honestly',async ({page},info)=>{
+  const at=Math.floor(Date.now()/1000);
+  const latest={at,cpu:28.5,gpu:null,ram_used:20*2**30,ram_total:64*2**30,vram_used:2*2**30,vram_total:16*2**30,gpu_device:'Controlled AMD',disk_used:130*2**30,disk_total:226*2**30,disk_available:86*2**30,swap_used:2*2**30,swap_total:8*2**30};
+  let stale=false;
+  await page.route('**/api/resources?source=observed*',async route=>{
+    const response=await route.fetch();const previous=await response.json();
+    await route.fulfill({response,json:{...previous,label:'Controlled observed collector',freshness:'fresh',latest,points:[latest],age_s:0,first_at:at,last_at:at,status_at:at-(stale?90:0),status_freshness:stale?'stale':'fresh',metric_notes:{gpu:'This GPU driver does not provide a readable utilization counter.'},model:{alias:'controlled-qwen',file:'controlled-model.gguf',bytes:14*2**30,mapped:true,api:'ready'},services:['api','worker','connector','private_access','model'].map((name,index)=>({name,state:'active',pid:index+100,restarts:0}))}});
+  });
+  await page.goto('/monitoring');
+  await expect(page.getByRole('heading',{name:'Machine resources',exact:true})).toBeVisible();
+  await expect(page.locator('.resource-card').filter({hasText:'CPU utilization'})).toContainText('28.5 %');
+  await expect(page.locator('.resource-card').filter({hasText:'Application disk'})).toContainText('86.0 GiB available');
+  await expect(page.locator('.resource-card').filter({hasText:'Swap'})).toContainText('2.0 GiB / 8.0 GiB');
+  await expect(page.locator('.resource-card').filter({hasText:'GPU utilization'})).toContainText('Not reported');
+  await expect(page.locator('.resource-card').filter({hasText:'VRAM'})).toContainText('2.0 GiB / 16.0 GiB');
+  await expect(page.locator('.resource-card').filter({hasText:'Active model'})).toContainText('controlled-qwen');
+  await expect(page.locator('.resource-card').filter({hasText:'Service health'})).toContainText('5 of 5 running');
+  await page.getByText('Model and process details',{exact:true}).click();
+  await expect(page.getByText(/Model file: controlled-model.gguf/)).toBeVisible();
+  await capture(page,info,'machine-resources-observed-desktop');
+  await page.setViewportSize({width:390,height:844});await overflow(page);
+  await capture(page,info,'machine-resources-observed-phone');
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%');await overflow(page);
+  await page.evaluate(()=>document.documentElement.style.fontSize='');
+  stale=true;
+  await page.getByRole('button',{name:'Refresh display',exact:true}).click();
+  await expect(page.getByText('These observations do not confirm current health.',{exact:false})).toBeVisible();
+  await expect(page.getByText('Last observed: running',{exact:true})).toHaveCount(5);
+  await expect(page.getByText(/Access verified/)).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByText('Last observed: running',{exact:true})).toHaveCount(5);
+});
+
 test('display preferences persist, preserve dirty edits, reject conflicts and use exact ownership',async ({page},info)=>{
   await page.goto('/settings');
   await expect(page.getByRole('heading',{name:'Settings',exact:true})).toBeVisible();

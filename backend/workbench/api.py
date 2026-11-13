@@ -38,6 +38,9 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
     app.state.engine = engine or engine_for()
     app.state.pilot_path = pilot_path if pilot_path is not None else os.environ.get("WORKBENCH_PILOT_DB")
     app.state.resources_path = resources_path if resources_path is not None else os.environ.get('WORKBENCH_RESOURCE_DB')
+    if app.state.resources_path is None and os.environ.get('WORKBENCH_PLANNER') == 'everyday':
+        from workbench.host_resources import database as resource_database
+        app.state.resources_path = resource_database(app.state.engine.url.database)
     app.state.policy_path = policy_path if policy_path is not None else os.environ.get('WORKBENCH_POLICY_DB')
     app.state.capabilities_path = capabilities_path
     token = secrets.token_urlsafe(32)

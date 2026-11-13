@@ -274,6 +274,12 @@ def main():
 
 
 def run(engine, args, stopped, policy):
+    from workbench.host_resources import observations
+    with observations(policy, stopped):
+        _run(engine, args, stopped, policy)
+
+
+def _run(engine, args, stopped, policy):
     from workbench.everyday import watch_capacity
     import time
 

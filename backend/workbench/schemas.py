@@ -187,6 +187,26 @@ class ResourcePoint(StrictModel):
     vram_used: float | None
     vram_total: float | None
     gpu_device: str | None
+    disk_used: float | None = None
+    disk_total: float | None = None
+    disk_available: float | None = None
+    swap_used: float | None = None
+    swap_total: float | None = None
+
+
+class ObservedModel(StrictModel):
+    alias: str | None
+    file: str | None
+    bytes: float | None
+    mapped: bool | None
+    api: Literal['ready', 'authentication_required', 'unavailable']
+
+
+class ObservedService(StrictModel):
+    name: Literal['api', 'worker', 'connector', 'private_access', 'model']
+    state: Literal['active', 'inactive', 'failed', 'activating', 'deactivating', 'reloading', 'unknown']
+    pid: int | None
+    restarts: int | None
 
 
 class Resources(StrictModel):
@@ -203,6 +223,11 @@ class Resources(StrictModel):
     first_at: int | None
     last_at: int | None
     message: str
+    model: ObservedModel | None = None
+    services: list[ObservedService] = Field(default_factory=list)
+    metric_notes: dict[str, str] = Field(default_factory=dict)
+    status_at: int | None = None
+    status_freshness: Literal['fresh', 'stale', 'unavailable'] = 'unavailable'
 
 
 class Policy(StrictModel):

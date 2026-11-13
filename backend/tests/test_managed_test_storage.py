@@ -33,8 +33,9 @@ def test_inode_pressure_holds_before_another_run(tmp_path, monkeypatch):
 
 
 def test_explicit_temporary_storage_is_preserved(tmp_path, monkeypatch):
-    monkeypatch.setattr(wb, 'environment', lambda: {'TMPDIR': str(tmp_path)})
+    monkeypatch.setattr(wb, 'environment', lambda: {'TMPDIR': str(tmp_path), 'WORKBENCH_TEST_STORAGE_UNIT':'inherited-owner-unit'})
     assert wb.test_environment()['TMPDIR'] == str(tmp_path)
+    assert 'WORKBENCH_TEST_STORAGE_UNIT' not in wb.test_environment()
 
 
 def test_default_storage_refuses_a_link_before_writing_outside(tmp_path, monkeypatch):
