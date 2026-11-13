@@ -357,7 +357,8 @@ th,td { text-align: left; padding: 10px; border-bottom: 1px solid #5e4a34; }
  .task-card .task-icon { display: none; }
  .task-card .task-meta { margin-top: 10px; row-gap: 8px; }
  .review-card-action { margin-top: 12px; width: 100%; }
- .resource-grid { grid-template-columns: repeat(auto-fit,minmax(min(140px,100%),1fr)); }
+ .resource-grid { grid-template-columns: repeat(auto-fit,minmax(min(8.75rem,100%),1fr)); }
+ .machine-resources-heading h1 { font-size: min(2.25rem,calc(1rem + 5vw)); }
  .chart-panel { padding: 14px 8px; }
  .chart-panel h2 { padding-inline: 10px; }
  .resource-card strong { font-size: 1.125rem; }

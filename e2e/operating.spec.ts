@@ -26,6 +26,10 @@ test('observed machine resources show real-source fields, partial GPU and stale 
   await page.setViewportSize({width:390,height:844});await overflow(page);
   await capture(page,info,'machine-resources-observed-phone');
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');await overflow(page);
+  const cards=await page.locator('.resource-card').evaluateAll(elements=>elements.map(e=>e.getBoundingClientRect()));
+  expect(cards.every(r=>r.width>=280)).toBe(true);
+  expect(new Set(cards.map(r=>r.x)).size).toBe(1);
+  await capture(page,info,'machine-resources-observed-phone-enlarged');
   await page.evaluate(()=>document.documentElement.style.fontSize='');
   stale=true;
   await page.getByRole('button',{name:'Refresh display',exact:true}).click();

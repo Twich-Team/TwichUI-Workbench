@@ -1,3 +1,33 @@
+# Milestone 2.5 — installed observations; final enlarged-phone correction pending
+
+A complete. Reviewed1daab8e passed all9hosted jobs43443072294, full local2698backend/
+8skips/66frontend,130browser/8conditional skips,4connected and12visual checks.
+Exact hosted app/front bytes, copied939-row rehearsal and complete private preflight
+passed. First activation omitted the cutover backup parent and rolled back automatically;
+all939rows, original c38source/private network/model access were verified restored.
+A distinct corrected private attempt precreated and pinned the directory, refused a
+missing-parent fault before stops and successfully activated the same accepted app.
+Private receipts: milestone2.5-20261113/candidate-1daab8e-retry1. Failed first package
+and its rolled-back journal remain preserved. No application reconstruction occurred.
+
+Installed CPU/RAM/disk/swap/VRAM/model/5service observations independently match host
+readings; actual desktop/phone/reload and historical held-result checks pass with zero
+browser writes. GPU utilization remains unsupported by this driver and is explained.
+Actual enlarged-phone image exposed cramped140px cards despite overflow test passing.
+Small frontend-only correction uses font-relative card minimum and responsive heading;
+new assertion requires one usable-width column at200%. Controlled image inspected;
+static/contracts/schema, all66frontend and targeted observed-resource browser pass.
+An uncertain browser scratch closeout was safely retained; no guard was weakened.
+
+NOT COMPLETE: final correction needs exact full hosted acceptance, accepted artifact
+installation, real UI/restart/restore, scheduled installed retention proof, stable
+worker observations and final closeout. Backend code is unchanged from full local pass.
+Preserve active Qwen PID1949395/auth, all939rows, oldsource rollback, history/permissions,
+archives and unrelated admin-document edit/.venv/node_modules links. No new addon task,
+gallery/map/Milestone3 work. Continue without routine approval, then stop owner review.
+
+---
+
 # Milestone 2.5 final retention correction — November 13
 
 Review found a retained report could still link into a disposable copy. The final

@@ -1,11 +1,11 @@
 Last updated November 13, 2026 (Mountain time).
 
-Milestone 2.5 is under verification. Checkpoint A is complete, including both preserved root-owned service backups. Available SSD space rose from 4.11 to about 86 GiB, a net recovery of about 81.9 GiB. Active Qwen and all original records remain preserved.
+Milestone 2.5 is not complete. Checkpoint A recovered about81.9GiB and verified preserved root-owned service backups. Active Qwen, saved history and rollback remain intact.
 
-Automatic retention passed targeted tests and three real-host disposable cycles covering workspaces, test artifacts, release copies and caches. It protects saved references, active work, current installation and required rollback. Unknown legacy data and unique evidence remain retained. This code is not installed yet.
+Accepted1daab8e is installed. Machine Resources now shows real CPU, RAM, disk, swap, VRAM, active-model and five-service readings. This AMD driver does not provide GPU utilization; the interface explains it. Desktop/phone/reload and saved-result checks passed. Enlarged-phone inspection exposed cramped cards; a small tested layout correction is awaiting final hosted acceptance and installation.
 
-Machine Resources now has a Workbench-owned observation source in development. Actual host tests produced CPU, RAM, disk, swap, VRAM, mapped-model and service readings without generation. This AMD driver does not expose utilization; the panel explains that specific gap. Desktop/phone/enlarged-text checks passed with controlled data. Installed-resource acceptance remains pending.
+Automatic reference-aware retention is installed and passed targeted tests and three real-host disposable development cycles. Installed scheduled-cleanup, restart, independent restore and final stable-worker checks remain pending. All939saved rows remain exact. One missing backup-directory preparation was safely rolled back and corrected; its original receipts are preserved.
 
-The running app remains c38d2bb with healthy services, original authentication, all 939 rows, 305 evidence locations and verified rollback. Full local tests are running. Next: reviewed commit/push, full exact hosted acceptance, copied-history rehearsal and one verified installation, followed by actual resource UI/restart/restore checks. No owner decision is currently needed. Stop for owner review after all of Milestone 2.5 passes.
+Full local backend/frontend/browser/visual checks and allninehosted acceptance jobs passed before the frontend correction. Next: full exact hosted acceptance for that correction and complete installed verification. No owner decision is currently needed. Stop for owner review after A, B and C all pass.
 
-Zero new addon tasks completed end to end in this assignment. Gallery continuation, map publication and Milestone 3 remain untouched. Full unattended reliability remains unproved.
+Zero new addon tasks completed end to end in this assignment. Gallery continuation, map publication and Milestone3 remain untouched. Full unattended reliability remains unproved.
