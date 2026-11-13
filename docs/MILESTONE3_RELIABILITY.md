@@ -103,3 +103,18 @@ the other three connected cases passed in the earlier complete connected run.
 Production terminal-proof requirements were retained. A superseded hosted browser
 job also failed during an external dependency-mirror timeout before tests; its logs
 are retained. Only a complete exact final hosted workflow may authorize installation.
+
+
+## Completed-prefix/non-dispatch consolidation
+
+Full hosted verification identified another existing boundary: a completed source
+response prefix followed by an unsent request stopped during packing/cancellation.
+The common local reader now validates that final request's explicit native
+request-stopped record, exact request number/category and absence of any wire or
+provider result, then counts only dispatched requests. Missing stop proof or a
+late wire still holds. Original prefix usage and all ledger rows remain exact.
+The scripted provider now gives each response a distinct identity, retaining the
+production duplicate-response guard.90focused source/receipt/normal-API tests pass,
+including six new missing-stop/late-wire cases. Earlier failed receipts and the
+observer's missing import are retained. The old envelope-only reader remains a
+historical-format compatibility entry point, not the ordinary recovery owner.

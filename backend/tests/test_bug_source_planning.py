@@ -61,7 +61,7 @@ def scripted(monkeypatch, answers):
                 if packet.get('coverage', {}).get('require_inspection'):
                     outcomes = json.loads(request.data)['response_format']['json_schema']['schema']['$defs']['BugOutcome']['anyOf']
                     assert len(outcomes) == 1 and set(outcomes[0]['properties']) == {'inspection'}
-                return json.dumps(dict(id='chatcmpl-controlled-inspection', model=expected_model,
+                return json.dumps(dict(id='chatcmpl-controlled-inspection-'+str(len(calls)), model=expected_model,
                     usage=dict(prompt_tokens=40, completion_tokens=10, total_tokens=50),
                     choices=[dict(finish_reason='stop', message=dict(content=json.dumps(value)))])).encode()
 

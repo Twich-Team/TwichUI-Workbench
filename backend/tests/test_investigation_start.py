@@ -1,5 +1,6 @@
 """Actual ordinary-input regression: no permission must never invoke a dead adapter."""
 
+import json
 from uuid import uuid4
 import pytest
 from sqlalchemy import select
@@ -318,9 +319,10 @@ def test_local_lock_race_waits_before_transport_and_honors_cancellation(tmp_path
 
 
 @pytest.mark.parametrize("packing_failure", ["input_budget", "context_budget", "cancelled"])
+@pytest.mark.parametrize("stop_receipt", ["valid", "missing_stop", "late_wire"])
 @pytest.mark.usefixtures("installed")
 def test_completed_reads_survive_later_preflight_failure_and_normal_renewal(
-    client, headers, store, monkeypatch, packing_failure
+    client, headers, store, monkeypatch, packing_failure, stop_receipt
 ):
     from workbench.planning_provider import LocalProvider, PlanningUnavailable
     from test_bug_source_planning import inspection
@@ -356,6 +358,21 @@ def test_completed_reads_survive_later_preflight_failure_and_normal_renewal(
         continue_investigation=True,
         renew_operation=True,
     )
+    if stop_receipt != 'valid':
+        parent = everyday.ROOT/'artifacts/runs'/('planning-evidence-'+old['id'])
+        events = [json.loads(line) for line in (parent/'events.jsonl').read_text().splitlines()]
+        last = [e for e in events if e.get('phase') == 'source-followup'][-1]['evidence_id']
+        path = parent.parent/('planning-evidence-'+last)/'events.jsonl'
+        events = [json.loads(line) for line in path.read_text().splitlines()]
+        if stop_receipt == 'missing_stop':
+            events = [e for e in events if e.get('phase') != 'request-stopped']
+        else:
+            events.append(dict(phase='wire-received',bounded_prefix=False))
+        path.write_text(''.join(json.dumps(e)+'\n' for e in events))
+        assert client.post(endpoint,headers=headers,json=reply).status_code == 409
+        with store.connect() as c:
+            assert dict(c.execute(select(model_attempts).where(model_attempts.c.id == old['id'])).mappings().one()) == old
+        return
     renewed = client.post(endpoint, headers=headers, json=reply)
     assert renewed.status_code == 200, renewed.text
     assert client.post(endpoint, headers=headers, json=reply).status_code == 200

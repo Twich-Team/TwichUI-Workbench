@@ -27,7 +27,7 @@ def request_state(identity, backend, requested, actual, outcome, usage, diagnost
         state = 'not_started'
     elif identity and finished and backend == 'local' and local_status == 'failed' and read_only:
         try:
-            proof = settled_local_turns(identity,usage,evidence_roots,requested)
+            proof = settled_local_turns(identity,usage,evidence_roots,requested,diagnostics=facts)
         except (ValueError,OSError,KeyError,TypeError):
             pass
         else:
@@ -392,7 +392,7 @@ def not_started_local_turn(identity, evidence_roots, diagnostics):
     return dict(provider_outcome='not_started',requests=0,usage_observation=None,source_sha256=sha,database_records_unchanged=True)
 
 
-def settled_local_turns(identity, usage, evidence_roots, requested_model):
+def settled_local_turns(identity, usage, evidence_roots, requested_model, *, diagnostics=None):
     """A final HTTP envelope settles execution independently of text and tokens.
 
     LocalHTTP closes its bounded non-streaming response before recording the
@@ -415,6 +415,7 @@ def settled_local_turns(identity, usage, evidence_roots, requested_model):
         raise ValueError('Local request sequence is unavailable')
     totals = dict(prompt_tokens=0, completion_tokens=0, total_tokens=0)
     records, seen, unknown = [], set(), 0
+    dispatched = count
     for index in range(count):
         phase = identity if index == 0 else str(uuid5(UUID(identity), 'committed-source-turn-'+str(index)))
         if index and followups[index-1].get('evidence_id') != phase:
@@ -427,6 +428,20 @@ def settled_local_turns(identity, usage, evidence_roots, requested_model):
                          e.get('model') in {'PlanningOutput','FeatureDecomposition'}]
         identified = (len(schemas) == 1 and schemas[0].get('request_number') == index+1
                       or count == 1 and not schemas and len(single_schema) == 1)
+        # A prepared follow-up can stop before dispatch after a completed prefix.
+        # Its own native stop receipt is required; blank/missing output is not
+        # sufficient. A late wire/result invalidates the non-dispatch proof.
+        facts = diagnostics or {}
+        if index == count-1 and index and facts.get('stopped_request_generation_state') == 'not_started':
+            stops = [e for e in events if e.get('phase') == 'request-stopped']
+            if (not identified or len(stops) != 1 or stops[0].get('generation_state') != 'not_started'
+                    or stops[0].get('category') != facts.get('stopped_request_category')
+                    or facts.get('investigation_requests') != index
+                    or any(e.get('phase') in {'wire-received','envelope','provider-result'} for e in events)):
+                raise ValueError('The final prepared follow-up has no verified non-dispatch receipt')
+            records.append(dict(non_dispatch=phase,source_sha256=sha))
+            dispatched -= 1
+            continue
         if (not identified
                 or len(envelopes) != 1 or len(wires) != 1 or wires[0].get('bounded_prefix') is not False):
             raise ValueError('Local final response is missing or incomplete')
@@ -450,9 +465,9 @@ def settled_local_turns(identity, usage, evidence_roots, requested_model):
         records.append(dict(phase=phase, source_sha256=sha, response_identity=response,
                             finish_reason=end['completion'], usage=values if valid else None))
     if isinstance(usage, dict) and usage.get('status') == 'complete':
-        if unknown or usage.get('values') != totals or usage.get('requests_observed') != count:
+        if unknown or usage.get('values') != totals or usage.get('requests_observed') != dispatched:
             raise ValueError('Local final receipts disagree with saved accounting')
-    return dict(provider_outcome='completed', actual_model=requested_model, requests=count,
+    return dict(provider_outcome='completed', actual_model=requested_model, requests=dispatched,
                 records=records, known_usage=totals, unknown_usage_requests=unknown,
                 historical_usage_unavailable=not isinstance(usage, dict) or usage.get('status') != 'complete',
                 database_records_unchanged=True, output_accepted=False, execution_authorized=False)
