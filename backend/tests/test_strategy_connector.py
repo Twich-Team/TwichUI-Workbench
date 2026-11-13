@@ -130,8 +130,10 @@ def test_unknown_reset_is_unknown_and_credits_permission_remains_separate():
     ('billing_permission','unavailable'),
 ])
 def test_native_preflight_does_not_invent_an_authentication_failure(tmp_path,monkeypatch,reason,state):
-    runtime=tmp_path/'runtime';runtime.mkdir()
-    evidence=tmp_path/'artifacts'/'codex-evidence';evidence.parent.mkdir()
+    runtime=tmp_path/'runtime'
+    runtime.mkdir()
+    evidence=tmp_path/'artifacts'/'codex-evidence'
+    evidence.parent.mkdir()
     b=connector.Boundary(None,Path('/unused'),Path('/unused'),runtime,evidence,Path('/unused'),lambda *args:'')
     b.stop=lambda:False
     b.hosts=lambda *args:tmp_path/'hosts'
