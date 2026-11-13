@@ -17,20 +17,7 @@ def failed(client, headers, store):
     def incomplete(value, schema):
         if schema is not PlanningOutput:
             value['tasks'] = value['tasks'][:1]
-    planner = ControlledFeaturePlanner(incomplete)
-    planner.diagnostics.update(accounting_state='complete', usage={'status':'complete', 'total_tokens':200})
-    generate = planner.generate
-    def received(packet, schema, expected_model=None):
-        result = generate(packet, schema, expected_model)
-        usage = dict(source='controlled provider', units='tokens', status='complete', requests_observed=1,
-            values=dict(prompt_tokens=100, completion_tokens=100, total_tokens=200))
-        planner.diagnostics.update(usage=usage, actual_model=expected_model)
-        planner.response_evidence.received(b'{}')
-        planner.response_evidence.envelope(dict(id='chatcmpl-'+str(uuid4())),
-            dict(generation_state='finished', finish_reason='stop',model_matches=1,
-                 accounting_state='complete', usage=usage))
-        return result
-    planner.generate = received
+    planner = ControlledFeaturePlanner(incomplete, terminal_receipts=True)
     data, body = submit(client, headers)
     assert worker.tick(store, planning_adapter=planner)
     assert worker.tick(store, planning_adapter=planner)

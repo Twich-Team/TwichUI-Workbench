@@ -213,8 +213,7 @@ def main():
                 def incomplete(result, schema):
                     result['tasks'] = result['tasks'][:1]
                 planner.mutate = incomplete
-                planner.diagnostics.update(accounting_state='complete',
-                    usage=dict(status='complete', total_tokens=200))
+                planner.terminal_receipts = True
             assert worker.tick(engine, planning_adapter=planner)
         return
     if args.action.startswith('reviewed-offer-'):

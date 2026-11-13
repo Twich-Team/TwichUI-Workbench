@@ -16,9 +16,10 @@ from test_everyday import installed as installed
 
 
 class ControlledFeaturePlanner:
-    def __init__(self, mutate=None):
+    def __init__(self, mutate=None, *, terminal_receipts=False):
         self.calls = []
         self.mutate = mutate
+        self.terminal_receipts = terminal_receipts
         self.diagnostics = {'generation_state':'finished', 'usage':None}
 
     def generate(self, packet, schema, expected_model=None):
@@ -38,6 +39,14 @@ class ControlledFeaturePlanner:
                 for index, (key, title) in enumerate([('save', 'Save the preference'), ('restore', 'Restore the preference')])])
         if self.mutate:
             self.mutate(result, schema)
+        if self.terminal_receipts:
+            usage = dict(source='controlled provider', units='tokens', status='complete', requests_observed=1,
+                values=dict(prompt_tokens=100, completion_tokens=100, total_tokens=200))
+            self.diagnostics.update(accounting_state='complete',usage=usage, actual_model=expected_model)
+            self.response_evidence.received(b'{}')
+            self.response_evidence.envelope(dict(id='chatcmpl-'+str(uuid4())),
+                dict(generation_state='finished', finish_reason='stop',model_matches=1,
+                     accounting_state='complete', usage=usage))
         return result, expected_model, 'demo'
 
 

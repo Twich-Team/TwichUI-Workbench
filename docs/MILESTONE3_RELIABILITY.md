@@ -82,3 +82,24 @@ in progress. Controlled results do not establish live recovery.
 
 Final results, exact release/CI/rollback and live model usage will be added after
 verification. Preserve the running f9e517b and rollback until acceptance succeeds.
+
+
+## Controlled original-history and browser acceptance checkpoint
+
+The actual original939-row history was copied again into a separately configured
+private fixture. The real Bug Report API retained all four attempts, three
+proposals, one owner decision and all other original rows, then appended only one
+planning continuation. The same command returned200without another job; a distinct
+duplicate returned409. Sixteen prior responses/360395tokens remained unchanged.
+No network/model request occurred. This is not live continuation.
+
+The full local ordinary browser suite passed130with8conditional skips; all12visual
+comparisons passed. Connected acceptance exposed an incomplete simulated-provider
+fixture: it asserted finished usage without a terminal response journal. The shared
+controlled provider can now emit the same bounded wire/envelope receipts that real
+providers produce. The invalid-step browser fixture and recovery unit tests reuse
+that implementation. The correction browser test and37affected backend checks pass;
+the other three connected cases passed in the earlier complete connected run.
+Production terminal-proof requirements were retained. A superseded hosted browser
+job also failed during an external dependency-mirror timeout before tests; its logs
+are retained. Only a complete exact final hosted workflow may authorize installation.
