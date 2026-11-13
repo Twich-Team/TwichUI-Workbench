@@ -395,9 +395,10 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             def inspect_source(policy):
                 if bug:
                     continuation=job['payload'].get('bug_followup',{})
-                    packet=bug_investigation.context(original['payload'], '' if continuation else feedback, policy)
                     frozen=continuation.get('source_scope')
                     retained=continuation.get('retained_source_packet')
+                    packet=bug_investigation.context(original['payload'], '' if continuation else feedback, policy,
+                        **({'legacy':True} if retained and not retained.get('source_contract') else {}))
                     if frozen and retained:
                         from workbench.bug_source_planning import verify_packet
                         verify_packet(packet,retained)

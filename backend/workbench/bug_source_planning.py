@@ -13,7 +13,7 @@ from workbench.bug_evidence import BugPlanningResponse, Reproducer, Step
 from workbench.planning_provider import PlanningUnavailable
 from workbench.planning_response import Evidence, ResponseValidationError, wire_schema
 from workbench import bug_plan_review, bug_investigation_stage as stage
-from workbench.source_artifacts import PATTERN, ROOTS
+from workbench.source_artifacts import PATTERN
 
 REQUESTS = bug.INVESTIGATION_REQUESTS
 MAX_FILES = 24
@@ -107,27 +107,22 @@ def correction(error, raw):
 
 
 def committed(path, base):
-    if (not INSPECT_PATH.fullmatch(path)
-            or '..' in path.split('/') or any(p.startswith('.') for p in path.split('/'))
-            or {'lib', 'libs', 'vendor'} & {p.lower() for p in path.split('/')}):
+    from workbench.source_artifacts import eligible, decoded, inventory
+    if not eligible(path):
         raise ValueError('Source inspection is restricted to eligible committed project source and PNG metadata.')
     root, actual, _ = source.repository()
     if actual != base:
         raise ValueError('The committed project changed during investigation.')
     bug.clean_base(root, base)
-    record = source.git(root, 'ls-tree', '-l', base, '--', path).decode().strip()
-    metadata, name = record.split('\t') if '\t' in record else ('', '')
-    fields = metadata.split()
-    if (name != path or len(fields) != 4 or fields[0] not in {'100644', '100755'}
-            or fields[1] != 'blob' or int(fields[3]) > 131072):
+    entry = inventory(root, base, {path}).get(path)
+    if entry is None:
         raise ValueError('The requested committed source is unavailable.')
     binary = path.endswith('.png')
-    raw = source.git(root, 'cat-file', 'blob', fields[2]) if binary else source.blob(root, fields[2])
-    item = dict(path=path, git_blob=fields[2], sha256=hashlib.sha256(raw).hexdigest(),
+    raw, content = decoded(root, path, entry['git_blob'])
+    item = dict(path=path, git_blob=entry['git_blob'], sha256=hashlib.sha256(raw).hexdigest(),
                 support_only=True, excerpts=[])
     if binary:
-        from workbench.source_artifacts import png_metadata
-        raw = png_metadata(raw)
+        raw = content
         item['content_kind'] = 'controlled-png-metadata-v1'
         item['content_sha256'] = hashlib.sha256(raw).hexdigest()
     lines = raw.decode().splitlines()
@@ -151,21 +146,9 @@ def search(base, query, paths=None, *, legacy=False):
         raise ValueError('The committed project changed during search.')
     bug.clean_base(root, base)
     result, scanned = [], 0
-    inventory = source.git(root, 'ls-tree', '-rz', '-l', base, '--',
-                           *(sorted(paths) if paths is not None else ROOTS[:3] if legacy else ROOTS), max_bytes=1 << 20)
-    for entry in inventory.split(b'\0'):
-        if not entry:
-            continue
-        meta, raw_path = entry.split(b'\t', 1)
-        mode, kind, oid, size = meta.decode().split()
-        path = raw_path.decode()
-        if (mode not in {'100644', '100755'} or kind != 'blob' or int(size) > 131072
-                or not INSPECT_PATH.fullmatch(path) or any(p.startswith('.') for p in path.split('/'))
-                or legacy and not path.endswith('.lua')
-                or paths is not None and not any(path==p or path.startswith(p+'/') for p in paths)
-                or {'lib', 'libs', 'vendor'} & {p.lower() for p in path.split('/')}):
-            continue
-        raw = committed(path, base)[0] if path.endswith('.png') else source.blob(root, oid)
+    from workbench.source_artifacts import inventory, decoded
+    for path, entry in inventory(root, base, paths, legacy=legacy).items():
+        raw = decoded(root, path, entry['git_blob'])[1]
         scanned += len(raw)
         if scanned > 16 << 20:
             raise ValueError('The source search exceeded its bounded local scan.')
@@ -235,6 +218,7 @@ def verify_packet(initial, supplied):
             or supplied.get('plan_review') != initial.get('plan_review')
             or supplied.get('api_references') != initial.get('api_references')
             or supplied.get('declarations') != initial.get('declarations')
+            or supplied.get('source_contract') != initial.get('source_contract')
             or supplied.get('files', [])[:len(initial['files'])] != initial['files']
             or not len(initial['files']) <= len(supplied['files']) <= MAX_FILES
             or len({f['path'] for f in supplied['files']}) != len(supplied['files'])):
@@ -446,6 +430,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             from workbench.source_directory import directory
             from workbench.investigation_strategy import context as strategy_context
             result['source_directory']=directory(packet['base'],getattr(adapter,'source_manifest',None))
+            result['source_contract']=result['source_directory']['source_contract']
             result['investigation_working_notes']=strategy_context(packet,result['source_directory'],original)
         added=packet.get('inspection_windows',[])[before:]
         if parent:
@@ -495,8 +480,30 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         wire=make_wire(packet,original,feedback,packet.get('inspection_windows',[]),
             'Construct executable tests for this exact approved behavior scope using actual sandbox feedback.')
     if intent_mode:
+        # Revalidate source locations already supplied in the saved report/owner
+        # feedback. Names are hints only: ordinary committed reads and disclosure
+        # checks still decide whether any bytes can enter the new operation.
+        from workbench.source_inspection import InvestigationRead
+        from workbench.source_artifacts import eligible
+        hints = list(dict.fromkeys(re.findall(
+            r'(?:!!!TwichUI|TwichUI_Settings|tests|tools|assets)/[A-Za-z0-9_./!-]+',
+            original['description']+'\n'+feedback)))
+        hints = [p.rstrip('.') for p in hints if eligible(p.rstrip('.'))][:3]
+        hint_errors = []
+        if hints and not should_stop():
+            visible = getattr(adapter,'source_manifest',None)
+            permitted_hints = [p for p in hints if visible is None or p in visible]
+            windows, _, _ = inspect(packet,[InvestigationRead(path=p,start=1,end=160) for p in permitted_hints],
+                disclosure_paths=visible, page_lines=160, result_budget=16000, errors=hint_errors)
+            if parent and windows:
+                parent.record('source-known-locations-revalidated',
+                    windows=[{k:w[k] for k in ('path','sha256','line','through_line')} for w in windows],
+                    approved=False,executed=False)
+            read_chars = source_characters(packet)
         wire=make_wire(packet,original,feedback,packet.get('inspection_windows',[]),
             'Retained committed source supports a repair scope; executable checks are a later preparation phase.')
+        if hint_errors:
+            wire['inspection_result']['read_errors'] = hint_errors
         wire['coverage']['scope_plan_format']='readable-intent-v1'
     if read_chars > limit:
         raise PlanningUnavailable('Initial source context exceeds the investigation read bound.', 'inspection_limit')

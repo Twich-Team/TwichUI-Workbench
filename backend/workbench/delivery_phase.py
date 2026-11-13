@@ -6,7 +6,7 @@ that content valid, authorize execution or resolve consequential uncertainty.
 """
 import json
 
-from workbench.provider_receipts import completed_turns,interrupted_turns
+from workbench.provider_receipts import safe_continuation
 from workbench.visual_scope import digest
 
 
@@ -43,42 +43,13 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
                 continue
         facts=payload.get('diagnostics',{})
         caps=payload.get('recovery_capabilities',{})
-        read_only=bool(caps) and all(caps.get(k) is False for k in
-            ('source_writes','execution_dispatch','external_action_tools'))
-        provider_state='unknown'
-        terminal_proof=None
-        if local in {'queued','running'} or attempt and not terminal:
-            provider_state='active'
-        elif attempt and terminal and backend=='local' and facts.get('generation_state')=='not_started' and facts.get('investigation_requests')==0:
-            from workbench.provider_receipts import not_started_local_turn
-            terminal_proof=not_started_local_turn(attempt,evidence_roots,facts)
-            provider_state='not_started'
-        elif (attempt and terminal and backend=='local' and local=='failed' and read_only
-              and (facts.get('generation_state')!='finished' or not isinstance(usage,dict) or usage.get('status')!='complete')):
-            from workbench.provider_receipts import settled_local_turns
-            try:
-                terminal_proof=settled_local_turns(attempt,usage,evidence_roots,requested)
-            except (ValueError, OSError, KeyError, TypeError):
-                pass  # A closed socket, missing envelope or uncertain request still holds.
-            else:
-                provider_state=terminal_proof['provider_outcome']
-                if actual is None:
-                    actual=terminal_proof['actual_model']
-        elif attempt and terminal and isinstance(usage,dict) and usage.get('status')=='complete':
-            if backend=='codex':
-                terminal_proof=(interrupted_turns(attempt,usage,evidence_roots,facts,caps)
-                    if outcome=='incomplete_output' and facts.get('terminal_status')=='interrupted'
-                    else completed_turns(attempt,usage,evidence_roots))
-                provider_state=terminal_proof['provider_outcome']
-            elif (outcome=='completed' or facts.get('generation_state')=='finished' and
-                    facts.get('accounting_state')=='complete'):
-                provider_state='completed'
-            elif backend=='local' and facts.get('generation_state')=='finished':
-                from workbench.provider_receipts import completed_local_turns
-                terminal_proof=completed_local_turns(attempt,usage,evidence_roots,requested,facts)
-                provider_state=terminal_proof['provider_outcome']
-                if actual is None:
-                    actual=terminal_proof['actual_model']  # Recovered fact only; database stays unchanged.
+        from workbench.provider_receipts import request_state
+        settlement=request_state(attempt,backend,requested,actual,outcome,usage,facts,caps,evidence_roots,
+            local_status=local,local_finished=finished,finished=terminal)
+        provider_state=settlement['provider_state']
+        terminal_proof=settlement['terminal_proof']
+        actual=settlement['actual_model']
+        read_only=settlement['read_only']
         if provider_state in {'completed','interrupted'} and isinstance(usage,dict) and usage.get('status')=='complete':
             values=usage.get('values',{})
             if (usage.get('units')!='tokens' or not isinstance(values,dict)
@@ -92,16 +63,12 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
         elif terminal_proof and terminal_proof.get('known_usage'):
             for key,value in terminal_proof['known_usage'].items():
                 totals[key]=totals.get(key,0)+value
-        count=(0 if provider_state=='not_started' else terminal_proof['requests']
-               if terminal_proof and 'requests' in terminal_proof else usage.get('requests_observed',1) if isinstance(usage,dict) else None)
-        if provider_state in {'completed','interrupted'} and (type(count) is not int or count<1
-                or provider_state=='completed' and (actual!=requested or not actual)
-                or actual is not None and actual!=requested):
-            raise ValueError('Completed operation attribution or request count is unavailable')
+        count=settlement['requests']
         phases.append(dict(job=job,sequence=sequence,local_status=local,local_finished=finished,
             attempt=attempt,backend=backend,requested_model=requested,actual_model=actual,
             database_outcome=outcome,provider_state=provider_state,usage=usage,requests=count,
             input_binding=digest(payload),terminal_proof=terminal_proof,read_only=read_only,
+            settlement=settlement,
             output_accepted=local=='completed' and provider_state=='completed',
             execution_authorized=False))
     start = initial['revision'] if initial else 1
@@ -119,9 +86,7 @@ def observe(connection,identity,evidence_roots,*,exclude_job=None):
 
 def renewable(snapshot):
     """A local rejection is renewable only after every old generation is settled."""
-    return bool(snapshot['phases']) and all(
-        p['local_status'] in {'completed','failed'} and p['local_finished'] and
-        p['provider_state'] in {'completed','interrupted','not_started'} and p['read_only'] and not p['execution_authorized'] for p in snapshot['phases'])
+    return bool(snapshot['phases']) and all(safe_continuation(p) for p in snapshot['phases'])
 
 
 def hold_reason(snapshot):

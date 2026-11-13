@@ -7,6 +7,74 @@ import stat
 from uuid import UUID,uuid5
 
 
+def request_state(identity, backend, requested, actual, outcome, usage, diagnostics,
+                  capabilities, evidence_roots, *, local_status, local_finished, finished):
+    """Shared interpretation of durable provider facts, never a state transition.
+
+    Planning, investigation and feature adapters keep their existing records and
+    dispatch owners. Content validity and token availability are separate from
+    execution. Native coding recovery still requires its source/owner/side-effect
+    proofs as well as the shared coding-accounting interpretation.
+    """
+    facts, caps = diagnostics, capabilities
+    read_only = bool(caps) and all(caps.get(k) is False for k in
+        ('source_writes','execution_dispatch','external_action_tools'))
+    state, proof = 'unknown', None
+    if local_status in {'queued','running'} or identity and not finished:
+        state = 'active'
+    elif identity and finished and backend == 'local' and facts.get('generation_state') == 'not_started' and facts.get('investigation_requests') == 0:
+        proof = not_started_local_turn(identity,evidence_roots,facts)
+        state = 'not_started'
+    elif identity and finished and backend == 'local' and local_status == 'failed' and read_only:
+        try:
+            proof = settled_local_turns(identity,usage,evidence_roots,requested)
+        except (ValueError,OSError,KeyError,TypeError):
+            pass
+        else:
+            state = proof['provider_outcome']
+            actual = actual or proof['actual_model']
+    elif identity and finished and isinstance(usage,dict) and usage.get('status') == 'complete':
+        if backend == 'codex':
+            proof = (interrupted_turns(identity,usage,evidence_roots,facts,caps)
+                if outcome == 'incomplete_output' and facts.get('terminal_status') == 'interrupted'
+                else completed_turns(identity,usage,evidence_roots))
+            state = proof['provider_outcome']
+        elif outcome == 'completed' or facts.get('generation_state') == 'finished' and facts.get('accounting_state') == 'complete':
+            state = 'completed'
+        elif backend == 'local' and facts.get('generation_state') == 'finished':
+            proof = completed_local_turns(identity,usage,evidence_roots,requested,facts)
+            state = proof['provider_outcome']
+            actual = actual or proof['actual_model']
+    count = (0 if state == 'not_started' else proof['requests'] if proof and 'requests' in proof
+             else usage.get('requests_observed',1) if isinstance(usage,dict) else None)
+    if state in {'completed','interrupted'} and (type(count) is not int or count < 1
+            or state == 'completed' and (actual != requested or not actual)
+            or actual is not None and actual != requested):
+        raise ValueError('Completed operation attribution or request count is unavailable')
+    reasons = [r.get('finish_reason') for r in (proof or {}).get('records', [])]
+    content_complete = (False if facts.get('generation_state') == 'partial' or 'length' in reasons
+                        else True if state == 'completed' and facts.get('generation_state') == 'finished' else None)
+    return dict(attempt=identity, provider_state=state, actual_model=actual, requests=count,
+        terminal_proof=proof, read_only=read_only, local_status=local_status, local_finished=local_finished,
+        dispatch='not_started' if state == 'not_started' else 'observed' if proof or state == 'completed' else 'unresolved',
+        transport='complete_response' if proof and proof.get('records') else
+            'terminal_acknowledged' if proof else 'not_dispatched' if state == 'not_started' else 'unresolved',
+        cancellation_acknowledged=state == 'interrupted',
+        cancellation_requested=facts.get('cancellation_requested') is True or state == 'interrupted',
+        content_complete=content_complete,
+        content_validity='accepted' if local_status == 'completed' and state == 'completed' else
+            'rejected' if local_status == 'failed' and state == 'completed' else 'unvalidated',
+        output_accepted=local_status == 'completed' and state == 'completed',
+        possible_external_side_effects=not read_only, execution_authorized=False)
+
+
+def safe_continuation(state):
+    """Generation settlement cannot confer permission for consequential replay."""
+    return (state['local_status'] in {'completed','failed'} and bool(state['local_finished'])
+        and state['provider_state'] in {'completed','interrupted','not_started'}
+        and state['read_only'] and not state['execution_authorized'])
+
+
 def _read(path, *, lines=False, bound=2 << 20):
     path=Path(path)
     info=path.lstat()
@@ -333,11 +401,14 @@ def settled_local_turns(identity, usage, evidence_roots, requested_model):
     """
     identity = str(UUID(identity))
     roots = list(dict.fromkeys(Path(p) for p in evidence_roots))
-    matches = [p for p in roots if (p/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl').is_file()]
+    matches = {folder/('planning-evidence-'+identity)/'events.jsonl' for p in roots
+               for folder in (p/'release/artifacts/runs', p/'artifacts/runs')
+               if (folder/('planning-evidence-'+identity)/'events.jsonl').is_file()}
     if len(matches) != 1 or not requested_model:
         raise ValueError('Local receipt owner is missing or ambiguous')
-    root = matches[0]
-    first, _ = _read(root/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl', lines=True, bound=65536)
+    first_path = next(iter(matches))
+    runs = first_path.parent.parent
+    first, _ = _read(first_path, lines=True, bound=65536)
     followups = [e for e in first if e.get('phase') == 'source-followup']
     count = len(followups)+1
     if count > 16 or [e.get('turn') for e in followups] != list(range(2, count+1)):
@@ -348,11 +419,15 @@ def settled_local_turns(identity, usage, evidence_roots, requested_model):
         phase = identity if index == 0 else str(uuid5(UUID(identity), 'committed-source-turn-'+str(index)))
         if index and followups[index-1].get('evidence_id') != phase:
             raise ValueError('Local request identity changed')
-        events, sha = _read(root/'release/artifacts/runs'/('planning-evidence-'+phase)/'events.jsonl', lines=True, bound=65536)
+        events, sha = _read(runs/('planning-evidence-'+phase)/'events.jsonl', lines=True, bound=65536)
         schemas = [e for e in events if e.get('phase') == 'request-schema']
         envelopes = [e for e in events if e.get('phase') == 'envelope']
         wires = [e for e in events if e.get('phase') == 'wire-received']
-        if (len(schemas) != 1 or schemas[0].get('request_number') != index+1
+        single_schema = [e for e in events if e.get('phase') == 'schema' and
+                         e.get('model') in {'PlanningOutput','FeatureDecomposition'}]
+        identified = (len(schemas) == 1 and schemas[0].get('request_number') == index+1
+                      or count == 1 and not schemas and len(single_schema) == 1)
+        if (not identified
                 or len(envelopes) != 1 or len(wires) != 1 or wires[0].get('bounded_prefix') is not False):
             raise ValueError('Local final response is missing or incomplete')
         end = envelopes[0]
@@ -381,3 +456,34 @@ def settled_local_turns(identity, usage, evidence_roots, requested_model):
                 records=records, known_usage=totals, unknown_usage_requests=unknown,
                 historical_usage_unavailable=not isinstance(usage, dict) or usage.get('status') != 'complete',
                 database_records_unchanged=True, output_accepted=False, execution_authorized=False)
+
+
+def settled_coding_accounting(row):
+    """Unknown local generation usage stays unknown after proven epoch termination.
+
+    This never covers active/uncertain effects or unknown separately billed usage.
+    The native failed outcome, no late tool dispatch and exact source are retained.
+    """
+    from pathlib import Path
+    from workbench.repair_continuation import private_json
+    usage=(row['result'] or {}).get('usage',{})
+    if usage.get('status')=='complete':
+        return True
+    if usage.get('status') not in {'partial','unavailable'} or row['grant_snapshot']['runtime'].get('codex_selection'):
+        return False
+    try:
+        from workbench.local_generation_recovery import absent_epoch
+        from workbench.real_workspace import Runtime,tree
+        from workbench import real_execution as execution
+        root=Path(row['grant_snapshot']['recovery']['root'])
+        proof=private_json(root/'terminated-generation.json')
+        runtime=Runtime(root)
+        return (proof['execution_id']==row['id'] and proof['fence']==row['fence']
+            and proof['outcome']=='failed' and proof['generation_final_outcome']=='unknown'
+            and proof['final_usage']=='unknown' and proof['partial_response_dispatched'] is False
+            and proof['provider_epoch_terminated'] is True and absent_epoch(proof['terminated_epoch'])
+            and runtime.owns_recovery(dict(snapshot=row['grant_snapshot']))
+            and proof['source_tree_sha256']==execution.digest(tree(runtime.workspace))
+            and runtime.failure_evidence(row['id'],row['fence'])['usage']==usage)
+    except (OSError, ValueError, KeyError, TypeError):
+        return False

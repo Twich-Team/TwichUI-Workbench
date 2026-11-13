@@ -38,13 +38,27 @@ def offer(c, row):
     job = _job(c, row)
     if not job or job['status'] != 'failed' or not job['finished_at'] or job['lease']:
         return None
-    diagnostics = job['payload'].get('diagnostics', {})
-    if diagnostics.get('generation_state') != 'finished' or diagnostics.get('accounting_state') != 'complete':
-        return None
     attempts = list(c.execute(select(model_attempts).where(model_attempts.c.job_id == job['id'])
         .order_by(model_attempts.c.started_at, model_attempts.c.id)).mappings())
     if (not attempts or any(not a['finished_at'] for a in attempts)
-            or attempts[-1]['outcome'] != 'failed' or not attempts[-1]['usage']):
+            or attempts[-1]['outcome'] != 'failed'):
+        return None
+    from workbench.provider_receipts import request_state, safe_continuation
+    from workbench import everyday
+    try:
+        history = job['payload'].get('correction_history', [])
+        if len(history) != len(attempts)-1:
+            return None
+        states = []
+        for attempt, prior in zip(attempts, [*history, job['payload']]):
+            state = request_state(attempt['id'], attempt['backend'], attempt['requested_model'],
+                attempt['actual_model'], attempt['outcome'], attempt['usage'], prior.get('diagnostics') or {},
+                job['payload'].get('recovery_capabilities', {}), everyday.configuration(c.engine).evidence_roots,
+                local_status=job['status'],local_finished=attempt['finished_at'],finished=attempt['finished_at'])
+            if not safe_continuation(state):
+                return None
+            states.append(state)
+    except (ValueError,OSError,KeyError,TypeError):
         return None
     proposal = intake.require(c, proposals, job['payload']['proposal_id'])
     if (proposal['revision'] != row['revision']
@@ -61,6 +75,7 @@ def offer(c, row):
         job_id=job['id'], revision=job['revision'], attempts=job['attempts'], finished_at=job['finished_at'],
         failure=job['message'], source=job['payload'].get('feature_base'),
         scope_revision=job['payload']['scope_revision'], route=route,
+        settlement=states,
         ledger=[dict(id=a['id'], outcome=a['outcome'], finished_at=a['finished_at'], usage=a['usage']) for a in attempts]))
     return dict(binding=binding, job_id=job['id'],
         message='The model finished, but its steps did not pass validation. Prepare corrected steps for this same plan using the saved AI. This permits one read-only request; implementation remains separate.')

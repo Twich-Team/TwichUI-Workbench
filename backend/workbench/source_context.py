@@ -55,7 +55,7 @@ def excerpts(files, inspected, terms, words):
         path = item['path']
         _, raw, lines = inspected[path]
         code = without_comments('\n'.join(lines)).splitlines()
-        spans = function_ranges(raw)
+        spans = function_ranges(raw) if path.endswith('.lua') else ()
         if path.startswith(('!!!TwichUI/', 'TwichUI_Settings/')):
             item['top_level_returns_value'] = compiled_shape(raw)[1]
         rows = []

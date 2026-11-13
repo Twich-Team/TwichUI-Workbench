@@ -19,6 +19,18 @@ def failed(client, headers, store):
             value['tasks'] = value['tasks'][:1]
     planner = ControlledFeaturePlanner(incomplete)
     planner.diagnostics.update(accounting_state='complete', usage={'status':'complete', 'total_tokens':200})
+    generate = planner.generate
+    def received(packet, schema, expected_model=None):
+        result = generate(packet, schema, expected_model)
+        usage = dict(source='controlled provider', units='tokens', status='complete', requests_observed=1,
+            values=dict(prompt_tokens=100, completion_tokens=100, total_tokens=200))
+        planner.diagnostics.update(usage=usage, actual_model=expected_model)
+        planner.response_evidence.received(b'{}')
+        planner.response_evidence.envelope(dict(id='chatcmpl-'+str(uuid4())),
+            dict(generation_state='finished', finish_reason='stop',model_matches=1,
+                 accounting_state='complete', usage=usage))
+        return result
+    planner.generate = received
     data, body = submit(client, headers)
     assert worker.tick(store, planning_adapter=planner)
     assert worker.tick(store, planning_adapter=planner)
@@ -30,6 +42,21 @@ def failed(client, headers, store):
 
 def command(view):
     return dict(command_id=str(uuid4()), binding=view['correction']['binding'])
+
+
+def test_finished_feature_response_with_unavailable_ledger_usage_is_recoverable(
+    client, headers, store, installed,
+):
+    view, _, _ = failed(client, headers, store)
+    with write_transaction(store) as c:
+        job = c.execute(select(planning_jobs).where(planning_jobs.c.id == view['correction']['job_id'])).mappings().one()
+        attempt = c.execute(select(model_attempts).where(model_attempts.c.job_id == job['id'])).mappings().one()
+        c.execute(model_attempts.update().where(model_attempts.c.id == attempt['id']).values(usage=None))
+    current = client.get('/api/features/'+view['id']).json()
+    assert current['correction']
+    assert client.post('/api/features/'+view['id']+'/correct-steps', headers=headers, json=command(current)).status_code == 200
+    with store.connect() as c:
+        assert c.execute(select(model_attempts.c.usage).where(model_attempts.c.id == attempt['id'])).scalar_one() is None
 
 
 def test_same_plan_correction_retains_rejected_response_and_claims(
@@ -76,7 +103,7 @@ def test_same_plan_correction_retains_rejected_response_and_claims(
     assert (evidence/'proposed-plan.json').is_file()
 
 
-@pytest.mark.parametrize('fault', ['unknown', 'unfinished', 'missing_usage', 'wrong_scope', 'superseded', 'declined'])
+@pytest.mark.parametrize('fault', ['unknown', 'unfinished', 'wrong_scope', 'superseded', 'declined'])
 def test_uncertain_changed_or_declined_feature_never_offers_or_replays_correction(
     client, headers, store, installed, fault,
 ):
@@ -86,6 +113,9 @@ def test_uncertain_changed_or_declined_feature_never_offers_or_replays_correctio
         payload = copy.deepcopy(job['payload'])
         if fault == 'unknown':
             payload['diagnostics']['generation_state'] = 'started'
+            evidence = everyday.ROOT/'artifacts/runs'/('planning-evidence-'+job['payload']['response_evidence_id'])/'events.jsonl'
+            events = [json.loads(line) for line in evidence.read_text().splitlines()]
+            evidence.write_text(''.join(json.dumps(e)+'\n' for e in events if e['phase'] != 'envelope'))
         if fault == 'wrong_scope':
             payload['scope_revision'] += 1
         c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(payload=payload))

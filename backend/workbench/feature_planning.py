@@ -328,6 +328,10 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
         lease = str(uuid4())
         payload = {**job['payload'], 'feature_generation_claim':owner_identity()}
         backend = 'codex' if original['local_planning'] in provider_routes.CODEX_CHOICES else 'local'
+        from workbench.investigation_recovery import capabilities
+        payload['recovery_capabilities'] = (capabilities() if backend == 'codex' else
+            dict(kind='local-message-investigation-v1', source_writes=False,
+                 execution_dispatch=False, external_action_tools=False))
         if backend == 'local' and adapter is None:
             from workbench.local_model_priority import planning_ready
             if not planning_ready():

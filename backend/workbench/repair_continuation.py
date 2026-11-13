@@ -115,32 +115,9 @@ def settled(c,selected):
 
 
 def settled_accounting(row):
-    """Unknown local generation usage stays unknown after proven epoch termination.
-
-    This never covers active/uncertain effects or unknown separately billed usage.
-    The native failed outcome, no late tool dispatch and exact source are retained.
-    """
-    usage=(row['result'] or {}).get('usage',{})
-    if usage.get('status')=='complete':
-        return True
-    if usage.get('status') not in {'partial','unavailable'} or row['grant_snapshot']['runtime'].get('codex_selection'):
-        return False
-    try:
-        from workbench.local_generation_recovery import absent_epoch
-        from workbench.real_workspace import Runtime,tree
-        from workbench import real_execution as execution
-        root=Path(row['grant_snapshot']['recovery']['root'])
-        proof=private_json(root/'terminated-generation.json')
-        runtime=Runtime(root)
-        return (proof['execution_id']==row['id'] and proof['fence']==row['fence']
-            and proof['outcome']=='failed' and proof['generation_final_outcome']=='unknown'
-            and proof['final_usage']=='unknown' and proof['partial_response_dispatched'] is False
-            and proof['provider_epoch_terminated'] is True and absent_epoch(proof['terminated_epoch'])
-            and runtime.owns_recovery(dict(snapshot=row['grant_snapshot']))
-            and proof['source_tree_sha256']==execution.digest(tree(runtime.workspace))
-            and runtime.failure_evidence(row['id'],row['fence'])['usage']==usage)
-    except (OSError, ValueError, KeyError, TypeError):
-        return False
+    # Compatibility entry point for native/frozen callers; one interpretation.
+    from workbench.provider_receipts import settled_coding_accounting
+    return settled_coding_accounting(row)
 
 
 def preview(c,selected):

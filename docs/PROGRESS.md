@@ -1,3 +1,25 @@
+# Milestone 3 in progress — November 13, 2026
+
+The owner authorized settlement/source-discovery consolidation and one normal
+continuation of existing gallery7f1ea569 to a review-only Python PNG repair plan.
+This supersedes the previous review stop for this assignment only. See
+[M3 reliability](MILESTONE3_RELIABILITY.md). Fresh baseline independently matches
+939rows/31tables/schema0014/hash28e3b4b9...da592. Running f9e517b, four Workbench
+services/Qwen/authentication and observed Machine Resources pass. No live model
+request, gallery continuation, approval, implementation or publication yet.
+Shared receipt interpretation, native coding-accounting compatibility and one
+versioned source inventory are implemented.104focused checks and static/build/
+contracts/schema pass; full local suites are running. Additional actual-entry-point
+checks cover initial Python/script/PNG selection and repeated saved owner locations.
+Private evidence:milestone3-20261113. The Astra audit chat is unavailable to current
+tools; owner asked for text/path while work continues against the explicit assignment.
+Preserve unrelated WORKBENCH_ADMIN_APPROVAL edits and dependency links. Continue
+full exact hosted acceptance, complete sealed package/install/restart/restore and
+one actual saved-report continuation; stop for plan review or a fundamental live
+orchestration blocker. No gallery repair, automatic discovery, map publication or M4.
+
+---
+
 # Milestone 2.5 complete — owner review, November 13
 
 Following the Project Working Philosophy: A, B and C are verified in the running

@@ -50,6 +50,63 @@ def setup(monkeypatch, tmp_path):
     return root
 
 
+@pytest.mark.usefixtures('installed')
+def test_fresh_report_selects_python_generator_and_artwork_with_one_source_contract(
+    client,headers,store,monkeypatch,tmp_path,
+):
+    root=setup(monkeypatch,tmp_path)
+    from test_bug_source_planning import scripted
+    calls=scripted(monkeypatch,[dict(finding='Inspect the committed reproducibility sources.',
+        draft=dict(limitation='This controlled provider does not execute code.'))])
+    body=report()
+    body.update(title='Reminder gallery PNG reproducibility failure',
+        description='Regenerated reminder gallery PNG artwork has different compressed bytes while decoded pixels match.')
+    saved=client.post('/api/intake',headers=headers,json=body).json()
+    assert worker.tick(store)
+    first=calls[0]
+    selected={f['path'] for f in first['files']}
+    assert {TEST,TOOL,PNG} <= selected
+    from workbench.source_artifacts import inventory,contract
+    base=git(root,'rev-parse','HEAD').strip()
+    assert first['source_contract']==contract(base,inventory(root,base))
+    assert first['source_contract']==first['source_directory']['source_contract']
+    assert first['source_contract']['edit_authority'] is False
+    assert first['source_contract']['execution_authority'] is False
+    with store.connect() as c:
+        packet=c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id==saved['id'])).scalar_one()['bug_inspection_packet']
+    assert packet['source_contract']==first['source_contract']
+
+
+@pytest.mark.usefixtures('installed')
+def test_saved_owner_locations_are_verified_before_first_request_without_new_path_coaching(
+    client,headers,store,monkeypatch,tmp_path,
+):
+    setup(monkeypatch,tmp_path)
+    from test_bug_source_planning import scripted
+    calls=scripted(monkeypatch,[dict(finding='Source locations are needed.',draft=dict(question='What failed?'))])
+    saved=client.post('/api/intake',headers=headers,json=report()).json()
+    assert worker.tick(store)
+    url='/api/intake/'+saved['id']
+    current=client.get(url).json()
+    # These locations become saved owner feedback once; a later continuation
+    # supplies no paths and must still receive freshly verified source windows.
+    text=f'The existing evidence names {TEST}, {TOOL} and {PNG}.'
+    command=dict(command_id=str(uuid4()),revision=current['revision'],text=text,
+        continue_investigation=True,renew_operation=True)
+    assert client.post(url+'/clarification',headers=headers,json=command).status_code==200
+    calls=scripted(monkeypatch,[dict(finding='The locations are now source evidence.',draft=dict(question='Which contract applies?'))])
+    assert worker.tick(store)
+    assert {TEST,TOOL,PNG} <= {w['path'] for w in calls[0]['source_memory']['recent_read_windows']}
+    current=client.get(url).json()
+    assert client.post(url+'/clarification',headers=headers,json={**command,'command_id':str(uuid4()),
+        'revision':current['revision'],'text':'Continue the existing investigation.'}).status_code==200
+    calls=scripted(monkeypatch,[dict(finding='Previously named source is still verified.',draft=dict(limitation='Controlled review-only result.'))])
+    assert worker.tick(store)
+    assert text in calls[0]['owner_reply']
+    assert {TEST,TOOL,PNG} <= {w['path'] for w in calls[0]['source_memory']['recent_read_windows']}
+    assert not worker.tick(store)
+
+
 def terminal(monkeypatch, *, usage=True, finish='length'):
     def generate(self, packet, schema, expected_model):
         self.diagnostics = dict(generation_state='not_started')

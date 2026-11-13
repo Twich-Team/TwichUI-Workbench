@@ -120,7 +120,7 @@ def clean_base(root, base):
         raise ValueError('Workbench needs a clean configured addon checkout at its committed main branch.')
 
 
-def context(original, feedback, policy):
+def context(original, feedback, policy, *, legacy=False):
     if CATEGORY not in policy['allowed_classes'] or not policy['scenario_generation']:
         raise ValueError('This installation has no approved addon bug investigation configuration.')
     root, base, tests = source.repository()
@@ -139,6 +139,13 @@ def context(original, feedback, policy):
                 and not {'libs', 'lib', 'vendor'} & {p.lower() for p in path.split('/')[:-1]}):
             inventory[path] = oid
     inventory.update({path: oid for path, oid in tests.items() if source.TEST_PATH.fullmatch(path)})
+    expanded = not legacy and policy.get('bug_plan_review') == 'source-grounded-intent-v1'
+    source_contract = {}
+    if expanded:
+        from workbench.source_artifacts import inventory as eligible_inventory, contract
+        entries = eligible_inventory(root, base)
+        inventory = {path:entry['git_blob'] for path,entry in entries.items()}
+        source_contract = dict(source_contract=contract(base,entries))
     if not inventory or len(inventory) > 650:
         raise ValueError('The committed Lua search inventory is outside its supported size.')
     title = words(original['title'])
@@ -151,7 +158,12 @@ def context(original, feedback, policy):
     scanned = 0
     for path, oid in inventory.items():
         try:
-            raw = source.blob(root, oid)
+            if expanded:
+                from workbench.source_artifacts import decoded
+                original_raw, raw = decoded(root, path, oid)
+            else:
+                raw = source.blob(root, oid)
+                original_raw = raw
         except (source.RepositoryUnavailable, UnicodeError):
             continue
         scanned += len(raw)
@@ -171,7 +183,7 @@ def context(original, feedback, policy):
         hits = name_hits.union(*blocks.values())
         if hits or path.startswith('tests/test_'):
             document_frequency.update(hits)
-            candidates.append((path, oid, raw, lines, name_hits, blocks))
+            candidates.append((path, oid, original_raw, lines, name_hits, blocks))
 
     def weight(term):
         return (2 if term in title else 1) * log2(1 + len(inventory) / document_frequency[term])
@@ -216,6 +228,18 @@ def context(original, feedback, policy):
             item['client_bootstrap'] = setup
             item['client_access_paths'] = client_access_paths(inspected[path][2], setup)
         files.append(item)
+    if expanded:
+        # Select by evidence relevance across the same eligible inventory used by
+        # follow-up tools. Lua companions remain useful for Lua reports; a Python
+        # or artwork report must not be forced through the game UI layer first.
+        files = [dict(item) for score, path, _, item in order[:SOURCE_FILES+TEST_FILES] if score > 0]
+        for item in files:
+            path = item['path']
+            if path.endswith('.png'):
+                item.update(content_kind='controlled-png-metadata-v1',
+                    content_sha256=hashlib.sha256(inspected[path][1]).hexdigest(), support_only=True)
+            elif not path.endswith('.lua'):
+                item['support_only'] = True
     from workbench.source_context import excerpts
     excerpts(files, inspected, terms, words)
     references = {}
@@ -225,7 +249,7 @@ def context(original, feedback, policy):
     declarations = declaration_index(files, inspected, terms)
     from workbench.source_support_context import add as add_support
     add_support(files, inspected, base)
-    return dict(base=base, files=files, declarations=declarations, **references,
+    return dict(base=base, files=files, declarations=declarations, **references, **source_contract,
                 **({'plan_review':policy['bug_plan_review']} if policy.get('bug_plan_review') in {'source-grounded-v1', 'source-grounded-v2', 'source-grounded-lua-v1','source-grounded-intent-v1'} else {}),
                 policy_sha256=digest(policy))
 

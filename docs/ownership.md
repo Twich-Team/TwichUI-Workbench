@@ -1,3 +1,17 @@
+# November 13 — shared settlement interpretation and versioned discovery
+
+provider_receipts owns read-only settlement interpretation and native coding
+accounting; delivery_phase and feature_recovery consume it. Existing intake,
+planning jobs, model ledger, native recovery and publication owners still control
+transitions. No content failure or unknown token count establishes execution state;
+no terminal proof creates execution authority. See [M3 contracts](MILESTONE3_RELIABILITY.md).
+
+source_artifacts owns the eligible exact-commit inventory/decoder contract shared
+by readable initial selection, navigation, search and read. Old saved searches and
+initial packets retain their original versions. Saved owner path hints are verified
+through ordinary bounded committed reads, under current disclosure permissions.
+Discovery remains separate from edit/run authority.
+
 # November 13 — storage retention and host observations
 
 The existing housekeeping path owns managed disposable-copy allocation, closeout,
