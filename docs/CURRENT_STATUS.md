@@ -1,9 +1,11 @@
 Last updated November 13, 2026 (UTC).
 
-Build 4f03783 is installed at private workbench.twich.gg after all nine hosted checks passed. It preserves the saved report, earlier plans and usage, original Qwen records and checked map-zoom result. The owner's later map-feature archive and publication hold are preserved.
+Private workbench.twich.gg is back on build 4f03783, deployment everyday-outcome-4f03783. The UI, API and connector are running. The worker remains unhealthy because an archived feature raises an unhandled error; ordinary task execution is unavailable.
 
-The stuck model request was closed with 24,440 reported tokens. Recovery now separates execution from incomplete text and unknown usage; old Lua searches retain their original scope while new investigations can inspect bounded Python files and PNG metadata. The real PNG byte mismatch was reproduced with identical pixels and game textures.
+Candidate 0c3cecb passed all nine hosted release checks. Installation stopped because I omitted a required rejected-evidence manifest from the final prepared installer. Following the owner's closeout instruction, I stopped and restored the previous deployment. Its sealed files and all 938 saved rows match; an independent restored copy and normal model authentication also passed verification.
 
-Restart exposed an archived feature record stopping the shared worker. The narrow correction passed 34 focused checks, but hosted verification hit its backend job time limit. A longer bounded CI window is being verified; the original report has not yet resumed or produced its corrected plan. Earlier tasks reached draft delivery; zero new addon repair tasks completed end to end in this assignment.
+The existing Bug Report did not resume. No new model attempt was made and no corrected plan was saved. Its report, three earlier plans, decisions and usage remain intact, along with the completed map-zoom result, owner archive choices and publication holds.
 
-Next: install the fully verified worker correction and continue the saved report once to a reviewable plan. No repeated continuation decision is needed. Repair approval and implementation remain outside this assignment.
+The actual Python PNG byte mismatch was reproduced, with identical decoded pixels and game textures. Recovery, unknown-usage handling and Python/PNG discovery passed controlled tests. These tests do not establish a completed recovery in the running app. Zero new addon repair tasks completed end to end in this assignment; earlier bug/test tasks reached draft delivery.
+
+Next: owner review and a separately assigned read-only Astra audit. No further development, installation retry, model attempt or addon repair is queued. No repeated continuation is requested from the owner.

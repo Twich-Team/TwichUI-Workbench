@@ -1,3 +1,147 @@
+# November 13 — controlled closeout stopped at installation blocker
+
+STOP for owner review. The owner's latest direction limits this assignment to the
+current hosted run, its prepared installation if accepted, and at most one bounded
+continuation if installation succeeds. A further blocker requires evidence and stop.
+Do not copy the missing manifest, retry installation, start another model attempt,
+launch a feature task or resume older delivery campaigns under this handoff. The
+next assignment is a separate read-only GPT-6 Astra audit; it has not been started.
+No implementation of audit recommendations is authorized.
+
+## Installed state and release result
+
+- Live source:4f03783f37771e6e119b905cb139cfccc0ad67f0 at
+  `/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-4f03783`.
+  This source passed full hosted43331894118. Private domain UI/API and connector
+  are running after rollback. Worker is NOT healthy: its existing background
+  feature-delivery reconciliation raises409for archived feature8a11c7e1 and exits.
+  Preserve that owner's archive choice; do not unarchive it to hide the fault.
+- Prepared candidate:0c3cecb2973e03dfa4745d31448cccb8104b1bac, staged in
+  `everyday-outcome-0c3cecb`. Full hosted43341422390passed ALL9jobs, including
+  final verify. Acceptance ZIP digest, complete162-file backend inventory and
+  byte-equal26-file frontend bundle are independently verified in deployment-final.
+  The candidate was NOT activated. Source/branch:active delivery checkout,
+  `codex/everyday-workbench`; later closeout commits contain reporting only.
+- Installation stopped at install.sh line26:copy-rejected-evidence.py could not
+  find deployment-final/rejected-evidence-manifest.json. This was an omission in
+  my prepared installer, not lost original evidence. The required manifest remains
+  in deployment-search and deployment, and original rejected evidence remains
+  retained. No manifest copy or installation repair was attempted after the stop.
+  The isolated candidate has copied store/configuration/preparations and must be
+  treated as an interrupted installation, not a dormant clean or running release.
+- Prepared rollback restored the prior unit files, configuration and store. Its
+  immediate LAN curl probe returned connection-refused before listener readiness;
+  subsequent bounded READ-ONLY checks confirmed exact prior index/HTTP200, original
+  intake readable, and API/LAN/connector active. Worker remains in its known archive
+  failure/auto-restart. Do not describe the whole prior deployment as healthy.
+- Current and independently restored store:938rows/31tables/schema0014,
+  logical e744e2bec0e9814636101151b6f18c917b97c374ee504eed1a7eb7f179c05570.
+  This exactly matches before-final-continuation and both rollback stores. Source
+  seal5507files/16links passes. Normal Qwen access401without auth/200with original
+  auth and unchanged key hash passes. No Traefik, publication or addon change.
+
+## Existing report and incident facts
+
+Original Bug Report7f1ea569-2790-427d-900a-21aa6a4e9ed5 remains failed/revision3,
+with4jobs/4provider attempts/3proposals/1requested-changes decision/0tasks. There
+is NO fifth live planning job, no new model attempt, no corrected saved plan and
+no scope/run approval. Do not confuse copied-actual-entrypoint's disposable queued
+fifth job with live history; NEVER install or restore that test copy.
+
+Original held attempt8e111965-3bc7-4916-8d64-793a2fe1302b/job e514fff9 returned
+chatcmpl-fQDR3yRRPrel4bglXsM8uDBegKK4HvJX at2026-11-12T22:50:28Z. Its complete
+nonstreaming HTTP response closed before immutable wire/envelope recording:
+finish_reason=length,21840prompt+2600completion=24440tokens; no cancellation was
+requested or acknowledged. Text was partial, execution closed. All16historical
+requests have360395reported tokens; no usage is missing for this incident.
+Unknown NULL usage in other cases remains unknown with known subtotals separate.
+The old gate conflated incomplete text with execution uncertainty; a separate
+single-attempt/no-proposals reconciler could not handle this multi-phase history.
+
+Code checkpoints:ff00633terminal settlement/bounded Python+PNG inspection;
+4f03783preserves unversioned Lua search inventory and versions new expanded searches;
+2aecb30contains background archived-feature refusal without mutating its records;
+0c3cecbchanges ONLY the hosted backend job window25to45min after full43337713183
+correctly refused a timed-out shard. Test assertions/deadlines and execution limits
+are unchanged. The last two checkpoints are not installed.113source/history checks,
+34recovery/source/feature checks,19CI configuration checks and final full hosted
+acceptance passed. Active/disconnected uncertainty still blocks new generation.
+
+Actual confined unchanged-main Python check atd09e6dc:8passed/1failed at
+`tests/test_reminder_gallery.py:174`,PNG byte equality in
+Rebuild.test_sample_pictures_are_what_the_tool_builds. All4generated PNGs differ in
+compressed bytes but match decoded pixels/raw image streams and both TGA sizes;
+zlib runtime1.3.1was observed. Original compressor-version cause is NOT established.
+No Python comparator, generator, artwork, Gallery.lua or Config.lua was changed.
+These host observations are not a Qwen-produced corrected plan. Python plans remain
+review-only under the existing Lua execution boundary. Strict gallery qualification
+and the separate map publication hold remain unchanged.
+
+## Audit documents and retained evidence
+
+Read [ownership](ownership.md), [application overview](../README.md),
+[execution controls](EXECUTION.md), [source/disclosure](PROJECT_SOURCE.md),
+[standing read-only recovery](OWNER_READONLY_RECOVERY_20261108.md),
+[model priority](MODEL_PRIORITY_RECOVERY_20261110.md), [incident progress](PROGRESS.md)
+and [hosted timeout records](CI_PERFORMANCE_20261111.md). Current owner-controlled
+closeout overrides older active-sounding instructions below. These are audit inputs,
+not permission to begin an audit or change implementation.
+
+Private evidence root:gallery-investigation-recovery-20261112 under the Workbench
+user data directory. deployment-final holds controlled-closeout.json, verified
+hosted receipts, install.log, rollback.log, rollback-observed-health.json,
+rollback-restored-history.json, rollback-seal-verified.json and rollback-worker-journal.log.
+Earlier incident-diagnosis.json/original-history.json/recovered-ledger.json preserve
+original receipts; native-diagnostic holds real Python/pixel checks. The original
+Qwen feature and checked map result/candidate/contributions/permissions are exact;
+the owner's later archives and canonical publication hold remain intact.
+
+Closed owned test evidence was retained with complete manifests and independently
+verified byte/mode/mtime restoration before pruning working copies. Lookup:
+closed-test-scratch-retention.json;closed-targeted-deduplication.json (use its retained
+deduplicated archive rather than the superseded full archive);closed-browser-scratch-retention.json.
+Never overwrite current938-row history using older926/936-row snapshots. The current
+before-final-continuation snapshot and rollback-independent-restore preserve all938.
+Unrelated docs/WORKBENCH_ADMIN_APPROVAL.md edits and local .venv/node_modules links
+remain untouched. No uncommitted implementation change is part of this closeout.
+
+# November 13 — owner-controlled closeout; no further repairs
+
+The owner now directs a safe stopping point before a separate read-only GPT-6
+Astra audit. Finish ONLY the currently running full hosted43341422390for exact
+0c3cecb2973e03dfa4745d31448cccb8104b1bac. If it passes, install the already staged
+everyday-outcome-0c3cecb, verify health/restart/history/recovery copies, then make
+ONE bounded continuation of existing gallery Bug Report7f1ea569through its normal
+browser entry. Save a source-grounded Python PNG plan for owner review if produced;
+no approval or implementation. If release, installation or continuation encounters
+a further infrastructure/source/recovery/adapter blocker, preserve exact evidence
+and STOP. No new Workbench development, extra model attempt, unrelated fix or audit
+implementation. Update CURRENT_STATUS and this handoff with actual state and stop
+for owner review. Earlier autonomous repair direction is narrowed for this closeout.
+
+Audit starting points: [application overview](../README.md),
+[ownership and state transitions](ownership.md), [execution controls](EXECUTION.md),
+[source snapshots/disclosure](PROJECT_SOURCE.md),
+[standing read-only recovery](OWNER_READONLY_RECOVERY_20261108.md),
+[model priority/recovery](MODEL_PRIORITY_RECOVERY_20261110.md),
+[incident progress](PROGRESS.md), and [hosted timeout evidence](CI_PERFORMANCE_20261111.md).
+For this incident, inspect existing `provider_receipts`, `delivery_phase`,
+`planning_limits`, `investigation_notebook`, `source_artifacts`, `source_inspection`,
+`bug_source_planning`, `intake.clarify`, `planning_worker` and `feature_delivery.reconcile`.
+These are audit pointers, not permission to change their architecture or behavior.
+
+Current state:4f03783installed, original938rows preserved including owner archives;
+its worker exits on archived-feature delivery409. The correction passed34focused
+checks and check. Its prior hosted2aecb30run43337713183timed out Backend1/2at25min;
+all other groups passed, final verify refused. Only the hosted backend job window
+changed to45min in0c3cecb;19CI configuration checks pass. All tests and execution
+safeguards unchanged. New full hosted run43341422390is in progress; do not install
+before all9jobs/full acceptance pass. Final prepared scripts/receipts live in
+private gallery-investigation-recovery-20261112/deployment-final. Main source is
+frozen; only closeout reporting changes are allowed. No fifth live investigation
+job/model attempt has been created. Prepared resume script enforces original4jobs
+and4attempts; stop rather than silently retrying if that precondition changes.
+
 # November 13 — complete hosted backend window
 
 Full hosted43337713183/2aecb30was correctly refused: Backend1/2was canceled at

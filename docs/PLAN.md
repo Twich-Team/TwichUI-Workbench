@@ -1,3 +1,15 @@
+# November 13 — owner-controlled closeout stopped; owner review
+
+Full hosted43341422390accepted0c3cecb/all9jobs. Its prepared installation stopped
+on a missing evidence manifest. Per the owner's latest direction, no repair/retry
+was made. Prior4f03783/private UI/API is restored with exact938-row history and
+verified independent restore/model authentication; its existing archived-feature
+worker failure remains. No Bug Report continuation or new model attempt occurred;
+no corrected saved plan or addon approval/implementation exists. See CURRENT_STATUS,
+CONTINUATION and retained deployment-final receipts. STOP for owner review and a
+separately assigned read-only Astra audit. No further development or campaign is
+queued or authorized by the older entries below.
+
 # November 12 — finish retained-search compatibility and saved plan
 
 The actual installed browser continuation exposed one further fail-closed boundary:
