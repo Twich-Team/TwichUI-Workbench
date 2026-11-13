@@ -1,6 +1,8 @@
 """Real-result delivery by the existing worker. Disabled without scoped activation."""
 
 from datetime import datetime, timedelta, timezone
+from workbench import worker_operation as operation
+
 import json
 import os
 from pathlib import Path
@@ -55,21 +57,21 @@ def _proof(row, grant):
     return completed["result"]
 
 
-def _checked(c, row, grant):
+def _checked(c, row, grant, *, active=True):
     from workbench.session_authorship import usage_eligible
     from workbench.result_rejection import later_review
 
     if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
         from workbench.feature_verification import checked
         try:
-            checked(c,row,grant)
+            checked(c,row,grant,active=active)
         except (ValueError,OSError,HTTPException,KeyError,TypeError):
             raise DeliveryHeld('The combined feature result or its independently checked contributions changed.') from None
         return
 
     from workbench.task_cleanup import require_current
     linked_task = grant['snapshot'].get('workflow_task') or {}
-    if linked_task.get('intake_id'):
+    if active and linked_task.get('intake_id'):
         require_current(c, linked_task['intake_id'])
 
     if later_review(c.connection.driver_connection, row['id']):
@@ -456,6 +458,7 @@ def _activation(snapshot):
 _delivery_lock = threading.Lock()
 
 
+@operation.isolated
 def process_one(engine, publisher=None, stop_event=None, execution_id=None, *, checked_root=None):
     # PID ownership alone does not exclude two threads in the same worker.
     if not _delivery_lock.acquire(blocking=False):
@@ -506,6 +509,7 @@ def _process_one(engine, publisher, stop_event, execution_id, checked_root):
         )
         if not row:
             return False
+        operation.selected(records, row)
         row = dict(row)
     if stop_event is not None and stop_event.is_set():
         return False

@@ -9,7 +9,6 @@ from pathlib import Path
 import json
 from uuid import UUID
 
-from fastapi import HTTPException
 from sqlalchemy import select
 
 from workbench import feature_verification, feature_steps, intake
@@ -28,9 +27,9 @@ from workbench.real_publication import DeliveryHeld
 KIND = "combined-feature-artifact-v1"
 
 
-def policy(c, row, grant, *, already_checked=False, allow_preparing=False):
+def policy(c, row, grant, *, already_checked=False, allow_preparing=False, active=True):
     if not already_checked:
-        feature_verification.checked(c, row, grant)
+        feature_verification.checked(c, row, grant, active=active)
     spec = grant["snapshot"]["feature_verification"]
     approval, _ = feature_steps.parent(c, spec["decision_id"], active=allow_preparing)
     job = (
@@ -399,7 +398,7 @@ def view_in(c, job):
         return None
     row = intake.require(c, real_execution_requests, saved["execution_id"])
     grant = intake.require(c, real_execution_grants, row["grant_id"])
-    artifact = policy(c, row, grant)
+    artifact = policy(c, row, grant, active=False)
     publication = (
         c.execute(select(real_publications).where(real_publications.c.execution_id == row["id"]))
         .mappings()
@@ -430,10 +429,12 @@ def view_in(c, job):
 
 
 def reconcile(engine):
+    from workbench.worker_operation import eligible
     with engine.connect() as c:
         jobs = list(
             c.execute(
                 select(planning_jobs).where(
+                    eligible(c, planning_jobs.c.intake_id),
                     planning_jobs.c.kind == "feature_execution",
                     planning_jobs.c.payload["phase"].as_string() == "delivery_ready",
                     planning_jobs.c.payload["feature_delivery"].as_string().is_not(None),
@@ -471,7 +472,12 @@ def reconcile(engine):
                     )
                 )
             return True
-        except ValueError, OSError, HTTPException:
+        except Exception as error:
+            from workbench.worker_operation import shared_failure
+            if shared_failure(error):
+                raise
+            import logging
+            logging.getLogger(__name__).exception('Historical feature delivery could not be read id=%s', job['id'])
             continue
     return False
 

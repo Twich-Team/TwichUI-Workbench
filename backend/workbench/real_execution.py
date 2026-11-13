@@ -1,5 +1,7 @@
 """One explicitly granted real task. Existing worker/transaction/accounting ownership."""
 from datetime import datetime, timedelta, timezone
+from workbench import worker_operation as operation
+
 import hashlib
 import copy
 import json
@@ -398,6 +400,7 @@ def failure_observations(runtime, identity, fence):
                     provenance={'method': 'current-attempt observations unavailable or invalid'}))
 
 
+@operation.isolated
 def process_one(engine, runtime=None, stop_event=None):
     if getattr(runtime,'operation_kind',None)=='feature-verification-v1':
         from workbench.feature_verification import process_one as local_checks
@@ -428,6 +431,7 @@ def process_one(engine, runtime=None, stop_event=None):
                 break
         if not pending:
             return False
+    operation.selected(requests, pending)
     if not valid(grant):
         # No expensive service observation or attempt reservation after expiry.
         with write_transaction(engine) as c:

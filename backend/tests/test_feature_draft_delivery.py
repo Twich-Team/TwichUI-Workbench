@@ -305,13 +305,20 @@ def test_archived_feature_delivery_cannot_stop_other_worker_work(
     def saved():
         with store.connect() as c:
             return {t.name: [dict(r) for r in c.execute(select(t)).mappings()] for t in tables}
-    before = saved()
     with store.connect() as c:
         job = c.execute(select(planning_jobs).where(
             planning_jobs.c.kind == 'feature_execution')).mappings().one()
+        assert feature_delivery.view_in(c, job)['published'] is False
+        saved_delivery = job['payload']['feature_delivery']
+        row, grant = publication._load(c, saved_delivery['execution_id'])
         with pytest.raises(HTTPException) as refusal:
-            feature_delivery.view_in(c, job)
+            feature_delivery.policy(c, row, grant)
         assert refusal.value.status_code == 409
+    # A malformed historical descriptor must not even reach active validation.
+    with write_transaction(store) as c:
+        c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(
+            payload={**job['payload'], 'feature_delivery': {'execution_id': 'missing-history'}}))
+    before = saved()
     reached = []
     monkeypatch.setattr(planning_worker, 'process_one',
                         lambda *_a, **_kw: reached.append('other planning') or True)

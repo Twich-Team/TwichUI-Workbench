@@ -1,11 +1,9 @@
 Last updated November 12, 2026 (Mountain time; November 13 UTC).
 
-Milestone 1 is complete. Private workbench.twich.gg runs verified build 0c3cecb in everyday-outcome-0c3cecb-m1. The worker, UI, API and connector are healthy after installation and a four-service restart. The worker stayed on one process with zero restarts during repeated observations.
+The running app remains verified build 0c3cecb, deployment everyday-outcome-0c3cecb-m1. Worker, UI, API and connector are healthy; the worker has zero automatic restarts. All 938 saved rows match the preinstallation baseline.
 
-The archived feature no longer stops scheduling. An isolated copy completed fourteen worker cycles without changing any historical row; the existing regression also proved unrelated eligible work can be considered. No new model request was made.
+Milestone 2 is authorized and in progress. Task fault isolation, fair scheduling, historical-read separation and complete installation preflight are implemented. Controlled worker and installer failure tests pass, including uncertain-operation replay refusal and rollback after a killed installer. These changes are not installed yet.
 
-All 938 rows, owner archives, decisions, permissions, publication holds and unknown usage are unchanged. An independent restored database and its rejection evidence passed verification. The complete private installation package, accepted release evidence and rollback are retained. Normal model authentication passed.
+Zero new addon tasks have completed end to end in this assignment. Earlier bug/test requests reached drafts. Map zoom remains a checked local result with publication held; the gallery investigation has not resumed. Their records and original Qwen permissions remain unchanged.
 
-Zero new addon tasks completed end to end in this assignment. Earlier bug/test requests reached draft delivery; map zoom remains a checked local result with publication held. The gallery Bug Report has not resumed and has no corrected saved plan. Recovery and Python/PNG discovery remain demonstrated only in controlled checks for that report.
-
-Nothing is blocking this worker-restoration milestone. Gallery recovery and map publication remain held. Next: owner review of the restored application. Further work, including Milestone 2, needs separate owner direction.
+Full local and hosted verification, saved-database rehearsal and accepted installation remain to finish. No owner decision is needed for this authorized work. The next complete outcome is an installed, verified Milestone 2 with preserved history and rollback, followed by owner review. Milestones 3/4 and additional features will not begin.

@@ -210,7 +210,8 @@ def proof(c, job, parent, offered):
 def resume(engine):
     with engine.connect() as c:
         jobs=list(c.execute(select(planning_jobs).where(planning_jobs.c.kind=='feature_execution',
-            planning_jobs.c.status=='failed',planning_jobs.c.payload['current_offer_id'].as_string().is_not(None))).mappings())
+            planning_jobs.c.status=='failed',
+            planning_jobs.c.payload['worker_operation_failure'].as_string().is_(None),planning_jobs.c.payload['current_offer_id'].as_string().is_not(None))).mappings())
     for job in jobs:
         try:
             with write_transaction(engine) as c:

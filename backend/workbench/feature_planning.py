@@ -4,6 +4,8 @@ Research and proposed steps grant no edit, execution, spending or publication
 permission. A crashed provider claim remains uncertain and is never replayed.
 """
 from datetime import datetime, timedelta, timezone
+from workbench import worker_operation as operation
+
 import copy
 import hashlib
 import json
@@ -255,6 +257,7 @@ def recover_interrupted(engine):
     return True
 
 
+@operation.isolated
 def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False):
     from workbench.real_execution import owner_identity
     from workbench.planning_provider import LocalProvider
@@ -266,7 +269,7 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
         return False
     if everyday.enabled():
         with engine.connect() as c:
-            next_job = c.execute(select(planning_jobs).join(intakes, intakes.c.id == planning_jobs.c.intake_id).where(
+            next_job = c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).join(intakes, intakes.c.id == planning_jobs.c.intake_id).where(
                 intakes.c.payload['feature_planning'].as_boolean().is_(True),
                 planning_jobs.c.status == 'queued', planning_jobs.c.kind.in_(['planning','decomposition']))
                 .order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
@@ -289,7 +292,7 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
                             message='Waiting for verified source and recovery storage. No feature generation has started.'))
                 return False
     with write_transaction(engine) as c:
-        query = select(planning_jobs).join(intakes, intakes.c.id == planning_jobs.c.intake_id).where(
+        query = select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).join(intakes, intakes.c.id == planning_jobs.c.intake_id).where(
             intakes.c.payload['feature_planning'].as_boolean().is_(True))
         if everyday.enabled() and pending_model:
             return False  # Reconcile dead owners first; never move source or overlap another model claim.
@@ -298,6 +301,7 @@ def process_one(engine, adapter=None, stop_event=None, fail_before_commit=False)
                 planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not saved:
             return False
+        operation.selected(planning_jobs, saved)
         job = dict(saved)
         row = intake.require(c, intakes, job['intake_id'])
         original = copy.deepcopy(row['payload'])

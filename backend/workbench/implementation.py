@@ -1,4 +1,6 @@
 """Exact synthetic task only. Inert inline artifacts; no executor, model or filesystem output."""
+from workbench import worker_operation as operation
+
 import hashlib
 import json
 import os
@@ -294,12 +296,14 @@ def crash_at(crash, point):
         os._exit(92 if point == 'after-commit' else 91)
 
 
+@operation.isolated
 def process_one(engine, crash=None):
     with write_transaction(engine) as c:
         request = c.execute(select(records).where(records.c.status == 'pending')
             .order_by(records.c.created_at, records.c.id).limit(1)).mappings().first()
         if not request:
             return False
+        operation.selected(records, request)
         started = None
         try:
             check_request(c, request)
@@ -357,6 +361,7 @@ def submit_verification(engine, intake_id, task_id, candidate_id, body):
         return public(row)
 
 
+@operation.isolated
 def process_verification(engine, adapter=None, crash=None):
     from workbench.verification import Check, FixtureVerifier
     with write_transaction(engine) as c:
@@ -364,6 +369,7 @@ def process_verification(engine, adapter=None, crash=None):
             .order_by(verifications.c.created_at, verifications.c.id).limit(1)).mappings().first()
         if not request:
             return False
+        operation.selected(verifications, request)
         values = {}
         try:
             candidate = validate_candidate(c, request['snapshot']['intake_id'], request['task_id'], request['candidate_id'])

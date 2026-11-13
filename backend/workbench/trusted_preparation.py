@@ -1,4 +1,6 @@
 """Supported same-user local preparation. Never exposed through ordinary HTTP."""
+from workbench import worker_operation as operation
+
 import json
 import os
 from pathlib import Path
@@ -449,6 +451,7 @@ def _hold(error):
                 **(dict(storage=dict(code=error.code,observation=error.observation)) if isinstance(error,StorageHold) else {}))
 
 
+@operation.isolated
 def process_one(engine, *, stop_event=None):
     """Dispatch from the existing job journal, with one durable external-work claim.
 
@@ -459,10 +462,11 @@ def process_one(engine, *, stop_event=None):
 
     recovering = False
     with write_transaction(engine) as c:
-        row = c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'behavioral_preparation',
+        row = c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).where(planning_jobs.c.kind == 'behavioral_preparation',
             planning_jobs.c.status.in_(['queued', 'running'])).order_by(planning_jobs.c.created_at).limit(1)).mappings().first()
         if not row:
             return False
+        operation.selected(planning_jobs, row)
         job = dict(row)
         payload = dict(job['payload'])
         ref = payload['ref']

@@ -4,6 +4,8 @@ Preparation uses the existing intake/job/proposal/decision owners. It deliberate
 does not register a runtime recipe, an offer, a budget or an execution permission.
 """
 
+from workbench import worker_operation as operation
+
 import copy
 import hashlib
 import json
@@ -269,6 +271,7 @@ def proposal_content(original, contract):
     ).model_dump(mode='json')
 
 
+@operation.isolated
 def process_one(engine, *, fail_before_commit=False, scenario_response=None, adapter=None, stop_event=None):
     from workbench import bug_investigation, everyday
 
@@ -282,7 +285,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
     with write_transaction(engine) as c:
         # A crashed scenario request is never automatically repeated. Reuse the
         # existing attempt ledger and leave an explicit retry/unknown outcome.
-        running = c.execute(select(planning_jobs).join(intakes, planning_jobs.c.intake_id == intakes.c.id).where(
+        running = c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).join(intakes, planning_jobs.c.intake_id == intakes.c.id).where(
             planning_jobs.c.kind == 'planning', planning_jobs.c.status == 'running',
             prepared_intake)).mappings().all()
         from workbench.real_execution import alive, owner_identity
@@ -300,11 +303,12 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                         and intake.human_scope(c, current['id'])['revision'] == active['payload'].get('scope_revision')):
                     c.execute(intakes.update().where(intakes.c.id == current['id']).values(status='failed'))
                 return True
-        row = c.execute(select(planning_jobs).join(intakes, planning_jobs.c.intake_id == intakes.c.id).where(
+        row = c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).join(intakes, planning_jobs.c.intake_id == intakes.c.id).where(
             planning_jobs.c.status == 'queued', planning_jobs.c.kind.in_(['planning', 'decomposition']), prepared_intake,
         ).order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not row:
             return False
+        operation.selected(planning_jobs, row)
         job = dict(row)
         original = intake.require(c, intakes, job['intake_id'])
         scope = intake.human_scope(c, original['id'])

@@ -1,4 +1,6 @@
 """Approval binding rehearsal only. No candidate, executor, verifier or external effect."""
+from workbench import worker_operation as operation
+
 import json
 import os
 from pathlib import Path
@@ -208,12 +210,14 @@ def submit(engine, intake_id, task_id, body):
     return view(record)
 
 
+@operation.isolated
 def process_one(engine, crash=None):
     with write_transaction(engine) as c:
         request = c.execute(select(records).where(records.c.status == 'pending')
             .order_by(records.c.created_at, records.c.id).limit(1)).mappings().first()
         if not request:
             return False
+        operation.selected(records, request)
         try:
             pinned = request['snapshot']
             item = require(c, backlog_items, request['task_id'])

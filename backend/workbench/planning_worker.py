@@ -1,5 +1,7 @@
 """Durable bounded planning. No implementation, subprocess, pilot write or publication path."""
 from datetime import datetime, timedelta, timezone
+from workbench import worker_operation as operation
+
 import json
 from uuid import uuid4
 
@@ -16,6 +18,7 @@ from workbench.schemas import PlanningOutput, DecompositionOutput
 from workbench.service import now
 
 
+@operation.isolated
 def apply_one(engine, fail_before_commit=False, command_id=None):
     with write_transaction(engine) as connection:
         receipt = connection.execute(select(proposal_decisions).where(proposal_decisions.c.status == 'pending',
@@ -24,6 +27,7 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
             .order_by(proposal_decisions.c.created_at, proposal_decisions.c.id).limit(1)).mappings().first()
         if not receipt:
             return False
+        operation.selected(proposal_decisions, receipt)
         if receipt['payload'].get('execution_continuation'):
             # Same command journal, original scope/decomposition and budget owner.
             # Applying a post-review budget must never enqueue decomposition again.
@@ -169,7 +173,7 @@ def materialize_single_task(connection, original, job, model):
 
 def claim(engine):
     with write_transaction(engine) as connection:
-        job = connection.execute(select(planning_jobs).where(planning_jobs.c.kind.in_(['planning', 'decomposition']), or_(planning_jobs.c.status == 'queued',
+        job = connection.execute(select(planning_jobs).where(operation.eligible(connection, planning_jobs.c.intake_id)).where(planning_jobs.c.kind.in_(['planning', 'decomposition']), or_(planning_jobs.c.status == 'queued',
             and_(planning_jobs.c.status == 'running', planning_jobs.c.lease_until < now())))
             .join(intakes, planning_jobs.c.intake_id == intakes.c.id)
             .where(intakes.c.payload['regression_tests'].as_string().is_(None))
@@ -180,6 +184,7 @@ def claim(engine):
             .order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not job:
             return None
+        operation.selected(planning_jobs, job)
         job = dict(job)
         approval = None
         try:
@@ -223,6 +228,7 @@ def claim(engine):
         return job
 
 
+@operation.isolated
 def process_one(engine, adapter=None, fail_before_commit=False, stop_event=None, *, scenario_response=None):
     from workbench import feature_planning
     if feature_planning.process_one(engine, adapter=adapter, stop_event=stop_event,

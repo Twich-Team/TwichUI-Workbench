@@ -1,5 +1,7 @@
 """A separate process; all fixture effects and completion commit in one transaction."""
 
+from workbench import worker_operation as operation
+
 import argparse
 import logging
 import os
@@ -27,6 +29,7 @@ from workbench import (
 log = logging.getLogger("workbench.worker")
 
 
+@operation.isolated
 def process_one(engine, crash=None):
     with write_transaction(engine) as connection:
         command = (
@@ -46,6 +49,7 @@ def process_one(engine, crash=None):
             .mappings()
             .one()
         )
+        operation.selected(commands, command)
         at = now()
         if version(row) != command["version"]:
             status, message = (
@@ -92,14 +96,13 @@ def process_one(engine, crash=None):
     return True
 
 
+@operation.scheduler
 def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, planning_adapter=None,
          *, feature_provision=None, session_adapter=None):
     """One production worker iteration; injectable controlled adapters are internal only."""
     if stop_event is not None and stop_event.is_set():
         return False
     from workbench.investigation_recovery import recover_one
-    if recover_one(engine):
-        return True
     from workbench.work_controls import read as work_status
     session_options = dict(advance=session_adapter) if session_adapter is not None else {}
     if work_status(engine).paused:
@@ -107,28 +110,39 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
             return True
         return task_sessions.process_one(engine, stop_event=stop_event, resume_only=True, **session_options)
     from workbench.preparation_resources import process_one as recover_storage
-    if recover_storage(engine):
-        return True
     from workbench import draft_delivery
     from workbench.continuing_repair import process_one as recover_local_repair
-    return (
-        process_one(engine, crash)
-        or verification.process_one(engine)
-        or admission.process_one(engine, crash)
-        or implementation.process_one(engine, crash)
-        or pr_preparation.process_one(engine, crash, stop_event=stop_event, publisher=publisher)
-        or draft_delivery.advance(engine, stop_event=stop_event)
-        or task_sessions.queue_one(engine)
-        or recover_local_repair(engine)
-        or task_sessions.process_one(engine, stop_event=stop_event, **session_options)
-        or real_execution.process_one(engine, runtime=runtime, stop_event=stop_event)
-        or feature_execution.apply_one(engine)
-        or feature_execution.advance(engine, adapter=planning_adapter,
-            provision=feature_provision, stop_event=stop_event)
-        or planning_worker.apply_one(engine)
-        or planning_worker.process_one(engine, stop_event=stop_event, adapter=planning_adapter)
-        or trusted_preparation.process_one(engine, stop_event=stop_event)
+    # Retain each stage's oldest-first ordering, but give every stage a turn.
+    # The sole worker owns this cursor; it is not another durable queue or claim.
+    stages = (
+        lambda: recover_one(engine),
+        lambda: recover_storage(engine),
+        lambda: process_one(engine, crash),
+        lambda: verification.process_one(engine),
+        lambda: admission.process_one(engine, crash),
+        lambda: implementation.process_one(engine, crash),
+        lambda: pr_preparation.process_one(engine, crash, stop_event=stop_event, publisher=publisher),
+        lambda: draft_delivery.advance(engine, stop_event=stop_event),
+        lambda: task_sessions.queue_one(engine),
+        lambda: recover_local_repair(engine),
+        lambda: task_sessions.process_one(engine, stop_event=stop_event, **session_options),
+        lambda: real_execution.process_one(engine, runtime=runtime, stop_event=stop_event),
+        lambda: feature_execution.apply_one(engine),
+        lambda: feature_execution.advance(engine, adapter=planning_adapter,
+            provision=feature_provision, stop_event=stop_event),
+        lambda: planning_worker.apply_one(engine),
+        lambda: planning_worker.process_one(engine, stop_event=stop_event, adapter=planning_adapter),
+        lambda: trusted_preparation.process_one(engine, stop_event=stop_event),
     )
+    start = getattr(engine, '_workbench_stage', 0) % len(stages)
+    for offset in range(len(stages)):
+        index = (start + offset) % len(stages)
+        if stop_event is not None and stop_event.is_set():
+            return False
+        if stages[index]():
+            engine._workbench_stage = (index + 1) % len(stages)
+            return True
+    return False
 
 
 def preparation_recovery(job_id, binding):

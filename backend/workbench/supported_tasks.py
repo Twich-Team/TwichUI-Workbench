@@ -1,5 +1,7 @@
 """Deterministic supported-task planning in the existing planning queue. No model."""
 
+from workbench import worker_operation as operation
+
 import hashlib
 import json
 import os
@@ -101,6 +103,7 @@ def catalog(engine=None):
     )
 
 
+@operation.isolated
 def process_one(engine, intake_id=None):
     with write_transaction(engine) as c:
         job = (
@@ -108,6 +111,7 @@ def process_one(engine, intake_id=None):
                 select(planning_jobs)
                 .join(intakes, planning_jobs.c.intake_id == intakes.c.id)
                 .where(
+                    operation.eligible(c, planning_jobs.c.intake_id),
                     planning_jobs.c.status == "queued",
                     *([planning_jobs.c.intake_id == intake_id] if intake_id else []),
                     intakes.c.payload["supported_task"].as_string().is_not(None),
@@ -120,6 +124,7 @@ def process_one(engine, intake_id=None):
         )
         if not job:
             return False
+        operation.selected(planning_jobs, job)
         job = dict(job)
         original = intake.require(c, intakes, job["intake_id"])
         try:

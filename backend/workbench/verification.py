@@ -3,6 +3,8 @@
 No provider execution, publication, subprocess or pilot integration. The adapter is
 pure and deterministic, so result and audit commit atomically like fixture reviews.
 """
+from workbench import worker_operation as operation
+
 import json
 from pathlib import Path
 from typing import Literal
@@ -113,12 +115,14 @@ class FixtureVerifier:
                 dict(label='Behavior claims match the controlled fixture contract', passed=bool(expected and evidence.get('claims') == expected['evidence'].get('claims')))]
 
 
+@operation.isolated
 def _process_original(engine, adapter=None, crash=False):
     with write_transaction(engine) as c:
         request = c.execute(select(records).where(records.c.status == 'pending')
             .order_by(records.c.created_at, records.c.id).limit(1)).mappings().first()
         if not request:
             return False
+        operation.selected(records, request)
         row = get_task(c, request['task_id'])
         values = {}
         if version(row) != request['version']:

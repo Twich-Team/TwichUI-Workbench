@@ -62,7 +62,7 @@ def checked_chain(c, decision_id, records, feature_input, *, active=True):
     contributions = []
     paths = set()
     for item in records:
-        row, grant, linked, result = feature_source._checked(c, item["execution_id"])
+        row, grant, linked, result = feature_source._checked(c, item["execution_id"], active=active)
         if (
             linked["approval"]["id"] != decision_id
             or linked["task"]["id"] != item["task_id"]
@@ -83,7 +83,7 @@ def checked_chain(c, decision_id, records, feature_input, *, active=True):
         )
         paths.update(grant["snapshot"]["contract"]["paths"])
     linked = task_execution.snapshot(c, approval["intake_id"], records[-1]["task_id"], decision_id)
-    carried = feature_source.prerequisite_tasks(c, feature_input, linked, configuration(c.engine))
+    carried = feature_source.prerequisite_tasks(c, feature_input, linked, configuration(c.engine), active=active)
     if (
         carried != {r["task_id"] for r in records}
         or feature_input != records[-1]["input"]
@@ -843,12 +843,13 @@ def valid(grant):
         return False
 
 
-def checked(c, row, grant):
+def checked(c, row, grant, *, active=True):
     """No fabricated model ledger for checks; all actual child ledgers still gate."""
     from workbench.result_rejection import later_review
     from workbench.task_cleanup import require_current
 
-    require_current(c, grant["snapshot"]["workflow_task"]["intake_id"])
+    if active:
+        require_current(c, grant["snapshot"]["workflow_task"]["intake_id"])
 
     if (
         not is_grant(grant)

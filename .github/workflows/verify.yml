@@ -23,6 +23,7 @@ jobs:
     timeout-minutes: 15
     outputs:
       build_artifact: ${{ steps.bundle.outputs.name }}
+      application_artifact: ${{ steps.bundle.outputs.application }}
       backend_matrix: ${{ steps.matrix.outputs.backend }}
       browser_matrix: ${{ steps.matrix.outputs.browser }}
     steps:
@@ -37,7 +38,16 @@ jobs:
       - run: npx vitest run --config frontend/vite.config.ts
       - id: bundle
         shell: bash
-        run: echo "name=frontend-build-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "name=frontend-build-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+          echo "application=application-build-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+          python scripts/release_bundle.py artifacts/ci/application.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.bundle.outputs.application }}
+          path: artifacts/ci/application.tar.gz
+          if-no-files-found: error
+          retention-days: 14
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.bundle.outputs.name }}
@@ -139,6 +149,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.14'
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.checks.outputs.application_artifact }}
+          path: artifacts/ci
       - name: Require complete release acceptance
         env:
           CI_RESULTS: ${{ toJSON(needs) }}

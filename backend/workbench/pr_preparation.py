@@ -1,4 +1,6 @@
 """Sample PR preparation only. Durable fake remote; no external-write adapter exists."""
+from workbench import worker_operation as operation
+
 from typing import Literal
 from uuid import UUID
 
@@ -202,6 +204,7 @@ def gate_failure(c, row):
     return False
 
 
+@operation.isolated
 def process_one(engine, crash=None, stop_event=None, publisher=None):
     with engine.connect() as connection:
         sample_pending = connection.scalar(select(records.c.id).where(records.c.status.in_(ACTIVE)).limit(1))
@@ -216,6 +219,7 @@ def process_one(engine, crash=None, stop_event=None, publisher=None):
             .order_by(records.c.created_at, records.c.id).limit(1)).mappings().first()
         if not row:
             return False
+        operation.selected(records, row)
         identity = row['id']
         if not request_intact(row):
             terminal(c, row, 'stale', 'Saved sample PR input integrity failed. No new effect was attempted; earlier simulated evidence is retained.')

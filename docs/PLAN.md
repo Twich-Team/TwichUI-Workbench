@@ -1,3 +1,30 @@
+# November 12 (Mountain time) — Milestone 2 authorized and in progress
+
+The owner has separately authorized task-level worker isolation and complete,
+prevalidated installation packages, including controlled fault injection, full
+local/hosted verification, Workbench commits/pushes and accepted installation.
+This supersedes the Milestone 1 review stop only for this assignment. Do not
+begin Milestones 3/4, automatic discovery, gallery continuation, map publication
+or other feature development. Stop for owner review after Milestone 2.
+
+Starting branch codex/everyday-workbench, HEAD 271a30f. Actual installed worker
+0c3cecb/everyday-outcome-0c3cecb-m1 is active with zero automatic restarts.
+Original 938-row history and prior recovery/evidence must remain exact. Preserve
+unrelated WORKBENCH_ADMIN_APPROVAL edits and .venv/node_modules links.
+
+Implementation keeps the existing task journals and stage owners: explicit task
+selection identifies failures, task-local exceptions are held without replay,
+shared store/capacity failures propagate, canonical archived requests are filtered
+before new planning and historical feature inspection does not test run eligibility.
+A worker-owned rotating stage cursor retains each stage's oldest-first ordering.
+Hosted verification will bind one source/frontend/installer artifact digest; the
+private installation envelope separately inventories configuration, runtime,
+rejection manifests, external dependencies, historical references and rollback.
+Activation records durable intent before service changes and never rebuilds code.
+Verification and live installation remain pending; no completion claimed.
+
+---
+
 # November 12 (Mountain time) — worker-restoration milestone complete
 
 The owner's narrow Milestone 1 assignment is complete: accepted 0c3cecb is installed

@@ -7,6 +7,8 @@ checks/restoration; existing publication owner alone owns GitHub writes.
 """
 
 from datetime import datetime
+from workbench import worker_operation as operation
+
 import json
 import os
 from pathlib import Path
@@ -83,6 +85,7 @@ def capability(engine):
         return None
 
 
+@operation.isolated
 def queue_one(engine):
     """Same worker discovers only explicit one-off decisions, never background findings."""
     config = capability(engine)
@@ -94,6 +97,7 @@ def queue_one(engine):
                 select(proposal_decisions)
                 .outerjoin(sessions, sessions.c.id == proposal_decisions.c.id)
                 .where(
+                    operation.eligible(c, proposal_decisions.c.intake_id),
                     proposal_decisions.c.status == "applied",
                     sessions.c.id.is_(None),
                     proposal_decisions.c.payload["run_budget"]["activate_once"]
@@ -108,6 +112,7 @@ def queue_one(engine):
         )
         if not approval:
             return False
+        operation.selected(proposal_decisions, approval)
         tasks = (
             c.execute(
                 select(backlog_items).where(
@@ -401,6 +406,7 @@ def reconcile_controller(root):
         )
 
 
+@operation.isolated
 def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
     """Called by the existing worker. No service work occurs without a queued command."""
     if not inspect(engine).has_table(sessions.name):
@@ -421,6 +427,7 @@ def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
         )
         if not row:
             return False
+        operation.selected(sessions, row)
         row = dict(row)
         state = dict(row["state"])
         owner = state.get("owner")

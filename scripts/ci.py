@@ -81,6 +81,11 @@ def main():
     if actual != commit:
         raise ValueError('Acceptance must bind the exact checked-out commit.')
     receipt = acceptance(commit, json.loads(os.environ['CI_RESULTS']), files)
+    from release_bundle import verify
+    application = ROOT / 'artifacts/ci/application.tar.gz'
+    digest = sha256(application.read_bytes()).hexdigest()
+    verify(application, digest, commit)
+    receipt.update(application_sha256=digest, application_artifact='application.tar.gz')
     output = ROOT / 'artifacts/ci/full-release-acceptance.json'
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(receipt, indent=2) + '\n')

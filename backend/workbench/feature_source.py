@@ -80,14 +80,14 @@ def locked(root):
         os.close(fd)
 
 
-def _checked(c, identity):
+def _checked(c, identity, *, active=True):
     row = c.execute(select(real_execution_requests).where(real_execution_requests.c.id == identity)).mappings().first()
     if not row:
         raise Held('The checked execution is unavailable.')
     grant = c.execute(select(real_execution_grants).where(real_execution_grants.c.id == row['grant_id'])).mappings().first()
     if not grant:
         raise Held('The original execution grant is unavailable.')
-    real_publication._checked(c, row, grant)
+    real_publication._checked(c, row, grant, active=active)
     linked = grant['snapshot']['workflow_task']
     if (not linked['original'].get('feature_planning')
             or not task_execution.current(c, linked)):
@@ -112,12 +112,12 @@ def _same_plan(value, linked):
         and value['plan_binding'] == linked['proposal_review']['binding'])
 
 
-def validate_input(c, descriptor, linked, policy, *, depth=0):
+def validate_input(c, descriptor, linked, policy, *, depth=0, active=True):
     """Revalidate every predecessor, including later independent rejection."""
     if depth >= 16 or not isinstance(descriptor, dict):
         raise Held('Invalid or cyclic checked-source ancestry.')
     try:
-        row, grant, parent, result = _checked(c, descriptor['execution_id'])
+        row, grant, parent, result = _checked(c, descriptor['execution_id'], active=active)
         root = _root(policy, parent, row['id'], grant)
         path = owned(root/'input.json')
         if path.stat().st_size > 65536 or path.stat().st_mode & 0o077:
@@ -133,7 +133,7 @@ def validate_input(c, descriptor, linked, policy, *, depth=0):
             raise Held('The checked source, plan or frozen result changed.')
         previous = grant['snapshot'].get('feature_input')
         if previous:
-            validate_input(c, previous, linked, policy, depth=depth+1)
+            validate_input(c, previous, linked, policy, depth=depth+1, active=active)
             if grant['snapshot']['contract']['source'] != previous['source'] or grant['snapshot']['contract']['base'] != previous['commit']:
                 raise Held('A predecessor did not execute against its checked input.')
         elif grant['snapshot']['contract']['base'] != value['original_base']:
@@ -209,15 +209,15 @@ def prepare_input(engine, execution_id):
             receipt_sha256=digest(value))
 
 
-def prerequisite_tasks(c, descriptor, linked, policy):
+def prerequisite_tasks(c, descriptor, linked, policy, *, active=True):
     """Only tasks whose frozen changes are in this exact source ancestry qualify."""
-    validate_input(c, descriptor, linked, policy)
+    validate_input(c, descriptor, linked, policy, active=active)
     identities, visited = set(), set()
     while descriptor:
         if descriptor['execution_id'] in visited or len(visited) >= 16:
             raise Held('Cyclic checked-source ancestry.')
         visited.add(descriptor['execution_id'])
-        row, grant, parent, _ = _checked(c, descriptor['execution_id'])
+        row, grant, parent, _ = _checked(c, descriptor['execution_id'], active=active)
         value = json.loads(owned(_root(policy, parent, row['id'], grant)/'input.json').read_text())
         identities.add(value['task_id'])
         descriptor = value['predecessor']

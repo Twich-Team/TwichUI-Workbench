@@ -107,4 +107,8 @@ def test_release_receipt_rejects_another_checkout(tmp_path, monkeypatch):
         ci.main()
     assert not target.exists()
     monkeypatch.setenv('GITHUB_SHA', commit)
+    from release_bundle import build
+    (tmp_path / 'frontend/dist').mkdir(parents=True)
+    (tmp_path / 'frontend/dist/index.html').write_text('Checked fixture frontend')
+    build(tmp_path, tmp_path / 'artifacts/ci/application.tar.gz')
     assert ci.main() == 0 and json.loads(target.read_text())['commit'] == commit

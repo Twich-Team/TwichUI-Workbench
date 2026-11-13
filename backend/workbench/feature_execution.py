@@ -5,6 +5,8 @@ controllers and frozen checks remain the owners of eventual implementation.
 """
 from fastapi import HTTPException
 from sqlalchemy import select
+from workbench import worker_operation as operation
+
 import json
 from pathlib import Path
 
@@ -12,6 +14,7 @@ from workbench import intake, feature_permission, everyday
 from workbench.db import proposal_decisions, planning_jobs, write_transaction
 
 
+@operation.isolated
 def apply_one(engine):
     try:
         feature_permission.capability(engine)
@@ -23,6 +26,7 @@ def apply_one(engine):
             .order_by(proposal_decisions.c.created_at,proposal_decisions.c.id).limit(1)).mappings().first()
         if not row:
             return False
+        operation.selected(proposal_decisions, row)
         identity = row['id']
         failure = None
         try:
@@ -44,7 +48,7 @@ def apply_one(engine):
                 feature_permission.validate(c,row,pending=True)
             except (ValueError, OSError, HTTPException, KeyError, TypeError):
                 failure = 'The feature changed while its run decision was being admitted. No implementation started.'
-        job = c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==row['intake_id'],
+        job = c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).where(planning_jobs.c.intake_id==row['intake_id'],
             planning_jobs.c.kind=='feature_execution',
             planning_jobs.c.payload['feature_decision_id'].as_string()==identity)).mappings().first()
         if not job or job['payload'].get('feature_decision_id')!=identity or job['status']!='queued':
@@ -155,8 +159,9 @@ def resume_failed_step(engine):
     from workbench.db import task_run_offers, task_sessions
     from sqlalchemy.exc import NoResultFound, MultipleResultsFound
     with engine.connect() as c:
-        jobs = list(c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'feature_execution',
+        jobs = list(c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).where(planning_jobs.c.kind == 'feature_execution',
             planning_jobs.c.status == 'failed',
+            planning_jobs.c.payload['worker_operation_failure'].as_string().is_(None),
             planning_jobs.c.payload['current_offer_id'].as_string().is_not(None))
             .order_by(planning_jobs.c.created_at).limit(8)).mappings())
     for job in jobs:
@@ -204,6 +209,7 @@ def recover_combined(engine):
     return recover_owned(engine)
 
 
+@operation.isolated
 def advance(engine, *, adapter=None, provision=None, stop_event=None):
     """Finite parent progress; the existing worker/session/controller own execution."""
     from workbench import feature_steps, feature_source, feature_preparation, real_execution
@@ -230,9 +236,15 @@ def advance(engine, *, adapter=None, provision=None, stop_event=None):
     if resume_failed_step(engine):
         return True
     with engine.connect() as c:
-        row = c.execute(select(planning_jobs).where(planning_jobs.c.kind == 'feature_execution',
-            planning_jobs.c.status.in_(['queued','running'])).order_by(planning_jobs.c.created_at).limit(1)).mappings().first()
-        if not row or row['payload'].get('parent_permission_pending'):
+        row = c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).where(planning_jobs.c.kind == 'feature_execution',
+            planning_jobs.c.payload['parent_permission_pending'].as_boolean().is_not(True),
+            (planning_jobs.c.status == 'queued') | ((planning_jobs.c.status == 'running') &
+                planning_jobs.c.payload['phase'].as_string().in_(['preparing_runtime', 'checking_combined_feature']))
+            ).order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
+        if not row:
+            return False
+        operation.selected(planning_jobs, row)
+        if row['payload'].get('parent_permission_pending'):
             return False
         job = dict(row)
         if job['status'] == 'running' and job['payload'].get('phase') not in {'preparing_runtime','checking_combined_feature'}:
