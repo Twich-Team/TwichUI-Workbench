@@ -146,8 +146,8 @@ def context(original, feedback, policy, *, legacy=False):
         entries = eligible_inventory(root, base)
         inventory = {path:entry['git_blob'] for path,entry in entries.items()}
         source_contract = dict(source_contract=contract(base,entries))
-    if not inventory or len(inventory) > 650:
-        raise ValueError('The committed Lua search inventory is outside its supported size.')
+    if not inventory or len(inventory) > (1024 if expanded else 650):
+        raise ValueError('The committed source inventory is outside its supported size.')
     title = words(original['title'])
     terms = title | words(original['description'] + '\n' + original.get('lua_error', '') + '\n' + feedback)
     if not terms:
