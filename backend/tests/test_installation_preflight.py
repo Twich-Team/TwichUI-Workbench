@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import site
 import sqlite3
 import subprocess
 import sys
@@ -27,6 +28,11 @@ def save(path, value):
 
 @pytest.fixture
 def installation(tmp_path, store):
+    # Hosted Python tool caches may be group-writable. Keep the production
+    # refusal and pin a private interpreter copy for this isolated installation.
+    interpreter = tmp_path / 'private-python'
+    shutil.copyfile(Path(sys.executable).resolve(), interpreter)
+    interpreter.chmod(0o700)
     source = tmp_path / 'source'
     source.mkdir(mode=0o700)
     (source / 'ops').mkdir()
@@ -92,12 +98,12 @@ def installation(tmp_path, store):
         release=str(stage / 'release'), configuration=str(config),
         store=str(stage / 'artifacts/workbench.sqlite3'), history=baseline,
         rollback_store=str(previous / 'artifacts/workbench.sqlite3'), rollback_stage=str(previous),
-        rollback_python=sys.executable, rollback_seal_script=str(previous / 'release/ops/acceptance_seal.py'),
-        python=sys.executable, seal_script=str(stage / 'release/ops/acceptance_seal.py'),
+        rollback_python=str(interpreter), rollback_seal_script=str(previous / 'release/ops/acceptance_seal.py'),
+        python=str(interpreter), seal_script=str(stage / 'release/ops/acceptance_seal.py'),
         activation_script=str(activation), rollback_script=str(rollback), rejection_manifest=str(rejection),
         evidence_roots=[str(previous / 'artifacts')],
         external_files=[dict(path=p, resolved=str(Path(p).resolve()), sha256=sha256(Path(p).read_bytes()).hexdigest())
-                        for p in [sys.executable, '/usr/bin/bash', str(previous / 'release/ops/acceptance_seal.py')]],
+                        for p in [str(interpreter), '/usr/bin/bash', str(previous / 'release/ops/acceptance_seal.py')]],
         files=[dict(path=p, role=role, sha256=sha256(Path(p).read_bytes()).hexdigest()) for p, role in files.items()])
     envelope = tmp_path / 'envelope.json'
     save(envelope, manifest)
@@ -107,7 +113,8 @@ def installation(tmp_path, store):
 def invoke(envelope, operation='activate'):
     return subprocess.run([sys.executable, str(ENTRY), operation, str(envelope)],
                           capture_output=True, text=True, timeout=20,
-                          env={**os.environ, 'PYTHONPATH':str(ROOT / 'backend') + ':' + str(ROOT / 'scripts')})
+                          env={**os.environ, 'PYTHONPATH':os.pathsep.join(
+                              [str(ROOT / 'backend'), str(ROOT / 'scripts'), *site.getsitepackages()])})
 
 
 @pytest.mark.parametrize('fault', ['missing_manifest', 'wrong_digest', 'wrong_revision', 'missing_config',
