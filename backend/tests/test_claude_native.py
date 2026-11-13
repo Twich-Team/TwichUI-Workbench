@@ -7,6 +7,15 @@ import pytest
 
 from workbench import claude_native as native
 
+
+def test_client_error_preserves_proven_model_and_partial_usage_without_final_total():
+    from workbench.claude_client import Held
+    subtotal=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)
+    error=Held('protocol',started=True,terminal=False,known_subtotal=subtotal,
+               actual_model='claude-sonnet-5-5')
+    assert error.native_known_subtotal==subtotal and error.counted is None
+    assert error.metadata['actual_model']=='claude-sonnet-5-5'
+
 MODEL = 'claude-sonnet-5-5'
 
 

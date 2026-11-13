@@ -1,3 +1,12 @@
+Boundary review before activation found and corrected three errors: contended
+admission is a durable known-nondispatch wait; a native terminal rejected response
+with complete usage releases only its settled owner while retaining unknown
+allowance delta and spent request; Claude error attribution no longer passes an
+unsupported argument to the shared Hold constructor. 55 focused boundary checks
+plus the new attribution check and wb check passed. Candidate56fe02a was never
+activated. Restart exact acceptance on the corrected candidate; earlier local
+source-changing runs are diagnostic only. No installed services changed.
+
 # Smart AI Choices — complete candidate, November 13, 2026
 
 Following the Project Working Philosophy: continue through exact acceptance and one

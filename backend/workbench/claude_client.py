@@ -9,7 +9,10 @@ from workbench import codex_provider as codex
 class Held(codex.Hold):
     def __init__(self, reason, **kwargs):
         self.native_known_subtotal=kwargs.pop('known_subtotal',None)
+        actual_model=kwargs.pop('actual_model',None)
         super().__init__(reason,**kwargs)
+        if isinstance(actual_model,str):
+            self.metadata['actual_model']=actual_model
         self.args=(str(self).replace('Codex','Claude'),)
 
 

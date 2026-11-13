@@ -16,6 +16,10 @@ from uuid import UUID, uuid4
 from workbench import ai_strategy as policy
 
 
+class AdmissionBusy(TimeoutError):
+    """This caller sent no request because another owner holds the boundary."""
+
+
 def canonical(value):
     return json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False)
 
@@ -71,7 +75,7 @@ def exclusive(root, stop=lambda:False, seconds=10):
         until=time.monotonic()+seconds
         while True:
             if stop() or time.monotonic()>=until:
-                raise TimeoutError('Another Workbench request is using the provider boundary.')
+                raise AdmissionBusy('Another Workbench request is using the provider boundary.')
             try:
                 fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
                 break
@@ -197,7 +201,8 @@ def run(root, request_id, strategy, *, observations, dispatch, stop=lambda:False
             write(receipt,admission)
             from workbench import claude_native, codex_provider
             not_started=(isinstance(error,claude_native.Held) and error.dispatched is False
-                         or isinstance(error,codex_provider.Hold) and error.started is False)
+                         or isinstance(error,codex_provider.Hold) and error.started is False
+                         or isinstance(error,AdmissionBusy))
             if not_started:
                 usage.requests-=1
                 role.requests-=1
@@ -208,6 +213,23 @@ def run(root, request_id, strategy, *, observations, dispatch, stop=lambda:False
                 state['strategies'][key]={k:v for k,v in pool.items() if not k.startswith('@')}
                 state['active']=None
                 admission.update(state='not_started')
+                write(receipt,admission)
+                write(root/'allowances.json',state)
+            settled=(isinstance(error,claude_native.Held) and error.terminal and error.usage_complete
+                     or isinstance(error,codex_provider.Hold) and error.terminal and not error.partial
+                     and isinstance(error.counted,dict))
+            if settled and not not_started:
+                # The native producer closed with final observed tokens. Retain
+                # the rejected result and spent request; missing allowance deltas
+                # remain unknown, but unrelated work has no uncertain owner.
+                usage.windows=observed_delta(before,None,usage.windows)
+                role.windows=observed_delta(before,None,role.windows)
+                save_consumption(state,pool,stage,usage,role)
+                state['strategies'][key]={k:v for k,v in pool.items() if not k.startswith('@')}
+                state['active']=None
+                admission.update(state='completed_rejected',finished_at=now(),
+                    usage=error.usage if isinstance(error,claude_native.Held) else error.counted,
+                    allowance_delta='unknown')
                 write(receipt,admission)
                 write(root/'allowances.json',state)
             raise

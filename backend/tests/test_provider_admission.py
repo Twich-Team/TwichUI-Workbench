@@ -71,6 +71,24 @@ def test_uncertain_dispatch_keeps_reservation_and_never_replays(tmp_path):
     assert json.loads((tmp_path/'allowances.json').read_text())['active']
 
 
+def test_rejected_but_fully_accounted_native_request_releases_owner_without_free_usage(tmp_path):
+    tmp_path.chmod(0o700)
+    identity=str(uuid4())
+    def reject(stage):
+        raise Held('invalid_content',dispatched=True,terminal=True,usage_complete=True,
+            usage=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50))
+    with pytest.raises(Held):
+        admission.run(tmp_path,identity,strategy(),observations=lambda:[snapshot(10)],dispatch=reject,now=lambda:1000)
+    state=json.loads((tmp_path/'allowances.json').read_text())
+    assert state['active'] is None
+    assert state['roles']['codex:primary']['requests']==1
+    assert state['roles']['codex:primary']['windows']['short']['consumed'] is None
+    receipt=json.loads((tmp_path/(identity+'.json')).read_text())
+    assert receipt['state']=='completed_rejected' and receipt['usage']['total_tokens']==50
+    assert admission.run(tmp_path,identity,strategy(),observations=lambda:[snapshot(10)],
+        dispatch=lambda _:pytest.fail('Rejected response replayed'),now=lambda:1000)['state']=='held'
+
+
 def test_missing_final_window_reading_never_becomes_zero_consumption(tmp_path):
     tmp_path.chmod(0o700)
     admission.run(tmp_path,str(uuid4()),strategy(),observations=lambda:[snapshot(10)],

@@ -198,6 +198,10 @@ def handle(connection,request,binary,credential,runtime,evidence_root,config_pat
         result=boundary.choose(request,strategy) if request['operation']=='smart-choose' else boundary.turn(request,strategy)
     except Wait as error:
         result=dict(state='waiting',decision=error.decision)
+    except admission.AdmissionBusy:
+        result=dict(state='waiting',decision=ai.Decision(state='waiting',
+            reason='Another Workbench request is using the AI connection. Work is saved and will check again.',
+            recheck_at=time.time()+60).model_dump())
     except claude.Held as error:
         result=dict(error='authentication' if 'auth' in error.reason else 'protocol',started=error.dispatched,
             terminal=error.terminal and error.usage_complete,counted=error.usage if error.usage_complete else None,

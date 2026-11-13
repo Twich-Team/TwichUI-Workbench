@@ -99,6 +99,19 @@ def test_duplicate_identity_is_held_across_new_connector_instances(boundary):
     assert len(calls)==1
 
 
+def test_contended_boundary_is_a_durable_wait_without_provider_dispatch(boundary,monkeypatch):
+    run,_,calls,_=boundary
+    @contextmanager
+    def busy(*args,**kwargs):
+        raise connector.admission.AdmissionBusy()
+        yield
+    monkeypatch.setattr(connector.admission,'exclusive',busy)
+    for operation in ('smart-choose','smart-turn'):
+        result=run(request(operation))
+        assert result['state']=='waiting' and result['decision']['recheck_at']>time.time()
+    assert not calls
+
+
 def test_unknown_reset_is_unknown_and_credits_permission_remains_separate():
     result=allowance(12)
     result['rateLimits']['primary']['resetsAt']=None
