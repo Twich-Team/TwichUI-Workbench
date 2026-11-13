@@ -48,7 +48,7 @@ jobs:
     name: Backend ${{ matrix.shard }}
     needs: checks
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.checks.outputs.backend_matrix) }}

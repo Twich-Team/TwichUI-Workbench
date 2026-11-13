@@ -4,6 +4,6 @@ Build 4f03783 is installed at private workbench.twich.gg after all nine hosted c
 
 The stuck model request was closed with 24,440 reported tokens. Recovery now separates execution from incomplete text and unknown usage; old Lua searches retain their original scope while new investigations can inspect bounded Python files and PNG metadata. The real PNG byte mismatch was reproduced with identical pixels and game textures.
 
-Restart exposed an archived feature record stopping the shared worker. A narrow correction is being verified; the original report has not yet resumed or produced its corrected plan. Earlier tasks reached draft delivery; zero new addon repair tasks completed end to end in this assignment.
+Restart exposed an archived feature record stopping the shared worker. The narrow correction passed 34 focused checks, but hosted verification hit its backend job time limit. A longer bounded CI window is being verified; the original report has not yet resumed or produced its corrected plan. Earlier tasks reached draft delivery; zero new addon repair tasks completed end to end in this assignment.
 
 Next: install the fully verified worker correction and continue the saved report once to a reviewable plan. No repeated continuation decision is needed. Repair approval and implementation remain outside this assignment.

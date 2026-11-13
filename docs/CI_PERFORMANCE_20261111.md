@@ -1,3 +1,21 @@
+# November 13 — complete hosted backend window
+
+Full hosted43337713183/2aecb30was correctly refused: Backend1/2was canceled at
+its25-minute job deadline, verify failed, and no replacement was installed. No
+pytest failure was reported; test_feature_draft_delivery completed all12cases
+but consumed14m40on that runner, and the shard had reached46%of cases. Backend2,
+all4browser groups, build/contracts/frontend and visual checks passed. Original
+logs, GitHub timeout annotations and incomplete artifact are retained under
+private gallery-investigation-recovery-20261112/deployment-worker.
+
+Increase only the hosted backend job window from25to45minutes. Keep the two
+serial partitions, all tests/assertions, test deadlines, resource/execution guards,
+full inventory and final fail-closed exact-commit verify unchanged. The34focused
+recovery/source/feature checks and check command already pass on2aecb30. This
+CI-only correction still requires a new complete hosted run for its exact commit
+before installation; do not accept the interrupted run or install the staged2aec.
+Continue the original gallery investigation once after verified installation.
+
 # CI performance — November 11, 2026
 
 The owner authorized measurement and safe optimization during the current campaign.
