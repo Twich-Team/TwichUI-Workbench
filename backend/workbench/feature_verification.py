@@ -252,7 +252,7 @@ def compose(engine, job_id, program, composition, authorization):
                 or not finished_history(c, job, payload['independent_check_preparation']['history'])
                 or c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()
                 or c.execute(select(requests.c.id).where(requests.c.status.in_(
-                    ['pending', 'running', 'checking', 'cancel_requested']))).first()):
+                    ['pending','waiting_ai','running','checking','cancel_requested']))).first()):
             raise ValueError('Composed checks require settled preparation and no active or completed verification.')
         value = dict(program=program, composition=composition,
             authorization_sha256=sha(authorization.encode()), recorded_at=intake.now(),
@@ -308,7 +308,7 @@ def retry_composed_timeout(engine, job_id, authorization):
                 or usage[0].get('cgroup_removed') is not True
                 or any(usage[0].get(k) for k in ('oom_kill','pids_limit_hit','leaked_after_kill'))
                 or c.execute(select(requests.c.id).where(requests.c.status.in_(
-                    ['pending','running','checking','cancel_requested']))).first()
+                    ['pending','waiting_ai','running','checking','cancel_requested']))).first()
                 or c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()):
             raise ValueError('Only a settled original-suite timeout within the existing attempt limit may be retried.')
         composed_checks(c, job)

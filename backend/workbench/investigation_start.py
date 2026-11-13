@@ -285,11 +285,11 @@ def start(engine, identity, body):
                 )
             previous.append(dict(id=job["id"], sha256=fingerprint(job, attempts)))
         original = dict(row["payload"])
-        effective = {**original, "local_planning": body.provider}
+        effective={**original,"local_planning":body.provider,**(dict(ai_settings=body.ai_settings.model_dump()) if body.ai_settings else {})}
         at = intake.now()
         receipt = everyday.planning_receipt(effective, at)
         try:
-            key, route = provider_routes.planning_binding(c, body.provider)
+            key, route = provider_routes.planning_binding(c,body.provider,body.ai_settings)
         except ValueError as error:
             raise HTTPException(409, str(error)) from None
         receipt[key] = route

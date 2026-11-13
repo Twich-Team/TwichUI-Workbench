@@ -243,3 +243,42 @@ test('AI usage empty, unavailable and unreported states never invent a balance',
  await expect(page.getByRole('button',{name:'Refresh activity',exact:true})).toBeVisible();
  await overflow(page);
 });
+
+for(const width of [1440,390])test(`Smart AI cards keep budgets, reorder controls and drafts usable at ${width}px`,async({page})=>{
+ // Visual/control acceptance only. Native admission and worker persistence use
+ // the real selection path in backend/tests/test_strategy_connector and test_smart_worker.
+ await page.route('**/api/models',async route=>{
+  const response=await route.fetch();const data=await response.json();
+  const provider=(model:string,effort:string|null)=>({enabled:true,model,effort,activated:false});
+  data.policy={...data.policy,revision:8,providers:{local:provider('pilot-qwen38-27b',null),codex:provider('gpt-6.1-sol','high'),claude:provider('claude-sonnet-5-5','high')},strategy:{name:'My AI game plan',ceiling:'request_start',unknown_usage:'wait',unknown_request_limit:0,recheck_seconds:300,stages:[
+   {id:'first',provider:'codex',model:'gpt-6.1-sol',effort:'high',allocation:50,role:'primary',triggers:['allocation'],on_limit:'switch',wait_seconds:1800,local_suitability:'simple_only'},
+   {id:'local',provider:'local',model:'pilot-qwen38-27b',effort:null,allocation:null,role:'primary',triggers:['allocation'],on_limit:'switch',wait_seconds:1800,local_suitability:'simple_only'},
+   {id:'reserve',provider:'codex',model:'gpt-6.1-sol',effort:'high',allocation:25,role:'fallback',triggers:['allocation','unsuitable'],on_limit:'wait',wait_seconds:1800,local_suitability:'simple_only'}]}};
+  data.capabilities.executors=Object.entries(data.policy.providers).map(([backend,p])=>({backend,models:[{model:(p as {model:string}).model,efforts:backend==='local'?[]:['low','high']}],observed_at:new Date().toISOString(),source:'Controlled visual acceptance catalog',limitation:'No native provider access is claimed by this visual fixture.'}));
+  await route.fulfill({response,json:data});
+ });
+ await page.setViewportSize({width,height:width===390?844:1000});
+ await page.goto('/settings');
+ const builder=page.getByRole('region',{name:'Smart AI strategy'});
+ await expect(builder.getByText('Codex · 75%')).toBeVisible();
+ await expect(builder.getByText('50% primary + 25% fallback reserve')).toBeVisible();
+ await builder.getByRole('button',{name:'Move card 2 later'}).click();
+ await expect(builder.locator('.strategy-card').nth(1)).toContainText('Codex reserve');
+ await shot(page,`smart-ai-cards-${width}`,'.strategy-builder');
+ await builder.getByRole('button',{name:'Add Claude'}).click();
+ await expect(builder.getByText('Claude · 25%')).toBeVisible();
+ await expect(builder.getByText('Codex · 75%')).toBeVisible();
+ await builder.locator('.strategy-card').last().getByText('When this choice can help',{exact:true}).click();
+ await builder.locator('.strategy-card').last().getByLabel('If this choice reaches a limit').selectOption('wait_then_switch');
+ await builder.locator('.strategy-card').last().getByLabel('Wait minutes').fill('30');
+ await page.reload();
+ await expect(builder.locator('.strategy-card')).toHaveCount(4);
+ await expect(builder.locator('.strategy-card').nth(1)).toContainText('Codex reserve');
+ await page.route('**/api/models/policy',r=>r.fulfill({status:409,json:{detail:'Controlled conflict: reload saved strategy before saving again.'}}));
+ await builder.getByRole('button',{name:'Save AI strategy'}).click();
+ await expect(builder.getByText('Controlled conflict: reload saved strategy before saving again.')).toBeVisible();
+ await expect(builder.getByRole('button',{name:'Save AI strategy'})).toBeDisabled();
+ await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+ await overflow(page);
+ await shot(page,`smart-ai-large-text-${width}`,'.strategy-builder');
+});

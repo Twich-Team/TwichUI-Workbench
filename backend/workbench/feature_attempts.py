@@ -87,7 +87,7 @@ def settled(c, offered, *, additional_review=False):
             or not _accounted(c, row, grant)):
         raise ValueError('Failed feature generation or accounting is not settled.')
     if (c.execute(select(requests.c.id).where(requests.c.status.in_(
-            ['pending','running','checking','cancel_requested']))).first()
+            ['pending','waiting_ai','running','checking','cancel_requested']))).first()
             or c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()
             or c.execute(select(real_publications.c.id).where(real_publications.c.task_id == scope['task_id'])).first()):
         raise ValueError('Active or externally consequential work prevents a fresh feature attempt.')

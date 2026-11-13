@@ -52,7 +52,8 @@ def execute(request,runtime,config_path,resolve,stop,*,before_dispatch=lambda sn
                 hosts.write_text(mapping)
                 snapshot=native.preflight(native.command(config,work,hosts,terminal=True),stop)
                 before_dispatch(snapshot)
-                if any(w['used_percent']>=100 for w in snapshot['windows']):
+                if any(w['used_percent']>=100 for w in snapshot['windows']
+                       if not w.get('model_family') or w['model_family'] in request['model']):
                     raise native.Held('provider_limit')
                 admission.write(receipt,dict(state='dispatch_reserved',request_id=request['request_id'],
                     request_sha256=admission.digest(request),snapshot=snapshot,facts=[]))
@@ -93,7 +94,7 @@ def handle(connection, request, runtime, config_path, resolve):
         completed=error.terminal and error.usage_complete
         result=dict(error='capacity' if error.reason=='provider_limit' else REASONS.get(error.reason,'protocol'),
             started=error.dispatched,terminal=completed,partial=error.dispatched and not completed,
-            counted=error.usage if completed else None,known_subtotal=error.usage if not completed else None,
+            counted=error.usage if completed else None,known_subtotal=error.usage if not completed else None,actual_model=error.actual_model,
             **(dict(terminal_status='completed') if completed else {}))
     except (ValueError,OSError,KeyError,TypeError,TimeoutError):
         result=dict(error='unavailable',started=True,terminal=False)

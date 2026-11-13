@@ -571,7 +571,7 @@ class FeatureScopeBinding(StrictModel):
     feature_base: str = Field(pattern=r'^[a-f0-9]{40}$')
     plan_binding: str = Field(pattern=r'^[a-f0-9]{64}$')
     graph: list[FeatureGraphBinding] = Field(min_length=1, max_length=6)
-    provider: Literal['local', 'codex', 'claude']
+    provider: Literal['local', 'codex', 'claude', 'smart']
     route: dict[str, JsonValue]
 
 
@@ -914,9 +914,10 @@ class PlanningRetry(StrictModel):
 
 
 class InvestigationStart(StrictModel):
+    ai_settings: TaskAISettings | None = Field(default=None,exclude_if=lambda value:value is None)
     command_id: UUID
     binding: Annotated[str, Field(pattern=r'^[a-f0-9]{64}$')]
-    provider: Literal['qwen-once', 'qwen-with-codex-fallback', 'codex-once', 'codex-with-local-fallback']
+    provider: Literal['qwen-once', 'qwen-with-codex-fallback', 'codex-once', 'codex-with-local-fallback','claude-once','smart-strategy']
 
 
 class ClarificationInput(StrictModel):

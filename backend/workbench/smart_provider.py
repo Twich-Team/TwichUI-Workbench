@@ -1,4 +1,5 @@
 """Ordered choices composed with the existing tool-free planners and journals."""
+import json
 from uuid import UUID,uuid5
 
 from workbench import ai_strategy as ai, codex_provider as codex
@@ -12,8 +13,8 @@ class Waiting(PlanningUnavailable):
         super().__init__(self.decision['reason'],'ai_wait',dict(generation_state='not_started'))
 
 
-def context(selection,*,suitable_local=False,reviewed_local=False,waiting_since=None):
-    return dict(strategy=selection['strategy'],suitable_local=suitable_local,reviewed_local=reviewed_local,
+def context(selection,*,suitable_local=False,reviewed_local=False,waiting_since=None,failures=None):
+    return dict(failures=failures or {},strategy=selection['strategy'],suitable_local=suitable_local,reviewed_local=reviewed_local,
         waiting_since=waiting_since or {},manual_stage=selection.get('manual_stage'),requested_stage=selection.get('requested_stage'))
 
 
@@ -65,12 +66,23 @@ class Planner(codex.Planner):
         self.engine=self.parent_attempt=None
         self.decision=None
         self.backend='smart'
+        self.request_history=[]
 
     def bind_operation(self,engine,parent,*,suitable_local=False,reviewed_local=False,waiting_since=None):
         self.engine,self.parent_attempt=engine,parent
         self.options=dict(suitable_local=suitable_local,reviewed_local=reviewed_local,waiting_since=waiting_since or {})
 
     def generate(self,packet,schema,*,expected_model=None):
+        from workbench.planning_provider import LocalBeforeGeneration
+        for _ in self.frozen['strategy']['stages']:
+            try:
+                return self._generate_once(packet,schema,expected_model=expected_model)
+            except LocalBeforeGeneration:
+                self.options.setdefault('failures',{})[self.decision.stage_id]='unavailable'
+        raise Waiting(ai.Decision(state='waiting',reason='All configured AI options are currently unavailable.',
+            recheck_at=__import__('time').time()+300).model_dump())
+
+    def _generate_once(self,packet,schema,*,expected_model=None):
         if self.engine is None or self.parent_attempt is None or self.response_evidence is None:
             raise codex.Hold('disclosure')
         try:
@@ -82,7 +94,7 @@ class Planner(codex.Planner):
         self.selection={**self.frozen,'model':stage.model,'effort':stage.effort,'provider':stage.provider}
         self.backend=stage.provider
         self.usage_source=('Native Claude Code reported response tokens including cache reads and creation' if stage.provider=='claude' else 'Codex app-server reported turn tokens' if stage.provider=='codex' else 'local llama.cpp response tokens')
-        identity=str(uuid5(UUID(self.response_evidence.identifier),'strategy-provider-request'))
+        identity=str(uuid5(UUID(self.response_evidence.identifier),'strategy-provider-request-'+stage.id))
         self.record(identity,'running',stage)
         try:
             if self.backend=='local':
@@ -95,19 +107,29 @@ class Planner(codex.Planner):
                     self.diagnostics=local.diagnostics
             else:
                 result=super().generate(packet,schema)
-            self.diagnostics.update(ai_decision=self.decision.model_dump(),actual_provider=self.backend)
+            self.request_history.append(dict(provider=self.backend,stage_id=stage.id,model=result[1],effort=stage.effort,
+                evidence_id=self.response_evidence.identifier,native_receipt=self.diagnostics.get('provider_receipt'),values=self.diagnostics['usage']['values']))
+            self.diagnostics.update(ai_decision=self.decision.model_dump(),actual_provider=self.backend,strategy_requests=list(self.request_history))
+            if self.diagnostics.get('usage'):
+                self.diagnostics['usage']={**self.diagnostics['usage'],'status':'complete','requests_observed':1,
+                    'strategy_requests':[self.request_history[-1]]}
             self.record(identity,'completed',stage)
             return result
         except Waiting as error:
             self.diagnostics=dict(generation_state='not_started',ai_wait=error.decision)
             self.record(identity,'not_started',stage)
             raise
-        except (PlanningUnavailable,ValueError,OSError):
-            self.record(identity,'interrupted_unknown' if self.diagnostics.get('generation_state')=='uncertain' else 'failed',stage)
+        except (PlanningUnavailable,ValueError,OSError) as error:
+            from workbench.planning_provider import LocalBeforeGeneration
+            self.record(identity,'not_started' if isinstance(error,LocalBeforeGeneration) else 'interrupted_unknown' if self.diagnostics.get('generation_state')=='uncertain' else 'failed',stage)
             raise
 
     def reported_usage(self,counted):
         return {**super().reported_usage(counted),'status':'complete'}
+
+    def encode_request(self,model,effort,prompt,schema,seconds):
+        request=encode_request(self.frozen,self.decision,prompt,schema,self.response_evidence.identifier,seconds,**self.options)
+        return json.dumps(request,ensure_ascii=True,allow_nan=False).encode()
 
     def dispatch(self,model,effort,prompt,schema,stop,*,input_limit=codex.MAX_PACKET,request_seconds=120):
         if model!=self.decision.model or effort!=self.decision.effort:
@@ -132,6 +154,10 @@ class Planner(codex.Planner):
             else:
                 facts=self.diagnostics
                 usage=facts.get('usage')
+                if isinstance(usage,dict) and facts.get('generation_state') in {'uncertain','partial'}:
+                    usage={**usage,'status':'partial','known_values':usage.get('values'),'values':None}
+                if usage is None and isinstance(facts.get('native_known_subtotal'),dict):
+                    usage=dict(status='partial',source='Native Claude observed subtotal; final usage unavailable',units='tokens',values=None,known_values=facts['native_known_subtotal'],observed_at=now())
                 if outcome=='not_started':
                     usage=dict(status='not_started',requests_observed=0,source='Verified no native strategy request started',units='tokens',values=dict(prompt_tokens=0,completion_tokens=0,total_tokens=0))
                 c.execute(model_attempts.update().where(model_attempts.c.id==identity).values(

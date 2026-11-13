@@ -68,7 +68,7 @@ def packet(c, decision_id, task_id, feature_input, *, inspections=()):
         if record.get('feature_input_binding')!=digest(feature_input):
             raise ValueError('Source inspection belongs to different checked predecessor input.')
     restored = feature_step_source.restore(value,root,base,inspections)
-    if permission['scope']['provider'] in {'codex','claude'}:
+    if permission['scope']['provider'] in {'codex','claude','smart'}:
         # Keep complete observations in native evidence, while disclosing search
         # text only from the selected files. Incidental global matches must not
         # consume the twelve-file read scope or silently expand disclosure.
@@ -151,7 +151,7 @@ def scope_packet(c, decision_id, task_id, feature_input, previous, *, remaining=
                          'Requested source range is outside the committed file.')
     inspected = [file['path'] for file in value['files'] if file.get('excerpts')]
     codex_ready = (remaining == 1 and bool(inspections)
-        and feature_steps.parent(c, decision_id)[1]['scope']['provider'] in {'codex','claude'})
+        and feature_steps.parent(c, decision_id)[1]['scope']['provider'] in {'codex','claude','smart'})
     repeated_navigation = len(stalled) == 2 and all(record.get('confirmed_finished')
             and not record.get('inspection')
             and any(message in (record.get('failure') or '') for message in navigation_errors)
@@ -204,6 +204,14 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         backend = permission['scope']['provider']
     if everyday.enabled():
         everyday.require_room(everyday.configuration(engine))
+    if backend=='smart' and adapter is None:
+        from workbench.strategy_waiting import preflight
+        if job['payload'].get('ai_wait',{}).get('recheck_at',0)>time.time():
+            return False
+        if preflight(engine,dict(job),route,lambda:bool(stop_event and stop_event.is_set())):
+            return True
+        with engine.connect() as c:
+            job=intake.require(c,planning_jobs,job_id)
     if backend == 'local' and adapter is None:
         from workbench.local_model_priority import planning_ready
         if not planning_ready():
@@ -253,13 +261,17 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
         evidence = create_evidence(lease, feature_steps.StepScope,
             coverage=current_packet.get('coverage'),files=current_packet['files'])
         used.response_evidence = evidence
+        if getattr(used,'strategy_control',False):
+            from workbench.strategy_waiting import options
+            used.bind_operation(engine,lease,**options(job))
+            used.ends_at=time.monotonic()+min(permission['budget']['scope_request_seconds'],(scope_deadline-datetime.now(timezone.utc)).total_seconds())
         with engine.connect() as c:
             feature_steps.parent(c, decision_id)
         attempted = True
         raw, model, basis = used.generate(current_packet, feature_steps.StepScope, expected_model=route['model'])
         if evidence:
             evidence.snapshot('proposed-plan', raw)
-        if model != route['model'] or basis not in {'local','codex','demo'}:
+        if (model != route['model'] and not getattr(used,'strategy_control',False)) or basis not in {'local','codex','claude','demo'}:
             raise ValueError('Step preparation did not use its saved model.')
         if len(json.dumps(raw, allow_nan=False).encode()) > 24000:
             raise ValueError('Proposed step scope exceeds its output bound.')
@@ -308,6 +320,10 @@ def prepare_scope(engine, job_id, task_id, *, feature_input=None, adapter=None, 
             feature_steps.parent(c, decision_id)
         except (ValueError, OSError, HTTPException, KeyError, TypeError):
             failure, result, inspection = 'The feature was stopped or changed. Its late scope output is retained without implementation.', None, None
+        if diagnostics.get('ai_wait'):
+            from workbench.strategy_waiting import pause_preparation
+            if pause_preparation(c,active,used,diagnostics['ai_wait'],decision_id,'feature_scope_claim'):
+                return True
         finish_attempt(c, {**job, 'lease':lease}, used, model, basis, 'completed' if result or inspection else 'failed')
         record = dict(task_id=task_id, operation_id=lease, confirmed_finished=confirmed,
             scope_request_permission=scope_authorization,

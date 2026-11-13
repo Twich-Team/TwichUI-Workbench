@@ -23,7 +23,7 @@ def strategy():
 
 def request(operation='smart-turn'):
     return dict(operation=operation,strategy=strategy().model_dump(),suitable_local=False,reviewed_local=False,
-        waiting_since={},manual_stage=None,requested_stage=None,**(dict(request_id=str(uuid4()),stage_id='first',prompt='Return JSON.',
+        waiting_since={},manual_stage=None,requested_stage=None,failures={},**(dict(request_id=str(uuid4()),stage_id='first',prompt='Return JSON.',
             schema={'type':'object'},request_seconds=120) if operation=='smart-turn' else {}))
 
 

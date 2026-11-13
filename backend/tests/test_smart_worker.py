@@ -26,7 +26,7 @@ def native(monkeypatch,strategy):
         assert not stop()
         observation=ai.Observation(provider='codex',state='available',paid_usage='disabled',observed_at=time.time(),
             source='Controlled native account',windows=[ai.Window(name='short',used_percent=state['used'],resets_at=time.time()+3600)])
-        decision=ai.evaluate(request['strategy'],[observation],[],now=time.time(),**{k:request[k] for k in ('waiting_since','manual_stage','requested_stage')})
+        decision=ai.evaluate(request['strategy'],[observation,ai.Observation(provider='local',state='available',paid_usage='disabled',observed_at=time.time())],[],now=time.time(),**{k:request[k] for k in ('waiting_since','manual_stage','requested_stage','failures','suitable_local','reviewed_local')})
         if request['operation']=='smart-choose':
             return dict(state='choice',decision=decision.model_dump())
         assert request['operation']=='smart-turn'
@@ -135,3 +135,52 @@ def test_manual_start_cannot_bypass_real_provider_limit(
     with store.connect() as c:
         row=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==identity)).mappings().one()
         assert row['status']=='queued' and row['payload']['ai_wait']['condition']=='provider_limit'
+
+
+def test_new_task_model_override_keeps_global_allocation_guard_without_manual_bypass(
+    store,client,headers,installed,catalog,monkeypatch,
+):
+    strategy=setup(store)
+    saved=model_policy.read(store)
+    saved.strategy=strategy
+    model_policy.save(store,saved,catalog)
+    state=native(monkeypatch,strategy)
+    request={**body(),'local_planning':'codex-once','ai_settings':dict(primary=dict(
+        provider='codex',model='capable-codex',effort='low'),fallback=None)}
+    response=client.post('/api/intake',headers=headers,json=request)
+    assert response.status_code==200,response.text
+    assert worker.tick(store)
+    assert not state['dispatches']
+    detail=client.get('/api/intake/'+response.json()['id']).json()
+    assert detail['start_now_binding']
+    with store.connect() as c:
+        saved_job=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==response.json()['id'])).mappings().one()
+    frozen=saved_job['payload']['local_planning_receipt']['codex_route']
+    assert frozen['requested_stage']=='primary' and 'manual_stage' not in frozen
+    assert frozen['strategy']['stages'][0]['effort']=='low'
+    assert frozen['strategy']['stages'][0]['allocation']==50
+
+
+def test_local_connection_refusal_switches_only_before_generation_to_authorized_stage(
+    store,client,headers,installed,catalog,monkeypatch,
+):
+    from workbench.planning_provider import LocalProvider,LocalBeforeGeneration
+    setup(store)
+    strategy=ai.Strategy(stages=[ai.Stage(id='qwen',provider='local',model='pilot-qwen38-27b'),
+        ai.Stage(id='codex',provider='codex',model='capable-codex',effort='high',allocation=50,
+            role='fallback',triggers=['unavailable'])])
+    state=native(monkeypatch,strategy)
+    state['used']=0
+    calls=[]
+    def refuse(self,*args,**kwargs):
+        calls.append('local-readiness')
+        self.diagnostics=dict(generation_state='not_started')
+        raise LocalBeforeGeneration()
+    monkeypatch.setattr(LocalProvider,'generate',refuse)
+    identity=submit(client,headers,strategy)
+    assert worker.tick(store)
+    detail=client.get('/api/intake/'+identity).json()
+    assert detail['status']=='completed',detail
+    assert calls==['local-readiness'] and len(state['dispatches'])==1
+    assert state['dispatches'][0]['stage_id']=='codex'
+    assert sorted(a['outcome'] for a in detail['provider_activity'])==['completed','not_started']

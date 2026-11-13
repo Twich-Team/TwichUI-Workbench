@@ -51,7 +51,7 @@ def exchange(request, stop=lambda:False, seconds=120):
         raise Held(result['error'],started=result.get('started') is not False,
             terminal=result.get('terminal') is True,partial=result.get('partial') is True,
             counted=result.get('counted'),provider_receipt=result.get('provider_receipt'),
-            known_subtotal=result.get('known_subtotal'),
+            known_subtotal=result.get('known_subtotal'),actual_model=result.get('actual_model'),
             terminal_status=result.get('terminal_status'))
     return result
 
@@ -77,6 +77,10 @@ def generate(model,effort,prompt,schema,stop=lambda:False,*,request_id,
 class Planner(codex.Planner):
     backend='claude'
     usage_source='Native Claude Code reported response tokens including cache reads and creation'
+
+    def encode_request(self,model,effort,prompt,schema,seconds):
+        request=encode_request(model,effort,prompt,schema,self.response_evidence.identifier,seconds)
+        return json.dumps(request,ensure_ascii=True,allow_nan=False).encode()
 
     def dispatch(self,*args,**kwargs):
         if self.response_evidence is None:

@@ -367,12 +367,20 @@ def advance(engine, job, *, adapter=None, stop_event=None):
             wire['previous_check_feedback']=saved['feedback']
         route = permission['scope']['route']
         provider = permission['scope']['provider']
-        if provider not in {'local', 'codex', 'claude'}:
+        if provider not in {'local', 'codex', 'claude', 'smart'}:
             raise ValueError('The saved provider has no supported independent feature-check request bound. No fallback was made.')
-        if provider in {'codex','claude'}:
+        if provider in {'codex','claude','smart'}:
             wire = complete_original_wire(wire)
     if everyday.enabled():
         everyday.require_room(everyday.configuration(engine))
+    if provider=='smart' and adapter is None:
+        from workbench.strategy_waiting import preflight
+        if job['payload'].get('ai_wait',{}).get('recheck_at',0)>time.time():
+            return False
+        if preflight(engine,dict(job),route,lambda:bool(stop_event and stop_event.is_set())):
+            return True
+        with engine.connect() as c:
+            job=intake.require(c,planning_jobs,job['id'])
     if adapter is None and provider == 'local':
         from workbench.local_model_priority import planning_ready
         if not planning_ready():
@@ -404,9 +412,9 @@ def advance(engine, job, *, adapter=None, stop_event=None):
             status='active',finished_at=None,message='Preparing read-only independent feature checks from original source.'))
     if adapter is not None:
         used = adapter
-    elif provider in {'codex','claude'}:
+    elif provider in {'codex','claude','smart'}:
         from workbench.provider_routes import external_planner
-        used = external_planner(dict(model=route['model'], effort=route.get('effort'),provider=provider), stopped.is_set)
+        used = external_planner(route if route.get('strategy') else dict(model=route['model'],effort=route.get('effort'),provider=provider),stopped.is_set)
         used.ends_at = time.monotonic()+budget['verification_request_seconds']
     else:
         used = LocalProvider(stopped,ends_at=time.monotonic()+budget['verification_request_seconds'])
@@ -415,16 +423,19 @@ def advance(engine, job, *, adapter=None, stop_event=None):
     accepted = unsupported = False
     next_saved = copy.deepcopy(saved)
     try:
-        if adapter is None and provider in {'codex','claude'}:
+        if adapter is None and provider in {'codex','claude','smart'}:
             used.bind_source(current_packet)
         evidence = create_evidence(lease,schema,files=current_packet['files'])
         used.response_evidence = evidence
+        if getattr(used,'strategy_control',False):
+            from workbench.strategy_waiting import options
+            used.bind_operation(engine,lease,**options(job))
         with engine.connect() as c:
             feature_steps.parent(c,approval['id'])
         raw,model,basis = used.generate(wire,schema,expected_model=route['model'])
         if evidence:
             evidence.snapshot('proposed-plan',raw)
-        if model!=route['model'] or basis not in {provider,'demo'} or len(json.dumps(raw).encode())>48000:
+        if (model!=route['model'] and not getattr(used,'strategy_control',False)) or basis not in ({'local','codex','claude','demo'} if provider=='smart' else {provider,'demo'}) or len(json.dumps(raw).encode())>48000:
             raise ValueError('Independent check response differs from its bounded saved model.')
         parsed = schema.model_validate(raw)
         if proposed:
@@ -442,7 +453,7 @@ def advance(engine, job, *, adapter=None, stop_event=None):
             raise ValueError('Independent feature checks need an unsupported capability: '+parsed.limitation)
         elif parsed.inspection:
             windows,matches,_ = inspect(current_packet,parsed.inspection,result_budget=6500,
-                **({'disclosure_paths':{f['path'] for f in current_packet['files']}} if provider in {'codex','claude'} else {}))
+                **({'disclosure_paths':{f['path'] for f in current_packet['files']}} if provider in {'codex','claude','smart'} else {}))
             if source_characters(current_packet)>262144:
                 raise ValueError('Independent source inspection exceeded its original-source bound.')
             current_packet['input_binding']=digest({k:v for k,v in current_packet.items() if k!='input_binding'})
@@ -482,6 +493,10 @@ def advance(engine, job, *, adapter=None, stop_event=None):
             failure,accepted = 'Feature stopped or changed. Independent output remains evidence only.',False
         parent = intake.require(c,task_sessions,approval['id'])
         stopped_parent = bool(parent['state'].get('cancel_requested'))
+        if diagnostics.get('ai_wait'):
+            from workbench.strategy_waiting import pause_preparation
+            if pause_preparation(c,active,used,diagnostics['ai_wait'],approval['id'],'feature_checks_claim'):
+                return True
         finish_attempt(c,{**job,'lease':lease},used,model,basis,'completed' if not failure else 'failed')
         record = dict(operation_id=lease,confirmed_finished=confirmed,schema=claim['schema'],
             failure=failure,diagnostics=diagnostics,input_binding=digest(wire))

@@ -70,7 +70,7 @@ def queue(engine, offered):
         if (c.execute(select(task_sessions.c.id).where(task_sessions.c.status.in_(owner.ACTIVE),
                 task_sessions.c.id != approval['id'])).first()
                 or c.execute(select(real_execution_requests.c.id).where(real_execution_requests.c.status.in_(
-                    ['pending','running','checking','cancel_requested']))).first()
+                    ['pending','waiting_ai','running','checking','cancel_requested']))).first()
                 or c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()
                 or c.execute(select(real_execution_grants.c.id).outerjoin(real_execution_requests,
                     real_execution_requests.c.grant_id == real_execution_grants.c.id).where(

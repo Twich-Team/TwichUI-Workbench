@@ -222,7 +222,7 @@ def resume(engine):
                 offered=intake.require(c,task_run_offers,job['payload']['current_offer_id'])
                 recovery=proof(c,current,parent,offered)
                 if (c.execute(select(real_execution_requests.c.id).where(real_execution_requests.c.status.in_(
-                        ['pending','running','checking','cancel_requested']))).first()
+                        ['pending','waiting_ai','running','checking','cancel_requested']))).first()
                         or c.execute(select(model_attempts.c.id).where(model_attempts.c.finished_at.is_(None))).first()):
                     continue
                 state={**parent['state'],'feature_history':parent['state'].get('feature_history',[])+[

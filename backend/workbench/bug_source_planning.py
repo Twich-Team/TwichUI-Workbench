@@ -883,6 +883,10 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
         elif receipts:
             diagnostics['known_usage'] = json.dumps(summed, sort_keys=True)
             diagnostics['usage'] = None
+        if getattr(adapter,'strategy_control',False):
+            diagnostics['strategy_requests']=list(adapter.request_history)
+            if diagnostics.get('usage'):
+                diagnostics['usage']['strategy_requests']=list(adapter.request_history)
         adapter.diagnostics = diagnostics
         adapter.inspection_packet = packet
         adapter.response_evidence = parent

@@ -446,12 +446,12 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 except (ValueError, OSError, HTTPException, OperationalError):
                     return True
 
-            if choice=='smart-strategy' or job['payload'].get('manual_ai'):
+            if everyday_mode:
                 from workbench import strategy_waiting
                 with engine.connect() as current:
                     prospective=provider_routes.approved(current,original)
                 route=prospective
-                if strategy_waiting.preflight(engine,job,prospective,provider_stopped,suitable_local=not bug):
+                if prospective.get('strategy') and strategy_waiting.preflight(engine,job,prospective,provider_stopped,suitable_local=not bug):
                     return True
             # Same job/lease and accounting owners; duplicate workers never call an
             # adapter for an already claimed job. No automatic inference retry.

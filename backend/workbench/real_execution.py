@@ -6,6 +6,7 @@ import hashlib
 import copy
 import json
 import os
+import time
 from pathlib import Path
 from uuid import uuid4
 
@@ -202,7 +203,7 @@ def submit(engine, grant_id, command_id):
             existing = c.execute(select(requests.c.id).join(grants, requests.c.grant_id == grants.c.id).where(
                 grants.c.snapshot['workflow_task']['task']['id'].as_string() == linked['task']['id'],
                 grants.c.snapshot['workflow_task']['intake_id'].as_string() == linked['intake_id'],
-                requests.c.status.in_(['pending','running','checking','checked','cancel_requested']))).first()
+                requests.c.status.in_(['pending','waiting_ai','running','checking','checked','cancel_requested']))).first()
             if existing:
                 raise ValueError('This task already has active or checked work; no duplicate execution')
         if c.execute(select(requests.c.id).where(requests.c.grant_id == grant_id)).first():
@@ -346,15 +347,16 @@ def cancel(engine, identity, command_id):
             if prior != command_id:
                 raise HTTPException(409, 'A different stop request is already recorded.')
             return dict(id=identity,status=row['status'])
-        if row['status'] not in {'pending','running','checking'}:
+        if row['status'] not in {'pending','waiting_ai','running','checking'}:
             raise HTTPException(409, 'This run has already finished; its history is retained.')
-        queued = row['status'] == 'pending'
+        queued = row['status'] in {'pending','waiting_ai'}
+        suspended=row['status']=='waiting_ai'
         c.execute(requests.update().where(requests.c.id == identity).values(
             status='cancelled' if queued else 'cancel_requested',
             finished_at=now() if queued else None,
-            message='Stopped before execution. No attempt was consumed.' if queued else
+            message='Stopped while waiting. Completed work and consumption are retained.' if suspended else 'Stopped before execution. No attempt was consumed.' if queued else
                     'Stopping this run. Waiting for confirmed cleanup; no replacement will start.',
-            result={**result,'stop_command':command_id, **({'inference_ran':False} if queued else {})}))
+            result={**result,'stop_command':command_id, **({'inference_ran':False} if queued and not suspended else {})}))
     return dict(id=identity,status='cancelled' if queued else 'cancel_requested')
 
 
@@ -421,7 +423,7 @@ def process_one(engine, runtime=None, stop_event=None):
     task_budget.authorize_one(engine, runtime)
     task_execution.dispatch_one(engine)
     with engine.connect() as c:
-        candidates = c.execute(select(requests).where(requests.c.status == 'pending')
+        candidates = c.execute(select(requests).where(requests.c.status.in_(['pending','waiting_ai']))
                             .order_by(requests.c.created_at, requests.c.id).limit(64)).mappings().all()
         pending = grant = None
         for candidate in candidates:
@@ -432,11 +434,26 @@ def process_one(engine, runtime=None, stop_event=None):
         if not pending:
             return False
     operation.selected(requests, pending)
+    resuming=pending['status']=='waiting_ai'
+    if resuming:
+        if pending['result'].get('ai_wait',{}).get('recheck_at',0)>time.time():
+            return False
+        from workbench.smart_coding_wait import load
+        try:
+            runtime.ai_resume=load(runtime,pending,grant)
+            runtime.ai_wait_since=runtime.ai_resume['waiting_since']
+            from workbench.manual_ai import effective_for_run
+            with engine.connect() as current:
+                manual=effective_for_run(current,pending,grant,runtime.ai_resume)
+            runtime.ai_override=manual['route'] if manual else None
+            runtime.ai_manual_authorization_sha256=digest(manual) if manual else None
+        except (ValueError,OSError,KeyError,TypeError):
+            return False  # Changed/uncertain saved work cannot resume.
     if not valid(grant):
         # No expensive service observation or attempt reservation after expiry.
         with write_transaction(engine) as c:
-            c.execute(requests.update().where(requests.c.id == pending['id'], requests.c.status == 'pending')
-                .values(status='blocked', finished_at=now(), result={'inference_ran':False},
+            c.execute(requests.update().where(requests.c.id == pending['id'], requests.c.status.in_(['pending','waiting_ai']))
+                .values(status='blocked',finished_at=now(),result={**(pending['result'] or {}),'resume_blocked_before_dispatch':True} if resuming else {'inference_ran':False},
                         message='Execution permission expired, changed or was withdrawn. Nothing started; review is needed.'))
         return True
     # Expensive source/provider/capability probes are always outside database locks.
@@ -451,7 +468,7 @@ def process_one(engine, runtime=None, stop_event=None):
     with write_transaction(engine) as c:
         row = c.execute(select(requests).where(requests.c.id == pending['id'])).mappings().one()
         current = c.execute(select(grants).where(grants.c.id == row['grant_id'])).mappings().one()
-        if row['status'] != 'pending':
+        if row['status'] != ('waiting_ai' if resuming else 'pending'):
             return False
         from workbench import everyday
 
@@ -477,14 +494,14 @@ def process_one(engine, runtime=None, stop_event=None):
             blocked = [g['name'] for g in gates if g['status'] != 'passed']
             c.execute(requests.update().where(requests.c.id == row['id']).values(
                 message='Waiting for execution safety checks: '+(', '.join(blocked)[:600] or 'activation evidence unavailable')+'. No model has started.',
-                result={'gates':gates,'inference_ran':False}))
+                result={**(row['result'] or {}), 'gates':gates,**({} if resuming else {'inference_ran':False})}))
             return False  # Same unconsumed request will be reconsidered; no attempt/retry is created.
         if not valid(current) or not ready or not task_ready:
             c.execute(requests.update().where(requests.c.id == row['id']).values(
                 status='blocked', finished_at=now(), message=(task_message or
                     'The execution permission or prepared environment is no longer current. Nothing started.') if linked else
                     'Activation, current task approval or execution permission failed. No inference ran.',
-                result={'gates': gates, 'inference_ran': False}))
+                result={**(row['result'] or {}),'gates':gates,**({} if resuming else {'inference_ran':False})}))
             return True
         # Globally one active real attempt; concurrent writers serialize here.
         if c.execute(select(requests.c.id).where(requests.c.status.in_(['running', 'checking', 'cancel_requested']))).first():
@@ -492,20 +509,24 @@ def process_one(engine, runtime=None, stop_event=None):
                 c.execute(requests.update().where(requests.c.id == row['id']).values(
                     message='Waiting for another run or its cleanup to finish. No model has started.'))
             return False
-        fence = str(uuid4())
+        fence = row['fence'] if resuming else str(uuid4())
         owner = owner_identity()
         c.execute(requests.update().where(requests.c.id == row['id']).values(
-            status='running', fence=fence, started_at=now(), message='Implementing with Codex in isolation.' if route else 'Implementing in isolation.',
-            result={'owner': owner, 'inference_ran': False}))
+            status='running',fence=fence,started_at=row['started_at'] if resuming else now(), message='Implementing with Codex in isolation.' if route else 'Implementing in isolation.',
+            result={'owner':owner,'inference_ran':False,**(dict(ai_resume_sequence=runtime.ai_resume['sequence'],ai_checkpoint=row['result']['ai_checkpoint'],
+                **({'ai_manual_sha256':row['result']['ai_manual_sha256']} if row['result'].get('ai_manual_sha256') else {})) if resuming else {})}))
         task_id = linked['intake_id'] if linked and everyday.enabled() else (linked or {}).get('task', {}).get('id', TASK)
-        c.execute(model_attempts.insert().values(id=fence, job_id=None, execution_id=row['id'],
-            task_id=task_id,
-            source='workbench', backend=route.get('provider','codex') if route else getattr(runtime,'execution_contract',contract())['provider'],
-            purpose='implementation', requested_model=route['model'] if route else getattr(runtime,'execution_contract',contract())['model'],
-            requested_effort=route['effort'] if route else None, policy_revision=route['policy_revision'] if route else None,
-            actual_model=None if route else runtime.identity()['model'],
-            routing_reason='Reviewed Codex route and explicit run approval.' if route else 'Explicit one-task owner grant; fallback disabled.',
-            started_at=now(), outcome='running'))
+        if resuming:
+            c.execute(model_attempts.update().where(model_attempts.c.id==fence).values(outcome='running',finished_at=None))
+        else:
+            c.execute(model_attempts.insert().values(id=fence, job_id=None, execution_id=row['id'],
+                task_id=task_id,
+                source='strategy-control' if route and route.get('strategy') else 'workbench', backend=route.get('provider','codex') if route else getattr(runtime,'execution_contract',contract())['provider'],
+                purpose='implementation', requested_model=route['model'] if route else getattr(runtime,'execution_contract',contract())['model'],
+                requested_effort=route['effort'] if route else None, policy_revision=route['policy_revision'] if route else None,
+                actual_model=None if route else runtime.identity()['model'],
+                routing_reason='Reviewed Codex route and explicit run approval.' if route else 'Explicit one-task owner grant; fallback disabled.',
+                started_at=now(), outcome='running'))
 
     def permitted():
         if stop_event is not None and stop_event.is_set():
@@ -529,6 +550,7 @@ def process_one(engine, runtime=None, stop_event=None):
                 requests.c.status == 'running').values(status='checking', message='Checking frozen real changes.'))
 
     runtime.phase = phase
+    runtime.strategy_engine=engine
     runtime.workflow_task = grant['snapshot'].get('workflow_task')
     returned_result = None
     try:
@@ -551,7 +573,15 @@ def process_one(engine, runtime=None, stop_event=None):
             result['check_failure'] = runtime.check_failure
         result.update(failure_observations(runtime, row['id'], fence))
         result = retain_usage(result, returned_result)
-        status = 'failed'
+        from workbench.smart_provider import Waiting
+        if isinstance(error,Waiting) and getattr(runtime,'ai_checkpoint',None):
+            status='waiting_ai'
+            result.update(ai_wait=runtime.ai_wait,ai_checkpoint=runtime.ai_checkpoint,usage=runtime.ai_wait_usage,
+                owner=owner,inference_ran=bool(runtime.ai_wait_usage['requests_observed']),
+                **({'ai_manual_sha256':runtime.ai_manual_authorization_sha256} if getattr(runtime,'ai_manual_authorization_sha256',None) else {}),
+                **(dict(ai_resume_sequence=runtime.ai_resume['sequence']) if resuming else {}))
+        else:
+            status = 'failed'
     completed_at = now()
     if status == 'failed' and hasattr(runtime, 'record_outcome'):
         try:
@@ -576,14 +606,14 @@ def process_one(engine, runtime=None, stop_event=None):
             if current['fence'] != fence or current['status'] not in {'running', 'checking'}:
                 return True  # Stale completion can never overwrite a recovered outcome.
             c.execute(requests.update().where(requests.c.id == row['id']).values(
-                status=status, result=result, finished_at=completed_at,
+                status=status,result=result,finished_at=None if status=='waiting_ai' else completed_at,
                 message=('Changes completed and independently checked. Nothing accepted or published.' if status == 'checked'
-                         else result.get('provider_message') or 'This run could not finish. Its evidence is saved; it will not restart automatically.') if linked else
+                         else result['ai_wait']['reason'] if status=='waiting_ai' else result.get('provider_message') or 'This run could not finish. Its evidence is saved; it will not restart automatically.') if linked else
                         ('Real candidate independently checked. Nothing published.' if status == 'checked'
                          else 'Real attempt did not qualify and is consumed. No replay under this grant.')))
             c.execute(model_attempts.update().where(model_attempts.c.id == fence).values(
                 outcome=status, verification=result.get('verification'), usage=result.get('usage'), finished_at=completed_at,
-                **({'actual_model': route['model']} if route and result.get('usage', {}).get('status') == 'complete' else {})))
+                **({'actual_model': route['model']} if route and not route.get('strategy') and result.get('usage', {}).get('status') == 'complete' else {})))
         return True
     try:
         if not commit_result():
@@ -711,7 +741,7 @@ def listing(engine, page=1, group='all'):
     if not inspect(engine).has_table(requests.name):
         return dict(available=False, reason='Recorded runs are unavailable in this store version.',
                     items=[], total=0, page=page)
-    filters = {'all': [], 'active': ['pending','running','checking'],
+    filters = {'all': [], 'active': ['pending','waiting_ai','running','checking'],
                'attention': ['failed','blocked','interrupted'], 'checked': ['checked']}
     filters['active'].append('cancel_requested')
     filters['attention'].append('cancelled')

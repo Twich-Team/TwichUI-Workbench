@@ -168,13 +168,13 @@ class Boundary:
 
 
 def selection_options(request):
-    return {k:request[k] for k in ('suitable_local','reviewed_local','waiting_since','manual_stage','requested_stage')}
+    return {k:request[k] for k in ('suitable_local','reviewed_local','waiting_since','manual_stage','requested_stage','failures')}
 
 
 def handle(connection,request,binary,credential,runtime,evidence_root,config_path,resolve):
     result=None
     try:
-        common={'operation','strategy','suitable_local','reviewed_local','waiting_since','manual_stage','requested_stage'}
+        common={'operation','strategy','suitable_local','reviewed_local','waiting_since','manual_stage','requested_stage','failures'}
         turn={'request_id','stage_id','prompt','schema','request_seconds'}
         if request.get('operation') not in {'smart-choose','smart-turn'} or set(request)!=(common|(turn if request['operation']=='smart-turn' else set())):
             raise ValueError('Unsupported strategy operation')
@@ -185,6 +185,9 @@ def handle(connection,request,binary,credential,runtime,evidence_root,config_pat
                 or any(type(v) not in (int,float) or not 0<v<=time.time() for v in request['waiting_since'].values())
                 or any(request[k] is not None and request[k] not in {s.id for s in strategy.stages} for k in ('manual_stage','requested_stage'))):
             raise ValueError('Unknown strategy stage')
+        if (not isinstance(request['failures'],dict) or set(request['failures'])-{s.id for s in strategy.stages}
+                or any(reason not in {'allocation','provider_limit','unavailable','authentication','unsuitable','unknown'} for reason in request['failures'].values())):
+            raise ValueError('Unsupported safely settled stage failure')
         if request['operation']=='smart-turn':
             if (str(UUID(request['request_id']))!=request['request_id'] or request['stage_id'] not in {s.id for s in strategy.stages}
                     or not isinstance(request['prompt'],str) or len(request['prompt'].encode())>393216
@@ -198,7 +201,7 @@ def handle(connection,request,binary,credential,runtime,evidence_root,config_pat
     except claude.Held as error:
         result=dict(error='authentication' if 'auth' in error.reason else 'protocol',started=error.dispatched,
             terminal=error.terminal and error.usage_complete,counted=error.usage if error.usage_complete else None,
-            known_subtotal=error.usage if not error.usage_complete else None)
+            known_subtotal=error.usage if not error.usage_complete else None,actual_model=error.actual_model)
     except codex.Hold as error:
         result=dict(error=error.reason,started=error.started,terminal=error.terminal,counted=error.counted,
                     partial=error.partial,**error.metadata)

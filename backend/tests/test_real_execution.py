@@ -376,3 +376,36 @@ def test_invalid_lease_deadline_issues_no_grant(store,deadline):
         real.issue(store,'NON-MODEL invalid lease test','pytest',runtime)
     with store.connect() as c:
         assert not c.execute(select(real.grants)).all()
+
+
+def test_smart_wait_resumes_same_grant_request_and_fence_without_a_second_attempt(store,monkeypatch):
+    from workbench.smart_provider import Waiting
+    from workbench import smart_coding_wait,ai_strategy
+    runtime,grant,receipt=granted(store)
+    calls=[]
+    def execute(identity,fence,permitted):
+        assert permitted()
+        calls.append((identity,fence))
+        if len(calls)==1:
+            runtime.ai_checkpoint=dict(path='/controlled-checkpoint',sha256='a'*64,sequence=1)
+            runtime.ai_wait=ai_strategy.Decision(state='waiting',reason='Waiting for verified native allowance.',recheck_at=1).model_dump()
+            runtime.ai_wait_usage=dict(status='complete',units='tokens',requests_observed=1,
+                values=dict(prompt_tokens=10,completion_tokens=5,total_tokens=15))
+            raise Waiting(runtime.ai_wait)
+        return dict(verification='passed',inference_ran=False,candidate_id='controlled')
+    runtime.execute=execute
+    monkeypatch.setattr(smart_coding_wait,'load',lambda *a:dict(sequence=1,waiting_since={}))
+    assert real.process_one(store,runtime)
+    with store.connect() as c:
+        first=dict(c.execute(select(real.requests).where(real.requests.c.id==receipt['id'])).mappings().one())
+    assert first['status']=='waiting_ai' and first['finished_at'] is None
+    assert first['result']['usage']['values']['total_tokens']==15
+    assert real.process_one(store,runtime)
+    with store.connect() as c:
+        final=c.execute(select(real.requests)).mappings().one()
+        attempts=c.execute(select(model_attempts).where(model_attempts.c.execution_id==receipt['id'])).mappings().all()
+        grants=c.execute(select(real.grants)).mappings().all()
+    assert calls==[(receipt['id'],first['fence'])]*2
+    assert final['status']=='checked' and final['started_at']==first['started_at']
+    assert len(attempts)==len(grants)==1
+    assert not real.process_one(store,runtime)

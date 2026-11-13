@@ -342,7 +342,7 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
             admitting=True,
             task_id=ref['task_id'], offer_id=config.get('feature_offer_id'),
         )
-        if everyday.enabled() and not (Path(config['run_root']) / 'session-claimed.json').exists():
+        if everyday.enabled():
             codex_route = provider_routes.run_selection(c, linked)
         if not budget or execution.digest(budget) != config["task_budget_fingerprint"]:
             raise ValueError("Current explicit owner task budget differs from session")
@@ -350,6 +350,24 @@ def process_one(engine, config_path, stop_event=None, prepare=provision, launch=
     real = root / "real-run"
     real.mkdir(exist_ok=True)
     claim = root / "session-claimed.json"
+    if codex_route and codex_route.get('strategy'):
+        from workbench.smart_provider import choose
+        if not claim.exists():
+            from workbench.db import task_sessions as saved_sessions
+            with engine.connect() as c:
+                state=c.execute(select(saved_sessions.c.state).where(saved_sessions.c.id==ref['approval_id'])).scalar() or {}
+            state=state.get('feature_slot_state',state)
+            choose(codex_route,lambda:bool(stop_event and stop_event.is_set()),waiting_since=state.get('ai_wait_since',{}))
+        else:
+            with engine.connect() as c:
+                waiting=c.execute(select(execution.requests).join(execution.grants,
+                    execution.requests.c.grant_id==execution.grants.c.id).where(
+                    execution.grants.c.snapshot['task_budget']['decision_id'].as_string()==ref['approval_id'],
+                    execution.requests.c.status=='waiting_ai')).mappings().first()
+            if waiting:
+                from workbench.smart_coding_wait import resume_controller
+                if not resume_controller(engine,root,waiting,config,stop_event,launch):
+                    return False
     if not claim.exists():
         # These deterministic proofs are prepared under the same one-session
         # package before any lease, then independently rechecked by the controller.

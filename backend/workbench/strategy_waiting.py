@@ -46,7 +46,9 @@ def preflight(engine,job,route,stop=lambda:False,**suitability):
     with write_transaction(engine) as c:
         if intake.require(c,planning_jobs,job['id'])!=job:
             return True
-        payload={**job['payload'],'ai_decision':decision}
+        since=dict(job['payload'].get('ai_wait_since',{}))
+        since.pop(decision.get('stage_id'),None)
+        payload={**job['payload'],'ai_decision':decision,'ai_wait_since':since}
         payload.pop('ai_wait',None)
         c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload=payload))
     job['payload']=payload
@@ -104,3 +106,27 @@ def remaining(job,bound):
 
 def seconds_remaining(job,bound):
     return bound-sum(p.get('active_seconds',0) for p in job['payload'].get('ai_resumed_phases',[]))
+
+
+def pause_preparation(c,active,adapter,decision,parent_id,claim_key):
+    """Retain a read-only preparation claim without consuming a native request."""
+    facts=adapter.diagnostics
+    if facts.get('generation_state')!='not_started':
+        return False
+    previous=list(active['payload'].get('ai_deferred_claims',[]))
+    if len(previous)>=32:
+        return False
+    previous.append(dict(attempt=active['lease'],claim=active['payload'].get(claim_key),decision=decision))
+    payload=waiting_payload(active['payload'],decision)
+    payload['ai_deferred_claims']=previous
+    payload['phase']='prepare_scopes' if claim_key=='feature_scope_claim' else 'prepare_independent_checks'
+    c.execute(model_attempts.update().where(model_attempts.c.id==active['lease']).values(
+        source='strategy-control',outcome='waiting',finished_at=intake.now(),usage=dict(status='not_started',
+            requests_observed=0,source='Verified no native preparation request started',units='tokens',
+            values=dict(prompt_tokens=0,completion_tokens=0,total_tokens=0))))
+    c.execute(planning_jobs.update().where(planning_jobs.c.id==active['id']).values(status='queued',
+        payload=payload,lease=None,lease_until=None,finished_at=None,message=decision['reason']))
+    from workbench.db import task_sessions
+    c.execute(task_sessions.update().where(task_sessions.c.id==parent_id).values(status='pending',
+        finished_at=None,message=decision['reason']+' Work is saved and will resume when eligible.'))
+    return True

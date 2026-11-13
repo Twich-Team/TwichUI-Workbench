@@ -39,8 +39,35 @@ def configured_fallback(saved, backend, conditions):
     return allowed
 
 
-def planning_binding(c, choice, settings=None):
+def planning_binding(c, choice, settings=None, *, apply_strategy=True):
     saved = model_policy.read_connection(c)
+    if apply_strategy and saved.strategy and choice!='smart-strategy':
+        from workbench.schemas import TaskAISettings,TaskModelChoice
+        explicit=TaskAISettings.model_validate(settings) if settings else None
+        if 'fallback' in choice or explicit and explicit.fallback:
+            raise ValueError('Use the ordered Smart strategy to authorize fallback stages, or choose one model for this task.')
+        backend='local' if choice=='qwen-once' else 'claude' if choice=='claude-once' else 'codex'
+        expected=explicit.primary if explicit else TaskModelChoice(provider=backend,
+            model=saved.providers[backend].model,effort=saved.providers[backend].effort)
+        if expected.provider!=backend or not saved.providers[backend].enabled:
+            raise ValueError('The explicit task choice does not match an enabled provider.')
+        validate_selection(backend,expected.model,expected.effort)
+        strategy=saved.strategy.model_copy(deep=True)
+        stage=next((s for s in strategy.stages if s.provider==backend),None)
+        override=bool(explicit and explicit.allocation_override)
+        if stage is None:
+            if not override:
+                raise ValueError('This provider has no strategy allocation. Use the saved strategy or explicitly authorize an allocation override with Start now.')
+            from workbench.ai_strategy import Stage,Strategy
+            stage=Stage(id='manual',provider=backend,model=expected.model,effort=expected.effort,
+                allocation=None if backend=='local' else 100,on_limit='wait')
+            strategy=Strategy(stages=[stage])
+        stage.model,stage.effort=expected.model,expected.effort
+        route=dict(provider='smart',policy_revision=saved.revision,model=expected.model,effort=expected.effort,
+            fallback=[],strategy=strategy.model_dump(),requested_stage=stage.id)
+        if override:
+            route['manual_stage']=stage.id
+        return ('codex_route' if choice in REMOTE_CHOICES else 'local_route'),route
     if choice=='smart-strategy':
         from workbench.schemas import TaskAISettings
         from workbench.ai_strategy import Strategy
@@ -135,14 +162,17 @@ def approved(c, original):
             if key in permission and permission.get('binding') == digest(original['payload']):
                 return permission[key]
         raise ValueError('The frozen task model receipt is unavailable.')
-    key, current = planning_binding(c, choice)
-    receipts = c.execute(select(planning_jobs.c.payload).where(
-        planning_jobs.c.intake_id == original['id'], planning_jobs.c.kind == 'planning')).scalars()
-    saved_routes = [receipt['local_planning_receipt'][key] for receipt in receipts
-                    if key in receipt.get('local_planning_receipt', {})]
+    key='codex_route' if choice in REMOTE_CHOICES else 'local_route'
+    receipts=list(c.execute(select(planning_jobs.c.payload).where(
+        planning_jobs.c.intake_id==original['id'],planning_jobs.c.kind=='planning')).scalars())
+    saved_routes=[r['local_planning_receipt'][key] for r in receipts if key in r.get('local_planning_receipt',{})]
+    for receipt in receipts:
+        permission=receipt.get('local_planning_receipt',{})
+        if permission.get('binding')==digest(original['payload']) and permission.get(key,{}).get('strategy'):
+            return permission[key]
+    _,current=planning_binding(c,choice,apply_strategy=False)
     for saved in saved_routes:
-        if {k: v for k, v in saved.items() if k != 'policy_revision'} == {
-                k: v for k, v in current.items() if k != 'policy_revision'}:
+        if {k:v for k,v in saved.items() if k!='policy_revision'}=={k:v for k,v in current.items() if k!='policy_revision'}:
             return saved
     if choice == 'qwen-once' and not saved_routes:
         # Requests saved before per-provider consent retained the prior default binding.
@@ -165,6 +195,10 @@ def fallback_reason(choice, selected, error):
 
 def bug_followup_codex(route, followup):
     """The read-only reply keeps the settled producer and never enables fallback."""
+    if route.get('strategy'):
+        return route
+    if followup['provider']=='claude' and route.get('provider')=='claude':
+        return route
     if followup['provider'] == 'local':
         return None
     if followup['provider'] == 'codex' or followup['provider'] is None:
@@ -205,7 +239,7 @@ def run_selection(c, linked):
         if (stage is None or basis!=stage.provider or grounding.get('model_selection')!={
                 'model':stage.model,'policy_revision':selected['policy_revision']}):
             raise ValueError('The reviewed plan does not identify a permitted frozen strategy stage.')
-        return selected
+        return None if stage.provider=='local' else selected
     if choice=='claude-once':
         if (basis!='claude' or reason or selected.get('provider')!='claude'
                 or grounding.get('model_selection')!={'model':selected['model'],'policy_revision':selected['policy_revision']}):

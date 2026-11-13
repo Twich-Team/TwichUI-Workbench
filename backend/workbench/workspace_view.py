@@ -6,7 +6,7 @@ from typing import Literal
 from fastapi import HTTPException
 from pydantic import BaseModel
 from pydantic import Field
-from sqlalchemy import select
+from sqlalchemy import select,inspect
 
 from workbench.db import intakes, planning_jobs, proposals, proposal_decisions, backlog_items, model_attempts
 from workbench import task_execution, task_budget
@@ -146,6 +146,14 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
         local_model = model_priority(c)
         from workbench.model_policy import read_connection
         work_paused = bool(read_connection(c).pause_new_work)
+        from workbench.db import task_sessions
+        saved_sessions=list(c.execute(select(task_sessions).order_by(task_sessions.c.created_at)).mappings()) if inspect(c).has_table(task_sessions.name) else []
+        session_waits={}
+        for saved in saved_sessions:
+            owner=saved['snapshot'].get('intake_id') or saved['snapshot'].get('task',{}).get('intake_id')
+            wait=saved['state'].get('feature_slot_state',saved['state']).get('ai_wait')
+            if owner and wait and saved['status'] in {'pending','active','waiting_recovery'} and not saved['state'].get('cancel_requested'):
+                session_waits[owner]=wait
         from workbench.task_identity import links as ownership_links
         links = ownership_links(c)
         from workbench.task_cleanup import lifecycle
@@ -251,9 +259,10 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
         ai_status=ai_reason=ai_recheck_at=ai_reset_at=None
         waiting_job=max((j for j in current_jobs if j['status']=='queued' and j['payload'].get('ai_wait')),
                         key=lambda j:j['revision'],default=None)
-        if phase=='queued' and waiting_job:
+        if (phase=='queued' and waiting_job) or identity in session_waits and phase not in {'completed','failed','stopped','paused'}:
             import time
-            wait=waiting_job['payload']['ai_wait']
+            phase='queued'
+            wait=session_waits.get(identity) or waiting_job['payload']['ai_wait']
             name={'codex':'Codex','claude':'Claude','local':'Local Qwen'}.get(wait.get('provider'),'AI')
             condition=wait.get('condition')
             ai_reason=wait['reason']

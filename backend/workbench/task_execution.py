@@ -6,7 +6,7 @@ import re
 from uuid import UUID, uuid5
 
 from fastapi import HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 from sqlalchemy import select, inspect, func
 
 from workbench import intake
@@ -332,6 +332,7 @@ class TaskRun(BaseModel):
 
 
 class TaskSessionView(BaseModel):
+    ai_wait: dict | None = Field(default=None,exclude_if=lambda value:value is None)
     id: str
     status: str
     message: str
@@ -491,6 +492,8 @@ def context_in(c, intake_id, task_id):
         reason = result_message(relevant)
         if relevant["recovery_pending"]:
             stage = "recovering"
+        if stage=="waiting_ai":
+            stage="pending"
         if stage == "pending":
             pending_grant = (
                 c.execute(

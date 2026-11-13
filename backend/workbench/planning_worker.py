@@ -393,6 +393,10 @@ def finish_attempt(connection, job, adapter, model, basis, outcome):
     is_claude = getattr(adapter,'backend',None)=='claude' or basis=='claude'
     is_codex = (isinstance(adapter, Planner) and not is_claude) or basis == 'codex'
     observed_usage = diagnostics.get('usage')
+    smart=bool(getattr(adapter,'strategy_control',False))
+    if smart:
+        from workbench.strategy_accounting import combine
+        observed_usage=combine(observed_usage,job['payload'])
     if is_claude and observed_usage is None and isinstance(diagnostics.get('native_known_subtotal'),dict):
         prior=json.loads(diagnostics.get('known_usage') or '{}')
         subtotal=diagnostics['native_known_subtotal']
@@ -406,9 +410,14 @@ def finish_attempt(connection, job, adapter, model, basis, outcome):
         observed_usage = dict(source='Workbench verified no '+('Claude' if is_claude else 'Codex')+' turn started', units='tokens',
             status='not_started', requests_observed=0,
             values=dict(prompt_tokens=0,completion_tokens=0,reasoning_tokens=0,total_tokens=0))
+    requests=(observed_usage or {}).get('strategy_requests',[]) if smart else []
+    models={r['model'] for r in requests}
+    providers={r['provider'] for r in requests}
+    selected_model=next(iter(models)) if len(models)==1 else None
+    selected_provider=next(iter(providers)) if len(providers)==1 else 'smart'
     connection.execute(model_attempts.update().where(model_attempts.c.id == job['lease']).values(
         source='strategy-control' if getattr(adapter,'strategy_control',False) else 'demo' if is_demo else 'workbench' if is_local or is_codex or is_claude else 'unknown',
-        backend='claude' if is_claude else 'codex' if is_codex else 'local' if is_local else None,
-        requested_model=func.coalesce(model_attempts.c.requested_model, diagnostics.get('configured_model')),
-        actual_model=diagnostics.get('actual_model') or model,
+        backend=selected_provider if smart else 'claude' if is_claude else 'codex' if is_codex else 'local' if is_local else None,
+        requested_model=selected_model if smart else func.coalesce(model_attempts.c.requested_model, diagnostics.get('configured_model')),
+        actual_model=selected_model if smart else diagnostics.get('actual_model') or model,
         finished_at=now(), outcome=outcome, usage=observed_usage))

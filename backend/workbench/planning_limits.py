@@ -141,6 +141,14 @@ def settled_planning_chain(connection, identity, revision=None):
             continue
         payload=json.loads(payload) if isinstance(payload,str) else payload
         usage=json.loads(usage) if isinstance(usage,str) else usage
+        resumed=payload.get('ai_resumed_phases',[])
+        retired={p['attempt']:p for p in resumed}
+        if attempt in retired:
+            if outcome!='waiting' or not finished or usage!=retired[attempt]['usage']:
+                raise ValueError('A suspended strategy phase changed its settled accounting')
+            continue
+        from workbench.strategy_accounting import complete_requests
+        smart=complete_requests(usage,payload) if isinstance(usage,dict) and usage.get('strategy_requests') else False
         # The existing single-turn regression connector records terminal outcome
         # and token values without the multi-turn investigation's status tag.
         # Accept that supported receipt only for the original non-investigation
@@ -156,9 +164,9 @@ def settled_planning_chain(connection, identity, revision=None):
         valid_values=(all(type(values.get(k)) is int and values[k]>=0 for k in
             ('prompt_tokens','completion_tokens','total_tokens')) and values['total_tokens']>0
             and values['prompt_tokens']+values['completion_tokens']==values['total_tokens'])
-        if (not valid_values or status!='completed' or claims!=1 or outcome!='completed' or not finished
+        if (not valid_values or status!='completed' or claims!=(1+len(resumed) if smart else 1) or outcome!='completed' or not finished
                 or not isinstance(usage,dict) or not (usage.get('status')=='complete' or single_receipt)
-                or usage.get('units')!='tokens' or not actual or actual!=requested):
+                or usage.get('units')!='tokens' or not smart and (not actual or actual!=requested)):
             raise ValueError('The investigation phase is unsettled or lacks complete accounting')
         records.append(dict(id=attempt,job_id=job,revision=rev,payload=payload,usage=usage,
             outcome=outcome,finished_at=finished,backend=backend,actual_model=actual,requested_model=requested))
@@ -172,7 +180,8 @@ def settled_planning_chain(connection, identity, revision=None):
         received=second['payload'].get('bug_followup',{})
         if (any(received.get(k)!=v for k,v in expected.items())
                 or second['payload'].get('local_planning_receipt')!=first['payload'].get('local_planning_receipt')
-                or second['backend']!=first['backend'] or second['actual_model']!=first['actual_model']
+                or not (second['usage'].get('strategy_requests') and first['usage'].get('strategy_requests'))
+                    and (second['backend']!=first['backend'] or second['actual_model']!=first['actual_model'])
                 or second['payload'].get('provider_switch')):
             raise ValueError('The continuation provider, source or consumed accounting changed')
         # Also validate its own remaining bound, including integer types.

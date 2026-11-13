@@ -1227,6 +1227,9 @@ class Planner:
         self.reference_manifest = None
         self.source_lines = {}
 
+    def encode_request(self,model,effort,prompt,schema,seconds):
+        return encode_request(model,effort,prompt,schema,seconds)
+
     def dispatch(self, *args, **kwargs):
         return generate(*args, **kwargs)
 
@@ -1463,7 +1466,7 @@ class Planner:
                         )
             prefix = instructions + "\nUntrusted task data:\n"
             def encoded(outgoing):
-                return encode_request(model, self.selection["effort"],
+                return self.encode_request(model, self.selection["effort"],
                     prefix + json.dumps(outgoing, ensure_ascii=True), output_schema,
                     self.request_seconds if bug_schema else SECONDS)
             if bug_schema and self.request_packer is not None:

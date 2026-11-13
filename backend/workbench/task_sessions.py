@@ -8,6 +8,7 @@ checks/restoration; existing publication owner alone owns GitHub writes.
 
 from datetime import datetime
 from workbench import worker_operation as operation
+from workbench.smart_provider import Waiting
 
 import json
 import os
@@ -416,6 +417,8 @@ def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
             c.execute(
                 select(sessions)
                 .where(sessions.c.status.in_(ACTIVE - {"pending"} if resume_only else ACTIVE))
+                .where(or_(sessions.c.state['ai_wait']['recheck_at'].as_float().is_(None),sessions.c.state['ai_wait']['recheck_at'].as_float()<=__import__('time').time()))
+                .where(or_(sessions.c.state['feature_slot_state']['ai_wait']['recheck_at'].as_float().is_(None),sessions.c.state['feature_slot_state']['ai_wait']['recheck_at'].as_float()<=__import__('time').time()))
                 .where(or_(sessions.c.snapshot['feature_parent'].as_boolean().is_not(True),
                     and_(sessions.c.state['feature_slot'].as_string().is_not(None),
                         sessions.c.state['feature_slot_result'].as_string().is_(None))))
@@ -546,6 +549,18 @@ def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
             pass  # Preserve unknown usage and every fence when proof is absent.
         if reason := getattr(stop_event, 'reason', None):
             state['resource_hold'] = reason
+        with engine.connect() as c:
+            waiting=c.execute(select(execution.requests.c.result,execution.grants.c.expires_at).join(execution.grants,
+                execution.requests.c.grant_id==execution.grants.c.id).where(
+                execution.grants.c.snapshot['task_budget']['decision_id'].as_string()==value['task']['approval_id'],
+                execution.requests.c.status=='waiting_ai')).first()
+        if waiting:
+            waiting,expires=waiting
+            state['ai_wait']={**waiting['ai_wait'],'recheck_at':min(waiting['ai_wait'].get('recheck_at') or float('inf'),datetime.fromisoformat(expires).timestamp())}
+            checkpoint=__import__('workbench.provider_admission',fromlist=['read']).read(Path(waiting['ai_checkpoint']['path']),{})
+            state['ai_wait_since']=checkpoint['waiting_since']
+            return _result(engine,row,'pending',waiting['ai_wait']['reason']+' Saved coding work will resume when eligible.',state)
+        state['ai_wait']=None
         terminal = root / "session-finished.json"
         if terminal.exists():
             outcome = json.loads(terminal.read_text())
@@ -574,6 +589,13 @@ def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
             engine, row, "waiting_recovery",
             "Waiting for saved result delivery and verified restoration. Implementation will not be replayed.", state,
         )
+    except Waiting as error:
+        state['ai_wait']={**error.decision,'recheck_at':min(error.decision.get('recheck_at') or float('inf'),datetime.fromisoformat(value['deadline']).timestamp())}
+        since=dict(state.get('ai_wait_since',{}))
+        if error.decision.get('stage_id'):
+            since.setdefault(error.decision['stage_id'],__import__('time').time())
+        state['ai_wait_since']=since
+        return _result(engine,row,'pending',error.decision['reason']+' Work is saved and will resume when eligible.',state)
     except (ValueError, HTTPException, OSError, subprocess.SubprocessError) as error:
         reason = getattr(stop_event, 'reason', None)
         state["error_type"] = type(error).__name__
@@ -619,7 +641,9 @@ def public_view(c, task_id):
                 row = parent
         if not row:
             return None
+    wait=row['state'].get('feature_slot_state',row['state']).get('ai_wait')
     return dict(
+        **(dict(ai_wait=wait) if wait else {}),
         id=row["id"],
         status=row["status"],
         message=' '.join(filter(None, [row["state"].get("resource_hold"), row["message"]])),
@@ -678,7 +702,7 @@ def _propagate_stop(engine, decision_id, command_id):
         query = select(execution.requests.c.id).join(execution.grants,
             execution.requests.c.grant_id == execution.grants.c.id).where(
             decision_match,
-            execution.requests.c.status.in_(['pending','running','checking']))
+            execution.requests.c.status.in_(['pending','waiting_ai','running','checking']))
         if offer_id:
             query = query.where(execution.grants.c.snapshot['task_budget']['offer']['id'].as_string() == offer_id)
         selected = (

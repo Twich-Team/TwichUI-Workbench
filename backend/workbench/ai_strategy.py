@@ -202,7 +202,7 @@ def evaluate(strategy, observations, consumption, *, now, failures=None,
         if not condition and requested_stage is not None and stage.id!=requested_stage:
             continue
         if not condition:
-            return Decision(state='selected',reason=(('Manual choice authorized for this request. ' if manual_stage else
+            return Decision(state='selected',reason=((first_wait.reason+' ' if first_wait else '')+('Manual choice authorized for this request. ' if manual_stage else
                 'Using your '+stage.role+' strategy stage. ')+label+' is eligible to start; a running request may finish above its cutoff.'),
                 unknown_usage=unknown,**base)
         prior_conditions.add(condition)
@@ -212,11 +212,13 @@ def evaluate(strategy, observations, consumption, *, now, failures=None,
                       provider_reset_at=reset,unknown_usage=unknown,**base)
         if reset is not None and condition in {'allocation','provider_limit'}:
             wait.recheck_at=reset
-        if first_wait is None:
+        if first_wait is None or (first_wait.condition=='unsuitable' and condition!='unsuitable') or (condition!='unsuitable' and wait.recheck_at<first_wait.recheck_at):
             first_wait=wait
         mode = 'switch' if condition=='unsuitable' else stage.on_limit
         if condition=='unknown' and strategy.unknown_usage=='switch':
             mode='switch'
+        elif condition=='unknown' and strategy.unknown_usage=='wait' and not reason.startswith('Strict ceiling:'):
+            mode='wait'
         if mode=='wait':
             return wait
         if mode=='wait_then_switch':

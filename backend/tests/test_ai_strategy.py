@@ -130,3 +130,13 @@ def test_impossible_strategies_are_rejected(change):
     change(data)
     with pytest.raises(ValidationError):
         ai.Strategy.model_validate(data)
+
+
+def test_unknown_wait_choice_holds_even_when_another_subscription_is_available():
+    s=ai.Strategy(stages=[ai.Stage(id='one',provider='codex',model='gpt-6.1-sol',allocation=50),
+        ai.Stage(id='two',provider='claude',model='claude-sonnet-5-5',allocation=50)])
+    obs=observations()
+    obs[1].windows[0].resets_at=None
+    assert decide(s=s,o=obs).stage_id=='one'
+    s.unknown_usage='switch'
+    assert decide(s=s,o=obs).stage_id=='two'

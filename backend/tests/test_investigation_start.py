@@ -10,6 +10,7 @@ from workbench.investigation_start import first, validate_prefix
 from test_everyday import installed  # noqa: F401
 from test_bug_workflow import enable_bugs, report, response
 from test_bug_source_planning import scripted
+from test_task_ai_settings import catalog  # noqa: F401
 
 VENDOR = dict(
     kind="issue",
@@ -60,15 +61,34 @@ def legacy(store, identity):
 
 
 def start(client, headers, item, **changes):
-    command = dict(
-        command_id=str(uuid4()),
-        binding=item["planning_start_binding"],
-        provider="qwen-once",
+    command = {
+        **dict(command_id=str(uuid4()),binding=item["planning_start_binding"],provider="qwen-once"),
         **changes,
-    )
+    }
     return command, client.post(
         "/api/intake/" + item["id"] + "/investigation", headers=headers, json=command
     )
+
+
+@pytest.mark.usefixtures('installed','catalog')
+def test_saved_report_accepts_frozen_smart_model_and_effort(client,headers,store,monkeypatch):
+    from workbench import model_policy
+    from workbench.ai_strategy import Stage,Strategy
+    enable_bugs(monkeypatch)
+    policy=model_policy.read(store)
+    policy.providers['codex'].enabled=True
+    policy.providers['codex'].model='capable-codex'
+    policy.providers['codex'].effort='high'
+    model_policy.save(store,policy,model_policy.capabilities())
+    original,item=saved(client,headers)
+    strategy=Strategy(stages=[Stage(id='selected',provider='codex',model='capable-codex',effort='low',allocation=40)])
+    _,result=start(client,headers,item,provider='smart-strategy',ai_settings=dict(
+        primary=dict(provider='codex',model='capable-codex',effort='low'),strategy=strategy.model_dump()))
+    assert result.status_code==200,result.text
+    with store.connect() as c:
+        route=first(c,item['id'])['payload']['local_planning_receipt']['codex_route']
+    assert route['strategy']==strategy.model_dump() and route['effort']=='low'
+    assert result.json()['original']['description']==original['description']
 
 
 @pytest.mark.usefixtures("installed")

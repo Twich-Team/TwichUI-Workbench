@@ -128,26 +128,101 @@ def disclosed_feedback(feedback,read_paths):
     return result
 
 
+def aggregate_native(receipts):
+    """Sum observed common fields; missing reasoning/cache counts stay unknown."""
+    common=set.intersection(*(set(r['values']) for r in receipts))
+    return {key:sum(r['values'][key] for r in receipts) for key in sorted(common)}
+
+
 class CodexRuntime(Runtime):
     def __init__(self, root, selection, stop_event=None):
         super().__init__(root, stop_event)
         self.codex_selection = selection
         self.provider_failure = None
-        self.provider_usage_source=('Native Claude Code reported response tokens including cache reads and creation'
+        self.provider_usage_source=('Native strategy provider turn tokens; exact attribution is retained per request' if selection.get('strategy') else 'Native Claude Code reported response tokens including cache reads and creation'
             if selection.get('provider')=='claude' else 'Codex app-server reported turn tokens')
 
-    def provider_generate(self, identity, fence, turn, *args, **kwargs):
+    def request_identity(self,identity,fence,turn,provider):
+        from uuid import UUID,uuid5
+        return str(uuid5(UUID(identity),provider+'-coding-'+str(fence)+'-'+str(turn)+('-resume-'+str(self.ai_resume['sequence']) if getattr(self,'ai_resume',None) else '')))
+
+    def provider_wire(self,identity,fence,turn,model,effort,prompt,schema,seconds=120,stop=lambda:False):
+        if self.codex_selection.get('strategy'):
+            from workbench.smart_provider import choose,encode_request
+            effective=getattr(self,'ai_override',None) or self.codex_selection
+            decision=choose(effective,stop,waiting_since=getattr(self,'ai_wait_since',{}))
+            self.ai_wait_since=dict(getattr(self,'ai_wait_since',{}))
+            self.ai_wait_since.pop(decision.stage_id,None)
+            if decision.provider=='local':
+                raise ValueError('This complex coding operation requires a suitable subscribed model.')
+            self.ai_choice=(turn,decision)
+            request=encode_request(effective,decision,prompt,schema,
+                self.request_identity(identity,fence,turn,'smart'),seconds,waiting_since=self.ai_wait_since)
+            return json.dumps(request,ensure_ascii=True,allow_nan=False).encode()
         if self.codex_selection.get('provider')=='claude':
-            from uuid import UUID,uuid5
+            from workbench.claude_client import encode_request
+            request=encode_request(model,effort,prompt,schema,self.request_identity(identity,fence,turn,'claude'),seconds)
+            return json.dumps(request,ensure_ascii=True,allow_nan=False).encode()
+        return codex_provider.encode_request(model,effort,prompt,schema,seconds)
+
+    def provider_generate(self, identity, fence, turn, *args, **kwargs):
+        if self.codex_selection.get('strategy'):
+            from workbench.smart_provider import remote_generate
+            if not getattr(self,'ai_choice',None) or self.ai_choice[0]!=turn:
+                self.provider_wire(identity,fence,turn,*args[:4],kwargs.get('request_seconds',120),kwargs.get('stop',lambda:False))
+            decision=self.ai_choice[1]
+            request_id=self.request_identity(identity,fence,turn,'smart')
+            self.record_ai_request(identity,fence,turn,decision,'running')
+            try:
+                output,usage=remote_generate(getattr(self,'ai_override',None) or self.codex_selection,decision,args[2],args[3],request_id,
+                    kwargs.get('stop',lambda:False),request_seconds=kwargs.get('request_seconds',120),waiting_since=getattr(self,'ai_wait_since',{}))
+            except BaseException as error:
+                from workbench.smart_provider import Waiting
+                self.record_ai_request(identity,fence,turn,decision,'not_started' if isinstance(error,Waiting) or isinstance(error,codex_provider.Hold) and not error.started else 'interrupted_unknown',usage=(error.counted or getattr(error,'native_known_subtotal',None)) if isinstance(error,codex_provider.Hold) else None)
+                raise
+            self.record_ai_request(identity,fence,turn,decision,'completed',usage)
+            return output,usage
+        if self.codex_selection.get('provider')=='claude':
             from workbench.claude_client import generate
-            return generate(*args,request_id=str(uuid5(UUID(identity),'claude-coding-'+str(fence)+'-'+str(turn))),**kwargs)
+            return generate(*args,request_id=self.request_identity(identity,fence,turn,'claude'),**kwargs)
         return codex_provider.generate(*args,**kwargs)
+
+    def record_ai_request(self,identity,fence,turn,decision,outcome,usage=None):
+        from uuid import UUID,uuid5
+        from sqlalchemy import select
+        from workbench.db import model_attempts,write_transaction
+        from workbench.service import now
+        if not getattr(self,'strategy_engine',None):
+            raise ValueError('Exact strategy request accounting is required before coding dispatch.')
+        record_id=str(uuid5(UUID(identity),'strategy-accounting-'+str(fence)+'-'+str(turn)+('-resume-'+str(self.ai_resume['sequence']) if getattr(self,'ai_resume',None) else '')))
+        with write_transaction(self.strategy_engine) as c:
+            parent=c.execute(select(model_attempts).where(model_attempts.c.id==fence)).mappings().one()
+            if outcome=='running':
+                c.execute(model_attempts.update().where(model_attempts.c.id==fence).values(source='strategy-control'))
+                c.execute(model_attempts.insert().values(id=record_id,job_id=None,execution_id=None,
+                    task_id=parent['task_id'],source='workbench',backend=decision.provider,purpose='strategy-request',
+                    requested_model=decision.model,requested_effort=decision.effort,policy_revision=parent['policy_revision'],
+                    routing_reason=decision.reason,started_at=now(),outcome='running'))
+            else:
+                receipt=dict(source='Native '+decision.provider+' coding request tokens',units='tokens',values=usage if outcome=='completed' else None,
+                    **(dict(known_values=usage) if usage and outcome!='completed' else {}),
+                    status='complete' if outcome=='completed' else 'partial' if usage else 'not_started' if outcome=='not_started' else 'unavailable',
+                    observed_at=now(),execution_id=identity,execution_fence=fence,turn=turn)
+                c.execute(model_attempts.update().where(model_attempts.c.id==record_id).values(outcome=outcome,
+                    actual_model=decision.model if outcome=='completed' else None,actual_effort=None,usage=receipt,finished_at=now()))
+        if outcome=='completed':
+            durable(self.root/('ai-request-'+identity+'-'+str(turn)+'.json'),json.dumps(dict(
+                execution_id=identity,fence=fence,turn=turn,decision=decision.model_dump(),usage=usage,
+                accounting_id=record_id),sort_keys=True).encode())
+
 
     def identity(self):
         result = super().identity()
         result.update(model=self.codex_selection['model'], model_path=None,
                       codex_selection=self.codex_selection)
-        for name in ('codex_runtime.py', 'codex_provider.py', 'provider_routes.py'):
+        for name in ('codex_runtime.py', 'codex_provider.py', 'provider_routes.py',*
+                (('smart_provider.py','ai_strategy.py','provider_admission.py','claude_native.py','claude_client.py','smart_coding_wait.py','manual_ai.py') if self.codex_selection.get('strategy') else
+                 ('claude_native.py','claude_client.py') if self.codex_selection.get('provider')=='claude' else ())):
             result['helper_sha256'][name] = sha(Path(__file__).with_name(name).read_bytes())
         return result
 
@@ -169,15 +244,29 @@ class CodexRuntime(Runtime):
         self.enforce_storage()
         return gates
 
-    def execute(self, identity, fence, permitted):
+    def execute(self,identity,fence,permitted):
+        self.ai_phase_started=time.monotonic()
+        try:
+            return self._execute(identity,fence,permitted)
+        except __import__('workbench.smart_provider',fromlist=['Waiting']).Waiting as error:
+            if not self.codex_selection.get('strategy'):
+                raise
+            from workbench.smart_coding_wait import checkpoint,usage
+            self.ai_checkpoint=checkpoint(self,identity,fence,error.decision)
+            self.ai_wait=error.decision
+            self.ai_wait_usage=usage(self,identity,fence,self.ai_checkpoint)
+            raise
+
+    def _execute(self, identity, fence, permitted):
         if not permitted() or any(gate['status'] != 'passed' for gate in self.preflight()):
             raise ValueError('Codex execution gate changed before inference.')
-        durable(self.root / ('ownership-' + identity + '.json'), json.dumps(
+        durable(self.root / ('ownership-' + identity + ('-ai-'+str(self.ai_resume['sequence']) if getattr(self,'ai_resume',None) else '') + '.json'), json.dumps(
             {'owner': job.owner_identity(), 'cgroup': confine.root()}).encode())
         self._request_id, self._fence, self._context_sha = identity, fence, self.context_sha()
         from workbench.repair_continuation import restore
-        restore(self,permitted)
-        self.implementation_deadline = time.monotonic() + job.LIMITS['implementation_s']
+        if not getattr(self,'ai_resume',None):
+            restore(self,permitted)
+        self.implementation_deadline = time.monotonic() + job.LIMITS['implementation_s']-(getattr(self,'ai_resume',None) or {}).get('active_seconds',0)
         tools = Tools(self, permitted)
         from workbench.verification_profiles import BUGFIX
         from workbench.verification_profiles import FEATURE
@@ -214,6 +303,8 @@ class CodexRuntime(Runtime):
                   'Untrusted committed source excerpts:\n' + json.dumps(source, ensure_ascii=True))
         if not permitted():
             raise ValueError('Codex execution permission changed before source transmission.')
+        self.provider_wire(identity,fence,1,self.codex_selection['model'],self.codex_selection['effort'],prompt,schema,
+            codex_provider.BUG_SECONDS if bug else codex_provider.SECONDS,lambda:not permitted())
         try:
             edit, counted = self.provider_generate(identity,fence,1,
                 self.codex_selection['model'], self.codex_selection['effort'],
@@ -262,14 +353,16 @@ class CodexRuntime(Runtime):
         Uncertain provider state stops; no fallback/replay or grant renewal occurs.
         Test feedback is data and cannot alter the frozen independent oracle.
         """
-        receipts=[]
-        feedback=continued_feedback(self)
+        resumed=(getattr(self,'ai_resume',None) or {}).get('progress',{})
+        receipts=list(resumed.get('receipts',[]))
+        feedback=resumed.get('feedback') or continued_feedback(self)
         failure=None
-        changed=False
+        changed=resumed.get('changed',False)
         source_lines={}
-        seen=set()
+        seen=set(resumed.get('seen',[]))
         try:
-            for turn in range(job.LIMITS['turns']):
+            for turn in range(resumed.get('next_turn',0),job.LIMITS['turns']):
+                self.ai_progress=dict(next_turn=turn,receipts=list(receipts),feedback=feedback,changed=changed,seen=sorted(seen))
                 if not permitted() or time.monotonic()+codex_provider.BUG_SECONDS>=self.implementation_deadline:
                     raise ValueError('Run permission or operation watchdog ended before another model turn')
                 source=[]
@@ -338,9 +431,9 @@ class CodexRuntime(Runtime):
                         operation_turn_bound=job.LIMITS['turns']),ensure_ascii=True))
                 # Bind the exact wire request before dispatch, even when a
                 # later cancellation prevents returning a provider receipt.
-                wire = codex_provider.encode_request(self.codex_selection['model'],
-                    self.codex_selection['effort'], prompt, schema, codex_provider.BUG_SECONDS)
-                durable(self.root/('codex-intent-'+identity+'-'+str(turn+1)+'.json'),
+                wire = self.provider_wire(identity,fence,turn+1,self.codex_selection['model'],
+                    self.codex_selection['effort'],prompt,schema,codex_provider.BUG_SECONDS,lambda:not permitted())
+                durable(self.root/('codex-intent-'+identity+'-'+str(turn+1)+('-ai-'+str(self.ai_resume['sequence']) if getattr(self,'ai_resume',None) else '')+'.json'),
                     json.dumps(dict(execution_id=identity, fence=fence, turn=turn+1,
                         model=self.codex_selection['model'], effort=self.codex_selection['effort'],
                         request_sha256=sha(wire+b'\n')), sort_keys=True).encode())
@@ -402,7 +495,7 @@ class CodexRuntime(Runtime):
                 feedback=self.candidate_feedback(permitted)
                 durable(self.root/('codex-feedback-'+identity+'-'+str(turn+1)+'.json'),json.dumps(feedback,sort_keys=True).encode())
                 if feedback['status']=='pass':
-                    values={key:sum(r['values'].get(key,0) for r in receipts) for key in receipts[0]['values']}
+                    values=aggregate_native(receipts)
                     durable(self.root/('codex-usage-'+identity+'.json'),json.dumps(dict(
                         fence=fence,model=self.codex_selection['model'],values=values,requests_observed=len(receipts),max_request_total_tokens=max(r['values']['total_tokens'] for r in receipts)),sort_keys=True).encode())
                     observations=self.failure_evidence(identity,fence)
@@ -411,13 +504,14 @@ class CodexRuntime(Runtime):
         finally:
             # Preserve known completed usage even if later parsing/checks fail.
             # An uncertain later turn never turns those observations into a complete total.
-            if receipts and not (self.root/('codex-usage-'+identity+'.json')).exists() and failure is None:
-                values={key:sum(r['values'].get(key,0) for r in receipts) for key in receipts[0]['values']}
+            waiting=__import__('sys').exc_info()[0] is __import__('workbench.smart_provider',fromlist=['Waiting']).Waiting
+            if receipts and not waiting and not (self.root/('codex-usage-'+identity+'.json')).exists() and failure is None:
+                values=aggregate_native(receipts)
                 durable(self.root/('codex-usage-'+identity+'.json'),json.dumps(dict(
                     fence=fence,model=self.codex_selection['model'],values=values,requests_observed=len(receipts),max_request_total_tokens=max(r['values']['total_tokens'] for r in receipts)),sort_keys=True).encode())
             elif receipts and failure is not None:
                 durable(self.root/('codex-known-usage-'+identity+'.json'),json.dumps(dict(
-                    fence=fence,model=self.codex_selection['model'],values={key:sum(r['values'].get(key,0) for r in receipts) for key in receipts[0]['values']},
+                    fence=fence,model=self.codex_selection['model'],values=aggregate_native(receipts),
                     requests_observed=len(receipts),final_usage_unknown=True),sort_keys=True).encode())
 
     def failure_evidence(self, identity, fence):
@@ -430,7 +524,8 @@ class CodexRuntime(Runtime):
                                        max_request_total_tokens=receipt.get('max_request_total_tokens',receipt['values']['total_tokens']),
                                        provenance=dict(method=self.provider_usage_source,
                                                        request_id=identity, fence=fence,
-                                                       receipt_sha256=sha(record.read_bytes()))),
+                                                       receipt_sha256=sha(record.read_bytes()),
+                                        **(dict(manual_ai_sha256=self.ai_manual_authorization_sha256) if getattr(self,'ai_manual_authorization_sha256',None) else {}))),
                             inference_ran=True, correction_count=0, read_input_errors=0)
         failure = self.provider_failure
         counted = failure.counted if failure else None

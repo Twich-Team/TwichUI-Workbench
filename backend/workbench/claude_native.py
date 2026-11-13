@@ -37,9 +37,10 @@ def builtin_plugins(values):
 
 
 class Held(Exception):
-    def __init__(self, reason, *, dispatched=False, terminal=False, usage=None, usage_complete=False):
+    def __init__(self, reason, *, dispatched=False, terminal=False, usage=None, usage_complete=False,actual_model=None):
         self.reason, self.dispatched, self.terminal, self.usage = reason, dispatched, terminal, usage
         self.usage_complete=usage_complete
+        self.actual_model=actual_model
         super().__init__('Claude '+reason.replace('_', ' ')+'.')
 
 
@@ -149,6 +150,14 @@ def usage_screen(text):
             return None
         windows.append(dict(name=name, used_percent=int(match[1]), reset_label=match[2].strip(),
                             resets_at=None, precision='native displayed percentage'))
+    for family in ('opus','sonnet'):
+        label=re.search(r'Current week \([^\n)]*'+family+r'[^\n)]*\)',text,re.I)
+        if label:
+            match=re.search(re.escape(label[0])+r'\s+[^\n]*?(\d+)% used\s+Resets ([^\n]+)',text)
+            if not match or not 0<=int(match[1])<=100:
+                return None
+            windows.append(dict(name='seven_day_'+family,model_family=family,used_percent=int(match[1]),
+                reset_label=match[2].strip(),resets_at=None,precision='native displayed percentage'))
     return dict(provider='claude', authentication='subscription', paid_usage='disabled',
         source='Native Claude Code /usage screen', observed_at=time.time(), windows=windows)
 
@@ -249,7 +258,8 @@ def allowance_event(value):
         if type(reset) is not int or reset <= 0:
             reset = None
         result.append(dict(name=name, used_percent=None if percent is None else round(percent*100, 6),
-                           resets_at=reset, status=window.get('status', 'unknown')))
+                           resets_at=reset,status=window.get('status','unknown'),
+                           **(dict(model_family=name.rsplit('_',1)[1]) if name in {'seven_day_opus','seven_day_sonnet'} else {})))
     return result
 
 
@@ -295,19 +305,19 @@ class Response:
         if not final or exit_code != 0 or final.get('subtype') != 'success' or final.get('is_error') is not False:
             # The real native SIGINT result can claim aggregate zeros after tokens.
             # Retain the partial subtotal but never promote it to complete usage.
-            raise Held('incomplete_response', dispatched=True, terminal=bool(final), usage=self.partial_usage)
+            raise Held('incomplete_response', dispatched=True, terminal=bool(final), usage=self.partial_usage,actual_model=self.model if self.initialized else None)
         models = final.get('modelUsage')
         usage = native_usage(final.get('usage'))
         if not isinstance(models, dict) or set(models) != {self.model} or usage is None:
-            raise Held('attribution_or_usage_unavailable', dispatched=True, terminal=True, usage=self.partial_usage)
+            raise Held('attribution_or_usage_unavailable', dispatched=True, terminal=True, usage=self.partial_usage,actual_model=self.model if self.initialized else None)
         if not isinstance(final.get('result'), str):
-            raise Held('invalid_content', dispatched=True, terminal=True, usage=usage,usage_complete=True)
+            raise Held('invalid_content', dispatched=True, terminal=True, usage=usage,usage_complete=True,actual_model=self.model)
         try:
             content = json.loads(final['result'])
         except ValueError:
-            raise Held('invalid_content', dispatched=True, terminal=True, usage=usage,usage_complete=True) from None
+            raise Held('invalid_content', dispatched=True, terminal=True, usage=usage,usage_complete=True,actual_model=self.model) from None
         if not isinstance(content, dict):
-            raise Held('invalid_content', dispatched=True, terminal=True, usage=usage,usage_complete=True)
+            raise Held('invalid_content', dispatched=True, terminal=True, usage=usage,usage_complete=True,actual_model=self.model)
         return dict(output=content, usage=usage, actual_model=self.model, actual_effort=None,
             windows=self.windows, observed_at=datetime.now(timezone.utc).isoformat())
 
@@ -331,7 +341,7 @@ def turn(argv, prompt, model, stop=lambda:False, *, seconds=120, observe=lambda 
                 if stop() or time.monotonic()>=deadline:
                     stop_child(child, signal.SIGINT)
                     raise Held('canceled' if stop() else 'timeout', dispatched=sent>0,
-                               usage=response.partial_usage)
+                               usage=response.partial_usage,actual_model=response.model if response.initialized else None)
                 for key, _ in selector.select(.1):
                     if key.fileobj is child.stdin:
                         sent += os.write(child.stdin.fileno(), raw[sent:])
@@ -360,7 +370,7 @@ def turn(argv, prompt, model, stop=lambda:False, *, seconds=120, observe=lambda 
             raise Held('incomplete_response', dispatched=True)
         return response.result(child.wait(timeout=max(.1, deadline-time.monotonic())))
     except (OSError, subprocess.SubprocessError):
-        raise Held('transport', dispatched=sent>0, usage=response.partial_usage) from None
+        raise Held('transport', dispatched=sent>0, usage=response.partial_usage,actual_model=response.model if response.initialized else None) from None
     finally:
         stop_child(child)
         child.stdout.close()

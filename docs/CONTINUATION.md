@@ -1,3 +1,41 @@
+# Smart AI Choices — complete candidate, November 13, 2026
+
+Following the Project Working Philosophy: continue through exact acceptance and one
+private release; this checkpoint is not the end of the approved assignment.
+The owner chose request-start cutoffs with possible in-flight overrun. Every native
+request rechecks included allowance; strict mode conservatively holds subscription
+requests. Never buy credits, change billing modes or invent percentages/reset times.
+
+Smart planning, feature scopes/checks, coding and same-fence coding resumption now
+use existing journals/controllers. Known pre-dispatch waits save the remaining
+request/time budget and original grant/source fence. Uncertain native work never
+replays. Additional manual authority is separately journaled; original frozen
+choices and usage remain intact. Individual child requests retain actual provider,
+model, requested effort and observed tokens; logical totals are excluded from the
+usage chart to avoid duplication. Native actual effort remains unknown.
+
+Focused connected candidate checks: 88 passed, including actual intake/worker,
+feature steps, scoped Lua edit/wait/restart/switch, manual coding authority and
+mixed-provider accounting. Earlier policy/native/admission checks and frontend
+interactions passed. Desktop/390px/200% strategy browser tests passed and actual
+screenshots were inspected. No automatic test discovery or database migration.
+All installed 942 rows/31 tables/schema0014 and original four services remain
+unchanged at build50cc64a. Private evidence: smart-ai-20261113 under the Workbench
+user data directory. Unrelated admin-document edits and dependency links preserved.
+
+Remaining gates: full local test inventory on the frozen candidate, complete exact
+hosted Verify fixture application (including verify), verified artifact/history/
+rollback envelope, one private install, native real app task acceptance, final
+record/retention/permissions verification. Do not use earlier source-changing test
+runs or the prior network-failed hosted partition as release acceptance.
+Native Claude2.1.323 is pinned at SHA604d29a6…96e348e, Pro authenticated, creditsOff,
+unmodified CLI only; no OAuth export/API billing. Its UI reset labels do not prove
+an exact epoch. Conservative unknown-request reserves remain spent until a reset
+is verified, so an explicit Start now decision may be necessary. Real quota
+exhaustion/auth expiration remain simulated boundary cases, not observed outages.
+
+---
+
 # Smart AI Choices — connected development checkpoint, November 13
 
 Following the Project Working Philosophy: the owner cutoff decision is accepted;

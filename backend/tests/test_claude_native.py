@@ -135,3 +135,12 @@ def test_cancellation_before_dispatch_never_starts_a_child():
 def test_unsupported_credit_only_or_alias_choices_cannot_dispatch(model,effort):
     with pytest.raises(native.Held):
         native.validate_selection(model,effort)
+
+
+def test_optional_family_windows_remain_distinct_from_account_wide_limits():
+    screen=SCREEN+'\nCurrent week (Opus)\n█████ 100% used\nResets Nov 18, 11:59am (UTC)\n'
+    snapshot=native.usage_screen(screen)
+    assert snapshot['windows'][-1]['model_family']=='opus'
+    assert snapshot['windows'][-1]['used_percent']==100
+    event=native.allowance_event(dict(unifiedWindows=dict(seven_day_opus=dict(utilization=1,resetsAt=2000))))
+    assert event[0]['model_family']=='opus' and event[0]['used_percent']==100

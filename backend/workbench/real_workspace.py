@@ -403,7 +403,7 @@ class Runtime:
     def cleanup(self, row):
         if quarantined(Path(__file__).resolve().parents[2]/'.local/real-primary-session.json'):
             return False  # Local process exit cannot clear uncertain server generation.
-        marker = self.root/('ownership-'+row['id']+'.json')
+        marker = self.root/('ownership-'+row['id']+('-ai-'+str(row['result']['ai_resume_sequence']) if row['result'].get('ai_resume_sequence') else '')+'.json')
         if not marker.is_file():
             return True  # execute writes ownership before creating any child or HTTP request.
         owned = json.loads(marker.read_text())
