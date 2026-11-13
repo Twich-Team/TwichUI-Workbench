@@ -1,3 +1,64 @@
+# Milestone 2.5 complete — owner review, November 13
+
+Following the Project Working Philosophy: A, B and C are verified in the running
+accepted f9e517b97e94aa5e1ec2ad7cd87b7d05b8383b27 / everyday-outcome-f9e517b.
+All nine exact hosted jobs passed in run 43452543387, including final verify.
+Application SHA256: 5f019b14673cf12d9aef96d8ac6b1fb4114123fdb84ab9e8d5c18e596128d2ce.
+Private envelope: da959c4be33f8851312d316868cbacf17a2f31c808fd00cccf699b2939a6fa95.
+All 727 accepted application files and 26 frontend files were verified without
+reconstruction. The package pins 80 private files and 29 external dependencies;
+all 311 evidence roots remain present. Copied-history rehearsal and an actual
+missing-directory refusal before activation/service changes passed.
+
+A: owner-run root backup receipt accepted; retired model service definitions absent,
+root backups preserved, three inactive weight variants removed under explicit authority.
+Active IQ4_XS, PID 1949395, original credential and authentication are unchanged.
+Net recovery was 81.88 GiB at A; final availability is about 81.7 GiB after subsequent
+verification/deployment writes. Browser sharing preserved paths and seals. No database,
+archived execution evidence, rollback release or saved historical record was removed.
+
+B: the existing worker's scheduled retention passed on interim and final installs.
+The final worker removed 10 expired fixture copies and kept 10 recent copies plus
+active, failed, open and referenced cases. Only synthetic timestamps were aged.
+The 24-hour/two-copy/bounded-pass policy is unchanged. Legacy checkouts/stages with
+unknown lifecycle or references remain protected; no blanket cleanup is authorized.
+
+C: real restarted CPU, RAM, disk, swap, VRAM, model and five-service readings match
+independent host checks. AMD utilization is unsupported and explained. Actual desktop,
+phone, reload and 200% text images passed inspection. Corrected enlarged phone cards
+form one readable column, enforced by a minimum-width browser assertion.
+
+Full local default run: 2,698 backend passed, 8 skipped, all 66 frontend passed.
+The final frontend-only correction has identical backend/runtime Git objects and
+reran static/contracts/schema, 66 frontend, 130 browser (8 conditional skips), four
+connected cases and 12 visual comparisons. Exact final hosted acceptance reran every
+partition: 2,695 backend passed, 11 skipped, zero failures/errors.
+Final restart, independent restore and rejection evidence match all 939 rows across
+31 tables/schema0014, hash 28e3b4b9b6ec2560303d07048eab6febf222c1ab5a7b340f64376e7d697da592.
+Thirteen worker observations over 120 seconds showed the same PID, zero restarts,
+ready API/connector and exact history. Original archived tasks, held publication,
+private TLS/network/kernel safeguards, normal model access and port 8765 passed.
+
+Failures remain recorded: first local fixture/socket failures were corrected without
+weakening guards; group-writable Node was refused and an identical private copy pinned;
+first 1da activation omitted a backup parent and safely rolled back to exact c38.
+A distinct retry installed the accepted backend. Actual enlarged-phone review prompted
+the final f9 layout correction and fresh full acceptance. The final wrapper refuses
+an actual missing parent before creating activation intent or changing any service.
+All earlier sources/logs/journals remain. Primary rollback is 1daab8e; c38d2bb,
+0c3cecb-m1 and 4f03783 are additionally protected and sealed.
+
+Private final report: milestone2.5-20261113/MILESTONE2.5_FINAL_REPORT.md.
+Final receipts: candidate-f9e517b/envelope.json, installation-journal.json,
+offline-verification.json, local-verification.json, CHECKPOINT_B_INSTALLED_VERIFIED.json,
+resources-restarted.json, worker-cycle-observations.json and final-live-preservation-proof.json.
+Preserve unrelated WORKBENCH_ADMIN_APPROVAL edits and .venv/node_modules links.
+STOP for owner review. No gallery continuation, map publication, addon run or Milestone 3.
+Zero new addon tasks completed in this assignment; broader unattended reliability is unproved.
+Earlier pending entries below are historical and superseded by this verified closeout.
+
+---
+
 # Milestone 2.5 reviewed candidate — November 13
 
 B now has85passing focused storage/archive/monitoring checks after final defensive

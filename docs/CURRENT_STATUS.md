@@ -1,11 +1,13 @@
 Last updated November 13, 2026 (Mountain time).
 
-Milestone 2.5 is not complete. Checkpoint A recovered about81.9GiB and verified preserved root-owned service backups. Active Qwen, saved history and rollback remain intact.
+Milestone 2.5 is complete. Accepted release f9e517b is installed. All three checkpoints are verified; work is stopped for owner review.
 
-Accepted1daab8e is installed. Machine Resources now shows real CPU, RAM, disk, swap, VRAM, active-model and five-service readings. This AMD driver does not provide GPU utilization; the interface explains it. Desktop/phone/reload and saved-result checks passed. Enlarged-phone inspection exposed cramped cards; a small tested layout correction is awaiting final hosted acceptance and installation.
+Storage cleanup recovered about 81.9 GiB at Checkpoint A. About 81.7 GiB is currently available after release verification. The retired service backups, active Qwen, saved history, immutable evidence and rollback are preserved. No unused large model remains to remove.
 
-Automatic reference-aware retention is installed and passed targeted tests and three real-host disposable development cycles. Installed scheduled-cleanup, restart, independent restore and final stable-worker checks remain pending. All939saved rows remain exact. One missing backup-directory preparation was safely rolled back and corrected; its original receipts are preserved.
+Automatic retention is running. In an installed check, the worker removed ten expired demonstration copies across all five storage classes while keeping recent, active, failed, open and referenced copies. Unknown legacy workspaces and historical releases remain protected.
 
-Full local backend/frontend/browser/visual checks and allninehosted acceptance jobs passed before the frontend correction. Next: full exact hosted acceptance for that correction and complete installed verification. No owner decision is currently needed. Stop for owner review after A, B and C all pass.
+Machine Resources shows real CPU, RAM, disk, swap, VRAM, active-model and five-service readings. This AMD driver does not expose GPU utilization; the panel explains that limit. Actual desktop, phone, reload and enlarged-text checks passed after restart.
 
-Zero new addon tasks completed end to end in this assignment. Gallery continuation, map publication and Milestone3 remain untouched. Full unattended reliability remains unproved.
+Full local and exact hosted acceptance passed. All 939 saved rows survived final installation, restart and independent restore. The worker stayed healthy with zero restarts. Earlier failed checks and the safely rolled-back preparation error remain recorded.
+
+Zero new addon tasks completed end to end in this assignment. Broader unattended reliability remains unproved. Gallery continuation, map publication and Milestone 3 were not started. Nothing blocks this milestone; the next step is owner review. No additional permission is currently needed.
