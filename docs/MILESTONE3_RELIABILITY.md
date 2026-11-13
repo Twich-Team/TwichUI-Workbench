@@ -19,11 +19,13 @@ three proposals, one requested-changes decision and zero implementation tasks.
 Its historical sixteen responses total360395tokens, including the final settled
 length-ended response:21840prompt+2600completion=24440tokens.
 
-The repository identifies the independent Astra audit as chat
-01a1d296-5aec-7e73-87be-d8b51164d992. This session cannot read chat history; the
-owner was asked for its text/path. The explicit assignment supplies the two
-recommendations and acceptance boundaries; no claim is made to have reread the
-unavailable chat.
+Astra's independent audit was recovered and read from the local session archive
+for01a1d296-5aec-7e73-87be-d8b51164d992. Private audit-provenance.json binds its
+original JSONL and extracted final text. Its recommendations3/4are this scope;
+verification composition, automatic discovery and later delivery work remain out
+of scope. In particular, the audit confirms matching pixels/textures but says a
+compressor-version cause was not proved. The earlier request for an audit copy is
+superseded; no owner response is needed.
 
 ## Consolidated owners and contracts
 
@@ -118,3 +120,21 @@ production duplicate-response guard.90focused source/receipt/normal-API tests pa
 including six new missing-stop/late-wire cases. Earlier failed receipts and the
 observer's missing import are retained. The old envelope-only reader remains a
 historical-format compatibility entry point, not the ordinary recovery owner.
+
+
+## Shared provider completion and retained contract
+
+The existing completed Codex receipt reader now has an explicit derived-observation
+mode. Verified completed lifecycle/turn identities and closed transport remain
+mandatory, independently of ledger/native token availability. Original NULL usage
+is never rewritten; known native subtotals and unavailable remainder stay separate.
+Malformed/conflicting values and missing completion/close events still refuse.
+Strict historical callers retain their original aggregate-usage contract.119focused
+provider, phase, intent, feature and accounting checks pass, including actual missing
+native tokens and disconnect after a formerly positive receipt. A custom intent
+fixture now emits native terminal records rather than asserting finished diagnostics.
+
+Every new readable operation records its source contract once in the existing
+private investigation journal, including continuations of old packets, and checks
+that it stays identical across stages. Old packets/search receipts remain untouched.
+The actual-contract test checks this retained event against the outgoing contract.

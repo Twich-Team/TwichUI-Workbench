@@ -35,6 +35,31 @@ def test_malformed_or_missing_model_text_cannot_destroy_completed_lifecycle(tmp_
     assert result['output_accepted'] is False and result['execution_authorized'] is False
 
 
+@pytest.mark.parametrize('missing_native_usage',[False,True])
+def test_completed_codex_execution_does_not_depend_on_available_ledger_tokens(tmp_path,missing_native_usage):
+    identity,path,events,usage=receipts(tmp_path)
+    journal=tmp_path/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl'
+    if missing_native_usage:
+        rows=[json.loads(line) for line in journal.read_text().splitlines()]
+        rows[0].update(accounting_state='unavailable',usage=None)
+        events[2]['usage']=None
+        write(journal,rows,True)
+        write(path,events,True)
+    before={p:p.read_bytes() for p in [journal,path]}
+    with pytest.raises(ValueError):
+        completed_turns(identity,None,[tmp_path])  # Frozen strict callers retain their contract.
+    proof=completed_turns(identity,None,[tmp_path],allow_unavailable=True)
+    assert proof['provider_outcome']=='completed' and proof['requests']==1
+    assert proof['historical_usage_unavailable']
+    assert proof['unknown_usage_requests']==int(missing_native_usage)
+    assert proof['known_usage']==({} if missing_native_usage else usage['values'])
+    assert all(p.read_bytes()==raw for p,raw in before.items())
+    events.pop()  # A disconnected transport alone still cannot close execution.
+    write(path,events,True)
+    with pytest.raises(ValueError):
+        completed_turns(identity,None,[tmp_path],allow_unavailable=True)
+
+
 @pytest.mark.parametrize('fault',['missing_lifecycle','failed','conflicting_terminal','no_close','wrong_usage','wrong_turn','aggregate','symlink'])
 def test_unknown_or_conflicting_execution_is_never_completed_by_content(tmp_path,fault):
     identity,path,events,usage=receipts(tmp_path)

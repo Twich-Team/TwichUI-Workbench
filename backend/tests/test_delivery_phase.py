@@ -30,8 +30,8 @@ def test_locally_rejected_content_can_continue_only_with_settled_read_only_recei
                 observe(c,'task',[tmp_path])
             return
         result=observe(c,'task',[tmp_path])
-        assert renewable(result)==(fault is None)
-        if fault is None:
+        assert renewable(result)==(fault in (None,'unknown_usage'))
+        if fault in (None,'unknown_usage'):
             assert result['phases'][0]['database_outcome']=='failed'
             assert result['phases'][0]['provider_state']=='completed'
             assert result['phases'][0]['output_accepted'] is False
@@ -71,13 +71,13 @@ def test_first_operator_renewal_uses_terminal_proof_before_any_v4_job_exists(tmp
         # Historical default retains its original meaning; fresh intent is explicit.
         with pytest.raises(ValueError):
             delivery_chain(c,'task',1)
-        if fault:
+        if fault in ('missing_terminal','missing_capabilities'):
             with pytest.raises((ValueError,OSError)):
                 delivery_chain(c,'task',1,renewal=True)
         else:
             result=delivery_chain(c,'task',1,renewal=True)
             assert result[0]['outcome']=='failed'
-            assert result[0]['usage']['values']['total_tokens']==34
+            assert result[0]['usage'] is None if fault=='unknown_usage' else result[0]['usage']['values']['total_tokens']==34
         assert c.total_changes==before
 
 

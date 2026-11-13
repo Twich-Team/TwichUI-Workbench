@@ -75,6 +75,10 @@ def test_fresh_report_selects_python_generator_and_artwork_with_one_source_contr
     with store.connect() as c:
         packet=c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id==saved['id'])).scalar_one()['bug_inspection_packet']
     assert packet['source_contract']==first['source_contract']
+    activity=client.get('/api/intake/'+saved['id']).json()['provider_activity']
+    events=tmp_path/'release/artifacts/runs'/('planning-evidence-'+activity[0]['id'])/'events.jsonl'
+    contracts=[e['contract'] for e in map(json.loads,events.read_text().splitlines()) if e.get('phase')=='source-contract']
+    assert contracts==[first['source_contract']]
 
 
 @pytest.mark.usefixtures('installed')

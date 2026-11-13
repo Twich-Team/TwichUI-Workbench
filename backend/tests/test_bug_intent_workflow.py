@@ -192,6 +192,12 @@ def test_settled_local_rejection_renews_with_fresh_bindings_without_losing_a_pha
         else:
             # Completed generation, locally invalid scope. No implementation.
             raw=dict(finding='An invalid draft.',plan=dict(scope='Incomplete'))
+        # The completed provider lifecycle is independent of this invalid scope.
+        # Supply native-format terminal evidence rather than only asserting a
+        # finished diagnostic, as a disconnected adapter could also do.
+        self.response_evidence.received(b'{}')
+        self.response_evidence.envelope(dict(id='chatcmpl-controlled-renewal-'+str(len(calls))),
+            {**self.diagnostics,'model_matches':1})
         return raw,expected_model,'local'
     monkeypatch.setattr(LocalProvider,'generate',generate)
     item=client.post('/api/intake',headers=headers,json=report()).json()

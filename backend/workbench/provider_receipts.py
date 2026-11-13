@@ -33,6 +33,17 @@ def request_state(identity, backend, requested, actual, outcome, usage, diagnost
         else:
             state = proof['provider_outcome']
             actual = actual or proof['actual_model']
+    elif (identity and finished and backend == 'codex' and read_only
+            and (not isinstance(usage,dict) or usage.get('status') != 'complete')):
+        try:
+            proof = completed_turns(identity,usage,evidence_roots,allow_unavailable=True)
+        except (ValueError,OSError,KeyError,TypeError):
+            pass
+        else:
+            state = proof['provider_outcome']
+            if proof.get('actual_model') and actual and proof['actual_model'] != actual:
+                raise ValueError('Native terminal model attribution changed')
+            actual = actual or proof.get('actual_model')
     elif identity and finished and isinstance(usage,dict) and usage.get('status') == 'complete':
         if backend == 'codex':
             proof = (interrupted_turns(identity,usage,evidence_roots,facts,caps)
@@ -57,8 +68,9 @@ def request_state(identity, backend, requested, actual, outcome, usage, diagnost
     return dict(attempt=identity, provider_state=state, actual_model=actual, requests=count,
         terminal_proof=proof, read_only=read_only, local_status=local_status, local_finished=local_finished,
         dispatch='not_started' if state == 'not_started' else 'observed' if proof or state == 'completed' else 'unresolved',
-        transport='complete_response' if proof and proof.get('records') else
-            'terminal_acknowledged' if proof else 'not_dispatched' if state == 'not_started' else 'unresolved',
+        transport='not_dispatched' if state == 'not_started' else
+            'complete_response' if proof and proof.get('records') else
+            'terminal_acknowledged' if proof else 'unresolved',
         cancellation_acknowledged=state == 'interrupted',
         cancellation_requested=facts.get('cancellation_requested') is True or state == 'interrupted',
         content_complete=content_complete,
@@ -86,25 +98,36 @@ def _read(path, *, lines=False, bound=2 << 20):
     return data,hashlib.sha256(raw).hexdigest()
 
 
-def completed_turns(identity,usage,evidence_roots):
+def completed_turns(identity,usage,evidence_roots,*,allow_unavailable=False):
     """Verify known complete turns; never infer terminal state from response content.
 
     Only private receipt identifiers/usage are returned. No model text, credentials,
     cancellation claim or execution permission is produced by this function.
+    Strict historical callers require their aggregate accounting. Derived reads
+    can retain unavailable ledger/native usage alongside verified completion;
+    they never replace the saved ledger with the observed subtotal.
     """
-    if str(UUID(identity))!=identity or not isinstance(usage,dict) or usage.get('status')!='complete':
+    complete = isinstance(usage,dict) and usage.get('status') == 'complete'
+    if str(UUID(identity))!=identity or not complete and not allow_unavailable:
         raise ValueError('Complete investigation accounting is unavailable')
-    count=usage.get('requests_observed',1)
-    if type(count) is not int or not 1<=count<=256:
-        raise ValueError('Invalid operation receipt count')
     roots=list(dict.fromkeys(Path(root) for root in evidence_roots))
     matches=[root for root in roots if (root/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl').is_file()]
     if len(matches)!=1:
         raise ValueError('The operation receipt location is missing or ambiguous')
     root=matches[0]
+    first,_=_read(root/'release/artifacts/runs'/('planning-evidence-'+identity)/'events.jsonl',lines=True,bound=65536)
+    followups=[e for e in first if e.get('phase')=='source-followup']
+    count=usage.get('requests_observed',1) if complete else len(followups)+1
+    if (type(count) is not int or not 1<=count<=256 or not complete and
+            ([e.get('turn') for e in followups] != list(range(2,count+1)) or
+             any(e.get('evidence_id') != str(uuid5(UUID(identity),'committed-source-turn-'+str(index)))
+                 for index,e in enumerate(followups,1)))):
+        raise ValueError('Invalid operation receipt count')
     records=[]
     summed={}
     used=set()
+    unknown=0
+    models=set()
     for index in range(count):
         phase=identity if index==0 else str(uuid5(UUID(identity),'committed-source-turn-'+str(index)))
         events,source_sha=_read(root/'release/artifacts/runs'/('planning-evidence-'+phase)/'events.jsonl',lines=True,bound=65536)
@@ -113,8 +136,9 @@ def completed_turns(identity,usage,evidence_roots):
             raise ValueError('A provider result receipt is missing or ambiguous')
         result=results[0]
         receipt=result.get('provider_receipt')
+        accounting = result.get('accounting_state')
         if (result.get('provider')!='codex' or result.get('generation_state')!='finished'
-                or result.get('accounting_state')!='complete' or not isinstance(receipt,str)
+                or accounting not in ({'complete','unavailable'} if allow_unavailable else {'complete'}) or not isinstance(receipt,str)
                 or str(UUID(receipt))!=receipt or receipt in used):
             raise ValueError('Provider completion is not established')
         used.add(receipt)
@@ -123,27 +147,39 @@ def completed_turns(identity,usage,evidence_roots):
         lifecycles=[e for e in terminal_events if e.get('phase')=='lifecycle-terminal']
         identities={(e.get('thread_id'),e.get('turn_id')) for e in terminal_events
                     if e.get('phase') in {'turn-started','lifecycle-turn'}}
-        values=result.get('usage',{}).get('values')
+        values=(result.get('usage') or {}).get('values')
         if (len(finals)!=1 or finals[0].get('status')!='completed' or not lifecycles
                 or len(identities)!=1 or not all(all(x) for x in identities)
                 or any(e.get('status')!='completed' or (e.get('thread_id'),e.get('turn_id')) not in identities for e in lifecycles)
-                or not any(e.get('phase')=='connection-closed' for e in terminal_events)
-                or not isinstance(values,dict) or finals[0].get('usage')!=values
-                or not all(type(values.get(k)) is int and values[k]>=0
-                           for k in ('prompt_tokens','completion_tokens','total_tokens'))
-                or values['prompt_tokens']+values['completion_tokens']!=values['total_tokens']):
+                or not any(e.get('phase')=='connection-closed' for e in terminal_events)):
             raise ValueError('Known terminal state and usage do not agree')
-        for key,value in values.items():
-            if type(value) is not int or value<0:
-                raise ValueError('Malformed reported usage')
-            summed[key]=summed.get(key,0)+value
+        native=finals[0].get('usage')
+        if native is None and values is None and allow_unavailable and not complete and accounting == 'unavailable':
+            unknown+=1
+        else:
+            if (not isinstance(native,dict) or values != native or not all(
+                    type(native.get(k)) is int and native[k]>=0 for k in
+                    ('prompt_tokens','completion_tokens','total_tokens')) or
+                    native['prompt_tokens']+native['completion_tokens']!=native['total_tokens']):
+                raise ValueError('Known terminal state and usage do not agree')
+            for key,value in native.items():
+                if type(value) is not int or value<0:
+                    raise ValueError('Malformed reported usage')
+                summed[key]=summed.get(key,0)+value
+        if result.get('actual_model'):
+            models.add(result['actual_model'])
         thread,turn=next(iter(identities))
         records.append(dict(phase=phase,provider_receipt=receipt,thread=thread,turn=turn,
             outcome='completed',usage=values,source_sha256=source_sha,terminal_sha256=terminal_sha))
-    if summed!=usage.get('values'):
+    if complete and summed!=usage.get('values'):
         raise ValueError('Task accounting differs from provider terminal receipts')
+    if allow_unavailable and len(models)>1:
+        raise ValueError('Native terminal models disagree')
     return dict(attempt=identity,provider_outcome='completed',turns=records,usage=summed,
-                output_accepted=False,execution_authorized=False)
+                output_accepted=False,execution_authorized=False,
+                **(dict(requests=count,known_usage=summed,unknown_usage_requests=unknown,
+                    historical_usage_unavailable=not complete,
+                    actual_model=next(iter(models)) if len(models)==1 else None) if allow_unavailable else {}))
 
 
 def interrupted_turns(identity, usage, evidence_roots, diagnostics, capabilities):

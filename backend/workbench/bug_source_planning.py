@@ -417,8 +417,10 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
     historical_pending = False
     packing_context = {}
     program_mode = program_context(initial)
+    discovery_contract = None
 
     def make_wire(*args,**kwargs):
+        nonlocal discovery_contract
         before=len(packet.get('inspection_windows',[]))
         # Codex can retain all of the bounded inspected context in its larger
         # supported request envelope. Local Qwen keeps its smaller context.
@@ -431,6 +433,13 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             from workbench.investigation_strategy import context as strategy_context
             result['source_directory']=directory(packet['base'],getattr(adapter,'source_manifest',None))
             result['source_contract']=result['source_directory']['source_contract']
+            if discovery_contract is None:
+                discovery_contract = copy.deepcopy(result['source_contract'])
+                if parent:
+                    parent.record('source-contract', contract=discovery_contract,
+                        approved=False,executed=False)
+            elif discovery_contract != result['source_contract']:
+                raise PlanningUnavailable('The investigation source contract changed between stages.', 'source_binding')
             result['investigation_working_notes']=strategy_context(packet,result['source_directory'],original)
         added=packet.get('inspection_windows',[])[before:]
         if parent:
