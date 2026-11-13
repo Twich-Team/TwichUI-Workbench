@@ -1,9 +1,13 @@
 Last updated November 12, 2026 (Mountain time; November 13 UTC).
 
-The running app remains verified build 0c3cecb, deployment everyday-outcome-0c3cecb-m1. Worker, UI, API and connector are healthy; the worker has zero automatic restarts. All 938 saved rows match the preinstallation baseline.
+Milestone 2 is complete. The running app is verified build c38d2bb, deployment everyday-outcome-c38d2bb. Task failures are contained, archived history cannot start new work, scheduling is fair across stages, and incomplete installation packages are refused before service shutdown.
 
-Milestone 2 is authorized and in progress. Task fault isolation, fair scheduling, historical-read separation and complete installation preflight are implemented. Controlled worker and installer failure tests pass, including uncertain-operation replay refusal and rollback after a killed installer. These changes are not installed yet.
+Full local verification passed: 2,650 backend tests, 65 frontend tests, static/build/contracts/schema checks and 12 visual checks. Browser cases passed after the storage-only failure was rerun, including four connected scenarios. All nine hosted release checks passed. Controlled failures proved task isolation, no uncertain replay, global safety holds and interrupted-installation rollback.
 
-Zero new addon tasks have completed end to end in this assignment. Earlier bug/test requests reached drafts. Map zoom remains a checked local result with publication held; the gallery investigation has not resumed. Their records and original Qwen permissions remain unchanged.
+The installed app passed a four-service restart, desktop/phone/reload checks and thirteen worker observations over two minutes with zero restarts. All 939 saved rows match the cutover baseline and independent restore. Every original 938 row is unchanged; one owner-saved preference added before installation is also preserved. Original Qwen permissions, unknown usage, archive choices and publication holds remain intact. No new Workbench model request was dispatched. Healthy rollback remains available.
 
-Full local and hosted verification, saved-database rehearsal and accepted installation remain to finish. No owner decision is needed for this authorized work. The next complete outcome is an installed, verified Milestone 2 with preserved history and rollback, followed by owner review. Milestones 3/4 and additional features will not begin.
+Zero new addon tasks completed end to end in this assignment. Earlier bug/test requests reached drafts. Map zoom remains a checked local result with publication held; the gallery investigation has not resumed. Complete unattended reliability remains unproved.
+
+The read-only storage inventory is complete and retained privately. Low SSD headroom remains a risk for larger work. About 78.5 GiB of inactive model weights are potential cleanup candidates, with disabled/manual choices to review first. Removing them needs owner approval. No model, evidence, database, rollback release or historical record was deleted for the inventory.
+
+Nothing blocks completion of Milestone 2. Next: owner review of the installed result and storage recommendations. Milestones 3/4, automatic test discovery and further feature work remain unstarted.

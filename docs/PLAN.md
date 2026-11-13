@@ -1,3 +1,17 @@
+# Milestone 2 complete — owner review
+
+Installed accepted c38d2bb/everyday-outcome-c38d2bb. Task isolation/fairness,
+historical-read separation and complete private installation preflight/rollback
+are verified. Full local/hosted checks, actual restart/browser/health and exact
+939-row independent restore pass, retaining every original 938 row plus the owner's
+new saved preference. See CURRENT_STATUS and current CONTINUATION for receipts.
+
+STOP for owner review. No Milestone3/4, automatic discovery, gallery continuation,
+map publication or additional feature development is queued. The added bounded
+storage investigation is complete and private; deletion requires owner approval.
+
+---
+
 # November 12 (Mountain time) — Milestone 2 authorized and in progress
 
 The owner has separately authorized task-level worker isolation and complete,

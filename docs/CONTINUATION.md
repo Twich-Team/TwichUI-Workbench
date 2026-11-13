@@ -1,3 +1,147 @@
+# Milestone 2 installed and complete — November 12 (Mountain time)
+
+STOP for owner review, as explicitly requested. Do not begin Milestones 3/4,
+automatic test discovery, gallery continuation, map publication or further features.
+Following the Project Working Philosophy, both authorized reliability corrections
+are installed and demonstrated. This does not prove complete unattended reliability.
+
+Installed c38d2bbc6376d0cfc1ca0811dbfbab8a95f898a9 in
+/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-c38d2bb.
+All 9 jobs/finalverify passed exact full hosted43356526177. Application SHA-256
+1d4da6a28847118c09ac944b057ec666ff0338933dbc197d709fb5d569226e0f.
+All 721 hosted application files and26 frontend files remains exact. The stage seal
+covers5,515 immutable files/16links; the private envelope binds70 files,28 external
+pins and305 historical evidence roots. Its digest is
+8d4982e53e0a35dfb161830cef3f07b6d86482664c629785e6429b1aa2426d5b.
+
+The worker contains selected task failures in existing journals; historical
+feature/contribution/composition reads retain evidence without executing action
+eligibility; canonical archives/deletions are filtered before selection. The same
+worker rotates stages, retaining oldest-first claims/fences. Unexpected feature
+preparation uses the existing interrupted_unknown hold. Shared DB/capacity/owner
+hazards remain holds; no parallel scheduler, queue or recovery machine was added.
+Hosted acceptance now binds the source/frontend/installer artifact digest. Complete
+private preflight, durable installation intent/lock and verified retained rollback
+precede the existing service-selection mechanism. No accepted application content
+was reconstructed after validation; credentials remain outside hosted artifacts.
+
+Preflight caught an owner-saved preference revision73 at03:32:44UTC before any
+service change. All 938 original rows were byte-equal; only one execution_policies
+row was appended. The prepared store/configuration was retained and refreshed
+through supported copying. NEVER restore an older938-row snapshot over this state.
+The fresh baseline, installed/restarted store and independent restore have939 rows,
+31 tables/schema 0014, logical
+28e3b4b9b6ec2560303d07048eab6febf222c1ab5a7b340f64376e7d697da592.
+Independent rejection sidecars validate; original Qwen records/permissions/unknown
+usage/archives/decisions and publication holds are unchanged. Current source has
+zero queued/running planning jobs and no new Workbench model requests. The gallery
+remains failed/revision3,4 jobs / 4 attempts / 3 proposals / 1 decision / 0 tasks; checked map
+candidate/two contributions and publication hold remain exact.
+
+Full local:2,650 backend passed/8 skipped;65 frontend passed; static/contracts/build/
+schema passed;129 ordinary browser cases pass across full run and storage-case
+rerun,8 conditional skips;4 connected cases and12 visuals pass. Hosted backend:
+2,647 passed/11 skipped,0 failures/errors; all other required jobs passed. Fourteen
+saved-store cycles and3malformed-archive cycles pass; fresh939-row rehearsal also
+passes14 cycles. Actual installed CLI refuses a corrupt disposable DB copy; live
+history remains exact. Five real-envelope negative cases all refuse before any
+activation/service operation. Killed-installer rollback is proved in sealed fixtures.
+
+Actual installation/restart passed all 4 services, private UI/API/domain/TLS/assets,
+Origin/CSRF/host/peer/kernel boundaries, connector, original model authentication
+401/200 and key hash, and port8765. Desktop 1440 / phone 390/reload/200% text screenshots
+were inspected, with zero browser writes/errors and no false PR link. Restarted
+worker PID 1481196 kept zero restarts across13 samples / 121.8 seconds and independent
+short clean-exit observation. One earlier observer launcher returned 143 after its
+complete successful receipt; its full samples and live state were independently
+revalidated. The known preflight owner-row change and all failed setup/CI/storage
+logs are retained, not hidden or waived.
+
+Healthy rollback: original0c3cecb-m1 source/current 939-row store plus verified
+immutable 939-row snapshot and prepared history baseline. Complete preflight was
+performed before service shutdown; later interrupted activation cannot depend on
+an omitted late-created baseline. Source/evidence/configuration/auth boundaries
+and named administrator grants were preserved. No addon push/PR/merge/game change.
+
+Private final report:
+/home/rich/.local/share/TwichUI-Workbench/milestone2-20261112/MILESTONE2_FINAL_REPORT.md.
+Private package/proofs:
+/home/rich/.local/share/TwichUI-Workbench/milestone2-20261112/candidate-c38d2bb.
+Read the final report for component/fault matrix, source/digest/rollback details,
+real receipts, verification limits, earlier failures and exact snapshot comparisons.
+
+Added owner READ-ONLY storage inventory is complete. Its host-specific details stay
+private in milestone2-20261112/storage-inventory/MILESTONE2_STORAGE_REPORT.md.
+No model/evidence/database/rollback/history deletion was performed for that inventory.
+Model/retention cleanup needs owner approval; do not start an infrastructure repair
+campaign. All actual staged/rollback/evidence references remain preserved. Original
+checkpoint commits47ee725, 11b8479, c38d2bb are pushed on codex/everyday-workbench;
+later reporting changes do not alter the installed accepted source. Unrelated
+WORKBENCH_ADMIN_APPROVAL edits and .venv/node_modules links remain untouched.
+
+---
+
+# Milestone 2 checkpoint — November 12 (Mountain time), full local checks passed
+
+Continue this same authorized Milestone 2 through accepted installation and final
+owner review. This checkpoint is not a new permission gate. No gallery continuation,
+map publication, model generation, automatic discovery or Milestone 3/4 is authorized.
+
+Current HEAD c38d2bbc6376d0cfc1ca0811dbfbab8a95f898a9 on codex/everyday-workbench.
+Commits 47ee725 and 11b8479 implement isolation/artifacts and existing recovery;
+c38d2bb fixes only the hosted fixture's group-writable Python-cache dependency by
+using a private interpreter copy. Production permission checks remain strict.
+
+Actual installed source stays healthy 0c3cecb/everyday-outcome-0c3cecb-m1,
+worker PID752278 / zero restarts. All938 rows/31 tables/schema0014 match logical
+e744e2bec0e9814636101151b6f18c917b97c374ee504eed1a7eb7f179c05570.
+
+Full local tests:2650 backend passed/8 skipped,65 frontend passed; final check
+passed;12 visual passed. Ordinary browser run had128 passes/8 skips/one physical
+space refusal at3.95GiB; both affected desktop/phone cases passed on rerun, and
+4connected cases passed. Final installer fixture11checks and shared-owner/model
+hazard16checks pass. Saved-store candidate rehearsal14cycles and malformed
+archived-feature3cycles pass with exact original history restored and zero models.
+
+Final full hosted43356526177 for exactc38d2bb has build,visual,all browser groups
+andBackend2/2passed;Backend1/2 and finalverify still pending. Never install before
+full acceptance. The already-failed47ee725/11b8479runs are obsolete; finalc38run
+was not canceled. Private receipts retain earlier failed cases and fixture fixes.
+
+Prepared stage: /home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-c38d2bb.
+All721accepted artifact files match; application SHA-256
+1d4da6a28847118c09ac944b057ec666ff0338933dbc197d709fb5d569226e0f.
+Private package: /home/rich/.local/share/TwichUI-Workbench/milestone2-20261112/candidate-c38d2bb.
+It contains staging/preparation/rehearsal scripts, original rejection manifest,
+complete copied history/configuration and unchanged draft authority, actual
+installer/rollback/network/restart/browser/observation helpers. All5prepared
+administrative/kernel/network probes passed before service changes. Live history
+still matches. No candidate was activated. Full hosted receipts/acceptance and
+complete envelope assembly/preflight remain next, followed by five real-envelope
+negative cases using harmless activation/rollback guards, actual cutover, restart,
+independent restored sidecars, actual desktop/phone inspection and120s observation.
+Use pinned stage browser/node and browser/lib; no disposable /tmp browser dependency.
+The assembler pins clock, CA/certificate, interpreter/shell/CLI/network tools and
+all private inputs. The accepted application must never be altered after validation.
+Old0c3cecb-m1source/store/configuration remain the healthy rollback target.
+
+Owner added bounded READ-ONLY storage inventory: completed; report is private at
+milestone2-20261112/storage-inventory/MILESTONE2_STORAGE_REPORT.md. Do not publish
+host-specific inventory or delete models/evidence/databases/rollback releases.
+Four inference weights total91.8GiB; activeIQ4_XS13.27GiB is confirmed by process
+arguments and maps. Other weights78.5GiB are cleanup recommendations only, two
+still referenced by disabled/manual choices. Pilot checkouts41.4GiB; releases35.2GiB;
+private evidence16.1GiB. Root SSD reports250.06GBphysical, ordinary free~4.3GiB,
+with10.23GiB filesystem reservation difference; SSD inodes healthy, /tmp near89%.
+Before this added direction, closed owned initial test files were verified/archived
+and byte-identical runtime copies shared. All42,149test files and failure logs are
+retained; subsequent inventory performed no deletion. Final full local tests used
+/dev/shm/workbench-m2-final-tests to avoid further SSD allocation. Preserve retained
+copies now; no separate infrastructure campaign. Unrelated admin-document edits
+and .venv/node_modules links remain untouched.
+
+---
+
 # November 12 (Mountain time) — Milestone 2 authorized and in progress
 
 The owner has separately authorized task-level worker isolation and complete,
