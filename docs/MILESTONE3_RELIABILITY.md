@@ -65,6 +65,17 @@ cross-language selection and repeated saved-location/owner-feedback checks pass
 through the actual Bug Report entry point. Earlier rejected fixture expectation
 (missing usage treated as missing completion) is retained and corrected: terminal
 proof permits read-only renewal while the NULL ledger remains exact.
+The actual current-main inventory has687eligible files. Fresh readable selection
+allows1024metadata entries while retaining the1MiB inventory and16MiB scan bounds;
+old Lua selection keeps650. Real-source preflight verifies both Python files and
+PNG metadata plus all four original search receipts. A controlled actual-request
+check using the real tokenizer (no generation) exposed optional-source eviction:
+the generator had only3visible characters. Saved-location reads now use the existing
+required-read protection and fresh focus. The same check preserves5331test,
+5287generator and363metadata characters. This is controlled request preparation,
+not a live investigation result. The earlier70ee90fpackage remains uninstalled and
+is superseded by the source-visibility checkpoint.
+
 Static/build/contracts/schema checks pass. Full local backend/frontend/browser,
 exact hosted acceptance, complete installation package and real continuation remain
 in progress. Controlled results do not establish live recovery.

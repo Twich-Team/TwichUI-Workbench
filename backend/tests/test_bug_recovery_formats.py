@@ -97,6 +97,7 @@ def test_saved_owner_locations_are_verified_before_first_request_without_new_pat
     calls=scripted(monkeypatch,[dict(finding='The locations are now source evidence.',draft=dict(question='Which contract applies?'))])
     assert worker.tick(store)
     assert {TEST,TOOL,PNG} <= {w['path'] for w in calls[0]['source_memory']['recent_read_windows']}
+    assert {TEST,TOOL,PNG} == {w['path'] for w in calls[0]['inspection_result']['visible_requested_windows'] if w['provided']}
     current=client.get(url).json()
     assert client.post(url+'/clarification',headers=headers,json={**command,'command_id':str(uuid4()),
         'revision':current['revision'],'text':'Continue the existing investigation.'}).status_code==200
@@ -104,6 +105,7 @@ def test_saved_owner_locations_are_verified_before_first_request_without_new_pat
     assert worker.tick(store)
     assert text in calls[0]['owner_reply']
     assert {TEST,TOOL,PNG} <= {w['path'] for w in calls[0]['source_memory']['recent_read_windows']}
+    assert {TEST,TOOL,PNG} == {w['path'] for w in calls[0]['inspection_result']['visible_requested_windows'] if w['provided']}
     assert not worker.tick(store)
 
 

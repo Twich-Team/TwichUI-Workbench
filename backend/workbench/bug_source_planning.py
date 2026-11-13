@@ -490,18 +490,23 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             original['description']+'\n'+feedback)))
         hints = [p.rstrip('.') for p in hints if eligible(p.rstrip('.'))][:3]
         hint_errors = []
+        hint_windows = []
         if hints and not should_stop():
             visible = getattr(adapter,'source_manifest',None)
             permitted_hints = [p for p in hints if visible is None or p in visible]
             windows, _, _ = inspect(packet,[InvestigationRead(path=p,start=1,end=160) for p in permitted_hints],
                 disclosure_paths=visible, page_lines=160, result_budget=16000, errors=hint_errors)
+            hint_windows = windows
+            if windows:
+                packet['inspection_focus'] = list(dict.fromkeys(w['path'] for w in windows))[:3]
             if parent and windows:
                 parent.record('source-known-locations-revalidated',
                     windows=[{k:w[k] for k in ('path','sha256','line','through_line')} for w in windows],
                     approved=False,executed=False)
             read_chars = source_characters(packet)
         wire=make_wire(packet,original,feedback,packet.get('inspection_windows',[]),
-            'Retained committed source supports a repair scope; executable checks are a later preparation phase.')
+            'Retained committed source supports a repair scope; executable checks are a later preparation phase.',
+            requested=hint_windows)
         if hint_errors:
             wire['inspection_result']['read_errors'] = hint_errors
         wire['coverage']['scope_plan_format']='readable-intent-v1'
