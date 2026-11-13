@@ -1,3 +1,198 @@
+# Milestone 3 closeout — infrastructure released; conditional gallery plan for owner review
+
+Following the Project Working Philosophy: distinguish installed reliability work
+from the remaining investigation uncertainty. **Stop for owner review.** No new
+model operation, source-path coaching, gallery approval/implementation, automatic
+addon test discovery, map publication or Milestone 4 is authorized by this closeout.
+
+## Installed and verified
+
+Installed 50cc64a102fd5f70b019691cde13849956822349, one installation after exact full
+hosted run [43476133087](https://github.com/Twich-Team/TwichUI-Workbench/actions/runs/43476133087)
+passed all nine jobs including final verify. Local: 2720 backend passes/8 conditional
+skips, 66 frontend, 130 ordinary browser passes/8 conditional skips, four connected
+feature passes, 12 visual passes, and 131 focused final receipt/budget/workflow
+checks. Earlier failures and interrupted superseded diagnostic runs are retained;
+none substitutes for the final passing run. The full local command exited zero.
+
+Application SHA256 eddc766f08b0a190b4cc435e3cc517f2b23bd56639ed4460ec2ed524e8921104.
+Private envelope SHA256 119daa46e65ee959292881a665dd5af7f994ebc02aef2bf49251aad0f0d05a46:
+728 exact application files, 80 pinned installation inputs, 29 external pins and
+314 evidence roots. Named administrative grants were used. Cutover and four-role
+restart preserved exact original939rows/31tables/schema0014/hash28e3b4b9...da592.
+Independent restore and native rejection sidecars passed. Thirteen observations
+across120seconds showed the same restarted worker, ready API/connector, zero
+restarts and exact history. Scheduled worker housekeeping removed10eligible
+controlled copies across all five storage classes and retained10recent copies plus
+active/failed/open/referenced data. All required rollback sources still verify.
+Actual desktop/phone/enlarged-text/reload resource views and saved-plan screenshots
+were inspected. Fresh CPU/RAM/disk/swap/VRAM/model/service data passed; unsupported
+GPU utilization stays explicit. Existing private network/TLS/CSRF boundaries and
+port8765 are preserved. Qwen IQ4_XS model, original authentication, service PID and
+provider defaults remain unchanged. No paid fallback or new model download.
+
+## Consolidated settlement and discovery
+
+provider_receipts.request_state is a shared read-only interpretation of existing
+ledger/journal facts: identity, dispatch, execution, transport, cancellation,
+content completeness/validity, known/unavailable usage and possible side effects.
+Planning/investigation delivery_phase and feature correction use it; feature
+correction checks every prior attempt. Coding-accounting interpretation moved to
+this owner, retaining its old compatibility wrapper and all native coding source,
+ownership, termination/restoration, dispatch and independent-check guards. Old
+strict historical reconcilers remain compatible. No second durable state machine
+or database migration was introduced.
+
+Complete local wire+terminal envelope, or bound Codex native lifecycle+closed
+producer, can settle invalid/truncated content independently of parsing and token
+availability. Missing transport completion, conflicting identities, cancellation
+without acknowledgment and uncertain consequential effects remain held. Codex
+parse failures before provider-result projection require actual saved tool-free
+isolation and exact original transport code. Explicit unsent followups after a
+completed prefix require native non-dispatch proof and no late wire/result. No
+rejected output becomes accepted, no continuation grants execution, and historical
+outcomes/NULL usage are never rewritten. Known native subtotals and unknown
+remainders remain distinct.
+
+source_artifacts owns one committed eligible inventory/decoder/contract for new
+initial selection, directory, search and read stages. Contract v1 binds exact base,
+inventory hash/completeness, formats, restrictions, bounded context and separate
+edit/execution/disclosure authority. Expanded search v2 and original Lua-only
+observations retain their versions and meanings. UTF-8 Lua/Python/shell sources and
+controlled PNG metadata share the eligible surface. Binary bytes/embedded text
+are withheld; PNG metadata does not claim decoded-pixel inspection. Saved owner
+locations are independently re-read and protected in the actual packed request.
+A contract is retained once per operation in the existing journal. No gallery
+paths are hardcoded in production. Current d09e6dcb inventory has687eligible files.
+Old Lua selection keeps its650limit; expanded inventory is bounded at1024 with
+existing byte/scan limits retained. Discovery grants no edit/execute permission.
+
+Controlled actual-Bug-Report tests cover duplicate/repeated continuation,
+interruption/late receipts/cancellation, unknown usage, multiple prior proposals,
+Python generator/test discovery, PNG metadata and missing/unauthorized files.
+A copy of the original939-row store retained all earlier rows/decisions/usage,
+appended one continuation, returned200 for the same command and409 for a distinct
+duplicate, with zero model/network requests. Real tokenizer preparation preserved
+5331test/5287generator/363PNG-metadata characters, without generation. These were
+controlled checks, separately identified from the real continuation below.
+
+## Real gallery result and its limits
+
+Existing intake7f1ea569-2790-427d-900a-21aa6a4e9ed5, original title `Fix LUA test on main`,
+was resumed through the normal installed browser with generic continuation text
+and no newly supplied paths. Command64e81998-33c9-4ecc-b100-98482208d769 produced
+one jobf573c656-0ac2-4ba3-b9c4-ff3587e81de7 and one attempt69cc48ea-20ec-4a85-8cf1-178b4e959f5b.
+Same-command checks returned200 and still exactly5jobs. A private observer used
+Fetch status as a method after the first successful submission; its exact error
+is retained. The corrected observer reused only the same existing command; no
+replacement report, new continuation, approval or implementation was submitted.
+
+Real Qwen finished seven responses. Three drafts were held for incomplete finding
+or scope fields; their complete provider receipts and usage remain retained.
+Final job completed2026-11-13T19:09:53Z and saved unapproved proposal revision5,
+2dc3124f-00a9-5f8c-836f-572a17a9c8d1, binding
+b64dc044c69ec249cd1774c475a54c7d3262a1350b54d6f067ce11d2d1d3b30d.
+The report now has5attempts/jobs,4proposals, the same single changes decision and
+zero implementation tasks. Current UI status is waiting_for_information because
+Python plans are review-only in the existing Lua repair runtime.
+
+The live journal proves automatic revalidation of the Python test, generator and
+lion-shield PNG metadata, one exact source contract, and a model-requested read of
+test lines116–181 including the PNG byte-equality assertion at174 and adjacent TGA
+checks. Model findings identify Rebuild.test_sample_pictures_are_what_the_tool_builds,
+the four-sample generator invocation and current byte-for-byte test promise. The
+owner's previously reproduced compressed-byte mismatch with equal pixels/textures
+was recovered as attributed prior evidence; no fresh Python execution is claimed.
+No unrelated Lua gallery changes were proposed.
+
+**Full gallery acceptance remains partial.** The final saved scope offers either
+byte-stable encoding or a decoded-pixel comparison, with only the Python test and
+generator as proposed writable candidates. It preserves approved artwork, manifest,
+ArtData and TGA outputs, and keeps unrelated Lua behavior outside scope. However,
+it still calls for completing encoder inspection and choosing the reproducibility
+contract. It has not established a compressor-version cause or resolved whether
+the final repair belongs in the test contract or generator. This is a real,
+reviewable conditional plan, not a fully determined repair or completed diagnosis.
+Do not silently turn its two alternatives into an approved implementation.
+The owner-review stopping point is reached; no extended live repair campaign began.
+
+## Accounting, preservation and recovery
+
+New usage:159886prompt+10617completion=170503tokens across7requests, all known and
+independently matched to seven complete native envelopes. Prior16requests and
+360395tokens remain exact. Gallery lifetime23requests/530898known tokens, zero
+unknown usage for these gallery requests. All other historical usage/unknowns remain
+unchanged. Actual model stays pilot-qwen38-27b, fallback Off.
+
+Fresh final history:942rows/31tables/schema0014, logical SHA256
+66342b7a9176ffe3937a5b835b7860999739a843e4ab091600964f34ce63e588.
+Only the gallery current intake state advanced; one job/attempt/proposal was added.
+All old immutable rows and unrelated intakes, decisions, permissions, original Qwen
+task, map comparison and publication holds remain exact. All32original gallery
+evidence files across4attempts/16request phases remain byte-identical. Addon source
+is clean at d09e6dcb29a4f9e3e3dbdba3fb7632c80043c810. Current accepted app remains728files
+byte-exact after live work; all four services are healthy with zero restarts, normal
+model authentication/resources pass, and no task remains running.
+
+f9e517b code/configuration and its939-row pre-continuation rollback snapshot remain
+protected and verified. A separate consistent942-row post-investigation backup was
+independently restored, including native rejection sidecars and the new plan. Do
+not overwrite new history with the older rollback snapshot: the existing guarded
+rollback must preserve the later history. Private evidence under
+/home/rich/.local/share/TwichUI-Workbench/milestone3-20261113 includes RUN_STATE.json,
+candidate-50cc64a installation envelope/activation/hosted/local/restart/retention
+receipts, live-history-proof.json, live-model-accounting-proof.json,
+original-gallery-evidence-preserved.json, post-gallery-final-health.json,
+post-gallery-restore and actual browser screenshots. CURRENT_STATUS.md is the short
+copyable owner report. Unrelated WORKBENCH_ADMIN_APPROVAL edits and dependency
+links are preserved. Zero new addon repairs completed end to end in this milestone.
+
+---
+
+# Milestone 3 — single live gallery continuation running, November 13
+
+All installed acceptance checks passed, including restart, independent restore,
+13 worker observations/120 seconds, automatic deletion of 10 eligible fixtures
+with all protected classes/rollback sources preserved, and real desktop/phone
+Machine Resources/reload/enlarged text. Installed 50cc64a; pre-live history remains
+exact 939 rows. Original 32 gallery evidence files still match their hashes.
+The normal installed browser submitted one generic reply to existing7f1ea569,
+command64e81998-33c9-4ecc-b100-98482208d769. New jobf573c656-0ac2-4ba3-b9c4-ff3587e81de7,
+attempt69cc48ea-20ec-4a85-8cf1-178b4e959f5b is running on original local Qwen.
+Same command returned200 with exactly5jobs; no replacement report, approval or
+implementation. A private acceptance observer used Fetch status as a function
+after the successful submission; its log is retained, corrected observer reused
+the exact existing command and did not create a new job. Source journal records
+one v1 contract/d09e6dcb base/687 eligible files and saved-location revalidation.
+Wait for this bounded live attempt; inspect actual evidence and any saved plan.
+Do not resubmit a different command, coach new paths, approve/implement a repair,
+or undertake an extended orchestration repair if this live attempt hits another
+fundamental blocker. Private RUN_STATE.json and live-poll files are current.
+
+---
+
+# Milestone 3 — installed acceptance checkpoint, November 13
+
+Installed 50cc64a102fd5f70b019691cde13849956822349 after full local 2720 backend
+passes/8 conditional skips, 66 frontend, 130 browser/8 conditional skips, four
+connected feature checks and 12 visual passes. All nine exact hosted jobs passed
+in run 43476133087. Private package candidate-50cc64a binds 728 app files,
+80 installation inputs, 29 external pins and 314 evidence roots. Application
+SHA eddc766f08b0a190b4cc435e3cc517f2b23bd56639ed4460ec2ed524e8921104;
+envelope 119daa46e65ee959292881a665dd5af7f994ebc02aef2bf49251aad0f0d05a46.
+Activation accepted, source/history/auth/network/resources checks pass; f9 rollback
+and exact 939-row/schema0014 history remain intact. Four-role restart/independent
+restore/scheduled retention and resource acceptance are running before any live
+continuation. No new model generation has occurred. R/RUN_STATE.json and private
+installation-journal.json are current; old local diagnostic runs were interrupted
+and retained as failed, never counted toward final acceptance. All 32 old gallery
+evidence files (4 attempts/16 request phases) are hash-retained. Continue the
+existing report once through normal browser after these checks, using only the
+generic saved resume-message.txt. Stop at owner review or fundamental live blocker.
+No gallery approval, implementation, map publication, automatic discovery or M4.
+
+---
+
 # Milestone 3 — final native receipt boundary, November 13
 
 Following the Project Working Philosophy: finish the accepted release and the
