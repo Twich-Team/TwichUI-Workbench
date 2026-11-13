@@ -1,3 +1,57 @@
+# Smart AI Choices — provider audit and allowance decision, November 13, 2026
+
+Following the Project Working Philosophy: the owner promoted Smart AI Choices and
+Claude integration as the next major priority after Milestone 3. This supersedes
+the previous no-next-milestone review stop for this assignment. Gallery repair,
+map publication, automatic test discovery, schema migration, wider redesign and
+legacy maintenance cutover remain excluded. One agent; no delegated work.
+
+Read the [dated provider audit](history/20261113-smart-ai-provider-audit.md).
+Installed application remains 50cc64a; its 441 inspected tracked runtime files match
+the active checkout. Policy 73 is unchanged: local pilot-qwen38-27b, Codex
+gpt-6.1-terra/medium, task fallback Off, Claude disabled. All 942 rows / 31 tables / schema0014
+retain logical hash 66342b7a9176ffe3937a5b835b7860999739a843e4ab091600964f34ce63e588.
+Four services retain their original PIDs and zero-restart counts; store settled.
+
+Claude initially 2.1.316, advanced to 2.1.323 by its existing native updater when its
+UI was opened. Current binary/auth and headless generation were rechecked.
+Native Claude Pro subscription, real Sonnet 5.5 print mode, low/high requested effort,
+real five-hour/week utilization and exact reset timestamps passed outside the app.
+Native usage credits are off; success events show no overage/API key. Both versions'
+real SIGINT checks returned exit 0 but error_during_execution with misleading zero
+aggregate usage after nonzero response fragments. Retain subtotals/unknown aggregate;
+never treat that as successful content, free usage or automatic-replay authority.
+Signed-out native refusal and pre-dispatch supervisor timeout were also observed.
+Real quota exhaustion/auth expiration and production Claude recovery remain unproved.
+Existing provider/model tests: 132 passed. No new production adapter is installed.
+
+**Material decision pending:** no inspected provider interface guarantees a custom
+hard subscription-percentage ceiling. An admitted request can cross a 50/75% cutoff;
+concurrent outside use changes account-wide readings. The owner was asked whether
+verified request-start cutoffs with conservative safeguards and this stated risk
+are acceptable, or strict ceilings must hold automatic work when consumption cannot
+be bounded. No answer has been assumed. This is the assignment's explicit essential
+provider-limitation stop, not a renewal of engineering permission. Do not implement
+an incompatible guarantee, silently accept the risk, enable API billing or copy OAuth
+tokens. Personal execution through the unmodified signed-in CLI is supported by
+current Anthropic guidance; do not report a blanket subscription prohibition.
+
+Checkpoint A's application adapter and checkpoints B–D remain incomplete. If the owner
+accepts the request-start semantics, continue the already-authorized outcome by
+extending existing execution_policies/provider_routes/task receipts/native journals,
+including every actual generation boundary. Keep frozen task authority and current
+records; use separate provider budgets/reserve triggers, durable waiting, suitability
+checks, honest Dashboard explanations and explicit manual authorization. Complete
+full local/exact hosted acceptance before one changed-app installation and inspect
+desktop/phone screenshots. No routine approval is needed beyond this product choice.
+
+Private receipts: /home/rich/.local/share/TwichUI-Workbench/smart-ai-20261113.
+CURRENT_STATUS.md is the complete short owner report. Preserve unrelated admin-document
+edits and dependency links. This checkpoint changes reporting only; no app release,
+addon work, gallery continuation, migration or new end-to-end strategy outcome.
+
+---
+
 # Milestone 3 closeout — infrastructure released; conditional gallery plan for owner review
 
 Following the Project Working Philosophy: distinguish installed reliability work

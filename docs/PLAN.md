@@ -1,3 +1,32 @@
+# Smart AI Choices and Claude — approved priority, November 13, 2026
+
+The owner approved the complete connected outcome through checkpoints A–D:
+
+1. A: audit actual installed providers and verify a subscription-safe native Claude adapter.
+2. B: extend the existing routing/allowance owners with deterministic ordered
+   strategies, separate provider allocations and fallback reserves, durable wait/resume.
+3. C: visual stage cards, clear Dashboard status/why, precise manual overrides and
+   frozen choices in the existing leather/bronze/ivory interface.
+4. D: exact production-path deterministic and connected acceptance, full local and
+   exact hosted release checks, preserved-history private installation and owner review.
+
+Read the [provider audit](history/20261113-smart-ai-provider-audit.md). Native Claude
+subscription headless access works; no application adapter or strategy implementation
+is complete. Provider percentage readings establish admission cutoffs but no hard
+custom percentage ceiling for an in-flight request. The owner was asked whether to
+accept that explicit limitation or require strict ceilings which hold automatic work
+when consumption cannot be bounded. Implementation is held for that material product
+decision under the assignment's essential-provider-limitation stop. No response is
+assumed, and no spending change is requested. Engineering authority otherwise persists.
+
+Preserve existing defaults, task overrides, frozen permissions, actual attribution,
+usage charts, durable worker, independent checks, retention/resources and rollback.
+No parallel scheduler, schema migration, addon features/gallery repair, map publication,
+automatic test discovery, broad redesign or legacy cutover. The later autonomous
+routine Bug Reports outcome follows a proven strategy system, not this audit.
+
+---
+
 # Milestone 3 in progress — November 13, 2026
 
 The owner authorized settlement/source-discovery consolidation and one normal

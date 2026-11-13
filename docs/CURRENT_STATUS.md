@@ -1,11 +1,9 @@
 Last updated November 13, 2026 (UTC).
 
-Build 50cc64a is installed. Shared request settlement and versioned source discovery are working. Full local and hosted release checks, restart, independent restore, automatic retention, Machine Resources and normal Qwen authentication passed. Previous build f9e517b remains protected as rollback.
+Build 50cc64a remains installed with existing Qwen/Codex choices, task overrides, usage charts, retention and Machine Resources. Its previously accepted restart and restore protections remain. All 942 saved rows are unchanged and four services remain healthy.
 
-The existing gallery report resumed once through the installed app and reached a saved review plan. Workbench found the Python test, generator and PNG metadata, identified the PNG byte comparison, and used the owner’s preserved failure evidence. It did not run a fresh Python reproduction. Controlled tests separately covered interruption, cancellation, late responses, unknown usage and source restrictions.
+Smart AI Choices and Claude integration are the approved next priority. The server now has Claude Code 2.1.323, signed into Claude Pro. A real headless Sonnet 5.5 check succeeded outside Workbench and reported subscription windows and reset times. Usage credits were off. Existing provider/model tests passed: 132. Claude is not yet integrated into Workbench.
 
-The saved plan is conditional. Complete encoder analysis and the choice between an encoding repair and a comparison-contract change remain unresolved. Full gallery acceptance is therefore partial. The current repair runtime supports Lua; Python implementation remains held.
+The provider interfaces checked do not guarantee a hard custom percentage ceiling: an already-started request can cross it. The owner must choose request-start percentage cutoffs with this limitation, or strict ceilings that hold automatic work when consumption cannot be bounded. No answer has been assumed.
 
-History increased from 939 to 942 rows. Prior attempts, plans, decisions, permissions and all 32 gallery evidence files are preserved. The live continuation used seven Qwen requests and 170,503 tokens, all known. Zero new addon repairs completed end to end in this milestone.
-
-Stopped for owner review of the conditional plan. No repair was approved or implemented. Automatic test discovery, map-zoom publication and Milestone 4 were not started. The next complete outcome requires resolving the PNG reproducibility contract and remaining encoder uncertainty before authorizing a repair.
+The strategy engine, visual builder, waiting/resumption and manual Start now action are not built or installed. The next complete outcome is a verified Claude adapter and connected strategy system after that allowance decision. Zero new AI-strategy tasks or addon repairs have completed end to end in this assignment. The gallery plan remains conditional and unapproved; excluded addon and maintenance work was not started.

@@ -1,3 +1,45 @@
+# November 13 — Smart AI provider audit; percentage-control decision pending
+
+Following the Project Working Philosophy: verified actual capabilities before new
+production routing. The owner promoted Smart AI Choices and Claude integration;
+the previous Milestone 3 review stop is superseded only for that assignment. See the
+[complete dated audit](history/20261113-smart-ai-provider-audit.md).
+
+Installed 50cc64a and 441 inspected tracked runtime files match. Live Models/local-work/
+activity endpoints pass. Policy 73 and frozen task history are unchanged. Exact 942-row/
+31-table/schema0014 hash 66342b7a9176ffe3937a5b835b7860999739a843e4ab091600964f34ce63e588,
+four original service PIDs/zero restarts and settled work were independently verified.
+Existing Codex provider/model policy tests: 132 passed in 2.20 seconds. No app code changed.
+
+Claude's native updater advanced 2.1.316 to 2.1.323; current binary hash 604d29a6...96e348e
+and authenticated Claude Pro session were rechecked without exposing credentials.
+Real tool-free headless Sonnet 5.5 checks passed on both versions. Requested low/high
+effort remains distinct from independently reported actual effort. Native credits
+off and success isUsingOverage=false were observed. Real emitted five-hour/week
+utilization and resets are retained as dated observations, not invented current
+allowance. Headless /usage returned plan text without generation. Empty native
+configuration returned signed out; a pre-dispatch supervisor timeout exited 143.
+Both versions' actual SIGINT checks exited 0 with error_during_execution and zero
+aggregate usage after nonzero native response usage: aggregate accounting remains
+unresolved and no interrupted request was replayed. Actual quota exhaustion and
+expired real login were not induced or claimed tested.
+
+Material limitation: no inspected provider control guarantees a hard custom
+subscription-percentage ceiling. One in-flight request and concurrent outside
+activity can cross a request-start cutoff. The owner was asked to accept clearly
+disclosed request-start cutoffs/conservative safeguards or retain strict ceilings
+and hold unsupported automatic dispatch. No answer is assumed. Stop under the
+assignment's explicit essential-provider-limitation rule; A's production adapter and
+B–D are incomplete. No renewed time/attempt allowance or API spending is requested.
+
+Native/private evidence: smart-ai-20261113 under the private Workbench data directory.
+No app installation, migration, new addon work/gallery continuation, map publication
+or legacy cutover. Existing saved records, Qwen settings, native permissions, rollback,
+unrelated admin-document edits and dependency links remain preserved. Zero new
+AI-strategy tasks or addon repairs completed end to end in this assignment.
+
+---
+
 # Milestone 3 closeout — infrastructure released; conditional gallery plan for owner review
 
 Following the Project Working Philosophy: distinguish installed reliability work
