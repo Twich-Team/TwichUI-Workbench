@@ -4,6 +4,9 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import shutil
+import tempfile
+import socket
 
 import pytest
 
@@ -11,7 +14,12 @@ import managed_storage as retention
 
 
 @pytest.fixture
-def rig(tmp_path, monkeypatch):
+def rig(tmp_path, monkeypatch, request):
+    # The command's outer scratch is itself disposable. These ownership tests
+    # need a separate filesystem fixture so their retained proof is genuinely
+    # outside every managed pool, exactly as required in production.
+    tmp_path = Path(tempfile.mkdtemp(prefix="wbr-retention-", dir="/dev/shm"))
+    failures_before = request.session.testsfailed
     pool = tmp_path / "managed"
     db = tmp_path / "history.sqlite3"
     with sqlite3.connect(db) as c:
@@ -26,7 +34,11 @@ def rig(tmp_path, monkeypatch):
         Path("/proc") / str(os.getpid()), target_is_directory=True
     )
     monkeypatch.setattr(retention, "PROCESSES", processes)
-    return pool, db
+    yield pool, db
+    if request.session.testsfailed == failures_before:
+        shutil.rmtree(tmp_path)
+    else:
+        print("Retained failed synthetic retention fixture:", tmp_path)
 
 
 def finished(pool, kind="test-scratch", evidence=None):
@@ -66,17 +78,20 @@ def test_preview_matches_cleanup_and_changes_no_contents_or_paths(rig):
     assert result["candidates"] == preview["candidates"]
 
 
-@pytest.mark.parametrize("kind", ["json", "blob"])
+@pytest.mark.parametrize("kind", ["json", "blob", "relative", "allocation_id"])
 def test_references_in_every_saved_row_block_deletion(rig, kind):
     pool, db = rig
     path = finished(pool)
+    location = str(path / "copy.txt")
+    if kind == "relative":
+        location = str(path.relative_to(pool)) + "/copy.txt"
+    if kind == "allocation_id":
+        location = retention.record(pool, path)[1]["id"]
     with sqlite3.connect(db) as c:
         c.execute(
             "INSERT INTO history VALUES(?,?)",
             (
-                json.dumps({"nested": {"evidence": str(path / "copy.txt")}})
-                if kind == "json"
-                else "",
+                json.dumps({"nested": {"evidence": location}}) if kind != "blob" else "",
                 str(path).encode() if kind == "blob" else b"",
             ),
         )
@@ -385,3 +400,49 @@ def test_invalid_one_copy_receipt_preserves_it_and_does_not_block_other_copies(r
     retention.save(entry, value)
     result = retention.maintain([pool], databases=[db])
     assert result["removed"] == [str(good)] and bad.exists()
+
+
+@pytest.mark.parametrize("escaped", [False, True, "relative"])
+def test_retained_report_that_links_back_into_a_copy_preserves_that_copy(rig, escaped):
+    pool, db = rig
+    path = retention.allocate(pool, "workspace")
+    (path / "snapshot.txt").write_text("still referenced by the report")
+    proof = pool.parent / "report.json"
+    location = (
+        str(path.relative_to(proof.parent) / "snapshot.txt")
+        if escaped == "relative"
+        else str(path / "snapshot.txt")
+    )
+    body = json.dumps({"evidence": location})
+    proof.write_text(body.replace("/", "\\/") if escaped is True else body)
+    proof.chmod(0o600)
+    retention.close(path, True, proof)
+    result = retention.maintain([pool], databases=[db])
+    assert not result["removed"] and (path / "snapshot.txt").exists()
+    assert any(
+        item["reason"] == "retained result references the copy" for item in result["deferred"]
+    )
+
+
+def test_short_directory_names_do_not_match_inside_unrelated_digests(rig):
+    pool, db = rig
+    path = retention.allocate(pool, "test-scratch", "a123b")
+    (path / "copy.txt").write_text("disposable copy")
+    retention.close(path, True)
+    with sqlite3.connect(db) as c:
+        c.execute(
+            "INSERT INTO history VALUES(?,?)", (json.dumps({"digest": "0a123b0123456789"}), b"")
+        )
+    assert retention.maintain([pool], databases=[db])["removed"] == [str(path)]
+
+
+def test_named_test_socket_holds_while_active_and_prunes_only_after_close(rig):
+    pool, db = rig
+    path = retention.allocate(pool, "test-scratch", "ipc")
+    with socket.socket(socket.AF_UNIX) as server:
+        server.bind(str(path / "s"))
+        server.listen()
+        retention.close(path, True)
+        assert not retention.maintain([pool], databases=[db])["removed"]
+        assert (path / "s").exists()
+    assert retention.maintain([pool], databases=[db])["removed"] == [str(path)]

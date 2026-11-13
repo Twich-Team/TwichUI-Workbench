@@ -1,3 +1,24 @@
+# Milestone 2.5 final retention correction — November 13
+
+Review found a retained report could still link into a disposable copy. The final
+candidate now holds absolute/relative/allocation-ID/escaped references in both saved
+history and the bound retained report. Short names match path components rather than
+substrings of unrelated digests. This adds protection; earlier ae54a1a is superseded
+before any installation even though its complete hosted run43433004962passed9jobs.
+
+The first full local default runner finished2679passed/8skipped/10failed: eight
+ownership tests placed retained proof inside the runner's managed parent; two native
+Unix socket paths exceeded Linux limits. Production proof protection was retained;
+controlled fixtures now use a separate private RAM test area. Default run directory
+names are short, with full UUID receipts. Closed test socket files are recognized
+while live endpoints in each process network namespace hold deletion. The standard
+wrapper rerun passed134affected backend and66frontend checks and certified its own
+successful scratch closeout. Final full local/default and exact hosted runs follow.
+No installed code or original records changed; c38d2bb continues running. A is done;
+B/C final installation/real UI acceptance remains pending. Preserve all failed logs.
+
+---
+
 # Milestone 2.5 — combined candidate under full verification, November 13
 
 A COMPLETE: root backup JSON accepted and current states independently rechecked.

@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+from uuid import uuid4
 from managed_storage import allocate, close, maintain as retain_managed
 from project_env import ROOT, environment
 from evidence_retention import maintain
@@ -26,7 +27,16 @@ def test_environment():
         if (scratch.resolve() != scratch or not scratch.is_dir()
                 or info.st_uid != os.getuid() or info.st_mode & 0o077):
             raise RuntimeError('Tests require a private owned temporary directory.')
-        unit = allocate(scratch, 'test-scratch')
+        # Keep Linux AF_UNIX fixture paths below 108 bytes. Receipt identities
+        # remain full UUIDs; only this disposable directory name is shortened.
+        for _ in range(16):
+            try:
+                unit = allocate(scratch, 'test-scratch', name=uuid4().hex[:5])
+                break
+            except FileExistsError:
+                continue
+        else:
+            raise RuntimeError('Could not allocate fresh short test storage.')
         env['TMPDIR'] = str(unit)
         env['WORKBENCH_TEST_STORAGE_UNIT'] = str(unit)
     else:

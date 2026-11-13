@@ -11,6 +11,7 @@ import hashlib
 import json
 import math
 import os
+import re
 from pathlib import Path
 import sqlite3
 import stat
@@ -140,7 +141,11 @@ def tree(path, deadline=None, test_fixtures=False):
             if len(result) >= MAX_FILES or time.monotonic() > deadline:
                 raise ValueError("Retention inventory budget exceeded; copy preserved")
             if s.st_uid != os.getuid() or not (
-                stat.S_ISDIR(s.st_mode) or stat.S_ISREG(s.st_mode) or stat.S_ISLNK(s.st_mode)
+                stat.S_ISDIR(s.st_mode)
+                or stat.S_ISREG(s.st_mode)
+                or stat.S_ISLNK(s.st_mode)
+                or test_fixtures
+                and stat.S_ISSOCK(s.st_mode)
             ):
                 raise ValueError("Unexpected owner or special file; copy preserved")
             # Model weights are never disposable cache or workspace data.
@@ -159,6 +164,14 @@ def tree(path, deadline=None, test_fixtures=False):
                     raise ValueError("Model weights are outside automatic retention")
             if stat.S_ISLNK(s.st_mode):
                 result[rel] = ["link", os.readlink(item)]
+            elif stat.S_ISSOCK(s.st_mode):
+                result[rel] = [
+                    "test-socket",
+                    s.st_ino,
+                    s.st_mtime_ns,
+                    s.st_ctime_ns,
+                    stat.S_IMODE(s.st_mode),
+                ]
             elif stat.S_ISDIR(s.st_mode):
                 result[rel] = ["directory", stat.S_IMODE(s.st_mode)]
             else:
@@ -200,6 +213,13 @@ def prune(path, expected, budget, deadline):
                 stat.S_ISLNK(s.st_mode)
                 and kind == "link"
                 and os.readlink(name, dir_fd=fd) == expected[rel][1]
+            ):
+                os.unlink(name, dir_fd=fd)
+            elif (
+                stat.S_ISSOCK(s.st_mode)
+                and kind == "test-socket"
+                and expected[rel]
+                == ["test-socket", s.st_ino, s.st_mtime_ns, s.st_ctime_ns, stat.S_IMODE(s.st_mode)]
             ):
                 os.unlink(name, dir_fd=fd)
             else:
@@ -297,6 +317,10 @@ def process_reference(path):
             args = (p / "cmdline").read_bytes()
             if needle in args or needle in (p / "maps").read_bytes():
                 return True
+            # Unix socket fds show socket:[inode], not a pathname. Each process
+            # exposes its own network namespace, including surviving children.
+            if needle in (p / "net/unix").read_bytes():
+                return True
             for link in [p / "cwd", *(p / "fd").iterdir()]:
                 try:
                     target = Path(os.readlink(link).removesuffix(" (deleted)"))
@@ -384,13 +408,25 @@ def overlap(path, roots):
     )
 
 
+def mentions(path, value, bodies):
+    # Component boundaries avoid treating a short test-directory name as part
+    # of an unrelated SHA256. Full paths and allocation UUIDs stay explicit.
+    component = re.compile(
+        rb"(?<![A-Za-z0-9_.-])" + re.escape(path.name.encode()) + rb"(?![A-Za-z0-9_.-])"
+    )
+    return any(
+        str(path).encode() in body or value["id"].encode() in body or component.search(body)
+        for body in bodies
+    )
+
+
 def reason(path, value, protected, bodies, now, physical=None, deadline=None):
     physical = physical or path
     if value["state"] != "closed":
         return "unfinished or failed lifecycle"
     if now - value["closed_at"] < MIN_AGE:
         return "within retention age"
-    if overlap(path, protected) or any(str(path).encode() in body for body in bodies):
+    if overlap(path, protected) or mentions(path, value, bodies):
         return "saved history, evidence, installation or rollback reference"
     s = plain(physical)
     if [s.st_dev, s.st_ino] != [value["device"], value["inode"]]:
@@ -402,6 +438,14 @@ def reason(path, value, protected, bodies, now, physical=None, deadline=None):
         plain(p, False)
         if evidence_digest(p) != value["evidence"]["sha256"]:
             return "retained evidence differs"
+        body = p.read_bytes()
+        references = [body, body.replace(b"\\/", b"/")]
+        try:
+            references.append(json.dumps(json.loads(body), ensure_ascii=False).encode())
+        except ValueError, UnicodeDecodeError, TypeError, RecursionError:
+            pass
+        if mentions(path, value, references):
+            return "retained result references the copy"
     actual, _ = tree(physical, deadline, value["kind"] == "test-scratch")
     expected = value["entries"]
     if (physical == path and actual != expected) or any(
@@ -548,7 +592,7 @@ def maintain(pools, protected=(), databases=(), preview=False, now=None):
                     # The short writer reservation ends after rename, before recursive
                     # deletion. New producers cannot claim the closed, absent path.
                     # A crash resumes only an unchanged subset of the known inventory.
-                    if process_reference(physical):
+                    if process_reference(path) or process_reference(physical):
                         raise ValueError("Quarantined copy is still in use")
                     reclaim, complete = prune(
                         physical, v["entries"], MAX_BYTES - result["reclaimed_bytes"], deadline

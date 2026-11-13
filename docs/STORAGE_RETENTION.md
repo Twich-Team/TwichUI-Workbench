@@ -15,6 +15,9 @@ all managed pools. Failed/unfinished copies, models, databases in saved use and
 unknown legacy directories remain protected. `wb.py` allocates each default test
 temporary run separately and closes it only after the complete command succeeds.
 Explicit caller-supplied temporary storage remains unchanged.
+Test directory names stay short for Linux socket paths; allocation receipts retain
+full UUID identities. Controlled retention fixtures live in a separate private test
+area so their retained proof is genuinely outside disposable pools.
 
 Default retention keeps the two newest successful copies of each class for at
 least 24 hours. Each pass checks 32 indexed copies, admits at most eight, targets
@@ -28,6 +31,11 @@ hold cleanup. Open files, mappings, process arguments and working directories
 hold cleanup too; unknown same-user process access is conservative. The known
 nondumpable login/service-manager daemons are identified explicitly. Source and
 retained-result ownership, identity and inventories are rechecked before pruning.
+Named Unix endpoints are checked in each owned process's network namespace.
+Successful test scratch may contain closed socket files; active endpoints hold
+cleanup. Other special files remain excluded.
+A retained report that links back into its disposable copy also holds that copy;
+absolute, relative, allocation-ID and JSON-escaped references are recognized.
 
 A durable intent precedes deletion. A short SQLite writer reservation covers the
 last reference check and atomic rename into the pool's private quarantine; it
