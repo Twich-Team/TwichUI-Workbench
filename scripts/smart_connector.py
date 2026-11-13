@@ -8,7 +8,7 @@ from uuid import UUID
 
 from workbench import claude_native as native, provider_admission as admission
 
-REASONS=dict(authentication='authentication',authentication_or_allowance_unavailable='authentication',
+REASONS=dict(authentication='authentication',authentication_or_allowance_unavailable='accounting',
     allowance_unavailable='accounting',billing_permission='credits',unexpected_billing='credits',
     unsupported_model_or_effort='model_identity',binary_changed='model_identity',
     canceled='canceled',timeout='timeout',input_limit='protocol',invalid_content='protocol',

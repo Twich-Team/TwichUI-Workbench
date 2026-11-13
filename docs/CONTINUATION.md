@@ -1,3 +1,21 @@
+# Smart AI Choices — native quota and final access-state checks
+
+Native CLI2.1.323 read-only preflight was exercised under512MiB/64tasks/100%CPU/
+NoNewPrivileges, peaking at about396MiB with zero generation. A fresh native
+short-window100% reading (creditsOff) made the actual production Boundary.choose
+and an explicit allocation override both return provider_limit waiting, no dispatch.
+No exact reset epoch was available; native labels were retained as labels only.
+Real generation before exhaustion remains the isolated Sonnet5.5 boundary proof;
+there is still zero finished Smart task in the installed app.
+
+Final error classification now keeps ambiguous authentication-or-allowance failures
+unknown instead of falsely claiming sign-in expired. Confirmed authentication,
+provider limits, unknown allowance and unavailable/billing cases remain distinct.
+Four deterministic native-preflight boundary cases were added. No API billing or
+subscription mode changes. Original app50cc64a/store942/schema0014 unchanged.
+
+---
+
 The latest hosted browser runner also failed before tests because the MIT Ubuntu
 mirror timed out after three bounded attempts. Existing official Ubuntu fallback
 URLs now undergo the same required signature check with the existing Ubuntu keyring;

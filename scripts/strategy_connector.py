@@ -86,7 +86,9 @@ class Boundary:
                 result.append(observation)
             except (codex.Hold,claude.Held,OSError,ValueError,TimeoutError) as error:
                 reason=getattr(error,'reason','unavailable')
-                state='authentication' if 'auth' in reason else 'provider_limit' if reason in {'capacity','provider_limit'} else 'unavailable'
+                state=('authentication' if reason=='authentication' else
+                    'provider_limit' if reason in {'capacity','provider_limit'} else
+                    'unknown' if reason in {'accounting','allowance_unavailable','authentication_or_allowance_unavailable'} else 'unavailable')
                 result.append(ai.Observation(provider=provider,state=state,observed_at=time.time(),
                     source='Native access check unavailable; no generation dispatched'))
         self.fresh=result

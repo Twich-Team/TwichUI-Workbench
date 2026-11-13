@@ -121,3 +121,26 @@ def test_unknown_reset_is_unknown_and_credits_permission_remains_separate():
     assert ai.evaluate(strategy(),[observation],[],now=time.time()).condition=='unknown'
     result['rateLimits']['credits']['hasCredits']=True
     assert connector.codex_observation(result).paid_usage=='unknown'
+
+
+@pytest.mark.parametrize('reason,state',[
+    ('authentication','authentication'),
+    ('authentication_or_allowance_unavailable','unknown'),
+    ('allowance_unavailable','unknown'),
+    ('billing_permission','unavailable'),
+])
+def test_native_preflight_does_not_invent_an_authentication_failure(tmp_path,monkeypatch,reason,state):
+    runtime=tmp_path/'runtime';runtime.mkdir()
+    evidence=tmp_path/'artifacts'/'codex-evidence';evidence.parent.mkdir()
+    b=connector.Boundary(None,Path('/unused'),Path('/unused'),runtime,evidence,Path('/unused'),lambda *args:'')
+    b.stop=lambda:False
+    b.hosts=lambda *args:tmp_path/'hosts'
+    monkeypatch.setattr(connector.claude,'configuration',lambda *args:{})
+    monkeypatch.setattr(connector.claude,'command',lambda *args,**kwargs:[])
+    def refuse(*args):
+        raise connector.claude.Held(reason)
+    monkeypatch.setattr(connector.claude,'preflight',refuse)
+    value=ai.Strategy(stages=[ai.Stage(id='native',provider='claude',model='claude-sonnet-5-5',allocation=75)])
+    observed=next(o for o in b.observations(value) if o.provider=='claude')
+    assert observed.state==state and observed.paid_usage=='unknown'
+    assert ai.evaluate(value,[observed],[],now=time.time()).state=='waiting'
