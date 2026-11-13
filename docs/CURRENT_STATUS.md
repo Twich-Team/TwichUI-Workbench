@@ -1,11 +1,11 @@
-Last updated November 13, 2026 (UTC).
+Last updated November 12, 2026 (Mountain time; November 13 UTC).
 
-Private workbench.twich.gg is back on build 4f03783, deployment everyday-outcome-4f03783. The UI, API and connector are running. The worker remains unhealthy because an archived feature raises an unhandled error; ordinary task execution is unavailable.
+Milestone 1 is complete. Private workbench.twich.gg runs verified build 0c3cecb in everyday-outcome-0c3cecb-m1. The worker, UI, API and connector are healthy after installation and a four-service restart. The worker stayed on one process with zero restarts during repeated observations.
 
-Candidate 0c3cecb passed all nine hosted release checks. Installation stopped because I omitted a required rejected-evidence manifest from the final prepared installer. Following the owner's closeout instruction, I stopped and restored the previous deployment. Its sealed files and all 938 saved rows match; an independent restored copy and normal model authentication also passed verification.
+The archived feature no longer stops scheduling. An isolated copy completed fourteen worker cycles without changing any historical row; the existing regression also proved unrelated eligible work can be considered. No new model request was made.
 
-The existing Bug Report did not resume. No new model attempt was made and no corrected plan was saved. Its report, three earlier plans, decisions and usage remain intact, along with the completed map-zoom result, owner archive choices and publication holds.
+All 938 rows, owner archives, decisions, permissions, publication holds and unknown usage are unchanged. An independent restored database and its rejection evidence passed verification. The complete private installation package, accepted release evidence and rollback are retained. Normal model authentication passed.
 
-The actual Python PNG byte mismatch was reproduced, with identical decoded pixels and game textures. Recovery, unknown-usage handling and Python/PNG discovery passed controlled tests. These tests do not establish a completed recovery in the running app. Zero new addon repair tasks completed end to end in this assignment; earlier bug/test tasks reached draft delivery.
+Zero new addon tasks completed end to end in this assignment. Earlier bug/test requests reached draft delivery; map zoom remains a checked local result with publication held. The gallery Bug Report has not resumed and has no corrected saved plan. Recovery and Python/PNG discovery remain demonstrated only in controlled checks for that report.
 
-Next: owner review and a separately assigned read-only Astra audit. No further development, installation retry, model attempt or addon repair is queued. No repeated continuation is requested from the owner.
+Nothing is blocking this worker-restoration milestone. Gallery recovery and map publication remain held. Next: owner review of the restored application. Further work, including Milestone 2, needs separate owner direction.

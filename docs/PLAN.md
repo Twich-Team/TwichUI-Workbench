@@ -1,3 +1,16 @@
+# November 12 (Mountain time) — worker-restoration milestone complete
+
+The owner's narrow Milestone 1 assignment is complete: accepted 0c3cecb is installed
+in everyday-outcome-0c3cecb-m1, worker/UI/API/connector are healthy after restart,
+and exact 938-row history plus independent rejection evidence/restore are verified.
+The complete private package, source seal and rollback remain available. See
+[restoration receipt](WORKER_RESTORATION_20261112.md) and current CONTINUATION.
+STOP for owner review. No gallery continuation, model request, map publication,
+feature implementation or Milestone 2 is queued. Earlier active plans below are
+historical and do not authorize further work.
+
+---
+
 # November 13 — owner-controlled closeout stopped; owner review
 
 Full hosted43341422390accepted0c3cecb/all9jobs. Its prepared installation stopped

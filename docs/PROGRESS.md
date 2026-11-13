@@ -1,3 +1,54 @@
+# November 12 (Mountain time) — Milestone 1 worker restoration complete
+
+STOP for owner review after restoration. The latest owner assignment authorized
+installing the existing accepted worker correction only; it supersedes the prior
+closeout's installation hold. The independent Astra audit has been read. No gallery
+continuation, new model request, map publication or Milestone 2 is authorized here.
+
+Installed `0c3cecb2973e03dfa4745d31448cccb8104b1bac` in
+`/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-0c3cecb-m1`.
+Application source is exact accepted code, not the later reporting HEAD. All nine
+hosted 43341422390 jobs were reconfirmed; ZIPs, 162-file backend inventory, 26-file
+frontend and 686 tracked source files passed. No application/feature code changed.
+The interrupted `everyday-outcome-0c3cecb` and its failed installer remain preserved.
+
+The complete private package is under
+`/home/rich/.local/share/TwichUI-Workbench/worker-restoration-20261112`.
+It includes the original missing rejection manifest and four exact original files,
+configuration, six passive context files, source/runtime inventories, accepted release
+receipts, rehearsal and the existing deployment/rollback mechanism. All preparation
+and package validation preceded service shutdown; a missing-manifest negative case
+refused before services. Package SHA-256:
+`88c1b9eab7d2c08742f6600fc0d200bb87029d9f2ec065bdd2b92bc49d8b6f14`.
+Source seal:
+`711263b3810928b913811338718516a4f9268634e295bb26f8c338e83f7858e0`.
+
+Fourteen isolated worker cycles preserved exact history and archive refusal, while
+thirteen reached remaining planning with the transport guard blocking requests.
+One expected passive recovery receipt was created; no historical row changed.
+The unchanged eligible-work/archive regression passed. Installation, all-four-service
+restart, desktop/phone/reload/enlarged text, UI/API/connector, both private listeners,
+TLS/assets/Origin/CSRF, kernel filters, model authentication and port 8765 passed.
+Worker remained on one PID with zero restarts before the explicit restart; afterward
+seven samples across 30 seconds again showed one PID, zero restarts, ready API and
+exact history. Independent restore includes validated rejection sidecars.
+
+All **938 rows / 31 tables / schema0014** remain exact, logical
+`e744e2bec0e9814636101151b6f18c917b97c374ee504eed1a7eb7f179c05570`.
+Original owner archives, decisions, permissions, old failures and unknown usage stay
+unchanged. Gallery remains failed/revision3, four jobs/attempts, three proposals,
+one decision, zero tasks; no new model request. The checked map result and publication
+hold are unchanged. Rollback to exact prior 4f03783 UI/API/store is available, with
+its known worker defect explicitly recorded. New stopped-source backup and independent
+restore are retained; do not restore an older history snapshot.
+
+See [restoration receipt](WORKER_RESTORATION_20261112.md) for dependency inventory,
+verification limits, failed observer/setup logs and precise recovery locations.
+Unrelated administrative edits, .venv/node_modules links and original checkout remain.
+Zero new addon tasks completed end to end. Next: owner review; no automatic continuation.
+
+---
+
 # November 13 — controlled closeout stopped at installation blocker
 
 STOP for owner review. The owner's latest direction limits this assignment to the
