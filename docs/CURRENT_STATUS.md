@@ -1,13 +1,13 @@
-Last updated November 13, 2026 (UTC).
+Last updated November 13, 2026 (Mountain time).
 
-Milestone 2.5 is in progress. The running app remains verified build c38d2bb. Its worker and four services are healthy; all 939 saved rows and historical references are preserved. Current and two validated rollback builds pass their checks.
+Milestone 2.5 is in progress. Approved model cleanup is finished, but checkpoint A still needs verification of two root-only backup files. The running app remains verified build c38d2bb; no replacement code has been installed.
 
-Storage recovery increased available disk space from 4.11 to 23.70 GiB, a measured gain of 19.59 GiB. The unused alternate Qwen weight was removed. Eleven closed browser copies now share verified identical files while preserving their paths. The active Qwen model still responds with its original authentication and unchanged process.
+Available SSD space increased from 4.11 to 86.00 GiB, a measured net recovery of 81.89 GiB. Three inactive model weights were removed. Eleven closed browser copies share verified identical files while preserving their paths. The active Qwen model, process and original authentication are unchanged.
 
-Checkpoint A is incomplete: two obsolete disabled model service definitions are root-owned and outside the existing administrator grant. A narrow owner-terminal script is prepared to back them up and retire them. Their model weights remain intact until that action is done. Uncertain or referenced workspaces, releases, caches and evidence remain protected.
+Both obsolete service definitions are confirmed absent and inactive. Their root-owned backup directory exists, but its contents cannot be read through the available administrator grants; direct verification requires interactive authentication. Work stopped at this exact access boundary. A read-only owner-terminal verification script is ready. No additional cleanup approval is needed.
 
-Automatic retention and the Machine Resources repair have not started because the owner requested sequential checkpoints. No new application code has been installed. Long-term storage growth remains unresolved.
+All 939 saved rows, 305 evidence locations, rejection records, current source and both checked rollback releases pass verification. All four services are active with zero restarts, and supported application pages and worker readiness pass. No model generation was dispatched. Referenced or uncertain workspaces, release directories, databases and historical evidence were retained.
 
-Zero addon tasks completed end to end in this assignment. Earlier bug/test requests reached drafts. Gallery continuation, map publication and Milestone 3 remain untouched.
+Automatic retention and the Machine Resources repair have not started. Next: verify the root-only backup files, complete checkpoint A, then carry out B and C followed by full local and hosted checks and one accepted installation with history and rollback verification. Stop for owner review after Milestone 2.5 is complete.
 
-Next: complete and verify model retirement, implement and exercise automatic retention, repair real host metrics, then run full local and hosted checks and install once with verified history and rollback. Owner action needed now: run the prepared narrow root script described in the handoff. Stop for owner review after the completed milestone.
+Zero new addon tasks completed end to end in this assignment. Gallery continuation, map publication and Milestone 3 remain untouched.

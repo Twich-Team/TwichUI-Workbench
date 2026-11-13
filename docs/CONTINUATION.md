@@ -1,3 +1,64 @@
+# Milestone 2.5 — model cleanup finished; root-only backup verification pending
+
+Following the Project Working Philosophy, recover the existing Milestone 2.5
+assignment; do not restart Milestone 2. The owner confirmed execution of the prepared
+root retirement script and again explicitly authorized inactive weights and proven
+disposable Workbench data. No further cleanup approval is needed. Continue sequential
+A → B → C and full verification/accepted installation, stopping for owner review only
+after the whole milestone, except for the exact verification boundary below.
+
+Both llama.service and llama-80b.service now have LoadState=not-found,
+ActiveState=inactive, and no /etc/systemd/system definitions. Root backup directory
+/var/lib/twichui-model-retirement-20261113 exists, root:root mode0700, with matching
+owner-action timing. Its actual file contents have NOT been independently read:
+no attached terminal exists; named grants provide no backup read; sudo -n for the
+narrow read-only check returned "interactive authentication is required". Per the
+owner's explicit stop-if-unverifiable direction, do not start B/C before this check.
+The user already authorized cleanup; this is an unavailable-read-access boundary.
+
+Prepared read-only owner command (stdout redirection runs as the ordinary owner):
+
+```sh
+sudo python3 /home/rich/.local/share/TwichUI-Workbench/milestone2.5-20261113/verify-retired-model-backups.py > /home/rich/.local/share/TwichUI-Workbench/milestone2.5-20261113/root-backup-verification.json
+```
+
+It checks both root-owned regular backup files, exact old model references, hashes,
+absent retired definitions, inactive/not-found states and actual active Qwen mapping.
+It changes no units, models, permissions, credentials or services. Validate that JSON
+against the prepared script and independent system state, then complete A and proceed
+to existing-housekeeping reference-aware retention (B), then real Machine Resources
+readings (C), full local/exact hosted acceptance and one final sealed installation.
+
+Approved removals are finished: prior alternate15.33 GiB, now retired Coder30B17.28
+GiB and cache-aware Next45.92 GiB. The latter cache consists of one revision/file:
+huggingface_hub correctly removed its complete single-revision repository; exact
+regular-file/symlink/directory inventory and reference metadata were checked/retained.
+No inference/model service restart occurred. Active IQ4_XS file/inode/header, Qwen PID
+1949395, original key and 401/200 authenticated model-list checks remain exact.
+
+Measured SSD availability: baseline4,413,333,504 →92,337,905,664 bytes =4.11→86.00 GiB;
+net gain87,924,572,160 bytes/81.89 GiB. Removed/shared allocated bytes88,888,766,464
+(82.78 GiB); normal concurrent writes explain the net difference. Eleven closed
+browser copies remain shared with original paths. All223 stage directories and387
+pilot checkouts remain; reference/uncertain ownership rules still prohibit bulk
+removal. Current and two rollback sources, all939 rows/schema0014/logical28e3b4b9,
+305 evidence roots, independent rejection sidecars and immutable rollback snapshot
+pass. All four app services are active/zero restarts; supported API/readiness passes.
+No model generation, application deployment, addon work or publication occurred.
+
+Private receipts: milestone2.5-20261113/CHECKPOINT_A_STORAGE_VERIFIED.json,
+checkpoint-a-current.json, remaining-models-preflight.json, model-coder30b-*/model-next-*,
+CHECKPOINT_A_STORAGE_RECOVERY.md, verification script and correction receipts.
+Initial retirement guards correctly stopped before unlink: an own header read changed
+atime, then the library exposed a whole-repository rather than blob-list deletion
+plan. Corrected only atime comparison and validated the exact supported cache plan;
+original intents/scripts retained. Do not rerun weight retirement (files already gone).
+
+The Milestone 2.5 assignment remains incomplete. No B/C implementation or release
+checks for new code have begun. Preserve unrelated admin-document edits and links.
+
+---
+
 # Milestone 2.5 authorized — November 13 UTC; checkpoint A in progress
 
 Owner authorized sequential storage recovery, existing-housekeeping retention and

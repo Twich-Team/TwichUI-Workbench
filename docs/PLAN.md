@@ -1,3 +1,16 @@
+# Milestone 2.5 checkpoint A — November 13 (Mountain time)
+
+Approved model cleanup finished; storage/application/history/rollback verification
+passed, with81.89 GiB net recovery and86.00 GiB available. Actual root unit retirement
+is verified; root-only backup file contents need the prepared read-only owner-terminal
+check. Per explicit owner instruction, stop before B/C until that receipt is validated.
+No more cleanup permission is needed. After A acceptance, continue already-authorized
+B automatic reference-aware retention, then C Machine Resources, full local/exact
+hosted acceptance and one final sealed installation. Do not repeat Milestone2 or any
+completed deletion. See current CONTINUATION; earlier A progress below is historical.
+
+---
+
 # Milestone 2.5 — active owner assignment, November 13 UTC
 
 Sequential checkpoints: A recover proven-disposable storage and verify active Qwen,

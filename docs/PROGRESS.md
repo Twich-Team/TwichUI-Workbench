@@ -1,3 +1,26 @@
+# Milestone 2.5 model cleanup — November 13 (Mountain time)
+
+Following the Project Working Philosophy, recovered checkpoint A and verified the
+owner's root action removed both obsolete unit selections. Removed remaining17.28
+GiB Coder30B and45.92 GiB cached Next only after actual not-found/inactive and process/
+reference/identity checks. Cache retirement used huggingface_hub's exact single-repo
+plan; original reference metadata and intent/completion/correction receipts retained.
+Active model/inode/header/PID/authentication unchanged; no generation or interruption.
+
+Net SSD recovery81.89 GiB (4.11→86.00 available); total allocation removed/shared82.78
+GiB including prior alternate model/eleven browser copies. All939 rows/305evidence
+roots/current+two rollback seals/snapshot/rejection sidecars/API/readiness and four
+services/zero restarts pass. All387pilot/223stage directories remain protected.
+
+A final access boundary prevents accepting A: root-owned backup directory exists,
+but its files cannot be read through named grants; direct sudo read requires interactive
+authentication and no app terminal is attached. Owner explicitly required a stop if
+actual root effects cannot be verified. Prepared a read-only owner verification command,
+recorded in CONTINUATION; no new cleanup approval requested. B/C remain unstarted.
+Private CHECKPOINT_A_STORAGE_RECOVERY.md and checkpoint-a-current.json give exact state.
+
+---
+
 # Milestone 2.5 checkpoint A progress — November 13 UTC
 
 Following the Project Working Philosophy, baseline installed c38d2bb/939 rows and
