@@ -282,7 +282,7 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
             source='workbench',backend=route.get('provider','codex') if route else 'local',requested_model=model,
             requested_effort=route.get('effort') if route else None,policy_revision=route['policy_revision'] if route else local.policy_revision,
             outcome='running',started_at=intake.now(),routing_reason='Original-only independent repair evidence before any implementation.'))
-    wire=dict(purpose='original-only independent behavior checks',original=linked['original'],intent=intent,
+    wire=dict(purpose='original-only independent behavior checks',original=linked['original'],owner_feedback=reviewed.get('review_feedback'),intent=intent,
         files=selected_source['files'],
         inspection_windows=[w for w in packet.get('inspection_windows',[]) if w['path'] in intent['plan']['read_paths']],
         instructions=('Design a bounded '+('Python' if intent['plan']['focused_test'].endswith('.py') else 'Lua')+
@@ -290,7 +290,7 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
             'Observe actual behavior, not source text, hashes, test-runner flags or self-assigned expected state. '
             'Use only stdlib/existing dependencies, no network. Include every criterion id. Do not emit verdicts or exit. '
             'For missing-regression the program must fail on original and pass on a genuine fix. '
-            'For test-correction cite exact report text or a committed requirement comment for every criterion in evidence (criterion,kind,path,quote). Do not cite the assertion being corrected or candidate behavior. Independently prove original production behavior is correct; provide one small exact '
+            'For test-correction cite exact report or recorded owner_feedback text, or a committed requirement comment for every criterion in evidence (criterion,kind,path,quote). Do not cite the assertion being corrected or candidate behavior. Independently prove original production behavior is correct; provide one small exact '
             'negative_control replacement in a read-only production dependency that both this program and a corrected test must reject. '
             'Do not weaken an assertion merely because it fails. Artifact contracts must follow original committed requirements.'))
     prefix_usage=list(prefix.get('usage',[])) if prefix else []
@@ -311,7 +311,7 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
             usage.append(copy.deepcopy(adapter.diagnostics.get('usage')))
             program=IndependentProgram.model_validate(raw)
             from workbench.repair_profiles import validate_requirement_evidence
-            validate_requirement_evidence(program,intent,linked['original'])
+            validate_requirement_evidence(program,intent,linked['original'],reviewed.get('review_feedback'))
             if evidence:
                 evidence.snapshot('original-only-program',program.model_dump())
                 evidence.close()

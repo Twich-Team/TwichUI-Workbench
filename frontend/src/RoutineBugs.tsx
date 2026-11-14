@@ -16,6 +16,7 @@ export function RoutineBugs(){
       const saved=await mutate<Control>('/api/routine-bug-policy',{revision:query.data.revision,enabled:!query.data.enabled},'PUT');
       client.setQueryData(['routine-bug-policy'],saved);
       await client.invalidateQueries({queryKey:['execution-policy']});
+      await client.invalidateQueries({queryKey:['models']});
     }catch(e){setError(e instanceof Error?e.message:'The setting could not be confirmed.');void query.refetch();}
     finally{setBusy(false);}
   }

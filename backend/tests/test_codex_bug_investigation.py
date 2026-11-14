@@ -151,7 +151,7 @@ def test_codex_uses_same_investigation_plan_and_review_before_normal_approval(
         and len(item["proposals"]) == 1
         and not item["tasks"]
         and not item["decisions"]
-    )
+    ), item['jobs']
     assert [p["investigation_progress"]["phase"] for p in calls] == [
         "source_diagnosis",
         "plan_construction",

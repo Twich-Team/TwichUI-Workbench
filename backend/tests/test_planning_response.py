@@ -606,6 +606,16 @@ def test_single_outcome_wire_compiles_only_explicit_selection_and_keeps_content_
         BugPlanningResponse.model_validate(decoded)
 
 
+def test_check_outcome_is_preserved_without_adding_it_to_legacy_plans():
+    from workbench.bug_intent import Response
+    checks=[dict(capability='python-test',path='tests/test_gallery.py')]
+    decoded,changes=payload(json.dumps(dict(finding='Reproduce the committed failure.',draft=dict(checks=checks))),bug=True)
+    assert changes==['unwrap-single-outcome']
+    assert Response.model_validate(decoded).checks[0].path=='tests/test_gallery.py'
+    with pytest.raises(ValidationError):
+        BugPlanningResponse.model_validate(decoded)
+
+
 def test_private_proposal_and_review_snapshots_persist_without_public_values(tmp_path):
     with_evidence=Evidence(tmp_path,str(uuid4()),BugPlanningResponse)
     try:

@@ -1,15 +1,13 @@
 Last updated November 13, 2026 (Mountain Time).
 
-The running app remains build 73b24f6 with Smart AI Choices and native Claude. Its four services are active. The saved store has 961 rows, including the newer navigation-lifts investigation; existing reports and permissions are untouched.
+The running app remains build 73b24f6 with Smart AI Choices and native Claude. All four services are active. The saved store now has 965 rows after two owner archive decisions. Every original row, report and permission is preserved.
 
 Earlier Lua tasks reached draft PRs, and Smart AI completed a real Codex-wait-to-Claude planning request. Zero tasks have completed from beginning to end under the new autonomous Bug Reports policy.
 
-Checkpoint A is implemented in development: one automatic routine-bug setting, frozen policy and model choices for new covered reports, and clearly attributed permissions through the existing worker. Controlled tests reach exactly one grant and dispatch without human scope/run approvals. Historical tasks, revocation, pause and publication boundaries remain protected. Static checks and 83 connected backend checks passed. This change is not installed.
+The new automatic repair setting, isolated Lua/Python reproduction, repair profiles, provider continuation, task priority and Pause/Resume controls are implemented in development. Twelve confined profile checks passed with simulated models. Desktop, phone, enlarged-text and reload checks passed. These changes are not installed.
 
-Reproduction is now implemented in development: models can request fixed committed Lua/Python tests and the repository suite in isolated copies. 74 focused checks passed, plus an actual confined Lua reproduction with a simulated provider. Observations stay separate from hypotheses; harmless duplicate source reads are normalized.
+Full release checks found older planning-response compatibility problems and an independent-rejection precedence issue. The corrections passed 137 focused checks; the failed candidate will not be installed. Browser and visual checks passed. Complete local and exact hosted acceptance are still required.
 
-Repair profiles are implemented in development for existing failures, missing coverage, independently justified test-only corrections and environment diagnosis. Ten dedicated native checks passed, including actual confined Lua/Python and a Python artifact generator, with simulated providers. Final regressions must pass; failing baselines, stale evidence and weakened tests cannot certify a fix.
+The current addon baseline passes 195 of 196 tests. Its gallery rebuild test rejects four PNGs whose decoded pixels match exactly; runtime textures, manifest and artwork data also match. This is diagnostic evidence, not an autonomous repair. A fresh Python report will investigate it without changing the old gallery task.
 
-Provider continuation and clear task controls are now implemented in development. Controlled checks preserve the same task, work and usage through long waits and permitted fallback. Work on this next changes actual scheduling; task Pause/Resume and the four-step bug journey work in browser checks. These changes are not installed.
-
-The remaining work is full release acceptance, one verified installation, and real independently verified draft delivery. No new delivery blocker or owner decision is identified. The next complete outcome is fresh routine Bug Reports reaching verified draft PRs with zero mandatory interventions after submission. Full local and hosted release acceptance, history preservation and rollback verification are still required.
+Next: finish release acceptance, install one verified build with rollback and history checks, then demonstrate real Python and Lua reports reaching independently verified draft PRs. No owner decision is needed yet. Merging any addon PR remains the owner's decision.

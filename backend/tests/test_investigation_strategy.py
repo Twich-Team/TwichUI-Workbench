@@ -135,7 +135,6 @@ def test_read_only_schema_feedback_does_not_select_ambiguous_outcomes_or_copy_va
 @pytest.mark.parametrize(
     "fault,field,code",
     [
-        ("reads", "read_paths", "distinct_read_paths"),
         ("writes", "writable_paths", "distinct_writable_paths"),
         ("unread", "read_paths", "writable_source_not_read"),
         ("test", "writable_paths", "focused_test_not_writable"),
@@ -151,8 +150,6 @@ def test_scope_relationship_feedback_identifies_the_actual_constraint_without_ec
     from test_bug_intent import plan
 
     value = plan()
-    if fault == "reads":
-        value["read_paths"].append(value["read_paths"][0])
     if fault == "writes":
         value["writable_paths"].append(value["writable_paths"][0])
     if fault == "unread":
@@ -218,3 +215,14 @@ def test_character_limit_cutoff_is_rejected_for_fresh_responses_without_invalida
     assert Plan.model_validate(
         value["plan"]
     )  # Historical bindings retain their original semantics.
+
+
+def test_duplicate_observation_paths_are_reused_without_relaxing_write_scope():
+    from workbench.bug_intent import Response
+    from test_bug_intent import plan
+    value=plan()
+    original=list(value['read_paths'])
+    value['read_paths']=[*original,*reversed(original)]
+    result=Response.model_validate(dict(finding='Repeated source observations retain one exact read scope.',plan=value))
+    assert result.plan.read_paths==original
+    assert result.plan.writable_paths==value['writable_paths']

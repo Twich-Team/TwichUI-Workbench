@@ -376,7 +376,7 @@ def changed_assertion_failure(runtime, observed, candidate):
     return bool(lines and any(int(line) in lines for line in frames))
 
 
-def validate_requirement_evidence(program,intent,original):
+def validate_requirement_evidence(program,intent,original,feedback=None):
     """Ground intended behavior independently of the assertion being corrected."""
     if intent['plan']['repair_profile']['kind']!='test-correction':
         return
@@ -386,9 +386,13 @@ def validate_requirement_evidence(program,intent,original):
         raise ValueError('Source changed before requirement evidence validation')
     if {e.criterion for e in program.evidence}!={c['id'] for c in intent['plan']['criteria']}:
         raise ValueError('Every corrected test criterion needs original requirement evidence')
+    if feedback:
+        from workbench.visual_scope import digest
+        if intent.get('report_binding')!=digest(dict(original=original,feedback=feedback)):
+            raise ValueError('Owner clarification differs from the frozen original requirement binding')
     for evidence in program.evidence:
         if evidence.kind=='report':
-            valid=evidence.path is None and evidence.quote in original['description']
+            valid=evidence.path is None and (evidence.quote in original['description'] or bool(feedback and evidence.quote in feedback))
         else:
             valid=(evidence.path in intent['plan']['read_paths'] and evidence.path!=intent['plan']['focused_test']
                 and evidence.quote in source.git(root,'show',base+':'+evidence.path).decode()

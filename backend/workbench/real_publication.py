@@ -69,6 +69,9 @@ def _checked(c, row, grant, *, active=True):
             raise DeliveryHeld('The combined feature result or its independently checked contributions changed.') from None
         return
 
+    if later_review(c.connection.driver_connection, row['id']):
+        raise DeliveryHeld('A later independent review prevents delivery of this patch. Resolve that review before requesting publication.')
+
     from workbench.task_cleanup import require_current
     linked_task = grant['snapshot'].get('workflow_task') or {}
     if active and linked_task.get('intake_id'):
@@ -82,9 +85,6 @@ def _checked(c, row, grant, *, active=True):
                 bug_authority.current(c,linked_task['intake_id'])
             except ValueError:
                 raise DeliveryHeld('The routine bug authorization is paused or revoked. Checked evidence is retained.') from None
-
-    if later_review(c.connection.driver_connection, row['id']):
-        raise DeliveryHeld('A later independent review prevents delivery of this patch. Resolve that review before requesting publication.')
 
     if row["status"] != "checked" or grant["binding"] != digest(grant["snapshot"]):
         raise DeliveryHeld("A bound independently checked real result is required.")

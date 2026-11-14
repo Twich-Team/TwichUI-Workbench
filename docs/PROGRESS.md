@@ -1,3 +1,50 @@
+# Autonomous Bug Reports — release compatibility checks, November 13, 2026 Mountain Time
+
+Following the Project Working Philosophy: full release acceptance remains unfinished.
+Hosted90e3ffe completed all nine jobs: build/frontend, four browser partitions and
+visual passed; both backend partitions failed. Backend1 found legacy tagged-plan
+responses polluted with checks:null (three failures), plus one obsolete duplicate-read
+expectation. Backend2 found the same normalization regression and three independent
+rejection cases where a newly added task-pause lookup ran before the stronger saved
+rejection. Corrections retain old response shapes, preserve explicit new check outcomes,
+deduplicate only harmless reads, and enforce later independent rejection first. No
+rejected candidate can publish. Final corrected source needs its own complete acceptance.
+Intake now explains saved automatic repair permission for covered new reports,
+retaining manual copy for other reports; toggling permission refreshes model settings.
+
+Original owner clarifications can now ground a test-only correction only when bound to
+the exact frozen original/feedback digest. Independent preparation sees that recorded
+feedback before any candidate. Candidate explanations and unbound answers remain invalid.
+Actual confined Lua/Python matrix:12 passed with simulated providers. Static checks pass.
+Corrected planning compatibility:112 passed; independent rejection/task controls:25 passed.
+Full local90 partitions are diagnostic, not accepted release proof; source corrections
+were developed while that broad diagnostic run was still running. Keep failed receipts.
+
+The owner archived two tasks during development, adding four rows:current store965.
+All initial961 rows were independently proved unchanged. Private staging copied965;
+recheck immediately before final cutover. Old navigation-lifts remains failed, archived,
+Qwen-only/fallbackOff. No model generation, addon edit, addon remote branch/PR, live
+setting/service change or installation has happened in this assignment.
+
+Current addon source registry uses d09e6dcb29a4f9e3e3dbdba3fb7632c80043c810,
+not the configured clone's older HEAD. Complete original suite in actual confinement:
+195/196 pass; only test_reminder_gallery.py PNG byte equality fails. Independent
+manual generation:four PNGs have identical decoded RGBA/dimensions, all eight TGAs,
+manifest and ArtData.lua are byte identical. This is preacceptance diagnostic evidence,
+not native-model investigation or delivery. Fresh Python test-correction acceptance
+should investigate this first; no unrelated Lua candidate may hide this failure. If
+its concrete verified draft needs owner merge before a fresh Lua base can pass all
+regressions, ask at that real boundary after the draft exists; do not merge by inference.
+
+Private evidence:autonomous-bugs-20261113, candidate90 and earlier candidates are
+uninstalled staging only. Read-only preview on9187 was stopped after real-history UI
+screenshots; settings and archived Qwen-only history passed phone/enlarged-text inspection.
+Continue final corrected commit/push, complete local/exact hosted acceptance, one sealed
+installation with original allowed_classes and optional v2 capability, then mandatory
+real request-to-draft and exceptional acceptance. Preserve unrelated admin doc edits.
+
+---
+
 # Autonomous Bug Reports — continuation and task controls, November 13, 2026 Mountain Time
 
 Following the Project Working Philosophy: continue the approved A–D assignment.

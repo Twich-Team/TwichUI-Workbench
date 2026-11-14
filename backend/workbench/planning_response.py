@@ -76,11 +76,12 @@ def normalize_bug(value, changes=()):
     changes = list(changes)
     if isinstance(value, dict) and set(value) == {'finding', 'draft'}:
         draft = value['draft']
-        fields = ('plan','question','limitation','inspection','checks')
-        if isinstance(draft, dict) and len(draft)==1 and set(draft) <= set(fields):
+        fields = ('plan','question','limitation','inspection')
+        if isinstance(draft, dict) and len(draft)==1 and set(draft) <= {*fields,'checks'}:
             # An explicit single-key outcome is a tagged union, not missing
             # plan data. Only absent alternatives become null.
-            value = dict(finding=value['finding'], **{key:draft.get(key) for key in fields})
+            value = dict(finding=value['finding'], **{key:draft.get(key) for key in fields},
+                         **(dict(checks=draft['checks']) if 'checks' in draft else {}))
             changes.append('unwrap-single-outcome')
         elif isinstance(draft, dict) and set(draft) in ({'plan', 'question', 'limitation'},
                                                     {'plan', 'question', 'limitation', 'inspection'}):

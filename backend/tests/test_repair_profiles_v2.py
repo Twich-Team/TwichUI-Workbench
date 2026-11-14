@@ -208,3 +208,21 @@ def test_environment_profile_retains_a_diagnosis_and_cannot_advertise_a_code_fix
     contract,*_=bug_intent.resolve(request,packet,original,'')
     assert 'No source repair or draft PR' in contract['scope_missing'][0]
     assert not contract['execution_authorized'] and not contract['publication_authorized']
+
+
+def test_only_bound_original_owner_clarifications_can_justify_test_correction(monkeypatch):
+    from workbench.repair_profiles import IndependentProgram,validate_requirement_evidence
+    from workbench import regression_preparation
+    from workbench.visual_scope import digest
+    monkeypatch.setattr(regression_preparation,'repository',lambda:(None,'a'*40,{}))
+    original=dict(description='The original report leaves the expected normalization unclear.')
+    reply='Return lowercase output for uppercase input; preserve the original production behavior.'
+    plan={**scope(),'repair_profile':dict(version=2,kind='test-correction')}
+    intent=dict(base='a'*40,plan=plan,report_binding=digest(dict(original=original,feedback=reply)))
+    program=IndependentProgram(rationale='The recorded owner clarification establishes the intended behavior before implementation.',
+        criteria=['normalization'],program='assert(True)\nassert(True)',evidence=[dict(criterion='normalization',kind='report',quote=reply)])
+    validate_requirement_evidence(program,intent,original,reply)
+    with pytest.raises(ValueError,match='clarification differs'):
+        validate_requirement_evidence(program,intent,original,'A candidate suggested '+reply)
+    with pytest.raises(ValueError,match='valid independent original'):
+        validate_requirement_evidence(program,intent,original)
