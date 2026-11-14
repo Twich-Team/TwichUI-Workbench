@@ -1,3 +1,28 @@
+# STOP — native handoff corrected; dormant-publication installation blocker
+
+November 14, 2026. c28eb9d is committed/pushed and qualified the actual unchanged
+gallery completion under its original c4b9dd8 runtime. The corrected real worker /
+publisher prepared an exact local commit in an isolated store; repeated preparation
+was idempotent and scratch cleaned. Ninety-eight focused checks pass. Full hosted acceptance remains pending.
+Local full verification was stopped at the owner boundary; no addon checks or
+native coding were rerun.
+
+The first private preparation copy is refused by the existing mandatory installer
+settled-store gate: the only active row is the saved native publication, pending
+with empty state, and its task remains paused. No commit/remote intent exists.
+The same guard protects preflight/rollback/cutover. There is no supported dormant
+publication transfer. Do not edit live history, bypass the guard, build another
+installer or begin a broader recovery. The owner required STOP at a new fundamental
+blocker. Further installation-boundary work is held for owner review.
+
+Installed c4b9dd8, four original service PIDs/zero restarts, all1,039rows and original
+281proof files plus closeout remain exact; independent restored snapshot matches.
+No installed build or addon PR changed. Zero native request-to-draft completions.
+Report: docs/history/20261114-native-checked-result-installation-blocker.md.
+Receipts: /home/rich/.local/share/TwichUI-Workbench/native-checked-boundary-20261114/.
+
+---
+
 # Native verification-to-publication correction — November 14, 2026
 
 The current owner attachment 6bf5abc1 authorizes the focused historical-evidence /
