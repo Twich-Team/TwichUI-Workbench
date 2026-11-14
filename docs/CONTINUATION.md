@@ -1,3 +1,30 @@
+# Autonomous Bug Reports — checkpoint B1, November 13, 2026 Mountain Time
+
+Application-owned Lua/Python committed-test and complete-suite reproduction now
+runs from the ordinary source-investigation operation under frozen policy authority.
+Models select fixed capabilities and paths, never shell text/arguments. Existing
+real_confine, delegated worker, resource limits and private-loopback suite capability
+own execution. Every run has a create-only intent and immutable result; duplicate
+requests reuse settled evidence and interrupted intents cannot replay. Raw output
+stays private; providers receive bounded outcome facts, not undisclosed source.
+Source revision, source disclosure, pause/revocation and scratch integrity are checked.
+Observed assertions/environment/unknown failures remain separate from hypotheses.
+
+Harmless duplicate plan read paths are normalized in order. Writable duplicates,
+stale source, unpermitted disclosure and contradictory receipts still refuse.
+74 focused source/wire/intent checks passed (one separate native case skipped in the
+ordinary runner). The dedicated delegated native acceptance passed with actual
+confined Lua, real cgroup cleanup and a controlled provider; no installed app/model
+request ran. Its first attempt exposed custom Lua assertion messages being classified
+as unknown; assertion stack frames now classify them accurately without claiming a
+production cause. Native receipts: autonomous-bugs-20261113/native-B1[b].log.
+
+B2 (repair profiles and Python execution) remains next. C/D, full exact release
+checks, one sealed installation and mandatory real request-to-draft cases remain.
+Installed build/history/permissions remain untouched. Continue this assignment.
+
+---
+
 # Autonomous Bug Reports — checkpoint A, November 13, 2026 Mountain Time
 
 The owner approved the complete November 13 Astra design and checkpoints A–D in

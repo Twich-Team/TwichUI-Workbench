@@ -213,7 +213,7 @@ def page_start(windows, path, start, end):
     return start
 
 def verify_packet(initial, supplied):
-    if (set(supplied) - set(initial) - {'inspection_windows','inspection_searches','inspection_focus','investigation_notes'}
+    if (set(supplied) - set(initial) - {'inspection_windows','inspection_searches','inspection_focus','investigation_notes','reproductions'}
             or supplied.get('base') != initial['base'] or supplied.get('policy_sha256') != initial['policy_sha256']
             or supplied.get('plan_review') != initial.get('plan_review')
             or supplied.get('api_references') != initial.get('api_references')
@@ -223,6 +223,8 @@ def verify_packet(initial, supplied):
             or not len(initial['files']) <= len(supplied['files']) <= MAX_FILES
             or len({f['path'] for f in supplied['files']}) != len(supplied['files'])):
         raise ValueError('The inspected source binding changed.')
+    from workbench.investigation_checks import verify_observations
+    verify_observations(supplied)
     from workbench.investigation_strategy import validate as validate_notes
     validate_notes(supplied)
     focus=supplied.get('inspection_focus',[])
@@ -441,6 +443,16 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
             elif discovery_contract != result['source_contract']:
                 raise PlanningUnavailable('The investigation source contract changed between stages.', 'source_binding')
             result['investigation_working_notes']=strategy_context(packet,result['source_directory'],original)
+            if engine is not None and parent is not None:
+                from workbench import bug_authority
+                from workbench.db import model_attempts, planning_jobs
+                from sqlalchemy import select
+                with engine.connect() as c:
+                    identity = c.execute(select(planning_jobs.c.intake_id).join(model_attempts, model_attempts.c.job_id == planning_jobs.c.id).where(model_attempts.c.id == parent.identifier)).scalar_one_or_none()
+                    covered = identity and bug_authority.frozen(c, identity)
+                if covered:
+                    result['reproduction_capabilities'] = dict(capabilities=['lua-test','python-test','repository-suite'], max_checks=6, note='Choose a committed test path. Commands, arguments, networking and writes to original source are unavailable.')
+                    result['reproduction_observations'] = [{k:v for k,v in observed.items() if k != 'evidence_root'} for observed in packet.get('reproductions', [])]
         added=packet.get('inspection_windows',[])[before:]
         if parent:
             for offset in range(0,len(added),16):
@@ -734,7 +746,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 if wire['coverage'].get('require_inspection') and draft.inspection is None:
                     raise ResponseValidationError('Stateful investigation must inspect committed source before a plan.',
                         ['inspection'], 'a read-only committed source window', None)
-                if draft.inspection is None:
+                if draft.inspection is None and not getattr(draft, 'checks', None):
                     # Compile/revalidate only; no reproducer or addon execution
                     # takes place before independent plan and run approvals.
                     bug.resolve(raw, packet, original, feedback)
@@ -761,6 +773,19 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     wire['validation_feedback'] = facts
                     continue
                 raise
+            if intent_mode and draft.checks:
+                if not wire.get('reproduction_capabilities') or engine is None or parent is None:
+                    raise PlanningUnavailable('This investigation has no standing reproduction permission.', 'capability')
+                from workbench.investigation_checks import run as reproduce
+                for selected in draft.checks:
+                    observed = reproduce(engine, parent.identifier, packet, selected.model_dump(), should_stop, disclosure_paths=getattr(adapter, 'source_manifest', None))
+                    records = packet.setdefault('reproductions', [])
+                    if observed not in records:
+                        records.append(observed)
+                    if evidence:
+                        evidence.record('committed-reproduction', observation=observed, approved=False, executed=True)
+                wire = make_wire(packet, original, feedback, [], draft.finding)
+                continue
             if draft.inspection is None:
                 checker=getattr(adapter,'preparation_check',None)
                 if checker and draft.plan:

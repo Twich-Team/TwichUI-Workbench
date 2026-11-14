@@ -14,6 +14,8 @@ PLAN_NOTE = (
     "action is inspect, plan, question or limitation. For inspect supply at most three reads/searches combined "
     "and null plan/question/limitation. For plan supply a complete plan, empty reads/searches and null question/limitation. "
     "For question or limitation supply only that value; all other values null and collections empty. "
+    "When the schema includes checks, include checks=null for other actions. Use action=check with the bounded checks list, "
+    "empty reads/searches and null plan/question/limitation only when reproduction_capabilities are supplied. "
     "Do not pad with whitespace, invent missing content or change scope. Local semantic validation still applies."
 )
 FLAT_NOTE = (
@@ -81,6 +83,9 @@ def schema(value):
             question=copy.deepcopy(result['properties']['question']) if not program else dict(anyOf=[dict(type="string", minLength=1, maxLength=450), dict(type="null")]),
             limitation=copy.deepcopy(result['properties']['limitation']) if not program else dict(anyOf=[dict(type="string", minLength=1, maxLength=450), dict(type="null")]),
         )
+        if 'checks' in result.get('properties', {}):
+            props['checks'] = copy.deepcopy(result['properties']['checks'])
+            props['action']['enum'].append('check')
         result["properties"] = props
         result["required"] = list(props)
         result["additionalProperties"] = False
@@ -129,6 +134,8 @@ def normalize(value):
     if "action" in value:
         outcome_field = "plan" if "plan" in value else "diagnosis"
         fields = {"finding", "action", "reads", "searches", outcome_field, "question", "limitation"}
+        if 'checks' in value:
+            fields.add('checks')
         # Seven fields, with one explicit outcome. Empty collections are supplied
         # by the provider, never invented to complete a partial response.
         valid = (
@@ -138,9 +145,14 @@ def normalize(value):
             and isinstance(value["searches"], list)
         )
         action = value["action"]
+        if 'checks' in value and action != 'check' and value['checks'] is not None:
+            valid = False
         if valid and action == "inspect":
             valid = all(value[k] is None for k in (outcome_field, "question", "limitation"))
             draft = dict(inspection=[*value["reads"], *value["searches"]])
+        elif valid and action == 'check':
+            valid = bool(value.get('checks')) and not value['reads'] and not value['searches'] and all(value[k] is None for k in (outcome_field, 'question', 'limitation'))
+            draft = dict(checks=value['checks'])
         elif valid and action in ({"plan", "question", "limitation"} if outcome_field == "plan" else {"diagnose", "question", "limitation"}):
             field = "diagnosis" if action == "diagnose" else action
             valid = (
