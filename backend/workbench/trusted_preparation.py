@@ -467,6 +467,47 @@ def _hold(error):
                 **(dict(storage=dict(code=error.code,observation=error.observation)) if isinstance(error,StorageHold) else {}))
 
 
+def stop_deferred(engine, identity, binding, command_id, owner_instruction_sha256):
+    """Trusted operator stop of an already-deferred, paused preparation only.
+
+    This removes queued admission, never cancels a producer or asserts settlement
+    of historical requests. Original claims, permissions and usage remain intact.
+    The existing preparation journal owns the exact stop receipt; no new queue.
+    """
+    from workbench.db import model_attempts
+    from workbench.work_controls import task_paused
+    if (str(UUID(command_id)) != command_id
+            or not re.fullmatch('[a-f0-9]{64}', owner_instruction_sha256)):
+        raise ValueError('Explicit operator stop identity required')
+    with write_transaction(engine) as c:
+        job = intake.require(c, planning_jobs, identity)
+        payload = job['payload']
+        receipt = dict(command_id=command_id, binding=binding,
+            owner_instruction_sha256=owner_instruction_sha256)
+        if payload.get('deferred_stop'):
+            if payload['deferred_stop'] != receipt or job['status'] != 'failed':
+                raise ValueError('Another deferred stop is already recorded')
+            return receipt
+        if (digest(dict(job)) != binding or job['kind'] != 'behavioral_preparation'
+                or job['status'] != 'queued' or job['lease'] or job['lease_until']
+                or not task_paused(c, job['intake_id'])
+                or payload.get('preparation_result', {}).get('status') != 'waiting'
+                or payload['preparation_result'].get('execution_authorized') is not False
+                or payload.get('ai_wait', {}).get('state') != 'waiting'):
+            raise ValueError('Exact paused deferred preparation required')
+        # The preparation owner committed its deferred result only after its
+        # current phase returned. Refuse any unfinished child rather than making
+        # an assumption about a currently active or disconnected producer.
+        attempts = list(c.execute(select(model_attempts).where(
+            model_attempts.c.job_id == identity)).mappings())
+        if not attempts or any(not a['finished_at'] or a['outcome'] == 'running' for a in attempts):
+            raise ValueError('Preparation has unfinished provider activity')
+        c.execute(planning_jobs.update().where(planning_jobs.c.id == identity).values(
+            status='failed', finished_at=intake.now(), payload={**payload, 'deferred_stop': receipt},
+            message='Deferred check preparation stopped by the owner. Original evidence, usage and permissions are retained. No provider was called.'))
+    return receipt
+
+
 @operation.isolated
 def process_one(engine, *, stop_event=None):
     """Dispatch from the existing job journal, with one durable external-work claim.

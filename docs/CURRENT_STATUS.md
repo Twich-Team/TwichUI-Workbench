@@ -1,23 +1,22 @@
 Last updated November 14, 2026, Mountain Time.
 
-Build b6ed0db remains installed. All four Workbench services are active. The
-1,018 saved records, installed source and immediate rollback remain intact.
+Build b6ed0db remains installed with all four services active. The 1,018 original
+saved records and rollback remain intact. Pausing and stopping the older deferred
+gallery check job added one scheduling-policy record; the store now has 1,019.
+Original task permissions, provider usage and evidence are unchanged.
 
-Real subscription-authenticated Codex ran native tools in the qualified isolated
-workspace, repaired a synthetic fixture and passed its unchanged test. Credential
-reads and network access were blocked; the owner's authentication stayed intact.
-Two earlier real fixture sessions stopped on flawed qualification assumptions;
-their evidence and usage remain saved. They were not addon proof attempts.
+Real subscription-authenticated Codex repaired a synthetic fixture with native
+tools inside the qualified boundary. Credential reads and tool network access
+were blocked. Cancellation and timeout settled detached descendants. Unreported
+model-call counts remain unknown.
 
-The minimal native adapter is built and has passed focused connected checks. It uses the
-existing worker, execution grants, model ledger and checked-draft publisher.
-The production runner also repaired a real-AI synthetic fixture. Native tokens
-are retained; unreported model-call counts stay unknown.
-Full release checks are next. This build is not installed or accepted yet.
+The native adapter uses the existing worker, grants, ledger and draft publisher.
+Focused connected checks pass. Full local and hosted release checks are running;
+a small pre-freeze deferred-job stop correction requires a new exact accepted
+commit before installation. The administrative safety gate remains intact.
 
 Zero addon tasks have completed from beginning to end through native-agent-v1.
-The real addon proof has not started. No new addon code, branch or PR exists.
-The next complete outcome is one real Codex-authored gallery-test repair,
-independently verified and delivered as exactly one draft PR. Release acceptance,
-installation and an immutable proof freeze must happen first. No owner decision
-is currently needed; existing authorization covers this work.
+The real addon proof has not started. No addon code, branch or PR was created.
+The next complete outcome is one Codex-authored gallery-test repair, independently
+verified and delivered as one draft PR after release acceptance, installation and
+an immutable proof freeze. No owner decision is currently needed.

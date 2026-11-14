@@ -1,3 +1,10 @@
+# Deferred preparation stop — November 14, 2026
+
+trusted_preparation owns a trusted operator stop for an exact-bound paused queued
+allowance wait. It records the stop in its existing planning job, refuses unfinished
+provider activity and never changes original task permission, provider accounting or
+claims. It grants no work and does not cancel or assert settlement of a producer.
+
 # Native-agent-v1 adapter ownership — November 14, 2026
 
 The opt-in native path uses the existing real_execution grant/request/fence owner,

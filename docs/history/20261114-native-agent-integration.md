@@ -130,3 +130,13 @@ Official references supporting the deployment mode and permission distinction:
 [non-interactive CLI](https://learn.chatgpt.com/docs/non-interactive-mode),
 [authentication](https://learn.chatgpt.com/docs/auth?surface=cli),
 [permission profiles](https://learn.chatgpt.com/docs/permissions).
+
+## Pre-freeze installation correction
+
+The old queued behavioral-preparation job0e9d1ddd prevented the existing admin
+settled-work check. Added trusted_preparation.stop_deferred, a local trusted exact-
+bound stop of paused queued waiting work only; reject unfinished ledger activity.
+Eight controls passed. Applied ordinary pause then supported stop to report672113d7.
+All old permissions, model ledger, original payload fields and other jobs retained;
+1018→1019 rows only by append-only scheduling policy. No provider request, native
+proof, approval migration or admin mechanism change. The code remains pre-freeze.

@@ -1,3 +1,14 @@
+# November 14 — pre-freeze installation settlement
+
+Read-only installation preflight found old behavioral preparation0e9d1ddd still
+queued on included-allowance wait; no active native generation. Preserve the admin
+settled-work gate. Added trusted_preparation.stop_deferred for an exact-bound paused
+waiting job only, with unfinished-child rejection and idempotent same-journal receipt.
+8 controls pass. Applied ordinary task pause then supported stop to report672113d7;
+all original permissions/model ledger/evidence retained, all other jobs unchanged.
+Store1018→1019rows solely by append-only pause policy; schema0014. No addon proof
+or freeze. a6b01c9 checks remain useful but cannot accept the new candidate commit.
+
 # Native-agent integration and real repair proof — active, November 14, 2026
 
 Owner attachment `31f07a14-9c61-477b-8c46-f95045b6b1d9/pasted-text-1.txt`

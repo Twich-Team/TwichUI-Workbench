@@ -1,3 +1,29 @@
+# Pre-freeze deferred-job stop — November 14, 2026
+
+The proof is NOT frozen/registered/dispatched. a6b01c9 was pushed; complete local
+and hosted checks are still running, but it is superseded by this small pre-freeze
+installation correction. Do not install a6 or claim its results accept a later SHA.
+
+The original1018-row store contains queued behavioral preparation0e9d1ddd for old
+report672113d7, safely waiting since12:26. Initial source/hash/service checks passed,
+but require_settled correctly rejects this queued job. The named administrative
+safeguard is preserved. trusted_preparation.stop_deferred now provides an exact-bound,
+trusted operator stop only for paused queued waiting preparation with no unfinished
+provider ledger child. It preserves every old payload/claim/permission/usage and
+adds a stop receipt in the SAME planning job; no new scheduler or provider request.
+8 controls pass (idempotency, preservation, unpaused/resumed/leased/changed/unfinished
+work rejection). The supported task pause and deferred stop were applied locally:
+all nonpolicy/nonjob tables unchanged; all other jobs unchanged; every original
+job payload field unchanged;1019rows/schema0014; require_settled now passes. No
+historical approval was migrated or rewritten. Receipts in native-integration-20261114.
+
+Commit/push this correction and run complete exact local+hosted acceptance. The
+private installer scripts are prepared under candidate-a6b01c9 but NOT activated;
+retarget their new commit/stage/hosted run fields after the final commit. Immediate
+rollback is still installed b6ed0db. Original installed c294 rollback remains too.
+
+---
+
 # Native integration candidate ready for full release acceptance — November 14, 2026
 
 Continue the SAME active owner assignment31f07a14 through one frozen real repair;
