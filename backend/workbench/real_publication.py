@@ -154,7 +154,7 @@ def preview(row, grant):
     title = text(linked["task"]["title"], 150).replace("\n", " ")
     result = row["result"]
     manifest = result["manifest"]
-    labels = ["Lua syntax: " + p for p in grant["snapshot"]["contract"]["paths"]] + [
+    labels = [("Python syntax: " if p.endswith(".py") else "Lua syntax: ") + p for p in grant["snapshot"]["contract"]["paths"]] + [
         "Focused task checks",
         "Frozen independent behavior check",
         "Complete applicable repository suite",

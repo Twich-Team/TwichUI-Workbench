@@ -787,3 +787,17 @@ def test_checked_delivery_fails_closed_without_an_external_write(store, checked_
             delivery.process_one(store, remote, execution_id=identity, checked_root=root)
         assert delivery.view(store, identity)["status"] == "held"
     assert remote.prepares == remote.pushes == remote.creates == 0
+
+
+def test_python_delivery_summary_names_the_actual_language_checks(checked_draft,store):
+    from workbench import real_publication
+    import copy
+    row,_,_,_=checked_draft
+    with store.connect() as c:
+        row,grant=real_publication._load(c,row['id'])
+    row,grant=copy.deepcopy(dict(row)),copy.deepcopy(dict(grant))
+    paths=grant['snapshot']['contract']['paths']
+    grant['snapshot']['contract']['paths']=[p.removesuffix('.lua')+'.py' for p in paths]
+    summary=real_publication.preview(row,grant)
+    assert 'Python syntax:' in summary['body']
+    assert 'Lua syntax:' not in summary['body']
