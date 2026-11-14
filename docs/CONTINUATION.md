@@ -1,3 +1,29 @@
+# Dormant publication installation — active November 14, 2026
+
+Owner attachment 985d8357 explicitly authorizes correcting the dormant-publication
+installation boundary, complete exact local/hosted acceptance, verified installation,
+and one separately authorized draft of the preserved gallery candidate. It supersedes
+the preceding installation STOP for this scope. Stop at one verified draft or one
+specific new delivery blocker. No native coding, addon check regeneration, merge,
+release or game installation.
+
+The shared settled-store check now retains only an exact pending/empty publication
+whose checked execution/grant/result bindings match and whose linked intake is
+explicitly paused in the saved execution policy. Eligible unpaused work, claimed
+preparation, remote intent and uncertain held publication still refuse. Reads/copies
+never change the publication, pause, authority, original result or evidence. Existing
+service stop/fingerprint, installer journal, rollback and publisher own all effects.
+
+Actual saved-state rehearsal passed real installer preflight/activation/repeat refusal/
+rollback, exact 1,039-row copies and two paused worker reopenings without dispatch.
+All 282 retained proof hashes match. Historical qualification and exact candidate
+review succeeded separately. Nested namespace qualification was refused; qualification
+then ran normally with its own mandatory read-only namespace. No safeguard changed.
+Private receipts: /home/rich/.local/share/TwichUI-Workbench/dormant-publication-installation-20261114/.
+Running app remains c4b9dd8; full correction release gates and draft delivery continue.
+
+---
+
 # STOP — native handoff corrected; dormant-publication installation blocker
 
 November 14, 2026. c28eb9d is committed/pushed and qualified the actual unchanged

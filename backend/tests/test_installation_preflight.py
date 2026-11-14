@@ -28,12 +28,16 @@ def save(path, value):
 
 @pytest.fixture
 def installation(tmp_path, store):
+    return make_installation(tmp_path, store.url.database)
+
+
+def make_installation(tmp_path, database):
     # Hosted Python tool caches may be group-writable. Keep the production
     # refusal and pin a private interpreter copy for this isolated installation.
     interpreter = tmp_path / 'private-python'
     shutil.copyfile(Path(sys.executable).resolve(), interpreter)
     interpreter.chmod(0o700)
-    source = tmp_path / 'source'
+    source = tmp_path / 'installer-source'
     source.mkdir(mode=0o700)
     (source / 'ops').mkdir()
     shutil.copyfile(ROOT / 'ops/acceptance_seal.py', source / 'ops/acceptance_seal.py')
@@ -57,7 +61,7 @@ def installation(tmp_path, store):
         subprocess.run([sys.executable, str(ROOT / 'ops/acceptance_seal.py'), 'create', str(stage)], check=True,
                        stdout=subprocess.DEVNULL)
         db = stage / 'artifacts/workbench.sqlite3'
-        with sqlite3.connect(store.url.database) as original, sqlite3.connect(db) as target:
+        with sqlite3.connect('file:' + str(database) + '?mode=ro', uri=True) as original, sqlite3.connect(db) as target:
             original.backup(target)
         db.chmod(0o600)
         for name in CONFIG_FILES - {'artifacts/draft-authority.json'}:
