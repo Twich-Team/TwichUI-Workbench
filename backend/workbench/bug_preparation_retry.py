@@ -17,6 +17,61 @@ def require(value,message):
         raise HTTPException(409,message)
 
 
+def settled_feedback_failure(job,linked,roots):
+    """Read-only disposition of a contained original-trial feedback crash.
+
+    No synthetic hold is written. A stopped owner, complete confined trials and
+    the normal native settlement checks are required before the existing renewal.
+    """
+    from workbench import real_execution
+    from workbench.real_workspace import require_safe_check,sha
+    from workbench.trusted_preparation import owned
+    from workbench.repair_continuation import private_json
+    from workbench.repair_profiles import IndependentProgram,oracle
+    payload=job['payload']
+    program_claim=payload.get('independent_program_claim') or {}
+    claim=payload.get('preparation_claim') or {}
+    require(payload.get('worker_operation_failure')=='TypeError' and payload.get('phase')=='held'
+        and program_claim.get('source_basis')=='original-only'
+        and program_claim.get('review_protocol')=='composed-bounded-v1'
+        and not payload.get('independent_profile_program') and not payload.get('check_construction')
+        and claim.get('owner') and not real_execution.alive(claim['owner']),
+        'The original-only feedback owner must be stopped; other operation failures remain held.')
+    root=owned(claim['root'])
+    require(any(root.is_relative_to(Path(p)) for p in roots),'Retained feedback is outside configured evidence roots.')
+    intent=linked['proposal_review']['task_contract']['bug_intent']
+    folders=sorted(root.glob('original-program-trial-*'))
+    require(1<=len(folders)<=3,'Completed original-only trial evidence is required.')
+    proofs=[]
+    rejected=False
+    for folder in folders:
+        owned(folder)
+        trial=private_json(owned(folder/'intent.json'),65536)
+        summary=private_json(owned(folder/'summary.json'),16384)
+        result=private_json(owned(folder/'result.json'),65536)
+        program=IndependentProgram.model_validate(trial['program'])
+        compiled=oracle(intent['plan']['focused_test'],program.program)
+        oracle_path=owned(folder/'oracle.lua')
+        summary_hash=owned(folder/'summary.sha256')
+        require(summary_hash.stat().st_size==64 and oracle_path.stat().st_size==len(compiled.encode()),
+            'Bounded original-only trial evidence is required.')
+        key=digest(dict(base=intent['base'],intent_digest=intent['review_digest'],program=program.model_dump()))
+        require(trial['key']==summary['key']==key and folder.name=='original-program-trial-'+key
+            and trial['ref']==payload['ref'] and trial['base']==summary['base']==intent['base']
+            and trial['intent_digest']==intent['review_digest']
+            and summary_hash.read_text()==sha((folder/'summary.json').read_bytes())
+            and summary['intent_sha256']==sha((folder/'intent.json').read_bytes())
+            and summary['result_sha256']==sha((folder/'result.json').read_bytes())
+            and summary['oracle_sha256']==sha(oracle_path.read_bytes()) and oracle_path.read_text()==compiled
+            and result.get('network_mode')=='denied' and result.get('usage',{}).get('cgroup_removed') is True,
+            'Retained original-only trial evidence changed or remains unsettled.')
+        require_safe_check(result)
+        rejected|=summary.get('accepted') is False
+        proofs.append(dict(key=key,summary_sha256=sha((folder/'summary.json').read_bytes())))
+    require(rejected,'A retained original-trial rejection is required for feedback recovery.')
+    return dict(failure='TypeError',original_claim_sha256=digest(claim),trials=proofs,owner_stopped=True)
+
+
 def settled_strategy_program(c,attempt,selection,payload,roots):
     """Read existing child/native receipts; never repair the historical parent ledger."""
     records=[payload,*payload.get('check_preparation_history',[])]
@@ -75,8 +130,8 @@ def request_in(c,job,body):
     if command in commands:
         require(commands[command]==signature,'This command already belongs to another check-construction request.')
         return
-    require(job['kind']=='behavioral_preparation' and job['status']=='failed' and job['finished_at'] and
-            payload.get('preparation_result',{}).get('status')=='hold','Check construction must be terminal before renewal.')
+    require(job['kind']=='behavioral_preparation' and job['status']=='failed' and job['finished_at'],
+            'Check construction must be terminal before renewal.')
     linked=task_execution.snapshot(c,**payload['ref'])
     reviewed=linked['proposal_review']['task_contract']
     require(reviewed.get('bug_intent') and linked['proposal_review']['binding']==body.review_binding,
@@ -90,9 +145,18 @@ def request_in(c,job,body):
     provider=selection.get('provider','codex') if selection else 'local'
     model=selection['model'] if selection else everyday.local_selection(c).model
     roots=everyday.configuration(c.engine).evidence_roots
+    feedback_failure=None
+    if (payload.get('preparation_result') or {}).get('status')!='hold':
+        try:
+            feedback_failure=settled_feedback_failure(job,linked,roots)
+        except (ValueError,OSError,KeyError,TypeError):
+            raise HTTPException(409,'Read-only feedback recovery requires intact, complete original-trial evidence.') from None
     attempts=list(c.execute(select(model_attempts).where(model_attempts.c.job_id==job['id'],
         model_attempts.c.purpose=='check_preparation')).mappings())
     require(attempts,'Retained check-construction accounting is required.')
+    if feedback_failure:
+        require(any(a['id']==payload['independent_program_claim']['id'] and a['outcome']=='failed'
+            for a in attempts),'The failed feedback construction has no terminal model owner.')
     proofs=[]
     for attempt in attempts:
         usage=attempt['usage']
@@ -150,10 +214,15 @@ def request_in(c,job,body):
     history.append(dict(attempts=job['attempts'],finished_at=job['finished_at'],message=job['message'],
         claim=payload.get('preparation_claim'),result=payload.get('preparation_result'),
         independent_program_claim=payload.get('independent_program_claim'),
-        construction=payload.get('check_construction'),settlement=proofs,output_reused=False))
+        construction=payload.get('check_construction'),settlement=proofs,output_reused=False,
+        **(dict(worker_operation_failure=payload['worker_operation_failure'],phase=payload['phase'],
+            read_only_feedback_failure=feedback_failure) if feedback_failure else {})))
     renewed={k:v for k,v in payload.items() if k not in {'preparation_claim','preparation_result','check_construction','recovery',
         'independent_program_claim','independent_program_resume','independent_profile_program'}}
     renewed.update(check_preparation_history=history,check_retry_commands={**commands,command:signature},
                    preparation_round_id=str(uuid4()))
+    if feedback_failure:
+        renewed.pop('worker_operation_failure')
+        renewed.pop('phase')
     c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(status='queued',finished_at=None,
         payload=renewed,message='A fresh bounded check-construction operation is queued with the same approved scope and provider. No repair is authorized.'))

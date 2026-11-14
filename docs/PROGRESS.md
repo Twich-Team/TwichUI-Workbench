@@ -1,3 +1,51 @@
+# Autonomous Bug Reports — contained-feedback recovery complete in source, November 14, 2026 UTC
+
+Following the Project Working Philosophy: the sixth batch now includes BOTH the
+closure-order fix1542625 AND safe same-job recovery of the actual contained TypeError.
+The real job has NOpreparation_result:worker_operation recorded phaseheld/typeTypeError
+before trusted_preparation could create an ordinary hold. Existing renewal previously
+required a hold, so closure-only installation would not resume the saved task. Candidate
+1542625 passed exact full hosted43586427122 but is SUPERSEDED/NEVERinstalled. Retain its
+stage/artifacts. Remaining local154diagnostics were stopped after source changed for
+this necessary recovery work; they are NOTrelease acceptance. Live services untouched.
+
+Existing bug_preparation_retry now separately recognizes this precise original-only
+feedback failure. It requires the original owner stopped, original-only bounded protocol,
+no accepted independent program, no legacy construction, <=3complete owned trial receipts,
+exact scope/base/program/intent/result/oracle hashes, denied network and actual cgroup
+cleanup. All existing native settlement/accounting/source/policy/no-offer/no-session
+checks STILLapply. No synthetic old hold or successful result is written. Original
+TypeError/phase/None-result/claim/proofs move into existing same-job history; fresh queue
+clears only its current worker-error projection. Other/active/partial/tampered cases hold.
+This is an extension of the existing read-only renewal, not a new recovery engine or grant.
+
+43focused checks pass. Actual-confinement matrix29cases passes, with simulated models/
+native terminal readers where stated. It includes actual real Evidence journaling and
+same-job API recovery after injected old error, plus refusal for live owner, unknown usage,
+accepted program, unrelated error and altered receipts. Static/contracts/build/lint/schema
+pass. New test corrected its scripted provider to distinguish a fresh renewal from a
+feedback round. No live data/source program was altered for that fixture.
+
+Separate read-only validation on the ACTUALc294store confirms the live-owner refusal,
+all real retained trial hashes, and ALL4native parents/8actual construction requests.
+ONLYthe stopped-owner predicate was simulated in this diagnostic; no recovery authority
+or task transition was created. Original owner remains live until verified cutover.
+Private proof:candidate-c294d65/feedback-recovery-metadata-only-proof.json. Store1013rows
+unchanged.13real completed case2calls/344430tokens; combined18calls/456714tokens.
+Current report stillfailed/notpaused, firstcasepaused, no active generation/implementation.
+Counts50grants/50requests/4publications unchanged. Zero new end-to-end autonomous repairs.
+
+Next: full exact verification for COMBINED correction, sealed install from currentc294
+history with c294IMMEDIATErollback; add superseded154to required retention/evidence roots
+alongside rejected91/failed70/all older required builds. Native runner is now PRIVATE
+native-profile-smart-recovery.sh (29cases). Do not reuse154or earlier hosted receipts for
+a new commit. Verify actual stopped old owner before ONEexisting exact-scope read-only
+renewal of same672113d7/job0e9d1ddd..., then continue real workflow to draft. No human plan/
+run approval or addon patch is authorized by this engineering renewal. Do not stop at
+installation; preserve usage/history/source/independent checks and owner-only merging.
+
+---
+
 # Autonomous Bug Reports — sixth repair: evidence lifetime, November 14, 2026 UTC
 
 Following the Project Working Philosophy: installedc294d65 remains safe/active, but

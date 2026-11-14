@@ -29,7 +29,7 @@ from test_verification_profiles import git,PRODUCTION,TEST,CORRECT
 
 @pytest.mark.usefixtures('installed','catalog')
 @pytest.mark.parametrize('failure',['runtime','citation','semantic'])
-def test_settled_feedback_is_journaled_before_real_evidence_closes(client,headers,store,monkeypatch,failure):
+def test_settled_feedback_is_journaled_before_real_evidence_closes(client,headers,store,monkeypatch,failure,contained_failure=False):
     from workbench import everyday
     controlled_trial_boundary(monkeypatch)
     source=enable_bugs(monkeypatch)
@@ -56,6 +56,12 @@ def test_settled_feedback_is_journaled_before_real_evidence_closes(client,header
         proofs.append(args[0])
         return dict(provider_state='completed')
     monkeypatch.setattr('workbench.provider_receipts.request_state',settled)
+    original_observe=smart_provider.Planner.observe_settled_failure
+    if contained_failure:
+        def old_close_order(self,reason):
+            self.response_evidence.close()  # Reproduce the installed pre-fix fault.
+            return original_observe(self,reason)
+        monkeypatch.setattr(smart_provider.Planner,'observe_settled_failure',old_close_order)
     designs=[]
     reviews=[]
     def exchange(request,stop,seconds):
@@ -76,7 +82,7 @@ def test_settled_feedback_is_journaled_before_real_evidence_closes(client,header
                     output['program']=output['program'].replace('=="alice"','=="ALICE"')
                 if failure=='citation':
                     output['evidence'][0]['quote']='An unsupported invented requirement.'
-            else:
+            elif not contained_failure:
                 assert packet['prior_design_reviews'][0]['accepted'] is False
         elif packet.get('purpose')=='review original-only independent behavior checks':
             reviews.append(packet)
@@ -98,6 +104,60 @@ def test_settled_feedback_is_journaled_before_real_evidence_closes(client,header
         worker.tick(store)
     with store.connect() as c:
         job=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==identity,planning_jobs.c.kind=='behavioral_preparation')).mappings().one()
+    if contained_failure:
+        assert job['status']=='failed' and job['payload']['worker_operation_failure']=='TypeError'
+        assert not job['payload'].get('preparation_result') and len(designs)==1
+        original_payload=copy.deepcopy(job['payload'])
+        command=dict(job_id=job['id'],command_id=str(uuid4()),review_binding=job['payload']['preparation_claim']['review_binding'],renew_check_construction=True)
+        # A live original owner cannot use this contained-failure recovery.
+        denied=client.post('/api/intake/'+identity+'/retry',headers=headers,json=command)
+        assert denied.status_code==409
+        from workbench import real_execution
+        alive=real_execution.alive
+        monkeypatch.setattr(real_execution,'alive',lambda *a:False)
+        def terminal(identity,usage,roots,**options):
+            entry=usage['strategy_requests'][0]
+            return dict(actual_model=entry['model'],requests=1,turns=[dict(provider_receipt=entry['native_receipt'])])
+        monkeypatch.setattr('workbench.bug_preparation_retry.completed_turns',terminal)
+        for fault in ('other-failure','accepted-program','unknown-usage'):
+            with write_transaction(store) as c:
+                bad=copy.deepcopy(original_payload)
+                parent=dict(c.execute(select(model_attempts).where(model_attempts.c.id==bad['independent_program_claim']['id'])).mappings().one())
+                if fault=='other-failure':
+                    bad['worker_operation_failure']='RuntimeError'
+                if fault=='accepted-program':
+                    bad['independent_profile_program']=dict(path='already-accepted')
+                c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload=bad))
+                if fault=='unknown-usage':
+                    c.execute(model_attempts.update().where(model_attempts.c.id==parent['id']).values(usage={**parent['usage'],'status':'partial'}))
+            assert client.post('/api/intake/'+identity+'/retry',headers=headers,json=command).status_code==409
+            with write_transaction(store) as c:
+                c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload=original_payload))
+                c.execute(model_attempts.update().where(model_attempts.c.id==parent['id']).values(usage=parent['usage']))
+        summary=next(Path(original_payload['preparation_claim']['root']).glob('original-program-trial-*/summary.json'))
+        raw=summary.read_bytes()
+        summary.write_text('{}')
+        assert client.post('/api/intake/'+identity+'/retry',headers=headers,json=command).status_code==409
+        summary.write_bytes(raw)
+        resumed=client.post('/api/intake/'+identity+'/retry',headers=headers,json=command)
+        assert resumed.status_code==200,resumed.text
+        assert client.post('/api/intake/'+identity+'/retry',headers=headers,json=command).status_code==200
+        with store.connect() as c:
+            renewed=c.execute(select(planning_jobs).where(planning_jobs.c.id==job['id'])).mappings().one()
+            history=renewed['payload']['check_preparation_history']
+            assert len(history)==1 and history[0]['worker_operation_failure']=='TypeError' and history[0]['result'] is None
+            assert history[0]['read_only_feedback_failure']['owner_stopped']
+            assert 'worker_operation_failure' not in renewed['payload'] and 'phase' not in renewed['payload']
+            assert dict(c.execute(select(model_attempts).where(model_attempts.c.id==parent['id'])).mappings().one())==parent
+        monkeypatch.setattr(real_execution,'alive',alive)
+        monkeypatch.setattr(smart_provider.Planner,'observe_settled_failure',original_observe)
+        for _ in range(12):
+            worker.tick(store)
+        with store.connect() as c:
+            assert c.execute(select(task_run_offers)).mappings().one()['snapshot']['reviewed_task']['ref']==original_payload['ref']
+            assert c.execute(select(planning_jobs.c.status).where(planning_jobs.c.id==job['id'])).scalar_one()=='completed'
+        return
+    with store.connect() as c:
         offer=c.execute(select(task_run_offers)).mappings().one()
     assert job['status']=='completed' and len(designs)==2 and len(proofs)==1
     root=Path(offer['snapshot']['ready_preparation']['root'])
@@ -108,6 +168,11 @@ def test_settled_feedback_is_journaled_before_real_evidence_closes(client,header
     events=[json.loads(line) for line in (evidence/'events.jsonl').read_text().splitlines()]
     observed=[event for event in events if event['phase']=='strategy-settled-failure']
     assert len(observed)==1 and observed[0]['settled'] and observed[0]['reason']=='invalid-response'
+
+
+@pytest.mark.usefixtures('installed','catalog')
+def test_contained_original_feedback_crash_renews_same_job_only_after_owner_and_receipts_settle(client,headers,store,monkeypatch):
+    test_settled_feedback_is_journaled_before_real_evidence_closes(client,headers,store,monkeypatch,'runtime',True)
 
 
 @pytest.mark.usefixtures('installed','catalog')
