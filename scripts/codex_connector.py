@@ -131,6 +131,11 @@ def handle(connection, binary, credential, runtime, evidence_root=None, *, claud
         request = json.loads(raw)
         if not isinstance(request, dict):
             raise codex.Hold('protocol')
+        if request.get('operation') in {'native-codex', 'native-codex-observe'} and evidence_root is not None:
+            from native_connector import handle as native_handle
+            native_handle(connection, request, binary, credential, runtime, evidence_root,
+                          claude_config, resolve_backend)
+            return
         if request.get('operation') in {'smart-choose','smart-turn'} and evidence_root is not None:
             from strategy_connector import handle as strategy_handle
             strategy_handle(connection,request,binary,credential,runtime,evidence_root,claude_config,resolve_backend)

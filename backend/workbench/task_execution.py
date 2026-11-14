@@ -246,6 +246,10 @@ def prerequisite_reason(c, linked, feature_input=None):
 
 
 def validate(c, grant, prerequisites=True, *, ongoing=False):
+    if grant['snapshot'].get('contract', {}).get('engine_version') == 'native-agent-v1':
+        from workbench.native_agent import validate_authority
+        validate_authority(c, grant, ongoing=ongoing)
+        return
     linked = grant["snapshot"].get("workflow_task")
     if linked is None:
         return  # Legacy real grants keep their existing meaning.
@@ -372,6 +376,9 @@ def context(engine, intake_id, task_id):
 
 def context_in(c, intake_id, task_id):
     """Project a task inside the caller's consistent read transaction."""
+    if intake_id == task_id and c.scalar(select(intakes.c.payload['native_task']).where(intakes.c.id == intake_id)):
+        from workbench.native_agent import task_context
+        return task_context(c, intake_id, task_id)
     from workbench import real_execution as execution
     from workbench.task_sessions import public_view, capability
 

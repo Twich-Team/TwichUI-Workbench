@@ -1,3 +1,64 @@
+# Native-agent integration and real repair proof — active, November 14, 2026
+
+Owner attachment `31f07a14-9c61-477b-8c46-f95045b6b1d9/pasted-text-1.txt`
+authorizes integration of the qualified `fed190e` design and one frozen real
+Codex-authored gallery repair through an independently verified draft PR. This
+supersedes the earlier design-only/controlled-stop instructions below for THIS
+assignment. Do not redesign the qualified isolation boundary without new evidence.
+No teams, Claude native coding, historical-task migration, legacy retirement or
+Feature Workshop expansion. Stop after proof success or controlled failure.
+
+Following the Project Working Philosophy: the outcome is one real addon repair
+and one checked draft, not another successful framework-test round.
+
+Fresh baseline: development fed190e; installed b6ed0db; rollback c294d65. Four
+services retain their PIDs and zero restarts. Read-only database: 1,018 rows,
+31 tables, integrity ok. Both release/rollback source manifests pass. Original
+checkout edits retain diff SHA dba344b2e7d890de8aa980417a98ed8bec8b6cbcb2546c04d17098203f4316fd.
+Actual addon main remains d09e6dcb29a4f9e3e3dbdba3fb7632c80043c810.
+
+Real provider qualification succeeded on synthetic fixture real-provider-04:
+ChatGPT personal subscription, ordinary included usage, zero extra credits,
+real native tools, actual fixture repair and unchanged test pass; credential
+reads/network blocked; original sign-in unchanged. Setup run01 refused the
+reserved built-in provider override before dispatch. Real runs02/03 stopped on
+incorrect security-probe assumptions: hidden paths yield ENOENT; writes in a
+private namespace can shadow a host path without changing the host. Independent
+checks confirmed no host write. All failed trials are preserved, not erased.
+Known real fixture usage across02/03/04: 257,075 total tokens (253,454 input,
+3,621 output, reasoning included). Model-call counts are not reported and remain
+unknown. Three sessions are not three model calls. Excludes development chat.
+
+Uncommitted native-agent-v1 implementation reuses real_execution claims/fences,
+model_attempts, real_handoff, provider_admission and real_publication. Fresh trusted
+owner ingress stores its explicit native task in the existing intake/grant records.
+Missing engine_version stays legacy. Runtime source writes are ordinary; the
+qualified strict exporter rejects ALL unapproved changes after cgroup settlement.
+Separate credential-free checks use the frozen candidate plus complete original
+source, not the dirty workspace. Original-derived gallery controls exercise the
+corrected repository test itself. No generated checking-program prerequisite.
+
+Focused controls75 passed; initial check/build/contracts/schema passed. Broader
+local application tests are RUNNING (log local-tests.log), not accepted yet.
+Original addon baseline controls are also running in a delegated private verifier;
+the first driver omitted the existing explicit usage-log destination and returned
+that infrastructure error. Preserve this diagnostic, fix the driver and rerun;
+no addon source was changed. Native runtime integration includes that log binding.
+
+Private evidence/programs: `/home/rich/.local/share/TwichUI-Workbench/native-integration-20261114/`.
+Native provider session91748 is finished. Full local tests session81410 and original
+addon controls session52862 may still run; inspect actual process state first.
+No proof task/grant, installation or addon PR has been launched. Before proof:
+finish connected confinement/provider/publication/restart checks, complete local
+and exact hosted acceptance, commit/push/install one accepted build, preserve
+history/rollback, freeze adapter/verifier/build and a new linked task's exact source,
+disclosure, candidate scope and strategy. Then ONE real repair; no Workbench or
+verifier edits during that attempt. Preserve original task permissions and prevent
+its duplicate scheduling through supported task controls. No implementation code
+is to be supplied to native Codex. Publish only exact independently verified bytes.
+
+---
+
 # Revised native workspace boundary — qualified design only, November 14, 2026
 
 The owner expressly authorized a focused reassessment separating runtime host and

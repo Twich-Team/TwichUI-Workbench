@@ -1,25 +1,23 @@
 Last updated November 14, 2026, Mountain Time.
 
-Build b6ed0db remains installed. All four Workbench services are active. The installed
-source, immediate rollback and 1,018 saved records remain intact.
+Build b6ed0db remains installed. All four Workbench services are active. The
+1,018 saved records, installed source and immediate rollback remain intact.
 
-The revised isolation boundary passed controlled qualification. Codex tools could
-create, edit and delete files in a disposable workspace while private reads,
-outside writes, network access and privileged operations stayed blocked.
-The candidate exporter rejected 18 unsafe cases and accepted two authorized cases.
-Cancellation and timeout stopped detached descendants.
+Real subscription-authenticated Codex ran native tools in the qualified isolated
+workspace, repaired a synthetic fixture and passed its unchanged test. Credential
+reads and network access were blocked; the owner's authentication stayed intact.
+Two earlier real fixture sessions stopped on flawed qualification assumptions;
+their evidence and usage remain saved. They were not addon proof attempts.
 
-A real Codex CLI session driven by a local mock edited a fixture. Its exact accepted
-change was frozen and checked by a separate verifier, which could not access the
-working copy or credentials. This demonstrated the boundary, not a real AI repair.
+The minimal native adapter is built and has passed focused connected checks. It uses the
+existing worker, execution grants, model ledger and checked-draft publisher.
+The production runner also repaired a real-AI synthetic fixture. Native tokens
+are retained; unreported model-call counts stay unknown.
+Full release checks are next. This build is not installed or accepted yet.
 
-Zero tasks have completed from beginning to end through the proposed native-agent
-engine. No real provider request, addon repair, installation or new PR occurred.
-Earlier vendor and test-coverage deliveries remain historical successes.
-
-The minimal isolation design and evidence are ready for review. No required
-security primitive is missing from the tested boundary. Subscription qualification,
-native usage accounting and integration with the existing worker remain unfinished.
-The next complete outcome is one independently verified native addon repair
-delivered as exactly one authorized draft PR. That implementation and real proof
-were not started under this design-only assignment.
+Zero addon tasks have completed from beginning to end through native-agent-v1.
+The real addon proof has not started. No new addon code, branch or PR exists.
+The next complete outcome is one real Codex-authored gallery-test repair,
+independently verified and delivered as exactly one draft PR. Release acceptance,
+installation and an immutable proof freeze must happen first. No owner decision
+is currently needed; existing authorization covers this work.

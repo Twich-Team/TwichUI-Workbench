@@ -75,7 +75,14 @@ def issue(engine, authorization, provenance, activation, *, task=None):
             raise ValueError('Current aware grant deadline required')
         expires = min(expires, deadline)
     chosen = getattr(activation,'execution_contract',contract())
-    if chosen != contract():
+    native_spec = getattr(activation, 'native_authorization', None)
+    if native_spec is not None:
+        from workbench.native_agent import validate_spec
+        validate_spec(native_spec)
+        if (native_spec['contract'] != chosen or
+                native_spec['owner_instruction_sha256'] != hashlib.sha256(authorization.encode()).hexdigest()):
+            raise ValueError('Native task differs from the exact new owner instruction')
+    elif chosen != contract():
         from workbench.task_budget import valid_contract
         if task is None or not valid_contract(chosen):
             raise ValueError('Registered task-bound local recipe required')
@@ -83,6 +90,8 @@ def issue(engine, authorization, provenance, activation, *, task=None):
                     authorization_sha256=hashlib.sha256(authorization.encode()).hexdigest(),
                     provenance=provenance, gates=gates, runtime=activation.identity(),
                     grant_deadline=deadline.isoformat() if deadline else None)
+    if native_spec is not None:
+        snapshot['native_task'] = copy.deepcopy(native_spec)
     if hasattr(activation, 'recovery_identity'):
         snapshot['recovery'] = activation.recovery_identity()
     checked_input = getattr(activation, 'feature_input', None)
@@ -180,6 +189,11 @@ def renew_waiting_grant(c, row, previous, snapshot, identity, issued, expires):
 
 def contract_matches(snapshot):
     try:
+        if snapshot.get('contract', {}).get('engine_version') == 'native-agent-v1':
+            from workbench.native_agent import validate_spec
+            spec = validate_spec(snapshot['native_task'])
+            return (spec['contract'] == snapshot['contract'] and
+                    spec['owner_instruction_sha256'] == snapshot['authorization_sha256'])
         policy = snapshot.get('task_budget')
         if policy:
             from workbench.task_budget import TaskBudget, valid_contract
@@ -429,11 +443,30 @@ def failure_observations(runtime, identity, fence):
                     provenance={'method': 'current-attempt observations unavailable or invalid'}))
 
 
+def native_runtime(engine, stop_event):
+    """Load the opt-in adapter only when an existing native request needs it."""
+    with engine.connect() as c:
+        if not inspect(c).has_table(requests.name):
+            return None
+        row = c.execute(select(requests, grants.c.snapshot.label('grant_snapshot'))
+            .join(grants, requests.c.grant_id == grants.c.id).where(
+                grants.c.snapshot['contract']['engine_version'].as_string() == 'native-agent-v1',
+                requests.c.status.in_(['pending', 'running', 'checking', 'cancel_requested']))
+            .order_by(requests.c.created_at).limit(1)).mappings().first()
+    if row:
+        operation.selected(requests, row)
+        from workbench.native_agent import Runtime as NativeRuntime
+        return NativeRuntime(row['grant_snapshot']['recovery']['root'], stop_event)
+    return None
+
+
 @operation.isolated
 def process_one(engine, runtime=None, stop_event=None):
     if getattr(runtime,'operation_kind',None)=='feature-verification-v1':
         from workbench.feature_verification import process_one as local_checks
         return local_checks(engine,runtime,stop_event)
+    if runtime is None:
+        runtime = native_runtime(engine, stop_event)
     if runtime is None:
         root = os.environ.get('WORKBENCH_REAL_EXECUTION_ROOT')
         recovery_root = os.environ.get('WORKBENCH_REAL_RECOVERY_ROOT')
@@ -486,6 +519,8 @@ def process_one(engine, runtime=None, stop_event=None):
     # Expensive source/provider/capability probes are always outside database locks.
     try:
         gates = runtime.preflight()
+        if hasattr(runtime, 'admission_gate'):
+            gates.append(runtime.admission_gate(pending, grant))
     except OSError:
         gates = [dict(name='temporary runtime availability', status='blocked',
                       evidence='Runtime observation unavailable. No model has started.')]
@@ -517,10 +552,12 @@ def process_one(engine, runtime=None, stop_event=None):
         except task_execution.Waiting as error:
             task_ready = False
             task_message = str(error)
-        if linked and valid(current) and identity_matches and task_ready and not ready:
+        if (linked or current['snapshot'].get('native_task')) and valid(current) and identity_matches and task_ready and not ready:
             blocked = [g['name'] for g in gates if g['status'] != 'passed']
+            native_wait = next((g.get('decision', {}).get('reason') for g in gates
+                if g.get('name') == 'native included-allowance admission' and g['status'] != 'passed'), None)
             c.execute(requests.update().where(requests.c.id == row['id']).values(
-                message='Waiting for execution safety checks: '+(', '.join(blocked)[:600] or 'activation evidence unavailable')+'. No model has started.',
+                message=native_wait or 'Waiting for execution safety checks: '+(', '.join(blocked)[:600] or 'activation evidence unavailable')+'. No model has started.',
                 result={**(row['result'] or {}), 'gates':gates,**({} if resuming else {'inference_ran':False})}))
             return False  # Same unconsumed request will be reconsidered; no attempt/retry is created.
         if not valid(current) or not ready or not task_ready:
@@ -540,19 +577,25 @@ def process_one(engine, runtime=None, stop_event=None):
         owner = owner_identity()
         c.execute(requests.update().where(requests.c.id == row['id']).values(
             status='running',fence=fence,started_at=row['started_at'] if resuming else now(), message='Implementing with Codex in isolation.' if route else 'Implementing in isolation.',
-            result={'owner':owner,'inference_ran':False,**(dict(ai_resume_sequence=runtime.ai_resume['sequence'],ai_checkpoint=row['result']['ai_checkpoint'],
+            result={'owner':owner,'inference_ran':False,
+                **(dict(native_waiting_since=getattr(runtime,'native_waiting_since',{})) if current['snapshot'].get('native_task') else {}),
+                **(dict(ai_resume_sequence=runtime.ai_resume['sequence'],ai_checkpoint=row['result']['ai_checkpoint'],
                 **({'ai_manual_sha256':row['result']['ai_manual_sha256']} if row['result'].get('ai_manual_sha256') else {})) if resuming else {})}))
-        task_id = linked['intake_id'] if linked and everyday.enabled() else (linked or {}).get('task', {}).get('id', TASK)
+        task_id = (current['snapshot']['native_task']['task_id'] if current['snapshot'].get('native_task') else
+            linked['intake_id'] if linked and everyday.enabled() else (linked or {}).get('task', {}).get('id', TASK))
         if resuming:
             c.execute(model_attempts.update().where(model_attempts.c.id==fence).values(outcome='running',finished_at=None))
         else:
+            native_choice = getattr(runtime, 'native_decision', {})
             c.execute(model_attempts.insert().values(id=fence, job_id=None, execution_id=row['id'],
                 task_id=task_id,
                 source='strategy-control' if route and route.get('strategy') else 'workbench', backend=route.get('provider','codex') if route else getattr(runtime,'execution_contract',contract())['provider'],
-                purpose='implementation', requested_model=route['model'] if route else getattr(runtime,'execution_contract',contract())['model'],
-                requested_effort=route['effort'] if route else None, policy_revision=route['policy_revision'] if route else None,
-                actual_model=None if route else runtime.identity()['model'],
-                routing_reason='Reviewed Codex route and explicit run approval.' if route else 'Explicit one-task owner grant; fallback disabled.',
+                purpose='implementation', requested_model=route['model'] if route else native_choice.get('model') or getattr(runtime,'execution_contract',contract())['model'],
+                requested_effort=route['effort'] if route else (native_choice.get('effort') or current['snapshot']['native_task']['strategy']['stages'][0].get('effort')
+                    if current['snapshot'].get('native_task') else None), policy_revision=route['policy_revision'] if route else None,
+                actual_model=None if route or current['snapshot'].get('native_task') else runtime.identity()['model'],
+                routing_reason=('Explicit native owner grant; frozen Smart strategy and included-only admission.' if current['snapshot'].get('native_task')
+                    else 'Reviewed Codex route and explicit run approval.' if route else 'Explicit one-task owner grant; fallback disabled.'),
                 started_at=now(), outcome='running'))
 
     def permitted():
@@ -690,6 +733,7 @@ def review(engine, identity):
         task_current = task_execution.current(c, linked) if linked else None
     recovering, notice = recovery_notice(row['status'], row['result'])
     result = row['result'] or {}
+    native_spec = grant['snapshot'].get('native_task')
     manifest = result.get('manifest') or {}
     proposal = (linked or {}).get('proposal_review') or {}
     contract = proposal.get('task_contract') or {}
@@ -726,13 +770,14 @@ def review(engine, identity):
     return dict(id=row['id'], title=(linked['original']['title'] if grant['snapshot'].get('operation_kind')=='feature-verification-v1' else linked['task']['title']) if linked else grant['snapshot']['contract']['title'], status=row['status'],
                 message=notice or row['message'], base=grant['snapshot']['contract']['base'], current_grant=valid(grant),
                 workflow_task=dict(intake_id=linked['intake_id'],task_id=linked['task']['id'],
-                                   binding=binding) if linked else None,
+                                   binding=binding) if linked else dict(intake_id=native_spec['task_id'],
+                    task_id=native_spec['task_id'], binding=digest(native_spec)) if native_spec else None,
                 current_task=task_current, intended_behavior=contract.get('acceptance') or [],
                 behavior_checked=behavior_checked, behavior_reproduced=behavior_reproduced and not followup,
                 later_review=followup,
                 grant_id=grant['id'], expires_at=grant['expires_at'],
                 recovery_pending=recovering,
-                publication_allowed=False, publication_requested=grant['snapshot'].get('task_budget',{}).get('budget',{}).get('publication')=='draft-pr', source='real', result=row['result'])
+                publication_allowed=False, publication_requested=bool(native_spec and native_spec.get('draft')) or grant['snapshot'].get('task_budget',{}).get('budget',{}).get('publication')=='draft-pr', source='real', result=row['result'])
 
 
 class LaterReview(BaseModel):

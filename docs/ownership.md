@@ -1,3 +1,18 @@
+# Native-agent-v1 adapter ownership — November 14, 2026
+
+The opt-in native path uses the existing real_execution grant/request/fence owner,
+model_attempts ledger, provider_admission reservation, real_handoff seals and
+real_publication reconciliation. native_agent is an adapter and trusted fresh-task
+ingress; native_boundary enforces source export; native_codex is transport/resource
+supervision in the existing private connector. No new scheduler, table or ledger.
+Old tasks retain their missing/legacy engine version and original permissions.
+The native author has ordinary disposable writes but no provider/publication
+credentials, host data or network. Only settled scanned changes reach independent
+verification; only the existing trusted publisher receives GitHub credentials.
+Native session usage retains unreported per-model-call counts as unknown.
+
+---
+
 # November 13 — repair profiles and original-only evidence
 
 repair_profiles supplies versioned language/check/evidence adapters to the existing

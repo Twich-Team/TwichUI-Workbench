@@ -242,6 +242,9 @@ def diagnostics_view(raw):
 
 def view_in(connection, identity):
     row = require(connection, intakes, identity)
+    # The trusted native owner ingress retains its private frozen execution
+    # contract in the existing row. Public original-input schemas remain strict.
+    public_original = {key: value for key, value in row['payload'].items() if key != 'native_task'}
     jobs = [dict(j) for j in connection.execute(select(planning_jobs).where(
         planning_jobs.c.intake_id == identity).order_by(planning_jobs.c.created_at)).mappings()]
     retained = retained_planning_failure(row, jobs)
@@ -315,7 +318,7 @@ def view_in(connection, identity):
             selected=[r['id'] for p in paths for r in refs if r.get('label')==p]
             result={**result,'evidence_ids':list(dict.fromkeys(selected or result.get('evidence_ids',[])))[:12]}
     activity = []
-    if row['payload'].get('local_planning'):
+    if row['payload'].get('local_planning') or row['payload'].get('native_task'):
         activity = connection.execute(select(
             model_attempts.c.id, model_attempts.c.purpose, model_attempts.c.backend,
             model_attempts.c.requested_model, model_attempts.c.actual_model,
@@ -343,7 +346,7 @@ def view_in(connection, identity):
     return dict(routine_bug_authorized=True if any(j['payload'].get('routine_bug_authority') for j in jobs) else None,**({'archived_at':archived_at} if archived_at else {}),task_history=history(connection, identity), **({'local_model':local_model} if local_model else {}),**({'scope_recovery':recovery} if recovery else {}),project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
         start_now_binding=__import__('workbench.manual_ai',fromlist=['offer']).offer(connection,row),
         planning_start_binding=digest(row['payload']) if configured_mode()=='everyday' and row['payload']['kind']=='issue' and not row['payload'].get('local_planning') and not row['payload'].get('supported_task') and row['status'] in {'failed','waiting_for_information'} else None,
-        provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],
+        provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=public_original, status='failed' if retained else row['status'], revision=row['revision'],
         created_at=row['created_at'], clarifications=[dict(text=j['payload']['feedback'], created_at=j['created_at'], revision=j['revision']) for j in jobs if j['payload'].get('clarification_id')], jobs=[dict({k:v for k,v in j.items() if k not in {'lease','lease_until','payload','intake_id'}}, automatic_recovery=automatic_storage_recovery(j), **({'operation_kind':'scope_binding'} if j['payload'].get('operation_kind')=='scope_binding' else {}), diagnostics=diagnostics_view(j['payload'].get('diagnostics', {}))) for j in jobs],
         proposals=[proposal_view(connection, dict(p)) for p in connection.execute(select(proposals).where(
             proposals.c.intake_id == identity).order_by(proposals.c.revision.desc())).mappings()

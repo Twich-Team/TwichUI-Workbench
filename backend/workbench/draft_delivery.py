@@ -13,7 +13,7 @@ from uuid import UUID
 
 from fastapi import HTTPException
 from pydantic import Field
-from sqlalchemy import select as sql_select
+from sqlalchemy import select as sql_select, func
 
 from workbench import real_publication as publication
 from workbench.db import engine_for, real_publications, real_execution_requests, real_execution_grants
@@ -125,7 +125,8 @@ def queue_automatic(engine):
         candidates = c.execute(sql_select(real_execution_requests.c.id)
             .join(real_execution_grants,real_execution_requests.c.grant_id==real_execution_grants.c.id)
             .outerjoin(real_publications, real_publications.c.execution_id == real_execution_requests.c.id)
-            .where(eligible(c,real_execution_grants.c.snapshot['workflow_task']['intake_id'].as_string()),real_execution_requests.c.status == "checked",
+            .where(eligible(c,func.coalesce(real_execution_grants.c.snapshot['native_task']['task_id'].as_string(),
+                       real_execution_grants.c.snapshot['workflow_task']['intake_id'].as_string())),real_execution_requests.c.status == "checked",
                    real_execution_grants.c.snapshot['task_budget']['feature_task_id'].as_string().is_(None),
                    real_execution_requests.c.finished_at >= policy["automatic_since"],
                    real_publications.c.id.is_(None))

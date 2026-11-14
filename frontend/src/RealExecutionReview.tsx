@@ -35,6 +35,9 @@ function checkName(command: string[] | undefined, i: number) {
   if (tool?.startsWith('lua') && /\/(?:recipe-)?oracle\.lua$/.test(target||'')) return 'Independent behavior check';
   if (tool?.startsWith('lua') && /(?:^|\/)test_[^/]+\.lua$/.test(target || '')) return 'Focused regression test';
   if (tool === 'bash' && target === 'tests/run.sh') return 'Existing test suite';
+  if (tool === 'python3' && args.includes('test_reminder_gallery')) return 'Gallery rebuild checks';
+  if (tool === 'python3' && args.some(arg=>arg.endsWith('/native_gallery_verifier.py'))) return 'Independent image checks';
+  if (tool === 'python3' && args.some(arg=>arg.endsWith('/repair_suite.py'))) return 'Complete regression suite';
   return `Check ${i+1}`;
 }
 
@@ -53,7 +56,8 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
   const active=['pending','running','checking','cancel_requested'].includes(row.status);
   const hasChanges=Boolean(result?.files?.length);
   const testOnly=Boolean(hasChanges&&result!.files!.every(file=>file.path.startsWith('tests/')&&(!file.old_path||file.old_path.startsWith('tests/'))));
-  const outcome=checked?(testOnly?'Test coverage added':hasChanges?(requestQuery.data?.original.requested_work==='feature'?'Feature prepared':'Fix prepared'):'Result checked'):null;
+  const testRepair=testOnly&&result?.operation_kind==='native-agent-v1';
+  const outcome=checked?(testRepair?'Test repaired':testOnly?'Test coverage added':hasChanges?(requestQuery.data?.original.requested_work==='feature'?'Feature prepared':'Fix prepared'):'Result checked'):null;
   const workflow=row.workflow_task;
   return <div className={embedded?"inline-result":"intake-page result-page"}>
     {!embedded&&<Link className="back-link" to={workflow?'/intake/'+encodeURIComponent(workflow.intake_id):'/executions'}>{workflow?'Back to the task':'All run results'}</Link>}
@@ -64,7 +68,7 @@ export function ExecutionResult({identity,embedded=false}:{identity:string;embed
       <div className={"result-outcome-heading outcome-"+(checked?"checked":"incomplete")}><span className="result-seal" aria-hidden="true">{checked?<CheckCircle2 size={30}/>:<AlertCircle size={30}/>}</span><div className="result-headline"><p className="eyebrow">{checked?'READY TO REVIEW':'SAVED OUTCOME'}</p>
       <h2>{row.later_review?(row.later_review.state==='rejected'?'Later review rejected this patch':'Later review needs attention'):row.recovery_pending?'Waiting for safe recovery':checked?`${outcome} — automated checks passed`:row.status==='checked'?'Run result saved':runStage[row.status]||'Recorded result'}</h2>
       {embedded&&<p className="result-request">{row.title}</p>}
-      {checked?<p className="result-lead">{testOnly?'Workbench added automated tests for this request. The proposed changes are in test files; addon source behavior is unchanged.':hasChanges?'Workbench prepared code changes for this request. The proposed change passed the available automated checks.':'The saved result passed its recorded automated checks.'}</p>
+      {checked?<p className="result-lead">{testRepair?'Workbench corrected the gallery rebuild test. Matching pictures pass after PNG recompression, while changed pictures and runtime files are rejected. The approved artwork is unchanged.':testOnly?'Workbench added automated tests for this request. The proposed changes are in test files; addon source behavior is unchanged.':hasChanges?'Workbench prepared code changes for this request. The proposed change passed the available automated checks.':'The saved result passed its recorded automated checks.'}</p>
         :<p>{row.later_review?'A later check found a problem with this patch. Review that finding before relying on these changes.':row.message}</p>}
       {checked&&<p className="result-limit">Offline checks only · Not installed or tested in game</p>}
       </div></div>

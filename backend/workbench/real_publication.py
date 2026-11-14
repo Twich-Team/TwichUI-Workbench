@@ -46,7 +46,11 @@ def _proof(row, grant):
         from workbench.feature_verification import Runtime as FeatureRuntime
         runtime = FeatureRuntime(Path(recovery['root']))
     else:
-        runtime = Runtime(Path(recovery["root"]))
+        if grant['snapshot'].get('contract', {}).get('engine_version') == 'native-agent-v1':
+            from workbench.native_agent import Runtime as NativeRuntime
+            runtime = NativeRuntime(Path(recovery['root']))
+        else:
+            runtime = Runtime(Path(recovery["root"]))
     if not runtime.owns_recovery(grant):
         raise DeliveryHeld("The evidence directory identity changed.")
     completed = runtime.recover_completion(row, grant)
@@ -60,6 +64,11 @@ def _proof(row, grant):
 def _checked(c, row, grant, *, active=True):
     from workbench.session_authorship import usage_eligible
     from workbench.result_rejection import later_review
+
+    if grant['snapshot'].get('contract', {}).get('engine_version') == 'native-agent-v1':
+        from workbench.native_agent import checked
+        checked(c, row, grant, active=active)
+        return
 
     if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
         from workbench.feature_verification import checked
@@ -113,6 +122,8 @@ def _checked(c, row, grant, *, active=True):
 
 def current(c, row, grant):
     _checked(c, row, grant)
+    if grant['snapshot'].get('contract', {}).get('engine_version') == 'native-agent-v1':
+        raise DeliveryHeld('Native proof delivery requires its separately bound checked-draft approval.')
     if grant['snapshot'].get('operation_kind') == 'feature-verification-v1':
         raise DeliveryHeld('Complete feature delivery follows its separate saved publication permission.')
     linked = grant["snapshot"]["workflow_task"]
@@ -140,6 +151,9 @@ def current(c, row, grant):
 
 
 def preview(row, grant):
+    if grant['snapshot'].get('contract', {}).get('engine_version') == 'native-agent-v1':
+        from workbench.native_agent import publication_preview
+        return publication_preview(row, grant)
     if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
         from workbench.feature_delivery import preview as feature_preview
         return feature_preview(row,grant)
@@ -297,6 +311,9 @@ def _enqueue(engine, row, grant, snapshot):
 def _saved_policy(c, row, grant):
     """The earlier run supplies evidence only. Its publication hold remains intact."""
     _checked(c, row, grant)
+    if grant['snapshot'].get('contract', {}).get('engine_version') == 'native-agent-v1':
+        from workbench.native_agent import publication_policy
+        return publication_policy(grant)
     if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
         from workbench.feature_delivery import policy
         return policy(c,row,grant,already_checked=True)

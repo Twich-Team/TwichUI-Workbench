@@ -19,6 +19,10 @@ def _verified_checks(runtime, grant, result):
     from workbench.real_workspace import PRELUDE, sha, suite_inventory
     from workbench.session_authorship import usage_eligible
 
+    if grant['snapshot'].get('contract', {}).get('engine_version') == 'native-agent-v1':
+        from workbench.native_agent import Runtime as NativeRuntime
+        return type(runtime) is NativeRuntime and runtime.verify_checks(result, grant)
+
     if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
         return bool(getattr(runtime,'operation_kind',None)=='feature-verification-v1'
             and runtime.verify_checks(result,grant)

@@ -1,3 +1,24 @@
+# Active native-agent integration and ONE frozen repair proof — November 14, 2026
+
+The current owner attachment31f07a14 authorizes the fed190e design integration,
+real subscription/security qualification, exact release acceptance/install, then
+one frozen gallery repair and one independently verified draft PR. It supersedes
+older stop/campaign notes below for this assignment. Do not redesign the boundary.
+
+1. Recover installed/development facts and original architecture audit. DONE.
+2. Integrate qualified boundary with existing worker/ledger/admission/verifier/
+   publisher; qualify real subscription execution. Real fixture DONE; integration
+   and controlled local/connected acceptance IN PROGRESS.
+3. Commit/push reviewed code, pass full local/exact hosted acceptance, install one
+   accepted build and verify history/service/rollback. NOT STARTED.
+4. Freeze adapter/verifier/build/new-task scope and authority. NOT STARTED.
+5. One genuine native gallery repair, independent invalid-image controls and full
+   addon suite, exact destination qualification, exactly one draft PR. NOT STARTED.
+6. Preserve outcome and stop for owner review. No repair/rebuild/retry campaign
+   during the frozen proof. No merge/release/live addon changes.
+
+---
+
 # Autonomous Bug Reports — continuation and task controls, November 13, 2026 Mountain Time
 
 Following the Project Working Philosophy: continue the approved A–D assignment.
