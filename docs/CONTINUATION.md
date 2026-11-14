@@ -1,3 +1,49 @@
+# Autonomous Bug Reports — installed release, November 13, 2026 Mountain Time
+
+Following the Project Working Philosophy: build dbf012005cc55987507cac0242f3e034145210e2
+is installed through one accepted release cutover. Full exact hosted run43555859967
+passed all9jobs including final verify. Final local canonical2backend partitions:
+1213+1619=2832passed,9conditional skips; frontend69, browser134/8conditional skips,
+visual12, connected feature4 passed. Dedicated exact-source actual-confinement profiles:
+12passed, models simulated. No previous failed diagnostic run was reused as acceptance.
+
+Private candidate-dbf0120 verified hosted ZIP/artifact digests, all762 application
+inventory files, all26 frontend files byte equal,29locked Python versions,103private
+installation inputs and30external executable/dependency pins. Optional v2 profiles are
+enabled with old allowed_classes unchanged. Worker rehearsal32cycles/31planning passes,
+only3authenticated metadata GETs and zero generation/other network dispatch. Original
+961rows are unchanged within current965; staging, stop, installation, restart and
+independent restore all match logical digest9cb555d0374f95dcf235a013f988add001be1c5165ad9b9b1e120bc4f463cb01.
+
+All4Workbench services active, zero automatic restarts. Normal authenticated8080
+access/key/model file/process unchanged. Existing LAN/firewall/portal/TLS/assets
+boundaries pass. Original rejection sidecars still validate,320evidence roots and
+required rollback builds/source seals verified. Independent backup restore/rejection
+proof passed before installation and again after restart. Real Machine Resources
+browser checks passed desktop/phone/enlarged text/reload with actual observations,
+no browser writes. Installed automatic retention passed:10eligible owned test copies removed; recent,
+active, failed, open and result-referenced copies and all required rollback sources
+preserved. No saved-store writes or production threshold changes.
+
+Automatic routine policy remains OFF pending final installed checks. No model
+generation, addon edits or new addon branches/PRs have occurred in this assignment;
+zero fresh routine bugs have completed end to end. Next: finish installed retention,
+enable policy through ordinary UI under this assignment, submit fresh Python gallery
+report using explicit per-task capable Codex/high Smart strategy (global model choices
+unchanged), and let the existing app own investigation/repair/independent checks/draft.
+Native submission helper is private acceptance tooling, not shipped orchestration.
+Do not click human plan/run approvals or directly edit task/receipt records. Record
+real calls/usage/interventions/failures separately from controlled evidence. Continue
+real Lua and exceptional acceptance; no merge/addon installation without owner decision.
+
+Private receipts:autonomous-bugs-20261113/candidate-dbf0120. Installed stage:
+/home/rich/TwichUI-Workbench/.local/m5-review/everyday-outcome-dbf0120.
+Source HEAD remains dbf0120; status/handoff reporting edits may now be committed
+without creating another installation candidate. Preserve unrelated106-line admin
+appendix and .venv/node_modules links. Do not stop at this installation checkpoint.
+
+---
+
 # Autonomous Bug Reports — release compatibility checks, November 13, 2026 Mountain Time
 
 Following the Project Working Philosophy: full release acceptance remains unfinished.
