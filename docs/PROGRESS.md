@@ -1,3 +1,39 @@
+# Native-agent proof — CONTROLLED FAILURE at Checkpoint A, November 14, 2026
+
+The owner authorized the native-agent-v1 proof in attachment
+d54c16e7-83d4-4de5-93eb-3adba99edb7c/pasted-text-1.txt, superseding the earlier
+campaign stop for that assignment. Its security stopping rule has now been reached.
+STOP for owner review. Do not start B, C, model generation, a native proof,
+installation, publication or another recovery campaign from this handoff.
+
+[Qualification report](NATIVE_AGENT_QUALIFICATION_20261114.md) records actual evidence.
+Codex CLI0.166.0 individual-file write policy failed before command execution.
+Directory grants with protected siblings ran but allowed an unauthorized new source
+file. The outer read-only source/individual writable-file alternative reached a
+denied inner namespace creation. No capability/security restriction was relaxed.
+Partial canary read/symlink/network checks passed; native lifecycle, complete
+extension isolation and subscription compatibility remain unqualified.
+
+Zero real native coding requests/tokens; no addon patch, full addon suite, adapter,
+installation or draft PR. Frozen Checkpoint C NEVER BEGAN. No Workbench implementation
+or verifier code changed. Controlled provider tests were not run.
+
+Installed b6ed0db and immediate rollback c294d65 each passed all 764 manifest-file checks.
+Four services are active with existing PIDs and zero automatic restarts. The read-only
+store check found 1,018 records, 31 tables and a passing integrity check.
+Existing task schedules, permissions and strategies remain untouched. Original main
+checkout's five modified and three untracked documents remain. The absent delivery
+checkout was recreated from saved 4f496ce; missing historical uncommitted admin edits were not
+recovered or certified. No existing archive was removed.
+
+Private evidence: /home/rich/.local/share/TwichUI-Workbench/native-agent-qualification-20261114/.
+Current owner review is of this security qualification failure, not the old generated
+checking-program rejection. No-go for native rollout. A separately authorized
+follow-up would need a supported exact-write/credential boundary and subscription
+qualification before adapter implementation and one frozen real repair.
+
+---
+
 # OWNER STOP — Autonomous Bug Reports controlled closeout, November 14, 2026 UTC
 
 The owner explicitly stopped this extended development campaign. This supersedes
