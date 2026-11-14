@@ -1,23 +1,25 @@
 Last updated November 14, 2026, Mountain Time.
 
-Build c4b9dd8 is installed and healthy with the corrected exact-pixel verifier.
-Complete local and hosted Workbench checks and installed desktop/phone checks passed.
+Build c4b9dd8 remains installed and healthy. No replacement build was installed.
 
-One real native Codex session repaired only the gallery test. Its first substantive
-edit appeared after 49 seconds. Ten focused tests, 87 independent controls and all
-196 addon regression files passed. The checked patch is saved and unpublished.
+The saved native gallery repair still changes only tests/test_reminder_gallery.py.
+Its original 10 focused tests, 87 independent controls and all 196 addon regression
+files passed. The installed publisher still accepts its exact frozen check evidence.
 
-Draft delivery exposed a Workbench defect: the publisher queues native results but
-selects only older task records to advance. No PR or addon remote write occurred.
-The proof is a controlled failure and the task is paused for owner review. Automatic
-native draft delivery remains demonstrated only with controlled test responses.
+No draft PR was created. An isolated copy with only the publication selector fixed
+exposed a new blocker: saved native verification requires every current backend file
+to match its original hash, including the publication selector. The candidate bytes
+remain valid, but the corrected publisher refuses the original completion evidence.
 
-Zero native addon tasks have completed end to end. No Workbench/verifier engineering
-changes, manual addon fixes or retries occurred during the frozen real proof. The
-owner's immediate model override was task-specific; global Smart AI is unchanged.
+Work stopped at this newly demonstrated blocker, as directed. No native coding,
+check regeneration, full-suite repeat, production source change or remote write ran.
+The original failed proof and paused task remain unchanged. Zero native addon tasks
+have completed end to end; native draft delivery has only controlled test evidence.
 
-All 1,025 earlier records remain exact in the 1,039-record store. Independent restore,
-original proof evidence, model usage, authentication and rollback builds are verified.
+All 1,039 records are unchanged, including every one of the original 1,025 records.
+Independent restore matches. All four services retain their prior processes;
+original check evidence, authentication, model settings and rollback are retained.
 
-Next: owner review of the publication defect and the saved checked candidate before
-any correction or delivery. Native-agent-v1 does not yet qualify for limited rollout.
+Next: an engineering decision on a bounded, separately authorized delivery handoff
+that validates original evidence under its frozen runtime while using the corrected
+publisher. It must preserve candidate identity and all publication safeguards.

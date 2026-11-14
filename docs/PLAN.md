@@ -1,3 +1,38 @@
+# STOP — preserved native delivery fails after selector correction, November 14
+
+The current owner authorized focused publication selection repair and one separate
+linked delivery of the existing checked candidate, with a stop at the first newly
+demonstrated engineering/owner blocker. That blocker is now demonstrated. No addon
+PR, native coding, production code change, correction commit/push or installation
+occurred. Installed c4b9dd8 and the original failed frozen proof remain unchanged.
+
+The live checked execution/grant/pending publication match the original receipts.
+An isolated copy fixes only advance's native/legacy identity coalesce. The installed
+publisher accepts the original proof; the corrected copy rejects it. Native runtime
+identity hashes every backend helper, including draft_delivery.py. verify_checks
+requires complete equality to the original grant; immutable handoff recovery then
+fails and the trusted publisher reports original completion integrity failure.
+Candidate3049e5ee... bytes stay valid in both copies; only that helper hash differs.
+A separate approval is evaluated after this gate and cannot fix the refusal.
+
+This needs an engineering decision on bounded linked delivery validating the original
+receipt under its frozen runtime with the corrected publisher. Do not rewrite old
+grants/certificates, regenerate checks or coding, or route around the trusted owner.
+No further engineering campaign under this assignment. Current destination checking,
+full correction regression/hosted verification and installation were not reached.
+
+All1039rows/schema0014/31tables unchanged; every1025/1031preproofrow exact; independent
+restore matches logical4375a2c31a62fd898753138a9533959d95c51c8c9f7225975010b9e20d999556.
+Four original service PIDs active/zero restarts; task remains paused/publication empty.
+Original10focused/87controls/196addonfiles evidence reused, not rerun. Zero native
+request-to-draft completions. Global Smart AI/authentication/rollback untouched.
+
+Report: docs/history/20261114-native-publication-evidence-blocker.md.
+Receipts: /home/rich/.local/share/TwichUI-Workbench/native-draft-delivery-20261114/.
+Include complete CURRENT_STATUS in the owner closeout. STOP at this new blocker.
+
+---
+
 # STOP FOR OWNER REVIEW — checked native repair; publication defect, November14
 
 Controlled frozen-proof FAILURE at draft advancement. Do not repair Workbench,
