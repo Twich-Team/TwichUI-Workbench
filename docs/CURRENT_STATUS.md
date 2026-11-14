@@ -1,25 +1,25 @@
 Last updated November 14, 2026, Mountain Time.
 
 Build b6ed0db remains installed. All four Workbench services are active. The installed
-source and immediate rollback passed their file checks. A read-only check found
-1,018 saved records and a healthy database. Existing tasks, choices, history,
-artwork, credentials and rollback were not changed.
+source, immediate rollback and 1,018 saved records remain intact.
+
+The revised isolation boundary passed controlled qualification. Codex tools could
+create, edit and delete files in a disposable workspace while private reads,
+outside writes, network access and privileged operations stayed blocked.
+The candidate exporter rejected 18 unsafe cases and accepted two authorized cases.
+Cancellation and timeout stopped detached descendants.
+
+A real Codex CLI session driven by a local mock edited a fixture. Its exact accepted
+change was frozen and checked by a separate verifier, which could not access the
+working copy or credentials. This demonstrated the boundary, not a real AI repair.
 
 Zero tasks have completed from beginning to end through the proposed native-agent
-engine. Earlier vendor and test-coverage deliveries remain historical successes;
-the recent Autonomous Bug Reports campaign delivered no new repair or draft.
+engine. No real provider request, addon repair, installation or new PR occurred.
+Earlier vendor and test-coverage deliveries remain historical successes.
 
-Native security qualification stopped at Checkpoint A. The installed Codex CLI
-could not run the tested individual-file write policy. A directory policy blocked
-private reads and network access but allowed an unauthorized new source file.
-An outer boundary with individual writable files then failed when Codex tried to
-create its inner sandbox. These were disposable security probes, not real coding.
-
-No native adapter was installed, no real model request or addon edit ran, and no
-new PR was created. The frozen acceptance proof never began. Subscription support
-for the intended unattended integration also remains unqualified.
-
-The next complete outcome remains one secure native-agent repair, independently
-checked and delivered as exactly one authorized draft PR. Owner review of the
-retained security failure is needed before authorizing a follow-up. Native rollout
-is not recommended on the current evidence.
+The minimal isolation design and evidence are ready for review. No required
+security primitive is missing from the tested boundary. Subscription qualification,
+native usage accounting and integration with the existing worker remain unfinished.
+The next complete outcome is one independently verified native addon repair
+delivered as exactly one authorized draft PR. That implementation and real proof
+were not started under this design-only assignment.

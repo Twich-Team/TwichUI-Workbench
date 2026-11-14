@@ -1,3 +1,36 @@
+# Revised native workspace boundary — qualified design only, November 14, 2026
+
+The owner expressly authorized a focused reassessment separating runtime host and
+credential isolation from disposable source writes and candidate acceptance.
+That revised contract passed controlled qualification. The earlier failure remains
+retained under its original contract; its per-file runtime-write requirement does
+not govern this newly authorized boundary.
+
+[Design and evidence](history/20261114-native-workspace-boundary.md):
+29 runtime assertions passed; 18 hostile exports rejected and two authorized cases
+accepted; cancellation and timeout each removed six processes including detached
+descendants. The installed CLI's actual shell/patch/image tool path was exercised
+against a local mock. The exact approved fixture patch was exported, frozen and
+checked in a separate credential-free environment. No real provider was used.
+
+Private evidence:
+`/home/rich/.local/share/TwichUI-Workbench/native-boundary-reassessment-20261114/`.
+Final matrix run-05; integrated clean-repository native fixture native-mock-07.
+No missing OS primitive was demonstrated for this revised boundary. This is design
+and qualification evidence, not an installed native-agent-v1 implementation.
+
+STOP after this assignment's design/evidence closeout. Do not infer authorization
+for a real addon repair, deployment, PR, full migration or renewed delivery campaign.
+Subscription/allowance and native accounting qualification, the minimum worker
+adapter and a later frozen real proof remain separate unfinished work.
+Existing tasks, strategies, saved history and services remain unchanged.
+
+Installed b6ed0db and rollback c294d65 each retained all 764 manifest files. Four
+services kept existing PIDs and zero restarts. Read-only history: 1,018 records,
+31 tables, integrity ok. Original main checkout's unrelated edits remain intact.
+
+---
+
 # Native-agent proof — CONTROLLED FAILURE at Checkpoint A, November 14, 2026
 
 The owner authorized the native-agent-v1 proof in attachment
