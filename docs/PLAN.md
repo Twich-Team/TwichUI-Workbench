@@ -1,3 +1,60 @@
+# STOP FOR OWNER REVIEW — checked native repair; publication defect, November14
+
+Controlled frozen-proof FAILURE at draft advancement. Do not repair Workbench,
+change verifier, reinstall, retry native coding, bypass automatic delivery with
+manual publication, or publish the saved candidate without further owner direction.
+Native coding and ALL independent/regression checks succeeded; draft workflow did
+not finish. Zero native addon tasks completed end to end. No new PR/addonremote write.
+
+Installedc4b9dd8; local2902backend/10skip,69frontend,134browser/8conditional skips,
+12visual,4connected; hosted43628341085 all9jobs/verify passed. Verifier exactRGBA
+fixture correction independently qualified87controls; originalfailed proof remains
+failed/unaccepted with its patch/verifier/source/usage unchanged.
+
+Ownerintervention authorized immediate task-only available subscription Codex use.
+Native initialpendingwait had no supported Startnow; task957972b1 waspaused and
+execution37cd2a92 blocked with0ledger/0native sessions. Frozeninput/grant preserved.
+Separately linked task6104b4a6-e3e6-4e29-9725-6bc552f15db9;execution36792197-7825-
+5f84-bb0f-d2db73471df1;grant54898b99-d87d-4177-8fd6-0def1dc0ddd1. One newnative
+CLI session configuredTerra/high,taskallocation100,globalstrategyunchanged; dispatch
+4.54s afterrequest,firstsubstantiveedit49.27s afterlaunch/53.81s afterrequest.
+Exact94-linechange onlytests/test_reminder_gallery.py. Candidate3049e5ee932eae98d190aac339d8b41e56055821e7d007d74f693d169645aa58.
+Tenfocused,87independentcontrols,full196files pass; native terminalexit0/settled,
+all3verifiercgroupsremoved/noOOM/PIDlimit/leak. Nativeauthentication unchanged.
+
+Publicationcanonicalrow pending,state{},checkedapprovalpresent,no remoteintent.
+Read-only exactpredicate proof: draft_delivery.advance requires eligible(workflow_task
+.intake_id),but nativegrant has onlynative_task.task_id. Existingqueue admission
+usescoalesce,but advancementdoesnot. Currentselector0matches;nativeeligibility1match.
+This is a frozen Workbench architecture defect. Per ownerstoprule,NO correction or
+manualCLIpublicationbypass. Currenttaskpausedthroughsupportedwork_controls; checked
+execution/candidate/checks retained,publicationrow preserved unstarted. RemotePRlist
+for exactbranch isempty;currentmainstilld09e6dcb. Not limitedrolloutqualified.
+
+Active receipts:`/home/rich/.local/share/TwichUI-Workbench/native-gallery-correction-20261114/manual-override/`.
+final-proof-summary.json,controlled-publication-failure.json,controlled-proof-stop.json,
+exact-native-submission.patch,checked-execution-before-stop.json,model-ledger.json,
+unpublished-draft-record.json,preservation-closeout.json andfresh-proof/ retain all.
+The actual1039-row/schema0014/31table store andindependentafter-controlled-failure-
+restore matchlogical4375a2c31a62fd898753138a9533959d95c51c8c9f7225975010b9e20d999556.
+Every1025originalrow and1031pre-live-proofrow remainsbyteexact. FourservicePIDs active/
+zero restarts;source/auth/modelPID3350312 unchanged;originalcheckoutdiffdba344b2...,
+originaladdonclean. c4,7760a1f,b6ed0db,c294 fullseals pass. GET-onlyactualdesktop/phone/
+reload/200%taskreview passed; savedcandidate sayschecked/nothingpublished,taskpaused.
+
+Realproofusage278001=272884input+5117output;259200cached INCLUDEDininput;728reasoning
+INCLUDEDinoutput. One nativeCLI/oneledger;modelrequestcount andactualservermodel/
+effortunknown. Allknown priorfixtures+firstproof+newproof738238tokens;developmentchat
+excluded. NoAPIbilling/extracredits.0post-freezeWorkbench/verifierengineeringchanges,
+0manualaddonfixes,0retries,0reinstallafterownerallocationoverride. Earlierprivate
+caller/configuration/cache/fixturecleanupdiagnostics allpre-freeze andretained.
+
+Detailedreport: docs/history/20261114-native-gallery-verifier-correction.md. Final
+must lead controlledfailureatpublication,distinguishcheckedrepairfromdraftdelivery,
+andincludecompleteCURRENT_STATUS copyableblock. STOP forownerreview.
+
+---
+
 # Corrected gallery verifier and one fresh proof — November 14, 2026
 
 Owner attachment `41c5812c-4484-4f66-a47d-51801a6e5aa1/Pasted text.txt`

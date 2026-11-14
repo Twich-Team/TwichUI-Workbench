@@ -1,3 +1,164 @@
+# STOP FOR OWNER REVIEW — checked native repair; publication defect, November14
+
+Controlled frozen-proof FAILURE at draft advancement. Do not repair Workbench,
+change verifier, reinstall, retry native coding, bypass automatic delivery with
+manual publication, or publish the saved candidate without further owner direction.
+Native coding and ALL independent/regression checks succeeded; draft workflow did
+not finish. Zero native addon tasks completed end to end. No new PR/addonremote write.
+
+Installedc4b9dd8; local2902backend/10skip,69frontend,134browser/8conditional skips,
+12visual,4connected; hosted43628341085 all9jobs/verify passed. Verifier exactRGBA
+fixture correction independently qualified87controls; originalfailed proof remains
+failed/unaccepted with its patch/verifier/source/usage unchanged.
+
+Ownerintervention authorized immediate task-only available subscription Codex use.
+Native initialpendingwait had no supported Startnow; task957972b1 waspaused and
+execution37cd2a92 blocked with0ledger/0native sessions. Frozeninput/grant preserved.
+Separately linked task6104b4a6-e3e6-4e29-9725-6bc552f15db9;execution36792197-7825-
+5f84-bb0f-d2db73471df1;grant54898b99-d87d-4177-8fd6-0def1dc0ddd1. One newnative
+CLI session configuredTerra/high,taskallocation100,globalstrategyunchanged; dispatch
+4.54s afterrequest,firstsubstantiveedit49.27s afterlaunch/53.81s afterrequest.
+Exact94-linechange onlytests/test_reminder_gallery.py. Candidate3049e5ee932eae98d190aac339d8b41e56055821e7d007d74f693d169645aa58.
+Tenfocused,87independentcontrols,full196files pass; native terminalexit0/settled,
+all3verifiercgroupsremoved/noOOM/PIDlimit/leak. Nativeauthentication unchanged.
+
+Publicationcanonicalrow pending,state{},checkedapprovalpresent,no remoteintent.
+Read-only exactpredicate proof: draft_delivery.advance requires eligible(workflow_task
+.intake_id),but nativegrant has onlynative_task.task_id. Existingqueue admission
+usescoalesce,but advancementdoesnot. Currentselector0matches;nativeeligibility1match.
+This is a frozen Workbench architecture defect. Per ownerstoprule,NO correction or
+manualCLIpublicationbypass. Currenttaskpausedthroughsupportedwork_controls; checked
+execution/candidate/checks retained,publicationrow preserved unstarted. RemotePRlist
+for exactbranch isempty;currentmainstilld09e6dcb. Not limitedrolloutqualified.
+
+Active receipts:`/home/rich/.local/share/TwichUI-Workbench/native-gallery-correction-20261114/manual-override/`.
+final-proof-summary.json,controlled-publication-failure.json,controlled-proof-stop.json,
+exact-native-submission.patch,checked-execution-before-stop.json,model-ledger.json,
+unpublished-draft-record.json,preservation-closeout.json andfresh-proof/ retain all.
+The actual1039-row/schema0014/31table store andindependentafter-controlled-failure-
+restore matchlogical4375a2c31a62fd898753138a9533959d95c51c8c9f7225975010b9e20d999556.
+Every1025originalrow and1031pre-live-proofrow remainsbyteexact. FourservicePIDs active/
+zero restarts;source/auth/modelPID3350312 unchanged;originalcheckoutdiffdba344b2...,
+originaladdonclean. c4,7760a1f,b6ed0db,c294 fullseals pass. GET-onlyactualdesktop/phone/
+reload/200%taskreview passed; savedcandidate sayschecked/nothingpublished,taskpaused.
+
+Realproofusage278001=272884input+5117output;259200cached INCLUDEDininput;728reasoning
+INCLUDEDinoutput. One nativeCLI/oneledger;modelrequestcount andactualservermodel/
+effortunknown. Allknown priorfixtures+firstproof+newproof738238tokens;developmentchat
+excluded. NoAPIbilling/extracredits.0post-freezeWorkbench/verifierengineeringchanges,
+0manualaddonfixes,0retries,0reinstallafterownerallocationoverride. Earlierprivate
+caller/configuration/cache/fixturecleanupdiagnostics allpre-freeze andretained.
+
+Detailedreport: docs/history/20261114-native-gallery-verifier-correction.md. Final
+must lead controlledfailureatpublication,distinguishcheckedrepairfromdraftdelivery,
+andincludecompleteCURRENT_STATUS copyableblock. STOP forownerreview.
+
+---
+
+# OWNER MANUAL OVERRIDE: native coding RUNNING — November14 at19:37UTC
+
+The owner explicitly intervened in this chat: immediate available subscription Codex
+use may exceed this task's allocation preference; global strategy unchanged. Use
+supported Start now if safe,else preserve waiting proof and freeze ONE linked task.
+No framework repair/release cycle. Keep adapter/verifier/security unchanged. Stop
+following one verified draft or documented frozen-proof failure; no countdown.
+
+Native initial pending wait has no supported Start now offer (manual_ai supports
+planning or between-turn legacy checkpoints only; native connector pins manual_stage
+None). Original waiting task957972b1 was paused through work_controls; worker settled
+execution37cd2a92 asblocked with0ledger rows/0native sessions. Its frozen input/grant/
+source/usage remain unchanged; stop receipt retained. Old read-only observer stopped.
+No duplicate generation or global strategy change. No architecture code was changed.
+
+New separately frozen linked task6104b4a6-e3e6-4e29-9725-6bc552f15db9;execution
+36792197-7825-5f84-bb0f-d2db73471df1;grant54898b99-d87d-4177-8fd6-0def1dc0ddd1.
+Native dispatch19:37:48UTC,about4.54s afterregistration. One realCLI session/oneledger
+row;configuredTerra/high,task-only100%allocation; sameapprovedsource/scope/limits,
+exact87-control verifier andinstalledc4b9dd8. Fresh signed-in/account/catalog checks
+passed,noextra credits,92%observedquota beforedispatch; no active native session
+then. Global strategy unchanged; only prior task pause appended to savedpolicy.
+All1031pre-dispatch rows captured before-frozen-proof.sqlite3 under newroot.
+
+ACTIVE evidence root: `/home/rich/.local/share/TwichUI-Workbench/native-gallery-correction-20261114/manual-override/`.
+Its frozen-proof.json,proof-registration.json,fresh-proof/ andfirst-code observer
+own this proof. Parentcurrent-work.jsonpoints here. Earlier failed proof andpaused
+waiting proof remain separate. Newowner-instruction.txt combines originalattachment
+with exactlaterownerintervention; native task links the superseded waiting task.
+
+READ ONLY now. NoWorkbench/verifierchanges,reinstall,manualaddonfixes ornewdispatch.
+Existingworkerowns strict export,independent87controls,complete196file addon suite,
+currentdestinationqualification and1trusted draft. Preserve actual timing/usage,
+unknownmodelcallcount,candidate,alloldrows/auth/rollback andstopownerreview.
+
+---
+
+# FROZEN corrected-verifier proof — November14 at19:24UTC
+
+READ ONLY from now on. New owner attachment41c5812c authorizes this ONE proof.
+Installedc4b9dd8 exact local2902backend/69frontend/134browser/12visual/4connected
+and hosted43628341085 all9jobs/verify passed. Corrected87-control verifier qualified;
+old frozen verifier/rejection/patch/usage remain unchanged and unaccepted.
+
+Task957972b1-a145-4166-b0f5-b35f6dfb7a0f;execution37cd2a92-46f9-569e-bf74-
+fdd5b756fe12;grantc0ba21f9-0185-4348-a03a-d16cb783695e. Freeze/registration succeeded
+once at19:24UTC.1025preproof rows copied to before-frozen-proof.sqlite3. Saved80%
+Sol/high primary is waiting30min; recheck1794686066.70798=19:54:26UTC. Do not bypass
+or reset wait.0native dispatch/ledger rows at initial readback. Grant expires around
+20:24UTC. Existing worker alone owns dispatch/export/87controls/full196file suite/
+current-destination qualification and exactly1draft. No duplicate launch/publication.
+No Workbench/verifier/adapter changes,reinstall or manual addon fixes after freeze.
+Any frozen verifier/security/architecture defect: preserve evidence,stop ownerreview.
+
+Private correction root: `/home/rich/.local/share/TwichUI-Workbench/native-gallery-correction-20261114`.
+Its frozen-proof.json,proof-registration.json,current-work.json andfrozen-observations
+hold live coordinates. Read-only first-code observerPID3573942 runs5400sec. Fresh
+workspace is in fresh-proof/workspace-location.json. Original input clean; prior
+candidate not supplied. Same approved scope/limits/strategy. Original1025rows/source/
+owner permissions/allowance accounting and7760a1f,b6ed0db,c294 rollback retained.
+Normal authentication/privateTLS/4services/GET-only desktop/phone/reload/200%pass.
+
+Immediately before actualfreeze, first driver correctly refused32generated cache
+files made by the installed account-check caller. NO freeze file/grant/request or
+model dispatch existed then. All accepted app files still matched. Exact caches
+archived,only generated files removed,originalseal restored; caller's no-bytecode
+flag corrected BEFORE actualfreeze. All logs/receipts preserved. No reinstall.
+Second driver then froze/registered ONCE. This is pre-freeze caller cleanup,not a
+post-freeze correction. Current source/helper hashes match the frozen identities.
+
+Continue only read-only observations through success or controlledfailure,then
+preserve exact candidate/usage/timing/alloldrows/independent restore/rollback/source/
+auth,attach actual draft PR if created,update CURRENT_STATUS with its complete final
+copyable block. Zero native addon tasks have completed end-to-end as of this entry.
+
+---
+
+# Corrected verifier installed; one fresh frozen proof next — November 14, 2026
+
+c4b9dd8412dbcc1d7df2f4e6daa1565b8b597142 is installed. Exact full hosted
+43628341085 passed all9jobs/verify. Full local2902backend/10skip across184files,
+69frontend,134browser/8conditional skips,12visual and4connectedfeature passed.
+The intentional unsafe-export FIFO fixture was archived before exact temporary
+FIFO removal; all scratch closed. Pre-freeze private caller/configuration and
+bookkeeping diagnostics are retained; no accepted application byte was changed.
+
+Named install45.31s,activated.1025rows/schema0014/31tables unchanged, SHA
+3e2553b7f08f277732827eb2dc7c9fc60750261232eeef0af1510fab7afeeefd. Prior7760a1f,
+b6ed0db andc294 rollback retained; independent restore/old permissions and allowance
+records preserved. Four services/zero restarts,normal401/200modelauth,privateTLS/
+browser boundaries and desktop/phone/reload/200% resources passed. Fresh installed
+subscription/catalog preflight passed at19:22UTC:91%observed usage,no extra credits.
+
+Fresh task957972b1-a145-4166-b0f5-b35f6dfb7a0f is prepared,NOT registered/frozen
+at this entry. Original212file disclosure/pristine source retained; earlier patch
+never supplied. Same80%Sol/high,30minwait,20%Terra/high strategy; same15minnative/
+20minacceptance and150line/64KiB scope. Corrected87-control verifier hash qualified.
+Freeze/register ONCE using private correction root's freeze-and-register.py via
+register-proof.sh in delegated cgroup; observe read-only. After freeze no Workbench/
+verifier changes,reinstall,manual addon fix or duplicate dispatch/publication. Stop
+for owner review on one verified draft or documented controlled failure.
+
+---
+
 # Corrected gallery verifier and one fresh proof — November 14, 2026
 
 Owner attachment `41c5812c-4484-4f66-a47d-51801a6e5aa1/Pasted text.txt`
