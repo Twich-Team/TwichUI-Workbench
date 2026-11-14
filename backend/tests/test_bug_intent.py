@@ -22,6 +22,25 @@ def plan():
                   dict(id='saved-state',description='Check separate identities and preserved state after a fresh client startup.')])
 
 
+@pytest.mark.parametrize('kind',['existing-failure','missing-regression'])
+def test_fresh_production_profile_cannot_freeze_a_python_test_only_repair(kind):
+    from workbench.investigation_strategy import correction
+    proposed=plan()
+    proposed.update(repair_profile=dict(version=2,kind=kind),
+        read_paths=['tools/make_gallery.py','tests/test_gallery.py'],writable_paths=['tests/test_gallery.py'],focused_test='tests/test_gallery.py')
+    # Saved plans remain readable; the constraint owns fresh model responses.
+    saved=bug_intent.Plan.model_validate(proposed)
+    assert saved.model_dump(exclude_unset=True)==proposed
+    with pytest.raises(ValueError) as rejected:
+        bug_intent.Response.model_validate(dict(finding='The failing gallery assertion needs a test-only correction.',plan=proposed))
+    feedback=correction(rejected.value)
+    assert feedback['errors'][0]['path']==['plan','repair_profile']
+    assert 'test-correction' in feedback['errors'][0]['rule']
+    assert 'unrelated production' in feedback['errors'][0]['rule']
+    proposed['repair_profile']['kind']='test-correction'
+    assert bug_intent.Response.model_validate(dict(finding='Independent evidence is required before correcting this assertion.',plan=proposed)).plan.repair_profile.kind=='test-correction'
+
+
 def test_scope_is_bound_to_all_owner_requirements_without_execution_or_test_program(monkeypatch):
     from workbench import regression_preparation as source_module
     monkeypatch.setattr(source_module,'repository',lambda:(None,'a'*40,{'tests/run.sh':'d'*40,'tests/harness.lua':'e'*40}))

@@ -284,6 +284,10 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
             outcome='running',started_at=intake.now(),routing_reason='Original-only independent repair evidence before any implementation.'))
     wire=dict(purpose='original-only independent behavior checks',original=linked['original'],owner_feedback=reviewed.get('review_feedback'),intent=intent,
         files=selected_source['files'],
+        execution_context=dict(working_directory='repository/tests',repository_root='..',
+            check_file='Outside the repository. Do not resolve repository paths from __file__.',
+            repository='Read-only. Use a temporary directory for generated artifacts.',
+            lua_globals=dict(ROOT='../!!!TwichUI/',REPO='../',TESTS='./')),
         inspection_windows=[w for w in packet.get('inspection_windows',[]) if w['path'] in intent['plan']['read_paths']],
         instructions=('Design a bounded '+('Python' if intent['plan']['focused_test'].endswith('.py') else 'Lua')+
             ' assertion body from the original report, requirements and committed source only. No candidate exists. '

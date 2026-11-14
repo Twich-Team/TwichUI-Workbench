@@ -452,6 +452,11 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     covered = identity and bug_authority.frozen(c, identity)
                 if covered:
                     result['coverage']['require_repair_profile']=True
+                    result['repair_profile_guidance'] = dict(
+                        existing_failure='Repair production code while preserving the original failing assertions. A test-only assertion correction cannot use this profile.',
+                        missing_regression='Repair missing production behavior with original-only independent checks and native regression coverage.',
+                        test_correction='Correct an incorrect test assertion or fixture only when independent original behavior and meaningful negative controls prove production correct. Production stays read-only.',
+                        environment='Diagnose an observed environment or fixture failure without inventing a source fix or empty draft PR.')
                     result['reproduction_capabilities'] = dict(capabilities=['lua-test','python-test','repository-suite'], max_checks=6, note='Choose a committed test path. Commands, arguments, networking and writes to original source are unavailable.')
                     result['reproduction_observations'] = [{k:v for k,v in observed.items() if k != 'evidence_root'} for observed in packet.get('reproductions', [])]
         added=packet.get('inspection_windows',[])[before:]

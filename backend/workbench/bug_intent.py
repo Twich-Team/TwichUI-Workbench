@@ -84,6 +84,10 @@ class Response(Data):
             raise PydanticCustomError('incomplete_finding','Summarize the finding in complete sentences within 800 characters.')
         if self.plan and len(self.plan.scope)>=795 and self.plan.scope[-1] not in '.!?':
             raise PydanticCustomError('incomplete_scope','Summarize the repair scope in complete sentences within 800 characters; do not copy the entire report.')
+        if self.plan and self.plan.repair_profile and self.plan.repair_profile.kind in {'existing-failure','missing-regression'}:
+            if not any(p.startswith(('!!!TwichUI/','TwichUI_Settings/','tools/')) for p in self.plan.writable_paths):
+                raise PydanticCustomError('repair_profile_scope',
+                    'Production repair profiles require relevant production changes. For an independently justified test-only correction, select test-correction. Do not add unrelated production files.')
         return self
 
 

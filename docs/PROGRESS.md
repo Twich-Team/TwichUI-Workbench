@@ -1,3 +1,53 @@
+# Autonomous Bug Reports — first live classification gap, November 13, 2026 Mountain Time
+
+Following the Project Working Philosophy: installed dbf0120 completed full local/
+hosted acceptance and installed health/restart/restore/security/resources/retention
+proof, but has NOT delivered a new routine repair end to end. First real report:
+7d64ae05-774a-4031-85bb-5d9543799bed, submitted05:04:53UTC November14. Frozen
+Codex gpt-6.1-sol/high single-stage Smart strategy, included/native access and automatic
+waiting; global model preferences unchanged. One routine setting was enabled through
+ordinary UI. The intake request used the ordinary API in that browser, no fake human
+plan/run approvals. Policy applied scope approval and normal decomposition automatically.
+
+Five genuine Codex requests completed with exact reported model/accounting:110304prompt,
+1980completion,758reasoning (included in completion),112284total tokens. High effort
+was requested; effort was not separately reported. Native model chose existing-failure
+with only tests/test_reminder_gallery.py writable; generator remained read-only. This
+profile preserves the entire original failing test and requires production changes,
+so the scope cannot qualify. Existing Python scope validation mistakenly bypassed
+that coherence rule. Preparation captured original evidence and produced an offer,
+but an ordinary task Pause prevented execution. No new grants, requests, addon edits
+or PRs:consequential counts remain50grants/50requests/4publications. All requests settled.
+
+One engineering repair/intervention is now required; do not report zero-repair success.
+The first scope/decision/offer and history remain unchanged and the report stays paused.
+Current supported investigation renewal refuses already approved tasks. Do not rewrite
+its intent/profile or fabricate approval to get past that boundary. Use a fresh
+acceptance report after the correction; the existing failed engineering attempt stays
+visible. This is separate from the mandatory same-task wait/resume case, already
+covered by controlled tests; do not claim this paused report resumed successfully.
+
+Narrow correction: only FRESH BugIntentResponse rejects existing-failure or missing-
+regression with no production write path. Its deterministic model feedback explains
+test-correction and forbids adding unrelated production files. Saved Plan/Intent
+bindings remain readable. Fresh outgoing guidance explains each class without changing
+saved verification requirements. Independent programs now receive their actual tests/
+working directory and read-only repository/temporary artifact context. Existing Runtime,
+independent evidence/negative controls, permissions and all verification gates unchanged.
+Focused162passed/one conditional skip; actual confinement profiles12passed with simulated
+providers. Static checks passed; final full exact-source release verification pending.
+
+Installed source stilldbf0120; reporting HEADc7504d1, narrow source edits uncommitted.
+Private first-live-case-profile-gap.json and python-engineering-pause.json retain facts.
+Do not use old73b as immediate rollback for the next release: current live store includes
+the new report, policy and pause. Stage from current dbf, copy/preserve ALL current rows,
+retain dbf as immediate rollback and all inherited required rollback/source evidence.
+Private next installer configure flag addition must be idempotent because dbf already
+has routine_repair_profiles_v2=True. Continue corrected release acceptance and native
+delivery; no new orchestration subsystem or owner approval is required for this repair.
+
+---
+
 # Autonomous Bug Reports — installed release, November 13, 2026 Mountain Time
 
 Following the Project Working Philosophy: build dbf012005cc55987507cac0242f3e034145210e2

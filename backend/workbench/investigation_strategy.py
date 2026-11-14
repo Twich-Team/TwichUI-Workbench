@@ -90,6 +90,9 @@ def correction(error):
             elif issue['type'] in {'incomplete_finding','incomplete_scope'}:
                 issues.append(dict(path=['finding'] if issue['type']=='incomplete_finding' else ['plan','scope'],
                     constraint=issue['type'],rule='Use complete concise sentences within 800 characters. Summarize the request instead of copying it; retain material facts, uncertainty and limits.'))
+            elif issue['type']=='repair_profile_scope':
+                issues.append(dict(path=['plan','repair_profile'],constraint='repair_profile_scope',
+                    rule='existing-failure and missing-regression repair production behavior and preserve trustworthy assertions. A test-only correction needs test-correction, independent original behavior and meaningful negative controls. Do not add unrelated production files.'))
             else:
                 issues.append(dict(path=path,constraint=issue['type']))
     elif isinstance(error,ResponseValidationError):
