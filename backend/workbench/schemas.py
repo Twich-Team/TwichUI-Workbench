@@ -651,6 +651,8 @@ class ExecutionContinuationView(StrictModel):
 
 
 class StoredProposalDecisionPayload(ProposalDecisionInput):
+    action: Literal['approve','changes','decline','authorize-operation']
+    policy_operation: dict | None = Field(default=None, exclude_if=lambda value:value is None)
     policy_authorization: PolicyAttribution | None = Field(default=None, exclude_if=lambda value: value is None)
     feature_browser_command: FeatureRunInput | None = Field(default=None, exclude_if=lambda value: value is None)
     feature_run: FeatureRunPermission | None = Field(default=None, exclude_if=lambda value: value is None)
@@ -881,6 +883,7 @@ class TaskHistory(StrictModel):
 
 
 class IntakeView(StrictModel):
+    routine_bug_authorized: bool | None = Field(default=None,exclude_if=lambda value:value is None)
     start_now_binding: str | None = Field(default=None,exclude_if=lambda value:value is None)
     archived_at: str | None = Field(default=None, exclude_if=lambda value: value is None)
     task_history: TaskHistory | None = Field(default=None, exclude_if=lambda value: value is None)

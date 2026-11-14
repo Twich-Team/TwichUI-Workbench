@@ -245,10 +245,13 @@ def prerequisite_reason(c, linked, feature_input=None):
     return None
 
 
-def validate(c, grant, prerequisites=True):
+def validate(c, grant, prerequisites=True, *, ongoing=False):
     linked = grant["snapshot"].get("workflow_task")
     if linked is None:
         return  # Legacy real grants keep their existing meaning.
+    from workbench.work_controls import task_paused
+    if not ongoing and task_paused(c,linked['intake_id']):
+        raise Waiting('This task is paused. Resume it before starting another operation.')
     if not current(c, linked):
         raise Waiting("The task, plan approval or scope mapping changed. Execution is held.")
     if grant['snapshot'].get('operation_kind')=='feature-verification-v1':
@@ -258,12 +261,19 @@ def validate(c, grant, prerequisites=True):
         except (ValueError,OSError,HTTPException,KeyError,TypeError):
             raise Waiting('The exact combined feature check authority or source changed.') from None
         return
+    if grant['snapshot'].get('policy_operation'):
+        from workbench.bug_authority import validate_operation
+        try:
+            validate_operation(c,grant,admitting=not ongoing)
+        except (ValueError,OSError,HTTPException,KeyError):
+            raise Waiting('The fresh policy operation, source or owner permission changed.') from None
+        return
     if grant["snapshot"].get("task_budget"):
         from workbench.task_budget import permission
 
         try:
             actual = permission(c, require(c, proposal_decisions, linked["approval"]["id"]),
-                task_id=linked['task']['id'], offer_id=grant['snapshot']['task_budget']['offer']['id'])
+                task_id=linked['task']['id'], offer_id=grant['snapshot']['task_budget']['offer']['id'],ongoing=ongoing)
         except ValueError, HTTPException:
             raise Waiting("The explicit task budget expired or changed.") from None
         if actual != grant["snapshot"]["task_budget"]:

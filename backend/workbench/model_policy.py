@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 from typing import Literal
+from uuid import UUID
 
 from fastapi import HTTPException
 from pydantic import Field, field_validator, model_validator
@@ -36,6 +37,8 @@ class BackendPreference(StrictModel):
 
 
 class ExecutionPolicy(StrictModel):
+    next_task: UUID | None = Field(default=None,exclude_if=lambda value:value is None)
+    task_pauses: dict[UUID, Literal[True]] | None = Field(default=None, max_length=1000, exclude_if=lambda value:not value)
     routine_bugs: RoutineBugPolicy | None = Field(default=None, exclude_if=lambda value: value is None)
     strategy: Strategy | None = Field(default=None, exclude_if=lambda value:value is None)
     revision: int = Field(default=0, ge=0)
@@ -209,7 +212,7 @@ def save(engine, body, report):
         current = read_connection(connection)
         # Model edits preserve the work control. Only its dedicated endpoint
         # changes admission, including for older clients that omit this field.
-        body = body.model_copy(update={'pause_new_work': current.pause_new_work, 'routine_bugs': current.routine_bugs})
+        body = body.model_copy(update={'pause_new_work': current.pause_new_work, 'routine_bugs': current.routine_bugs, 'task_pauses':current.task_pauses, 'next_task':current.next_task})
         values = body.model_dump()
         if body.revision == current.revision - 1 and {**values, 'revision': current.revision} == current.model_dump():
             return current

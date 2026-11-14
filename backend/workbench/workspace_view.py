@@ -158,6 +158,7 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
         links = ownership_links(c)
         from workbench.task_cleanup import lifecycle
         organization = lifecycle(c)
+        task_pauses={str(k) for k in (read_connection(c).task_pauses or {})}
     rows = []
     for original in originals:
         preparation_message = None
@@ -235,7 +236,7 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
                       *[d['finished_at'] or d['created_at'] for d in current_choices],
                       *[p['finished_at'] or p['started_at'] for p in providers[identity]]]
         task_kind = body.get('requested_work') or ('coverage' if body.get('regression_tests') else 'bug' if body['kind']=='issue' else 'feature')
-        if work_paused and phase == 'queued':
+        if (work_paused or identity in task_pauses) and phase == 'queued':
             phase = 'paused'
         label, message = LABELS[phase]
         if fresh_run_decision:
@@ -279,6 +280,22 @@ def listing(engine, *, page=1, search='', state='all', kind='all', page_size=12,
             if name and recent['outcome']=='running':
                 ai_status=('Using '+name+' fallback' if 'fallback strategy stage' in recent['routing_reason'] else 'Working with '+name)
                 ai_reason=recent['routing_reason']
+        covered=any(j['payload'].get('routine_bug_authority') for j in current_jobs)
+        if covered and not ai_status:
+            if phase in {'understanding','queued','preparing','decision_pending','needs_approval'}:
+                if phase=='needs_approval' and not fresh_run_decision:
+                    phase='queued'
+                label='Investigating' if phase=='understanding' else 'Preparing the repair'
+                message='Workbench is investigating the report and preparing bounded repair work under your saved routine bug setting.'
+            elif phase=='working':
+                label='Fixing'
+            elif phase in {'checking','cleanup'}:
+                label='Verifying'
+            elif phase=='completed' and result_kind=='patch':
+                label='Ready for review'
+                message='Fix verified — draft PR created.' if draft_pr_submitted else 'Fix verified. Draft delivery is pending its separate publication policy.'
+        if identity in task_pauses and phase not in ACTIVE and phase not in {'completed','failed','stopped','interrupted'}:
+            phase,label,message='paused',*LABELS['paused']
         from workbench.intake import priority as task_priority
         priority = task_priority(original)
         rows.append(dict(ai_status=ai_status,ai_reason=ai_reason,ai_recheck_at=ai_recheck_at,ai_reset_at=ai_reset_at,description=body.get('description',''), priority=priority['priority'], priority_manual=priority['manual'], id=identity, title=body['title'], kind=task_kind, state=phase, stage=label, message=message,

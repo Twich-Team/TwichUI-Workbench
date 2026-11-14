@@ -322,3 +322,47 @@ test('an unapproved bug plan can request read-only refinement without a plan or 
   await expect(page.getByRole('button',{name:'Refine this plan',exact:true})).toHaveCount(0);
   expect(sent).toBe(1);expect(state.decisions).toHaveLength(0);expect(state.tasks).toHaveLength(0);
 });
+
+test('task priority and pause persist across reload at desktop phone and enlarged text',async({page},info)=>{
+  fixture('reset');
+  await page.goto('/intake/new?kind=issue');
+  await page.getByLabel('Title Optional').fill('Saved routine bug control example');
+  await page.getByLabel('Description',{exact:true}).fill('The saved report needs investigation. This interface check does not claim a completed repair.');
+  await page.getByRole('button',{name:'Submit request',exact:true}).click();
+  await expect(page).toHaveURL(/\/intake\/[a-f0-9-]{36}/);
+  await page.getByRole('button',{name:'Work on this next',exact:true}).click();
+  await expect(page.getByText('This task will take priority for its next eligible operation.',{exact:false})).toBeVisible();
+  await page.getByRole('button',{name:'Pause this task',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Resume this task',exact:true})).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('button',{name:'Resume this task',exact:true})).toBeVisible();
+  for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
+    await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+    await overflow(page);await capture(page,info,`bug-task-controls-${width}-${font}`,{keepInCompact:true});
+  }
+  await page.getByRole('button',{name:'Resume this task',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Pause this task',exact:true})).toBeVisible();
+});
+
+test('controlled routine journey keeps a paused report distinct from a verified repair',async({page},info)=>{
+  fixture('reset');
+  // Presentation-only policy flag; all task controls and saved states use the
+  // ordinary API. This is not evidence of model execution or publication.
+  await page.route(/\/api\/intake\/[a-f0-9-]{36}$/,async route=>{
+    const response=await route.fetch();const value=await response.json();
+    await route.fulfill({response,json:{...value,routine_bug_authorized:true}});
+  });
+  await page.goto('/intake/new?kind=issue');
+  await page.getByLabel('Title Optional').fill('Automatic bug journey example');
+  await page.getByLabel('Description',{exact:true}).fill('Investigate the saved symptom and preserve the difference between a plan and a verified repair.');
+  await page.getByRole('button',{name:'Submit request',exact:true}).click();
+  const journey=page.getByRole('region',{name:'Task progress',exact:true});
+  await expect(journey.locator('ol li')).toHaveText(['1Investigating','2Fixing','3Verifying','4Ready for review']);
+  await page.getByRole('button',{name:'Pause this task',exact:true}).click();
+  await expect(journey.getByRole('status')).toHaveText('Paused');
+  await expect(journey.getByText('Fix verified',{exact:false})).toHaveCount(0);
+  for(const [width,height,font] of [[1440,1000,16],[390,844,16],[320,700,32]]){
+    await page.setViewportSize({width,height});await page.evaluate(size=>document.documentElement.style.fontSize=size+'px',font);
+    await overflow(page);await capture(page,info,`routine-journey-${width}-${font}`,{keepInCompact:true});
+  }
+});

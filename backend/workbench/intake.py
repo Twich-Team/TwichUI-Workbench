@@ -340,7 +340,7 @@ def view_in(connection, identity):
     from workbench.task_cleanup import group, lifecycle
     cleanup_root, _, _ = group(connection, identity)
     archived_at = (lifecycle(connection).get(cleanup_root) or {}).get('archived_at')
-    return dict(**({'archived_at':archived_at} if archived_at else {}),task_history=history(connection, identity), **({'local_model':local_model} if local_model else {}),**({'scope_recovery':recovery} if recovery else {}),project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
+    return dict(routine_bug_authorized=True if any(j['payload'].get('routine_bug_authority') for j in jobs) else None,**({'archived_at':archived_at} if archived_at else {}),task_history=history(connection, identity), **({'local_model':local_model} if local_model else {}),**({'scope_recovery':recovery} if recovery else {}),project_source=refresh_view(row,jobs,has_authority=has_authority),planning_resume_binding=resume_binding(connection,row,latest) if latest else None,
         start_now_binding=__import__('workbench.manual_ai',fromlist=['offer']).offer(connection,row),
         planning_start_binding=digest(row['payload']) if configured_mode()=='everyday' and row['payload']['kind']=='issue' and not row['payload'].get('local_planning') and not row['payload'].get('supported_task') and row['status'] in {'failed','waiting_for_information'} else None,
         provider_activity=[dict(attempt) for attempt in activity], human_scope=human_scope(connection, identity), scope_history=scope_history(connection, identity), id=identity, original=row['payload'], status='failed' if retained else row['status'], revision=row['revision'],

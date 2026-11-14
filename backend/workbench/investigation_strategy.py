@@ -126,3 +126,13 @@ def rejection_signature(raw,facts):
             signatures.append(dict(constraint=error['constraint'],values=values))
         return digest(signatures)
     return digest(dict(raw=raw,facts=facts))
+
+
+def suitable_local(packet, original):
+    """Conservative source evidence for small Lua investigations, not a default."""
+    files=packet.get('files',[])
+    paths={f['path'] for f in files}
+    named=[p for p in paths if p in original.get('description','')]
+    return (1<=len(named)<=2 and all(p.endswith('.lua') for p in named)
+        and len(files)<=3 and all(f.get('file_lines',10000)<=180 for f in files)
+        and any(p.startswith('tests/test_') for p in named))

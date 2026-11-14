@@ -13,7 +13,9 @@ def due():
 
 def options(job,*,suitable_local=False,reviewed_local=False):
     return dict(suitable_local=suitable_local,reviewed_local=reviewed_local,
-                waiting_since=job['payload'].get('ai_wait_since',{}))
+                waiting_since=job['payload'].get('ai_wait_since',{}),
+                failures=job['payload'].get('ai_failures',job['payload'].get('diagnostics',{}).get('ai_failures',{})),
+                settled_failures=job['payload'].get('ai_settled_failures',job['payload'].get('diagnostics',{}).get('ai_settled_failures',[])))
 
 
 def waiting_payload(payload,decision):
@@ -31,7 +33,9 @@ def preflight(engine,job,route,stop=lambda:False,**suitability):
     if not route.get('strategy'):
         return False
     try:
-        decision=choose(route,stop,**options(job,**suitability)).model_dump()
+        eligibility=options(job,**suitability)
+        eligibility.pop('settled_failures',None)
+        decision=choose(route,stop,**eligibility).model_dump()
     except Waiting as error:
         with write_transaction(engine) as c:
             current=intake.require(c,planning_jobs,job['id'])
@@ -86,6 +90,7 @@ def pause(c,job,original,adapter,decision,*,active_seconds=0):
         claim=job['payload'].get('scenario_generation_claim') or job['payload'].get('feature_generation_claim'),
         active_seconds=max(0,active_seconds)))
     payload=waiting_payload(job['payload'],decision)
+    payload.update(ai_failures=facts.get('ai_failures',{}),ai_settled_failures=facts.get('ai_settled_failures',[]))
     payload.update(ai_resumed_phases=previous)
     retained=getattr(adapter,'inspection_packet',None)
     if retained:

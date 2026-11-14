@@ -245,8 +245,22 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
         route=provider_routes.run_selection(c,linked)
         local=everyday.local_selection(c) if not route else None
     intent=reviewed['bug_intent']
+    retained=job['payload'].get('independent_program_resume')
+    prefix=None
+    if retained:
+        from workbench.repair_continuation import private_json
+        path=Path(retained['path'])
+        if path.parent!=root or sha(path.read_bytes())!=retained['sha256']:
+            raise ValueError('Independent preparation prefix changed')
+        prefix=private_json(path)
+        if prefix['intent_digest']!=intent['review_digest'] or prefix['base']!=intent['base']:
+            raise ValueError('Independent preparation source changed')
+        with engine.connect() as c:
+            prior=intake.require(c,model_attempts,prefix['attempt'])
+        if prior['outcome']!='waiting' or prior['usage']['status'] not in {'complete','not_started'}:
+            raise ValueError('Independent preparation has not settled')
     operation=str(uuid4())
-    claim=root/'independent-program-claim.json'
+    claim=root/('independent-program-claim-'+operation+'.json' if prefix else 'independent-program-claim.json')
     if claim.exists():
         raise ValueError('Independent preparation already has a durable claim; no replay')
     durable(claim,json.dumps(dict(id=operation,source_basis='original-only',base=intent['base'],intent_digest=intent['review_digest'])).encode())
@@ -256,9 +270,10 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
     adapter=adapter or (provider_routes.external_planner(route,stopped) if route else LocalProvider(stop_event,ends_at=time.monotonic()+600))
     model=route['model'] if route else local.model
     if callable(getattr(adapter,'bind_operation',None)):
-        adapter.bind_operation(engine,operation,suitable_local=False)
+        adapter.bind_operation(engine,operation,**__import__('workbench.strategy_waiting',fromlist=['options']).options(job,suitable_local=False))
+    selected_source={**packet,'files':[f for f in packet['files'] if f['path'] in intent['plan']['read_paths']]}
     if callable(getattr(adapter,'bind_source',None)):
-        adapter.bind_source(packet)
+        adapter.bind_source(selected_source)
     with write_transaction(engine) as c:
         current=intake.require(c,planning_jobs,job['id'])
         c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload={**current['payload'],
@@ -268,7 +283,8 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
             requested_effort=route.get('effort') if route else None,policy_revision=route['policy_revision'] if route else local.policy_revision,
             outcome='running',started_at=intake.now(),routing_reason='Original-only independent repair evidence before any implementation.'))
     wire=dict(purpose='original-only independent behavior checks',original=linked['original'],intent=intent,
-        files=[f for f in packet['files'] if f['path'] in intent['plan']['read_paths']],
+        files=selected_source['files'],
+        inspection_windows=[w for w in packet.get('inspection_windows',[]) if w['path'] in intent['plan']['read_paths']],
         instructions=('Design a bounded '+('Python' if intent['plan']['focused_test'].endswith('.py') else 'Lua')+
             ' assertion body from the original report, requirements and committed source only. No candidate exists. '
             'Observe actual behavior, not source text, hashes, test-runner flags or self-assigned expected state. '
@@ -277,8 +293,11 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
             'For test-correction cite exact report text or a committed requirement comment for every criterion in evidence (criterion,kind,path,quote). Do not cite the assertion being corrected or candidate behavior. Independently prove original production behavior is correct; provide one small exact '
             'negative_control replacement in a read-only production dependency that both this program and a corrected test must reject. '
             'Do not weaken an assertion merely because it fails. Artifact contracts must follow original committed requirements.'))
+    prefix_usage=list(prefix.get('usage',[])) if prefix else []
     usage=[]
     issued=0
+    program=IndependentProgram.model_validate(prefix['program']) if prefix and prefix.get('program') else None
+    actual=model
     evidence=None
     failure=None
     try:
@@ -286,15 +305,16 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
         adapter.response_evidence=evidence
         with engine.connect() as c:
             validate_behavior(c,linked['proposal_review'],linked['approval']['payload'])
-        issued+=1
-        raw,actual,basis=adapter.generate(wire,IndependentProgram,expected_model=model)
-        usage.append(copy.deepcopy(adapter.diagnostics.get('usage')))
-        program=IndependentProgram.model_validate(raw)
-        from workbench.repair_profiles import validate_requirement_evidence
-        validate_requirement_evidence(program,intent,linked['original'])
-        if evidence:
-            evidence.snapshot('original-only-program',program.model_dump())
-            evidence.close()
+        if program is None:
+            issued+=1
+            raw,actual,basis=adapter.generate(wire,IndependentProgram,expected_model=model)
+            usage.append(copy.deepcopy(adapter.diagnostics.get('usage')))
+            program=IndependentProgram.model_validate(raw)
+            from workbench.repair_profiles import validate_requirement_evidence
+            validate_requirement_evidence(program,intent,linked['original'])
+            if evidence:
+                evidence.snapshot('original-only-program',program.model_dump())
+                evidence.close()
         review_id=str(uuid4())
         review_wire={**wire,'purpose':'review original-only independent behavior checks','proposed_check':program.model_dump(),
             'review_instructions':'Check semantic coverage against every original criterion, independence from candidate code, meaningful assertions and negative controls. Refuse source-text matching, constant/vacuous checks and unsupported expected behavior.'}
@@ -303,7 +323,7 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
         with engine.connect() as c:
             validate_behavior(c,linked['proposal_review'],linked['approval']['payload'])
         issued+=1
-        checked,_,_=adapter.generate(review_wire,ProfileProgramReview,expected_model=model)
+        checked,actual,_=adapter.generate(review_wire,ProfileProgramReview,expected_model=model)
         usage.append(copy.deepcopy(adapter.diagnostics.get('usage')))
         review=ProfileProgramReview.model_validate(checked)
         if not review.ready or set(review.covered_criteria)!={v['id'] for v in intent['plan']['criteria']} or set(program.criteria)!=set(review.covered_criteria):
@@ -318,7 +338,8 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
             c.execute(model_attempts.update().where(model_attempts.c.id==operation).values(outcome='completed',actual_model=actual,
                 usage=observed,finished_at=intake.now()))
         record=dict(version=2,model_attempt_id=operation,intent_digest=intent['review_digest'],source_basis='original-only',
-            source_base=intent['base'],program=program.model_dump(),review=review.model_dump())
+            source_base=intent['base'],program=program.model_dump(),review=review.model_dump(),
+            prior_settled_usage=prefix_usage)
         path=root/'independent-program.json'
         durable(path,json.dumps(record,sort_keys=True).encode())
         reference=dict(path=str(path),sha256=sha(path.read_bytes()))
@@ -329,6 +350,17 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
         return program.model_dump()
     except Exception as error:
         failure=error
+        from workbench.smart_provider import Waiting
+        if isinstance(error,Waiting) and adapter.diagnostics.get('generation_state')=='not_started':
+            path=root/('independent-program-prefix-'+operation+'.json')
+            durable(path,json.dumps(dict(intent_digest=intent['review_digest'],base=intent['base'],attempt=operation,
+                program=program.model_dump() if program else None,usage=[*prefix_usage,*usage]),sort_keys=True).encode())
+            with write_transaction(engine) as c:
+                current=intake.require(c,planning_jobs,job['id'])
+                from workbench.strategy_waiting import waiting_payload
+                payload=waiting_payload(current['payload'],error.decision)
+                payload['independent_program_resume']=dict(path=str(path),sha256=sha(path.read_bytes()))
+                c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload=payload))
         raise
     finally:
         if failure is not None:

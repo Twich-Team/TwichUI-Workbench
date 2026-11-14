@@ -316,13 +316,13 @@ def validate_selection(c, proposal_id, budget, *, admitting=False):
     return selected
 
 
-def permission(c, approval, *, require_current=True, admitting=False, task_id=None, offer_id=None):
+def permission(c, approval, *, require_current=True, admitting=False, task_id=None, offer_id=None, ongoing=False):
     if approval['payload'].get('feature_run'):
         from workbench.feature_steps import permission as feature_policy
         return feature_policy(c, approval, task_id, offer_id=offer_id, require_current=require_current)
     if require_current and approval['payload'].get('policy_authorization'):
         from workbench.bug_authority import validate
-        validate(c, approval['intake_id'], approval['snapshot'], approval['payload']['policy_authorization'])
+        validate(c, approval['intake_id'], approval['snapshot'], approval['payload']['policy_authorization'],admitting=not ongoing)
     raw = approval["payload"].get("run_budget")
     if not raw:
         return None

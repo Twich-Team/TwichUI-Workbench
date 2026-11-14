@@ -105,7 +105,7 @@ def queue_one(engine):
                     .as_boolean()
                     .is_(True),
                 )
-                .order_by(proposal_decisions.c.created_at, proposal_decisions.c.id)
+                .order_by(__import__('workbench.work_controls',fromlist=['priority_order']).priority_order(proposal_decisions.c.intake_id),proposal_decisions.c.created_at, proposal_decisions.c.id)
                 .limit(1)
             )
             .mappings()
@@ -417,12 +417,13 @@ def process_one(engine, stop_event=None, advance=None, *, resume_only=False):
             c.execute(
                 select(sessions)
                 .where(sessions.c.status.in_(ACTIVE - {"pending"} if resume_only else ACTIVE))
+                .where(or_(sessions.c.status!='pending',operation.eligible(c,sessions.c.snapshot['task']['intake_id'].as_string())))
                 .where(or_(sessions.c.state['ai_wait']['recheck_at'].as_float().is_(None),sessions.c.state['ai_wait']['recheck_at'].as_float()<=__import__('time').time()))
                 .where(or_(sessions.c.state['feature_slot_state']['ai_wait']['recheck_at'].as_float().is_(None),sessions.c.state['feature_slot_state']['ai_wait']['recheck_at'].as_float()<=__import__('time').time()))
                 .where(or_(sessions.c.snapshot['feature_parent'].as_boolean().is_not(True),
                     and_(sessions.c.state['feature_slot'].as_string().is_not(None),
                         sessions.c.state['feature_slot_result'].as_string().is_(None))))
-                .order_by(sessions.c.created_at, sessions.c.id)
+                .order_by(__import__('workbench.work_controls',fromlist=['priority_order']).priority_order(sessions.c.snapshot['task']['intake_id'].as_string()),sessions.c.created_at, sessions.c.id)
                 .limit(1)
             )
             .mappings()

@@ -24,7 +24,7 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
         receipt = connection.execute(select(proposal_decisions).where(proposal_decisions.c.status == 'pending',
             proposal_decisions.c.payload['feature_run'].as_string().is_(None),
             *([proposal_decisions.c.id == command_id] if command_id else []))
-            .order_by(proposal_decisions.c.created_at, proposal_decisions.c.id).limit(1)).mappings().first()
+            .order_by(__import__('workbench.work_controls',fromlist=['priority_order']).priority_order(proposal_decisions.c.intake_id),proposal_decisions.c.created_at, proposal_decisions.c.id).limit(1)).mappings().first()
         if not receipt:
             return False
         operation.selected(proposal_decisions, receipt)
@@ -197,7 +197,7 @@ def claim(engine):
             .where(~((intakes.c.payload['kind'].as_string() == 'issue')
                 & intakes.c.payload['local_planning'].as_string().is_not(None)
                 & intakes.c.payload['supported_task'].as_string().is_(None)))
-            .order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
+            .order_by(__import__('workbench.work_controls',fromlist=['priority_order']).priority_order(planning_jobs.c.intake_id),planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not job:
             return None
         operation.selected(planning_jobs, job)

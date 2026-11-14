@@ -766,6 +766,11 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     stamp=rejection_signature(raw,facts)
                 else:
                     stamp = hashlib.sha256(json.dumps(dict(raw=raw, facts=facts), sort_keys=True).encode()).hexdigest()
+                fallback=getattr(adapter,'observe_settled_failure',None)
+                if fallback and index+1<requests and fallback('invalid-response'):
+                    wire['validation_feedback']=facts
+                    wire['strategy_update']='The previous model produced settled invalid replies. Continue from these retained source observations with the next authorized suitable choice.'
+                    continue
                 if (facts and index+1 < requests and stamp not in rejected
                         and diagnostics.get('generation_state') == 'finished'
                         and diagnostics.get('accounting_state') == 'complete'
@@ -869,6 +874,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 gained=max(0,source_characters(packet)-before_chars)
                 new_searches=len(packet.get('inspection_searches',[]))-before_searches
                 unchanged_streak=0 if gained or new_searches else unchanged_streak+1
+                if unchanged_streak>=2 and callable(getattr(adapter,'observe_settled_failure',None)):
+                    adapter.observe_settled_failure('no-progress')
                 wire['investigation_tool_progress']=dict(new_source_characters=gained,new_searches=new_searches,
                     no_new_information_streak=unchanged_streak,
                     next_strategy=('Use the returned source. If it supports a specific scope, propose it with explicit uncertainties.'

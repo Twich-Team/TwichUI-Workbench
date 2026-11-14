@@ -78,6 +78,13 @@ def request(engine, identity, binding):
     from workbench.work_controls import read as work_status
     if work_status(engine).paused:
         raise HTTPException(409, "New work is paused. Resume work before starting draft delivery.")
+    with engine.connect() as c:
+        linked=c.execute(sql_select(real_execution_grants.c.snapshot).join(real_execution_requests,real_execution_requests.c.grant_id==real_execution_grants.c.id).where(real_execution_requests.c.id==identity)).scalar_one().get('workflow_task')
+        if linked:
+            from workbench.worker_operation import eligible
+            from workbench.db import intakes
+            if not c.scalar(sql_select(intakes.c.id).where(intakes.c.id==linked['intake_id'],eligible(c,intakes.c.id))):
+                raise HTTPException(409,'This task is paused or its current authorization is unavailable. Checked work remains saved.')
     checked = publication.review_checked(engine, identity)
     if binding != checked["binding"]:
         raise HTTPException(409, "The checked draft changed. Reload it before submitting.")
@@ -114,10 +121,11 @@ def queue_automatic(engine):
     if not policy:
         return False
     with engine.connect() as c:
+        from workbench.worker_operation import eligible
         candidates = c.execute(sql_select(real_execution_requests.c.id)
             .join(real_execution_grants,real_execution_requests.c.grant_id==real_execution_grants.c.id)
             .outerjoin(real_publications, real_publications.c.execution_id == real_execution_requests.c.id)
-            .where(real_execution_requests.c.status == "checked",
+            .where(eligible(c,real_execution_grants.c.snapshot['workflow_task']['intake_id'].as_string()),real_execution_requests.c.status == "checked",
                    real_execution_grants.c.snapshot['task_budget']['feature_task_id'].as_string().is_(None),
                    real_execution_requests.c.finished_at >= policy["automatic_since"],
                    real_publications.c.id.is_(None))
@@ -134,7 +142,11 @@ def advance(engine, stop_event=None):
     if not configuration(engine):
         return False
     with engine.connect() as c:
+        from workbench.worker_operation import eligible
         identity = c.execute(sql_select(real_publications.c.execution_id)
+            .join(real_execution_requests,real_execution_requests.c.id==real_publications.c.execution_id)
+            .join(real_execution_grants,real_execution_grants.c.id==real_execution_requests.c.grant_id)
+            .where(eligible(c,real_execution_grants.c.snapshot['workflow_task']['intake_id'].as_string()))
             .where(real_publications.c.status.in_(publication.ACTIVE),
                    real_publications.c.snapshot["checked_approval"].as_string().is_not(None))
             .order_by(real_publications.c.created_at).limit(1)).scalar()

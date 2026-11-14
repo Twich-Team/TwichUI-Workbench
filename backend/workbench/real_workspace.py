@@ -74,6 +74,7 @@ def require_safe_check(result):
 
 
 class Runtime:
+    repair_profile_v2 = False
     def __init__(self, root, stop_event=None):
         if Path(root).is_symlink():
             raise ValueError('Symlink output root refused')
@@ -218,7 +219,7 @@ class Runtime:
         clean = (git(Path(self.source),'rev-parse','HEAD').strip()==self.base and
                  not git(Path(self.source),'status','--porcelain=v1','--ignored') and
                  git(self.workspace,'rev-parse','HEAD').strip()==self.base and
-                 tree(self.workspace)==json.loads(self.initial.read_text()))
+                 tree(self.workspace)==(getattr(self,'ai_resume',None) or {}).get('source_tree',json.loads(self.initial.read_text())))
         oracle = (self.root/'oracle.lua').read_bytes()==self.oracle_source.read_bytes()
         resources=baseline.get('usage',{})
         safe=(not any(resources.get(k) for k in ('oom_kill','pids_limit_hit','leaked_after_kill'))

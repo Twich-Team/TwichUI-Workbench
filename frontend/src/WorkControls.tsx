@@ -36,3 +36,33 @@ export function WorkControls(){
     {error&&<p role="alert">{error}</p>}
   </section>;
 }
+
+
+export function TaskControls({identity}:{identity:string}){
+  const client=useQueryClient();
+  const query=useQuery({queryKey:['task-work-control',identity],queryFn:()=>request<Control>(`/api/intake/${identity}/work-control`),refetchInterval:5000});
+  const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
+  async function change(next:boolean){
+    if(!query.data)return;
+    setBusy(true);setError('');
+    try{
+      if(next){
+        const saved=await mutate<{message:string}>(`/api/intake/${identity}/work-next`,{});
+        setMessage(saved.message);
+      }else{
+        const saved=await mutate<Control>(`/api/intake/${identity}/work-control`,{revision:query.data.revision,paused:!query.data.paused},'PUT');
+        client.setQueryData(['task-work-control',identity],saved);setMessage(saved.message);
+      }
+      await client.invalidateQueries({queryKey:['task-work-control',identity]});
+      await client.invalidateQueries({queryKey:['workspace']});
+      await client.invalidateQueries({queryKey:['task-journey',identity]});
+    }catch(e){setError(e instanceof Error?e.message:'The task setting could not be saved.');void query.refetch();}
+    finally{setBusy(false);}
+  }
+  return <section className="panel" aria-label="Task controls"><h2>Guide this task</h2>
+    <div className="task-control-buttons"><Button variant="secondary" disabled={busy||!query.data||query.isError} onClick={()=>void change(true)}>Work on this next</Button>
+      <Button variant="secondary" disabled={busy||!query.data||query.isError} onClick={()=>void change(false)}>{query.data?.paused?'Resume this task':'Pause this task'}</Button></div>
+    <p className="small-text">Priority applies when work is ready to start. Pausing keeps saved work and lets an active operation finish safely.</p>
+    {(message||query.data?.paused)&&<p role="status">{message||query.data?.message}</p>}{error&&<p role="alert">{error}</p>}
+  </section>;
+}

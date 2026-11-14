@@ -149,7 +149,7 @@ def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=
 
     owned(engine.url.database)
     root = owned(evidence_root)
-    if not root.is_dir() or any(root.iterdir()):
+    if not root.is_dir() or (any(root.iterdir()) and not (root/'independent-program-claim.json').is_file()):
         raise ValueError('A fresh empty owned preparation directory is required; retained evidence is never overwritten')
     with engine.connect() as c:
         linked=task_execution.snapshot(c,**ref)
@@ -479,7 +479,7 @@ def process_one(engine, *, stop_event=None):
     recovering = False
     with write_transaction(engine) as c:
         row = c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).where(planning_jobs.c.kind == 'behavioral_preparation',
-            planning_jobs.c.status.in_(['queued', 'running'])).order_by(planning_jobs.c.created_at).limit(1)).mappings().first()
+            planning_jobs.c.status.in_(['queued', 'running']),__import__('workbench.strategy_waiting',fromlist=['due']).due()).order_by(__import__('workbench.work_controls',fromlist=['priority_order']).priority_order(planning_jobs.c.intake_id),planning_jobs.c.created_at).limit(1)).mappings().first()
         if not row:
             return False
         operation.selected(planning_jobs, row)
@@ -520,7 +520,9 @@ def process_one(engine, *, stop_event=None):
                 if round_id is not None and str(UUID(round_id))!=round_id:
                     raise ValueError('Invalid preparation round identity')
                 root = Path(config['output_root']) / (job['id']+'-round-'+round_id if round_id else job['id'])
-                if root.exists():
+                if payload.get('independent_program_resume'):
+                    root=Path(payload['preparation_claim']['root'])
+                elif root.exists():
                     raise ValueError('Preparation output already exists without a journal claim; retained evidence requires inspection.')
                 claim = dict(root=str(root), owner=real_execution.owner_identity(), review_binding=binding,
                     policy_sha256=digest(config), identity=config['identity'])
@@ -531,7 +533,7 @@ def process_one(engine, *, stop_event=None):
             except (ValueError, OSError, HTTPException) as error:
                 result = _hold(error)
         if result is not None:
-            c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(status='completed' if result['status']=='prepared' else 'failed',
+            c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(status='completed' if result['status']=='prepared' else 'queued' if result['status']=='waiting' else 'failed',
                 payload={**payload, 'preparation_result':result}, finished_at=intake.now(), message=result['message']))
             return True
     result = _run_claim(engine, ref, claim, recovering, stop_event=stop_event)
@@ -539,7 +541,7 @@ def process_one(engine, *, stop_event=None):
         current = intake.require(c, planning_jobs, job['id'])
         if current['payload'].get('preparation_claim') != claim:
             raise ValueError('Preparation journal claim changed; retained output requires inspection')
-        c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(status='completed' if result['status']=='prepared' else 'failed',
+        c.execute(planning_jobs.update().where(planning_jobs.c.id == job['id']).values(status='completed' if result['status']=='prepared' else 'queued' if result['status']=='waiting' else 'failed',
             payload={**current['payload'], 'preparation_result':result}, finished_at=intake.now(), message=result['message']))
     # Existing diagnostic projection supplies specific browser holds, including
     # failures before Runtime could create its own outcome receipt.
@@ -565,7 +567,7 @@ def _run_claim(engine, ref, claim, reconciling, *, recovery=None, stop_event=Non
                 raise ValueError('Preparation was interrupted after its durable claim. Inspect retained evidence; automatic replay is denied.')
             selected = register(engine, ref, root, recovery_id=recovery['id'] if recovery else None)
         else:
-            root.mkdir(mode=0o700)
+            root.mkdir(mode=0o700,exist_ok=True)
             selected = prepare_regression(engine, ref, root, claim['identity'],
                                           validate_policy=validate_policy, recovery=recovery, stop_event=stop_event)
         from workbench import everyday
@@ -575,6 +577,8 @@ def _run_claim(engine, ref, claim, reconciling, *, recovery=None, stop_event=Non
             message += ' An owned scratch copy needs attention.'
         result = dict(status='prepared', message=message,
             offer_id=selected['id'], review_binding=claim['review_binding'], execution_authorized=False)
+    except __import__('workbench.smart_provider',fromlist=['Waiting']).Waiting as error:
+        result=dict(status='waiting',message=error.decision['reason']+' Independent checking progress is saved.',review_binding=claim['review_binding'],execution_authorized=False)
     except SubprocessError:
         result = dict(status='hold', message='A bounded preparation subprocess did not complete successfully. Inspect the retained preparation evidence; no checks will replay automatically.',
             review_binding=claim['review_binding'], execution_authorized=False)

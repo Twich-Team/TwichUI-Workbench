@@ -68,19 +68,56 @@ class Planner(codex.Planner):
         self.backend='smart'
         self.request_history=[]
 
-    def bind_operation(self,engine,parent,*,suitable_local=False,reviewed_local=False,waiting_since=None):
+    def bind_operation(self,engine,parent,*,suitable_local=False,reviewed_local=False,waiting_since=None,failures=None,settled_failures=None):
         self.engine,self.parent_attempt=engine,parent
-        self.options=dict(suitable_local=suitable_local,reviewed_local=reviewed_local,waiting_since=waiting_since or {})
+        self.options=dict(suitable_local=suitable_local,reviewed_local=reviewed_local,waiting_since=waiting_since or {},failures=dict(failures or {}))
+        self.settled_failures=list(settled_failures or [])
 
     def generate(self,packet,schema,*,expected_model=None):
         from workbench.planning_provider import LocalBeforeGeneration
-        for _ in self.frozen['strategy']['stages']:
-            try:
-                return self._generate_once(packet,schema,expected_model=expected_model)
-            except LocalBeforeGeneration:
-                self.options.setdefault('failures',{})[self.decision.stage_id]='unavailable'
-        raise Waiting(ai.Decision(state='waiting',reason='All configured AI options are currently unavailable.',
-            recheck_at=__import__('time').time()+300).model_dump())
+        try:
+            for _ in self.frozen['strategy']['stages']:
+                try:
+                    return self._generate_once(packet,schema,expected_model=expected_model)
+                except LocalBeforeGeneration:
+                    self.options.setdefault('failures',{})[self.decision.stage_id]='unavailable'
+                except codex.Hold as error:
+                    if error.started or error.reason not in {'unavailable','authentication','capacity'}:
+                        raise
+                    self.options.setdefault('failures',{})[self.decision.stage_id]={'capacity':'provider_limit'}.get(error.reason,error.reason)
+            raise Waiting(ai.Decision(state='waiting',reason='All configured AI options are currently unavailable.',
+                recheck_at=__import__('time').time()+300).model_dump())
+        finally:
+            self.diagnostics.update(ai_failures=dict(self.options.get('failures',{})),ai_settled_failures=list(getattr(self,'settled_failures',[])))
+
+    def observe_settled_failure(self,reason):
+        """Change model only after the shared receipt owner proves completion."""
+        if reason not in {'invalid-response','no-progress'} or not self.request_history or not self.response_evidence:
+            return False
+        from workbench.provider_receipts import request_state
+        from workbench.everyday import configuration
+        last=self.request_history[-1]
+        facts=self.diagnostics
+        usage=dict(status='complete',units='tokens',values=last['values'],requests_observed=1)
+        try:
+            settled=request_state(self.response_evidence.identifier,last['provider'],last['model'],last['model'],
+                'schema_validation',usage,facts,dict(source_writes=False,execution_dispatch=False,external_action_tools=False),
+                configuration(self.engine).evidence_roots,local_status='failed',local_finished=True,finished=True)
+        except (ValueError,OSError,KeyError,TypeError):
+            return False
+        if settled['provider_state']!='completed':
+            return False
+        observation=dict(stage_id=last['stage_id'],provider=last['provider'],model=last['model'],reason=reason,
+            evidence_id=self.response_evidence.identifier,provider_receipt=last.get('native_receipt'),settled=True)
+        if observation not in self.settled_failures:
+            self.settled_failures.append(observation)
+        self.response_evidence.record('strategy-settled-failure',**observation)
+        count=sum(f['stage_id']==last['stage_id'] for f in self.settled_failures)
+        if count<2:
+            return False
+        self.options.setdefault('failures',{})[last['stage_id']]='unsuitable'
+        self.diagnostics.update(ai_failures=dict(self.options['failures']),ai_settled_failures=list(self.settled_failures))
+        return True
 
     def _generate_once(self,packet,schema,*,expected_model=None):
         if self.engine is None or self.parent_attempt is None or self.response_evidence is None:
@@ -121,7 +158,11 @@ class Planner(codex.Planner):
             raise
         except (PlanningUnavailable,ValueError,OSError) as error:
             from workbench.planning_provider import LocalBeforeGeneration
-            self.record(identity,'not_started' if isinstance(error,LocalBeforeGeneration) else 'interrupted_unknown' if self.diagnostics.get('generation_state')=='uncertain' else 'failed',stage)
+            facts=self.diagnostics
+            if facts.get('generation_state')=='finished' and facts.get('accounting_state')=='complete' and isinstance(facts.get('usage',{}).get('values'),dict):
+                self.request_history.append(dict(provider=self.backend,stage_id=stage.id,model=stage.model,effort=stage.effort,
+                    evidence_id=self.response_evidence.identifier,native_receipt=facts.get('provider_receipt'),values=facts['usage']['values']))
+            self.record(identity,'not_started' if isinstance(error,LocalBeforeGeneration) or isinstance(error,codex.Hold) and not error.started else 'interrupted_unknown' if facts.get('generation_state')=='uncertain' else 'failed',stage)
             raise
 
     def reported_usage(self,counted):

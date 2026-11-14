@@ -41,7 +41,7 @@ def configured_fallback(saved, backend, conditions):
 
 def planning_binding(c, choice, settings=None, *, apply_strategy=True):
     saved = model_policy.read_connection(c)
-    if apply_strategy and saved.strategy and choice!='smart-strategy':
+    if apply_strategy and saved.strategy and choice not in {'smart-strategy','qwen-once'}:
         from workbench.schemas import TaskAISettings,TaskModelChoice
         explicit=TaskAISettings.model_validate(settings) if settings else None
         if 'fallback' in choice or explicit and explicit.fallback:
@@ -151,7 +151,7 @@ def approved(c, original):
         return receipt['route']
     from workbench.bug_authority import frozen, current
     if frozen(c, original['id']):
-        return current(c, original['id'])['route']
+        return current(c, original['id'],admitting=False)['route']
     if original['payload'].get('ai_settings'):
         # The server receipt freezes this task's exact primary and fallback.
         # Global edits cannot change an already authorized operation.

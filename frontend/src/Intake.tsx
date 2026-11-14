@@ -10,6 +10,7 @@ import { Admission } from './Admission';
 import { Implementation } from './Implementation';
 import { TaskExecution } from './TaskExecution';
 import { TaskJourney, TaskOverview } from './TaskOverview';
+import {TaskControls} from './WorkControls';
 import { TaskExample } from './TaskExample';
 import { minutes, providerOutcome } from './taskProgress';
 import { ExactRunLimits, RunLimits } from './RunLimits';
@@ -286,6 +287,7 @@ export function IntakeDetail() {
     </div>
     {data.status==='unavailable'?<section className="panel"><h2>Saved for later</h2><p>Your request is in the backlog. This kind of work is not executable yet. No model request, repair or publication has been authorized.</p></section>:<TaskJourney item={data}/>}
 
+    {!data.archived_at&&<TaskControls identity={data.id}/>}
     {query.isError && <p role="alert" className="form-error">Refresh failed. Showing the last saved record. Refresh before making a decision.</p>}
     {error && <p className="form-error" role="alert">{error}</p>}
     {data.start_now_binding&&<ManualAI binding={data.start_now_binding} blocked={blocked} start={body=>act('start-now',body)}/>}
@@ -353,8 +355,8 @@ export function IntakeDetail() {
       {data.result.related_ids.length>0 && <details><summary>Possibly related records</summary>{data.result.related_ids.map(id=><p key={id}><Link to={`/records/fixture/${id}`}>{id}</Link></p>)}</details>}
     </section>}
     {receipt && <section className="panel saved-plan-decision" aria-label="Latest plan decision">
-      <h2>{receipt.status==='pending'?'Saved · Pending application':receipt.scope_review_required||receipt.status==='stale'?'Review the current plan again':receipt.status==='applied'?({approve:'Plan approved',decline:'Plan declined',changes:'Changes requested'}[receipt.payload.action]):'Plan decision could not be applied'}</h2>
-      <p>{receipt.status==='pending'?'Workbench saved your choice and will check it before applying it.':receipt.scope_review_required||receipt.status==='stale'?'The earlier decision is saved. A changed plan needs a new review.':receipt.status==='applied'?({approve:sample?'Your choice was confirmed. No addon work is permitted.':receipt.payload.run_budget?'The plan and the separately selected run permission were recorded.':'Workbench confirmed the plan. The current work and any decisions you need to make are shown below.',decline:'Workbench closed this plan without approving the work.',changes:'Workbench saved your feedback for a revised plan.'}[receipt.payload.action]):receipt.message}</p>
+      <h2>{receipt.status==='pending'?'Saved · Pending application':receipt.scope_review_required||receipt.status==='stale'?'Review the current plan again':receipt.status==='applied'?({approve:receipt.payload.policy_authorization?'Authorized by your routine bug setting':'Plan approved',decline:'Plan declined',changes:'Changes requested','authorize-operation':'Fresh operation authorized'}[receipt.payload.action]):'Plan decision could not be applied'}</h2>
+      <p>{receipt.status==='pending'?'Workbench saved your choice and will check it before applying it.':receipt.scope_review_required||receipt.status==='stale'?'The earlier decision is saved. A changed plan needs a new review.':receipt.status==='applied'?({'authorize-operation':'Saved policy authority covers this bounded continuation; earlier permissions and usage remain recorded.',approve:receipt.payload.policy_authorization?'Workbench is using your saved automatic bug setting. Your current progress is shown below.':sample?'Your choice was confirmed. No addon work is permitted.':receipt.payload.run_budget?'The plan and the separately selected run permission were recorded.':'Workbench confirmed the plan. The current work and any decisions you need to make are shown below.',decline:'Workbench closed this plan without approving the work.',changes:'Workbench saved your feedback for a revised plan.'}[receipt.payload.action]):receipt.message}</p>
       {receipt.payload.note && <p>{receipt.payload.note}</p>}
     </section>}
     {currentTasks.map(t=>

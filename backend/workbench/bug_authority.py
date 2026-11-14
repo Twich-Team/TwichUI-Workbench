@@ -6,10 +6,14 @@ freeze authority. Current revocation/pause and exact source still gate admission
 from typing import Literal
 from uuid import UUID, uuid4, uuid5
 import re
+import json
+import hashlib
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
 from pydantic import Field
-from sqlalchemy import select
+from sqlalchemy import select, func, or_
 
 from workbench.db import execution_policies, intakes, planning_jobs, proposal_decisions, proposals, backlog_items, write_transaction
 from workbench.schemas import StrictModel, PolicyAttribution
@@ -97,18 +101,18 @@ def prepare_submission(engine, body):
 
 def frozen(c, identity):
     for payload in c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id == identity,
-            planning_jobs.c.kind == 'planning').order_by(planning_jobs.c.created_at, planning_jobs.c.id)).scalars():
+            planning_jobs.c.kind == 'planning').order_by(__import__('workbench.work_controls',fromlist=['priority_order']).priority_order(planning_jobs.c.intake_id),planning_jobs.c.created_at, planning_jobs.c.id)).scalars():
         if payload.get('routine_bug_authority'):
             return payload['routine_bug_authority']
     return None
 
 
-def current(c, identity):
+def current(c, identity, *, admitting=True):
     from workbench.model_policy import read_connection
     value = frozen(c, identity)
     saved = read_connection(c)
     if (not value or digest({k:v for k,v in value.items() if k != 'policy_sha256'}) != value['policy_sha256']
-            or not saved.routine_bugs or not saved.routine_bugs.enabled or saved.pause_new_work
+            or not saved.routine_bugs or not saved.routine_bugs.enabled or admitting and saved.pause_new_work
             or saved.routine_bugs.authorization_id != RoutineBugPolicy.model_validate(value['policy']).authorization_id):
         raise ValueError('Standing routine bug permission is paused, revoked or unavailable.')
     return value
@@ -126,8 +130,8 @@ def permitted_path(path):
         and not {'libs', 'lib', 'vendor', 'auth', 'security', 'credentials'} & {p.lower() for p in path.split('/')} )
 
 
-def validate(c, identity, review, proof, *, active=True):
-    value = current(c, identity) if active else frozen(c, identity)
+def validate(c, identity, review, proof, *, active=True, admitting=True):
+    value = current(c, identity, admitting=admitting) if active else frozen(c, identity)
     if not value or digest({k:v for k,v in value.items() if k != 'policy_sha256'}) != value['policy_sha256']:
         raise ValueError('The frozen routine bug policy receipt changed.')
     if proof != attribution(identity, value):
@@ -166,8 +170,11 @@ def process_one(engine):
     from workbench.schemas import TaskBudget
     with write_transaction(engine) as c:
         rows = c.execute(select(intakes).where(intakes.c.status.in_(['completed', 'tasks_ready']))
-            .order_by(intakes.c.created_at, intakes.c.id)).mappings().all()
+            .order_by(__import__('workbench.work_controls',fromlist=['priority_order']).priority_order(intakes.c.id),intakes.c.created_at, intakes.c.id)).mappings().all()
         for row in rows:
+            from workbench.worker_operation import eligible
+            if not c.scalar(select(intakes.c.id).where(intakes.c.id==row['id'],eligible(c,intakes.c.id))):
+                continue
             if not frozen(c, row['id']):
                 continue
             proposal = c.execute(select(proposals).where(proposals.c.intake_id == row['id'],
@@ -193,12 +200,17 @@ def process_one(engine):
             else:
                 parent = next((d for d in decisions if d['status'] == 'applied'
                     and d['payload'].get('policy_authorization') and not d['payload'].get('execution_continuation')), None)
-                if not parent or any(d['payload'].get('run_budget') for d in decisions):
+                if not parent:
+                    continue
+                operations=[d for d in decisions if d['payload'].get('run_budget') or d['payload'].get('policy_operation')]
+                if len(operations)>=authority['policy']['max_operations']:
                     continue
                 tasks = list(c.execute(select(backlog_items).where(backlog_items.c.proposal_id == proposal['id'],
                     backlog_items.c.kind == 'task')).mappings())
                 selected = task_budget.offer(c, proposal['id'])
                 if len(tasks) != 1 or not selected:
+                    continue
+                if operations and (not selected['snapshot'].get('repair_resume') or any(d['payload'].get('run_budget',{}).get('offer_id')==selected['id'] for d in decisions)):
                     continue
                 ref = dict(intake_id=row['id'], task_id=tasks[0]['id'], approval_id=parent['id'])
                 linked = task_execution.snapshot(c, **ref)
@@ -206,6 +218,8 @@ def process_one(engine):
                     continue
                 budget = TaskBudget(offer_id=selected['id'], offer_fingerprint=selected['fingerprint'], activate_once=True)
                 task_budget.validate_selection(c, proposal['id'], budget, admitting=True)
+                from workbench.repair_continuation import freeze
+                freeze(c,selected)
                 identity = str(uuid5(UUID(row['id']), 'routine-run:' + selected['fingerprint']))
                 continuation = dict(scope_approval_id=parent['id'], scope_binding=parent['binding'], owner_provenance=proof)
                 binding = digest(dict(execution_continuation=continuation, run_budget=budget.model_dump(mode='json')))
@@ -222,3 +236,106 @@ def process_one(engine):
                 message='Authorized under the saved routine bug policy; waiting for validation.', created_at=now(), finished_at=None))
             return True
     return False
+
+
+def validate_operation(c, grant, *, admitting=True):
+    """A fresh policy operation never makes its expired predecessor valid."""
+    from workbench.db import real_execution_requests as requests, real_execution_grants as grants, task_sessions
+    from workbench import task_budget
+    value=grant['snapshot']['policy_operation']
+    receipt=c.execute(select(proposal_decisions).where(proposal_decisions.c.id==value['decision_id'])).mappings().one()
+    operation={k:v for k,v in value.items() if k not in {'decision_id','binding'}}
+    linked=grant['snapshot']['workflow_task']
+    if (receipt['status']!='applied' or receipt['payload']['action']!='authorize-operation'
+            or receipt['binding']!=value['binding'] or digest(operation)!=value['binding']
+            or receipt['payload']['policy_operation']!=operation or receipt['snapshot']!=linked['proposal_review']):
+        raise ValueError('The policy operation record changed')
+    validate(c,linked['intake_id'],linked['proposal_review'],receipt['payload']['policy_authorization'],admitting=admitting)
+    row=c.execute(select(requests).where(requests.c.id==operation['request_id'])).mappings().one()
+    prior=c.execute(select(grants).where(grants.c.id==operation['previous_grant_id'])).mappings().one()
+    session=c.execute(select(task_sessions).where(task_sessions.c.id==linked['approval']['id'])).mappings().one()
+    if (row['grant_id']!=grant['id'] or row['fence']!=operation['fence']
+            or session['state'].get('cancel_requested') or session['status'] in {'cancelled','expired'}
+            or prior['binding']!=operation['previous_binding']
+            or grant['snapshot']['runtime']!=prior['snapshot']['runtime']
+            or grant['snapshot']['workflow_task']!=prior['snapshot']['workflow_task']
+            or grant['snapshot']['task_budget']!=prior['snapshot']['task_budget']
+            or grant['expires_at']!=operation['expires_at']):
+        raise ValueError('Policy operation source, task, grant or owner stop changed')
+    from workbench.real_workspace import sha
+    from workbench.provider_admission import read as private_read
+    checkpoint=private_read(Path(operation['checkpoint_path']),None)
+    if (sha(Path(operation['checkpoint_path']).read_bytes())!=operation['checkpoint_sha256']
+            or checkpoint['dispatch']!='not_started' or checkpoint['execution_id']!=row['id']
+            or checkpoint['fence']!=row['fence']):
+        raise ValueError('The settled coding checkpoint changed')
+    # The old explicit budget remains historical. Its counters and offer are
+    # unchanged; this operation's separately recorded grant owns new admission.
+    original_approval=c.execute(select(proposal_decisions).where(proposal_decisions.c.id==linked['approval']['id'])).mappings().one()
+    actual=task_budget.permission(c,original_approval,require_current=False)
+    if actual!=grant['snapshot']['task_budget']:
+        raise ValueError('Original budget or spent accounting changed')
+    from workbench.schemas import TaskBudget
+    task_budget.validate_selection(c,linked['task']['proposal_id'],TaskBudget.model_validate(actual['budget']),admitting=admitting)
+    return operation
+
+
+def renew_wait(engine, row, grant, runtime):
+    """Reauthorize only a saved nondispatched suffix; never reset a coding run."""
+    import copy
+    from workbench import real_execution as execution, task_execution
+    from workbench.smart_coding_wait import load
+    from workbench.db import real_execution_grants as grants, real_execution_requests as requests, task_sessions
+    if not grant['snapshot'].get('runtime',{}).get('codex_selection',{}).get('strategy'):
+        raise ValueError('Only a frozen Smart coding wait can renew through this ingress')
+    checkpoint=load(runtime,row,grant)
+    if execution.alive(row['result']['owner']) or grant['revoked_at']:
+        raise ValueError('An active or withdrawn operation cannot be renewed')
+    with write_transaction(engine) as c:
+        current_row=c.execute(select(requests).where(requests.c.id==row['id'])).mappings().one()
+        if current_row['status']!='waiting_ai' or current_row['fence']!=row['fence'] or current_row['result']!=row['result']:
+            raise ValueError('The waiting operation changed before renewal')
+        if current_row['grant_id']!=grant['id']:
+            existing=c.execute(select(grants).where(grants.c.id==current_row['grant_id'])).mappings().one()
+            validate_operation(c,existing)
+            return dict(existing)
+        linked=grant['snapshot']['workflow_task']
+        authority=current(c,linked['intake_id'])
+        proof=attribution(linked['intake_id'],authority)
+        validate(c,linked['intake_id'],linked['proposal_review'],proof)
+        if not task_execution.current(c,linked):
+            raise ValueError('The original scope changed while waiting')
+        session=c.execute(select(task_sessions).where(task_sessions.c.id==linked['approval']['id'])).mappings().one()
+        if session['state'].get('cancel_requested') or session['status'] in {'cancelled','expired'}:
+            raise ValueError('The owner stopped this task')
+        from workbench import task_budget
+        from workbench.schemas import TaskBudget
+        original_approval=c.execute(select(proposal_decisions).where(proposal_decisions.c.id==linked['approval']['id'])).mappings().one()
+        budget=task_budget.permission(c,original_approval,require_current=False)
+        task_budget.validate_selection(c,linked['task']['proposal_id'],TaskBudget.model_validate(budget['budget']),admitting=True)
+        issued=datetime.now(timezone.utc)
+        end=issued+timedelta(seconds=2400)
+        number=c.scalar(select(func.count()).select_from(proposal_decisions).where(
+            proposal_decisions.c.intake_id==linked['intake_id'],or_(proposal_decisions.c.payload['action'].as_string()=='authorize-operation',proposal_decisions.c.payload['run_budget'].as_string().is_not(None))))
+        if number>=authority['policy']['max_operations']:
+            raise ValueError('The configured bounded repair-operation limit was reached; retained work needs review')
+        identity=str(uuid5(UUID(row['id']),'policy-wait:'+grant['id']+':'+checkpoint['checkpoint_sha256']))
+        operation=dict(version=1,request_id=row['id'],fence=row['fence'],previous_grant_id=grant['id'],previous_binding=grant['binding'],
+            checkpoint_path=row['result']['ai_checkpoint']['path'],checkpoint_sha256=checkpoint['checkpoint_sha256'],
+            sequence=checkpoint['sequence'],active_seconds=checkpoint['active_seconds'],completed_requests=checkpoint['progress']['next_turn'],
+            issued_at=issued.isoformat(),expires_at=end.isoformat())
+        binding=digest(operation)
+        c.execute(proposal_decisions.insert().values(id=identity,intake_id=linked['intake_id'],proposal_id=linked['task']['proposal_id'],
+            binding=binding,scope_revision=linked['proposal_review']['human_scope']['revision'],required_artifacts=linked['proposal_review']['required_artifacts'],
+            scope_review_required=0,payload=dict(command_id=identity,proposal_id=linked['task']['proposal_id'],binding=binding,
+                scope_revision=linked['proposal_review']['human_scope']['revision'],action='authorize-operation',
+                note='Fresh bounded operation under the frozen owner policy; original grants, completed turns and consumption are unchanged.',
+                policy_authorization=proof,policy_operation=operation),snapshot=linked['proposal_review'],status='applied',
+            message='A fresh bounded operation is authorized under the saved owner policy.',created_at=issued.isoformat(),finished_at=issued.isoformat()))
+        snapshot=copy.deepcopy(grant['snapshot'])
+        snapshot['policy_operation']={**operation,'decision_id':identity,'binding':binding}
+        snapshot['grant_deadline']=end.isoformat()
+        snapshot['owner_instruction']=json_instruction=json.dumps(dict(policy_authorization=proof,operation=operation),sort_keys=True)
+        snapshot['authorization_sha256']=hashlib.sha256(json_instruction.encode()).hexdigest()
+        snapshot['provenance']='Fresh bounded routine bug operation after a settled allowance wait'
+        return execution.renew_waiting_grant(c,row,grant,snapshot,str(uuid5(UUID(identity),'operation-grant')),issued,end)

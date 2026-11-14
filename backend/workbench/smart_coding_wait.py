@@ -88,22 +88,6 @@ def resume_controller(engine,root,row,config,stop_event=None,launch=None):
     from workbench.db import real_execution_grants as grants,real_execution_requests as requests,model_attempts,write_transaction
     with engine.connect() as c:
         grant=c.execute(select(grants).where(grants.c.id==row['grant_id'])).mappings().one()
-    if not execution.valid(grant):
-        if execution.alive(row['result']['owner']):
-            return False
-        with write_transaction(engine) as c:
-            current=c.execute(select(requests).where(requests.c.id==row['id'])).mappings().one()
-            if current['status']=='waiting_ai' and current['fence']==row['fence']:
-                c.execute(requests.update().where(requests.c.id==row['id']).values(status='failed',finished_at=execution.now(),
-                    result={**current['result'],'error':'Run permission expired or was withdrawn while waiting. No new native request started.'},
-                    message='Run permission needs review. Completed work and native consumption remain saved.'))
-                c.execute(model_attempts.update().where(model_attempts.c.id==row['fence']).values(outcome='failed'))
-        return True
-    decision=row['result']['ai_wait']
-    if decision.get('recheck_at',0)>time.time():
-        raise Waiting(decision)
-    if datetime.now(timezone.utc)>=datetime.fromisoformat(config['deadline']):
-        raise ValueError('The original run permission expired while waiting. Saved work needs a new run decision.')
     number=row['result']['ai_checkpoint']['sequence']
     report=root/('ai-controller-result-'+str(number)+'.json')
     owner_file=root/('ai-controller-owner-'+str(number)+'.json')
@@ -117,6 +101,51 @@ def resume_controller(engine,root,row,config,stop_event=None,launch=None):
     log=root/('ai-controller-'+str(number)+'.log')
     if log.exists():
         raise ValueError('An earlier resume launch intent needs settlement; no duplicate controller was started.')
+    decision=row['result']['ai_wait']
+    if decision.get('recheck_at',0)>time.time():
+        raise Waiting(decision)
+    from workbench import bug_authority
+    linked=grant['snapshot'].get('workflow_task') or {}
+    with engine.connect() as c:
+        covered=bool(linked and bug_authority.frozen(c,linked['intake_id']))
+    if covered and execution.alive(row['result']['owner']):
+        return False
+    with engine.connect() as c:
+        from workbench.work_controls import task_paused
+        if linked and task_paused(c,linked['intake_id']):
+            return False
+    if covered:
+        # Verify saved work before a fresh native allowance observation. Neither
+        # elapsed time nor the old expired grant supplies permission to dispatch.
+        from workbench.codex_runtime import CodexRuntime
+        from workbench.smart_provider import choose
+        selection=grant['snapshot']['runtime']['codex_selection']
+        restored=CodexRuntime(Path(grant['snapshot']['recovery']['root']),selection,stop_event)
+        restored.package=grant['snapshot']['runtime'].get('package')
+        previous_deadline=grant['snapshot']['runtime'].get('grant_deadline')
+        restored.grant_deadline=datetime.fromisoformat(previous_deadline) if previous_deadline else None
+        saved=load(restored,row,grant)
+        with engine.connect() as c:
+            bug_authority.current(c,linked['intake_id'])
+        choose(selection,lambda:bool(stop_event and stop_event.is_set()),waiting_since=saved['waiting_since'],failures=saved['progress'].get('failures',{}))
+        if not execution.valid(grant):
+            grant=bug_authority.renew_wait(engine,row,grant,restored)
+            with engine.connect() as c:
+                row=c.execute(select(requests).where(requests.c.id==row['id'])).mappings().one()
+    if not execution.valid(grant):
+        if execution.alive(row['result']['owner']):
+            return False
+        with write_transaction(engine) as c:
+            current=c.execute(select(requests).where(requests.c.id==row['id'])).mappings().one()
+            if current['status']=='waiting_ai' and current['fence']==row['fence']:
+                c.execute(requests.update().where(requests.c.id==row['id']).values(status='failed',finished_at=execution.now(),
+                    result={**current['result'],'error':'Run permission expired or was withdrawn while waiting. No new native request started.'},
+                    message='Run permission needs review. Completed work and native consumption remain saved.'))
+                c.execute(model_attempts.update().where(model_attempts.c.id==row['fence']).values(outcome='failed'))
+        return True
+    deadline=(datetime.fromisoformat(grant['expires_at']) if grant['snapshot'].get('policy_operation') else datetime.fromisoformat(config['deadline']))
+    if datetime.now(timezone.utc)>=deadline:
+        raise ValueError('The original run permission expired while waiting. Saved work needs a new run decision.')
     unit='workbench-real-codex-'+root.name+'-ai-'+str(number)
     from workbench import task_session
     command=task_session.delegated_command([
@@ -135,7 +164,7 @@ def resume_controller(engine,root,row,config,stop_event=None,launch=None):
             owner_file.chmod(0o600)
             try:
                 while child.poll() is None:
-                    if stop_event and stop_event.is_set() or datetime.now(timezone.utc)>=datetime.fromisoformat(config['deadline']):
+                    if stop_event and stop_event.is_set() or datetime.now(timezone.utc)>=deadline:
                         subprocess.run(['/usr/bin/systemctl','--user','stop',unit+'.service'],
                             stdout=stream,stderr=subprocess.STDOUT,timeout=20,check=True)
                         child.wait(timeout=30)
@@ -145,3 +174,23 @@ def resume_controller(engine,root,row,config,stop_event=None,launch=None):
                 # Exiting the caller never turns an uncertain producer into settlement.
                 pass
     return report.exists() and files.read(report,None).get('restoration',{}).get('restored') is True
+
+
+def operation_deadline(engine,root,link):
+    """A resume reads fresh authority without rewriting its original workflow file."""
+    from sqlalchemy import select
+    from workbench.db import real_execution_grants as grants, real_execution_requests as requests
+    from workbench import bug_authority, real_execution
+    with engine.connect() as c:
+        grant=c.execute(select(grants).join(requests,requests.c.grant_id==grants.c.id).where(
+            requests.c.status=='waiting_ai',grants.c.snapshot['recovery']['root'].as_string()==str(root/'real-run'))).mappings().one_or_none()
+        if not grant or not grant['snapshot'].get('policy_operation'):
+            return link['run_deadline']
+        if not real_execution.valid(grant):
+            raise ValueError('The new bounded operation grant expired or was withdrawn')
+        bug_authority.validate_operation(c,grant)
+        linked=grant['snapshot']['workflow_task']
+        if link['task']!=dict(intake_id=linked['intake_id'],task_id=linked['task']['id'],approval_id=linked['approval']['id']):
+            raise ValueError('Resume workflow belongs to another task')
+        from datetime import datetime
+        return datetime.fromisoformat(grant['expires_at']).timestamp()

@@ -303,6 +303,28 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
         intake.research_revision(app.state.engine, identity, body)
         return intake.view(app.state.engine, identity)
 
+    @app.post('/api/intake/{identity}/work-next')
+    def task_work_next(identity: str):
+        return work_controls.work_next(app.state.engine,identity)
+
+    @app.get('/api/intake/{identity}/journey',response_model=__import__('workbench.workspace_view',fromlist=['WorkspaceTask']).WorkspaceTask)
+    def task_journey(identity: str):
+        from workbench.workspace_view import listing
+        from workbench.task_identity import history
+        with app.state.engine.connect() as c:
+            intake.require(c,intake.intakes,identity)
+            group=history(c,identity)
+        key=group['canonical_id'] if group else identity
+        return next(row for row in listing(app.state.engine,page_size=10000,archive_scope='all')['items'] if row['id']==key)
+
+    @app.get('/api/intake/{identity}/work-control',response_model=work_controls.WorkControl)
+    def task_work_control(identity: str):
+        return work_controls.task_read(app.state.engine,identity)
+
+    @app.put('/api/intake/{identity}/work-control',response_model=work_controls.WorkControl)
+    def task_work_control_save(identity: str,body: work_controls.WorkControlInput):
+        return work_controls.task_save(app.state.engine,identity,body)
+
     @app.put('/api/intake/{identity}/priority', response_model=IntakeView, responses=errors)
     def planning_priority(identity: str, body: PriorityInput):
         intake.set_priority(app.state.engine, identity, body.priority)

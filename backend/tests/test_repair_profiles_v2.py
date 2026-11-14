@@ -7,7 +7,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import select
 from workbench import bug_intent, worker, task_session
-from workbench.db import task_run_offers
+from workbench.db import task_run_offers,planning_jobs
 from workbench.planning_provider import LocalProvider
 from test_bug_authority import enable
 from test_bug_workflow import enable_bugs, report
@@ -29,8 +29,8 @@ class ProfileRuntime(ControlledPreparer):
 
 
 @pytest.mark.usefixtures('installed')
-@pytest.mark.parametrize('language,kind', [(language,kind) for language in ('lua','python') for kind in ('existing-failure','missing-regression','test-correction')]+[('python-artifact','existing-failure')])
-def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(client,headers,store,monkeypatch,language,kind):
+@pytest.mark.parametrize('language,kind,defer_review', [(language,kind,False) for language in ('lua','python') for kind in ('existing-failure','missing-regression','test-correction')]+[('python-artifact','existing-failure',False),('lua','missing-regression',True)])
+def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(client,headers,store,monkeypatch,language,kind,defer_review):
     source=enable_bugs(monkeypatch)
     settings_path=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
     settings=json.loads(settings_path.read_text())
@@ -76,6 +76,8 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
     enable(store)
     monkeypatch.setattr('workbench.trusted_preparation.Runtime',ProfileRuntime)
     monkeypatch.setattr('workbench.task_sessions.process_one',lambda *a,**k:False)
+    program_calls=[]
+    review_wait=[]
     def generate(self,packet,schema,expected_model):
         self.diagnostics=dict(actual_model=expected_model,generation_state='finished',accounting_state='complete',finish_reason='stop',
             request_completion_limit=6144,usage=dict(units='tokens',values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))
@@ -84,12 +86,19 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
         if schema is bug_intent.Response:
             response=dict(finding='The committed behavior and original tests define a bounded normalization repair.',plan=proposed)
         elif schema is IndependentProgram:
+            program_calls.append('original-only')
             assert 'candidate' not in packet and packet['purpose']=='original-only independent behavior checks'
             program=('local normalize=dofile("../!!!TwichUI/normalize.lua")\nassert(normalize(" ALICE ")=="alice")' if language=='lua' else
                 'import runpy\nnormalize=runpy.run_path("../tools/normalize.py")["normalize"]\nassert normalize(" ALICE ")=="alice"')
             response=dict(rationale='The original requirements specify trimming and lowercase output for uppercase input.',
                 criteria=['normalization'],program=program,evidence=[dict(criterion='normalization',kind='report',path=None,quote='The intended behavior is trimmed lowercase output for uppercase input.')] if kind=='test-correction' else [],negative_control=[dict(path=production,old=':lower()' if language=='lua' else '.lower()',new='')] if kind=='test-correction' else [])
         elif schema is ProfileProgramReview:
+            if defer_review and not review_wait:
+                review_wait.append('verified-no-dispatch')
+                from workbench.smart_provider import Waiting
+                from workbench.ai_strategy import Decision
+                self.diagnostics=dict(generation_state='not_started')
+                raise Waiting(Decision(state='waiting',reason='Controlled allowance wait before review',recheck_at=1).model_dump())
             response=dict(ready=True,covered_criteria=['normalization'],reason='The independent assertions use original behavior and reject missing normalization.')
         else:
             raise AssertionError(schema)
@@ -102,12 +111,19 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
     saved=client.post('/api/intake',headers=headers,json=body)
     assert saved.status_code==200,saved.text
     identity=saved.json()['id']
-    for _ in range(14):
+    for _ in range(18):
         worker.tick(store)
     item=client.get('/api/intake/'+identity).json()
     with store.connect() as c:
         offered=c.execute(select(task_run_offers)).mappings().first()
     assert offered,item
+    if kind in {'missing-regression','test-correction'}:
+        assert program_calls==['original-only']
+    if defer_review:
+        assert review_wait==['verified-no-dispatch']
+        with store.connect() as c:
+            preparation=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==identity,planning_jobs.c.kind=='behavioral_preparation')).mappings().one()
+        assert preparation['payload']['independent_program_resume']
     assert offered['snapshot']['specification']['verification_profile']=='offline-repair-v2'
     prepared=Path(offered['snapshot']['ready_preparation']['root'])
     baseline=json.loads((prepared/'fresh-baseline-suite.json').read_text())

@@ -152,3 +152,18 @@ def test_claude_uses_actual_worker_route_and_keeps_its_frozen_override(
     assert detail['original']['ai_settings']==request['ai_settings']
     assert client.get('/api/usage').status_code==200
     assert not worker.tick(store)
+
+
+def test_explicit_qwen_only_does_not_inherit_smart_remote_stages(store,client,headers,installed,catalog):
+    from workbench.ai_strategy import Strategy,Stage
+    save_codex_policy(store)
+    saved=model_policy.read(store)
+    saved.strategy=Strategy(stages=[Stage(id='remote',provider='codex',model='capable-codex',effort='high',allocation=50)])
+    model_policy.save(store,saved,catalog)
+    request={**body(),'local_planning':'qwen-once','ai_settings':settings('local',everyday.MODEL,None)}
+    response=client.post('/api/intake',headers=headers,json=request)
+    assert response.status_code==200,response.text
+    with store.connect() as c:
+        row=c.execute(select(intakes).where(intakes.c.id==response.json()['id'])).mappings().one()
+        route=provider_routes.approved(c,row)
+    assert route['model']==everyday.MODEL and 'strategy' not in route and not route.get('fallback')

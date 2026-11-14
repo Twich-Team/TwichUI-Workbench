@@ -73,6 +73,15 @@ def _checked(c, row, grant, *, active=True):
     linked_task = grant['snapshot'].get('workflow_task') or {}
     if active and linked_task.get('intake_id'):
         require_current(c, linked_task['intake_id'])
+        from workbench.work_controls import task_paused
+        if task_paused(c,linked_task['intake_id']):
+            raise DeliveryHeld('This task is paused. The independently checked change is retained.')
+        from workbench import bug_authority
+        if bug_authority.frozen(c,linked_task['intake_id']):
+            try:
+                bug_authority.current(c,linked_task['intake_id'])
+            except ValueError:
+                raise DeliveryHeld('The routine bug authorization is paused or revoked. Checked evidence is retained.') from None
 
     if later_review(c.connection.driver_connection, row['id']):
         raise DeliveryHeld('A later independent review prevents delivery of this patch. Resolve that review before requesting publication.')

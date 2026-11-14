@@ -58,16 +58,28 @@ function summary(item: Intake, execution?: Execution, approval?: RunApprovalCont
 }
 
 export function TaskJourney({item}: {item: Intake}) {
+  const journey=useQuery({queryKey:['task-journey',item.id],queryFn:()=>request<components['schemas']['WorkspaceTask']>(`/api/intake/${item.id}/journey`),refetchInterval:3000});
   const task = singleCurrentTask(item);
   const execution = useQuery({...executionQuery(item.id, task?.id || ''), enabled: Boolean(task), refetchInterval: 3000});
   const approval = useQuery({...approvalQuery(item.id, task?.id || ''),
     enabled: Boolean(task && (item.original.regression_tests || item.original.local_planning) && needsRunOffer(execution.data)),
     refetchInterval: 3000});
-  const progress = summary(item, execution.isError ? undefined : execution.data, approval.isError ? undefined : approval.data);
+  const savedProgress = summary(item, execution.isError ? undefined : execution.data, approval.isError ? undefined : approval.data);
+  const progress=journey.data?.state==='paused'?{...savedProgress,title:'Paused',next:journey.data.message}:savedProgress;
+  if(item.routine_bug_authorized){
+    const current=journey.data;
+    const position=!current?0:['working'].includes(current.state)?1:['checking','cleanup'].includes(current.state)?2:current.state==='completed'&&current.result_kind==='patch'?3:0;
+    return <section className="panel task-journey" aria-label="Task progress"><h2>Your task’s journey</h2>
+      <ol className="journey-steps">{['Investigating','Fixing','Verifying','Ready for review'].map((step,i)=><li key={step} aria-current={i===position?'step':undefined}><span>{i+1}</span>{step}</li>)}</ol>
+      <p className="journey-title" role="status"><strong>{current?.stage||'Opening task progress…'}</strong></p><p>{current?.message}</p>
+      <p className="small-text">Routine work is covered by your saved owner setting. Checks and draft publication retain their safeguards.</p>
+      {journey.isError&&<p role="alert">Progress could not be refreshed. Showing the last saved status.</p>}
+    </section>;
+  }
   return <section className="panel task-journey" aria-label="Task progress"><h2>Your task’s journey</h2>
     <ol className="journey-steps">{['Understand', 'Review plan', 'Do the work', 'Check', 'Result'].map((step, i) =>
       <li key={step} aria-current={i === progress.step ? 'step' : undefined}><span>{i + 1}</span>{step}</li>)}</ol>
-    {(!execution.data || execution.data.stage==='waiting' ||
+    {(journey.data?.state==='paused' || !execution.data || execution.data.stage==='waiting' ||
       approval.data?.available&&!approval.data.receipt&&approval.data.offer?.repair_cycle?.continuation ||
       item.decisions.some(d=>d.status==='pending')) &&
       <div role="status"><p className="journey-title"><strong>{progress.title}</strong></p>

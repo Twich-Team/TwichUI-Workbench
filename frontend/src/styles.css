@@ -673,3 +673,5 @@ th,td { text-align: left; padding: 10px; border-bottom: 1px solid #5e4a34; }
 .strategy-builder .strategy-card-fields input[type=number]{max-width:12rem}
 .strategy-builder .strategy-card-fields{align-items:start}
 @media(max-width:640px){.strategy-builder .provider-config{grid-template-columns:minmax(0,1fr)}.strategy-builder .strategy-card-fields input[type=number]{max-width:100%}}
+
+.task-control-buttons { display: flex; flex-wrap: wrap; gap: .75rem; }

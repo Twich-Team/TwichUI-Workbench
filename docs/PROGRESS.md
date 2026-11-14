@@ -1,3 +1,53 @@
+# Autonomous Bug Reports — continuation and task controls, November 13, 2026 Mountain Time
+
+Following the Project Working Philosophy: continue the approved A–D assignment.
+Checkpoint C now derives fresh bounded operation grants from frozen routine policy
+when a settled Smart coding wait outlasts its original grant. Original task/request,
+source, strategy, completed turns, unfinished edits and usage remain bound. The expired
+grant is revoked and retained; a separate policy operation journal records fresh
+permission, never human approval. Revocation, owner stop, closed edit batches, dead
+owners, native settlement and fresh allowance verification fence resumption.
+
+Settled ineffective replies can mark an existing strategy stage unsuitable after two
+distinct terminal proofs. Known pre-dispatch availability/authentication/capacity
+failures may use authorized fallback; unknown requests remain held. Explicit new
+Qwen-only choices keep a plain local route even when global Smart settings exist.
+Small Lua investigations can qualify locally from committed source evidence. Original-only
+independent preparation retains accepted program/usage through known nondispatch waits.
+Settled whole-run recovery uses the existing repair_continuation offer/freeze checks,
+within the same policy's three-operation ceiling; historical local continuing authority
+was not broadened. Actual independent-program adapters use their correct source/context
+and size limits. No independent generation has run against a real provider yet.
+
+D task controls use execution_policies, existing worker selection and grant/publication
+gates. Work on this next changes actual SQL selection priority; per-task Pause/Resume
+blocks new dispatch and draft delivery while preserving history and active safe finish.
+Covered reports show Investigating / Fixing / Verifying / Ready for review, with native
+waiting reasons and plans kept distinct from repaired results. Original manual review,
+start-selected-model, change review and draft links remain.
+
+Focused C/D suite:52 passed. Delivery/control regression set:39 passed. Separate feedback,
+preparation and settlement set:35 passed. Dedicated actual-confinement Lua/Python matrix:
+11 passed, including a saved independent preparation prefix; model responses simulated.
+Two browser cases passed desktop/phone/200% text and reload; screenshots inspected.
+The automatic journey presentation case explicitly simulates only the frozen-policy
+flag; it is not real coding/publication evidence. A stale settings refresh between
+priority and Pause was fixed. Full local verification is in progress and found four
+legacy fixture compatibility failures; Runtime's legacy default was restored and all
+18 feedback tests now pass. Do not call the broad run accepted until it finishes and
+all corrections receive final verification. Private logs:autonomous-bugs-20261113.
+
+Installed73b24f6 and baseline961 rows remain untouched. No model generation, addon edit,
+external addon branch/PR, live app setting, service restart or cutover occurred here.
+Existing named administrator read-only status succeeded with its owner-renewed grant.
+Next: finish full local/exact hosted release acceptance, prepare one sealed installation
+with optional routine_repair_profiles_v2 enabled and original allowed_classes retained,
+recheck actual current history/independent restore/rollback, then mandatory real installed
+Lua/Python request-to-draft acceptance and the remaining exceptional cases. Zero new
+routine bugs have completed end to end. Preserve admin-document edits/dependency links.
+
+---
+
 # Autonomous Bug Reports — checkpoint B2, November 13, 2026 Mountain Time
 
 Versioned offline-repair-v2 profiles now reuse the existing Runtime, edit batches,

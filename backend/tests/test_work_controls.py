@@ -86,3 +86,44 @@ def test_paused_workspace_preserves_a_queued_request(client, headers, store):
     after = client.get("/api/intake/" + item["id"]).json()
     assert len(after["jobs"]) == 1 and after["jobs"][0]["status"] == "completed"
 
+
+
+def test_task_pause_and_work_next_control_real_selection_after_restart(client,headers,store):
+    from test_intake import submit
+    from workbench.db import planning_jobs
+    from workbench.planning_provider import DemoProvider
+    first,_=submit(client,headers,kind='issue',title='Earlier ordinary request')
+    second,_=submit(client,headers,kind='issue',title='Prioritized new request')
+    route='/api/intake/'+second['id']
+    assert client.post(route+'/work-next',headers=headers,json={}).status_code==200
+    current=client.get(route+'/work-control').json()
+    paused=client.put(route+'/work-control',headers=headers,json=dict(revision=current['revision'],paused=True))
+    assert paused.status_code==200,paused.text
+    assert client.get(route+'/journey').json()['state']=='paused'
+    store.dispose()
+    assert worker.tick(store,planning_adapter=DemoProvider())
+    with store.connect() as c:
+        statuses={r['intake_id']:r['status'] for r in c.execute(select(planning_jobs)).mappings()}
+    assert statuses[first['id']]=='completed' and statuses[second['id']]=='queued'
+    saved=model_policy.read(store)
+    model_policy.save(store,saved.model_copy(update=dict(task_pauses=None,next_task=None)),model_policy.capabilities())
+    assert client.get(route+'/work-control').json()['paused']
+    current=client.get(route+'/work-control').json()
+    assert client.put(route+'/work-control',headers=headers,json=dict(revision=current['revision'],paused=False)).status_code==200
+    assert worker.tick(store,planning_adapter=DemoProvider())
+    assert client.get(route).json()['jobs'][0]['status']=='completed'
+
+
+def test_work_next_beats_older_high_priority_without_rewriting_it(client,headers,store):
+    from test_intake import submit
+    from workbench.db import planning_jobs
+    from workbench.planning_provider import DemoProvider
+    first,_=submit(client,headers,kind='issue',title='Existing highest priority')
+    second,_=submit(client,headers,kind='issue',title='Selected next task')
+    client.put('/api/intake/'+first['id']+'/priority',headers=headers,json=dict(priority=1))
+    assert client.post('/api/intake/'+second['id']+'/work-next',headers=headers,json={}).status_code==200
+    assert worker.tick(store,planning_adapter=DemoProvider())
+    with store.connect() as c:
+        statuses={r['intake_id']:r['status'] for r in c.execute(select(planning_jobs)).mappings()}
+    assert statuses[first['id']]=='queued' and statuses[second['id']]=='completed'
+    assert client.get('/api/intake/'+first['id']).json()['priority']['priority']==1

@@ -59,16 +59,18 @@ def main():
     ref = link['task']
     db = Path(link['database'])
     info = db.stat()
+    engine = engine_for(db)
+    from workbench.smart_coding_wait import operation_deadline
+    effective_deadline=operation_deadline(engine,root,link) if resume else link['run_deadline']
     if (ref != claim['task'] or link['task_budget_fingerprint'] != claim['task_budget_fingerprint']
             or [info.st_dev, info.st_ino] != link['database_identity']
-            or not 0 < link['run_deadline'] - time.time() <= 2400):
+            or not 0 < effective_deadline - time.time() <= 2400):
         raise ValueError('Original workflow binding or deadline changed.')
-    engine = engine_for(db)
     with engine.connect() as c:
         linked = task_execution.snapshot(c, **ref)
         route = provider_routes.run_selection(c, linked)
         approval = task_execution.require(c, proposal_decisions, ref['approval_id'])
-        policy = task_budget.permission(c, approval, admitting=True, task_id=ref['task_id'],
+        policy = task_budget.permission(c, approval, require_current=not bool(resume), admitting=True, task_id=ref['task_id'],
             offer_id=link.get('feature_offer_id'))
         if not route or real_execution.digest(policy) != link['task_budget_fingerprint']:
             raise ValueError('Approved Codex route or budget changed.')
@@ -84,11 +86,13 @@ def main():
         raise ValueError('An existing task-wide reservation is required.')
     runtime.package = dict(package=str(package.root), baseline_sha256=package.hash)
     runtime.grant_deadline = datetime.fromtimestamp(link['run_deadline'], timezone.utc)
-    runtime.deadline = min(runtime.deadline, time.monotonic() + link['run_deadline'] - time.time())
+    runtime.deadline = min(runtime.deadline, time.monotonic() + effective_deadline - time.time())
     process_with_contention(engine, runtime, stopped)
-    durable(root / ('ai-controller-result-'+str(resume)+'.json' if resume else 'lease-controller-result.json'), json.dumps({
+    report=root / ('ai-controller-result-'+str(resume)+'.json' if resume else 'lease-controller-result.json')
+    durable(report, json.dumps({
         'restoration': {'restored': True, 'no_lease': True},
     }).encode())
+    report.chmod(0o600)
 
 
 if __name__ == '__main__':

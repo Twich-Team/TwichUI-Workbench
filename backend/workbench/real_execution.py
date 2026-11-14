@@ -151,13 +151,40 @@ def issue(engine, authorization, provenance, activation, *, task=None):
     return row
 
 
+def renew_waiting_grant(c, row, previous, snapshot, identity, issued, expires):
+    """Grant-owner ingress for an already validated policy nondispatch suffix.
+
+    The request keeps its identity and original submission payload. The old grant
+    and its snapshot remain historical; a separately journaled operation owns the
+    next bounded execution window. Counters, source and provider choices cannot change.
+    """
+    from workbench import task_execution
+    current=c.execute(select(requests).where(requests.c.id==row['id'])).mappings().one()
+    if (current['status']!='waiting_ai' or current['fence']!=row['fence'] or current['grant_id']!=previous['id']
+            or previous['revoked_at'] or previous['binding']!=digest(previous['snapshot'])
+            or datetime.fromisoformat(previous['expires_at'])>issued
+            or not 0<(expires-issued).total_seconds()<=2400):
+        raise ValueError('Only a settled expired policy operation can receive a fresh grant')
+    changed={'policy_operation','grant_deadline','owner_instruction','authorization_sha256','provenance'}
+    if {k:v for k,v in snapshot.items() if k not in changed}!={k:v for k,v in previous['snapshot'].items() if k not in changed}:
+        raise ValueError('Fresh operation changed original source, work, model or accounting')
+    fresh=dict(id=identity,snapshot=snapshot,binding=digest(snapshot),issued_at=issued.isoformat(),expires_at=expires.isoformat(),revoked_at=None)
+    c.execute(grants.insert().values(**fresh))
+    c.execute(grants.update().where(grants.c.id==previous['id']).values(revoked_at=issued.isoformat()))
+    c.execute(requests.update().where(requests.c.id==row['id']).values(grant_id=identity))
+    task_execution.validate(c,fresh)
+    if not valid(fresh):
+        raise ValueError('The fresh operation did not establish valid bounded authority')
+    return fresh
+
+
 def contract_matches(snapshot):
     try:
         policy = snapshot.get('task_budget')
         if policy:
             from workbench.task_budget import TaskBudget, valid_contract
             TaskBudget.model_validate(policy['budget'])
-            if (datetime.now(timezone.utc) >= datetime.fromisoformat(policy['expires_at']) or
+            if (datetime.now(timezone.utc) >= datetime.fromisoformat(snapshot.get('policy_operation',{}).get('expires_at',policy['expires_at'])) or
                     policy['offer']['fingerprint'] != digest(policy['offer']['snapshot']) or
                     snapshot['contract'] != policy['offer']['snapshot']['specification']['contract']):
                 return False
@@ -535,7 +562,7 @@ def process_one(engine, runtime=None, stop_event=None):
             g = c.execute(select(grants).where(grants.c.id == row['grant_id'])).mappings().one()
             r = c.execute(select(requests).where(requests.c.id == row['id'])).mappings().one()
             try:
-                task_execution.validate(c, g)
+                task_execution.validate(c, g,ongoing=True)
                 if linked and everyday.enabled() and route != provider_routes.run_selection(c, linked):
                     return False
             except (task_execution.Waiting, ValueError):

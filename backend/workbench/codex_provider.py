@@ -1375,6 +1375,9 @@ class Planner:
 
         from workbench.bug_intent import Response as IntentResponse
 
+        from workbench.repair_profiles import IndependentProgram
+        from workbench.bug_check_preparation import ProfileProgramReview
+        profile_schema=schema in (IndependentProgram,ProfileProgramReview)
         bug_schema = schema in (BugPlanningResponse, ReviewResponse, InvestigationResponse, IntentResponse)
         from workbench.feature_planning import FeatureDecomposition, INSTRUCTIONS as FEATURE_INSTRUCTIONS
         from workbench.feature_checks import Response as FeatureChecks, Review as FeatureCheckReview
@@ -1405,9 +1408,13 @@ class Planner:
             from workbench.bug_investigation_stage import INSTRUCTIONS
 
             instructions = INSTRUCTIONS
+        if profile_schema:
+            instructions=packet.get('review_instructions') if schema is ProfileProgramReview else packet.get('instructions')
+            if not isinstance(instructions,str) or not instructions:
+                raise Hold('disclosure')
         model = self.selection["model"]
         self.diagnostics = dict(generation_state="not_started")
-        if bug_schema or feature_schema:
+        if bug_schema or feature_schema or profile_schema:
             self.validate_source(packet)
         if expected_model is not None and model != expected_model:
             raise Hold("model_identity")
@@ -1417,10 +1424,12 @@ class Planner:
             output_schema = required_output(
                 wire_schema(
                     schema,
-                    packet.get("coverage") if bug_schema or feature_schema else None,
-                    packet.get("files") if bug_schema or feature_schema else None,
+                    packet.get("coverage") if bug_schema or feature_schema or profile_schema else None,
+                    packet.get("files") if bug_schema or feature_schema or profile_schema else None,
                 )
             )
+            if profile_schema:
+                output_schema['title']='ReviewResponse' if schema is ProfileProgramReview else 'ProgramResponse'
             if schema in (FeatureChecks, FeatureCheckReview):
                 # These use the existing bounded Lua-program/review traffic
                 # profiles. The domain classes have generic names, so their
@@ -1468,7 +1477,7 @@ class Planner:
             def encoded(outgoing):
                 return self.encode_request(model, self.selection["effort"],
                     prefix + json.dumps(outgoing, ensure_ascii=True), output_schema,
-                    self.request_seconds if bug_schema else SECONDS)
+                    self.request_seconds if bug_schema or profile_schema else SECONDS)
             if bug_schema and self.request_packer is not None:
                 packet, packing = self.request_packer(packet, encoded, MAX_BUG_INPUT)
                 self.validate_source(packet)
@@ -1482,7 +1491,7 @@ class Planner:
                 self.stopped,
                 **(
                     {"input_limit": MAX_BUG_INPUT, "request_seconds": self.request_seconds}
-                    if bug_schema or feature_schema
+                    if bug_schema or feature_schema or profile_schema
                     else {}
                 ),
             )
@@ -1520,7 +1529,7 @@ class Planner:
         )
         if getattr(result, "provider_receipt", None):
             self.diagnostics["provider_receipt"] = result.provider_receipt
-        if bug_schema or feature_schema:
+        if bug_schema or feature_schema or profile_schema:
             from workbench.planning_response import normalize_bug
 
             if self.response_evidence:

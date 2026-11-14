@@ -85,3 +85,45 @@ def test_between_turn_restart_keeps_edits_oracle_counts_and_exact_provider_attri
     changed['snapshot']['runtime']['model']='unexpected'
     with pytest.raises(ValueError,match='Frozen work'):
         smart_coding_wait.load(restored,row,changed)
+
+
+@pytest.mark.parametrize('unknown',[False,True])
+def test_two_settled_bad_turns_can_change_provider_but_unknown_cannot(store,tmp_path,monkeypatch,unknown):
+    runtime=prepared(tmp_path)
+    strategy=ai.Strategy(stages=[ai.Stage(id='first',provider='codex',model='controlled-codex',allocation=50),
+        ai.Stage(id='next',provider='claude',model='claude-sonnet-5-5',effort='high',allocation=50,
+            role='fallback',triggers=['unsuitable'])])
+    runtime.codex_selection=dict(provider='smart',model='controlled-codex',effort=None,policy_revision=1,strategy=strategy.model_dump())
+    runtime.strategy_engine=store
+    identity,fence=str(uuid4()),str(uuid4())
+    with write_transaction(store) as c:
+        c.execute(model_attempts.insert().values(id=fence,task_id='disposable-coding',source='strategy-control',backend='smart',
+            purpose='implementation',requested_model='controlled-codex',policy_revision=1,started_at=real_execution.now(),routing_reason='Controlled boundary',outcome='running'))
+    monkeypatch.setattr(codex_runtime.confine,'root',lambda:'/controlled-test-boundary')
+    calls=[]
+    def choose(selection,stop,**options):
+        stage=strategy.stages[1] if options.get('failures',{}).get('first')=='unsuitable' else strategy.stages[0]
+        return ai.Decision(state='selected',provider=stage.provider,stage_id=stage.id,model=stage.model,effort=stage.effort,role=stage.role,reason='Authorized controlled boundary')
+    class Output(dict):
+        pass
+    def generate(selection,decision,prompt,schema,request_id,stop,**kwargs):
+        calls.append(decision.provider)
+        if unknown:
+            from workbench.codex_provider import Hold
+            raise Hold('timeout',started=True,terminal=False)
+        output=Output(edits=[dict(path=PRODUCTION,old=BUGGY,new=CORRECT)] if decision.provider=='claude' else [dict(path=PRODUCTION,old=BUGGY,new=BUGGY)])
+        output.provider_receipt=str(uuid4())
+        return output,dict(prompt_tokens=100,completion_tokens=20,total_tokens=120)
+    monkeypatch.setattr(smart_provider,'choose',choose)
+    monkeypatch.setattr(smart_provider,'remote_generate',generate)
+    if unknown:
+        from workbench.codex_provider import Hold
+        with pytest.raises(Hold):
+            runtime.execute(identity,fence,lambda:True)
+        assert calls==['codex']
+        assert runtime.ai_failures=={}
+    else:
+        result=runtime.execute(identity,fence,lambda:True)
+        assert calls==['codex','codex','claude']
+        assert result['verification']=='passed' and result['usage']['values']['total_tokens']==360
+        assert Canonical(runtime.root).verify_frozen(result)

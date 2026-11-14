@@ -184,3 +184,30 @@ def test_local_connection_refusal_switches_only_before_generation_to_authorized_
     assert calls==['local-readiness'] and len(state['dispatches'])==1
     assert state['dispatches'][0]['stage_id']=='codex'
     assert sorted(a['outcome'] for a in detail['provider_activity'])==['completed','not_started']
+
+
+def test_ineffective_investigation_adapts_only_after_distinct_shared_terminal_proofs(store,tmp_path,monkeypatch):
+    from types import SimpleNamespace
+    from test_provider_receipts import receipts,write
+    strategy=ai.Strategy(stages=[ai.Stage(id='primary',provider='codex',model='selected',allocation=50),
+        ai.Stage(id='fallback',provider='claude',model='claude-sonnet-5-5',allocation=50,role='fallback',triggers=['unsuitable'])])
+    planner=smart_provider.Planner(dict(strategy=strategy.model_dump(),model='selected',effort=None,policy_revision=1),lambda:False)
+    planner.bind_operation(store,str(uuid4()))
+    monkeypatch.setattr('workbench.everyday.configuration',lambda _:SimpleNamespace(evidence_roots=[tmp_path]))
+    observations=[]
+    for number in range(2):
+        identity,path,events,usage=receipts(tmp_path)
+        planner.response_evidence=SimpleNamespace(identifier=identity,record=lambda *a,**k:observations.append(k))
+        planner.request_history.append(dict(stage_id='primary',provider='codex',model='selected',values=usage['values'],native_receipt=path.stem))
+        planner.diagnostics=dict(generation_state='finished',accounting_state='complete')
+        if number==1:
+            write(path,events[:-1],True)
+            assert not planner.observe_settled_failure('invalid-response')
+            assert not planner.options['failures']
+            write(path,events,True)
+        assert planner.observe_settled_failure('invalid-response') is (number==1)
+        # Duplicate observation cannot count as a second settled failure.
+        planner.observe_settled_failure('invalid-response')
+        assert len(planner.settled_failures)==number+1
+    assert planner.options['failures']==dict(primary='unsuitable')
+    assert all(o['settled'] for o in observations)

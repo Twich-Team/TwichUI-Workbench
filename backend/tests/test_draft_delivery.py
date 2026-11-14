@@ -129,3 +129,25 @@ def test_private_connector_delivers_only_for_the_existing_system_worker(monkeypa
         left.close()
         right.close()
     assert calls == [identity]
+
+
+def test_task_pause_prevents_automatic_and_direct_draft_dispatch_without_losing_checked_work(client,headers,installed_draft,monkeypatch):
+    from workbench import work_controls,model_policy
+    from workbench.db import real_execution_grants,real_execution_requests
+    engine,row,_=installed_draft
+    with engine.connect() as c:
+        linked=c.execute(select(real_execution_grants.c.snapshot).join(real_execution_requests,real_execution_requests.c.grant_id==real_execution_grants.c.id).where(real_execution_requests.c.id==row['id'])).scalar_one()['workflow_task']
+    revision=model_policy.read(engine).revision
+    work_controls.task_save(engine,linked['intake_id'],work_controls.WorkControlInput(revision=revision,paused=True))
+    assert not draft_delivery.queue_automatic(engine)
+    assert not client.get('/api/real-executions/'+row['id']+'/draft-review').json()['available']
+    with engine.connect() as c:
+        saved=c.execute(select(real_execution_requests).where(real_execution_requests.c.id==row['id'])).mappings().one()
+        assert saved['status']=='checked' and saved['result']['verification']=='passed'
+    current=work_controls.task_read(engine,linked['intake_id'])
+    work_controls.task_save(engine,linked['intake_id'],work_controls.WorkControlInput(revision=current.revision,paused=False))
+    assert draft_delivery.queue_automatic(engine)
+    current=work_controls.task_read(engine,linked['intake_id'])
+    work_controls.task_save(engine,linked['intake_id'],work_controls.WorkControlInput(revision=current.revision,paused=True))
+    monkeypatch.setattr(draft_delivery,'send',lambda *a,**k:pytest.fail('Paused task dispatched publication'))
+    assert not draft_delivery.advance(engine)

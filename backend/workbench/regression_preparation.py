@@ -306,7 +306,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
         row = c.execute(select(planning_jobs).where(operation.eligible(c, planning_jobs.c.intake_id)).join(intakes, planning_jobs.c.intake_id == intakes.c.id).where(
             planning_jobs.c.status == 'queued', planning_jobs.c.kind.in_(['planning', 'decomposition']), prepared_intake,
             __import__('workbench.strategy_waiting',fromlist=['due']).due(),
-        ).order_by(planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
+        ).order_by(__import__('workbench.work_controls',fromlist=['priority_order']).priority_order(planning_jobs.c.intake_id),planning_jobs.c.created_at, planning_jobs.c.id).limit(1)).mappings().first()
         if not row:
             return False
         operation.selected(planning_jobs, row)
@@ -451,7 +451,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
                 with engine.connect() as current:
                     prospective=provider_routes.approved(current,original)
                 route=prospective
-                if prospective.get('strategy') and strategy_waiting.preflight(engine,job,prospective,provider_stopped,suitable_local=not bug):
+                if prospective.get('strategy') and strategy_waiting.preflight(engine,job,prospective,provider_stopped,suitable_local=(not bug or __import__('workbench.investigation_strategy',fromlist=['suitable_local']).suitable_local(packet,original['payload']))):
                     return True
             # Same job/lease and accounting owners; duplicate workers never call an
             # adapter for an already claimed job. No automatic inference retry.
@@ -507,7 +507,7 @@ def process_one(engine, *, fail_before_commit=False, scenario_response=None, ada
             phase_started=time.monotonic()
             if getattr(adapter_used,'strategy_control',False):
                 from workbench.strategy_waiting import options
-                adapter_used.bind_operation(engine,lease,**options(job,suitable_local=not bug))
+                adapter_used.bind_operation(engine,lease,**options(job,suitable_local=(not bug or __import__('workbench.investigation_strategy',fromlist=['suitable_local']).suitable_local(packet,original['payload']))))
             initial_source_packet = packet
             if bug and getattr(adapter_used, 'source_investigation', False):
                 adapter_used.request_seconds = job['payload'].get('local_planning_receipt', {}).get(
