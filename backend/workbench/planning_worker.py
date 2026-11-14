@@ -35,9 +35,16 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
             try:
                 intake.validate_approval(connection, {**receipt, 'status': 'applied'})
                 continuation = receipt['payload']['execution_continuation']
-                if continuation.get('owner_provenance', {}).get('purpose') != 'browser-reviewed-offer-v1':
+                policy_proof = receipt['payload'].get('policy_authorization')
+                if continuation.get('owner_provenance', {}).get('purpose') != 'browser-reviewed-offer-v1' and not policy_proof:
                     raise ValueError('Unsupported pending continuation')
-                request = continuation['browser_request']
+                if policy_proof:
+                    tasks = connection.execute(select(backlog_items.c.id).where(backlog_items.c.proposal_id == receipt['proposal_id'], backlog_items.c.kind == 'task')).scalars().all()
+                    if len(tasks) != 1 or continuation['owner_provenance'] != policy_proof:
+                        raise ValueError('Policy operation task or attribution changed')
+                    request = dict(task_id=tasks[0], run_budget=receipt['payload']['run_budget'])
+                else:
+                    request = continuation['browser_request']
                 budget = receipt['payload']['run_budget']
                 if (request['run_budget'] != budget or receipt['binding'] !=
                         task_budget.digest(dict(execution_continuation=continuation, run_budget=budget))):
@@ -48,7 +55,7 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
                 from workbench.schemas import TaskBudget
                 selected = task_budget.validate_selection(connection, receipt['proposal_id'],
                     TaskBudget.model_validate(budget), admitting=True)
-                if (request['binding'] != task_budget.digest(dict(scope=linked, offer=selected['fingerprint']))
+                if (not policy_proof and request['binding'] != task_budget.digest(dict(scope=linked, offer=selected['fingerprint']))
                         or selected['snapshot'].get('reviewed_task', {}).get('ref') != ref):
                     raise ValueError('Scope or certified offer changed before application')
                 # Original timestamp owns expiry, including time spent pending.
@@ -73,7 +80,14 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
                 intake.validate_review(connection, proposal, intake.proposal_view(connection, proposal),
                                        receipt['scope_revision'], receipt['required_artifacts'])
                 from workbench.bug_evidence import validate_expectation_review
-                validate_expectation_review(intake.proposal_view(connection, proposal), receipt['payload'])
+                if receipt['payload'].get('policy_authorization'):
+                    from workbench.bug_authority import validate
+                    try:
+                        validate(connection, receipt['intake_id'], intake.proposal_view(connection, proposal), receipt['payload']['policy_authorization'])
+                    except ValueError as error:
+                        raise HTTPException(409, str(error)) from None
+                else:
+                    validate_expectation_review(intake.proposal_view(connection, proposal), receipt['payload'])
                 if receipt['scope_review_required'] or receipt['required_artifacts'] is None:
                     raise HTTPException(409, 'Scope review required')
             if receipt['scope_revision'] != intake.human_scope(connection, row['id'])['revision']:
@@ -108,6 +122,8 @@ def apply_one(engine, fail_before_commit=False, command_id=None):
         except HTTPException as error:
             status = 'rejected' if error.status_code == 422 else 'stale'
             message = 'The proposal, human scope or required artifacts changed or are missing. The saved decision was not applied.'
+        if status == 'applied' and receipt['payload'].get('policy_authorization'):
+            message = 'Authorized under the saved routine bug policy. No human plan approval was recorded.'
         connection.execute(proposal_decisions.update().where(proposal_decisions.c.id == receipt['id']).values(
             status=status, message=message, finished_at=now()))
         if fail_before_commit:

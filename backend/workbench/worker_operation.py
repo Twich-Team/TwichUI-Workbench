@@ -106,4 +106,12 @@ def eligible(c, column):
     excluded = {key for key, value in states.items() if value['archived_at'] or value['deleted_at']}
     if excluded:
         excluded.update(r['intake_id'] for r in links(c) if r['canonical_id'] in excluded)
+    from workbench import bug_authority
+    for identity in c.execute(select(bug_authority.planning_jobs.c.intake_id).where(
+            bug_authority.planning_jobs.c.payload['routine_bug_authority'].as_string().is_not(None)).distinct()).scalars():
+        if bug_authority.frozen(c, identity):
+            try:
+                bug_authority.current(c, identity)
+            except ValueError:
+                excluded.add(identity)
     return column.not_in(excluded)

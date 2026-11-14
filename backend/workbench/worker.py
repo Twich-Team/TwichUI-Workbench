@@ -114,7 +114,9 @@ def tick(engine, runtime=None, publisher=None, crash=None, stop_event=None, plan
     from workbench.continuing_repair import process_one as recover_local_repair
     # Retain each stage's oldest-first ordering, but give every stage a turn.
     # The sole worker owns this cursor; it is not another durable queue or claim.
+    from workbench import bug_authority
     stages = (
+        lambda: bug_authority.process_one(engine),
         lambda: recover_one(engine),
         lambda: recover_storage(engine),
         lambda: process_one(engine, crash),

@@ -49,6 +49,10 @@ def enqueue(connection, intake_id, kind, revision, payload=None):
 def submit(engine, body, *, owner_provenance=None):
     from workbench import bug_investigation, everyday
 
+    from workbench import bug_authority
+    body, authority = bug_authority.prepare_submission(engine, body)
+    if body is None:
+        return view(engine, str(authority['submitted_input']['request_id']))
     original = body.model_dump(mode='json')
     feature = body.feature_planning
     if feature and (body.kind != 'feature' or body.requested_work not in (None, 'feature')
@@ -100,6 +104,13 @@ def submit(engine, body, *, owner_provenance=None):
                 raise HTTPException(503, 'Planning queue is full. Keep this request and retry after queued work completes.')
             at = now()
             planning = {'owner_provenance': owner_provenance} if owner_provenance is not None else {}
+            if authority:
+                from workbench.model_policy import read_connection
+                current_policy = read_connection(connection)
+                if (current_policy.revision != authority['policy_revision'] or not current_policy.routine_bugs
+                        or not current_policy.routine_bugs.enabled):
+                    raise HTTPException(409, 'Routine bug permission changed before submission. Retry this report.')
+                planning['routine_bug_authority'] = authority
             if body.local_planning:
                 if not everyday.enabled():
                     raise HTTPException(409, 'Ordinary local planning is unavailable at this address.')
@@ -712,7 +723,13 @@ def validate_approval(connection, receipt):
         raise HTTPException(409, 'The approval requires human scope review. No tasks may be created.')
     validate_review(connection, proposal, review, receipt['scope_revision'], receipt['required_artifacts'])
     from workbench.bug_evidence import validate_expectation_review
-    if not continuation:
+    if receipt['payload'].get('policy_authorization'):
+        from workbench.bug_authority import validate
+        try:
+            validate(connection, receipt['intake_id'], review, receipt['payload']['policy_authorization'], active=False)
+        except ValueError as error:
+            raise HTTPException(409, str(error)) from None
+    elif not continuation:
         validate_expectation_review(review, receipt['payload'])
     return proposal
 

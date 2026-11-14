@@ -47,7 +47,7 @@ def save(engine, body):
         })
         c.execute(execution_policies.insert().values(
             revision=updated.revision,
-            payload=updated.model_dump(),
+            payload=updated.model_dump(mode='json'),
             saved_at=now(),
             actor="local-owner-work-control",
         ))

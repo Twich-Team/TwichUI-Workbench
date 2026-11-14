@@ -1,3 +1,14 @@
+# November 13 — routine bug policy authority
+
+bug_authority applies the versioned optional routine_bugs field of the existing
+append-only execution_policies owner. Fresh intake freezes source/policy/model
+choices in its existing planning journal. Existing proposal_decisions record policy
+applications distinctly from human approvals; normal decomposition, preparation,
+task_budget, task_sessions and real_execution own the actual work. No second queue,
+approval engine, scheduler or publication authority exists. Current revocation,
+pause, source/scope and capability checks gate admission. Historical receipts stay
+immutable; re-enabling authority covers new reports only.
+
 # November 13 — shared settlement interpretation and versioned discovery
 
 provider_receipts owns read-only settlement interpretation and native coding

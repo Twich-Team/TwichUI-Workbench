@@ -1,3 +1,41 @@
+# Autonomous Bug Reports — checkpoint A, November 13, 2026 Mountain Time
+
+The owner approved the complete November 13 Astra design and checkpoints A–D in
+attachment 293b0b7b-8806-4c61-be94-6deedff70663. This supersedes the prior Smart AI
+owner-review stop for this connected assignment. Continue through real installed
+Lua/Python request-to-draft acceptance; stop for owner review only after delivery
+or a genuine unsupported architectural/access boundary. No teams are authorized.
+
+Active checkout cc1cb24 baseline; installed build remains 73b24f6. Four services
+active, zero automatic restarts. Read-only baseline has 961 rows/31 tables/schema0014;
+new navigation-lifts investigation has failed, remains Qwen-only/fallbackOff, and is
+untouched. Private per-table baseline: autonomous-bugs-20261113/baseline.json.
+Astra audit recovered from chat 01a1d79b-43d9-7423-9e94-04eabb203aa1 and read.
+
+Checkpoint A implemented one optional versioned policy in execution_policies,
+frozen on fresh nonvisual issue intake with exact source and provider strategy.
+Policy-derived scope/run receipts use owner-policy attribution, never fabricated
+human review. Existing decisions, decomposition, preparation, sessions and grant
+owners remain authoritative. Separate publication policy remains mandatory.
+Disable revokes new admission; re-enable cannot resurrect old authority. Existing
+reports never inherit it. Settings exposes the working control. No live setting,
+report, permission, model call, service or addon source was changed.
+
+Controlled normal API/worker proof reaches one grant and one dispatch with no
+human scope/run command; old tasks, pause/revocation, duplicate intake/dispatch,
+source/scope refusal and held publication are asserted. Static/build/contracts/schema
+passed; 83 connected backend checks passed, plus updated eight policy tests.
+This is controlled execution-admission evidence, not real autonomous coding.
+
+Continue B: bounded reproduction, duplicate-read normalization, versioned repair
+profiles for failing Lua/Python baselines and independently evidenced test corrections.
+Then C: settled fallback/fresh grants across long waits, D: controls/status/actual
+installed request-to-draft cases. Full local/exact hosted acceptance and sealed
+history/rollback installation remain required. Preserve unrelated admin document
+edits and dependency links. No intermediate deployment is planned.
+
+---
+
 # Smart AI Choices delivered — owner review, November 13, 2026 Mountain Time
 
 Following the Project Working Philosophy: exact candidate73b24f6 is installed

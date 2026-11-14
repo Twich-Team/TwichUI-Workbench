@@ -350,6 +350,16 @@ def create_app(engine=None, pilot_path=None, resources_path=None, policy_path=No
             raise HTTPException(422, 'Choose 1, 24 or 168 hours.')
         return monitoring.resources(app.state.resources_path, hours, source)
 
+    from workbench import bug_authority
+
+    @app.get('/api/routine-bug-policy', response_model=bug_authority.Control)
+    def routine_bug_policy():
+        return bug_authority.read(app.state.engine)
+
+    @app.put('/api/routine-bug-policy', response_model=bug_authority.Control, responses=errors)
+    def save_routine_bug_policy(body: bug_authority.ControlInput):
+        return bug_authority.save(app.state.engine, body)
+
     @app.get('/api/work-controls', response_model=work_controls.WorkControl)
     def work_status():
         return work_controls.read(app.state.engine)

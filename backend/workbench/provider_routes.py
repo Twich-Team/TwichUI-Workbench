@@ -149,6 +149,9 @@ def approved(c, original):
         if receipt['original_binding']!=digest(original['payload']) or receipt['scope_revision']!=manual.get('scope_revision'):
             raise ValueError('The explicit Start now choice no longer matches this task.')
         return receipt['route']
+    from workbench.bug_authority import frozen, current
+    if frozen(c, original['id']):
+        return current(c, original['id'])['route']
     if original['payload'].get('ai_settings'):
         # The server receipt freezes this task's exact primary and fallback.
         # Global edits cannot change an already authorized operation.

@@ -115,8 +115,8 @@ def approval_needs_scope_review(connection, receipt):
     review = proposal_review(connection, dict(p))
     try:
         validate_review(connection, p, review, receipt['scope_revision'], receipt['required_artifacts'])
-        from workbench.bug_evidence import validate_expectation_review
-        validate_expectation_review(review, receipt['payload'])
+        from workbench.bug_authority import validate_behavior
+        validate_behavior(connection, review, receipt['payload'])
     except HTTPException:
         return True
     return receipt['binding'] != review['binding'] or receipt['required_artifacts'] is None

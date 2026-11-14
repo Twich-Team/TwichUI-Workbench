@@ -618,6 +618,14 @@ class ProposalDecisionInput(StrictModel):
         return value
 
 
+class PolicyAttribution(StrictModel):
+    actor: Literal['owner-policy'] = 'owner-policy'
+    purpose: Literal['routine-bug-policy-v1'] = 'routine-bug-policy-v1'
+    intake_id: UUID
+    policy_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
+    policy_revision: int = Field(ge=1)
+
+
 class OwnerInstructionProvenance(StrictModel):
     authorization_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
     authorization_path: str = Field(min_length=1, max_length=1024)
@@ -637,12 +645,13 @@ class ExecutionContinuationView(StrictModel):
     authoring_mode: Literal['explicit-current-session'] | None = Field(default=None, exclude_if=lambda value: value is None)
     scope_approval_id: UUID
     scope_binding: str = Field(pattern=r'^[a-f0-9]{64}$')
-    owner_provenance: OwnerInstructionProvenance | BrowserApprovalProvenance | BrowserFeatureProvenance
+    owner_provenance: OwnerInstructionProvenance | BrowserApprovalProvenance | BrowserFeatureProvenance | PolicyAttribution
     continuation_id: str = Field(default='', max_length=200)
     operational_controls: LocalRepairControls | None = Field(default=None, exclude_if=lambda value: value is None)
 
 
 class StoredProposalDecisionPayload(ProposalDecisionInput):
+    policy_authorization: PolicyAttribution | None = Field(default=None, exclude_if=lambda value: value is None)
     feature_browser_command: FeatureRunInput | None = Field(default=None, exclude_if=lambda value: value is None)
     feature_run: FeatureRunPermission | None = Field(default=None, exclude_if=lambda value: value is None)
     # Output only. Public commands still use ProposalDecisionInput and reject it.

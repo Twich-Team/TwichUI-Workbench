@@ -12,6 +12,7 @@ from workbench.schemas import ScenarioModelSelection, StrictModel
 from workbench.db import execution_policies, write_transaction
 from workbench.service import now
 from workbench.ai_strategy import Strategy, Observation as AllowanceObservation
+from workbench.bug_authority import RoutineBugPolicy
 
 Backend = Literal['local', 'codex', 'claude']
 Condition = Literal['unavailable', 'capability', 'verification', 'capacity', 'unknown', 'stale']
@@ -32,7 +33,10 @@ class BackendPreference(StrictModel):
     activated: Literal[False] = False
 
 
+
+
 class ExecutionPolicy(StrictModel):
+    routine_bugs: RoutineBugPolicy | None = Field(default=None, exclude_if=lambda value: value is None)
     strategy: Strategy | None = Field(default=None, exclude_if=lambda value:value is None)
     revision: int = Field(default=0, ge=0)
     preferred: Backend = 'local'
@@ -205,14 +209,14 @@ def save(engine, body, report):
         current = read_connection(connection)
         # Model edits preserve the work control. Only its dedicated endpoint
         # changes admission, including for older clients that omit this field.
-        body = body.model_copy(update={'pause_new_work': current.pause_new_work})
+        body = body.model_copy(update={'pause_new_work': current.pause_new_work, 'routine_bugs': current.routine_bugs})
         values = body.model_dump()
         if body.revision == current.revision - 1 and {**values, 'revision': current.revision} == current.model_dump():
             return current
         if body.revision != current.revision:
             raise HTTPException(409, 'Model preferences changed. Your edits are kept. Reload saved preferences before saving again.')
         saved = body.model_copy(update={'revision': current.revision+1})
-        connection.execute(execution_policies.insert().values(revision=saved.revision, payload=saved.model_dump(), saved_at=now(), actor='local-owner'))
+        connection.execute(execution_policies.insert().values(revision=saved.revision, payload=saved.model_dump(mode='json'), saved_at=now(), actor='local-owner'))
         return saved
 
 

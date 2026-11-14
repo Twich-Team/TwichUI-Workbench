@@ -172,7 +172,12 @@ def prepare_regression(engine, ref, evidence_root, identity, *, validate_policy=
         template=dict(scenario_preparation=prepared_scenarios)
     else:
         raise ValueError('A reviewed behavior scope, reproducer or regression example is required.')
-    bug_evidence.validate_expectation_review(linked['proposal_review'],linked['approval']['payload'])
+    if linked['approval']['payload'].get('policy_authorization'):
+        from workbench.bug_authority import validate
+        with engine.connect() as c:
+            validate(c, ref['intake_id'], linked['proposal_review'], linked['approval']['payload']['policy_authorization'])
+    else:
+        bug_evidence.validate_expectation_review(linked['proposal_review'],linked['approval']['payload'])
     with engine.connect() as c:
         spec=real_recipes.from_review(c,ref,oracle=compiled['oracle'],behavior_id=compiled['behavior_id'],
             read_paths=compiled['read_paths'],focused_test=compiled['focused_test'],identity=identity,prepared=prepared,

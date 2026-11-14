@@ -319,6 +319,9 @@ def permission(c, approval, *, require_current=True, admitting=False, task_id=No
     if approval['payload'].get('feature_run'):
         from workbench.feature_steps import permission as feature_policy
         return feature_policy(c, approval, task_id, offer_id=offer_id, require_current=require_current)
+    if require_current and approval['payload'].get('policy_authorization'):
+        from workbench.bug_authority import validate
+        validate(c, approval['intake_id'], approval['snapshot'], approval['payload']['policy_authorization'])
     raw = approval["payload"].get("run_budget")
     if not raw:
         return None
@@ -716,7 +719,7 @@ def authorize_one(engine, runtime):
         execution.issue(
             engine,
             authorization,
-            "explicit Workbench scope and run-budget decision " + approval["id"],
+            ("saved owner policy operation " if approval["payload"].get("policy_authorization") else "explicit Workbench scope and run-budget decision ") + approval["id"],
             runtime,
             task=selected,
         )

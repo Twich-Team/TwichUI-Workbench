@@ -190,7 +190,8 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
             raise ValueError('Reproducer differs from the independently reviewed bug plan')
     if intent:=reviewed.get('bug_intent'):
         from workbench import bug_check_preparation,bug_evidence
-        bug_evidence.validate_expectation_review(linked['proposal_review'],linked['approval']['payload'])
+        from workbench.bug_authority import validate_behavior
+        validate_behavior(connection, linked['proposal_review'], linked['approval']['payload'])
         if repair_cycle:
             from workbench.repair_cycle import oracle as assertion_runner
             plan=intent['plan']
