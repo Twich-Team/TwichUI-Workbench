@@ -1,3 +1,62 @@
+# Autonomous Bug Reports — combined correction installed; real allocation wait, November 14, 2026 UTC
+
+Following the Project Working Philosophy: b6ed0dbd4e3a5659e9831e19d03d7e629a72aac2
+is INSTALLED, not merely built. Full exact hosted43589029242/all9jobs/finalverify
+passed. Package764files SHA b50e3fa346fceec1aae378897bdaab2102c50fe1a00811dc41dc366cbb3677c2;
+private envelope c74467dac0b0e6f70e9019873c48b70113dbc0e98e96b4a819a154e4ca2aa06a
+pins124files/30externaldependencies/344evidenceroots. Immediate rollbackc294d65;
+superseded154/rejected91/failed70 and all inherited builds remain. All16current/
+required source seals pass. One historical diagnostic proof was made private0600;
+its contents/hash stayed unchanged. This preflight refusal occurred before services.
+
+Exact local backend592+780+642+845=2859passed/9skips;69frontend,134browser/8skips,
+12visual,4connectedfeature,29actual-confined checks with models/readers simulated
+where stated. All4backend drivers/app commands exit0; ALLmanaged scratch closeouts
+complete without standalone recovery. Full runners finished before reporting edits.
+Actual copied-history desktop/phone/200%task screens resolved and were inspected.
+
+Installation driver completed normally exit0/45.7seconds in authorized session78;
+no activation replay. One bounded restart/restore completed exit0/10.7seconds.
+Current/copied/restarted/independentlyrestored store1013rows/31tables/schema0014,
+SHA06ce7e0624b8d7ebd7ea09bc5510a698738ed01f46c15781ed031bc6828a9ab9.
+Initial961andcurrent1013 row subsets retained. Historical rejection sidecars valid.
+Fourservicesactive/0automaticrestarts; privateTLS/listeners/assets/CSRF/kernel/
+resources/reload pass. Actual resource desktop/phone/enlarged images inspected;
+phone work-activity section was still loading, not native task-completion evidence.
+QwenPID3350312/modelinode/header/key unchanged across this cutover;401unauth/200auth.
+Zero localQwen generations for this assignment. Old88GBstorage recovery is historical;
+no new cleanup is claimed. Private receipts:candidate-b6ed0db/final-live-preservation-
+proof.json,activation-runner-result.json,restart-runner-result.json,ui-review.json.
+
+At11:54UTC SAMEtask672113d7/job0e9d1ddd/scope95a18630... used existing exact-bound
+READ-ONLYengineering renewal ONCE. HTTP200; no human approval, implementation grant,
+provider/scope/policy change. Actual originalowner1070560 is DEAD, independently
+verified without simulation. Historylength4 retains original TypeError/phaseheld/
+None-result, originalclaim and all4settledparents/8nativeconstructionproofs. Newroot
+ends round-8401fb5a-0072-4854-a28f-9a0223318e5b; parentf0b465d1-6767-4e55-b9b6-d3a1f11df918.
+
+Fresh allowance observation reached PRIMARY80%cutoff BEFORE generation. Jobqueued,
+parentwaiting/completeZEROusage/requests0. Original-only progress prefix persisted
+with SHA665bf0beea3f462e20b57a031a17d5a9a57ac95dd86ae9e18858b1c3980d212e.
+Frozenwait_then_switch1800seconds respected; wait since1794657272.4440737,
+recheck1794659072.436519 (~12:24:32UTC). Primary reset1794952593 is later;
+permitted Terra/high20%fallback follows the saved strategy, not a manual override.
+DO NOT renew again or change preferences. Tasknotpaused. Case2STILL13completedcalls/
+344430tokens; combinedpausedcase1STILL18calls/456714tokens. Newwaitingparent is NOT
+an extra provider call. CountsSTILL50grants/50requests/4publications; no newaddonedit.
+Zero new end-to-end autonomous repairs or new drafts.
+
+Read-only observer session94769 runs2700seconds from11:54 (~12:39UTC); its native-
+case-observations.jsonl cannot dispatch. Continue actual saved wait/fallback, original
+program design/trial/revision/review/fullinventory, policycoding/candidateall196/
+negativecontrols/exactlyonedraft. AttachcreatedPR. Only after concrete Python draft,
+ask if owner merge genuinely blocks freshLua all-regression baseline. Addonmain
+stilld09e6dcb... verified11:51. Preserve oldQwen/archive/firstpausedreport. Genuine
+ambiguity acceptance remains unproven; never manufacture an owner question. No addon
+merge/release/gameinstall. Continue this assignment; installation is not completion.
+
+---
+
 # Autonomous Bug Reports — contained-feedback recovery complete in source, November 14, 2026 UTC
 
 Following the Project Working Philosophy: the sixth batch now includes BOTH the
