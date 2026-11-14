@@ -46,6 +46,11 @@ def test_fresh_bug_advances_to_separate_run_authority_without_human_approval_and
     value=json.loads(config.read_text())
     value['bug_plan_review']='source-grounded-intent-v1'
     write_policy(config,value)
+    from test_verification_profiles import git, TEST, GOOD_TEST
+    source=Path(os.environ['WORKBENCH_RESEARCH_ROOT'])
+    (source/TEST).write_text((source/TEST).read_text()+GOOD_TEST)
+    git(source,'add','.')
+    git(source,'-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Reported failure')
     # This report predates policy adoption and cannot inherit it.
     historical=client.post('/api/intake',headers=headers,json=report()).json()
     enable(store)
@@ -54,8 +59,10 @@ def test_fresh_bug_advances_to_separate_run_authority_without_human_approval_and
         calls.append(copy.deepcopy(packet))
         self.diagnostics=dict(actual_model=expected_model,generation_state='finished',accounting_state='complete',finish_reason='stop',
             request_completion_limit=6144,usage=dict(units='tokens',values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))
-        return dict(finding='The inspected function omits normalization.',plan=scope()),expected_model,'local'
+        return dict(finding='The inspected function omits normalization.',plan={**scope(),'repair_profile':dict(version=2,kind='existing-failure')}),expected_model,'local'
     monkeypatch.setattr(LocalProvider,'generate',generate)
+    from test_repair_profiles_v2 import ProfileRuntime
+    monkeypatch.setattr('workbench.trusted_preparation.Runtime',ProfileRuntime)
     submitted=report()
     submitted.pop('local_planning')
     response=client.post('/api/intake',headers=headers,json=submitted)
@@ -102,11 +109,10 @@ def test_fresh_bug_advances_to_separate_run_authority_without_human_approval_and
     # Exercise actual grant issuance and dispatch with controlled preflight only.
     # No provider transport runs, and this does not prove real autonomous coding.
     from workbench import task_budget, task_execution
-    from test_grounded_workflow import ControlledPreparer
     with store.connect() as c:
         permission_value=permission(c,run)
         selected=permission_value['offer']
-    runtime=ControlledPreparer(Path(selected['snapshot']['ready_preparation']['root']))
+    runtime=ProfileRuntime(Path(selected['snapshot']['ready_preparation']['root']))
     runtime.task_ref=dict(intake_id=item['id'], task_id=item['tasks'][-1]['id'], approval_id=run['id'])
     runtime.preflight=lambda:[dict(name='controlled-preflight',status='passed',evidence='No model or service is contacted')]
     assert task_budget.authorize_one(store,runtime)

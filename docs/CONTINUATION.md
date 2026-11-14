@@ -1,3 +1,46 @@
+# Autonomous Bug Reports — checkpoint B2, November 13, 2026 Mountain Time
+
+Versioned offline-repair-v2 profiles now reuse the existing Runtime, edit batches,
+confined checks, offers, task grants, original/candidate separation and frozen results.
+Existing-failure keeps trustworthy original assertions unchanged and records a failing
+baseline. Missing-regression freezes an original-only independently authored/reviewed
+program, then requires new native assertions to fail against original production.
+Test-correction permits test-only edits only with cited original requirement evidence,
+original production passing independent behavior, and both independent/newly corrected
+assertions rejecting a source-bound negative control. Vacuous weakening is rejected.
+Environment-only findings cannot advertise implementation or an empty PR.
+
+Lua and Python use language-specific fixed commands through the same confinement.
+The complete v2 suite inventories all committed top-level Lua and Python tests instead
+of the historical runner's three hard-coded Python entries. Empty/all-skipped Python
+checks cannot pass. Unrelated baseline failures remain visible and cannot certify a
+candidate. Independent programs precede candidate creation, retain provider accounting
+and original-only provenance; executing candidate tests is not claimed as independent
+test design. Ordinary policy scopes must select a supported profile; old human-approved
+Lua profiles keep their original semantics. Capability extension does not broaden old
+tasks or require changing their saved plans/permissions. Installation must enable the
+new optional routine_repair_profiles_v2 capability, retaining old allowed_classes.
+
+Focused current-policy/profile/reproduction checks:23passed/one conditional native
+skip. Earlier connected legacy/profile run:118passed/one conditional native skip;
+current coding/profile regression set passes. Dedicated native final matrix:10passed,
+including actual Lua/Python, a Python artifact generator, negative controls, weakened
+assertion refusal and stale evidence refusal. Providers are simulated in these checks;
+no real autonomous coding/publication claim. Static/build/contracts/schema pass.
+Private logs:autonomous-bugs-20261113/{tests-B2*,native-B2*,profiles-coding-final.log}.
+Earlier failures remain: original Python import path and mixed output ordering were
+corrected without weakening final verdicts; a fixture's unrelated failing test correctly
+prevented artifact repair qualification and was removed from that synthetic case only.
+
+Continue checkpoint C: fresh bounded policy operation grants after durable allowance
+waits, settled-failure/suitability routing and preparation continuation. Then D controls,
+exact full local/hosted release and one sealed private installation, mandatory real
+Lua/Python request-to-draft acceptance, history/rollback proof and owner review.
+Installed73b24f6 and historical gallery/navigation-lifts remain untouched. No real model
+calls, addon edits, remote addon branches/PRs or service restarts occurred here.
+
+---
+
 # Autonomous Bug Reports — checkpoint B1, November 13, 2026 Mountain Time
 
 Application-owned Lua/Python committed-test and complete-suite reproduction now

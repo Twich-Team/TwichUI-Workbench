@@ -698,7 +698,7 @@ class PreparationEvidence(StrictModel):
 
 
 class VerificationProfileSelection(StrictModel):
-    id: Literal['lua-regression-tests-v1', 'lua-offline-bugfix-v1']
+    id: Literal['lua-regression-tests-v1', 'lua-offline-bugfix-v1', 'offline-repair-v2']
     requirements: list[str]
     status: Literal['not_run'] = 'not_run'
     execution_authorized: Literal[False] = False
@@ -726,7 +726,7 @@ class RegressionTaskContract(StrictModel):
     bug_evidence: BugEvidence | None = Field(default=None, exclude_if=lambda value: value is None)
     behavioral_evidence: BehavioralPreparation | None = Field(default=None, exclude_if=lambda value: value is None)
     verification_profile: VerificationProfileSelection | None = Field(default=None, exclude_if=lambda value: value is None)
-    category: Literal['lua-regression-tests', 'lua-offline-bugfix'] = 'lua-regression-tests'
+    category: Literal['lua-regression-tests', 'lua-offline-bugfix', 'python-offline-bugfix'] = 'lua-regression-tests'
     version: Literal[1] = 1
     repository: Literal['Twich-Team/TwichUI'] = 'Twich-Team/TwichUI'
     base_ref: Literal['HEAD'] = 'HEAD'
@@ -736,7 +736,7 @@ class RegressionTaskContract(StrictModel):
     review_feedback: str
     writable_paths: list[str]
     path_candidates: list[str]
-    change_policy: Literal['additions-only-existing-test-files', 'bounded-existing-lua-files'] = 'additions-only-existing-test-files'
+    change_policy: Literal['additions-only-existing-test-files', 'bounded-existing-lua-files', 'bounded-repair-profile-v2'] = 'additions-only-existing-test-files'
     verification_commands: list[ProposedCheck]
     independent_checks: list[str]
     evidence: list[PreparationEvidence]

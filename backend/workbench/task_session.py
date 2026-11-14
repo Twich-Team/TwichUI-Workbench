@@ -89,13 +89,20 @@ def provision(runtime, template):
     They are applied only to disposable sibling clones, never the model workspace.
     """
     runtime.prepare()
+    if template.get('independent_program_reference'):
+        reference=runtime.root/'independent-program-reference.json'
+        durable(reference,json.dumps(template['independent_program_reference'],sort_keys=True).encode())
+        reference.chmod(0o600)
     if (getattr(runtime,'recipe',None) or {}).get('repair_cycle'):
         from workbench.repair_cycle import reuse_baseline
-        baseline=reuse_baseline(runtime,template.get('baseline_source'))
+        baseline=None if getattr(runtime,'repair_profile_v2',False) else reuse_baseline(runtime,template.get('baseline_source'))
         if baseline is None:
-            baseline=runtime.check(['bash','tests/run.sh'],runtime.workspace,timeout=600,private_loopback=True)
+            baseline=runtime.check(runtime.expected_checks()[-1],runtime.workspace,timeout=600,private_loopback=True)
         durable(runtime.root/'fresh-baseline-suite.json',json.dumps(baseline,sort_keys=True).encode())
-        if not suite_inventory(baseline,runtime.expected_suite()):
+        if getattr(runtime,'repair_profile_v2',False):
+            from workbench.repair_profiles import prepare_original
+            prepare_original(runtime,baseline)
+        elif not suite_inventory(baseline,runtime.expected_suite()):
             raise ValueError('Existing baseline failed; no repair attempt is ready')
     elif (getattr(runtime, 'recipe', None) or {}).get('verification_profile'):
         from workbench.verification_profiles import prepare,reuse_controls

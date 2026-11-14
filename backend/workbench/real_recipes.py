@@ -14,6 +14,7 @@ def validate(spec):
         raise ValueError("Unsupported bounded Lua contract")
     if spec.get('read_budget_policy', 'repeated-v1') not in ('repeated-v1', 'distinct-lines-v1'):
         raise ValueError('Unknown bounded source read policy')
+    v2 = spec.get("repair_cycle")=="scoped-repair-v2"
     paths = spec.get("read_paths", spec["contract"]["paths"])
     if (
         not isinstance(paths, list)
@@ -24,8 +25,8 @@ def validate(spec):
             or not re.fullmatch(r"[A-Za-z0-9_!./-]{1,240}", p)
             or PurePosixPath(p).is_absolute()
             or ".." in PurePosixPath(p).parts
-            or not p.endswith(".lua")
-            or not p.startswith(("!!!TwichUI/", "TwichUI_Settings/", "tests/"))
+            or not (p.endswith(".lua") or v2 and p.endswith(".py"))
+            or not p.startswith(("!!!TwichUI/", "TwichUI_Settings/", "tests/", *(("tools/",) if v2 else ())))
             for p in paths
         )
         or spec.get("focused_test") not in paths
@@ -79,6 +80,9 @@ def validate(spec):
         if spec.get('repair_cycle') == 'scoped-feature-v1':
             from workbench.feature_steps import validate_spec
             validate_spec(spec)
+        elif v2:
+            from workbench.repair_profiles import validate_spec
+            validate_spec(spec)
         elif 'repair_cycle' in spec:
             from workbench import bug_intent
             from workbench.repair_cycle import enabled,oracle
@@ -126,7 +130,7 @@ def load(root):
     return spec
 
 
-def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity, prepared=None, repair_cycle=False, api_contracts=None, retained_result=None):
+def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_test, identity, prepared=None, repair_cycle=False, api_contracts=None, retained_result=None, independent_program=None):
     """Compile task data from the actual applied review, never a task registry.
 
     Oracle semantics and bounded read selection still require trusted preparation.
@@ -143,9 +147,16 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         validate_reviewed_policy(connection.engine, reviewed)
     if not reviewed or linked['dependencies']:
         raise ValueError('A current reviewed Lua contract without prerequisites is required')
-    profile = select(reviewed['category'])
+    plan_profile=(reviewed.get('bug_intent') or {}).get('plan',{}).get('repair_profile')
+    if plan_profile and plan_profile['kind'] in {'missing-regression','test-correction'}:
+        from workbench.bug_check_preparation import profile_program
+        original_program,_=profile_program(connection,ref)
+        if independent_program!=original_program:
+            raise ValueError('Independent program differs from its original-only preparation journal')
+    from workbench import repair_profiles
+    profile = repair_profiles.selection() if plan_profile else select(reviewed['category'])
     policy = ('additions-only-existing-test-files' if reviewed['category'] == 'lua-regression-tests'
-              else 'bounded-existing-lua-files')
+              else 'bounded-repair-profile-v2' if plan_profile else 'bounded-existing-lua-files')
     if (reviewed['scope_missing'] or reviewed['verification_profile'] != profile
             or reviewed['change_policy'] != policy or not reviewed['acceptance']
             or any(not a.strip() for a in reviewed['acceptance'])
@@ -195,7 +206,8 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         if repair_cycle:
             from workbench.repair_cycle import oracle as assertion_runner
             plan=intent['plan']
-            if (prepared is not None or oracle!=assertion_runner(plan['focused_test'],api_contracts)
+            expected_oracle=repair_profiles.oracle(plan['focused_test'],independent_program['program'] if independent_program else None) if plan_profile else assertion_runner(plan['focused_test'],api_contracts)
+            if (prepared is not None or oracle!=expected_oracle
                     or behavior_id!='bug-reproducer' or read_paths!=plan['read_paths']
                     or focused_test!=plan['focused_test']):
                 raise ValueError('Scoped repair attempt differs from the approved behavior/source scope')
@@ -210,6 +222,8 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
                 raise ValueError('Prepared bootstrap differs from current committed source')
             bug=prepared
     contract = real_execution.contract()
+    if plan_profile:
+        contract['runtime_profile']=repair_profiles.PROFILE
     if reviewed.get('bug_intent'):
         contract['limits']={**contract['limits'],'read_chars':262144}
     contract.update(task_id=linked['task']['id'], title=linked['task']['title'],
@@ -239,7 +253,11 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         spec['initial_reads'] = bug['windows']
     if reviewed.get('bug_intent'):
         if repair_cycle:
-            spec['repair_cycle']='scoped-repair-v1'
+            spec['repair_cycle']='scoped-repair-v2' if plan_profile else 'scoped-repair-v1'
+            if plan_profile:
+                spec['repair_profile']=plan_profile
+                if independent_program:
+                    spec['independent_program']=independent_program
             spec['approved_intent']=reviewed['bug_intent']
             if api_contracts is not None:
                 from workbench.api_mock_contract import source_support
@@ -258,9 +276,13 @@ def from_review(connection, ref, *, oracle, behavior_id, read_paths, focused_tes
         spec['read_budget_policy']='distinct-lines-v1'
     validate(spec)
     # Every command advertised to the reviewer must be consumed by this runtime.
-    checks = [dict(argv=['luac5.1', '-p', p], cwd='.') for p in contract['paths']]
-    checks += [dict(argv=['lua5.1', '-e', PRELUDE, focused_test.split('/')[-1]], cwd='tests'),
-               dict(argv=['bash', 'tests/run.sh'], cwd='.')]
+    if plan_profile:
+        checks = [dict(argv=repair_profiles.syntax_command(p),cwd='.') for p in contract['paths']]
+        checks += [dict(argv=repair_profiles.focused_command(focused_test),cwd='tests')]
+    else:
+        checks = [dict(argv=['luac5.1', '-p', p], cwd='.') for p in contract['paths']]
+        checks += [dict(argv=['lua5.1', '-e', PRELUDE, focused_test.split('/')[-1]], cwd='tests'),
+                   dict(argv=['bash', 'tests/run.sh'], cwd='.')]
     if [{k: c[k] for k in ('argv', 'cwd')} for c in reviewed['verification_commands']] != checks:
         raise ValueError('Reviewed checks differ from the supported fixed runtime checks')
     # Pin actual committed regular bytes, including the harness and selected scope.

@@ -71,7 +71,7 @@ def test_normal_investigation_runs_a_check_retains_observation_and_proposes_grou
         self.diagnostics=dict(actual_model=expected_model,generation_state='finished',accounting_state='complete',finish_reason='stop',
             request_completion_limit=6144,usage=dict(units='tokens',values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))
         result=(dict(finding='Run the existing committed normalization test before explaining its cause.',checks=[dict(capability='lua-test',path=scope()['focused_test'])])
-            if len(calls)==1 else dict(finding='The check failed; missing normalization is a hypothesis supported by the inspected implementation.',plan=scope()))
+            if len(calls)==1 else dict(finding='The check failed; missing normalization is a hypothesis supported by the inspected implementation.',plan={**scope(),'repair_profile':dict(version=2,kind='existing-failure')}))
         return result,expected_model,'local'
     monkeypatch.setattr(LocalProvider,'generate',generate)
     response=client.post('/api/intake',headers=headers,json=report())

@@ -17,6 +17,7 @@ from workbench.regression_evidence import LuaPath, TestPath
 from workbench.visual_scope import digest
 from workbench.source_artifacts import PATTERN
 from workbench.investigation_checks import Check
+from workbench.repair_profiles import Profile, selection as profile_selection
 
 Text = Annotated[str, Field(min_length=1, max_length=800)]
 InvestigationPath = Annotated[str, Field(pattern=PATTERN, max_length=240)]
@@ -30,6 +31,7 @@ class Criterion(Data):
 
 
 class Plan(Data):
+    repair_profile: Profile | None = Field(default=None, exclude_if=lambda value:value is None)
     scope: Text
     read_paths: Annotated[list[InvestigationPath], Field(min_length=1, max_length=12)]
     writable_paths: Annotated[list[LuaPath | TestPath | PythonPath], Field(min_length=1, max_length=3)]
@@ -46,12 +48,14 @@ class Plan(Data):
 
     @model_validator(mode='after')
     def coherent(self):
+        if self.repair_profile and self.repair_profile.kind=='test-correction' and any(not p.startswith('tests/test_') for p in self.writable_paths):
+            raise ValueError('Test correction permits test files only; original production remains unchanged')
         checks=(
             (len(self.read_paths)==len(set(self.read_paths)), 'distinct_read_paths', 'Read paths must be distinct.'),
             (len(self.writable_paths)==len(set(self.writable_paths)), 'distinct_writable_paths', 'Writable paths must be distinct.'),
             (set(self.writable_paths)<=set(self.read_paths), 'writable_source_not_read', 'Every writable path must also be a read path.'),
             (self.focused_test in self.writable_paths, 'focused_test_not_writable', 'The focused test must be included in writable paths, within the three-file total.'),
-            (self.focused_test.endswith('.py') or any(p.startswith(('!!!TwichUI/', 'TwichUI_Settings/')) for p in self.writable_paths), 'production_scope_required', 'A repair scope must include project production code.'),
+            (self.focused_test.endswith('.py') or self.repair_profile and self.repair_profile.kind=='test-correction' or any(p.startswith(('!!!TwichUI/', 'TwichUI_Settings/')) for p in self.writable_paths), 'production_scope_required', 'A repair scope must include project production code.'),
             (len({c.id for c in self.criteria})==len(self.criteria), 'distinct_criteria', 'Behavior criterion identifiers must be distinct.'),
         )
         for valid,code,message in checks:
@@ -169,18 +173,24 @@ INSTRUCTIONS = (
     'A repeated visible read is not progress. Follow missing consumers/callers, search another relevant layer, or propose a specific bounded scope with explicit uncertainty. '
     'At most three reads and searches COMBINED are permitted per response.'
     ' Relevant committed Python tests and generator tools may be investigated and proposed in a plan; '
-    'Python plans are review-only in this release, with execution held by the existing Lua runtime boundary. '
+    'For supported repairs select repair_profile={version:2,kind:existing-failure|missing-regression|test-correction|environment}. '
+    'Use existing-failure for an actual failing committed test, missing-regression when coverage must be added, '
+    'test-correction only when independent original-source evidence establishes production behavior is already correct, '
+    'and environment when no code change is warranted. Python tests/tools use the same isolated runtime. '
     'Do not propose unrelated Lua changes to satisfy a production-path requirement for a Python-only failure. '
     'PNG reads supply controlled metadata, not decoded pixels or executable source.'
 )
 
 
-def schema(files):
+def schema(files, require_profile=False):
     result=Response.model_json_schema()
     paths=[f['path'] for f in files]
     writes=[f['path'] for f in files if f.get('repair_scope_candidate', not f.get('support_only'))]
     tests=[p for p in writes if p.startswith('tests/test_')]
     properties=result['$defs']['Plan']['properties']
+    if require_profile:
+        result['$defs']['Plan']['required'].append('repair_profile')
+        properties['repair_profile']={'$ref':'#/$defs/Profile'}
     properties['read_paths']['items']={'type':'string','enum':paths}
     properties['writable_paths']['items']={'type':'string','enum':writes}
     properties['focused_test']={'type':'string','enum':tests}
@@ -199,11 +209,21 @@ def resolve(raw,packet,original,feedback):
         raise ValueError('Source inspection must finish before a scope is proposed')
     intent=bind(value.plan.model_dump(mode='json'),packet,original,feedback) if value.plan else None
     missing=[value.question or value.limitation] if not intent else []
-    review_only=bool(intent and any(not p.endswith('.lua') for p in intent.plan.writable_paths))
+    profile=intent.plan.repair_profile if intent else None
+    category='python-offline-bugfix' if intent and intent.plan.focused_test.endswith('.py') and profile else 'lua-offline-bugfix'
+    verification=profile_selection() if profile else select('lua-offline-bugfix')
+    review_only=bool(intent and any(not p.endswith('.lua') for p in intent.plan.writable_paths) and not profile)
+    if profile and profile.kind=='environment':
+        established=any(r.get('outcome')=='environment-or-fixture-failure' for r in packet.get('reproductions',[]))
+        missing=['A supported check observed an environment or fixture failure. No source repair or draft PR will be invented; review the retained diagnosis and supported resolution.' if established else 'No environmental diagnosis has been established by a supported check; continue investigation before claiming a cause.']
     if review_only:
         missing=['This Python repair plan is saved for review. The current isolated repair runtime supports Lua; no Python execution or implementation is authorized.']
     checks=[]
-    if intent and not review_only:
+    if intent and profile and not missing:
+        from workbench.repair_profiles import syntax_command,focused_command
+        checks=[dict(argv=syntax_command(p),cwd='.',purpose='Syntax check') for p in intent.plan.writable_paths]
+        checks += [dict(argv=focused_command(intent.plan.focused_test),cwd='tests',purpose='Focused original regression')]
+    elif intent and not review_only and not missing:
         checks=[dict(argv=['luac5.1','-p',p],cwd='.',purpose='Syntax check') for p in intent.plan.writable_paths]
         checks += [dict(argv=['lua5.1','-e',PRELUDE,intent.plan.focused_test.split('/')[-1]],cwd='tests',purpose='Focused existing regression'),
                    dict(argv=['bash','tests/run.sh'],cwd='.',purpose='Complete existing suite')]
@@ -222,12 +242,12 @@ def resolve(raw,packet,original,feedback):
                 raw=source.blob(root,inventory[path])
                 evidence.append(dict(path=path,git_blob=inventory[path],sha256=hashlib.sha256(raw).hexdigest()))
     blockers=missing or ['Review this scope. A separate run decision may allow isolated edits and test development; independent checks are required before a checked result.']
-    contract=RegressionTaskContract(category='lua-offline-bugfix',bug_workflow='scope-then-checks-v1',bug_intent=intent,
-        verification_profile=select('lua-offline-bugfix'),resolved_base=packet['base'],
+    contract=RegressionTaskContract(category=category,bug_workflow='scope-then-checks-v1',bug_intent=intent,
+        verification_profile=verification,resolved_base=packet['base'],
         intended_behavior=original['description'],acceptance=acceptance,review_feedback=feedback,
         writable_paths=intent.plan.writable_paths if intent else [],path_candidates=[],
-        change_policy='bounded-existing-lua-files',verification_commands=checks,
-        independent_checks=select('lua-offline-bugfix')['requirements'],evidence=evidence,
+        change_policy='bounded-repair-profile-v2' if profile else 'bounded-existing-lua-files',verification_commands=checks,
+        independent_checks=verification['requirements'],evidence=evidence,
         resource_limits={**LIMITS,'read_chars':262144,'overall_seconds':5400,'implementation_attempts':1,'publication_seconds':900,'fallback_attempts':0},
         scope_missing=missing,execution_blockers=blockers).model_dump(mode='json')
     content=ProposalContent(summary=original['title'],value=value.finding,feasibility=blockers[0],

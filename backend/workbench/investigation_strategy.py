@@ -93,7 +93,7 @@ def correction(error):
             else:
                 issues.append(dict(path=path,constraint=issue['type']))
     elif isinstance(error,ResponseValidationError):
-        issues=[dict(path=['response'],constraint='semantic_validation')]
+        issues=[dict(path=['plan','repair_profile'],constraint='repair_profile_required',rule=error.expected)] if list(error.path)==['plan','repair_profile'] else [dict(path=['response'],constraint='semantic_validation')]
     else:
         return None
     return dict(rejected=True,approved=False,executed=False,errors=issues,

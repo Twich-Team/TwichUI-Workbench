@@ -53,7 +53,7 @@ def preview(runtime,planned):
             if not added.isdecimal() or not removed.isdecimal():
                 raise ToolDenied('binary_edit','Binary edits are unavailable')
             count+=int(added)+int(removed)
-            if name.startswith('tests/') and int(removed):
+            if name.startswith('tests/') and int(removed) and not (getattr(runtime,'repair_profile_v2',False) and runtime.recipe['repair_profile']['kind']=='test-correction'):
                 raise RepairConstraint('test-preservation','Existing tests may gain assertions; existing lines cannot be removed.')
     if count>LIMITS['changed_lines']:
         raise RepairConstraint('change-budget','The entire repair and regression tests must fit the approved changed-line limit. Revise the proposal; do not reduce required behavior coverage.',

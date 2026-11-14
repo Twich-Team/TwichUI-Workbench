@@ -451,6 +451,7 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                     identity = c.execute(select(planning_jobs.c.intake_id).join(model_attempts, model_attempts.c.job_id == planning_jobs.c.id).where(model_attempts.c.id == parent.identifier)).scalar_one_or_none()
                     covered = identity and bug_authority.frozen(c, identity)
                 if covered:
+                    result['coverage']['require_repair_profile']=True
                     result['reproduction_capabilities'] = dict(capabilities=['lua-test','python-test','repository-suite'], max_checks=6, note='Choose a committed test path. Commands, arguments, networking and writes to original source are unavailable.')
                     result['reproduction_observations'] = [{k:v for k,v in observed.items() if k != 'evidence_root'} for observed in packet.get('reproductions', [])]
         added=packet.get('inspection_windows',[])[before:]
@@ -743,6 +744,8 @@ def generate(adapter, initial, original, feedback, should_stop, expected_model, 
                 if setup_fact and evidence:
                     evidence.record('explicit-setup-compiled', **setup_fact)
                 draft = response_model.model_validate(raw)
+                if intent_mode and draft.plan and wire['coverage'].get('require_repair_profile') and not draft.plan.repair_profile:
+                    raise ResponseValidationError('Routine repairs need a supported independent verification class.', ['plan','repair_profile'], 'Select version 2 and kind existing-failure, missing-regression, test-correction or environment from the observed evidence.', None)
                 if wire['coverage'].get('require_inspection') and draft.inspection is None:
                     raise ResponseValidationError('Stateful investigation must inspect committed source before a plan.',
                         ['inspection'], 'a read-only committed source window', None)

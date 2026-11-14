@@ -1,3 +1,16 @@
+# November 13 — repair profiles and original-only evidence
+
+repair_profiles supplies versioned language/check/evidence adapters to the existing
+Runtime; repair_suite runs the exact complete committed Lua/Python inventory within
+real_confine. They own no scheduler, execution authority or publication. Existing
+bug_check_preparation/planning_jobs/model_attempts freeze original-only independent
+programs and their requirement evidence before candidate creation. Existing scoped
+edit batches, task grants and candidate snapshots remain authoritative. Original
+assertions may remain failing at admission; every applicable candidate regression
+must pass. Test correction requires independent original behavior and meaningful
+negative controls; candidate-authored tests alone are never independent design.
+Historical Lua recipes and original approvals retain their original contracts.
+
 # November 13 — routine bug policy authority
 
 bug_authority applies the versioned optional routine_bugs field of the existing

@@ -60,7 +60,8 @@ def suite_inventory(result, expected):
     return (result.get('status') == 'pass' and result.get('rc') == 0 and
             sorted(groups) == sorted(expected) and len(groups) == len(set(groups)) and
             result.get('out', '').strip().endswith(summary) and
-            result.get('command') == ['bash', 'tests/run.sh'] and
+            (result.get('command') == ['bash', 'tests/run.sh'] or result.get('inventory_version')=='all-committed-tests-v2'
+                and result.get('command',[])[:3]==['python3','-B',str(Path(__file__).with_name('repair_suite.py'))]) and
             result.get('network_mode') == 'private-loopback')
 
 
@@ -108,6 +109,8 @@ class Runtime:
         self.source_read_limit = self.execution_contract['limits']['read_chars']
         self.read_paths = tuple(self.recipe.get('read_paths', self.paths)) if self.recipe else self.paths
         self.oracle_source = self.root/'recipe-oracle.lua' if self.recipe else ORACLE
+        from workbench import repair_profiles
+        self.repair_profile_v2=repair_profiles.selected(self.recipe)
         from workbench.real_feedback import CheckFeedback
         self.feedback = CheckFeedback(self.root, self.read_paths)
         selected = self.root/'selected-task.json'
@@ -148,6 +151,9 @@ class Runtime:
         durable(self.initial, json.dumps(tree(self.workspace), sort_keys=True).encode())
         durable(self.root/'oracle.lua', self.oracle_source.read_bytes())
         durable(self.root/'oracle.sha256', sha(self.oracle_source.read_bytes()).encode())
+        if self.repair_profile_v2:
+            from workbench.repair_profiles import complete_inventory
+            durable(self.root/'complete-test-inventory.json',json.dumps(complete_inventory(self)).encode())
 
     def identity(self):
         value = dict(model='pilot-qwen38-27b', model_path=str(MODEL),
@@ -161,6 +167,8 @@ class Runtime:
                     oracle_sha256=sha(self.oracle_source.read_bytes()), contract=job.digest(self.execution_contract),
                     helper_sha256={name: sha(Path(__file__).with_name(name).read_bytes()) for name in
                        ['real_execution.py','real_workspace.py','storage_resources.py','implementation_context.py','continuing_repair.py','lua_failure_context.py','suite_failure_detail.py','local_generation_recovery.py','real_provider.py','real_confine.py','real_sandbox.py','real_primary.py','real_stream.py','real_lease.py','real_tool_contract.py','real_usage.py','real_probe.py','real_sse.py','real_feedback.py','real_package.py','real_handoff.py','task_execution.py','owner_task.py','intake.py','planning_worker.py','visual_scope.py','repair_edits.py','repair_continuation.py']})
+        if self.repair_profile_v2:
+            value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes()) for name in ('repair_profiles.py','repair_suite.py','bug_authority.py')})
         if self.recipe:
             value['helper_sha256'].update({name:sha(Path(__file__).with_name(name).read_bytes()) for name in ['real_recipes.py','task_budget.py','verification_process.py']})
             if self.recipe.get('repair_cycle'):
@@ -197,6 +205,12 @@ class Runtime:
         # a missing marker in an arbitrary different output directory.
         return grant['snapshot']['runtime'].get('workspace') == str(self.workspace)
 
+    def baseline_valid(self, result):
+        if self.repair_profile_v2:
+            from workbench.repair_profiles import suite_observation
+            return suite_observation(result,self.expected_suite())
+        return suite_inventory(result,self.expected_suite())
+
     def static_preflight(self):
         """No service/credentials/generation. Actual frozen preparation evidence only."""
         baseline_path = self.root/'fresh-baseline-suite.json'
@@ -211,7 +225,7 @@ class Runtime:
               and resources.get('cgroup_removed') is True)
         return [dict(name=name,status='passed' if valid else 'blocked') for name,valid in [
             ('exact clean base and isolated workspace',clean),('frozen oracle',oracle),
-            ('complete confined baseline',suite_inventory(baseline,self.expected_suite())),
+            ('complete confined baseline',self.baseline_valid(baseline)),
             ('actual baseline cleanup/resources',safe),
             ('scope and sandbox readiness; correctness pending' if self.recipe and self.recipe.get('repair_cycle') else 'independent control evidence',self.controls_valid())]]
 
@@ -274,7 +288,7 @@ class Runtime:
              'Authorized total cap2500, wire2496; installed total-limit source/multibyte controls required by lease controller')
         baseline_path = self.root/'fresh-baseline-suite.json'
         baseline = json.loads(baseline_path.read_text()) if baseline_path.is_file() else {}
-        gate('complete confined baseline suite', suite_inventory(baseline, self.expected_suite()),
+        gate('complete confined baseline suite', self.baseline_valid(baseline),
              'All test-file groups required; trusted verification uses private loopback, model tools deny sockets')
         # These are current runtime prerequisites, not user-supplied pass switches.
         gate('scope and sandbox readiness; correctness pending' if self.recipe and self.recipe.get('repair_cycle') else 'reproduction and negative controls', (self.root/'controls-passed.json').is_file() and
@@ -376,10 +390,14 @@ class Runtime:
         if self.recipe and private_loopback:
             from workbench.verification_process import VerificationProcess
             verification = VerificationProcess(tuple(argv), str(self.workspace))
+        if self.repair_profile_v2 and argv==self.expected_checks()[-1]:
+            ro=[*ro,Path(__file__).with_name('repair_suite.py'),self.root/'complete-test-inventory.json']
         result = confine.run(argv, str(cwd), min(timeout, left), ro=[str(self.workspace), *map(str, ro)],
                            env={'PATH': '/usr/bin:/bin', 'HOME': '/nonexistent', 'LANG': 'C.UTF-8'},
                            stop_event=self.stop_event,
                            private_loopback=private_loopback, **({'verification':verification} if verification else {}))
+        if self.repair_profile_v2 and argv==self.expected_checks()[-1]:
+            result['inventory_version']='all-committed-tests-v2'
         result['network_mode'] = 'private-loopback' if private_loopback else 'denied'
         result['command'] = argv
         result['working_directory'] = str(cwd)
@@ -389,6 +407,9 @@ class Runtime:
     def expected_suite(self):
         if not self.initial.is_file():
             return []
+        if self.repair_profile_v2:
+            from workbench.repair_profiles import complete_inventory
+            return complete_inventory(self)
         base = json.loads(self.initial.read_text())
         return [Path(name).name for name in base if name.startswith('tests/test_') and name.endswith('.lua')] + [
             'test_sv_inspect.py','test_release_tools.py','test_wizard_art.py']
@@ -444,7 +465,7 @@ class Runtime:
             additions, deletions, path = line.split('\t')
             if additions == '-' or deletions == '-':
                 raise ValueError('Binary change')
-            if (path.startswith('tests/') if self.recipe else path == self.paths[2]) and deletions != '0':
+            if (path.startswith('tests/') if self.recipe else path == self.paths[2]) and deletions != '0' and not (self.repair_profile_v2 and self.recipe['repair_profile']['kind']=='test-correction'):
                 raise ValueError('Existing tests may only gain assertions')
             changes += int(additions)+int(deletions)
         if changes > 150 or any(line.startswith(('old mode', 'new mode', 'deleted file', 'rename '))
@@ -466,6 +487,9 @@ class Runtime:
         return sha(path.read_bytes())
 
     def expected_checks(self):
+        if self.repair_profile_v2:
+            from workbench.repair_profiles import commands
+            return commands(self)
         return [['luac5.1','-p',path] for path in self.paths] + [
             ['lua5.1','-e',PRELUDE,self.recipe['focused_test'].split('/')[-1] if self.recipe else 'test_chronicle_journey.lua'],
             ['lua5.1','-e',PRELUDE,str(self.root/'oracle.lua')],
@@ -476,7 +500,7 @@ class Runtime:
             return {'syntax-data':['luac5.1','-p',self.paths[0]],
                     'syntax-recorder':['luac5.1','-p',self.paths[1]],
                     'focused':self.expected_checks()[-3]}
-        return {**{'syntax-'+str(i+1):['luac5.1','-p',p] for i,p in enumerate(self.paths)},
+        return {**{'syntax-'+str(i+1):self.expected_checks()[i] for i,p in enumerate(self.paths)},
                 'focused':self.expected_checks()[-3]}
 
     def candidate_feedback(self, permitted):
@@ -518,7 +542,7 @@ class Runtime:
         durable(folder/'changes.patch', patch.encode())
         for path in changed:
             durable(folder/'files'/path, (self.workspace/path).read_bytes())
-        if self.recipe and self.recipe.get('repair_cycle') and self.recipe['focused_test'] not in changed:
+        if self.recipe and self.recipe.get('repair_cycle') and not self.repair_profile_v2 and self.recipe['focused_test'] not in changed:
             feedback=dict(status='fail',check_round=index,completed_checks=0,required_checks=len(self.expected_checks()),
                 failed_check_name='original-with-new-tests',original_test_differential=dict(status='fail',
                     reason='Add regression assertions to the approved focused test while implementing the repair.'),
@@ -643,7 +667,9 @@ class Runtime:
             instruction = (self.recipe['instruction']+'\nInitial bounded reads: '+
                 json.dumps(self.recipe['initial_reads'],ensure_ascii=True)+
                 '\nOnly write '+', '.join(self.paths)+'. Use the supplied checks; normal failures may be repaired within this attempt.')
-            if self.recipe.get('repair_cycle'):
+            if self.repair_profile_v2:
+                instruction+=(' Repair profile: '+self.recipe['repair_profile']['kind']+'. Preserve existing failing tests for production fixes. Test-only correction requires independent original-source and negative-control evidence. The application owns independent checks and complete Lua/Python inventory verification.')
+            elif self.recipe.get('repair_cycle'):
                 instruction+=(' Develop the repair and new native Lua assert regression checks together. '
                     'A separate checking program is not required before editing this isolated copy. '
                     'The new assertions must exercise actual behavior: they must fail on unchanged original production '

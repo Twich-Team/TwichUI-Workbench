@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 from uuid import uuid4
 
+from pydantic import Field
 from sqlalchemy import select
 
 from workbench import bug_evidence,bug_intent,bug_investigation,bug_source_planning
@@ -195,5 +196,150 @@ def construct(engine,ref,root,identity,stop_event=None,*,adapter=None):
             diagnostics={key:facts.get(key) for key in ('provider_receipt','provider_terminal_confirmed',
                 'terminal_status','protocol_guard','wire_bytes','investigation_requests',
                 'stopped_request_category','stopped_request_generation_state')}),sort_keys=True).encode())
+        if evidence:
+            evidence.close()
+
+
+class ProfileProgramReview(bug_evidence.Data):
+    ready: bool
+    covered_criteria: list[str] = Field(min_length=1,max_length=12)
+    reason: str = Field(min_length=10,max_length=1200)
+
+
+def profile_program(c, ref):
+    """Existing preparation journal points to original-only program evidence."""
+    from workbench.real_workspace import sha
+    from workbench.trusted_preparation import owned
+    linked=task_execution.snapshot(c,**ref)
+    payload=c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id==ref['intake_id'],
+        planning_jobs.c.kind=='behavioral_preparation',planning_jobs.c.revision==linked['proposal_review']['revision'])).scalar_one()
+    reference=payload['independent_profile_program']
+    path=owned(reference['path'])
+    value=json.loads(path.read_text())
+    attempt=c.execute(select(model_attempts).where(model_attempts.c.id==value['model_attempt_id'])).mappings().one()
+    if (sha(path.read_bytes())!=reference['sha256'] or value['intent_digest']!=linked['proposal_review']['task_contract']['bug_intent']['review_digest']
+            or value['source_basis']!='original-only' or not value['review']['ready']
+            or attempt['task_id']!=ref['intake_id'] or attempt['outcome']!='completed'):
+        raise ValueError('Original-only independent program identity or provider settlement changed')
+    return value['program'], reference
+
+
+def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
+    """Blind program design before coding, in the current preparation operation."""
+    from workbench import provider_routes, everyday
+    from workbench.repair_profiles import IndependentProgram
+    from workbench.planning_response import create_evidence
+    from workbench.real_workspace import sha
+    from workbench.bug_authority import validate_behavior
+    with engine.connect() as c:
+        linked=task_execution.snapshot(c,**ref)
+        reviewed=linked['proposal_review']['task_contract']
+        validate_behavior(c,linked['proposal_review'],linked['approval']['payload'])
+        job=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==ref['intake_id'],
+            planning_jobs.c.kind=='behavioral_preparation',planning_jobs.c.revision==linked['proposal_review']['revision'])).mappings().one()
+        if job['status']!='running' or job['payload']['preparation_claim']['root']!=str(root):
+            raise ValueError('A current preparation claim is required for independent checks')
+        original=c.execute(select(planning_jobs.c.payload).where(planning_jobs.c.intake_id==ref['intake_id'],
+            planning_jobs.c.kind=='planning',planning_jobs.c.revision==linked['proposal_review']['revision'])).scalar_one()
+        packet=copy.deepcopy(original['bug_inspection_packet'])
+        route=provider_routes.run_selection(c,linked)
+        local=everyday.local_selection(c) if not route else None
+    intent=reviewed['bug_intent']
+    operation=str(uuid4())
+    claim=root/'independent-program-claim.json'
+    if claim.exists():
+        raise ValueError('Independent preparation already has a durable claim; no replay')
+    durable(claim,json.dumps(dict(id=operation,source_basis='original-only',base=intent['base'],intent_digest=intent['review_digest'])).encode())
+    def stopped():
+        return bool(stop_event and stop_event.is_set())
+    from workbench.planning_provider import LocalProvider
+    adapter=adapter or (provider_routes.external_planner(route,stopped) if route else LocalProvider(stop_event,ends_at=time.monotonic()+600))
+    model=route['model'] if route else local.model
+    if callable(getattr(adapter,'bind_operation',None)):
+        adapter.bind_operation(engine,operation,suitable_local=False)
+    if callable(getattr(adapter,'bind_source',None)):
+        adapter.bind_source(packet)
+    with write_transaction(engine) as c:
+        current=intake.require(c,planning_jobs,job['id'])
+        c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload={**current['payload'],
+            'local_planning_receipt':original['local_planning_receipt'],'independent_program_claim':dict(id=operation,source_basis='original-only')}))
+        c.execute(model_attempts.insert().values(id=operation,job_id=job['id'],task_id=ref['intake_id'],purpose='check_preparation',
+            source='workbench',backend=route.get('provider','codex') if route else 'local',requested_model=model,
+            requested_effort=route.get('effort') if route else None,policy_revision=route['policy_revision'] if route else local.policy_revision,
+            outcome='running',started_at=intake.now(),routing_reason='Original-only independent repair evidence before any implementation.'))
+    wire=dict(purpose='original-only independent behavior checks',original=linked['original'],intent=intent,
+        files=[f for f in packet['files'] if f['path'] in intent['plan']['read_paths']],
+        instructions=('Design a bounded '+('Python' if intent['plan']['focused_test'].endswith('.py') else 'Lua')+
+            ' assertion body from the original report, requirements and committed source only. No candidate exists. '
+            'Observe actual behavior, not source text, hashes, test-runner flags or self-assigned expected state. '
+            'Use only stdlib/existing dependencies, no network. Include every criterion id. Do not emit verdicts or exit. '
+            'For missing-regression the program must fail on original and pass on a genuine fix. '
+            'For test-correction cite exact report text or a committed requirement comment for every criterion in evidence (criterion,kind,path,quote). Do not cite the assertion being corrected or candidate behavior. Independently prove original production behavior is correct; provide one small exact '
+            'negative_control replacement in a read-only production dependency that both this program and a corrected test must reject. '
+            'Do not weaken an assertion merely because it fails. Artifact contracts must follow original committed requirements.'))
+    usage=[]
+    issued=0
+    evidence=None
+    failure=None
+    try:
+        evidence=create_evidence(operation,IndependentProgram,None,wire['files'])
+        adapter.response_evidence=evidence
+        with engine.connect() as c:
+            validate_behavior(c,linked['proposal_review'],linked['approval']['payload'])
+        issued+=1
+        raw,actual,basis=adapter.generate(wire,IndependentProgram,expected_model=model)
+        usage.append(copy.deepcopy(adapter.diagnostics.get('usage')))
+        program=IndependentProgram.model_validate(raw)
+        from workbench.repair_profiles import validate_requirement_evidence
+        validate_requirement_evidence(program,intent,linked['original'])
+        if evidence:
+            evidence.snapshot('original-only-program',program.model_dump())
+            evidence.close()
+        review_id=str(uuid4())
+        review_wire={**wire,'purpose':'review original-only independent behavior checks','proposed_check':program.model_dump(),
+            'review_instructions':'Check semantic coverage against every original criterion, independence from candidate code, meaningful assertions and negative controls. Refuse source-text matching, constant/vacuous checks and unsupported expected behavior.'}
+        evidence=create_evidence(review_id,ProfileProgramReview,None,wire['files'])
+        adapter.response_evidence=evidence
+        with engine.connect() as c:
+            validate_behavior(c,linked['proposal_review'],linked['approval']['payload'])
+        issued+=1
+        checked,_,_=adapter.generate(review_wire,ProfileProgramReview,expected_model=model)
+        usage.append(copy.deepcopy(adapter.diagnostics.get('usage')))
+        review=ProfileProgramReview.model_validate(checked)
+        if not review.ready or set(review.covered_criteria)!={v['id'] for v in intent['plan']['criteria']} or set(program.criteria)!=set(review.covered_criteria):
+            raise ValueError('Independent check review did not establish all original behavior requirements')
+        if any(not isinstance(u,dict) or not isinstance(u.get('values'),dict) for u in usage):
+            raise ValueError('Independent provider accounting is unavailable')
+        values={key:sum(u['values'][key] for u in usage) for key in ('prompt_tokens','completion_tokens','total_tokens')}
+        observed=dict(status='complete',units='tokens',values=values,requests_observed=len(usage))
+        if getattr(adapter,'strategy_control',False):
+            observed['strategy_requests']=list(adapter.request_history)
+        with write_transaction(engine) as c:
+            c.execute(model_attempts.update().where(model_attempts.c.id==operation).values(outcome='completed',actual_model=actual,
+                usage=observed,finished_at=intake.now()))
+        record=dict(version=2,model_attempt_id=operation,intent_digest=intent['review_digest'],source_basis='original-only',
+            source_base=intent['base'],program=program.model_dump(),review=review.model_dump())
+        path=root/'independent-program.json'
+        durable(path,json.dumps(record,sort_keys=True).encode())
+        reference=dict(path=str(path),sha256=sha(path.read_bytes()))
+        durable(root/'independent-program-reference.json',json.dumps(reference,sort_keys=True).encode())
+        with write_transaction(engine) as c:
+            current=intake.require(c,planning_jobs,job['id'])
+            c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload={**current['payload'],'independent_profile_program':reference}))
+        return program.model_dump()
+    except Exception as error:
+        failure=error
+        raise
+    finally:
+        if failure is not None:
+            known=[u for u in usage if isinstance(u,dict) and isinstance(u.get('values'),dict)]
+            complete=len(known)==issued
+            not_started=getattr(adapter,'diagnostics',{}).get('generation_state')=='not_started'
+            values={k:sum(u['values'][k] for u in known) for k in ('prompt_tokens','completion_tokens','total_tokens')}
+            retained=(dict(status='complete',units='tokens',values=values,requests_observed=len(known)) if complete or not_started else
+                dict(status='partial',units='tokens',values=None,known_values=values,requests_observed=len(known)))
+            with write_transaction(engine) as c:
+                c.execute(model_attempts.update().where(model_attempts.c.id==operation).values(outcome='waiting' if not_started else 'failed' if complete else 'interrupted_unknown',
+                    usage=retained,finished_at=intake.now()))
         if evidence:
             evidence.close()

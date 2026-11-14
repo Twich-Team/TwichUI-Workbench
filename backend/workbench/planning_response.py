@@ -105,7 +105,7 @@ def wire_schema(model, coverage=None, files=None):
         return feature_scope_schema(files, coverage)
     from workbench.bug_intent import Response as IntentResponse, schema as intent_schema
     if model is IntentResponse:
-        return intent_schema(files or [])
+        return intent_schema(files or [],require_profile=bool((coverage or {}).get('require_repair_profile')))
     if (model.__name__ == 'BugPlanningResponse' and isinstance(coverage, dict)
             and coverage.get('reproducer_format') == 'lua-phases-v1'):
         from workbench.bug_program import schema
@@ -349,7 +349,7 @@ class Evidence:
 
     def snapshot(self, name, value):
         """Retain bounded proposed data privately; never approval or execution."""
-        if name not in {'proposed-plan', 'model-plan-review', 'investigation-diagnosis', 'provider-content','sandbox-feedback'}:
+        if name not in {'original-only-program', 'proposed-plan', 'model-plan-review', 'investigation-diagnosis', 'provider-content','sandbox-feedback'}:
             raise OSError('Unknown private planning snapshot')
         from workbench.trusted_preparation import owned
         owned(self.directory)

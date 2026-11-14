@@ -16,7 +16,7 @@ import tempfile
 
 
 def enabled(spec):
-    return isinstance(spec,dict) and spec.get('repair_cycle') in {'scoped-repair-v1','scoped-feature-v1'}
+    return isinstance(spec,dict) and spec.get('repair_cycle') in {'scoped-repair-v1','scoped-repair-v2','scoped-feature-v1'}
 
 
 def oracle(focused_test, api_contracts=None, *, behavior_id='bug-reproducer'):
@@ -37,6 +37,9 @@ def oracle(focused_test, api_contracts=None, *, behavior_id='bug-reproducer'):
 def readiness(runtime):
     """Pure revalidation of scope/sandbox readiness; never bug certification."""
     from workbench.real_workspace import sha,suite_inventory,require_safe_check
+    from workbench import repair_profiles
+    if repair_profiles.selected(runtime.recipe):
+        return repair_profiles.readiness(runtime)
     path=runtime.root/'controls-passed.json'
     value=json.loads(path.read_text())
     baseline=json.loads((runtime.root/'fresh-baseline-suite.json').read_text())
@@ -61,6 +64,9 @@ def readiness(runtime):
 
 def record_readiness(runtime,boundary):
     from workbench.real_workspace import durable,sha
+    from workbench import repair_profiles
+    if repair_profiles.selected(runtime.recipe):
+        return repair_profiles.record_readiness(runtime,boundary)
     durable(runtime.root/'boundary-proof.json',Path(boundary).read_bytes())
     value=dict(kind=('scoped-feature-readiness-v1' if runtime.recipe.get('repair_cycle')=='scoped-feature-v1' else 'scoped-repair-readiness-v1'),verification='not_run',
         recipe_sha256=sha((runtime.root/'recipe.json').read_bytes()),
@@ -97,6 +103,9 @@ def original_with_new_tests(runtime,folder,permitted):
     removed only after exact source/test/check evidence has been saved.
     """
     from workbench.real_workspace import durable,git,sha,tree
+    from workbench import repair_profiles
+    if repair_profiles.selected(runtime.recipe):
+        return repair_profiles.original_comparison(runtime,folder,permitted)
     changed,_=runtime.scope()
     tests=[p for p in changed if p.startswith('tests/test_')]
     focused=runtime.recipe['focused_test']
@@ -150,6 +159,9 @@ def original_with_new_tests(runtime,folder,permitted):
 def verify_result(runtime,result):
     """Re-evaluate the saved original assertion evidence against frozen test bytes."""
     from workbench.real_workspace import git,sha
+    from workbench import repair_profiles
+    if repair_profiles.selected(runtime.recipe):
+        return repair_profiles.verify_result(runtime,result)
     relative=result.get('independent_check_evidence','')
     if not re.fullmatch(r'working-checks/[0-9]{2}',relative):
         return False

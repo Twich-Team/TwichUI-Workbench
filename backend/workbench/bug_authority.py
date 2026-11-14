@@ -134,7 +134,8 @@ def validate(c, identity, review, proof, *, active=True):
         raise ValueError('The exact frozen owner policy attribution changed.')
     contract = review.get('task_contract') or {}
     scope = review['human_scope']
-    if (contract.get('category') != 'lua-offline-bugfix' or not contract.get('bug_intent')
+    if (contract.get('category') not in {'lua-offline-bugfix','python-offline-bugfix'} or not contract.get('bug_intent')
+            or not contract.get('bug_intent',{}).get('plan',{}).get('repair_profile')
             or contract.get('scope_missing') or scope['visual_requirement'] != 'nonvisual'
             or scope['stage'] != 'implementation' or review['research_only']
             or review['approval_blockers'] or contract.get('resolved_base') != value['base']

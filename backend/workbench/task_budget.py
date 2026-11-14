@@ -50,11 +50,11 @@ def valid_contract(contract):
             and len(set(paths)) == len(paths)
             and all(
                 isinstance(p, str)
-                and p.endswith(".lua")
+                and (p.endswith(".lua") or contract.get("runtime_profile")=="offline-repair-v2" and p.endswith(".py"))
                 and not PurePosixPath(p).is_absolute()
                 and ".." not in PurePosixPath(p).parts
                 and not any(x.startswith(".") for x in PurePosixPath(p).parts)
-                and p.startswith(("!!!TwichUI/", "TwichUI_Settings/", "tests/test_"))
+                and p.startswith(("!!!TwichUI/", "TwichUI_Settings/", "tests/test_", *(("tools/",) if contract.get("runtime_profile")=="offline-repair-v2" else ())))
                 for p in paths
             )
             and isinstance(contract["task_id"], str)
@@ -195,7 +195,7 @@ def _reviewed_spec(c, ref, runtime):
                         behavior_id=spec['behavior']['id'], read_paths=spec['read_paths'],
                         focused_test=spec['focused_test'], identity=spec['identity'],prepared=prepared,
                         repair_cycle=bool(spec.get('repair_cycle')),api_contracts=spec.get('api_contracts'),
-                        retained_result=retained)
+                        retained_result=retained, independent_program=spec.get("independent_program"))
     if actual != spec:
         raise ValueError('Certified recipe differs from the current reviewed contract')
     return actual
@@ -276,6 +276,7 @@ def preparation_inputs(c, selected):
     root = Path(saved.get('ready_preparation',saved.get('certified_preparation'))['root'])
     profile = saved['specification']['controls']
     return dict(recipe=saved['specification'], oracle=(root / 'recipe-oracle.lua').read_text(),
+                **(dict(independent_program_reference=json.loads((root/'independent-program-reference.json').read_text())) if saved['specification'].get('independent_program') else {}),
                 **(dict(baseline_source=saved.get('repair_resume',{}).get('root',str(root))) if saved.get('ready_preparation') else {}),
                 **(dict(control_source=str(root)) if saved.get('certified_preparation') else {}),
                 **(dict(repair_resume=saved['repair_resume']) if saved.get('repair_resume') else {}),
@@ -295,7 +296,7 @@ def validate_selection(c, proposal_id, budget, *, admitting=False):
     if everyday.enabled():
         review = selected['snapshot'].get('reviewed_task') or {}
         if (budget.publication != 'hold' or not (selected['snapshot'].get('certified_preparation') or
-                selected['snapshot'].get('specification',{}).get('repair_cycle')=='scoped-repair-v1' and selected['snapshot'].get('ready_preparation'))
+                selected['snapshot'].get('specification',{}).get('repair_cycle') in {'scoped-repair-v1','scoped-repair-v2'} and selected['snapshot'].get('ready_preparation'))
                 or not review or not review.get('ref')):
             raise HTTPException(409, 'This Workbench installation runs certified test coverage and keeps results local.')
         if admitting:

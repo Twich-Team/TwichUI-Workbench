@@ -11,11 +11,14 @@ import subprocess
 from pathlib import Path
 
 from workbench.visual_scope import digest
+from workbench.repair_profiles import PROFILE, REQUIREMENTS
 
 REGRESSION = 'lua-regression-tests-v1'
 BUGFIX = 'lua-offline-bugfix-v1'
 FEATURE = 'lua-feature-step-v1'
+
 PROFILES = {
+    PROFILE: {'controls': {'original':'observed'}, 'requirements': REQUIREMENTS},
     FEATURE: {
         'controls': {'original': 'fail'},
         'requirements': [
