@@ -1,3 +1,54 @@
+# STOP — protected administrator repeats dormant-publication refusal
+
+November 14, 2026. Owner attachment 985d8357 authorized the narrow installation repair
+and exact preserved draft, with STOP at one specific new delivery blocker. That new
+blocker is confirmed in the actual protected helper. No further engineering or
+publication under this assignment; no installation or running-service change.
+
+Source correction ecfd2c12f06b0d9ad62460fc1404d119f49077b8 fixes the application
+settled-store check. Eighty-five focused tests pass. The actual 1,039-row store
+passes real installer preflight/activation/repeat refusal/rollback and interrupted
+activation/rollback in isolated copies. Two reopened engines and 27 ordinary worker
+cycles preserve pause/data with zero task/model dispatch. Revoked authority remains
+revoked; active, uncertain and eligible-unpaused cases refuse installation.
+
+The installed /usr/local/sbin/twichui-workbench-admin, root:root, mode 0755, one link, SHA
+5654057602bf37945b3422d90be16fc8c002775776aede936c615821e1244318,
+exactly matches tracked ops/workbench_admin.py. settled_check:635–658 still rejects
+all pending publications. Its real read-only --settled everyday-outcome-c4b9dd8
+entry exits 2: "History still contains unsettled work". require_settled:275–282 and
+service_action:326–330 make this mandatory before stopping worker/codex. The protected
+grant offers no helper self-update. Do not bypass ingress/service guards, alter
+live status/history or replace this root-owned helper through another mechanism.
+An owner-controlled helper correction is the actual access boundary.
+
+Local static/schema/frontend 69 / browser 134 + 8 conditional skips / visual 12 / connected 4
+pass; backend 4/4 passed 615. The other three full local partitions were stopped with
+SIGINT at the strict boundary; their partial results/scratch remain retained and
+are not full acceptance. Exact ecfd2c1 hosted run 43640130709 finished successfully, all nine jobs including
+verify. Its original app/frontend/final acceptance artifacts were hash verified.
+Full local acceptance remains incomplete; the helper refusal still blocks cutover.
+Previous publisher c28eb9d passed full hosted 43637471646; never reuse it for ecfd2c1.
+
+Installed c4b9dd8 and all four original PIDs/zero restarts remain unchanged. All 1,039 rows /
+31 tables / schema0014 match logical 4375a2c31a62fd898753138a9533959d95c51c8c9f7225975010b9e20d999556.
+The 281 original checked-proof files plus closeout and 227 original failed-proof files
+remain hash exact. Original native failure stays failed; no model request/addon
+check/remote write occurred. Native publication remains pending, state {}, task paused;
+exact remote branch has no PR. Original checkout diff, permissions, retention,
+Machine Resources, credentials, port 8765 and rollback are preserved.
+
+Report: docs/history/20261114-dormant-publication-protected-helper-blocker.md.
+Receipts: /home/rich/.local/share/TwichUI-Workbench/dormant-publication-installation-20261114/.
+Prepared activation/delivery callers were NOT run and are NOT independently accepted.
+Do not run deliver-preserved.py: it is untested preparation, and its worker-stop
+call also needs the existing ingress-closure contract before any later authorized use.
+Next complete outcome needs the protected-helper correction and exact accepted
+installation, then one separately authorized preserved draft; no native recoding.
+Include complete CURRENT_STATUS in closeout. STOP at this new access blocker.
+
+---
+
 # Dormant publication installation — active November 14, 2026
 
 Owner attachment 985d8357 explicitly authorizes correcting the dormant-publication

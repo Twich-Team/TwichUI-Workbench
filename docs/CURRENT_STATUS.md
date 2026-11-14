@@ -1,16 +1,19 @@
 Last updated: November 14, 2026.
 
-Build c4b9dd8 remains installed and healthy. Zero native tasks have completed from
-request to draft PR. The saved gallery repair remains independently checked.
+Build c4b9dd8 remains installed and healthy, with native coding and corrected gallery
+checks. Zero native tasks have completed from request to draft PR. The saved gallery
+repair is checked, paused and unpublished; no new coding or addon checks were run.
 
-The installation correction preserves an untouched publication only when its exact
-task is durably paused and its saved result bindings match. Actual copied history
-passed installer, rollback and paused worker-restart rehearsals without dispatch.
-All 1,039 original records and 282 retained proof files remain unchanged.
+Correction ecfd2c1 passed 85 focused tests and real-history installer, interruption,
+rollback and worker-restart rehearsals. Browser, visual and connected checks passed.
+The correction is not installed. Exact-build hosted verification passed all nine
+jobs. Full local acceptance stopped at the new blocker; hosted success alone does
+not authorize installation.
 
-Full local and hosted release verification is underway. The correction is not yet
-installed, and no gallery draft PR exists. Original addon checks are being reused.
+The protected administrator helper repeats the old rule and refuses this dormant
+publication. The current grant cannot replace that root-owned helper. No running
+service or installed build changed. All 1,039 records and original proof hashes match.
 
-Next: install the exact accepted build, then deliver one draft from the saved
-candidate through the trusted publisher. No owner decision is currently needed.
-No merge or addon installation is authorized.
+Next: an owner-controlled correction of that protected helper, then complete accepted
+installation and one draft from the preserved candidate. This assignment stopped at
+that access boundary. No merge, release or addon installation is authorized.
