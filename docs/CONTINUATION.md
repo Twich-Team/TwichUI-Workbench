@@ -1,3 +1,54 @@
+# Autonomous Bug Reports — sixth repair: evidence lifetime, November 14, 2026 UTC
+
+Following the Project Working Philosophy: installedc294d65 remains safe/active, but
+same report672113d7/job0e9d1ddd... FAILED10:29:48UTC before coding. DO NOT replay it.
+New parentd3f64190-9228-4c63-9746-af9b7b8791d8 settled2genuine Sol/high calls with complete
+usage:52544prompt+7317completion=59861total;677reasoning included in completion. First
+citation rejection revised automatically. Second valid program's ACTUAL original-only
+trial correctly rejected its decoder representation comparison at bodyline135. Trial
+summary/intent/result/oracle/hashes retained in rounda96bd239.../original-program-trial-
+a70f77d3918e57c48f5f11eb980c4210b3e25a388baf52e6a47fc9fbd31b68c7.
+Then Smart feedback logging raised TypeError:the program evidence was closed BEFORE
+observe_settled_failure recorded its proven completion. Both native terminal proofs
+and usage survive; second evidence lacks the final strategy log entry, not provider
+settlement. Worker trace private:candidate-c294d65/native-worker-failure.log.
+Task2now13completed native calls/344430tokens; combined firstpausedcase18calls/456714tokens.
+High requested, actual effort not separately reported. No addon edits, new implementation
+grant/request/candidate/PR. Consequential counts STILL50/50/4. Zero new end-to-end repairs.
+Current store healthy1013rows/31tables/schema0014, SHA06ce7e0624b8d7ebd7ea09bc5510a698738ed01f46c15781ed031bc6828a9ab9.
+Full model/job preservation snapshot:native-failure-preservation.json. Task2 NOTpaused.
+All work now settled; observer68196 is read-only and can finish normally.
+
+Sixth connected engineering batch changes ONLY closure order:record actual original
+trial rejection and Smart settlement while Evidence is open, then close. Existing
+citation/semantic paths already use that order. Added3connected regressions(runtime,
+citation,semantic):REAL Evidence files, real Smart accounting/feedback, controlled native
+terminal reader. They retain rejection+strategy event and revise to an offer. The runtime
+case reproduced EXACT TypeError against INSTALLEDc294source with no cache writes, then
+passed corrected source.42focused checks pass. Dedicated actual-confinement matrix now
+28cases(25profiles+3Smart-evidence cases), models/terminal proofs simulated, passes.
+Private native-profile-smart-evidence.sh is the new28case runner. Static/contracts/build/
+lint/schema pass. No new engine, permission, relaxed verification, or addon patch supplied.
+Full exact local/hosted acceptance and sealed installation still required for correction.
+
+Nextcandidate must copy CURRENTc294store/history and retain c294 as IMMEDIATErollback,
+not9da. Preserve rejected91, failed70 and every inherited source/evidence root. Installed
+c294proof:2855backend/9skips,69frontend,134browser/8skips,12visual,4feature,25native
+simulated-model profile checks; hosted43581969908all9jobs/finalverify. Details below.
+Use persistent user verification units to avoid outer terminal lifetime ambiguity;
+privileged installer/restart remain in the authorized session's cgroup. Bounded detached
+restart runner inherits that cgroup; do not move administrative actions into user units.
+Admin named grant expiresNov15 00:42UTC, check normally; no arbitrary privilege bypass.
+Keep normal model PID/file/key/auth. After correction fully installed/verified, use existing
+same-job exact-scope READ-ONLY renewal ONCE as documented engineering action; settle all4
+retained parents through native receipts. New independent loop should deliver actual runtime
+feedback and authorized fallback after2settled ineffective designs, not another blind replay.
+Continue through native coding/all196regressions/negativecontrols/exactlyonedraft; no final
+at installation. Owner merge only after concrete Python draft if Lua requires it. Current
+main stilld09e6dcb...; no model/local-Qwen generation or addon changes performed by engineering.
+
+---
+
 # Autonomous Bug Reports — c294d65 installed; same-task native continuation, November 14, 2026 UTC
 
 Following the Project Working Philosophy:c294d65ea8fa0adf30b87574e03eb46b89e18ede

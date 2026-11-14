@@ -28,6 +28,89 @@ from test_verification_profiles import git,PRODUCTION,TEST,CORRECT
 
 
 @pytest.mark.usefixtures('installed','catalog')
+@pytest.mark.parametrize('failure',['runtime','citation','semantic'])
+def test_settled_feedback_is_journaled_before_real_evidence_closes(client,headers,store,monkeypatch,failure):
+    from workbench import everyday
+    controlled_trial_boundary(monkeypatch)
+    source=enable_bugs(monkeypatch)
+    for path in (source/'tests').glob('test_*.py'):
+        path.write_text('import unittest\nclass Existing(unittest.TestCase):\n def test_environment(self): self.assertEqual(1+1,2)\n')
+    (source/PRODUCTION).write_text(CORRECT)
+    (source/TEST).write_text('local normalize=dofile("../!!!TwichUI/normalize.lua")\nassert(normalize(" ALICE ")=="ALICE")\n')
+    git(source,'add','.')
+    git(source,'-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Incorrect original assertion')
+    config=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
+    settings=json.loads(config.read_text())
+    settings['bug_plan_review']='source-grounded-intent-v1'
+    write_policy(config,settings)
+    strategy=setup(store)
+    enable(store)
+    monkeypatch.setattr('workbench.trusted_preparation.Runtime',ProfileRuntime)
+    monkeypatch.setattr('workbench.task_sessions.process_one',lambda *a,**k:False)
+    proofs=[]
+    def settled(*args,**kwargs):
+        # Only the native terminal reader is controlled. Actual Evidence files,
+        # Smart request accounting and feedback recording run unchanged.
+        assert kwargs['local_finished'] and kwargs['finished']
+        assert args[-2]==dict(source_writes=False,execution_dispatch=False,external_action_tools=False)
+        proofs.append(args[0])
+        return dict(provider_state='completed')
+    monkeypatch.setattr('workbench.provider_receipts.request_state',settled)
+    designs=[]
+    reviews=[]
+    def exchange(request,stop,seconds):
+        stage=strategy.stages[0]
+        decision=ai.Decision(state='selected',stage_id=stage.id,provider=stage.provider,model=stage.model,
+            effort=stage.effort,role=stage.role,reason='Controlled verified allowance')
+        if request['operation']=='smart-choose':
+            return dict(state='choice',decision=decision.model_dump())
+        packet=json.loads(request['prompt'].split('Untrusted task data:\n')[1])
+        if packet.get('purpose')=='original-only independent behavior checks':
+            designs.append(packet)
+            output=dict(rationale='Original requirements specify lowercase normalized output.',criteria=['normalization'],
+                program='local normalize=dofile("../!!!TwichUI/normalize.lua")\nassert(normalize(" ALICE ")=="alice")',
+                evidence=[dict(criterion='normalization',kind='report',path=None,quote='Return trimmed lowercase output for uppercase input.')],
+                negative_control=[dict(path=PRODUCTION,old=':lower()',new='')])
+            if len(designs)==1:
+                if failure=='runtime':
+                    output['program']=output['program'].replace('=="alice"','=="ALICE"')
+                if failure=='citation':
+                    output['evidence'][0]['quote']='An unsupported invented requirement.'
+            else:
+                assert packet['prior_design_reviews'][0]['accepted'] is False
+        elif packet.get('purpose')=='review original-only independent behavior checks':
+            reviews.append(packet)
+            output=dict(ready=not(failure=='semantic' and len(reviews)==1),covered_criteria=['normalization'],
+                reason='The independent assertions must cover the original normalization requirement.')
+        else:
+            output=dict(finding='The original implementation follows the requirement and its test disagrees.',action='plan',reads=[],searches=[],checks=None,question=None,limitation=None,
+                plan={**scope(),'writable_paths':[TEST],'repair_profile':dict(version=2,kind='test-correction')})
+        return dict(state='completed',result=dict(actual_model=stage.model,output=output,provider_receipt=str(uuid4()),
+            usage=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)),admission=dict(stage_id=stage.id,overrun=[]))
+    monkeypatch.setattr(smart_provider,'exchange',exchange)
+    stage=strategy.stages[0]
+    body={**report(), 'description':'Return trimmed lowercase output for uppercase input.', 'local_planning':'smart-strategy',
+        'ai_settings':dict(primary=dict(provider=stage.provider,model=stage.model,effort=stage.effort),fallback=None,strategy=strategy.model_dump())}
+    response=client.post('/api/intake',headers=headers,json=body)
+    assert response.status_code==200,response.text
+    identity=response.json()['id']
+    for _ in range(18):
+        worker.tick(store)
+    with store.connect() as c:
+        job=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==identity,planning_jobs.c.kind=='behavioral_preparation')).mappings().one()
+        offer=c.execute(select(task_run_offers)).mappings().one()
+    assert job['status']=='completed' and len(designs)==2 and len(proofs)==1
+    root=Path(offer['snapshot']['ready_preparation']['root'])
+    record=json.loads((root/'independent-program.json').read_text())
+    rejected=record['design_reviews'][0]
+    assert not rejected['accepted'] and record['design_reviews'][-1]['accepted']
+    evidence=everyday.ROOT/'artifacts/runs'/('planning-evidence-'+rejected['evidence_id'])
+    events=[json.loads(line) for line in (evidence/'events.jsonl').read_text().splitlines()]
+    observed=[event for event in events if event['phase']=='strategy-settled-failure']
+    assert len(observed)==1 and observed[0]['settled'] and observed[0]['reason']=='invalid-response'
+
+
+@pytest.mark.usefixtures('installed','catalog')
 def test_settled_smart_review_can_renew_same_job_once_with_policy_attribution(client,headers,store,monkeypatch):
     controlled_trial_boundary(monkeypatch)
     source=enable_bugs(monkeypatch)

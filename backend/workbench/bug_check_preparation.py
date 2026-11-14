@@ -438,10 +438,11 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
                     evidence_id=evidence.identifier if evidence else None,accepted=False))
                 if evidence:
                     evidence.snapshot('model-plan-review',rounds[-1])
-                    evidence.close()
                 observe=getattr(adapter,'observe_settled_failure',None)
                 if callable(observe):
                     observe('invalid-response')
+                if evidence:
+                    evidence.close()
                 program=None
                 continue
             if evidence:
