@@ -1,11 +1,13 @@
-Last updated November 14, 2026 (UTC).
+Last updated November 13, 2026 (Mountain Time).
 
-Build 50cc64a is still installed. All 942 saved rows, schema0014, original model preferences, task history, retention, Machine Resources and four running services are preserved. No changed app code has been installed for this assignment.
+Smart AI Choices and native Claude integration are installed privately as build 73b24f6. Settings now provides ordered AI cards, separate provider allocations and fallback reserves, model and effort choices, waiting rules and conservative unknown-usage controls. Tasks retain frozen choices and offer explicit Start now overrides. Dashboard shows the active or waiting reason.
 
-Smart AI Choices and the native Claude adapter are built and pushed as 73b24f6. Full local acceptance passed: 2,797 backend checks, 69 frontend checks, 132 browser checks, four connected feature checks and 12 visual checks. The backend and browser suites each had eight conditional skips. The exact hosted release workflow and final verify passed. Desktop, phone and enlarged-text strategy screens were inspected.
+One real read-only planning request completed from submission to a reviewable plan: Codex reached its configured cutoff, Workbench waited, then automatically switched to Claude Sonnet 5.5. Global preferences were restored while the task retained its strategy. Claude reported 8,867 tokens; requested effort was Low, actual effort was not reported. There were no run approvals, addon changes, publication or duplicate native dispatches.
 
-Real confined Claude Pro/Sonnet 5.5 generation and request-start cutoff checks passed outside the installed app. A fresh native 100% short-window reading held both ordinary and manual allocation-override choices without dispatch. Credits were off. Actual effort and some exact reset times remain unknown. Strict ceilings hold unbounded requests; conservative unknown-usage reserves may require an explicit Start now decision. No API billing or paid fallback is enabled.
+Full local and exact hosted acceptance passed, including final verify. Desktop, phone and enlarged-text screens were inspected. Restart recovery, concurrency, reserve isolation, manual overrides and coding continuations passed controlled tests; a full real Smart coding run was not performed.
 
-The exact private release, copied history, dependency pins and rollback envelope passed preflight. Installation is blocked by the expired protected host administrator grant. The owner must renew that existing access; engineering and installation are already authorized.
+All 942 original saved rows remain unchanged. The database now has 957 rows, still schema0014. Qwen, original model permissions, usage history, retention, Machine Resources, private network access and rollback evidence are preserved. The final database backup passed verification.
 
-Zero real tasks have completed through the full installed Smart AI workflow in this assignment. After access is restored, the next outcome is one private installation and a real read-only task demonstrating waiting, switching, frozen choices and actual attribution. No addon changes or publication are approved by that demonstration. Stop for owner review after complete verified delivery. Excluded gallery, map publication and maintenance work remains untouched.
+Percentages stop new requests; a running request may cross its cutoff. Unknown allowance or reset information follows the chosen conservative policy. Strict ceilings hold requests whose consumption cannot be bounded. No API billing or paid fallback is enabled.
+
+No delivery blocker remains. The milestone is ready for owner review. The next product outcome is routine autonomous Bug Reports after that review; it has not started. Excluded gallery, map publication and maintenance work remains untouched.

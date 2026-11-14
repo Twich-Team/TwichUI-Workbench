@@ -6,11 +6,12 @@ strict ceilings and explicit conservative unknown-usage policies remain availabl
 Provider-specific budgets/reserves, models/effort, frozen task choices, durable
 waiting, manual Start now and clear Dashboard reasons are in scope. No API billing.
 
-A–C are implemented and accepted in development. Exact candidate73b24f6 passed
-full local/hosted acceptance. D remains staged pending actual host administrator
-access, one private installation and real installed-app acceptance. Existing records,
+A–D are complete. Exact candidate73b24f6 passed full local/hosted acceptance,
+private installation and a real Codex allocation wait → automatic Claude switch →
+reviewable read-only plan. Original global preferences were restored while the
+task retained its frozen strategy. Existing records,
 permissions, service ownership, retention, rollback and publication checks remain.
-After complete verified delivery, stop for owner review. The next product milestone
+Stop for owner review. See history/20261113-smart-ai-delivery.md. The next product milestone
 will make routine Bug Reports autonomous under standing owner authorization; it is
 not started here. Gallery repair, map publication, automatic test discovery, database
 migration, wider redesign and legacy maintenance cutover remain excluded.

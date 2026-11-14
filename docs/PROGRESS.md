@@ -1,3 +1,27 @@
+# Smart AI Choices delivered — owner review, November 13, 2026 Mountain Time
+
+Following the Project Working Philosophy: exact candidate73b24f6 is installed
+privately and one real request reached a reviewable coverage plan. Codex1% cutoff
+wait → automatic ClaudeSonnet5.5/Low switch → completed plan. Native generation
+count1,8,867tokens; actual effortunknown, creditsdisabled. Global originalpreferences
+restored while frozen task strategy persisted. No addon/run/publication approval.
+All942originalrows exact; final957rows/31tables/schema0014, hash
+e61dd6d31c94d8e7ccaab61b36822e660691d88b6d6c0f13ecddc70f8740939e.
+Originalrollback and independent finalbackup verified. Four services active/zero
+automatic restarts; Qwen/auth/retention/resources/private network preserved.
+All exact local/hosted acceptance passed before oneactivation. Noappsource changed
+after73b24f6. Owneractuallyrenewedprotectedhostgrant; no bypass/selfrenewal.
+
+See [delivery receipt](history/20261113-smart-ai-delivery.md) for checkpoints,
+real vs controlled checks, native limits and diagnostic attempts. Private evidence
+smart-ai-20261113/candidate-73b24f6, final-smart-delivery-proof.json. RUN_STATE is
+complete_owner_review. Current installed globals remain localQwen, Codexenabled,
+fallbackOff, Claudedisabled/no strategy; ownercanconfigureSmart inSettings. Do not
+silentlyenableit. Stopforownerreview. AutonomousBugReportsnotstarted. Noexcluded
+work. Unrelatedadmin-document edits/dependencysymlinks unchanged.
+
+---
+
 # Verified Smart AI candidate staged; host access required — November 14, 2026
 
 Candidate73b24f6dd07d4167b97a7a0a687ceaf94188f08e passed complete exact local
