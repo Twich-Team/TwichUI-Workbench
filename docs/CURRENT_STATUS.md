@@ -1,13 +1,13 @@
-Last updated November 13, 2026 (Mountain Time).
+Last updated November 14, 2026 (UTC).
 
-Build dbf0120 is installed. It adds automatic routine Bug Reports, isolated Lua/Python reproduction and repair profiles, durable provider continuation, task priority, Pause/Resume and the four-step repair journey. Automatic repairs are on. The first fresh Python gallery report is paused after a classification gap was found; global model preferences remain unchanged. The four services are active; all 965 saved rows and original permissions survived installation and restart.
+Build 56dbe78 is installed. It includes automatic routine Bug Reports, isolated Lua/Python checks and repair profiles, provider continuation, task priority, Pause/Resume and the four-step repair journey. Automatic repairs are on. The four services are active. All 983 rows survived the last installation; the two live acceptance attempts have now brought the store to 1,001 rows. Original permissions and global model preferences remain unchanged.
 
 Earlier Lua tasks reached draft PRs, and Smart AI completed a real Codex-wait-to-Claude planning request. Zero tasks have completed from beginning to end under the new autonomous Bug Reports policy.
 
-The complete local release checks passed: 2,832 backend, 69 frontend, 134 browser, 12 visual and four connected feature checks. The exact hosted release passed all nine jobs and its final acceptance check. Twelve confined Lua/Python profile checks passed with simulated models. These tests do not prove real autonomous delivery.
+The installed release passed complete local and exact hosted checks. The addon baseline has one failing gallery rebuild test: 195 of 196 pass. Manual investigation found identical PNG pixels and matching runtime textures and metadata. This supports a Python test-correction investigation; it is not a completed repair.
 
-The addon baseline still has one failing gallery rebuild test: 195 of 196 pass. A manual diagnostic found identical decoded PNG pixels and matching runtime textures, manifest and artwork data. This is evidence for a fresh Python investigation, not a completed repair. The old gallery and navigation reports remain preserved and archived as the owner chose.
+The first live report made five real Codex calls and chose an incompatible scope; it stays paused unchanged. Its planning correction is installed. The second report chose the correct scope and made seven real Codex calls. Independent review then held before coding because the review context omitted checks already owned by the app. Neither report made an addon edit or PR.
 
-Installed health, restart, restore, retention and private-network checks passed. The first live report made five real Codex calls but chose a test-only scope under the production-repair profile. It received no execution grant and made no addon edit or PR. The scope is saved unchanged. A correction rejects this mismatch during planning and gives clear guidance; 162 focused checks and twelve confined checks passed, with full release verification still required.
+A second engineering repair now gives review the complete verification plan, allows bounded design feedback and supports settled recovery of the same valid task. Focused safety checks and 15 actual confined profile checks passed with simulated models. Full release verification and installation are next. These tests do not prove real autonomous delivery.
 
-Next: verify and install that correction, then demonstrate fresh Python and Lua reports reaching independently verified drafts and complete the exceptional cases. No owner decision is needed yet. Any addon merge remains the owner's decision.
+Next: resume the second Python report after verified installation, reach independently verified Python and Lua drafts, and finish the exceptional cases. No owner decision is needed yet. Any addon merge remains the owner's decision.

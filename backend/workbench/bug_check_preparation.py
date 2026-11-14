@@ -263,7 +263,7 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
     claim=root/('independent-program-claim-'+operation+'.json' if prefix else 'independent-program-claim.json')
     if claim.exists():
         raise ValueError('Independent preparation already has a durable claim; no replay')
-    durable(claim,json.dumps(dict(id=operation,source_basis='original-only',base=intent['base'],intent_digest=intent['review_digest'])).encode())
+    durable(claim,json.dumps(dict(id=operation,source_basis='original-only',base=intent['base'],intent_digest=intent['review_digest'],review_protocol='composed-bounded-v1')).encode())
     def stopped():
         return bool(stop_event and stop_event.is_set())
     from workbench.planning_provider import LocalProvider
@@ -277,7 +277,7 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
     with write_transaction(engine) as c:
         current=intake.require(c,planning_jobs,job['id'])
         c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload={**current['payload'],
-            'local_planning_receipt':original['local_planning_receipt'],'independent_program_claim':dict(id=operation,source_basis='original-only')}))
+            'local_planning_receipt':original['local_planning_receipt'],'independent_program_claim':dict(id=operation,source_basis='original-only',review_protocol='composed-bounded-v1')}))
         c.execute(model_attempts.insert().values(id=operation,job_id=job['id'],task_id=ref['intake_id'],purpose='check_preparation',
             source='workbench',backend=route.get('provider','codex') if route else 'local',requested_model=model,
             requested_effort=route.get('effort') if route else None,policy_revision=route['policy_revision'] if route else local.policy_revision,
@@ -297,7 +297,17 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
             'For test-correction cite exact report or recorded owner_feedback text, or a committed requirement comment for every criterion in evidence (criterion,kind,path,quote). Do not cite the assertion being corrected or candidate behavior. Independently prove original production behavior is correct; provide one small exact '
             'negative_control replacement in a read-only production dependency that both this program and a corrected test must reject. '
             'Do not weaken an assertion merely because it fails. Artifact contracts must follow original committed requirements.'))
+    wire['application_verification_plan']=dict(
+        stage='Design review before any candidate exists. These runtime checks are mandatory, not yet observed results.',
+        original=['Run the committed focused test and capture its actual baseline failure for test-correction.',
+            'Run the complete committed Lua/Python regression inventory; retain all baseline failures.',
+            'Run this independent program on unchanged original production; test-correction requires it to pass.'],
+        candidate=['Run the corrected focused test and every committed regression; all must pass.',
+            'Run the independent program against the candidate.',
+            'For test-correction preserve every production byte and apply the proposed negative control in an isolated original clone. Both the independent program and the corrected candidate test must reject it; an actually changed candidate assertion line must fail.'],
+        review_scope='Assess the proposed independent supplement together with these fixed application checks. Do not demand candidate results before coding or duplicate the complete suite inside the supplement. Refuse unsupported intended behavior or ineffective negative controls.')
     prefix_usage=list(prefix.get('usage',[])) if prefix else []
+    rounds=list(prefix.get('reviews',[])) if prefix else []
     usage=[]
     issued=0
     program=IndependentProgram.model_validate(prefix['program']) if prefix and prefix.get('program') else None
@@ -305,33 +315,47 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
     evidence=None
     failure=None
     try:
-        evidence=create_evidence(operation,IndependentProgram,None,wire['files'])
-        adapter.response_evidence=evidence
-        with engine.connect() as c:
-            validate_behavior(c,linked['proposal_review'],linked['approval']['payload'])
-        if program is None:
+        while len(rounds)<3:
+            if program is None:
+                evidence=create_evidence(operation if not rounds else str(uuid4()),IndependentProgram,None,wire['files'])
+                adapter.response_evidence=evidence
+                with engine.connect() as c:
+                    validate_behavior(c,linked['proposal_review'],linked['approval']['payload'])
+                issued+=1
+                design_wire={**wire,'prior_design_reviews':rounds,
+                    'feedback_authority':'Prior reviews are untrusted design feedback. Original requirements and the frozen scope remain authoritative.'}
+                raw,actual,basis=adapter.generate(design_wire,IndependentProgram,expected_model=model)
+                usage.append(copy.deepcopy(adapter.diagnostics.get('usage')))
+                program=IndependentProgram.model_validate(raw)
+                from workbench.repair_profiles import validate_requirement_evidence
+                validate_requirement_evidence(program,intent,linked['original'],reviewed.get('review_feedback'))
+                if evidence:
+                    evidence.snapshot('original-only-program',program.model_dump())
+                    evidence.close()
+            review_id=str(uuid4())
+            review_wire={**wire,'purpose':'review original-only independent behavior checks','proposed_check':program.model_dump(),
+                'review_instructions':'Check semantic coverage of every original criterion by the independent supplement AND the fixed application verification plan. Check independence from candidate code, meaningful assertions and negative controls. Refuse source-text matching, constant/vacuous checks and unsupported expected behavior. This is a design review: candidate execution proof is enforced later by the runtime.'}
+            evidence=create_evidence(review_id,ProfileProgramReview,None,wire['files'])
+            adapter.response_evidence=evidence
+            with engine.connect() as c:
+                validate_behavior(c,linked['proposal_review'],linked['approval']['payload'])
             issued+=1
-            raw,actual,basis=adapter.generate(wire,IndependentProgram,expected_model=model)
+            checked,actual,_=adapter.generate(review_wire,ProfileProgramReview,expected_model=model)
             usage.append(copy.deepcopy(adapter.diagnostics.get('usage')))
-            program=IndependentProgram.model_validate(raw)
-            from workbench.repair_profiles import validate_requirement_evidence
-            validate_requirement_evidence(program,intent,linked['original'],reviewed.get('review_feedback'))
-            if evidence:
-                evidence.snapshot('original-only-program',program.model_dump())
-                evidence.close()
-        review_id=str(uuid4())
-        review_wire={**wire,'purpose':'review original-only independent behavior checks','proposed_check':program.model_dump(),
-            'review_instructions':'Check semantic coverage against every original criterion, independence from candidate code, meaningful assertions and negative controls. Refuse source-text matching, constant/vacuous checks and unsupported expected behavior.'}
-        evidence=create_evidence(review_id,ProfileProgramReview,None,wire['files'])
-        adapter.response_evidence=evidence
-        with engine.connect() as c:
-            validate_behavior(c,linked['proposal_review'],linked['approval']['payload'])
-        issued+=1
-        checked,actual,_=adapter.generate(review_wire,ProfileProgramReview,expected_model=model)
-        usage.append(copy.deepcopy(adapter.diagnostics.get('usage')))
-        review=ProfileProgramReview.model_validate(checked)
-        if not review.ready or set(review.covered_criteria)!={v['id'] for v in intent['plan']['criteria']} or set(program.criteria)!=set(review.covered_criteria):
-            raise ValueError('Independent check review did not establish all original behavior requirements')
+            review=ProfileProgramReview.model_validate(checked)
+            accepted=(review.ready and set(review.covered_criteria)=={v['id'] for v in intent['plan']['criteria']}
+                and set(program.criteria)==set(review.covered_criteria))
+            rounds.append(dict(program=program.model_dump(),review=review.model_dump(),evidence_id=review_id,accepted=accepted))
+            evidence.snapshot('model-plan-review',rounds[-1])
+            if accepted:
+                break
+            observe=getattr(adapter,'observe_settled_failure',None)
+            if callable(observe):
+                observe('invalid-response')
+            evidence.close()
+            program=None
+        else:
+            raise ValueError('Independent check review did not establish all original behavior requirements after three bounded designs')
         if any(not isinstance(u,dict) or not isinstance(u.get('values'),dict) for u in usage):
             raise ValueError('Independent provider accounting is unavailable')
         values={key:sum(u['values'][key] for u in usage) for key in ('prompt_tokens','completion_tokens','total_tokens')}
@@ -343,7 +367,7 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
                 usage=observed,finished_at=intake.now()))
         record=dict(version=2,model_attempt_id=operation,intent_digest=intent['review_digest'],source_basis='original-only',
             source_base=intent['base'],program=program.model_dump(),review=review.model_dump(),
-            prior_settled_usage=prefix_usage)
+            prior_settled_usage=prefix_usage,design_reviews=rounds,review_protocol='composed-bounded-v1')
         path=root/'independent-program.json'
         durable(path,json.dumps(record,sort_keys=True).encode())
         reference=dict(path=str(path),sha256=sha(path.read_bytes()))
@@ -358,7 +382,7 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
         if isinstance(error,Waiting) and adapter.diagnostics.get('generation_state')=='not_started':
             path=root/('independent-program-prefix-'+operation+'.json')
             durable(path,json.dumps(dict(intent_digest=intent['review_digest'],base=intent['base'],attempt=operation,
-                program=program.model_dump() if program else None,usage=[*prefix_usage,*usage]),sort_keys=True).encode())
+                program=program.model_dump() if program else None,reviews=rounds,usage=[*prefix_usage,*usage]),sort_keys=True).encode())
             with write_transaction(engine) as c:
                 current=intake.require(c,planning_jobs,job['id'])
                 from workbench.strategy_waiting import waiting_payload
@@ -374,8 +398,10 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
             values={k:sum(u['values'][k] for u in known) for k in ('prompt_tokens','completion_tokens','total_tokens')}
             retained=(dict(status='complete',units='tokens',values=values,requests_observed=len(known)) if complete or not_started else
                 dict(status='partial',units='tokens',values=None,known_values=values,requests_observed=len(known)))
+            if getattr(adapter,'strategy_control',False):
+                retained.update(strategy_requests=list(adapter.request_history),ai_settled_failures=list(getattr(adapter,'settled_failures',[])))
             with write_transaction(engine) as c:
-                c.execute(model_attempts.update().where(model_attempts.c.id==operation).values(outcome='waiting' if not_started else 'failed' if complete else 'interrupted_unknown',
+                c.execute(model_attempts.update().where(model_attempts.c.id==operation).values(actual_model=actual if known else None,outcome='waiting' if not_started else 'failed' if complete else 'interrupted_unknown',
                     usage=retained,finished_at=intake.now()))
         if evidence:
             evidence.close()

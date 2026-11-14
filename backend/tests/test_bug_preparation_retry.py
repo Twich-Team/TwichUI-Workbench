@@ -1,0 +1,147 @@
+"""Settled original-only construction uses the existing job and policy journal.
+
+Provider IO and terminal reader are controlled
+the live native receipt reader is
+also exercised read-only against retained acceptance evidence outside this suite.
+"""
+import copy
+import json
+import os
+from pathlib import Path
+from uuid import uuid4
+
+import pytest
+from fastapi import HTTPException
+from sqlalchemy import select
+
+from workbench import ai_strategy as ai,bug_authority,smart_provider,worker
+from workbench.db import model_attempts,planning_jobs,proposal_decisions,task_run_offers,write_transaction
+from workbench.bug_preparation_retry import settled_strategy_program
+from test_bug_authority import enable
+from test_bug_intent_workflow import scope
+from test_bug_workflow import enable_bugs,report
+from test_everyday import installed,write_policy  # noqa: F401
+from test_task_ai_settings import catalog  # noqa: F401
+from test_smart_worker import setup
+from test_repair_profiles_v2 import ProfileRuntime
+from test_verification_profiles import git,PRODUCTION,TEST,CORRECT
+
+
+@pytest.mark.usefixtures('installed','catalog')
+def test_settled_smart_review_can_renew_same_job_once_with_policy_attribution(client,headers,store,monkeypatch):
+    source=enable_bugs(monkeypatch)
+    (source/PRODUCTION).write_text(CORRECT)
+    (source/TEST).write_text('local normalize=dofile("../!!!TwichUI/normalize.lua")\nassert(normalize(" ALICE ")=="ALICE")\n')
+    git(source,'add','.')
+    git(source,'-c','user.name=Fixture','-c','user.email=fixture@invalid','commit','-qm','Incorrect original assertion')
+    config=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
+    settings=json.loads(config.read_text())
+    settings['bug_plan_review']='source-grounded-intent-v1'
+    write_policy(config,settings)
+    strategy=setup(store)
+    enable(store)
+    monkeypatch.setattr('workbench.trusted_preparation.Runtime',ProfileRuntime)
+    monkeypatch.setattr('workbench.task_sessions.process_one',lambda *a,**k:False)
+    state=dict(accept=False,calls=0)
+    def exchange(request,stop,seconds):
+        stage=strategy.stages[0]
+        decision=ai.Decision(state='selected',stage_id=stage.id,provider=stage.provider,model=stage.model,
+            effort=stage.effort,role=stage.role,reason='Controlled allowance')
+        if request['operation']=='smart-choose':
+            return dict(state='choice',decision=decision.model_dump())
+        state['calls']+=1
+        packet=json.loads(request['prompt'].split('Untrusted task data:\n')[1])
+        if packet.get('purpose')=='original-only independent behavior checks':
+            output=dict(rationale='Original requirements specify lowercase normalized output.',criteria=['normalization'],
+                program='local normalize=dofile("../!!!TwichUI/normalize.lua")\nassert(normalize(" ALICE ")=="alice")',
+                evidence=[dict(criterion='normalization',kind='report',path=None,quote='Return trimmed lowercase output for uppercase input.')],
+                negative_control=[dict(path=PRODUCTION,old=':lower()',new='')])
+        elif packet.get('purpose')=='review original-only independent behavior checks':
+            output=dict(ready=state['accept'],covered_criteria=['normalization'],reason='Controlled design review requires a clearer independent check.')
+        else:
+            output=dict(finding='The original implementation follows the requirement, and the assertion disagrees.',action='plan',reads=[],searches=[],checks=None,question=None,limitation=None,
+                plan={**scope(),'writable_paths':[TEST],'repair_profile':dict(version=2,kind='test-correction')})
+        return dict(state='completed',result=dict(actual_model=stage.model,output=output,provider_receipt=str(uuid4()),
+            usage=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)),admission=dict(stage_id=stage.id,overrun=[]))
+    monkeypatch.setattr(smart_provider,'exchange',exchange)
+    body=report()
+    stage=strategy.stages[0]
+    body.update(description='Return trimmed lowercase output for uppercase input.',local_planning='smart-strategy',
+        ai_settings=dict(primary=dict(provider=stage.provider,model=stage.model,effort=stage.effort),fallback=None,strategy=strategy.model_dump()))
+    response=client.post('/api/intake',headers=headers,json=body)
+    assert response.status_code==200,response.text
+    identity=response.json()['id']
+    for _ in range(18):
+        worker.tick(store)
+    with store.connect() as c:
+        job=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==identity,planning_jobs.c.kind=='behavioral_preparation')).mappings().one()
+        attempt=c.execute(select(model_attempts).where(model_attempts.c.job_id==job['id'],model_attempts.c.purpose=='check_preparation')).mappings().one()
+        frozen=bug_authority.frozen(c,identity)
+        children=list(c.execute(select(model_attempts).where(model_attempts.c.job_id==job['id'],model_attempts.c.purpose=='strategy-request')).mappings())
+    assert job['status']=='failed' and len(children)==6
+    # Current bounded failures remain held. Only the old one-shot protocol upgrades.
+    assert not bug_authority.process_one(store)
+    payload=copy.deepcopy(job['payload'])
+    payload['independent_program_claim'].pop('review_protocol')
+    payload['preparation_result']['message']='Independent check review did not establish all original behavior requirements'
+    with write_transaction(store) as c:
+        c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(payload=payload))
+        # Preserve the legacy missing parent actual model rather than invent one.
+        c.execute(model_attempts.update().where(model_attempts.c.id==attempt['id']).values(actual_model=None))
+        attempt=dict(c.execute(select(model_attempts).where(model_attempts.c.id==attempt['id'])).mappings().one())
+    receipt_calls=[]
+    def terminal(identity,usage,roots,**options):
+        receipt_calls.append(identity)
+        entry=usage['strategy_requests'][0]
+        return dict(actual_model=entry['model'],requests=1,turns=[dict(provider_receipt=entry['native_receipt'])])
+    monkeypatch.setattr('workbench.bug_preparation_retry.completed_turns',terminal)
+    with store.connect() as c:
+        proof=settled_strategy_program(c,attempt,frozen['route'],payload,[])
+        assert len(proof['requests'])==6
+    for fault in ('unknown','aggregate','model','duplicate','native'):
+        with write_transaction(store) as c:
+            bad=dict(attempt)
+            if fault=='unknown':
+                bad['outcome']='interrupted_unknown'
+            if fault=='aggregate':
+                bad['usage']={**attempt['usage'],'values':dict(prompt_tokens=0,completion_tokens=0,total_tokens=0)}
+            child=dict(children[0])
+            changes={}
+            if fault=='model':
+                changes['actual_model']='other-model'
+            if fault=='duplicate':
+                changed=copy.deepcopy(child['usage'])
+                changed['strategy_requests'][0]['evidence_id']=children[1]['usage']['strategy_requests'][0]['evidence_id']
+                changes['usage']=changed
+            if changes:
+                c.execute(model_attempts.update().where(model_attempts.c.id==child['id']).values(**changes))
+            if fault=='native':
+                monkeypatch.setattr('workbench.bug_preparation_retry.completed_turns',lambda *a,**k:dict(actual_model='other',requests=1,turns=[]))
+            with pytest.raises((HTTPException,ValueError)):
+                settled_strategy_program(c,bad,frozen['route'],payload,[])
+            if changes:
+                c.execute(model_attempts.update().where(model_attempts.c.id==child['id']).values(**{k:child[k] for k in changes}))
+            monkeypatch.setattr('workbench.bug_preparation_retry.completed_turns',terminal)
+    # Normal task Pause prevents automatic renewal
+    # Resume keeps the same task.
+    control=client.get('/api/intake/'+identity+'/work-control').json()
+    assert client.put('/api/intake/'+identity+'/work-control',headers=headers,json=dict(revision=control['revision'],paused=True)).status_code==200
+    assert not bug_authority.process_one(store)
+    assert client.put('/api/intake/'+identity+'/work-control',headers=headers,json=dict(revision=control['revision']+1,paused=False)).status_code==200
+    state['accept']=True
+    assert bug_authority.process_one(store)
+    assert not bug_authority.process_one(store)
+    with store.connect() as c:
+        renewed=c.execute(select(planning_jobs).where(planning_jobs.c.id==job['id'])).mappings().one()
+        history=renewed['payload']['check_preparation_history']
+        assert renewed['status']=='queued' and len(history)==1 and len(history[0]['settlement'])==1
+        assert history[0]['independent_program_claim']==payload['independent_program_claim']
+        operation=c.execute(select(proposal_decisions).where(proposal_decisions.c.payload['policy_operation']['kind'].as_string()=='renew-independent-review')).mappings().one()
+        assert operation['status']=='applied' and operation['payload']['policy_authorization']['actor']=='owner-policy'
+        assert c.execute(select(model_attempts).where(model_attempts.c.id==attempt['id'])).mappings().one()==attempt
+    for _ in range(12):
+        worker.tick(store)
+    with store.connect() as c:
+        offer=c.execute(select(task_run_offers)).mappings().one()
+        assert offer['snapshot']['reviewed_task']['ref']==payload['ref']
+        assert c.execute(select(planning_jobs).where(planning_jobs.c.id==job['id'])).mappings().one()['status']=='completed'

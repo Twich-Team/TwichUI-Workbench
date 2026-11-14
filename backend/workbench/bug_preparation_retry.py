@@ -1,7 +1,7 @@
 """Fresh check construction after proved terminal failure; no implementation grant."""
 import json
 from pathlib import Path
-from uuid import uuid4
+from uuid import UUID,uuid4,uuid5
 
 from fastapi import HTTPException
 from sqlalchemy import select
@@ -15,6 +15,55 @@ from workbench.visual_scope import digest
 def require(value,message):
     if not value:
         raise HTTPException(409,message)
+
+
+def settled_strategy_program(c,attempt,selection,payload,roots):
+    """Read existing child/native receipts; never repair the historical parent ledger."""
+    records=[payload,*payload.get('check_preparation_history',[])]
+    require(any((r.get('independent_program_claim') or {}).get('id')==attempt['id']
+                and r['independent_program_claim'].get('source_basis')=='original-only'
+                for r in records),'Independent construction ownership is unavailable.')
+    usage=attempt['usage']
+    require(attempt['backend']=='smart' and attempt['source']=='strategy-control'
+        and attempt['execution_id'] is None and attempt['finished_at']
+        and attempt['outcome'] in {'completed','failed'} and isinstance(usage,dict)
+        and usage.get('status')=='complete','Previous strategy construction is unsettled.')
+    children=list(c.execute(select(model_attempts).where(model_attempts.c.job_id==attempt['job_id'],
+        model_attempts.c.task_id==attempt['task_id'],model_attempts.c.purpose=='strategy-request',
+        model_attempts.c.started_at>=attempt['started_at'],model_attempts.c.started_at<=attempt['finished_at'])).mappings())
+    require(type(usage.get('requests_observed')) is int and len(children)==usage['requests_observed']>0,
+        'Strategy construction request inventory differs.')
+    stages={s['id']:s for s in selection['strategy']['stages']}
+    totals=dict(prompt_tokens=0,completion_tokens=0,total_tokens=0)
+    proofs=[]
+    evidence_ids=set()
+    for child in children:
+        observed=child['usage'] or {}
+        entries=observed.get('strategy_requests',[])
+        require(len(entries)==1,'Strategy request attribution is unavailable.')
+        entry=entries[0]
+        stage=stages.get(entry.get('stage_id'))
+        require(stage and child['source']=='workbench' and child['execution_id'] is None
+            and child['policy_revision']==attempt['policy_revision'] and child['outcome']=='completed'
+            and child['finished_at'] and child['finished_at']<=attempt['finished_at']
+            and child['backend']==stage['provider']==entry.get('provider')=='codex'
+            and child['requested_model']==child['actual_model']==entry.get('model')==stage['model']
+            and child['requested_effort']==entry.get('effort')==stage['effort']
+            and observed.get('status')=='complete' and observed.get('requests_observed')==1
+            and observed.get('values')==entry.get('values'),'Strategy request is unsettled or changed.')
+        identity=entry['evidence_id']
+        require(identity not in evidence_ids and child['id']==str(uuid5(UUID(identity),
+            'strategy-provider-request-'+stage['id'])),'Strategy evidence ownership differs.')
+        evidence_ids.add(identity)
+        proof=completed_turns(identity,observed,roots,allow_unavailable=True,requested_model=stage['model'])
+        require(proof['actual_model']==stage['model'] and proof['requests']==1
+            and proof['turns'][0]['provider_receipt']==entry.get('native_receipt'),
+            'Native strategy terminal attribution differs.')
+        for key in totals:
+            totals[key]+=observed['values'][key]
+        proofs.append(dict(attempt=child['id'],terminal_proof_sha256=digest(proof)))
+    require(totals==usage.get('values'),'Strategy aggregate accounting differs.')
+    return dict(attempt=attempt['id'],requests=proofs,usage_sha256=digest(usage))
 
 
 def request_in(c,job,body):
@@ -38,7 +87,7 @@ def request_in(c,job,body):
     from workbench.trusted_preparation import validate_reviewed_policy
     validate_reviewed_policy(c.engine,reviewed)
     selection=provider_routes.run_selection(c,linked)
-    provider='codex' if selection else 'local'
+    provider=selection.get('provider','codex') if selection else 'local'
     model=selection['model'] if selection else everyday.local_selection(c).model
     roots=everyday.configuration(c.engine).evidence_roots
     attempts=list(c.execute(select(model_attempts).where(model_attempts.c.job_id==job['id'],
@@ -47,6 +96,12 @@ def request_in(c,job,body):
     proofs=[]
     for attempt in attempts:
         usage=attempt['usage']
+        if provider=='smart' and attempt['backend']=='smart':
+            try:
+                proofs.append(settled_strategy_program(c,attempt,selection,payload,roots))
+            except (ValueError,OSError,KeyError,TypeError):
+                raise HTTPException(409,'Independent strategy terminal receipts are unavailable.') from None
+            continue
         require(attempt['source']=='workbench' and attempt['execution_id'] is None
                 and attempt['backend']==provider and attempt['requested_model']==model
                 and attempt['finished_at'],'Previous check activity is unsettled.')
@@ -94,8 +149,10 @@ def request_in(c,job,body):
     history=list(payload.get('check_preparation_history',[]))
     history.append(dict(attempts=job['attempts'],finished_at=job['finished_at'],message=job['message'],
         claim=payload.get('preparation_claim'),result=payload.get('preparation_result'),
+        independent_program_claim=payload.get('independent_program_claim'),
         construction=payload.get('check_construction'),settlement=proofs,output_reused=False))
-    renewed={k:v for k,v in payload.items() if k not in {'preparation_claim','preparation_result','check_construction','recovery'}}
+    renewed={k:v for k,v in payload.items() if k not in {'preparation_claim','preparation_result','check_construction','recovery',
+        'independent_program_claim','independent_program_resume','independent_profile_program'}}
     renewed.update(check_preparation_history=history,check_retry_commands={**commands,command:signature},
                    preparation_round_id=str(uuid4()))
     c.execute(planning_jobs.update().where(planning_jobs.c.id==job['id']).values(status='queued',finished_at=None,

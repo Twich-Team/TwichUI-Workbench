@@ -208,6 +208,8 @@ def process_one(engine):
                 tasks = list(c.execute(select(backlog_items).where(backlog_items.c.proposal_id == proposal['id'],
                     backlog_items.c.kind == 'task')).mappings())
                 selected = task_budget.offer(c, proposal['id'])
+                if len(tasks)==1 and not selected and renew_legacy_program(c,row,review,parent,proof):
+                    return True
                 if len(tasks) != 1 or not selected:
                     continue
                 if operations and (not selected['snapshot'].get('repair_resume') or any(d['payload'].get('run_budget',{}).get('offer_id')==selected['id'] for d in decisions)):
@@ -236,6 +238,39 @@ def process_one(engine):
                 message='Authorized under the saved routine bug policy; waiting for validation.', created_at=now(), finished_at=None))
             return True
     return False
+
+
+def renew_legacy_program(c,row,review,parent,proof):
+    """One bounded upgrade of the original one-shot check design, in its existing job."""
+    job=c.execute(select(planning_jobs).where(planning_jobs.c.intake_id==row['id'],
+        planning_jobs.c.revision==row['revision'],planning_jobs.c.kind=='behavioral_preparation')).mappings().first()
+    if not job or job['status']!='failed':
+        return False
+    payload=job['payload']
+    claim=payload.get('independent_program_claim') or {}
+    result=payload.get('preparation_result') or {}
+    if (claim.get('source_basis')!='original-only' or claim.get('review_protocol')
+            or payload.get('check_preparation_history') or result.get('status')!='hold'
+            or result.get('message')!='Independent check review did not establish all original behavior requirements'):
+        return False
+    from workbench.schemas import PlanningRetry
+    from workbench.bug_preparation_retry import request_in
+    identity=str(uuid5(UUID(row['id']),'routine-independent-review-upgrade:'+claim['id']))
+    body=PlanningRetry(job_id=job['id'],command_id=identity,review_binding=review['binding'],renew_check_construction=True)
+    try:
+        request_in(c,job,body)
+    except (HTTPException,ValueError):
+        return False
+    operation=dict(kind='renew-independent-review',job_id=job['id'],previous_attempt=claim['id'],
+        scope_approval_id=parent['id'],scope_binding=review['binding'],review_protocol='composed-bounded-v1')
+    binding=digest(operation)
+    c.execute(proposal_decisions.insert().values(id=identity,intake_id=row['id'],proposal_id=review['id'],
+        binding=binding,scope_revision=review['human_scope']['revision'],required_artifacts=review['required_artifacts'],
+        scope_review_required=0,payload=dict(action='authorize-operation',command_id=identity,
+            policy_authorization=proof,policy_operation=operation),snapshot=review,status='applied',
+        message='Saved owner policy authorizes a fresh bounded independent check design on the same scope. No human approval or implementation grant.',
+        created_at=now(),finished_at=now()))
+    return True
 
 
 def validate_operation(c, grant, *, admitting=True):

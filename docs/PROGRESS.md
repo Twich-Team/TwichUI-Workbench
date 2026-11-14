@@ -1,3 +1,79 @@
+# Autonomous Bug Reports — second native preparation gap, November 14, 2026 UTC
+
+Following the Project Working Philosophy: installed56dbe78 handled fresh report
+672113d7-2730-47cb-b922-19697f877d60 with the correct test-correction scope.
+Five native investigation requests and two independent program/review requests
+settled. Review held before coding because the outgoing context omitted existing
+runtime-owned baseline/candidate checks. No addon edit, grant or PR occurred;
+consequential counts remain50grants/50requests/4publications. Current store1001rows,
+31tables. First report7d64ae05 remains paused with its immutable original scope.
+
+Second engineering repair: original-only design/review receives the fixed application
+verification plan, explicitly distinguishes pending runtime proof from design review,
+and permits three retained design/review rounds. No final runtime proof is weakened.
+Known non-dispatch retains completed design/review prefixes and usage. Failed Smart
+parents now retain per-request attribution; historical parents remain unchanged.
+Existing check-construction renewal reads exact Smart child/native terminals and
+aggregate accounting. A qualifying legacy one-shot review failure can renew ONCE
+through the current routine policy journal and same preparation job/scope; this
+consumes the existing combined operation ceiling. Pause/revocation/source/current
+scope/no offer/no dispatched session/settled usage still gate it. New three-round
+exhaustion holds, without automatic repeated renewal. No new scheduler or authority.
+
+Focused connected safety/recovery68passed, simulated profile15passed. Actual confined
+profile15passed with simulated models, including revised designs and bounded hold.
+Static/contracts/build passed. Both actual native preparation terminals independently
+verified read-only from current private receipts without live ledger mutation.
+Private proof: candidate-56dbe78/python-independent-terminal-proof.json.
+New exact-source full local/hosted acceptance and installation remain pending.
+Continue same valid second task after verified release; preserve its seven real calls,
+failed claim/review and history. Zero new autonomous repairs completed end to end.
+
+---
+
+# Autonomous Bug Reports — corrected release installed, November 13, 2026 Mountain Time
+
+Following the Project Working Philosophy:56dbe780984cc0eeb6eab076010668547d856692
+is installed after full exact hosted acceptance run43561057404/all9jobs/finalverify.
+Final local complete inventory used4existing CI partitions (all files once):
+627+951+586+670=2834passed,9conditional skips. Frontend69, browser134/8conditional
+skips, visual12 and connectedfeature4 passed. Dedicated actual confinement12passed,
+models simulated. All26frontend files match hosted bytes; app inventory762 files,
+29locked Python packages. UI outer harness temporary closeout failed because nested
+wb.py check had already closed its caller marker after9.6seconds; ALL5actual check
+commands returned0. Scratch2b20c is retained under changed-inventory guards, no removal
+or source change. ui-scratch-closeout.json is pinned in the private envelope.
+
+Named-helper activation, restart, independent restore, rejection sidecars, source/
+rollback seals,323evidence roots, network/portal/firewall/TLS/assets/model authentication
+and real resource browser checks passed. All983rows copied unchanged from dbf0120,
+including first native report's policy approval/offer, actual5calls and task Pause.
+Logical SHA5508b3800dba710b00e7bb803b9a72f41d09d891634030989e71b46e1e115ada.
+Both initial961 and immediate983 row subsets proved preserved. Immediate rollback is
+now dbf0120, retaining73b and inherited required builds. Local model process/key/file
+unchanged; only nativeCodex has generated. Existing global model preferences unchanged.
+Original first report7d64ae05 remains paused, readable and has no execution grant.
+
+Narrow source correction owns FRESH response validation only; saved Plan bindings stay
+readable. Fresh profile guidance is outgoing-only; saved verification requirements were
+not rewritten. Independent programs receive accurate working-directory/read-only/temp
+context. No new lifecycle, scheduler or approval owner was introduced. Original scope
+cannot be reclassified through supported investigation renewal after approval; do not
+rewrite that history. One engineering repair is recorded, not zero-repair success.
+
+Next fresh report is Portable gallery rebuild checks, ordinary browser/intake API,
+explicit task-only Sol/high primary80% plus Terra/high fallback20%, both existing signed-in
+Codex, auto waiting and native access/billing gates; global strategy remains unchanged.
+Do not click human plan/run approval. Native fresh run submission is underway; inspect
+candidate-56dbe78/python-submission.log and python-intake-result.json before any replay.
+Private acceptance helpers are outside shipped source. Zero new routine fixes have
+completed end to end. Continue native Python/Lua to exactlyone draft each, independent
+checks/all regressions, controlled exceptional cases, actualusage/intervention/time
+report, history/rollback proof and final owner review. No addon merge/release/game
+installation without separate owner permission. Do not stop at installation.
+
+---
+
 # Autonomous Bug Reports — first live classification gap, November 13, 2026 Mountain Time
 
 Following the Project Working Philosophy: installed dbf0120 completed full local/
