@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 from types import SimpleNamespace
+from contextlib import contextmanager
 import tempfile
 
 from pydantic import Field, model_validator
@@ -59,6 +60,30 @@ def classify(result):
     return 'unclassified-failure'
 
 
+@contextmanager
+def original_copy(engine, root, base, evidence_root):
+    """Shared original-only disposable source for application-owned checks."""
+    from workbench.everyday import configuration
+    from workbench.real_workspace import git
+    from workbench.storage_resources import require
+    temporary = Path(tempfile.mkdtemp(prefix='workbench-verify-', dir=configuration(engine).scratch))
+    workspace = temporary/'workspace'
+    try:
+        require(evidence_root, workspace)
+        subprocess.run(['git', '-c', 'core.hooksPath=/dev/null', '-c', 'protocol.allow=never',
+            '-c', 'protocol.file.allow=always', 'clone', '--local', '--no-hardlinks', '--no-recurse-submodules',
+            '--quiet', str(root), str(workspace)], check=True, timeout=60,
+            env={'PATH':'/usr/bin:/bin','GIT_CONFIG_NOSYSTEM':'1','GIT_CONFIG_GLOBAL':'/dev/null'})
+        git(workspace, 'remote', 'remove', 'origin')
+        git(workspace, 'config', 'core.hooksPath', '/dev/null')
+        if git(workspace, 'rev-parse', 'HEAD').strip() != base:
+            raise ValueError('Reproduction copy source changed.')
+        require(evidence_root, workspace)
+        yield workspace
+    finally:
+        shutil.rmtree(temporary)
+
+
 def run(engine, attempt_id, packet, requested, should_stop, *, disclosure_paths=None):
     from workbench import bug_authority, regression_preparation as source, real_confine
     from workbench.db import model_attempts, planning_jobs
@@ -90,20 +115,7 @@ def run(engine, attempt_id, packet, requested, should_stop, *, disclosure_paths=
     intent = dict(version=1, key=key, base=base, attempt_id=attempt_id, intake_id=identity,
         check=check.model_dump(), policy_sha256=authority['policy_sha256'])
     durable(folder/'intent.json', json.dumps(intent, sort_keys=True).encode())
-    from workbench.everyday import configuration as work_config
-    temporary = Path(tempfile.mkdtemp(prefix='workbench-verify-', dir=work_config(engine).scratch))
-    workspace = temporary/'workspace'
-    try:
-        # Same clean committed-copy and command-confinement mechanisms as repair.
-        subprocess.run(['git', '-c', 'core.hooksPath=/dev/null', '-c', 'protocol.allow=never',
-            '-c', 'protocol.file.allow=always', 'clone', '--local', '--no-hardlinks', '--no-recurse-submodules',
-            '--quiet', str(root), str(workspace)], check=True, timeout=60,
-            env={'PATH':'/usr/bin:/bin','GIT_CONFIG_NOSYSTEM':'1','GIT_CONFIG_GLOBAL':'/dev/null'})
-        from workbench.real_workspace import git
-        git(workspace, 'remote', 'remove', 'origin')
-        git(workspace, 'config', 'core.hooksPath', '/dev/null')
-        if git(workspace, 'rev-parse', 'HEAD').strip() != base:
-            raise ValueError('Reproduction copy source changed.')
+    with original_copy(engine, root, base, folder) as workspace:
         before = tree(workspace)
         argv, cwd = command(check)
         from workbench.storage_resources import require
@@ -133,8 +145,6 @@ def run(engine, attempt_id, packet, requested, should_stop, *, disclosure_paths=
             note='Observed committed check outcome. A failure does not establish its cause; inspect source and distinguish hypotheses.')
         durable(folder/'summary.json', json.dumps(summary, sort_keys=True).encode())
         return summary
-    finally:
-        shutil.rmtree(temporary)
 
 
 def read(folder, base, key):

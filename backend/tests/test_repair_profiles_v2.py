@@ -30,7 +30,7 @@ class ProfileRuntime(ControlledPreparer):
 
 @pytest.mark.usefixtures('installed')
 @pytest.mark.parametrize('language,kind,defer_review,rejected_reviews', [(language,kind,False,0) for language in ('lua','python') for kind in ('existing-failure','missing-regression','test-correction')]+[('python-artifact','existing-failure',False,0),('lua','missing-regression',True,0),('python','test-correction',False,1),('lua','missing-regression',False,1),('python','test-correction',False,3)])
-def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(client,headers,store,monkeypatch,language,kind,defer_review,rejected_reviews,invalid_citations=0,authority_failure=False):
+def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(client,headers,store,monkeypatch,language,kind,defer_review,rejected_reviews,invalid_citations=0,authority_failure=False,runtime_errors=0):
     source=enable_bugs(monkeypatch)
     settings_path=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
     settings=json.loads(settings_path.read_text())
@@ -79,6 +79,16 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
     program_calls=[]
     review_wait=[]
     reviews=[]
+    if not os.environ.get('WORKBENCH_TEST_REAL_PROFILE'):
+        # Real interpreter, deliberately controlled confinement telemetry. The
+        # dedicated delegated matrix exercises this exact helper with confinement.
+        import subprocess
+        def controlled_trial(argv,cwd,timeout,**kwargs):
+            assert kwargs['ro'] and not kwargs.get('private_loopback') and timeout==120
+            result=subprocess.run(argv,cwd=cwd,env=kwargs['env'],capture_output=True,text=True,timeout=timeout)
+            return dict(status='pass' if result.returncode==0 else 'fail',rc=result.returncode,
+                out=result.stdout+result.stderr,usage=dict(controlled_fixture=True,cgroup_removed=True))
+        monkeypatch.setattr('workbench.real_confine.run',controlled_trial)
     def generate(self,packet,schema,expected_model):
         self.diagnostics=dict(actual_model=expected_model,generation_state='finished',accounting_state='complete',finish_reason='stop',
             request_completion_limit=6144,usage=dict(units='tokens',values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))
@@ -99,6 +109,13 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
                 response['evidence'][0]['quote']='A fabricated requirement absent from the original report.'
             elif invalid_citations:
                 assert 'valid independent original requirement evidence' in str(packet['prior_design_reviews'])
+            if runtime_errors and len(program_calls)<=runtime_errors:
+                response['program']=('local values=nil\nassert(values[1]=="alice")' if language=='lua' else
+                    'values=None\nassert values[0]=="alice"')
+            elif runtime_errors:
+                trial=packet['prior_design_reviews'][-1]['original_trial']
+                assert not trial['accepted'] and trial['program_locations']
+                assert 'values' in str(trial['program_locations'])
         elif schema is ProfileProgramReview:
             if defer_review and not review_wait:
                 review_wait.append('verified-no-dispatch')
@@ -108,6 +125,7 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
                 raise Waiting(Decision(state='waiting',reason='Controlled allowance wait before review',recheck_at=1).model_dump())
             assert 'candidate execution proof is enforced later' in packet['review_instructions']
             assert 'actually changed candidate assertion line must fail' in str(packet['application_verification_plan'])
+            assert packet['original_trial']['accepted'] and packet['original_trial']['observed']
             reviews.append(packet['proposed_check'])
             response=dict(ready=len(reviews)>rejected_reviews,covered_criteria=['normalization'],reason='The original requirement needs a more explicit behavioral check.' if len(reviews)<=rejected_reviews else 'The independent assertions use original behavior and reject missing normalization.')
         else:
@@ -132,7 +150,7 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
             job=c.execute(select(planning_jobs).where(planning_jobs.c.kind=='behavioral_preparation')).mappings().one()
         assert job['status']=='failed' and ('Source changed' in job['message'] or 'clarification differs' in job['message'])
         return
-    if rejected_reviews==3 or invalid_citations==3:
+    if rejected_reviews==3 or invalid_citations==3 or runtime_errors==3:
         assert not offered,item
         from workbench.db import model_attempts
         with store.connect() as c:
@@ -145,7 +163,7 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
         return
     assert offered,item
     if kind in {'missing-regression','test-correction'}:
-        assert program_calls==['original-only']*(1+rejected_reviews+invalid_citations)
+        assert program_calls==['original-only']*(1+rejected_reviews+invalid_citations+runtime_errors)
     if defer_review:
         assert review_wait==['verified-no-dispatch']
         with store.connect() as c:
@@ -155,10 +173,15 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
     prepared=Path(offered['snapshot']['ready_preparation']['root'])
     if kind!='existing-failure':
         design=json.loads((prepared/'independent-program.json').read_text())
-        assert len(design['design_reviews'])==1+rejected_reviews+invalid_citations
+        assert len(design['design_reviews'])==1+rejected_reviews+invalid_citations+runtime_errors
         assert all(not r['accepted'] for r in design['design_reviews'][:-1])
         assert design['design_reviews'][-1]['accepted']
-        assert len({r['evidence_id'] for r in design['design_reviews']})==1+rejected_reviews+invalid_citations
+        assert len({r['evidence_id'] for r in design['design_reviews']})==1+rejected_reviews+invalid_citations+runtime_errors
+        trials=list(prepared.glob('original-program-trial-*/summary.json'))
+        assert trials and all(json.loads(p.read_text())['observed'] for p in trials)
+        if runtime_errors:
+            rejected=design['design_reviews'][0]['original_trial']
+            assert not rejected['accepted'] and rejected['program_locations']
     baseline=json.loads((prepared/'fresh-baseline-suite.json').read_text())
     assert baseline['status']==('pass' if kind=='missing-regression' else 'fail')
     assert focused.split('/')[-1] in baseline['out']
@@ -287,3 +310,13 @@ def test_changed_requirement_authority_holds_without_another_model_request(clien
     monkeypatch.setattr('workbench.repair_profiles.validate_requirement_evidence',refuse)
     test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(
         client,headers,store,monkeypatch,'python','test-correction',False,0,authority_failure=True)
+
+
+@pytest.mark.usefixtures('installed')
+@pytest.mark.parametrize('language,kind,errors',[
+    ('python','test-correction',1),('lua','test-correction',1),
+    ('python','missing-regression',1),('lua','missing-regression',1),
+    ('python','test-correction',3)])
+def test_actual_program_error_is_retained_and_revised_before_semantic_acceptance(client,headers,store,monkeypatch,language,kind,errors):
+    test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(
+        client,headers,store,monkeypatch,language,kind,False,0,runtime_errors=errors)

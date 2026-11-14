@@ -206,6 +206,87 @@ class ProfileProgramReview(bug_evidence.Data):
     reason: str = Field(min_length=10,max_length=1200)
 
 
+def profile_trial(engine, ref, root, program, validate, stopped):
+    """Try a proposed assertion body on original source, never on a candidate.
+
+    Only application observations and locations in the already disclosed proposed
+    body leave this boundary. Raw traceback/source text stays private.
+    """
+    import re
+    from types import SimpleNamespace
+    from workbench import regression_preparation, real_confine
+    from workbench.investigation_checks import original_copy, classify
+    from workbench.repair_profiles import oracle, language
+    from workbench.real_workspace import PRELUDE, tree, sha, require_safe_check
+    from workbench.verification_profiles import behavioral_outcome
+    from workbench.trusted_preparation import owned
+    validate()
+    with engine.connect() as c:
+        linked=task_execution.snapshot(c,**ref)
+    intent=linked['proposal_review']['task_contract']['bug_intent']
+    source,base,_=regression_preparation.repository()
+    if base!=intent['base'] or stopped():
+        raise ValueError('Independent trial source changed or preparation stopped')
+    bug_investigation.clean_base(source,base)
+    key=digest(dict(base=base,intent_digest=intent['review_digest'],program=program.model_dump()))
+    folder=root/('original-program-trial-'+key)
+    compiled=oracle(intent['plan']['focused_test'],program.program)
+    if folder.exists():
+        summary=json.loads(owned(folder/'summary.json').read_text())
+        if (owned(folder/'summary.sha256').read_text()!=sha((folder/'summary.json').read_bytes())
+                or summary['key']!=key or summary['base']!=base
+                or summary['result_sha256']!=sha(owned(folder/'result.json').read_bytes())
+                or summary['intent_sha256']!=sha(owned(folder/'intent.json').read_bytes())
+                or summary['oracle_sha256']!=sha(owned(folder/'oracle.lua').read_bytes())
+                or owned(folder/'oracle.lua').read_text()!=compiled):
+            raise ValueError('Original program trial evidence changed')
+        return summary  # An incomplete trial has no summary and holds, never replays.
+    folder.mkdir(mode=0o700)
+    durable(folder/'intent.json',json.dumps(dict(key=key,ref=ref,base=base,
+        intent_digest=intent['review_digest'],program=program.model_dump()),sort_keys=True).encode())
+    path=folder/'oracle.lua'
+    durable(path,compiled.encode())
+    python=language(intent['plan']['focused_test'])=='python'
+    argv=['python3','-B',str(path)] if python else ['lua5.1','-e',PRELUDE,str(path)]
+    with original_copy(engine,source,base,folder) as workspace:
+        before=tree(workspace)
+        validate()
+        if stopped():
+            raise ValueError('Preparation stopped before independent trial dispatch')
+        real_confine.USAGE_LOG=str(folder/'usage.jsonl')
+        result=real_confine.run(argv,str(workspace/'tests'),120,
+            stop_event=SimpleNamespace(is_set=stopped),ro=[str(workspace),str(path)],
+            env={'PATH':'/usr/bin:/bin','HOME':'/nonexistent','LANG':'C.UTF-8','PYTHONDONTWRITEBYTECODE':'1'})
+        result.update(command=argv,network_mode='denied')
+        durable(folder/'result.json',json.dumps(result,sort_keys=True).encode())
+        require_safe_check(result)
+        validate()
+        if stopped() or tree(workspace)!=before or path.read_text()!=compiled:
+            raise ValueError('Independent trial inputs changed or preparation stopped')
+    outcome=behavioral_outcome(result,'bug-reproducer')
+    classification=classify(result)
+    if classification=='environment-or-fixture-failure':
+        raise ValueError('Independent trial environment failure; private evidence retained')
+    expected='pass' if intent['plan']['repair_profile']['kind']=='test-correction' else 'fail'
+    accepted=(outcome==expected and (expected=='pass' or classification=='assertion-failure'))
+    # Do not forward exception values, filesystem paths or traceback source from
+    # dependencies outside the provider disclosure. Reuse only its own body lines.
+    # Lua abbreviates long source paths; retain its unique digest suffix.
+    pattern=(r'File "'+re.escape(str(path))+r'", line (\d+)' if python else re.escape(str(path)[-40:])+r':(\d+):')
+    lines=program.program.splitlines()
+    locations=sorted({int(n)-(4 if python else 1) for n in re.findall(pattern,result.get('out',''))})
+    feedback=[dict(line=n,body=lines[n-1][:600]) for n in locations if 1<=n<=len(lines)][-6:]
+    summary=dict(version=1,key=key,base=base,observed=True,accepted=accepted,
+        status=result['status'],rc=result['rc'],outcome=outcome,classification=classification,
+        expected_original=expected,program_locations=feedback,
+        guidance='Inspect the proposed body and original disclosed source. Correct setup or representation errors; preserve the original behavior requirements. A trial outcome does not establish semantic coverage or candidate correctness.',
+        result_sha256=sha((folder/'result.json').read_bytes()),intent_sha256=sha((folder/'intent.json').read_bytes()),
+        oracle_sha256=sha(path.read_bytes()))
+    durable(folder/'summary.json',json.dumps(summary,sort_keys=True).encode())
+    durable(folder/'summary.sha256',sha((folder/'summary.json').read_bytes()).encode())
+    return summary
+
+
 def profile_program(c, ref):
     """Existing preparation journal points to original-only program evidence."""
     from workbench.real_workspace import sha
@@ -266,6 +347,9 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
     durable(claim,json.dumps(dict(id=operation,source_basis='original-only',base=intent['base'],intent_digest=intent['review_digest'],review_protocol='composed-bounded-v1')).encode())
     def stopped():
         return bool(stop_event and stop_event.is_set())
+    def validate_trial():
+        with engine.connect() as c:
+            validate_behavior(c,linked['proposal_review'],linked['approval']['payload'])
     from workbench.planning_provider import LocalProvider
     adapter=adapter or (provider_routes.external_planner(route,stopped) if route else LocalProvider(stop_event,ends_at=time.monotonic()+600))
     model=route['model'] if route else local.model
@@ -348,10 +432,23 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
                         evidence.close()
                     program=None
                     continue
+            trial=profile_trial(engine,ref,root,program,validate_trial,stopped)
+            if not trial['accepted']:
+                rounds.append(dict(program=program.model_dump(),original_trial=trial,
+                    evidence_id=evidence.identifier if evidence else None,accepted=False))
                 if evidence:
+                    evidence.snapshot('model-plan-review',rounds[-1])
                     evidence.close()
+                observe=getattr(adapter,'observe_settled_failure',None)
+                if callable(observe):
+                    observe('invalid-response')
+                program=None
+                continue
+            if evidence:
+                evidence.close()
             review_id=str(uuid4())
             review_wire={**wire,'purpose':'review original-only independent behavior checks','proposed_check':program.model_dump(),
+                'original_trial':trial,
                 'review_instructions':'Check semantic coverage of every original criterion by the independent supplement AND the fixed application verification plan. Check independence from candidate code, meaningful assertions and negative controls. Refuse source-text matching, constant/vacuous checks and unsupported expected behavior. This is a design review: candidate execution proof is enforced later by the runtime.'}
             evidence=create_evidence(review_id,ProfileProgramReview,None,wire['files'])
             adapter.response_evidence=evidence
@@ -363,7 +460,7 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
             review=ProfileProgramReview.model_validate(checked)
             accepted=(review.ready and set(review.covered_criteria)=={v['id'] for v in intent['plan']['criteria']}
                 and set(program.criteria)==set(review.covered_criteria))
-            rounds.append(dict(program=program.model_dump(),review=review.model_dump(),evidence_id=review_id,accepted=accepted))
+            rounds.append(dict(program=program.model_dump(),review=review.model_dump(),original_trial=trial,evidence_id=review_id,accepted=accepted))
             evidence.snapshot('model-plan-review',rounds[-1])
             if accepted:
                 break

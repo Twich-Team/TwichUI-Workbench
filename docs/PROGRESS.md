@@ -1,3 +1,48 @@
+# Autonomous Bug Reports — original-program execution feedback, November 14, 2026 UTC
+
+Following the Project Working Philosophy: installed9da9c5f safely stopped the real
+Python preparation at09:05:03UTC. Complete original inventory was195pass/1expected
+failure; focused unittest8pass/1expected original PNG-byte assertion. The accepted
+independent program failed inside its own decoder representation comparison, not
+an addon correction. Original behavior receipt retained under round80f1c2bf-...
+Parent2d4c3089 completed all3native requests/89074tokens. Task2 totals remain11calls/
+284569tokens; combined with paused first case16calls/396853tokens. No new addon edit,
+implementation grant/request, candidate or draft. Zero new end-to-end autonomous repairs.
+Task2 remains NOTpaused, preparationFAILED, no active generation. Do not replay it.
+
+Fifth connected engineering batch adds original-only executable trials inside the
+EXISTING bounded independent-program design loop, before independent semantic review.
+It shares the existing committed-copy/confinement owner with investigation checks;
+no service, scheduler, execution authority or second source of truth. Each program
+gets a durable create-only intent, raw private result, derived observation and hashes.
+Known completed trials are reused after a known no-dispatch wait. Incomplete/changed
+receipts hold without replay. Original-only source and current scope/pause/revocation
+are revalidated before/after execution. Read-only source/oracle, denied network,
+120second/resource ceilings, owned scratch cleanup and storage safeguards remain.
+Raw traceback/dependency values remain private; model feedback contains only fixed
+observations and locations/text in its own already-disclosed proposed program.
+Ordinary executable design errors can revise within the existing3design limit;
+environment, infrastructure, source/authority changes and stops hold. Missing-regression
+requires an original assertion failure; test-correction requires original success.
+Independent review sees the actual original trial plus the fixed application plan.
+The final full original inventory/focused/program and all candidate/negative-control
+checks remain mandatory and unchanged. This does not fix or edit a generated addon
+program outside the app. Native acceptance must resume the SAME report/job/scope
+through the existing exact-bound read-only renewal after a fully verified installation.
+
+Focused actual interpreter/controlled-confinement checks:30pass/1conditional native
+skip plus7trial safety/nonreplay/disclosure checks. Dedicated real confinement matrix
+passed25cases with simulated model responses, including actual runtime errors revised
+automatically for both languages/classes and bounded exhaustion. Static checks pass.
+Full local/hosted release acceptance pending.
+Current installed source9da9c5f remains untouched; no cutover yet. Preserve all prior
+history, accepted/failed builds, native programs/receipts and unrelated admin edits.
+Immediate rollback for the next candidate MUSTbe9da9c5f, notDFA. Fresh baseline/model
+PID and existing named admin status must be captured; never use old1949395PID guard.
+Continue this assignment through real Python and Lua draft outcomes, not this checkpoint.
+
+---
+
 # Autonomous Bug Reports — 9da9c5f installed; real bounded feedback passed, November 14, 2026 UTC
 
 Following the Project Working Philosophy:9da9c5f6f610aed6ddb4d6d94a44924cb521aedd
