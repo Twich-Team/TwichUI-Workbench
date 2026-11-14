@@ -1,3 +1,61 @@
+# Autonomous Bug Reports — 9da9c5f installed; real bounded feedback passed, November 14, 2026 UTC
+
+Following the Project Working Philosophy:9da9c5f6f610aed6ddb4d6d94a44924cb521aedd
+is installed after exact hosted43574689922/all9jobs/finalverify and full local
+664+647+988+544=2843passed/9conditional skips. Frontend69, browser134/8skips,
+visual12, connectedfeature4 and actual confinement20(simulated models) passed.
+App763files/SHA7b2b70ff0281530831119ab7fe4dfb9122f46fb84504c46651da2a7dd8581cf3.
+The last outer terminal returned143 AFTER saving application exit0,988passed/xunit/
+inventory AND successful managed scratch closeout; reason unestablished. All four
+scratch closeouts complete. Observation is retained/pinned, not an app check failure.
+Private envelope112files/30external pins/332evidence roots. Activation, restart,
+independent restore, every required source/rollback seal, private network/TLS/assets/
+model auth and real resource browser passed. All1006rows/31tables/schema0014 copied
+unchanged (SHA0e3e8932edcc2f8d40102e68a54948eb241ab321a322263ef504090fbe8c94e7),
+initial961subset unchanged. Current modelPID3350312/file/key unchanged during cutover.
+Immediate rollback isDFA, not56; retain failed70 and every inherited required build.
+No repeat actual retention/model cleanup: prior88GB outcome is historical only.
+Task detail and journey nowreturn200 on ACTUAL legacy renewal row; stored payload
+remains byte-equivalent. Current old failure remains historical, no falsified pass.
+
+At08:57UTC used EXISTING check-construction renewal API ONCE as an ENGINEERING
+read-only intervention; no human plan/run approval and no implementation grant.
+Private engineering-check-renewal-request/result.json and.log prove same task,
+job, scope binding and original AI settings. Both old Smart parents independently
+settled from actual native receipts. Same job0e9d1ddd..., new root round80f1c2bf-...
+Report672113d7-2730-47cb-b922-19697f877d60 remains the active valid Python case.
+First report7d64ae05 remains paused unchanged. Task2 is NOT paused.
+
+NEW REAL proof: first design's citation failed validation; app automatically retained
+it, supplied feedback and requested a corrected design. Next design passed requirement
+validation and independent native review accepted ALL5criteria. No engineering change
+or owner answer was needed inside this operation. Three genuine Sol/high calls,
+80516prompt+8558completion=89074total tokens;1734reasoning included in completion.
+High requested, actual effort not separately reported. Parent2d4c3089-68d5-4d31-8c8e-eae762904bc5
+completed with complete usage. independent-program.json/ref93a9159e906aa331a8d6115d8b95d56fbfb5f1178438d1cd6f516435680ba83d
+stores rejected draft+validation feedback+accepted revision. Native review explicitly
+credits original-only supplement plus fixed application checks, not candidate results.
+It specifies meaningful compression/dimensions/everyRGBAchannel/runtime/metadata checks
+and a production alpha mutation that both independent program and corrected test must
+reject. No candidate exists yet; original-source native checks currently RUNNING.
+Task2 now11known completed native calls,284569tokens including retained prior195495.
+First report5calls/112284tokens. Combined16calls/396853tokens. Do not double-count
+strategy-control parents. No addon edit, new implementation grant/request or PR yet.
+Zero new autonomous repairs have completed end to end. Four engineering repair batches.
+
+Private acceptance-only READ-ONLY observer (not product orchestration) is running,
+exec session84898, 1800seconds max, sourcecandidate-9da9c5f/observe-native-case.py.
+Read native-case-observer.log / append-only native-case-observations.jsonl; it cannot
+change work or dispatch. Current jobRunning after accepted independent design; likely
+complete original196file suite plus original behavioral checks. Do NOT replay/retry.
+Original baseline195/196failedonlygalleryPNGbytecheck; candidate mustpassALL196.
+Observe normal preparation→policy run→native coding→independent checks→exactonedraft.
+Attach any created PR via codex_app attach_artifact. Keep same source/model/usage fences.
+If genuine merge boundary needed for Lua, ask only after concrete Python draft exists;
+no addon merge/release/game install without owner's separate approval. Continue now.
+
+---
+
 # Autonomous Bug Reports — installed dfa6ba1 and fourth repair batch, November 14, 2026 UTC
 
 Following the Project Working Philosophy:dfa6ba1b8712c9db4cc2f9b0f859c850f1c73ffd
