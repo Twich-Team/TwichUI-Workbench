@@ -1,3 +1,133 @@
+# STOP FOR OWNER REVIEW — frozen native proof FAILED, November14,2026
+
+Do NOT continue implementation,change Workbench/verifier,reinstall,retry or start
+another proof without new owner direction. Latest owner instruction explicitly
+requires bounded read-only observation and a stop on any frozen verification defect.
+This is the terminal controlled failure of the SAME assignment,not a fresh campaign.
+
+Installed7760a1f remains healthy; exact local/hosted acceptance passed beforehand.
+New native task016233ad-a2c6-4b82-917f-91fff253e526;execution10bdb853-c2a1-5f3b-a45c-
+9288497d3972;grant7ef5c0e4-e020-45bb-b355-eaf7830b58fe. Native frozen17:43:02UTC,
+automatic saved30minwait,automaticTerra/high dispatch18:13:08UTC. One real native
+CLI session,one model-ledger row,one execution; model-call count/actual model/effort
+unreported and unknown. Native terminal exit0,settled,authentication unchanged.
+First substantive edit41.86s after native launch,30m47.47s after request saved.
+Native-only unaccepted patch:tests/test_reminder_gallery.py,42changed lines; no
+artwork or production file changed. Ten focused tests passed.
+
+Independent frozen native_gallery_verifier failed at its FIRST recompression
+acceptance control:return23 expected0. Source review identifies its original
+read_png uses THRESHOLD=8 and clears RGBA for alpha<=8 before constructing a
+purported identical-pixel PNG. Native exact_png disables this normalization.
+This points to a frozen verifier-control defect; it does NOT establish candidate
+acceptance. Remaining negative controls and complete196-file addon suite did NOT
+run. No candidate completion,no publication attempt,no new addon branch/PR.
+Workbench request isFAILED/consumed;0publication rows for it;no replay permitted.
+Do not fix or rerun the checker under this frozen proof.
+
+Private native-integration-20261114/failed-proof-summary.json records full evidence;
+failed-native-changes.patch preserves the unaccepted model-authored changes.
+prospective-proof/native-provider-result.json,native-stdout.jsonl,native-check-0.json,
+native-check-1.json and native-first-edit.json retained. Exact candidate source is
+prospective-proof/accepted-native/tests/test_reminder_gallery.py. No manual addon
+edits;0post-freeze Workbench/verifier code changes. Read-only browser locator was
+disambiguated during observation only; all source/helper identities still match.
+
+Native unit inactive/dead,MainPID0,cgroup empty; both verifier cgroups removed,
+no leaks/OOM/PID-limit event. Four app service PIDs unchanged/active/0restarts.
+Original1019rows remain byte-for-byte in current1025-row store/schema0014/31tables;
+independent after-failed-proof-restore/workbench.sqlite3 matches logical SHA
+3e2553b7f08f277732827eb2dc7c9fc60750261232eeef0af1510fab7afeeefd.
+Original checkout edits retain dba344b2e7d890de8aa980417a98ed8bec8b6cbcb2546c04d17098203f4316fd.
+Original addon working copy clean. Current/rollback b6/c294 full seals pass; normal
+Qwen key/auth passes401withoutkey/200withkey. Source/authentication unchanged.
+
+Proof tokens167117=163912input+3205output;152704cached INCLUDED in input and531
+reasoning INCLUDED in output. Prior real fixture qualification293120tokens across
+4sessions;combined known460237tokens,model-call count unknown;development chat
+usage excluded. No API billing route enabled or extra credits purchased.
+
+Final report must lead with controlled failure,clearly say zero native addon tasks
+completed end-to-end,and include the complete CURRENT_STATUS copyable block.
+Limited rollout is not justified before a separately authorized corrected proof.
+Keep the older task672113d7 paused/stopped with original permissions/history intact.
+
+---
+
+# FROZEN proof active — November14 at17:43:02UTC
+
+Do NOT change Workbench/adapter/verifier code or retry this proof. Installed code
+7760a1f,all local/hosted acceptance passed. Exact fresh task016233ad-a2c6-4b82-917f-
+91fff253e526;execution10bdb853-c2a1-5f3b-a45c-9288497d3972;grant7ef5c0e4-e020-45bb-
+b355-eaf7830b58fe. Frozen receipt/private before-frozen-proof.sqlite3 in native-
+integration-20261114. Current1019rows before proof; source/helper/credential hashes
+and destinationd09e6dcb sealed. Proof registration from delegated helper succeeded.
+No model generation yet;0newledger rows. Existing worker pending allocation gate:
+80%primary reached;waiting_since1794678185.2114,recheck1794679985.1746(18:13:05UTC),
+then frozen20%Terra/high fallback may dispatch if eligible. Never bypass or reset
+this wait. Grant expires around18:43UTC. No renewal/rebuild campaign after freeze.
+
+Read-only substantive-edit observer PID3095884 is running (5400sec bound), watches
+Python AST changes excluding comments/docstrings; native runtime also records first
+file edit. No addon code manually changed. Existing worker must own1native session,
+settle all processes,strict export,independent63image controls,full196file addon
+suite,exact destination qualification and1checked draft through existing publisher.
+Any frozen-proof defect:preserve exact evidence,stop for owner review,no code fix.
+If successful,attach actual PR URL to this chat,verify saved application result,
+all old rows/permissions/rollback/source/auth and unchanged frozen code. Then stop.
+
+Normal installed health/TLS/Qwen auth and actual desktop/phone/reload/200% resources
+passed;4services/zero restarts,modelPID unchanged. b6ed0db and c294 remain retained.
+Private installed reader initially lacked its bundled library env; caller env was
+corrected BEFORE freeze. Private FIFO test closeout archived the intentional FIFO
+fixture and safely closed scratch BEFORE freeze. No application source changed.
+Active checkout currently has ONLY reporting-doc edits plus .venv/node_modules
+symlinks;do not mistake them for a new installable candidate. Final fullCURRENT_STATUS
+copyable block required,plus actual native time/usage/unknowns/PR or failure/report.
+
+---
+
+# Accepted native build installed; freeze and one proof next — November 14, 2026
+
+Installed7760a1f76a58835db0355436be6310d0868c16f6 on the SAME owner assignment.
+Integration a6b01c9 plus pre-freeze deferred-stop correction7760a1f. Exact hosted
+run43617703650:all9jobs includingverify green. Local backend2899pass/10skip,
+frontend69pass,browser134pass/8conditionalskip,visual12pass,connectedfeature4pass.
+All183backend files covered once by final local partitions. The native unsafe-export
+FIFO fixture was archived before exact temporary-FIFO removal; managed scratch
+safely closed. No application test failed; the original closeout refusal is retained.
+
+Installation used the unchanged named admin helper,46seconds,activated journal.
+Four services healthy,zero restarts,source775files exact. Database1019rows/31tables/
+schema0014/logical4b666f14617376b513d3e30ad44d5ae5c88674f0b4985e377fa9ead74714146b
+unchanged. TLS/private listeners/browser boundaries and normal Qwen authentication
+pass; Qwen PID unchanged. Old b6ed0db is immediate retained rollback; c294 retained.
+Independent restore,all original961rows,owner permissions and existing provider
+admission reservations preserved. Private preparation coordinates were corrected
+before activation; every hosted application byte stayed unchanged. No new privileges.
+
+Actual installed desktop/phone/reload/enlarged-text resources review passed with
+GETs only; browser uses its existing bundled libraries (initial missing-library
+caller-environment diagnostic retained). Actual addon main remainsd09e6dcb...,read
+again through GitHub just before freeze. All code/verifier bytes still7760a1f.
+
+Proof NOT frozen or registered yet. Private native-integration-20261114 contains
+freeze-and-register.py,observe-first-code-edit.py and prospective-proof/(4files),
+task016233ad-a2c6-4b82-917f-91fff253e526. Finish actual installed screenshot review,
+then start read-only edit timing observer and run ONE freeze/registration driver
+from a transient delegated cgroup with installed Python/PYTHONPATH. Its provenance
+is the explicit owner-attachment string required by real_execution.issue.
+The driver seals before register; any post-freeze defect is controlled failure,
+NOT permission to change Workbench/verifier or retry. Existing worker then owns
+one native session,strict export,independent63image controls,196-file suite and
+exactly one checked draft. Expect frozen80%primary/30minwait/20%Terrafallback;
+keep actual model-request counts unknown. No addon source has been manually edited.
+Preserve original task672113d7 pause/stop and all its permissions/usage/history.
+Do not resume old work or expand scope. Continue until proof success or controlled
+failure,then stop owner review. Final must include complete CURRENT_STATUS block.
+
+---
+
 # Pre-freeze deferred-job stop — November 14, 2026
 
 The proof is NOT frozen/registered/dispatched. a6b01c9 was pushed; complete local

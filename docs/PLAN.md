@@ -1,3 +1,11 @@
+# Terminal checkpoint — November14 frozen native proof failed
+
+Owner review is the next action. Do not change code/verifier,reinstall,retry or
+start another proof under this frozen attempt. Native coding and focused tests
+worked;independent image acceptance failed. No complete addon suite or publication.
+Current status/continuation and private failed-proof-summary.json retain evidence.
+All original history,source,authentication androllback remain protected.
+
 # Active native-agent integration and ONE frozen repair proof — November 14, 2026
 
 The current owner attachment31f07a14 authorizes the fed190e design integration,

@@ -1,3 +1,122 @@
+# Frozen native-agent proof — controlled failure, November 14, 2026
+
+A real native Codex session produced an addon test change, but the frozen independent
+verification failed. The proof is recorded as FAILED and stopped for owner review.
+No retry, Workbench/verifier repair, reinstall, merge, release or game installation
+followed. Zero addon tasks have completed end to end through native-agent-v1.
+No new addon PR exists. The patch remains unaccepted.
+
+## Installed foundation
+
+The qualified boundary is fed190e; integration is a6b01c9; the pre-freeze deferred-job
+stop is 7760a1f. Installed build 7760a1f76a58835db0355436be6310d0868c16f6 remains unchanged.
+[Hosted acceptance](https://github.com/Twich-Team/TwichUI-Workbench/actions/runs/43617703650)
+passed all nine jobs, including verify. Local checks passed: 2,899 backend tests with
+10 skips across all 183 files; 69 frontend tests; 134 browser tests with eight
+conditional skips; 12 visual tests; four connected feature checks. Actual installed
+desktop/phone views, reload and enlarged text passed. Installation took 45.76 seconds
+through the unchanged named administrative helper. Four services remain healthy.
+
+Before freezing, the older gallery preparation was paused and stopped through its
+supported owners. Original permissions, claims and model accounting were retained.
+One appended scheduling record increased the store from 1,018 to 1,019 records.
+Private preparation coordinates and the browser caller's library environment were
+corrected before freezing, with hosted application bytes unchanged. The intentional
+unsafe-export FIFO fixture was archived before removing only that temporary FIFO;
+all final test scratch was safely closed. These were pre-freeze operations.
+
+## The real coding session
+
+New task: 016233ad-a2c6-4b82-917f-91fff253e526, linked to historical report
+672113d7-2730-47cb-b922-19697f877d60 without changing its original permissions.
+Execution: 10bdb853-c2a1-5f3b-a45c-9288497d3972.
+Grant: 7ef5c0e4-e020-45bb-b355-eaf7830b58fe.
+The addon base was d09e6dcb29a4f9e3e3dbdba3fb7632c80043c810, checked against main
+before freezing. The freeze occurred at 17:43:02 UTC. Workbench honored the saved
+80% primary allocation, 1,800-second wait and 20% fallback strategy. Its own worker
+automatically selected configured gpt-6.1-terra/high and dispatched at 18:13:08 UTC.
+No manual admission or strategy change occurred.
+
+The native CLI finished with exit code 0, a terminal response, settled local
+processes and unchanged original authentication. There was one CLI invocation,
+one observed native session and one existing model-ledger row. Internal model-call
+count and actual server model/effort are unreported and remain unknown.
+
+The first substantive Python AST change, excluding comments and docstrings, was
+observed 41.86 seconds after launch, or 30 minutes 47.47 seconds after the request
+was saved. The runtime's first-file metric was 41.80 seconds. Native Codex changed
+only tests/test_reminder_gallery.py: 42 added/deleted lines. The change compares
+exact PNG dimensions and decoded pixels with low-alpha normalization disabled,
+and adds a compression/channel/dimension regression case. Gallery, manifest,
+ArtData, runtime TGAs and artwork remained unchanged. No manual addon implementation
+was supplied or edited. Strict export completed before independent checks.
+
+Proof usage was 163,912 input plus 3,205 output = 167,117 tokens. The 152,704 cached
+tokens are included in input; 531 reasoning tokens are included in output. Four
+previous real fixture sessions used 293,120 tokens; the combined known total is
+460,237. Development-chat usage is excluded. Sessions are not model-request counts.
+Subscription authentication, included-only/zero-extra-credit checks and the qualified
+credential/network boundary were retained. No API billing route, purchase or new
+subscription was enabled. Pre-proof lifecycle probes had verified cancellation and
+timeout cleanup of detached local descendants.
+
+## Exact verification failure
+
+The separate focused gallery run passed 10 tests. The frozen native-gallery-v1
+verifier then failed its first recompression acceptance control: the subject
+returned 23 (assertion rejection), while the parent expected 0 (acceptance).
+Workbench recorded the request as failed and consumed, preserving the diagnostic
+and complete known token accounting. Remaining image controls and the complete
+196-file addon regression suite did not run. No accepted candidate completion,
+publication destination qualification, push or draft-PR attempt occurred.
+
+Source inspection points to a frozen verifier-control defect. Its original PNG
+reader uses THRESHOLD=8 and clears RGBA values for alpha at or below eight. The
+verifier re-encodes those normalized rows as a supposedly identical-pixel PNG.
+The native patch disables that normalization for exact comparison. The unchanged
+fixture passed; the first purported lossless recompression was rejected. This is
+a source-derived diagnosis, not independent acceptance of the patch. The frozen
+checker was not modified, weakened or rerun.
+
+## Preservation and stopping point
+
+All 1,019 pre-proof database rows remain exactly in the 1,025-record store, with
+31 tables and schema 0014. An independent after-failure restore matches logical SHA
+3e2553b7f08f277732827eb2dc7c9fc60750261232eeef0af1510fab7afeeefd.
+Original source, task permissions, model rows and publication records are retained.
+The unrelated original-checkout diff retains SHA
+dba344b2e7d890de8aa980417a98ed8bec8b6cbcb2546c04d17098203f4316fd.
+The original addon checkout is clean.
+
+The native unit is inactive/dead with MainPID 0 and an empty cgroup. Both verification
+cgroups were removed without leaks, OOM or PID-limit events. The four installed
+service PIDs remain unchanged, active and at zero restarts. Normal Qwen authentication
+still rejects an unauthenticated request and accepts the unchanged key. Installed,
+b6ed0db and c294d65 release seals pass. Retained rollback builds keep their pre-proof
+stores; the new failed-proof history has its own independent recovery copy. No
+rollback was activated after the proof.
+
+Post-freeze Workbench/adapter/verifier code changes: zero. Manual addon edits: zero.
+Retries: zero. Operator actions were bounded read-only status/process/evidence
+inspection, disambiguating a read-only screenshot locator for duplicate wait text,
+history preservation and reporting documentation. Browser inspection made no writes.
+The existing worker alone dispatched, exported, checked and recorded the failure.
+
+Evidence is retained under
+/home/rich/.local/share/TwichUI-Workbench/native-integration-20261114/.
+failed-proof-summary.json and failed-native-changes.patch preserve the summary and
+unaccepted change. prospective-proof/ retains native stdout, provider result,
+first-edit timestamps, strict-export source and both independent check receipts.
+
+Stop for owner review. Review the frozen verifier failure before separately
+authorizing any correction and fresh proof. Limited rollout is not yet justified
+by an end-to-end result.
+
+---
+
+Earlier implementation and qualification records follow. Their future-tense status
+is historical and superseded by the terminal outcome above.
+
 # Native-agent-v1 integration — release candidate, not an addon delivery
 
 November 14, 2026, Mountain Time. Owner authority: attachment

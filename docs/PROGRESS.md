@@ -1,3 +1,34 @@
+# November14 — frozen native proof:CONTROLLED FAILURE;stop owner review
+
+Installed7760a1f unchanged. Existing worker automatically waited30min then selected
+savedTerra/high fallback. Real nativeCLI session completed,one ledger row,code edit
+at41.86s;onlytests/test_reminder_gallery.py changed,42lines,artwork unchanged.
+Independent focused10tests passed. Frozen image verifier failed its first purported
+identical-RGBA recompression acceptance control(rc23 vs0). Source review points to
+its decoder's THRESHOLD=8 normalization changing low-alpha pixels in that fixture.
+Candidate remains unverified;remaining controls/full196file suite/publication NOT
+run. Requestfailed/consumed,no new PR,no replay. No code/verifier changes,reinstall
+or retry afterfreeze. All original1019rows retained in1025-row store;independent
+restore,source/auth,fourhealthyPIDs andallretainedrelease seals pass. Exact private
+failure receipts andunaccepted native patch retained. Stop for owner review under
+latest explicit instruction;any correction/newproof requires new direction.
+
+# November14 — exact native release accepted and installed
+
+7760a1f installed; hosted43617703650 all9jobs green. Local2899backendpass/10skip,
+69frontend,134browser/8conditionalskip,12visual,4connectedfeature. Exact183file
+inventory/hosted artifact hashes match. Deliberate FIFO unsafe-export fixture
+archived before removing only its owned temporary FIFO; all scratch safely closed.
+Private caller library/path preparation diagnostics retained; no application test
+failed. Source unchanged since7760a1f; no proof freeze yet.
+
+Named admin install46s,activated,4healthyservices/zero restarts.1019-row store
+unchanged; independent restore/old histories/permissions/reservations preserved.
+TLS/private listeners/browser guards/Qwen auth pass,modelPID unchanged. Actual
+installed desktop/phone/reload/200%text GET-only review passed. Native proof and
+new addon PR stillzero. Next:freeze exactlyonce and let the existing worker finish
+one real repair/strict export/independent verification/draft or controlled failure.
+
 # November 14 — pre-freeze installation settlement
 
 Read-only installation preflight found old behavioral preparation0e9d1ddd still

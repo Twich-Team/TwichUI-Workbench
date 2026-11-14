@@ -1,22 +1,21 @@
 Last updated November 14, 2026, Mountain Time.
 
-Build b6ed0db remains installed with all four services active. The 1,018 original
-saved records and rollback remain intact. Pausing and stopping the older deferred
-gallery check job added one scheduling-policy record; the store now has 1,019.
-Original task permissions, provider usage and evidence are unchanged.
+Build 7760a1f remains installed with four healthy Workbench services. All 1,019
+pre-proof records remain intact in the 1,025-record store. Authentication, source,
+independent database restore and retained rollback builds are verified.
 
-Real subscription-authenticated Codex repaired a synthetic fixture with native
-tools inside the qualified boundary. Credential reads and tool network access
-were blocked. Cancellation and timeout settled detached descendants. Unreported
-model-call counts remain unknown.
+Workbench automatically started one real Codex session with its saved Terra/high
+fallback. It changed only tests/test_reminder_gallery.py. Its first edit appeared
+about 42 seconds after launch. Ten focused tests passed.
 
-The native adapter uses the existing worker, grants, ledger and draft publisher.
-Focused connected checks pass. Full local and hosted release checks are running;
-a small pre-freeze deferred-job stop correction requires a new exact accepted
-commit before installation. The administrative safety gate remains intact.
+The frozen independent image check failed. Source review points to its test-image
+builder clearing faint pixels instead of preserving exact pixels. The patch remains
+unverified. The complete addon suite and draft publication did not run. No new PR
+was created by this proof.
 
-Zero addon tasks have completed from beginning to end through native-agent-v1.
-The real addon proof has not started. No addon code, branch or PR was created.
-The next complete outcome is one Codex-authored gallery-test repair, independently
-verified and delivered as one draft PR after release acceptance, installation and
-an immutable proof freeze. No owner decision is currently needed.
+Zero addon tasks have completed end to end through native-agent-v1. The proof is
+recorded as failed. No Workbench/verifier code changes, reinstall or retry followed
+the freeze. Original history and model accounting are preserved.
+
+Stopped for owner review. Review the verifier failure before separately authorizing
+any correction and fresh proof. Native rollout is not yet justified.
