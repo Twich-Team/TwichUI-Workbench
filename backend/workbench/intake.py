@@ -349,10 +349,26 @@ def view_in(connection, identity):
             proposals.c.intake_id == identity).order_by(proposals.c.revision.desc())).mappings()
             if not retained or p['revision'] != retained['revision']],
         decisions=[dict({k:v for k,v in d.items() if k not in {'snapshot','intake_id'}},
-            scope_review_required=approval_needs_scope_review(connection, d)) for d in connection.execute(select(proposal_decisions).where(
+            payload=decision_payload_view(d),scope_review_required=approval_needs_scope_review(connection, d)) for d in connection.execute(select(proposal_decisions).where(
             proposal_decisions.c.intake_id == identity).order_by(proposal_decisions.c.created_at.desc())).mappings()],
         result=result,
         evidence=evidence_previews(next((j['payload']['evidence'] for j in reversed(jobs) if j['kind']=='planning' and 'evidence' in j['payload']), [])), tasks=[{k:v for k,v in t.items() if k not in {'intake_id','created_at'}} for t in planned], priority=priority(row, sum(len(t['dependencies']) for t in planned)))
+
+
+def decision_payload_view(row):
+    """Derive redundant view metadata for the original policy-renewal format.
+
+    The historical row and its operation remain unchanged; this confers no
+    authority and never repairs an approval or a contradictory payload.
+    """
+    payload=dict(row['payload'])
+    operation=payload.get('policy_operation') or {}
+    if (payload.get('action')=='authorize-operation' and operation.get('kind')=='renew-independent-review'
+            and payload.get('policy_authorization',{}).get('actor')=='owner-policy'
+            and row['binding']==digest(operation)):
+        payload.setdefault('proposal_id',row['proposal_id'])
+        payload.setdefault('binding',row['binding'])
+    return payload
 
 
 def listing(engine, page):

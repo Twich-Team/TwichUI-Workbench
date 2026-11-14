@@ -1,3 +1,65 @@
+# Autonomous Bug Reports — installed dfa6ba1 and fourth repair batch, November 14, 2026 UTC
+
+Following the Project Working Philosophy:dfa6ba1b8712c9db4cc2f9b0f859c850f1c73ffd
+is installed after exact hosted43570256789/all9jobs/finalverify and complete local
+664+647+983+544=2838passed/9conditional skips. Frontend69, browser134/8skips,
+visual12, connectedfeature4 and actual confinement15(simulated models) passed.
+All private wrappers now have successful scratch closeouts, including last983case
+partition. App763files/SHA98ff6fc41898aed1bb2602ac81f3b277f812103ae986d4147540ca013afb87ac.
+Activation, restart, independent restore, all required source/rollback seals,
+329evidence roots, private network/TLS/model auth and real resource browser passed.
+All1002rows/schema0014/31tables copied unchanged; original961subset retained.
+The CURRENT modelPID3350312/file/key stayed unchanged across this cutover. Historical
+model-cleanup preflightPID1949395 is NOT the process baseline. No repeat cleanup or
+88GB storage claim: that retained proof describes an earlier completed outcome.
+Immediate rollback is56dbe78; retain failed70and all inherited required builds.
+
+Ordinary UI Resume at07:53:36UTC retained report672113d7 and frozen scope/strategy.
+Existing policy automatically appended ONE read-only renewal receipt29062c2a...
+and reset the same preparation job0e9d1ddd... with old claim/usage in history.
+Original scope9f4a5655... remained the parent despite renewalbinding3af... sorting
+before scopebinding95a.... One new genuine Sol/high request completed, then held
+BEFORE coding. Current total for task2:8native requests/186400prompt+9095completion
+=195495tokens. High requested, not separately reported. First report stillpaused,
+5calls/112284tokens. No addon edit, new implementation grant/request or PR;
+consequential counts remain50/50/4. Main store now1006rows, all work settled.
+Task2 is NOT paused now, but preparation is safelyfailed; no active model request.
+
+Fourth repair batch has two connected issues. The citation is VALID body text of
+an original committed Python module docstring, but the validator required leading
+comment/quote markers. New reader uses Python tokenize+AST to recognize actual
+comments/docstrings, rejects code/string literals, keeps exact committed source and
+focused-test exclusion. Unsupported citations/schema drafts get up to3retained
+feedback rounds; changed source/owner bindings hold immediately, no additional
+request. Full proposed programs are snapshotted BEFORE citation validation.
+The new renewal journal omitted redundant payload proposal_id/binding, causing
+HTTP500 on task/detail/list serialization. Future producer supplies them; an exact
+bound owner-policy renewal view derives missing metadata from authoritative row
+columns without rewriting the historical payload. Connected API test covers both
+new/legacy formats, unchanged stored history and actual continued preparation.
+Read-only proofs on ACTUAL stored row and ACTUAL committed docstring bothpass.
+
+Focused38passed, additional API/authority/receipt90passed; actual confined matrix
+20passed with simulated models. Static/contracts/build pass. New exact full local/
+hosted acceptance and installation pending. Current installedDFA STILL has the task
+page serialization defect; the held task remains safe and allhistory is present.
+Private candidate-dfa6ba1/{fourth-native-gap,fourth-gap-readonly-proof}.json and
+api-after-resume.log retain facts. Do not fix the old row in place or fake approval.
+
+After the next verified installation, use EXISTING check-construction renewal API
+ONCE as a documented engineering read-only intervention, exact same scope/model,
+new commandID/reviewbinding. No new one-off automatic migration owner is needed.
+Existing request_in must independently settle BOTH retained Smart parents (2+1calls)
+from native child receipts; old unknown parent actual remains unchanged. It retains
+both failed operations/history and usage. This is no plan/run approval or grant.
+Current protocol failure is not eligible for the legacy one-shot auto-renewal;
+future citation failures will iterate inside the current three-design operation.
+Continue native Python/Lua drafts, conditional owner-merge boundary only once a
+concrete verified Python draft exists. Zero autonomous repairs completed end to end.
+Do not stop at installation. Preserve unrelated admin doc106additions/symlinks.
+
+---
+
 # Autonomous Bug Reports — retained rollback and approval ancestry correction, November 14, 2026 UTC
 
 Following the Project Working Philosophy:70d3b7d8cf6626387b0036cb563e4ffc3e56bde4

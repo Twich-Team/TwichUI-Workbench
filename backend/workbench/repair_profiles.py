@@ -376,6 +376,28 @@ def changed_assertion_failure(runtime, observed, candidate):
     return bool(lines and any(int(line) in lines for line in frames))
 
 
+def requirement_comment(text,quote,path):
+    """Recognize actual Python comments/docstrings, including quoted body text."""
+    if quote not in text:
+        return False
+    if not path.endswith('.py'):
+        return quote.lstrip().startswith(('--','#','"""',"\'\'\'"))
+    import ast
+    import io
+    import tokenize
+    try:
+        comments=[token.string for token in tokenize.generate_tokens(io.StringIO(text).readline)
+                  if token.type==tokenize.COMMENT]
+        for node in ast.walk(ast.parse(text)):
+            if isinstance(node,(ast.Module,ast.ClassDef,ast.FunctionDef,ast.AsyncFunctionDef)):
+                first=node.body[0] if node.body else None
+                if isinstance(first,ast.Expr) and isinstance(first.value,ast.Constant) and isinstance(first.value.value,str):
+                    comments.append(ast.get_source_segment(text,first.value) or '')
+        return any(quote in comment for comment in comments)
+    except (SyntaxError,tokenize.TokenError):
+        return False
+
+
 def validate_requirement_evidence(program,intent,original,feedback=None):
     """Ground intended behavior independently of the assertion being corrected."""
     if intent['plan']['repair_profile']['kind']!='test-correction':
@@ -395,7 +417,6 @@ def validate_requirement_evidence(program,intent,original,feedback=None):
             valid=evidence.path is None and (evidence.quote in original['description'] or bool(feedback and evidence.quote in feedback))
         else:
             valid=(evidence.path in intent['plan']['read_paths'] and evidence.path!=intent['plan']['focused_test']
-                and evidence.quote in source.git(root,'show',base+':'+evidence.path).decode()
-                and evidence.quote.lstrip().startswith(('--','#','"""',"\'\'\'")))
+                and requirement_comment(source.git(root,'show',base+':'+evidence.path).decode(),evidence.quote,evidence.path))
         if not valid:
             raise ValueError('Test correction cites no valid independent original requirement evidence')

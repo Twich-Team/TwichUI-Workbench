@@ -30,7 +30,7 @@ class ProfileRuntime(ControlledPreparer):
 
 @pytest.mark.usefixtures('installed')
 @pytest.mark.parametrize('language,kind,defer_review,rejected_reviews', [(language,kind,False,0) for language in ('lua','python') for kind in ('existing-failure','missing-regression','test-correction')]+[('python-artifact','existing-failure',False,0),('lua','missing-regression',True,0),('python','test-correction',False,1),('lua','missing-regression',False,1),('python','test-correction',False,3)])
-def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(client,headers,store,monkeypatch,language,kind,defer_review,rejected_reviews):
+def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(client,headers,store,monkeypatch,language,kind,defer_review,rejected_reviews,invalid_citations=0,authority_failure=False):
     source=enable_bugs(monkeypatch)
     settings_path=Path(os.environ['WORKBENCH_PREPARATION_CONFIG'])
     settings=json.loads(settings_path.read_text())
@@ -88,13 +88,17 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
             response=dict(finding='The committed behavior and original tests define a bounded normalization repair.',plan=proposed)
         elif schema is IndependentProgram:
             assert 'application_verification_plan' in packet
-            assert len(packet['prior_design_reviews'])==len(reviews)
+            assert len(packet['prior_design_reviews'])==len(program_calls)
             program_calls.append('original-only')
             assert 'candidate' not in packet and packet['purpose']=='original-only independent behavior checks'
             program=('local normalize=dofile("../!!!TwichUI/normalize.lua")\nassert(normalize(" ALICE ")=="alice")' if language=='lua' else
                 'import runpy\nnormalize=runpy.run_path("../tools/normalize.py")["normalize"]\nassert normalize(" ALICE ")=="alice"')
             response=dict(rationale='The original requirements specify trimming and lowercase output for uppercase input.',
                 criteria=['normalization'],program=program,evidence=[dict(criterion='normalization',kind='report',path=None,quote='The intended behavior is trimmed lowercase output for uppercase input.')] if kind=='test-correction' else [],negative_control=[dict(path=production,old=':lower()' if language=='lua' else '.lower()',new='')] if kind=='test-correction' else [])
+            if invalid_citations and len(program_calls)<=invalid_citations:
+                response['evidence'][0]['quote']='A fabricated requirement absent from the original report.'
+            elif invalid_citations:
+                assert 'valid independent original requirement evidence' in str(packet['prior_design_reviews'])
         elif schema is ProfileProgramReview:
             if defer_review and not review_wait:
                 review_wait.append('verified-no-dispatch')
@@ -122,19 +126,26 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
     item=client.get('/api/intake/'+identity).json()
     with store.connect() as c:
         offered=c.execute(select(task_run_offers)).mappings().first()
-    if rejected_reviews==3:
+    if authority_failure:
+        assert not offered and program_calls==['original-only'] and not reviews
+        with store.connect() as c:
+            job=c.execute(select(planning_jobs).where(planning_jobs.c.kind=='behavioral_preparation')).mappings().one()
+        assert job['status']=='failed' and ('Source changed' in job['message'] or 'clarification differs' in job['message'])
+        return
+    if rejected_reviews==3 or invalid_citations==3:
         assert not offered,item
         from workbench.db import model_attempts
         with store.connect() as c:
             attempt=c.execute(select(model_attempts).where(model_attempts.c.purpose=='check_preparation')).mappings().one()
             job=c.execute(select(planning_jobs).where(planning_jobs.c.kind=='behavioral_preparation')).mappings().one()
         assert job['status']=='failed' and attempt['outcome']=='failed'
-        assert attempt['usage']['requests_observed']==6 and len(reviews)==3
+        assert attempt['usage']['requests_observed']==(6 if rejected_reviews else 3)
+        assert len(reviews)==(3 if rejected_reviews else 0)
         assert job['payload']['independent_program_claim']['review_protocol']=='composed-bounded-v1'
         return
     assert offered,item
     if kind in {'missing-regression','test-correction'}:
-        assert program_calls==['original-only']*(1+rejected_reviews)
+        assert program_calls==['original-only']*(1+rejected_reviews+invalid_citations)
     if defer_review:
         assert review_wait==['verified-no-dispatch']
         with store.connect() as c:
@@ -144,10 +155,10 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
     prepared=Path(offered['snapshot']['ready_preparation']['root'])
     if kind!='existing-failure':
         design=json.loads((prepared/'independent-program.json').read_text())
-        assert len(design['design_reviews'])==1+rejected_reviews
+        assert len(design['design_reviews'])==1+rejected_reviews+invalid_citations
         assert all(not r['accepted'] for r in design['design_reviews'][:-1])
         assert design['design_reviews'][-1]['accepted']
-        assert len({r['evidence_id'] for r in design['design_reviews']})==1+rejected_reviews
+        assert len({r['evidence_id'] for r in design['design_reviews']})==1+rejected_reviews+invalid_citations
     baseline=json.loads((prepared/'fresh-baseline-suite.json').read_text())
     assert baseline['status']==('pass' if kind=='missing-regression' else 'fail')
     assert focused.split('/')[-1] in baseline['out']
@@ -248,3 +259,31 @@ def test_only_bound_original_owner_clarifications_can_justify_test_correction(mo
         validate_requirement_evidence(program,intent,original,'A candidate suggested '+reply)
     with pytest.raises(ValueError,match='valid independent original'):
         validate_requirement_evidence(program,intent,original)
+
+
+def test_original_python_docstring_body_is_requirement_evidence_but_code_and_strings_are_not():
+    from workbench.repair_profiles import requirement_comment
+    quote='Each accepted picture retains every exact RGBA channel.'
+    assert requirement_comment('"""Original requirements.\n'+quote+'\n"""\nx=1\n',quote,'tools/gallery.py')
+    assert requirement_comment('def build():\n    """'+quote+'"""\n    return 1\n',quote,'tools/gallery.py')
+    assert requirement_comment('# '+quote+'\nx=1\n',quote,'tools/gallery.py')
+    assert not requirement_comment('message="'+quote+'"\n',quote,'tools/gallery.py')
+    assert not requirement_comment('message="# '+quote+'"\n','# '+quote,'tools/gallery.py')
+    assert not requirement_comment('"""A different requirement."""\n',quote,'tools/gallery.py')
+
+
+@pytest.mark.usefixtures('installed')
+@pytest.mark.parametrize('invalid_citations',[1,3])
+def test_invalid_original_citation_gets_bounded_feedback_without_weakening_requirements(client,headers,store,monkeypatch,invalid_citations):
+    test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(
+        client,headers,store,monkeypatch,'python','test-correction',False,0,invalid_citations)
+
+
+@pytest.mark.usefixtures('installed')
+@pytest.mark.parametrize('message',['Source changed before requirement evidence validation','Owner clarification differs from the frozen original requirement binding'])
+def test_changed_requirement_authority_holds_without_another_model_request(client,headers,store,monkeypatch,message):
+    def refuse(*args,**kwargs):
+        raise ValueError(message)
+    monkeypatch.setattr('workbench.repair_profiles.validate_requirement_evidence',refuse)
+    test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(
+        client,headers,store,monkeypatch,'python','test-correction',False,0,authority_failure=True)

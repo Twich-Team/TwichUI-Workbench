@@ -272,6 +272,7 @@ def renew_legacy_program(c,row,review,parent,proof):
     c.execute(proposal_decisions.insert().values(id=identity,intake_id=row['id'],proposal_id=review['id'],
         binding=binding,scope_revision=review['human_scope']['revision'],required_artifacts=review['required_artifacts'],
         scope_review_required=0,payload=dict(action='authorize-operation',command_id=identity,
+            proposal_id=review['id'],binding=binding,scope_revision=review['human_scope']['revision'],
             policy_authorization=proof,policy_operation=operation),snapshot=review,status='applied',
         message='Saved owner policy authorizes a fresh bounded independent check design on the same scope. No human approval or implementation grant.',
         created_at=now(),finished_at=now()))

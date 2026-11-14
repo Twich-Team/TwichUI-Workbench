@@ -1,15 +1,13 @@
 Last updated November 14, 2026 (UTC).
 
-Build 56dbe78 is installed. It includes automatic routine Bug Reports, isolated Lua/Python checks and repair profiles, provider continuation, task priority, Pause/Resume and the four-step repair journey. Automatic repairs are on. The four services are active. All 983 rows survived the last installation; the two live acceptance attempts have now brought the store to 1,001 rows. Original permissions and global model preferences remain unchanged.
+Build dfa6ba1 is installed with automatic routine Bug Reports, isolated Lua/Python checks and repair profiles, provider continuation, task priority, Pause/Resume and the repair journey. Automatic repairs are on. All four services are active. All 1,002 rows survived installation, restart and independent restore. Current model process, file, key and authentication stayed unchanged during cutover. Original permissions and global model choices remain intact.
 
-Earlier Lua tasks reached draft PRs, and Smart AI completed a real Codex-wait-to-Claude planning request. Zero tasks have completed from beginning to end under the new autonomous Bug Reports policy.
+Earlier Lua tasks reached draft PRs. Zero tasks have completed from beginning to end under the new autonomous Bug Reports policy.
 
-The installed release passed complete local and exact hosted checks. The addon baseline has one failing gallery rebuild test: 195 of 196 pass. Manual investigation found identical PNG pixels and matching runtime textures and metadata. This supports a Python test-correction investigation; it is not a completed repair.
+The installed build passed complete local and exact hosted checks: 2,838 backend, 69 frontend, 134 browser, 12 visual and four connected feature checks. Fifteen confined profile checks passed with simulated models. These results do not prove real autonomous delivery.
 
-The first live report made five real Codex calls and chose an incompatible scope; it stays paused unchanged. Its planning correction is installed. The second report chose the correct scope and made seven real Codex calls. Independent review then held before coding because the review context omitted checks already owned by the app. Neither report made an addon edit or PR.
+The first acceptance report stays paused unchanged after five real Codex calls. The second report resumed automatically on the same scope and has made eight real Codex calls. It held before coding because a valid source-documentation citation was rejected. Its new renewal receipt also causes a display error on the task page. All history is retained; the store now has 1,006 rows. No addon edit or PR has occurred.
 
-The check-review repair passed complete local and exact hosted checks. Its installation automatically rolled back because a private health check expected an older model-service process number. All 1,002 rows and the previous app survived. The check is being corrected using the actual pre-cutover observation. Temporary verification caches were preserved privately; sealed application files were unchanged.
+The next repair accepts citations only when they appear in actual original comments or documentation, gives invalid drafts bounded feedback, and restores the task view without changing old records. Focused checks and 20 confined profile checks passed with simulated models. Full release verification is next. Four engineering repair batches have been needed during acceptance.
 
-A further source review found that recovery could mistake a renewal receipt for the original scope approval. That selection is corrected and focused tests pass. Three engineering corrections have been needed during acceptance. A new fully verified release is next. The second report remains paused for installation. These checks do not prove real autonomous delivery.
-
-Next: resume the second Python report after verified installation, reach independently verified Python and Lua drafts, and finish the exceptional cases. No owner decision is needed yet. Any addon merge remains the owner's decision.
+The addon baseline still has one failing gallery test: 195 of 196 pass. Next: finish the current Python report through an independently verified draft, demonstrate a Lua draft, and finish the exceptional cases. No owner decision is needed yet. Any addon merge remains the owner's decision.

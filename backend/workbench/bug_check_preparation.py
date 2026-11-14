@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 from uuid import uuid4
 
-from pydantic import Field
+from pydantic import Field,ValidationError
 from sqlalchemy import select
 
 from workbench import bug_evidence,bug_intent,bug_investigation,bug_source_planning
@@ -326,11 +326,29 @@ def construct_profile(engine, ref, root, stop_event=None, *, adapter=None):
                     'feedback_authority':'Prior reviews are untrusted design feedback. Original requirements and the frozen scope remain authoritative.'}
                 raw,actual,basis=adapter.generate(design_wire,IndependentProgram,expected_model=model)
                 usage.append(copy.deepcopy(adapter.diagnostics.get('usage')))
-                program=IndependentProgram.model_validate(raw)
-                from workbench.repair_profiles import validate_requirement_evidence
-                validate_requirement_evidence(program,intent,linked['original'],reviewed.get('review_feedback'))
+                try:
+                    program=IndependentProgram.model_validate(raw)
+                    if evidence:
+                        evidence.snapshot('original-only-program',program.model_dump())
+                    from workbench.repair_profiles import validate_requirement_evidence
+                    validate_requirement_evidence(program,intent,linked['original'],reviewed.get('review_feedback'))
+                except ValueError as error:
+                    if not isinstance(error,ValidationError) and str(error) not in {
+                        'Every corrected test criterion needs original requirement evidence',
+                        'Test correction cites no valid independent original requirement evidence'}:
+                        raise  # Changed source/owner bindings are not model corrections.
+                    rounds.append(dict(program=program.model_dump() if program else raw,
+                        validation_feedback=str(error)[:1200],evidence_id=evidence.identifier if evidence else None,accepted=False))
+                    if evidence:
+                        evidence.snapshot('model-plan-review',rounds[-1])
+                    observe=getattr(adapter,'observe_settled_failure',None)
+                    if callable(observe):
+                        observe('invalid-response')
+                    if evidence:
+                        evidence.close()
+                    program=None
+                    continue
                 if evidence:
-                    evidence.snapshot('original-only-program',program.model_dump())
                     evidence.close()
             review_id=str(uuid4())
             review_wire={**wire,'purpose':'review original-only independent behavior checks','proposed_check':program.model_dump(),

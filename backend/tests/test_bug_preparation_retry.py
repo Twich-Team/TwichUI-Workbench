@@ -145,6 +145,22 @@ def test_settled_smart_review_can_renew_same_job_once_with_policy_attribution(cl
         assert bug_authority.scope_approval([original,operation])==original
         assert bug_authority.scope_approval([operation]) is None
         assert c.execute(select(model_attempts).where(model_attempts.c.id==attempt['id'])).mappings().one()==attempt
+    response=client.get('/api/intake/'+identity)
+    assert response.status_code==200,response.text
+    # Older installed policy renewals omitted redundant payload metadata.
+    # Rendering derives it from the bound row without rewriting saved history.
+    legacy=copy.deepcopy(operation['payload'])
+    legacy.pop('proposal_id')
+    legacy.pop('binding')
+    with write_transaction(store) as c:
+        c.execute(proposal_decisions.update().where(proposal_decisions.c.id==operation['id']).values(payload=legacy))
+    response=client.get('/api/intake/'+identity)
+    assert response.status_code==200,response.text
+    shown=next(d for d in response.json()['decisions'] if d['id']==operation['id'])
+    assert shown['payload']['binding']==operation['binding']
+    assert shown['payload']['proposal_id']==operation['proposal_id']
+    with store.connect() as c:
+        assert c.execute(select(proposal_decisions.c.payload).where(proposal_decisions.c.id==operation['id'])).scalar_one()==legacy
     for _ in range(12):
         worker.tick(store)
     with store.connect() as c:
