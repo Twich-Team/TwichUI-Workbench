@@ -1,3 +1,67 @@
+# Autonomous Bug Reports — c294d65 installed; same-task native continuation, November 14, 2026 UTC
+
+Following the Project Working Philosophy:c294d65ea8fa0adf30b87574e03eb46b89e18ede
+is installed. Exact hosted43581969908 passed ALL9jobs/finalverify. Complete local
+592+780+642+841=2855backend passed/9conditional skips across ALL181files exactly once;
+frontend69, browser134/8skips, visual12, connectedfeature4 and actual-confined25profile
+cases(simulated models) passed.38focused checks/1conditional native skip also passed.
+Production correction adds actual original-only execution feedback to the existing
+bounded design loop; c294also fixes its controlled Smart-renewal test boundary.
+Rejected91fea01 remains preserved/protected and was NEVERinstalled.
+
+Accepted package764files/SHA6235cfdb81e5f9f51c179d7a4efa9815bb9a2c4d87a4b18c32a444c667f25ccf.
+Envelope122files/30external pins/338evidence roots. All14current/required source seals
+pass. Immediate rollback is9da9c5f, notDFA or rejected91. Every inherited required build
+and failed70/91 retained. Private evidence:candidate-c294d65 under autonomous-bugs-20261113.
+All1010rows/31tables/schema0014 survived cutover, restart and independent restore:
+SHA59453255141d17b59f4bbf5e2fd666a5513c1ab5287af1391bab8fcf507abdbe.
+Initial961subset and immediate1010subset verified. Original permissions/preferences/
+paused first report/archived Qwen-only navigation/history remain unchanged. Consequential
+counts before continuation stayed50grants/50requests/4publications. All4services active,
+zero automatic restarts. ModelPID3350312/file/key unchanged during cutover; unauth401/
+auth200. Private network/TLS/sealed assets, actual resource desktop/phone/enlarged/reload,
+restored rejection sidecars and rollback all pass. No repeat retention/model cleanup;
+prior88GB recovery proof is historical only, NOTnew work or space recovered here.
+
+Local shard1 app exit0/592pass, but its outer housekeeping initially hit the20second
+inventory guard. Supported standalone closeout succeeded7.73seconds, preserving result;
+no tests repeated. ALL4managed closeouts complete. Activation outer terminal returned143
+AFTER durable activated journal, actual history/source/resources success. Cause remains
+unestablished; activation-driver-observation.json retained; activation NOTreplayed.
+One separately bounded restart/restore completed normally exit0 in10.5seconds.
+The saved real-model program93a9159e... was independently tried with the new helper on
+copied history under actual confinement and rejected with2locations. Zero model calls/
+addon edits/live transitions; this is engineering failure-detection proof, NOTa real
+model correction. Fully resolved real-history UI review passed, including legacy renewal.
+
+At10:27UTC existing exact-bound check-renewal API used ONCE as an ENGINEERING read-only
+intervention after installation verification. HTTP200; no human plan/run approval or
+new implementation grant. Same report672113d7-2730-47cb-b922-19697f877d60/job0e9d1ddd-2bc1-4464-8b75-a6e3e03ef8d4/
+scope95a18630720ee58f49e9d6a9bf2c07aabd83e728182e3b5fdd0ceb772c82bdce.
+All3prior Smart parents independently settled against actual native receipts, retained
+in history(length3). New root ends round-a96bd239-3f4c-4cc6-95fd-e730a49ceb68;
+parentd3f64190-9228-4c63-9746-af9b7b8791d8. Preparation RUNNING, first new request active;
+DO NOT replay/retry. Task NOTpaused. Existing frozen Sol/high80% + Terra/high20% strategy
+unchanged; global choices unchanged. Before this operation task2had11completed native
+calls/284569tokens; combined paused first case16calls/396853tokens. Active request usage
+not yet settled; do not fabricate or double-count strategy-control parents. No new
+addon edit, execution grant/request or PR. Zero new autonomous repairs completed end to end.
+Five connected engineering repair batches, including the renewal fixture correction.
+
+Acceptance-only READ-ONLY observer exec session68196 runs2700seconds max, lognative-case-
+observer.log/append-only native-case-observations.jsonl. It cannot dispatch/change tasks.
+Continue native original-only program trials/revisions/independent review, full original
+inventory/focus/program, policy implementation, candidate all196tests and negativecontrols,
+then exactly one authorized draft. Attach created PR. Do NOTfinish at this installation.
+Only after a concrete Python draft exists, ask if its merge is genuinely required for
+Lua's all-regression baseline. Addon main was independently confirmed STILLd09e6dcb...
+at10:16UTC; no source/approval changes. Lua invalid-filter case has explicit original
+bad-input=>Alltime test, so do not manufacture an owner ambiguity. Genuine ambiguity
+acceptance remains unproven; do not invent a question/answer to check a box. No addon
+merge/release/game installation without separate owner action. Continue now.
+
+---
+
 # Autonomous Bug Reports — controlled renewal fixture correction, November 14, 2026 UTC
 
 Following the Project Working Philosophy: candidate91fea01 is REJECTED, NOTinstalled.
