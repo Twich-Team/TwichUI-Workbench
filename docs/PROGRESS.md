@@ -1,3 +1,42 @@
+# Verified Smart AI candidate staged; host access required — November 14, 2026
+
+Candidate73b24f6dd07d4167b97a7a0a687ceaf94188f08e passed complete exact local
+acceptance (2797 backend/8 conditional skips,69 frontend,132 browser/8 conditional
+skips,4 connected controlled feature cases,12 visual) and full hosted run43530685910
+including verify. Private73b24f6 installer envelope passed preflight: original942
+rows/31tables/schema0014, exact hosted app/frontend,29 locked Python dependencies,
+rollback source/store, retained evidence and immutable configuration. Desktop/phone/
+200% strategy screenshots inspected and privately retained. No application activation.
+
+Live build50cc64a retains original four PIDs and zero restarts; fingerprint remains
+66342b7a9176ffe3937a5b835b7860999739a843e4ab091600964f34ce63e588.
+Actual protected admin grant expiredNov13 23:29:31UTC; the named helper refused
+status. Never bypass or self-renew. All unblocked engineering/release preparation
+is complete; request actual owner-run host renewal, not new task/engineering consent.
+Prepared narrow renewal script is under the private smart-ai-20261113 directory;
+it preserves helper/sudoers/scope and backs up the root grant, then changes only
+created/expires for24hours. Offline scope/clock checks passed; no protected write.
+
+Next: verify actual renewed helper status, recheck complete envelope/history/old
+seal, activate once through existing installation_preflight/activate-private.py,
+verify LAN/TLS/resources/history/independent restore, then run the prepared rendered
+UI-only installed-strategy-acceptance.mjs. This temporarily authorizes Codex1%
+wait_then_switch60sec then Claude75% with explicit unknown-request limit1, submits
+one read-only existing spell-rank coverage plan and restores original global values
+while the task waits. No scope/run/addon/publication approval. Preserve any submitted
+request; never rerun the driver blindly after response loss. Observe the saved task.
+The actual Claude short window was100%, so check fresh native eligibility and allow
+waiting; do not convert native reset labels into epochs or buy credits. Its constrained
+native /usage preflight passed512MiB/64tasks/NoNewPrivileges at~396MiB, zero generation.
+Real earlier native boundary generated2391prompt/9output tokens; actual effortnull.
+
+Private receipts: ~/.local/share/TwichUI-Workbench/smart-ai-20261113/candidate-73b24f6.
+Current report is CURRENT_STATUS.md. Zero complete native Smart app tasks so far.
+Unrelated admin-document edits and dependency symlinks preserved. Continue to the
+complete delivered outcome after access; stop for owner review afterward.
+
+---
+
 # Smart AI Choices — native quota and final access-state checks
 
 Native CLI2.1.323 read-only preflight was exercised under512MiB/64tasks/100%CPU/

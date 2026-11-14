@@ -1,3 +1,22 @@
+# Active priority — Smart AI Choices and Claude integration
+
+The November13 owner assignment approves checkpoints A–D after Milestone3.
+Request-start percentage cutoffs with possible in-flight overrun are the default;
+strict ceilings and explicit conservative unknown-usage policies remain available.
+Provider-specific budgets/reserves, models/effort, frozen task choices, durable
+waiting, manual Start now and clear Dashboard reasons are in scope. No API billing.
+
+A–C are implemented and accepted in development. Exact candidate73b24f6 passed
+full local/hosted acceptance. D remains staged pending actual host administrator
+access, one private installation and real installed-app acceptance. Existing records,
+permissions, service ownership, retention, rollback and publication checks remain.
+After complete verified delivery, stop for owner review. The next product milestone
+will make routine Bug Reports autonomous under standing owner authorization; it is
+not started here. Gallery repair, map publication, automatic test discovery, database
+migration, wider redesign and legacy maintenance cutover remain excluded.
+
+---
+
 # Smart AI Choices and Claude — approved priority, November 13, 2026
 
 The owner approved the complete connected outcome through checkpoints A–D:
