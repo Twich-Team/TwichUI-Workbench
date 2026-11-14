@@ -431,11 +431,20 @@ class PilotGitHub:
             for p in paths
         ):
             return False
-        patch = git(
-            "diff", "--no-ext-diff", "--no-textconv", "--binary", snapshot["base"], raw=True
-        )
-        if hashlib.sha256(patch).hexdigest() != result["manifest"]["patch_sha256"]:
-            return False
+        if specification(snapshot)['contract'].get('engine_version') == 'native-agent-v1':
+            # Native evidence preserves a unified patch, not Git's diff framing.
+            # Keep its exact original seal, require unchanged modes, and compare
+            # every prepared byte below. Do not regenerate the historical patch.
+            patch = Path(snapshot['evidence_root']) / 'candidates' / snapshot['candidate_id'] / 'changes.patch'
+            if (hashlib.sha256(patch.read_bytes()).hexdigest() != result['manifest']['patch_sha256']
+                    or git('diff', '--no-ext-diff', '--no-textconv', '--summary', snapshot['base'])):
+                return False
+        else:
+            patch = git(
+                "diff", "--no-ext-diff", "--no-textconv", "--binary", snapshot["base"], raw=True
+            )
+            if hashlib.sha256(patch).hexdigest() != result["manifest"]["patch_sha256"]:
+                return False
         for name in paths:
             file = self.workspace / name
             if (

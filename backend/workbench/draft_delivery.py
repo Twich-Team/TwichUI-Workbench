@@ -147,7 +147,8 @@ def advance(engine, stop_event=None):
         identity = c.execute(sql_select(real_publications.c.execution_id)
             .join(real_execution_requests,real_execution_requests.c.id==real_publications.c.execution_id)
             .join(real_execution_grants,real_execution_grants.c.id==real_execution_requests.c.grant_id)
-            .where(eligible(c,real_execution_grants.c.snapshot['workflow_task']['intake_id'].as_string()))
+            .where(eligible(c,func.coalesce(real_execution_grants.c.snapshot['native_task']['task_id'].as_string(),
+                       real_execution_grants.c.snapshot['workflow_task']['intake_id'].as_string())))
             .where(real_publications.c.status.in_(publication.ACTIVE),
                    real_publications.c.snapshot["checked_approval"].as_string().is_not(None))
             .order_by(real_publications.c.created_at).limit(1)).scalar()

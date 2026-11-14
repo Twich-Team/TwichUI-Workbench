@@ -1,3 +1,15 @@
+# Historical native checked-result handoff — November 14, 2026
+
+checked_handoff owns only the versioned read-only qualification receipt. It grants
+no execution/publication authority, edits no old grant/completion/check and never
+reruns original checks. real_handoff retains its original complete runtime seal.
+real_publication remains the single publication owner; draft_delivery retains the
+existing worker/connector path and canonical durable remote record. The separate
+approval renewal applies only to an exact pending native delivery with empty state;
+the old approval snapshot is retained. No remote-intent replay is allowed.
+
+---
+
 # Deferred preparation stop — November 14, 2026
 
 trusted_preparation owns a trusted operator stop for an exact-bound paused queued

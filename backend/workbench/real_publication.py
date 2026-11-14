@@ -54,6 +54,12 @@ def _proof(row, grant):
     if not runtime.owns_recovery(grant):
         raise DeliveryHeld("The evidence directory identity changed.")
     completed = runtime.recover_completion(row, grant)
+    if not completed and grant['snapshot'].get('contract', {}).get('engine_version') == 'native-agent-v1':
+        from workbench.checked_handoff import load
+        try:
+            completed = load(runtime, row, grant)
+        except (ValueError, OSError, KeyError, TypeError) as error:
+            raise DeliveryHeld('Historical checked-result integrity failed: ' + str(error)) from None
     if not completed or digest(completed["result"]) != digest(row["result"]):
         raise DeliveryHeld(
             "The frozen candidate or independent completion evidence failed integrity checks."
@@ -275,6 +281,23 @@ def _enqueue(engine, row, grant, snapshot):
         binding = digest(snapshot)
         if existing:
             if "checked_approval" in snapshot and existing["binding"] != binding:
+                before = existing['snapshot']
+                if (grant['snapshot'].get('contract', {}).get('engine_version') == 'native-agent-v1'
+                        and existing['status'] == 'pending' and existing['state'] == {}
+                        and 'checked_approval' in before
+                        and {k: v for k, v in before.items() if k != 'checked_approval'}
+                        == {k: v for k, v in snapshot.items() if k != 'checked_approval'}):
+                    # A new installation has a different store/policy identity.
+                    # Renew only an entirely unstarted exact delivery, after the
+                    # normal current checks and separate approval; retain the old
+                    # permission and hold as history. Never replay remote intent.
+                    recovery = dict(previous_binding=existing['binding'],
+                        previous_snapshot=before, previous_status=existing['status'],
+                        previous_state=existing['state'], renewed_at=execution.now())
+                    c.execute(records.update().where(records.c.id == existing['id']).values(
+                        snapshot=snapshot, binding=binding,
+                        state=dict(checked_approval_recovery=recovery)))
+                    return True
                 raise DeliveryHeld("This result already has a different delivery record.")
             if ("checked_approval" in snapshot and snapshot.get("feature_artifact")
                     and existing["binding"] == binding and existing["snapshot"] == snapshot

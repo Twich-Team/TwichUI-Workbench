@@ -163,3 +163,37 @@ def test_shared_installed_scratch_can_be_cleaned_after_connector_preparation(pre
     recovered = LocalOnly(original.root, snapshot)
     assert recovered.cleanup(commit)
     assert not adapter.workspace.parent.exists()
+
+
+@pytest.mark.parametrize('damage', [None, 'bytes', 'mode', 'patch'])
+def test_native_unified_patch_keeps_original_seal_and_exact_recovery(prepared, damage):
+    import difflib
+    adapter, snapshot, result = prepared
+    spec = snapshot['task_budget']['offer']['snapshot']['specification']
+    spec['contract']['engine_version'] = 'native-agent-v1'
+    name = result['files'][0]['path']
+    candidate = adapter.root.parent / 'evidence/candidates' / snapshot['candidate_id']
+    before = git(spec['contract']['source'], 'show', snapshot['base'] + ':' + name, raw=True)
+    after = (candidate / 'files' / name).read_bytes()
+    patch = ''.join(difflib.unified_diff(before.decode().splitlines(True),
+        after.decode().splitlines(True), fromfile='a/' + name, tofile='b/' + name)).encode()
+    (candidate / 'changes.patch').write_bytes(patch)
+    result['manifest']['patch_sha256'] = hashlib.sha256(patch).hexdigest()
+    adapter.interrupt_apply = True
+    with pytest.raises(OSError):
+        adapter.prepare(snapshot, result)
+    assert adapter.prepared_patch_matches(snapshot, result)
+    if damage:
+        if damage == 'bytes':
+            (adapter.workspace / name).write_text('unapproved change\n')
+        elif damage == 'mode':
+            (adapter.workspace / name).chmod(0o755)
+        else:
+            (candidate / 'changes.patch').write_bytes(patch + b'corrupt')
+        assert not adapter.prepared_patch_matches(snapshot, result)
+        with pytest.raises(DeliveryHeld):
+            adapter.prepare(snapshot, result)
+    else:
+        commit = adapter.prepare(snapshot, result)
+        assert adapter.prepare(snapshot, result) == commit
+        assert (candidate / 'changes.patch').read_bytes() == patch

@@ -1,3 +1,36 @@
+# Native verification-to-publication correction — November 14, 2026
+
+The current owner attachment 6bf5abc1 authorizes the focused historical-evidence /
+current-publication correction, full accepted release and one separately authorized
+linked draft delivery. It supersedes earlier stops for that scope only. No new
+native coding, addon patch generation or original-source checks are authorized.
+Stop after one draft or a fundamental new blocker; no merge/addon installation.
+
+Development adds a versioned create-only checked-result receipt. Qualification
+runs the sealed original runtime read-only, without network or credentials, and
+retains original grant/runtime/candidate/check hashes, completion and linked failed
+attempt provenance. Current publication rechecks those seals and its own existing
+authority, destination, pause, revocation and durable remote reconciliation. It never
+pretends to be the historical runtime or edits its source seal.
+
+The worker advancement now uses the native/legacy task coalesce already used at
+admission. An entirely unstarted pending native delivery can receive a separately
+validated new approval after installation while retaining the previous snapshot /
+binding / state as history. Any prior remote intent prevents this renewal.
+The native unified patch keeps its original bytes/hash; isolated preparation checks
+exact candidate bytes, scope and modes instead of expecting Git's diff framing.
+Legacy patch checks remain unchanged.
+
+The actual saved gallery result qualified under unchanged installed c4b9dd8 and
+reached a real local commit through the corrected worker/publisher in an isolated
+store. Repeated preparation produced the same commit; no remote writes occurred;
+owned scratch was cleaned. Original addon checks were reused, never rerun.
+Candidate 3049e5ee932eae98d190aac339d8b41e56055821e7d007d74f693d169645aa58.
+Private evidence: /home/rich/.local/share/TwichUI-Workbench/native-checked-boundary-20261114/.
+Installed app remains c4b9dd8; release verification/install/delivery are pending.
+
+---
+
 # STOP — preserved native delivery fails after selector correction, November 14
 
 The current owner authorized focused publication selection repair and one separate

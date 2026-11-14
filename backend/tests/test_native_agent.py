@@ -226,21 +226,19 @@ def test_existing_worker_claim_and_model_ledger_are_reused_once(store, spec, tmp
     assert execution.review(store, request['id'])['status'] == 'failed'
 
 
-def test_native_candidate_uses_existing_completion_and_exact_draft_owners(store, client, spec, tmp_path, monkeypatch, request):
+@pytest.fixture
+def native_checked(store, client, spec, tmp_path, monkeypatch, request):
     """Real file seals/DB/publication preview; provider and check results SIMULATED."""
-    from workbench import real_confine, real_publication
+    from workbench import real_confine
     runtime = native.prepare(tmp_path / 'native', spec)
     import shutil
     request.addfinalizer(lambda: shutil.rmtree(runtime.workspace.parent))
     monkeypatch.setattr(runtime, 'preflight', lambda: [dict(name='SIMULATED', status='passed')])
     monkeypatch.setattr(runtime, 'admission_gate', lambda *args: dict(name='SIMULATED allowance', status='passed'))
     monkeypatch.setattr(runtime, 'cleanup', lambda row: True)
-    monkeypatch.setattr(native, 'Runtime', lambda root: runtime)
-    registered = native.register(store, runtime.root, 'EXPLICIT TEST OWNER', 'SIMULATED pytest')
-    monkeypatch.undo()
-    monkeypatch.setattr(runtime, 'preflight', lambda: [dict(name='SIMULATED', status='passed')])
-    monkeypatch.setattr(runtime, 'admission_gate', lambda *args: dict(name='SIMULATED allowance', status='passed'))
-    monkeypatch.setattr(runtime, 'cleanup', lambda row: True)
+    with monkeypatch.context() as registration_patch:
+        registration_patch.setattr(native, 'Runtime', lambda root: runtime)
+        registered = native.register(store, runtime.root, 'EXPLICIT TEST OWNER', 'SIMULATED pytest')
     intake = client.get('/api/intake/' + spec['task_id'])
     assert intake.status_code == 200, intake.text
     context_url = '/api/intake/' + spec['task_id'] + '/tasks/' + spec['task_id'] + '/execution'
@@ -270,6 +268,12 @@ def test_native_candidate_uses_existing_completion_and_exact_draft_owners(store,
     view = execution.review(store, registered['id'])
     assert view['status'] == 'checked'
     assert client.get(context_url).json()['stage'] == 'checked'
+    return runtime, registered, view
+
+
+def test_native_candidate_uses_existing_completion_and_exact_draft_owners(store, client, spec, tmp_path, native_checked):
+    from workbench import real_publication
+    runtime, registered, view = native_checked
     review = real_publication.review_checked(store, registered['id'])
     assert review['repository'] == 'Twich-Team/TwichUI'
     assert review['base'] == spec['contract']['base']

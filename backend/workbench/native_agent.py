@@ -231,6 +231,8 @@ def checked(c, row, grant, *, active=True):
     from workbench.result_rejection import later_review
     if active:
         validate_authority(c, grant)
+        if grant['revoked_at']:
+            raise DeliveryHeld('Native task permission was revoked; checked history is retained')
     ledger = c.execute(select(model_attempts).where(model_attempts.c.id == row['fence'],
         model_attempts.c.execution_id == row['id'])).mappings().first()
     result = row['result'] or {}
