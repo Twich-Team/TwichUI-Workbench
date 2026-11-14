@@ -25,6 +25,16 @@ FOCUSED = 'tests/test_reminder_gallery.py'
 REJECTED = 23
 
 
+def exact_png(decoder, path):
+    """Disable the original artwork reader's lossy alpha cleanup for fixtures."""
+    threshold = decoder.THRESHOLD
+    try:
+        decoder.THRESHOLD = -1
+        return decoder.read_png(path)
+    finally:
+        decoder.THRESHOLD = threshold
+
+
 def png(width, height, rows, *, alpha=True):
     def chunk(kind, data):
         return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data) & 0xffffffff)
@@ -214,7 +224,7 @@ def main(root, original):
     # This module is unchanged original production source, never the candidate
     # test. Import it BEFORE any untrusted child exists, in this parent only.
     sys.path.insert(0, str(root / 'tools'))
-    from make_map_tool_icons import read_png
+    import make_map_tool_icons as decoder
     checked = []
     with tempfile.TemporaryDirectory() as directory:
         output = Path(directory)
@@ -240,7 +250,7 @@ def main(root, original):
         checked.append('unchanged-valid-output')
         for index, sample in enumerate(SAMPLES):
             path = output / 'assets/reminder-gallery' / (sample + '.png')
-            width, height, rows, alpha = read_png(root / 'assets/reminder-gallery' / (sample + '.png'))
+            width, height, rows, alpha = exact_png(decoder, root / 'assets/reminder-gallery' / (sample + '.png'))
             rows = [bytearray(row) for row in rows]
             if not alpha:
                 raise AssertionError('Original artwork must have its alpha channel')
@@ -262,11 +272,21 @@ def main(root, original):
                 changed = [bytearray(row) for row in rows]
                 changed[height // 2][4 * (width // 2) + channel] ^= 1
                 rejects(sample + ':changed-' + name, path, png(width, height, changed))
-            hidden_rgb = [bytearray(row) for row in rows]
-            if hidden_rgb[0][3] != 0:
+            if rows[0][3] != 0:
                 raise AssertionError('Original source must retain a transparent edge')
-            hidden_rgb[0][0] ^= 1
-            rejects(sample + ':changed-RGB-under-zero-alpha', path, png(width, height, hidden_rgb))
+            for channel, name in enumerate(('red', 'green', 'blue')):
+                hidden_rgb = [bytearray(row) for row in rows]
+                hidden_rgb[0][channel] ^= 1
+                rejects(sample + ':changed-' + name + '-under-zero-alpha', path, png(width, height, hidden_rgb))
+            faint = next(((y, x) for y, row in enumerate(rows)
+                for x in range(width) if 1 <= row[4 * x + 3] <= 8), None)
+            if faint is None:
+                raise AssertionError('Original source must retain a faint nonzero-alpha pixel')
+            y, x = faint
+            for channel, name in enumerate(('red', 'green', 'blue', 'alpha')):
+                changed = [bytearray(row) for row in rows]
+                changed[y][4 * x + channel] ^= 1
+                rejects(sample + ':changed-faint-' + name, path, png(width, height, changed))
             rgb = [bytes(v for i, v in enumerate(row) if i % 4 != 3) for row in rows]
             rejects(sample + ':missing-alpha', path, png(width, height, rgb, alpha=False))
             rejects(sample + ':truncated-PNG', path, recompressed[:24])
@@ -279,7 +299,7 @@ def main(root, original):
         for name in paths[:2]:
             path = output / name
             rejects(name + ':changed-exact-bytes', path, path.read_bytes() + b'\n')
-    checked.extend(quality_controls(root, original, read_png))
+    checked.extend(quality_controls(root, original, decoder.read_png))
     print(json.dumps(dict(independent_profile='native-gallery-v1', checks=checked, count=len(checked)), sort_keys=True))
 
 

@@ -1,3 +1,37 @@
+# Corrected gallery verifier and one fresh proof — November 14, 2026
+
+Owner attachment `41c5812c-4484-4f66-a47d-51801a6e5aa1/Pasted text.txt`
+authorizes a narrow future-verifier correction, independent qualification, exact
+local/hosted acceptance and installation, then ONE fresh native-agent-v1 task
+through one independently verified draft PR. This supersedes the prior owner-review
+stop for this new assignment only. Prior proof remains failed, consumed and unaccepted.
+No architecture redesign, historical promotion, merge, release or in-game install.
+Once the fresh proof freezes, no Workbench/verifier changes or retry campaign;
+stop for owner review after success or controlled failure.
+
+Qualification is complete without a provider request. Exact original decoder is
+used with THRESHOLD=-1 only while building exact-pixel fixtures; normal quality
+reader configuration is restored. All 87 controls pass with the earlier candidate
+as a diagnostic input only, including four recompressions, dimensions, every channel,
+faint RGBA, transparent RGB, TGAs, manifest, ArtData and original quality/catalogue
+controls. Original unchanged source still fails, historical verifier still rejects
+the same diagnostic, and lossy/omitted comparison known-bad cases are rejected.
+Independent raw PNG parsing proves old fixtures change 792/1614/1961/835 pixels
+and corrected fixtures preserve exact dimensions/every RGBA byte. Hidden nonzero
+RGB at alpha zero is also preserved in a synthetic sentinel. Source bound to exact
+original d09e6dcb; parent/subject separation, input integrity and cgroup settlement
+retained. 36 focused native/fixture tests pass. Old frozen verifier copied unchanged;
+historical source/patch/task/check hashes saved. No new real proof has started.
+
+Private receipts: `/home/rich/.local/share/TwichUI-Workbench/native-gallery-correction-20261114/`.
+Installed7760a1f remains untouched. Next: full exact local+hosted release acceptance,
+sealed installation preserving1025rows/rollback, fresh source/task/adapter/verifier
+freeze and subscription eligibility, one real task, complete196file suite and exact
+current destination qualification through trusted publisher. Retain original80/20
+strategy and wait; no prior implementation code enters fresh task input.
+
+---
+
 # November14 — frozen native proof:CONTROLLED FAILURE;stop owner review
 
 Installed7760a1f unchanged. Existing worker automatically waited30min then selected
