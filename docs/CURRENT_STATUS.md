@@ -8,6 +8,8 @@ The installed release passed complete local and exact hosted checks. The addon b
 
 The first live report made five real Codex calls and chose an incompatible scope; it stays paused unchanged. Its planning correction is installed. The second report chose the correct scope and made seven real Codex calls. Independent review then held before coding because the review context omitted checks already owned by the app. Neither report made an addon edit or PR.
 
-A second engineering repair now gives review the complete verification plan, allows bounded design feedback and supports settled recovery of the same valid task. Focused safety checks and 15 actual confined profile checks passed with simulated models. Full release verification and installation are next. These tests do not prove real autonomous delivery.
+The check-review repair passed complete local and exact hosted checks. Its installation automatically rolled back because a private health check expected an older model-service process number. All 1,002 rows and the previous app survived. The check is being corrected using the actual pre-cutover observation. Temporary verification caches were preserved privately; sealed application files were unchanged.
+
+A further source review found that recovery could mistake a renewal receipt for the original scope approval. That selection is corrected and focused tests pass. Three engineering corrections have been needed during acceptance. A new fully verified release is next. The second report remains paused for installation. These checks do not prove real autonomous delivery.
 
 Next: resume the second Python report after verified installation, reach independently verified Python and Lua drafts, and finish the exceptional cases. No owner decision is needed yet. Any addon merge remains the owner's decision.

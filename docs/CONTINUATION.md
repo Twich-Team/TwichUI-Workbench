@@ -1,3 +1,56 @@
+# Autonomous Bug Reports — retained rollback and approval ancestry correction, November 14, 2026 UTC
+
+Following the Project Working Philosophy:70d3b7d8cf6626387b0036cb563e4ffc3e56bde4
+passed exact full hosted run43566529036/all9jobs/finalverify and full local inventory:
+664+647+983+544=2838passed/9conditional skips. Frontend69, browser134/8skips,
+visual12, connectedfeature4 and actual confinement15(simulated models) passed.
+Application763files/SHAfca52a99ceabb852aef8b124a0b84191147f1f9703edd8e094d5e3dbd73689a9.
+The last private backend wrapper reported143 AFTER saving exact-source command exit0,
+983passed/xunit/inventory; cause unestablished. This is not a failed application check
+or successful scratch-closeout claim; private observation is retained and pinned.
+
+Task2 was paused through ordinary UI for installation/history/restore verification.
+The current baseline is1002rows/31tables/schema0014, logicalSHA
+73b5fb6ad9d3f5b79b2100a1f7ac9962b8a02bf916ab84d711d3e1e385973b1e.
+All initial961 and immediate1002 rows retained. Worker rehearsal25cycles/24planning,
+3authenticated metadataGET/0generation or other dispatch. Independent restore,
+26frontend exact bytes/29locked dependencies and actual copy desktop/phone/200%
+text/reload passed. First report remains paused unchanged; second same valid report
+672113d7 is paused, with all seven genuine calls and failed check history intact.
+
+First preflight stopped before services:verification commands had added36UNSEALED
+pytest/import cache files to installed56. Every sealed byte/link was unchanged.
+Only those extra generated files were quarantined privately, all bytes retained;
+original source seal was NOT rewritten and passes. Candidate cutover then happened,
+but its private resource verifier incorrectly required historical PID1949395.
+Retained pre-cutover rehearsal already shows actual modelPID3350312. This PID remained
+unchanged across cutover; the earlier restart06:26:46UTC predates cutover and its cause
+was not established. Installer automatically rolled back to56, preserving1002rows;
+all four services are active, zero automatic restarts.70isNOT successfully installed.
+Preserve the failed installation journal/receipts and cutover backup; do not overwrite
+or silently retry their durable destinations. No addon edit/grant/PR occurred.
+
+Third engineering correction found before resuming:the proposal/binding SQLiteindex
+can put the renewal receipt before scope approval (current renewalbinding3af314...
+versusscope95a186...). Scope ancestry must select an applied approve receipt and
+exclude policy_operation/execution_continuation, regardless of row order. A pure
+selector and adversarial-order assertions extend the connected same-job recovery
+case. Focused10passed. New exact-source full acceptance is required before installing.
+Private next resource checks must bind fresh pre-cutover modelPID from rehearsal,
+not the unrelated older model-cleanup preflight PID. Keep original model file/header,
+key/authentication and source/seal checks. Build the next candidate from CURRENT live56,
+retain56as immediate rollback and every inherited required build, including70's
+failed stage/evidence. Do not reuse cutover paths or installation journal from70.
+
+Real-call totals remain firstreport5/112284tokens, secondreport7/167474tokens.
+Requested Sol/high; High was not separately reported. No human product decision;
+engineering controls were first reportPause plus second installationPause/resume
+pair (Resume still pending). Zero new autonomous repairs have completed end to end.
+Continue same valid second task after corrected verified installation, then real
+Python/Lua drafts and exceptional cases. No addon merge/game install without owner.
+
+---
+
 # Autonomous Bug Reports — second native preparation gap, November 14, 2026 UTC
 
 Following the Project Working Philosophy: installed56dbe78 handled fresh report

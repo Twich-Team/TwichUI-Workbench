@@ -138,6 +138,12 @@ def test_settled_smart_review_can_renew_same_job_once_with_policy_attribution(cl
         assert history[0]['independent_program_claim']==payload['independent_program_claim']
         operation=c.execute(select(proposal_decisions).where(proposal_decisions.c.payload['policy_operation']['kind'].as_string()=='renew-independent-review')).mappings().one()
         assert operation['status']=='applied' and operation['payload']['policy_authorization']['actor']=='owner-policy'
+        original=c.execute(select(proposal_decisions).where(proposal_decisions.c.id==payload['ref']['approval_id'])).mappings().one()
+        # The proposal/binding index can return the renewal before the scope.
+        # Receipt kind, never row order, determines implementation ancestry.
+        assert bug_authority.scope_approval([operation,original])==original
+        assert bug_authority.scope_approval([original,operation])==original
+        assert bug_authority.scope_approval([operation]) is None
         assert c.execute(select(model_attempts).where(model_attempts.c.id==attempt['id'])).mappings().one()==attempt
     for _ in range(12):
         worker.tick(store)

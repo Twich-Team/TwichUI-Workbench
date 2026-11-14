@@ -164,6 +164,12 @@ def validate_behavior(c, review, payload):
         validate_expectation_review(review, payload)
 
 
+def scope_approval(decisions):
+    return next((d for d in decisions if d['status']=='applied'
+        and d['payload'].get('policy_authorization') and d['payload'].get('action')=='approve'
+        and not d['payload'].get('execution_continuation') and not d['payload'].get('policy_operation')),None)
+
+
 def process_one(engine):
     """Derive a single scope/run receipt; normal worker stages apply and execute it."""
     from workbench import intake, task_budget, task_execution
@@ -198,8 +204,7 @@ def process_one(engine):
                     note='Authorized under the saved owner policy; no human plan review was recorded.',
                     policy_authorization=proof)
             else:
-                parent = next((d for d in decisions if d['status'] == 'applied'
-                    and d['payload'].get('policy_authorization') and not d['payload'].get('execution_continuation')), None)
+                parent = scope_approval(decisions)
                 if not parent:
                     continue
                 operations=[d for d in decisions if d['payload'].get('run_budget') or d['payload'].get('policy_operation')]
