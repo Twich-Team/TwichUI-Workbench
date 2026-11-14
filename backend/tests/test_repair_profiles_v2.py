@@ -28,6 +28,20 @@ class ProfileRuntime(ControlledPreparer):
         return result
 
 
+def controlled_trial_boundary(monkeypatch):
+    if os.environ.get('WORKBENCH_TEST_REAL_PROFILE'):
+        return
+    # Real interpreter, deliberately controlled confinement telemetry. The
+    # dedicated delegated matrix exercises this exact helper with confinement.
+    import subprocess
+    def controlled_trial(argv,cwd,timeout,**kwargs):
+        assert kwargs['ro'] and not kwargs.get('private_loopback') and timeout==120
+        result=subprocess.run(argv,cwd=cwd,env=kwargs['env'],capture_output=True,text=True,timeout=timeout)
+        return dict(status='pass' if result.returncode==0 else 'fail',rc=result.returncode,
+            out=result.stdout+result.stderr,usage=dict(controlled_fixture=True,cgroup_removed=True))
+    monkeypatch.setattr('workbench.real_confine.run',controlled_trial)
+
+
 @pytest.mark.usefixtures('installed')
 @pytest.mark.parametrize('language,kind,defer_review,rejected_reviews', [(language,kind,False,0) for language in ('lua','python') for kind in ('existing-failure','missing-regression','test-correction')]+[('python-artifact','existing-failure',False,0),('lua','missing-regression',True,0),('python','test-correction',False,1),('lua','missing-regression',False,1),('python','test-correction',False,3)])
 def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_original_assertions(client,headers,store,monkeypatch,language,kind,defer_review,rejected_reviews,invalid_citations=0,authority_failure=False,runtime_errors=0):
@@ -79,16 +93,7 @@ def test_existing_real_failure_can_be_prepared_and_repaired_without_changing_ori
     program_calls=[]
     review_wait=[]
     reviews=[]
-    if not os.environ.get('WORKBENCH_TEST_REAL_PROFILE'):
-        # Real interpreter, deliberately controlled confinement telemetry. The
-        # dedicated delegated matrix exercises this exact helper with confinement.
-        import subprocess
-        def controlled_trial(argv,cwd,timeout,**kwargs):
-            assert kwargs['ro'] and not kwargs.get('private_loopback') and timeout==120
-            result=subprocess.run(argv,cwd=cwd,env=kwargs['env'],capture_output=True,text=True,timeout=timeout)
-            return dict(status='pass' if result.returncode==0 else 'fail',rc=result.returncode,
-                out=result.stdout+result.stderr,usage=dict(controlled_fixture=True,cgroup_removed=True))
-        monkeypatch.setattr('workbench.real_confine.run',controlled_trial)
+    controlled_trial_boundary(monkeypatch)
     def generate(self,packet,schema,expected_model):
         self.diagnostics=dict(actual_model=expected_model,generation_state='finished',accounting_state='complete',finish_reason='stop',
             request_completion_limit=6144,usage=dict(units='tokens',values=dict(prompt_tokens=40,completion_tokens=10,total_tokens=50)))

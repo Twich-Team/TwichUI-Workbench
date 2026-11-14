@@ -23,12 +23,13 @@ from test_bug_workflow import enable_bugs,report
 from test_everyday import installed,write_policy  # noqa: F401
 from test_task_ai_settings import catalog  # noqa: F401
 from test_smart_worker import setup
-from test_repair_profiles_v2 import ProfileRuntime
+from test_repair_profiles_v2 import ProfileRuntime,controlled_trial_boundary
 from test_verification_profiles import git,PRODUCTION,TEST,CORRECT
 
 
 @pytest.mark.usefixtures('installed','catalog')
 def test_settled_smart_review_can_renew_same_job_once_with_policy_attribution(client,headers,store,monkeypatch):
+    controlled_trial_boundary(monkeypatch)
     source=enable_bugs(monkeypatch)
     (source/PRODUCTION).write_text(CORRECT)
     (source/TEST).write_text('local normalize=dofile("../!!!TwichUI/normalize.lua")\nassert(normalize(" ALICE ")=="ALICE")\n')

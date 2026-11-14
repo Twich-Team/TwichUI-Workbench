@@ -1,3 +1,41 @@
+# Autonomous Bug Reports — controlled renewal fixture correction, November 14, 2026 UTC
+
+Following the Project Working Philosophy: candidate91fea01 is REJECTED, NOTinstalled.
+Exact hosted43580093848 caught one renewal test still lacking the newly added trial's
+controlled confinement boundary (1failed/1620passed/1skip in backend2; other backend
+still finishing). This is a TEST fixture omission, not authority to bypass confinement.
+The same test now shares the profile matrix's real-interpreter/controlled-telemetry
+helper; actual delegated matrix explicitly bypasses that helper. All38focused checks
+pass/1conditional native skip. Production application bytes are unchanged from91.
+The exact current candidate must receive complete full hosted/local verification.
+
+Before rejection,91passed local592backend/8skips in partition1, frontend69, browser134/
+8skips, visual12, connectedfeature4 and actual confined25profile cases (models simulated).
+Other local91diagnostics were stopped after known hosted rejection; retained partial
+logs/failed managed scratch are NOTacceptance. SIGINT/TERM were handled by fault-test
+signal handlers; only exact verified owned CI descendants were stopped, including one
+final pytestSIGKILL. No installed service/model/task was targeted. Hosted run was not
+cancelled and must finish. Keep dormant91source, package, proofs and all partial logs.
+
+Separate NEW actual-confinement engineering proof ran the EXACT retained real-model
+program93a9159e... that failed on9da. New trial rejected it and returned two locations
+in its own proposed body, with raw dependency output private. Zero model requests,
+addon edits or live task transitions; copied1010row history unchanged. This proves
+failure detection, not a real native model correction or end-to-end delivery.
+Private proof:candidate-91fea01/retained-program-trial-proof.json and immutable trial.
+Rehearsal28cycles/27planning checks/3model-metadata GETs made zero dispatches and kept
+history. Full independent restore, original961 and immediate1010subsets, all26hosted
+frontend bytes and29locked dependencies verified. Fully resolved task journey200/held
+rendered at desktop/phone/enlargedtext; initial loading frames retained as diagnostics.
+
+Installed9da9c5f remains unchanged, all native acceptance history preserved. Task2
+failed/notpaused; first case paused. No new implementation grant/request/PR. Zero new
+autonomous repairs completed end to end. Nextcandidate immediate rollback remains9da;
+add rejected91to required retention/evidence roots. Continue full exact verification,
+installation and SAMEtask read-only construction renewal; do not stop at this checkpoint.
+
+---
+
 # Autonomous Bug Reports — original-program execution feedback, November 14, 2026 UTC
 
 Following the Project Working Philosophy: installed9da9c5f safely stopped the real
